@@ -9,15 +9,22 @@ export default function LaboratorioAcademico() {
   const [resultado, setResultado] = useState("");
   const [cargando, setCargando] = useState(false);
 
-  const generarTitulos = async () => {
-    if (!programa || !modulos || !interes) return alert("Por favor, llena los 3 campos para tener un buen contexto.");
+  // Modificamos la función para aceptar un modo "sorpresa"
+  const generarTitulos = async (esSorpresa = false) => {
+    // Ahora el interés NO es obligatorio si eligen "Sorpréndeme"
+    if (!programa || !modulos) return alert("Por favor, llena al menos el Programa y los Módulos.");
+    
     setCargando(true);
     setResultado("");
+    
+    // Si es sorpresa, le mandamos una palabra clave secreta a la IA
+    const temaFinal = esSorpresa ? "SORPRENDEME" : interes;
+
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ programa, modulos, interes }),
+        body: JSON.stringify({ programa, modulos, interes: temaFinal }),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -46,45 +53,57 @@ export default function LaboratorioAcademico() {
         <section className="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl mb-8 space-y-4">
           
           <div>
-            <label className="block text-sm font-semibold text-cyan-500 mb-2 tracking-widest uppercase">Programa Académico (Diplomado, Maestría, etc.)</label>
+            <label className="block text-sm font-semibold text-cyan-500 mb-2 tracking-widest uppercase">Programa Académico</label>
             <input 
               type="text" 
               className="w-full bg-black border border-slate-700 p-3 rounded-lg focus:outline-none focus:border-cyan-400"
-              placeholder="Ej: Diplomado en Gestión Financiera y Riesgos"
+              placeholder="Ej: Diplomado en Gestión Financiera..."
               value={programa}
               onChange={(e) => setPrograma(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-cyan-500 mb-2 tracking-widest uppercase">Módulos o Materias Relevantes Cursadas</label>
+            <label className="block text-sm font-semibold text-cyan-500 mb-2 tracking-widest uppercase">Módulos o Materias Cursadas</label>
             <textarea 
               className="w-full bg-black border border-slate-700 p-3 rounded-lg focus:outline-none focus:border-cyan-400"
-              placeholder="Ej: Econometría Aplicada, Análisis Financiero, Auditoría"
+              placeholder="Ej: Econometría Aplicada, Análisis Financiero..."
               rows={2}
               value={modulos}
               onChange={(e) => setModulos(e.target.value)}
             />
           </div>
 
+          {/* AQUÍ CAMBIAMOS EL TONO DE LA PREGUNTA */}
           <div>
-            <label className="block text-sm font-semibold text-cyan-500 mb-2 tracking-widest uppercase">Área de Interés o Problema Observado</label>
+            <label className="block text-sm font-semibold text-cyan-500 mb-2 tracking-widest uppercase">
+              ¿Qué te apasiona, en qué trabajas o qué problema ves a tu alrededor? (Opcional)
+            </label>
             <input 
               type="text" 
               className="w-full bg-black border border-slate-700 p-3 rounded-lg focus:outline-none focus:border-cyan-400"
-              placeholder="Ej: Aumento de mora en microcréditos del sector comercio"
+              placeholder="Ej: Me gustan los autos, trabajo en un banco, o simplemente 'no sé'"
               value={interes}
               onChange={(e) => setInteres(e.target.value)}
             />
           </div>
 
-          <div className="pt-4">
+          <div className="pt-4 flex gap-4">
             <button 
-              onClick={generarTitulos}
+              onClick={() => generarTitulos(false)}
               disabled={cargando}
-              className="w-full bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-3 rounded-lg font-bold transition-all disabled:bg-slate-700"
+              className="flex-1 bg-cyan-600 hover:bg-cyan-500 text-white px-8 py-3 rounded-lg font-bold transition-all disabled:bg-slate-700"
             >
-              {cargando ? "Analizando malla curricular y generando..." : "Generar Propuestas de Título"}
+              {cargando ? "Generando..." : "Generar con mi idea"}
+            </button>
+            
+            {/* NUEVO BOTÓN SORPRÉNDEME */}
+            <button 
+              onClick={() => generarTitulos(true)}
+              disabled={cargando}
+              className="flex-1 bg-purple-600 hover:bg-purple-500 text-white px-8 py-3 rounded-lg font-bold transition-all disabled:bg-slate-700"
+            >
+              {cargando ? "Pensando..." : "¡Sorpréndeme, no tengo idea!"}
             </button>
           </div>
         </section>

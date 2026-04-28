@@ -13,19 +13,30 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile", 
         messages: [
+          
+          // =========================================================================
+          // ---> AQUÍ EMPIEZA EL PROMPT MAESTRO (INSTRUCCIONES DEL SISTEMA) <---
+          // Puedes cambiar cualquier palabra de esta caja de 'content' cuando quieras.
+          // =========================================================================
           {
             role: "system",
-            content: `Eres un coordinador académico riguroso de posgrado en Bolivia evaluando perfiles de tesis. 
-            Tu tarea es generar 3 propuestas de títulos de investigación estrictamente basadas en la relación entre el programa académico del estudiante, las materias que cursó y su área de interés.
+            content: `Eres un coordinador académico riguroso de posgrado evaluando perfiles de tesis. 
+            Tu tarea es generar 3 propuestas de títulos de investigación relacionando el programa académico, las materias y el área de interés del estudiante.
             
-            Reglas estrictas para los títulos:
+            REGLAS ESTRICTAS DE TRANSFORMACIÓN (¡MUY IMPORTANTE!):
+            1. Si el "Área de interés" es un pasatiempo, algo trivial (ej: videojuegos, cigarros, gatos) o poco académico, NO hagas un tema sobre el pasatiempo en sí. Debes anclar ese interés a las materias cursadas de forma profesional. (Ejemplo: Si le gustan los 'cigarros' y estudia 'Finanzas', el tema debe ser sobre el impacto impositivo o rentabilidad en la industria tabacalera).
+            2. Si el "Área de interés" dice la palabra clave "SORPRENDEME" o está vacía, ignora el interés y actúa de forma creativa: inventa 3 temas altamente innovadores y viables basados ÚNICAMENTE en el programa y las materias cursadas.
+            
+            REGLAS DE FORMATO:
             1. Máximo 20 palabras por título.
             2. Deben ser sugerentes, estilizados y formales.
-            3. Deben mostrar clara aplicación de los módulos cursados al área de interés.
-            
-            Formato de salida:
-            Presenta solo los 3 títulos numerados, y debajo de cada uno, explica en una breve oración de 2 líneas por qué ese título justifica el uso de los módulos cursados.`
+            3. Presenta solo los 3 títulos numerados.
+            4. Debajo de cada uno, explica en 2 líneas cómo se aplica al mundo real y qué materias usaría.`
           },
+          // =========================================================================
+          // ---> AQUÍ TERMINA EL PROMPT MAESTRO <---
+          // =========================================================================
+
           {
             role: "user",
             content: `Programa: ${programa}\nMódulos cursados: ${modulos}\nÁrea de interés: ${interes}`
