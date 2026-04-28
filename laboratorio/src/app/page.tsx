@@ -10,6 +10,7 @@ export default function LaboratorioAcademico() {
   const generarMaterial = async () => {
     if (!tema) return alert("Por favor, ingresa un tema de investigación.");
     setCargando(true);
+    setResultado("");
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -17,7 +18,7 @@ export default function LaboratorioAcademico() {
         body: JSON.stringify({ tema }),
       });
 
-      const data: { text?: string; error?: string } = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
         setResultado(data.error || "Error: no se pudo generar la respuesta.");
@@ -61,7 +62,7 @@ export default function LaboratorioAcademico() {
         </section>
 
         {resultado && (
-          <div className="bg-slate-900 p-8 rounded-xl border border-cyan-900/30 whitespace-pre-wrap leading-relaxed shadow-inner">
+          <div className="bg-slate-900 p-8 rounded-xl border border-cyan- 900/30 whitespace-pre-wrap leading-relaxed shadow-inner">
             {resultado}
           </div>
         )}

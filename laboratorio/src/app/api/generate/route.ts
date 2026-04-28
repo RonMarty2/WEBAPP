@@ -1,87 +1,41 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-
-export const runtime = "nodejs";
-
-type Body = {
-  tema?: string;
-};
 
 export async function POST(req: Request) {
   try {
-    const body = (await req.json().catch(() => ({}))) as Body;
-    const tema = (body.tema || "").trim();
+    const { tema } = await req.json();
 
-    if (!tema) {
-      return NextResponse.json({ error: "Por favor, ingresa un tema de investigación." }, { status: 400 });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: "Falta `GEMINI_API_KEY` en `.env.local`." },
-        { status: 500 },
-      );
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    const prompt = `Actúa como un experto en metodología de investigación y redacción académica.
-Tema propuesto: "${tema}"
-Genera:
-1. Tres títulos sugeridos para monografía o proyecto de grado.
-2. Un breve planteamiento del problema para el título más relevante.
-Usa un tono formal y académico.`;
-
-    const preferredModel = process.env.GEMINI_MODEL?.trim();
-    const candidates = [
-      preferredModel,
-      "gemini-2.0-flash",
-      "gemini-2.5-flash",
-      "gemini-2.5-pro",
-      "gemini-3-flash",
-      "gemini-3.1-pro",
-    ].filter(Boolean) as string[];
-
-    let lastErr: unknown;
-    for (const modelName of candidates) {
-      try {
-        const model = genAI.getGenerativeModel({ model: modelName });
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
-        return NextResponse.json({ text, model: modelName });
-      } catch (err) {
-        lastErr = err;
-        const msg = err instanceof Error ? err.message : String(err);
-        const isModelNotFound = msg.includes("404") && msg.toLowerCase().includes("not found");
-        const isNotSupported = msg.toLowerCase().includes("not supported");
-        if (isModelNotFound || isNotSupported) continue;
-        throw err;
-      }
-    }
-
-    throw lastErr ?? new Error("No hay modelos compatibles disponibles.");
-  } catch (err) {
-    console.error("Gemini generate error:", err);
-
-    const message = err instanceof Error ? err.message : String(err);
-    const details = process.env.NODE_ENV !== "production" ? message : undefined;
-    const lower = message.toLowerCase();
-    const isQuota =
-      message.includes("429") ||
-      lower.includes("quota") ||
-      lower.includes("rate limit") ||
-      lower.includes("too many requests");
-
-    return NextResponse.json(
-      {
-        error: isQuota
-          ? "Cuota excedida (429). Revisa tu plan/billing y límites de la Gemini API."
-          : "Error al generar contenido. Verifica tu API key o restricciones.",
-        details,
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json"
       },
-      { status: isQuota ? 429 : 500 },
-    );
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile", 
+        messages: [
+          {
+            role: "system",
+            content: "Actúa como un experto en metodología de investigación para Bolivia."
+          },
+          {
+            role: "user",
+            content: `Genera 3 títulos de proyectos de grado para el tema: "${tema}"`
+          }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    // AQUÍ ESTÁ LA MAGIA: Si Groq falla, mostramos su excusa exacta
+    if (!response.ok) {
+      return NextResponse.json({ 
+        error: `Detalle del proveedor: ${data.error?.message || "Rechazo desconocido"}` 
+      }, { status: 500 });
+    }
+
+    return NextResponse.json({ text: data.choices[0].message.content });
+  } catch (error: any) {
+    return NextResponse.json({ error: `Fallo del sistema: ${error.message}` }, { status: 500 });
   }
 }
-
