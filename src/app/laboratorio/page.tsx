@@ -120,63 +120,96 @@ function LaboratorioContent() {
     }
   };
 
-  const handleExportPDF = async () => {
-    const { jsPDF } = await import("jspdf");
-    const doc = new jsPDF({ orientation: "portrait", unit: "cm", format: "a4" });
-
-    doc.setFont("helvetica");
-    doc.setFontSize(12);
-
-    let yPos = 3;
-    const pageWidth = 21;
-    const leftMargin = 3;
-    const rightMargin = 2.5;
-    const lineHeight = 0.7;
-    const maxWidth = pageWidth - leftMargin - rightMargin;
-
-    // Title page
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("PERFIL DE INVESTIGACIÓN", pageWidth / 2, 5, { align: "center" });
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text(universityName, pageWidth / 2, 6.5, { align: "center" });
-    doc.text(modality, pageWidth / 2, 7.5, { align: "center" });
-
-    if (sections.titulo) {
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      const titleLines = doc.splitTextToSize(sections.titulo, maxWidth);
-      doc.text(titleLines, pageWidth / 2, 10, { align: "center" });
+  const handleExportPDF = () => {
+    // Create a print-ready document in a new window
+    const printContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Perfil de Investigación — ${sections.titulo ? sections.titulo.split('\n')[0] : 'Documento'}</title>
+  <style>
+    @page { size: A4; margin: 3cm 2.5cm 2.5cm 3cm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 12pt;
+      line-height: 1.8;
+      color: #000;
     }
+    .cover {
+      text-align: center;
+      padding-top: 4cm;
+      page-break-after: always;
+    }
+    .cover .university {
+      font-size: 11pt;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #333;
+    }
+    .cover .modality {
+      font-size: 11pt;
+      margin-top: 8px;
+      color: #444;
+    }
+    .cover .title {
+      font-size: 16pt;
+      font-weight: bold;
+      margin-top: 40px;
+      line-height: 1.4;
+    }
+    .cover .program {
+      font-size: 11pt;
+      margin-top: 24px;
+      color: #555;
+    }
+    .section {
+      page-break-before: always;
+      padding-top: 1cm;
+    }
+    .section-title {
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 2px solid #000;
+      padding-bottom: 6px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    .section-body {
+      text-align: justify;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <div class="university">${universityName}</div>
+    <div class="modality">${modality}</div>
+    ${sections.titulo ? `<div class="title">${sections.titulo.replace(/\*\*/g, '').split('\n')[0]}</div>` : ''}
+    ${programa ? `<div class="program">${programa}</div>` : ''}
+  </div>
+  ${SECTION_STEPS.filter(s => sections[s.key]).map(step => `
+  <div class="section">
+    <div class="section-title">${step.label}</div>
+    <div class="section-body">${sections[step.key].replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+  </div>
+  `).join('')}
+</body>
+</html>`;
 
-    // Sections
-    SECTION_STEPS.forEach((step) => {
-      if (!sections[step.key]) return;
-      doc.addPage();
-      yPos = 3;
-
-      doc.setFontSize(13);
-      doc.setFont("helvetica", "bold");
-      doc.text(step.label.toUpperCase(), leftMargin, yPos);
-      yPos += 1;
-
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-
-      const lines = doc.splitTextToSize(sections[step.key], maxWidth);
-      lines.forEach((line: string) => {
-        if (yPos > 27) {
-          doc.addPage();
-          yPos = 3;
-        }
-        doc.text(line, leftMargin, yPos);
-        yPos += lineHeight;
-      });
-    });
-
-    doc.save(`perfil-investigacion-${Date.now()}.pdf`);
+    const printWindow = window.open('', '_blank', 'width=800,height=900');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    }
   };
+
 
   const totalCompleted = SECTION_STEPS.filter((s) => sections[s.key]).length;
   const progressPercent = Math.round((totalCompleted / SECTION_STEPS.length) * 100);
