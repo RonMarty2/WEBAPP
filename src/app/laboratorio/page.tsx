@@ -12,6 +12,7 @@ function LaboratorioContent() {
   const router = useRouter();
   const params = useSearchParams();
 
+  const projectId = params.get("projectId") || `proj_${Date.now().toString(36)}`;
   const plan = params.get("plan") || "demo";
   const universityId = params.get("university") || "";
   const universityName = params.get("universityName") || "Universidad";
@@ -29,6 +30,7 @@ function LaboratorioContent() {
   const [isSurprise, setIsSurprise] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [savedStep, setSavedStep] = useState(-1);
+  const [toast, setToast] = useState("");
 
   const userId = `user-${Date.now().toString(36)}`;
   const currentSection = SECTION_STEPS[currentStep];
@@ -37,7 +39,7 @@ function LaboratorioContent() {
 
   // Load saved sections from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem("lab_current_doc");
+    const saved = localStorage.getItem(`lab_project_${projectId}`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -46,18 +48,13 @@ function LaboratorioContent() {
         setSavedStep(parsed.savedStep ?? -1);
       } catch {}
     }
-  }, []);
-
-  // Save to localStorage on changes
-  useEffect(() => {
-    localStorage.setItem("lab_current_doc", JSON.stringify({ sections, currentStep, savedStep }));
-  }, [sections, currentStep, savedStep]);
+  }, [projectId]);
 
   // Load current section text when step changes
   useEffect(() => {
     setEditingText(sections[currentSection?.key] || "");
     setError("");
-  }, [currentStep]);
+  }, [currentStep, sections, currentSection]);
 
   const getContextPayload = () => ({
     section_key: currentSection.key,
@@ -93,23 +90,62 @@ function LaboratorioContent() {
 
       if (!res.ok) {
         setError(data.error || "Error al generar. Intenta de nuevo.");
+        setIsGenerating(false);
         return;
       }
 
-      setEditingText(data.text || "");
       if (data.credits_remaining !== undefined) {
         setCredits(data.credits_remaining);
       }
+      
+      // Typewriter effect
+      const fullText = data.text || "";
+      let i = 0;
+      setIsGenerating(false);
+      
+      const interval = setInterval(() => {
+        i += 15;
+        if (i >= fullText.length) {
+          clearInterval(interval);
+          setEditingText(fullText);
+        } else {
+          setEditingText(fullText.substring(0, i));
+        }
+      }, 20);
+
     } catch {
       setError("Error de conexión. Verifica tu internet.");
-    } finally {
       setIsGenerating(false);
     }
   };
 
   const handleSave = () => {
-    setSections((prev) => ({ ...prev, [currentSection.key]: editingText }));
+    const newSections = { ...sections, [currentSection.key]: editingText };
+    setSections(newSections);
     setSavedStep(currentStep);
+    
+    const currentParams = new URLSearchParams(params.toString());
+    currentParams.set("projectId", projectId);
+
+    const projectData = {
+      id: projectId,
+      title: newSections.titulo || "Proyecto sin título",
+      universityName,
+      modality,
+      programa,
+      plan,
+      sections: newSections,
+      currentStep,
+      savedStep: currentStep,
+      savedAt: new Date().toISOString(),
+      params: currentParams.toString(),
+    };
+    
+    localStorage.setItem(`lab_project_${projectId}`, JSON.stringify(projectData));
+    
+    // Show toast
+    setToast("✅ Guardado correctamente");
+    setTimeout(() => setToast(""), 3000);
   };
 
   const handleNextStep = () => {
@@ -117,6 +153,35 @@ function LaboratorioContent() {
     if (currentStep < SECTION_STEPS.length - 1) {
       setCurrentStep((s) => s + 1);
       setSavedStep(currentStep);
+    }
+  };
+
+  const handleExportLatex = async () => {
+    try {
+      const res = await fetch("/api/export/latex", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          universityName,
+          modality,
+          programa,
+          sections,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Error generating LaTeX");
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "perfil_investigacion.tex";
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      alert("Error al exportar LaTeX: " + error);
     }
   };
 
@@ -213,9 +278,21 @@ function LaboratorioContent() {
 
   const totalCompleted = SECTION_STEPS.filter((s) => sections[s.key]).length;
   const progressPercent = Math.round((totalCompleted / SECTION_STEPS.length) * 100);
+  const wordCount = editingText.trim().split(/\s+/).filter(w => w.length > 0).length;
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#020617" }}>
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          position: "fixed", bottom: 32, right: 32, background: "rgba(34,197,94,0.9)", backdropFilter: "blur(8px)",
+          color: "white", padding: "12px 24px", borderRadius: 8, fontWeight: 600, zIndex: 1000,
+          boxShadow: "0 10px 25px rgba(34,197,94,0.3)", animation: "fadeIn 0.3s ease"
+        }}>
+          {toast}
+        </div>
+      )}
+      
       {/* Sidebar */}
       <aside className="sidebar" style={{ padding: "24px 16px", gap: 8 }}>
         {/* Logo */}
@@ -285,8 +362,8 @@ function LaboratorioContent() {
           </div>
         </div>
 
-        <button className="btn-ghost" onClick={() => router.push("/")} style={{ marginTop: 12, width: "100%", fontSize: 12 }}>
-          ← Volver al inicio
+        <button className="btn-ghost" onClick={() => router.push("/dashboard")} style={{ marginTop: 12, width: "100%", fontSize: 12 }}>
+          ← Ir al Dashboard
         </button>
       </aside>
 
@@ -314,6 +391,11 @@ function LaboratorioContent() {
               <button className="btn-cyan" onClick={handleExportPDF} style={{ fontSize: 13 }}>
                 📄 Exportar PDF
               </button>
+            )}
+            {totalCompleted > 0 && plan === "pro" && (
+               <button className="btn-purple" onClick={handleExportLatex} style={{ fontSize: 13 }}>
+                 TEX LaTeX
+               </button>
             )}
           </div>
         </div>
@@ -393,14 +475,19 @@ function LaboratorioContent() {
                   ))}
                 </div>
               ) : (
-                <textarea
-                  className="input-dark"
-                  rows={16}
-                  placeholder={`Haz clic en "Generar ${currentSection?.label}" para que la IA redacte esta sección, o escribe directamente aquí...`}
-                  value={editingText}
-                  onChange={(e) => setEditingText(e.target.value)}
-                  style={{ resize: "vertical", fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}
-                />
+                <>
+                  <textarea
+                    className="input-dark"
+                    rows={16}
+                    placeholder={`Haz clic en "Generar ${currentSection?.label}" para que la IA redacte esta sección, o escribe directamente aquí...`}
+                    value={editingText}
+                    onChange={(e) => setEditingText(e.target.value)}
+                    style={{ resize: "vertical", fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}
+                  />
+                  <div style={{ textAlign: "right", fontSize: 12, color: "#94a3b8", marginTop: 8 }}>
+                    📝 {wordCount} palabras
+                  </div>
+                </>
               )}
             </div>
 

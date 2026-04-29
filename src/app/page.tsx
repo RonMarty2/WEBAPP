@@ -78,9 +78,14 @@ export default function HomePage() {
             <span style={{ fontWeight: 800, fontSize: 18, color: "#e2e8f0" }}>Laboratorio</span>
             <span style={{ fontWeight: 800, fontSize: 18, color: "#06b6d4" }}>Académico</span>
           </div>
-          <button className="btn-ghost" onClick={() => router.push("/admin/login")} style={{ fontSize: 13 }}>
-            Panel Admin →
-          </button>
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <button className="btn-ghost" onClick={() => router.push("/monografia")} style={{ fontSize: 13, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.4)", color: "#a5b4fc" }}>
+              📄 Generar Monografía
+            </button>
+            <button className="btn-ghost" onClick={() => router.push("/admin/login")} style={{ fontSize: 13 }}>
+              Panel Admin →
+            </button>
+          </div>
         </div>
       </header>
 

@@ -1,21 +1,69 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { SECTION_STEPS, DEFAULT_UNIVERSITIES } from "@/lib/data";
 
-const STATS = [
-  { label: "Universidades activas", value: DEFAULT_UNIVERSITIES.filter(u => u.is_active).length, icon: "🏫", color: "#06b6d4" },
-  { label: "Secciones configuradas", value: SECTION_STEPS.length, icon: "📝", color: "#8b5cf6" },
-  { label: "Proveedores de IA", value: 3, icon: "🤖", color: "#4ade80" },
-  { label: "Prompts maestros", value: SECTION_STEPS.length, icon: "✍️", color: "#f97316" },
-];
+interface ProjectStats {
+  total: number;
+  completed: number;
+  demoCount: number;
+  proCount: number;
+}
 
 export default function AdminDashboard() {
+  const [stats, setStats] = useState<ProjectStats>({
+    total: 0,
+    completed: 0,
+    demoCount: 0,
+    proCount: 0,
+  });
+
+  useEffect(() => {
+    // Read actual stats from localStorage projects
+    let total = 0;
+    let completed = 0;
+    let demoCount = 0;
+    let proCount = 0;
+
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith("lab_project_")) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const project = JSON.parse(raw);
+            total++;
+            
+            // Check completed
+            const completedSections = SECTION_STEPS.filter((s) => project.sections?.[s.key]).length;
+            if (completedSections === SECTION_STEPS.length) {
+              completed++;
+            }
+            
+            // Plan distribution
+            if (project.plan === "pro") proCount++;
+            else if (project.plan === "demo") demoCount++;
+          }
+        } catch {}
+      }
+    }
+
+    setStats({ total, completed, demoCount, proCount });
+  }, []);
+
+  const STATS = [
+    { label: "Universidades activas", value: DEFAULT_UNIVERSITIES.filter(u => u.is_active).length, icon: "🏫", color: "#06b6d4" },
+    { label: "Proyectos creados", value: stats.total, icon: "📂", color: "#8b5cf6" },
+    { label: "Proyectos pro", value: stats.proCount, icon: "💎", color: "#4ade80" },
+    { label: "Proyectos terminados", value: stats.completed, icon: "✅", color: "#f97316" },
+  ];
+
   return (
     <div className="fade-in">
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 8 }}>📊 Dashboard</h1>
         <p style={{ color: "#94a3b8", fontSize: 15 }}>
-          Panel de control del Laboratorio Académico. Desde aquí controlas toda la plataforma.
+          Panel de control del Laboratorio Académico. Estadísticas generadas dinámicamente desde proyectos guardados.
         </p>
       </div>
 

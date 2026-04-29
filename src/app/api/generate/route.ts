@@ -159,8 +159,27 @@ export async function POST(req: Request) {
       metodologia: metodologia || "",
     };
 
-    const systemPrompt = interpolateTemplate(promptConfig.system_prompt, vars);
-    const userMessage = interpolateTemplate(promptConfig.user_template, vars);
+    let systemPrompt = interpolateTemplate(promptConfig.system_prompt, vars);
+    let userMessage = interpolateTemplate(promptConfig.user_template, vars);
+
+    // --- CONTEXTO RODANTE ---
+    if (section_key !== "titulo") {
+      userMessage += `\n\n--- CONTEXTO APROBADO PREVIAMENTE ---\n`;
+      if (titulo) userMessage += `Título: ${titulo}\n`;
+      if (introduccion) userMessage += `Introducción: ${introduccion}\n`;
+      if (planteamiento) userMessage += `Problema: ${planteamiento}\n`;
+      if (objetivos) userMessage += `Objetivos: ${objetivos}\n`;
+    }
+
+    // --- CONTROL DE CALIDAD POR MODALIDAD ---
+    if (modalidad === "Tesis de Grado") {
+      if (section_key === "planteamiento") {
+         systemPrompt += "\n\nREQUISITO OBLIGATORIO: Al ser Tesis de Grado, debes incluir obligatoriamente la Formulación de la Hipótesis de Investigación al final del planteamiento del problema.";
+      }
+      if (section_key === "metodologia") {
+         systemPrompt += "\n\nREQUISITO OBLIGATORIO: Al ser Tesis de Grado, debes detallar la Operacionalización de Variables y la estructura de una Matriz de Consistencia.";
+      }
+    }
 
     // Call AI provider (default: Groq)
     let generatedText: string;
