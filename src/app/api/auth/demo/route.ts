@@ -1,0 +1,37 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE } from "@/lib/auth";
+import type { UserRole, UserPlan } from "@/lib/auth";
+
+const VALID_ROLES: UserRole[] = ["estudiante", "docente"];
+const VALID_PLANS: UserPlan[] = ["estandar", "pro"];
+
+export async function POST(req: Request) {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not available" }, { status: 403 });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const role: UserRole = VALID_ROLES.includes(body.role) ? body.role : "estudiante";
+  const plan: UserPlan = VALID_PLANS.includes(body.plan) ? body.plan : "estandar";
+
+  const token = await createSessionToken({
+    id: `demo-${role}-${plan}`,
+    email: `demo.${role}@laboratorio.test`,
+    name: `Demo ${role === "estudiante" ? "Estudiante" : "Docente"} (${plan})`,
+    role,
+    plan,
+    active: true,
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: SESSION_MAX_AGE,
+    path: "/",
+  });
+
+  return NextResponse.json({ ok: true });
+}

@@ -1,295 +1,426 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { DEFAULT_UNIVERSITIES, SECTION_STEPS } from "@/lib/data";
 
-const PLANS = [
+const GARANTIAS = [
+  { icono: "🔒", texto: "Sin alucinación — solo datos verificables" },
+  { icono: "🔗", texto: "Coherencia total entre capítulos" },
+  { icono: "📐", texto: "Formato institucional exacto" },
+  { icono: "📚", texto: "Bibliografía APA 7 automática" },
+  { icono: "💬", texto: "Chat de modificaciones por etapa" },
+  { icono: "⚡", texto: "Generación completa en 30 minutos" },
+];
+
+const ESTUDIANTES_PRODUCTOS = [
   {
-    id: "demo",
-    name: "Demo",
-    price: "Gratis",
-    credits: 10,
-    color: "badge-amber",
-    features: ["10 generaciones", "Modelo básico", "1 documento activo"],
+    icono: "📄",
+    nombre: "Monografías",
+    desc: "5 capítulos completos, bibliografía APA 7 y exportación LaTeX lista para presentar.",
+    etiqueta: "Disponible",
+    color: "#06b6d4",
   },
   {
-    id: "standard",
-    name: "Estándar",
-    price: "Bs. 150/mes",
-    credits: 100,
-    color: "badge-cyan",
-    features: ["100 generaciones/mes", "Modelo avanzado", "5 documentos", "Exportar PDF"],
+    icono: "🎓",
+    nombre: "Tesis de grado",
+    desc: "Estructura y redacción asistida para tesis de licenciatura con rigor metodológico.",
+    etiqueta: "Próximamente",
+    color: "#8b5cf6",
   },
   {
-    id: "pro",
-    name: "Pro",
-    price: "Bs. 300/mes",
-    credits: -1,
-    color: "badge-purple",
-    features: ["Ilimitado", "Mejor modelo", "Sin límites", "PDF + LaTeX"],
+    icono: "📝",
+    nombre: "Ensayos académicos",
+    desc: "Ensayos argumentativos y analíticos con fuentes verificadas y formato institucional.",
+    etiqueta: "Próximamente",
+    color: "#f59e0b",
+  },
+  {
+    icono: "📊",
+    nombre: "Trabajos finales",
+    desc: "Proyectos de grado e informes de práctica con estructura personalizada.",
+    etiqueta: "Próximamente",
+    color: "#22c55e",
   },
 ];
 
+const DOCENTES_PRODUCTOS = [
+  {
+    icono: "📋",
+    nombre: "Planificaciones de clase",
+    desc: "Planes de sesión, unidades didácticas y programaciones curriculares en minutos.",
+    etiqueta: "Próximamente",
+    color: "#8b5cf6",
+  },
+  {
+    icono: "✅",
+    nombre: "Rúbricas de evaluación",
+    desc: "Rúbricas analíticas y holísticas alineadas a los objetivos de aprendizaje.",
+    etiqueta: "Próximamente",
+    color: "#06b6d4",
+  },
+  {
+    icono: "📖",
+    nombre: "Material didáctico",
+    desc: "Guías de estudio, resúmenes y fichas de trabajo para tus estudiantes.",
+    etiqueta: "Próximamente",
+    color: "#f59e0b",
+  },
+  {
+    icono: "🔬",
+    nombre: "Guías de investigación",
+    desc: "Protocolos de investigación, marcos teóricos y diseños metodológicos.",
+    etiqueta: "Próximamente",
+    color: "#22c55e",
+  },
+];
+
+const PLANES = [
+  {
+    id: "estandar",
+    nombre: "Estándar",
+    precio: "Bs. 150",
+    nota: "pago único",
+    color: "#06b6d4",
+    popular: true,
+    items: [
+      "1 documento académico",
+      "IA avanzada (mejor calidad)",
+      "Chat de modificaciones ilimitado",
+      "Descarga PDF + LaTeX profesional",
+      "Bibliografía APA 7 automática",
+      "Soporte prioritario",
+    ],
+    cta: "Elegir Estándar",
+  },
+  {
+    id: "pro",
+    nombre: "Pro",
+    precio: "Bs. 300",
+    nota: "3 documentos / mes",
+    color: "#8b5cf6",
+    popular: false,
+    items: [
+      "Hasta 3 documentos al mes",
+      "Mejor modelo de IA disponible",
+      "Chat ilimitado + regeneración",
+      "PDF + LaTeX + historial de versiones",
+      "Acceso anticipado a nuevos productos",
+      "Soporte prioritario 24/7",
+    ],
+    cta: "Elegir Pro",
+  },
+];
+
+function ProductoCard({ p, onStart }: { p: typeof ESTUDIANTES_PRODUCTOS[0]; onStart?: () => void }) {
+  return (
+    <div
+      className="card"
+      style={{
+        position: "relative",
+        opacity: p.etiqueta === "Próximamente" ? 0.6 : 1,
+        display: "flex", flexDirection: "column", gap: 10,
+      }}
+    >
+      <div style={{
+        position: "absolute", top: 14, right: 14,
+        fontSize: 11, fontWeight: 600,
+        background: p.etiqueta === "Disponible" ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.04)",
+        border: `1px solid ${p.etiqueta === "Disponible" ? "rgba(34,197,94,0.3)" : "#1e293b"}`,
+        color: p.etiqueta === "Disponible" ? "#4ade80" : "#475569",
+        borderRadius: 6, padding: "2px 8px",
+      }}>{p.etiqueta}</div>
+      <div style={{ fontSize: 30 }}>{p.icono}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: p.color }}>{p.nombre}</div>
+      <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.6, flex: 1 }}>{p.desc}</div>
+      {p.etiqueta === "Disponible" && onStart && (
+        <button
+          onClick={onStart}
+          style={{
+            marginTop: 6, fontSize: 13, fontWeight: 600,
+            background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.3)",
+            color: "#06b6d4", borderRadius: 8, padding: "8px 16px", cursor: "pointer",
+          }}
+        >
+          Empezar →
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const router = useRouter();
-  const [step, setStep] = useState<"plan" | "setup" | "ready">("plan");
-  const [selectedPlan, setSelectedPlan] = useState("");
-  const [selectedUniversity, setSelectedUniversity] = useState("");
-  const [selectedModality, setSelectedModality] = useState("");
-  const [universities, setUniversities] = useState(DEFAULT_UNIVERSITIES);
-  const [programa, setPrograma] = useState("");
-  const [modulos, setModulos] = useState("");
-  const [interes, setInteres] = useState("");
 
-  useEffect(() => {
-    fetch("/api/admin/universities")
-      .then((r) => r.json())
-      .then((data) => Array.isArray(data) && setUniversities(data))
-      .catch(() => {});
-  }, []);
-
-  const selectedUniv = universities.find((u) => u.id === selectedUniversity);
-
-  const handleStart = () => {
-    if (!programa || !modulos) {
-      alert("Por favor, completa el Programa Académico y las Materias Cursadas.");
-      return;
+  function handlePlan(planId: string) {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("plan_elegido", planId);
     }
-    const params = new URLSearchParams({
-      plan: selectedPlan,
-      university: selectedUniversity,
-      universityName: selectedUniv?.name || "",
-      modality: selectedModality,
-      programa,
-      modulos,
-      interes,
-    });
-    router.push(`/laboratorio?${params.toString()}`);
-  };
+    router.push("/login");
+  }
 
   return (
-    <div className="gradient-bg min-h-screen">
-      {/* Header */}
-      <header style={{ borderBottom: "1px solid rgba(6,182,212,0.15)", padding: "0 32px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ fontSize: 24 }}>🧪</span>
-            <span style={{ fontWeight: 800, fontSize: 18, color: "#e2e8f0" }}>Laboratorio</span>
-            <span style={{ fontWeight: 800, fontSize: 18, color: "#06b6d4" }}>Académico</span>
+    <div className="gradient-bg" style={{ minHeight: "100vh" }}>
+
+      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      <header style={{
+        borderBottom: "1px solid rgba(6,182,212,0.12)", padding: "0 32px",
+        position: "sticky", top: 0,
+        background: "rgba(2,6,23,0.92)", backdropFilter: "blur(14px)", zIndex: 50,
+      }}>
+        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 62 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <span style={{ fontSize: 22 }}>🧪</span>
+            <span style={{ fontWeight: 800, fontSize: 17, color: "#e2e8f0" }}>Laboratorio</span>
+            <span style={{ fontWeight: 800, fontSize: 17, color: "#06b6d4" }}>Académico</span>
           </div>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <button className="btn-ghost" onClick={() => router.push("/monografia")} style={{ fontSize: 13, background: "rgba(99,102,241,0.15)", border: "1px solid rgba(99,102,241,0.4)", color: "#a5b4fc" }}>
-              📄 Generar Monografía
-            </button>
-            <button className="btn-ghost" onClick={() => router.push("/admin/login")} style={{ fontSize: 13 }}>
-              Panel Admin →
-            </button>
-          </div>
+          <nav style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            <a href="#estudiantes" style={{ fontSize: 14, color: "#94a3b8", textDecoration: "none", padding: "6px 12px" }}>Para Estudiantes</a>
+            <a href="#docentes" style={{ fontSize: 14, color: "#94a3b8", textDecoration: "none", padding: "6px 12px" }}>Para Docentes</a>
+            <a href="#planes" style={{ fontSize: 14, color: "#94a3b8", textDecoration: "none", padding: "6px 12px" }}>Planes</a>
+            <a href="/tutorial" style={{ fontSize: 14, color: "#94a3b8", textDecoration: "none", padding: "6px 12px" }}>Tutorial</a>
+            <a href="/login" style={{ fontSize: 14, color: "#94a3b8", textDecoration: "none", padding: "8px 14px", borderRadius: 8, border: "1px solid #1e293b" }}>
+              Iniciar sesión
+            </a>
+            <a href="#planes" style={{
+              fontSize: 14, fontWeight: 600,
+              background: "rgba(6,182,212,0.12)", border: "1px solid rgba(6,182,212,0.35)",
+              color: "#06b6d4", padding: "8px 18px", borderRadius: 8, textDecoration: "none",
+            }}>
+              Ver planes
+            </a>
+          </nav>
         </div>
       </header>
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "60px 32px" }}>
-        {step === "plan" && (
-          <div className="fade-in">
-            {/* Hero */}
-            <div style={{ textAlign: "center", marginBottom: 60 }}>
-              <div className="badge badge-cyan" style={{ marginBottom: 16, fontSize: 12 }}>
-                ✨ Plataforma Académica con IA
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
+
+        {/* ── Hero ───────────────────────────────────────────────────────────── */}
+        <section style={{ textAlign: "center", padding: "96px 0 72px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 8,
+            background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.2)",
+            borderRadius: 20, padding: "5px 16px", fontSize: 13, color: "#67e8f9", marginBottom: 28,
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+            Plataforma académica con inteligencia artificial
+          </div>
+
+          <h1 style={{ fontSize: "clamp(36px, 5.5vw, 60px)", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.03em", marginBottom: 22 }}>
+            Documentos académicos{" "}<br />
+            <span style={{ background: "linear-gradient(135deg, #06b6d4 30%, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              de calidad, sin esfuerzo
+            </span>
+          </h1>
+
+          <p style={{ color: "#94a3b8", fontSize: 18, maxWidth: 520, margin: "0 auto 40px", lineHeight: 1.65 }}>
+            Para estudiantes y docentes. Genera monografías, planificaciones y material
+            académico con IA — coherente, preciso y listo para presentar.
+          </p>
+
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+            <a href="#estudiantes" style={{
+              padding: "14px 32px", fontSize: 15, fontWeight: 700,
+              background: "linear-gradient(135deg, #06b6d4, #0284c7)",
+              color: "#fff", borderRadius: 10, textDecoration: "none",
+              boxShadow: "0 0 32px rgba(6,182,212,0.3)",
+            }}>
+              🎓 Para Estudiantes
+            </a>
+            <a href="#docentes" style={{
+              padding: "14px 32px", fontSize: 15, fontWeight: 700,
+              background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+              color: "#fff", borderRadius: 10, textDecoration: "none",
+              boxShadow: "0 0 32px rgba(139,92,246,0.25)",
+            }}>
+              👨‍🏫 Para Docentes
+            </a>
+            <a href="/tutorial" style={{
+              padding: "14px 22px", fontSize: 14, color: "#94a3b8",
+              textDecoration: "none", border: "1px solid #1e293b", borderRadius: 10,
+            }}>
+              Cómo funciona
+            </a>
+          </div>
+        </section>
+
+        {/* ── Garantías ──────────────────────────────────────────────────────── */}
+        <section style={{ marginBottom: 88 }}>
+          <div style={{
+            background: "rgba(255,255,255,0.02)", border: "1px solid #1e293b",
+            borderRadius: 12, padding: "18px 28px",
+            display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center",
+          }}>
+            {GARANTIAS.map(g => (
+              <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "#64748b", padding: "4px 10px" }}>
+                <span>{g.icono}</span><span>{g.texto}</span>
               </div>
-              <h1 style={{ fontSize: 52, fontWeight: 900, lineHeight: 1.1, marginBottom: 20 }}>
-                Tu{" "}
-                <span style={{ background: "linear-gradient(135deg, #06b6d4, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                  Perfil de Investigación
-                </span>
-                <br />
-                en minutos, no en semanas
-              </h1>
-              <p style={{ color: "#94a3b8", fontSize: 18, maxWidth: 560, margin: "0 auto 32px" }}>
-                Genera tu tesis, monografía o proyecto de grado paso a paso, con IA y cumpliendo los lineamientos de tu universidad.
+            ))}
+          </div>
+        </section>
+
+        {/* ── Para Estudiantes ───────────────────────────────────────────────── */}
+        <section id="estudiantes" style={{ marginBottom: 96 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40 }}>
+            <div style={{ fontSize: 40 }}>🎓</div>
+            <div>
+              <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Para Estudiantes</h2>
+              <p style={{ color: "#64748b", fontSize: 15 }}>
+                Genera tus trabajos académicos con IA — desde monografías hasta tesis de grado.
               </p>
-
-              {/* Steps preview */}
-              <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap", marginBottom: 48 }}>
-                {SECTION_STEPS.map((s, i) => (
-                  <div key={s.key} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <div style={{
-                      background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)",
-                      borderRadius: 6, padding: "4px 10px", fontSize: 12, color: "#94a3b8",
-                      display: "flex", alignItems: "center", gap: 5
-                    }}>
-                      <span>{s.icon}</span> {s.label}
-                    </div>
-                    {i < SECTION_STEPS.length - 1 && <span style={{ color: "#334155" }}>→</span>}
-                  </div>
-                ))}
-              </div>
             </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16 }}>
+            {ESTUDIANTES_PRODUCTOS.map(p => (
+              <ProductoCard key={p.nombre} p={p} onStart={p.etiqueta === "Disponible" ? () => router.push("/login") : undefined} />
+            ))}
+          </div>
+        </section>
 
-            {/* Plans */}
-            <h2 style={{ textAlign: "center", fontSize: 24, fontWeight: 700, marginBottom: 32 }}>
-              Elige tu Plan
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 40 }}>
-              {PLANS.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="card card-hover"
-                  onClick={() => setSelectedPlan(plan.id)}
+        {/* ── Para Docentes ──────────────────────────────────────────────────── */}
+        <section id="docentes" style={{ marginBottom: 96 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40 }}>
+            <div style={{ fontSize: 40 }}>👨‍🏫</div>
+            <div>
+              <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 4 }}>Para Docentes</h2>
+              <p style={{ color: "#64748b", fontSize: 15 }}>
+                Prepara clases, evalúa con rúbricas y crea material didáctico en minutos.
+              </p>
+            </div>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16 }}>
+            {DOCENTES_PRODUCTOS.map(p => (
+              <ProductoCard key={p.nombre} p={p} />
+            ))}
+          </div>
+          <div style={{
+            marginTop: 24, padding: "16px 24px", borderRadius: 10,
+            background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.2)",
+            fontSize: 14, color: "#94a3b8",
+          }}>
+            <strong style={{ color: "#a78bfa" }}>Próximamente para docentes.</strong>{" "}
+            Regístrate ahora para recibir acceso anticipado cuando lancemos los módulos de docentes.
+          </div>
+        </section>
+
+        {/* ── Planes ─────────────────────────────────────────────────────────── */}
+        <section id="planes" style={{ marginBottom: 88 }}>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>Planes y precios</h2>
+            <p style={{ color: "#64748b", fontSize: 16 }}>
+              Válidos para estudiantes y docentes · Sin suscripción obligatoria
+            </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, alignItems: "start", maxWidth: 680, margin: "0 auto" }}>
+            {PLANES.map(plan => (
+              <div
+                key={plan.id}
+                className="card"
+                style={{
+                  position: "relative",
+                  border: plan.popular ? `2px solid ${plan.color}` : undefined,
+                  boxShadow: plan.popular ? `0 0 48px ${plan.color}22` : undefined,
+                  paddingTop: plan.popular ? 32 : undefined,
+                }}
+              >
+                {plan.popular && (
+                  <div style={{
+                    position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
+                    background: "linear-gradient(135deg,#06b6d4,#0284c7)",
+                    color: "#fff", borderRadius: 20, padding: "3px 14px",
+                    fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
+                  }}>⭐ Más popular</div>
+                )}
+                <div style={{ marginBottom: 6 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: plan.color }}>{plan.nombre}</span>
+                </div>
+                <div style={{ fontSize: 36, fontWeight: 900, color: "#f1f5f9", lineHeight: 1, marginBottom: 4 }}>
+                  {plan.precio}
+                </div>
+                <div style={{ fontSize: 13, color: "#475569", marginBottom: 24 }}>{plan.nota}</div>
+                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9, marginBottom: 28 }}>
+                  {plan.items.map(item => (
+                    <li key={item} style={{ display: "flex", gap: 9, fontSize: 14, color: "#94a3b8", alignItems: "flex-start" }}>
+                      <span style={{ color: "#4ade80", flexShrink: 0 }}>✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handlePlan(plan.id)}
                   style={{
-                    border: selectedPlan === plan.id ? "2px solid #06b6d4" : undefined,
-                    boxShadow: selectedPlan === plan.id ? "0 0 30px rgba(6,182,212,0.2)" : undefined,
-                    position: "relative",
-                    transition: "all 0.2s",
+                    width: "100%", padding: "12px", borderRadius: 9,
+                    fontSize: 14, fontWeight: 700, cursor: "pointer",
+                    border: plan.popular ? "none" : `1px solid ${plan.color}55`,
+                    background: plan.popular ? "linear-gradient(135deg,#06b6d4,#0284c7)" : `${plan.color}14`,
+                    color: plan.popular ? "#fff" : plan.color,
                   }}
                 >
-                  {plan.id === "standard" && (
-                    <div style={{ position: "absolute", top: -12, right: 20 }}>
-                      <span className="badge badge-cyan">⭐ Popular</span>
-                    </div>
-                  )}
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                    <span style={{ fontWeight: 700, fontSize: 18 }}>{plan.name}</span>
-                    <span className={`badge ${plan.color}`}>{plan.id === "demo" ? "Free" : plan.id}</span>
-                  </div>
-                  <div style={{ fontSize: 28, fontWeight: 800, color: "#06b6d4", marginBottom: 16 }}>
-                    {plan.price}
-                  </div>
-                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
-                    {plan.features.map((f) => (
-                      <li key={f} style={{ display: "flex", gap: 8, color: "#94a3b8", fontSize: 14 }}>
-                        <span style={{ color: "#4ade80" }}>✓</span> {f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+                  {plan.cta}
+                </button>
+              </div>
+            ))}
+          </div>
 
-            <div style={{ textAlign: "center" }}>
-              <button
-                className="btn-cyan"
-                disabled={!selectedPlan}
-                onClick={() => setStep("setup")}
-                style={{ padding: "14px 40px", fontSize: 16 }}
-              >
-                Continuar con Plan {PLANS.find((p) => p.id === selectedPlan)?.name || ""} →
-              </button>
+          <div style={{ marginTop: 28, textAlign: "center" }}>
+            <p style={{ fontSize: 13, color: "#334155", lineHeight: 1.8 }}>
+              El pago se coordina por <strong style={{ color: "#64748b" }}>QR o transferencia bancaria</strong>.<br />
+              Recibirás acceso en menos de 24 horas tras confirmar el pago.
+            </p>
+          </div>
+        </section>
+
+        {/* ── CTA final ──────────────────────────────────────────────────────── */}
+        <section style={{ textAlign: "center", marginBottom: 80 }}>
+          <div style={{
+            background: "linear-gradient(135deg, rgba(6,182,212,0.07), rgba(139,92,246,0.07))",
+            border: "1px solid rgba(6,182,212,0.15)", borderRadius: 16, padding: "56px 32px",
+          }}>
+            <h3 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>¿Listo para empezar?</h3>
+            <p style={{ color: "#64748b", fontSize: 16, marginBottom: 32, maxWidth: 460, margin: "0 auto 32px" }}>
+              Regístrate con tu cuenta Google y espera la activación. En menos de 24 horas tendrás acceso completo.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <a href="/login" style={{
+                padding: "14px 36px", fontSize: 15, fontWeight: 700,
+                background: "linear-gradient(135deg,#06b6d4,#0284c7)",
+                color: "#fff", borderRadius: 10, textDecoration: "none",
+                boxShadow: "0 0 32px rgba(6,182,212,0.25)",
+              }}>
+                Crear cuenta →
+              </a>
+              <a href="#planes" style={{
+                padding: "14px 28px", fontSize: 14, color: "#94a3b8",
+                textDecoration: "none", border: "1px solid #1e293b", borderRadius: 10,
+              }}>
+                Ver planes
+              </a>
             </div>
           </div>
-        )}
+        </section>
 
-        {step === "setup" && (
-          <div className="fade-in" style={{ maxWidth: 700, margin: "0 auto" }}>
-            <button className="btn-ghost" onClick={() => setStep("plan")} style={{ marginBottom: 32, fontSize: 13 }}>
-              ← Cambiar Plan
-            </button>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(6,182,212,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🏫</div>
-              <div>
-                <h2 style={{ fontSize: 24, fontWeight: 700 }}>Configura tu Investigación</h2>
-                <p style={{ color: "#94a3b8", fontSize: 14 }}>Plan seleccionado: <span style={{ color: "#06b6d4" }}>{PLANS.find((p) => p.id === selectedPlan)?.name}</span></p>
-              </div>
-            </div>
-
-            <div className="card" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-              {/* University */}
-              <div>
-                <label className="label">Universidad</label>
-                <select
-                  className="input-dark"
-                  value={selectedUniversity}
-                  onChange={(e) => { setSelectedUniversity(e.target.value); setSelectedModality(""); }}
-                >
-                  <option value="">Selecciona tu universidad...</option>
-                  {universities.filter((u) => u.is_active).map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Modality */}
-              {selectedUniv && (
-                <div className="fade-in">
-                  <label className="label">Modalidad de Graduación</label>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 10 }}>
-                    {selectedUniv.modalities.map((m) => (
-                      <div
-                        key={m}
-                        onClick={() => setSelectedModality(m)}
-                        className="card card-hover"
-                        style={{
-                          padding: "12px 16px",
-                          border: selectedModality === m ? "2px solid #06b6d4" : undefined,
-                          fontSize: 14, fontWeight: 500, cursor: "pointer",
-                        }}
-                      >
-                        {selectedModality === m ? "✓ " : ""}{m}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <hr style={{ borderColor: "#1e293b" }} />
-
-              {/* Academic info */}
-              <div>
-                <label className="label">Programa Académico *</label>
-                <input
-                  className="input-dark"
-                  placeholder="Ej: Diplomado en Gestión Financiera, Maestría en Derecho..."
-                  value={programa}
-                  onChange={(e) => setPrograma(e.target.value)}
-                />
-              </div>
-
-              <div>
-                <label className="label">Módulos o Materias Cursadas *</label>
-                <textarea
-                  className="input-dark"
-                  placeholder="Ej: Econometría Aplicada, Finanzas Corporativas, Análisis Estadístico..."
-                  rows={3}
-                  value={modulos}
-                  onChange={(e) => setModulos(e.target.value)}
-                  style={{ resize: "vertical" }}
-                />
-              </div>
-
-              <div>
-                <label className="label">¿Qué te apasiona o en qué trabajas? <span style={{ color: "#475569", fontWeight: 400 }}>(Opcional)</span></label>
-                <input
-                  className="input-dark"
-                  placeholder="Ej: trabajo en un banco, me interesan las startups, o simplemente deja vacío para sorprenderte"
-                  value={interes}
-                  onChange={(e) => setInteres(e.target.value)}
-                />
-              </div>
-
-              {selectedUniv && (
-                <div style={{ background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", borderRadius: 8, padding: 16, fontSize: 13, color: "#94a3b8" }}>
-                  <div style={{ color: "#06b6d4", fontWeight: 600, marginBottom: 8 }}>📋 Formato: {selectedUniv.name}</div>
-                  <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
-                    <span>Fuente: {selectedUniv.format.font} {selectedUniv.format.size}pt</span>
-                    <span>Interlineado: {selectedUniv.format.lineHeight}</span>
-                    <span>Márgenes: {selectedUniv.format.margins.top}/{selectedUniv.format.margins.left}/{selectedUniv.format.margins.bottom}/{selectedUniv.format.margins.right} cm</span>
-                  </div>
-                </div>
-              )}
-
-              <button
-                className="btn-cyan"
-                onClick={handleStart}
-                disabled={!selectedUniversity || !selectedModality || !programa || !modulos}
-                style={{ padding: "14px 28px", fontSize: 15, width: "100%", justifyContent: "center" }}
-              >
-                🚀 Iniciar Laboratorio
-              </button>
-            </div>
-          </div>
-        )}
       </main>
+
+      {/* ── Footer ─────────────────────────────────────────────────────────── */}
+      <footer style={{ borderTop: "1px solid #0f172a", padding: "28px 32px" }}>
+        <div style={{
+          maxWidth: 1100, margin: "0 auto",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          flexWrap: "wrap", gap: 14,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 18 }}>🧪</span>
+            <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Laboratorio Académico</span>
+            <span style={{ fontSize: 12, color: "#1e293b", marginLeft: 8 }}>© 2026</span>
+          </div>
+          <nav style={{ display: "flex", gap: 20 }}>
+            <a href="#estudiantes" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>Estudiantes</a>
+            <a href="#docentes" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>Docentes</a>
+            <a href="/tutorial" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>Tutorial</a>
+            <a href="/terminos" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>Términos</a>
+            <a href="/privacidad" style={{ fontSize: 13, color: "#334155", textDecoration: "none" }}>Privacidad</a>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }

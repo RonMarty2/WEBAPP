@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { llamarIA } from "@/lib/aiProvider";
-import { getCapitulo, upsertCapitulo } from "@/lib/memoryStore";
+import { getCapitulo, upsertCapitulo, trackRevision } from "@/lib/memoryStore";
 
 type Params = Promise<{ numero: string }>;
 
@@ -45,8 +45,9 @@ Devuelve el capítulo completo con las modificaciones solicitadas.`;
 
     const { text } = await llamarIA(systemPrompt, userMessage, 7000);
 
-    // Actualizar el capítulo en el store preservando el JSON estructurado original
+    // Actualizar el capítulo y registrar revisión para estadísticas
     if (monografia_id) {
+      trackRevision(monografia_id, etapa);
       const existing = getCapitulo(monografia_id, etapa);
       upsertCapitulo({
         monografia_id,

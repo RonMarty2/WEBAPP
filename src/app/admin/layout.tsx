@@ -5,6 +5,8 @@ import { useRouter, usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: "📊" },
   { href: "/admin/usuarios", label: "Usuarios & Docs", icon: "👥" },
+  { href: "/admin/estadisticas", label: "Estadísticas", icon: "📈" },
+  { href: "/admin/logs", label: "Logs de errores", icon: "🪵" },
   { href: "/admin/modelos", label: "Modelos & APIs", icon: "🤖" },
   { href: "/admin/prompts", label: "Prompts Maestros", icon: "✍️" },
   { href: "/admin/universidades", label: "Universidades", icon: "🏫" },
@@ -15,8 +17,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   const handleLogout = async () => {
-    await fetch("/api/admin/auth", { method: "DELETE" });
-    router.push("/admin/login");
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
     router.refresh();
   };
 

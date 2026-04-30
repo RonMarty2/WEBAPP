@@ -6,7 +6,9 @@
       "Bash(npm run *)",
       "Bash(curl -s http://localhost:3000)",
       "Bash(mkdir -p \"c:/Users/lmigu/Desktop/WEBAPP/src/app/api/etapas/0/tema-directo\")",
-      "Bash(mkdir -p \"c:/Users/lmigu/Desktop/WEBAPP/src/app/admin/usuarios\")"
+      "Bash(mkdir -p \"c:/Users/lmigu/Desktop/WEBAPP/src/app/admin/usuarios\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(xargs grep *)"
     ]
   }
 }

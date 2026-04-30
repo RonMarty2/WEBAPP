@@ -19,6 +19,8 @@ import {
   getCitas,
   getDocumentos,
   addCita,
+  incrementEtapaUsage,
+  logError,
 } from "@/lib/memoryStore";
 
 type Params = Promise<{ numero: string }>;
@@ -32,9 +34,11 @@ export async function POST(req: Request, { params }: { params: Params }) {
     return NextResponse.json({ error: "Etapa debe ser 0, 1, 2 o 3" }, { status: 400 });
   }
 
+  let _monografiaIdForLog = "";
   try {
     const body = await req.json();
     const { monografia_id, inputs = {} } = body;
+    _monografiaIdForLog = monografia_id ?? "";
 
     if (!monografia_id) {
       return NextResponse.json({ error: "monografia_id requerido" }, { status: 400 });
@@ -183,8 +187,10 @@ export async function POST(req: Request, { params }: { params: Params }) {
       });
     }
 
-    // Call AI
+    // Call AI (track duration for stats)
+    const t0 = Date.now();
     const { text, provider } = await llamarIA(systemPrompt, userMessage, 7000);
+    incrementEtapaUsage(etapa, Date.now() - t0);
 
     // Anti-hallucination check
     const { limpio, alertas } = detectarAlucinaciones(text);
@@ -242,6 +248,13 @@ export async function POST(req: Request, { params }: { params: Params }) {
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Error desconocido";
+    logError({
+      nivel: "critical",
+      etapa,
+      monografia_id: _monografiaIdForLog || undefined,
+      mensaje: `Error generando Etapa ${etapa}`,
+      detalle: message,
+    });
     return NextResponse.json({ error: `Error generando Etapa ${etapa}: ${message}` }, { status: 500 });
   }
 }

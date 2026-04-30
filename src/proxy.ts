@@ -1,35 +1,41 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { jwtVerify } from "jose";
+import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 
-const ADMIN_JWT_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || "laboratorio-academico-super-secret-key-2024"
-);
+export async function proxy(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  const token = req.cookies.get(SESSION_COOKIE)?.value;
+  const user = token ? await verifySessionToken(token) : null;
 
-export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Protect all /admin routes except /admin/login
-  if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
-    const token = request.cookies.get("admin_session")?.value;
-
-    if (!token) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
+  // /admin/* requires admin role
+  if (path.startsWith("/admin") && path !== "/admin/login") {
+    if (!user || user.role !== "admin") {
+      return NextResponse.redirect(new URL("/login", req.url));
     }
+  }
 
-    try {
-      await jwtVerify(token, ADMIN_JWT_SECRET);
-      return NextResponse.next();
-    } catch {
-      const response = NextResponse.redirect(new URL("/admin/login", request.url));
-      response.cookies.delete("admin_session");
-      return response;
-    }
+  // /dashboard y /monografia requieren sesión activa
+  if (path.startsWith("/dashboard") || path.startsWith("/monografia")) {
+    if (!user) return NextResponse.redirect(new URL("/login", req.url));
+    if (!user.active) return NextResponse.redirect(new URL("/pendiente", req.url));
+  }
+
+  // /pendiente solo para usuarios autenticados pero inactivos
+  if (path === "/pendiente" && user?.active) {
+    const dest = user.role === "admin" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(dest, req.url));
+  }
+
+  // Redirigir usuarios ya autenticados fuera del login
+  if (path === "/login" && user) {
+    if (!user.active) return NextResponse.redirect(new URL("/pendiente", req.url));
+    const dest = user.role === "admin" ? "/admin" : "/dashboard";
+    return NextResponse.redirect(new URL(dest, req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|.*\\.(?:png|jpg|svg|ico)$).*)"],
 };

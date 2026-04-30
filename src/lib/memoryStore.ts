@@ -1,6 +1,8 @@
 // In-memory store for development when Supabase is not configured.
 // NOTE: Data is lost on server restart. Configure Supabase for persistence.
 
+import { createHash } from "crypto";
+
 export interface MonografiaRecord {
   id: string;
   user_id: string;
@@ -23,6 +25,7 @@ export interface CapituloRecord {
   latex_source?: string;
   status: string;
   observaciones?: string;
+  checksum?: string;
   created_at: string;
   updated_at: string;
 }
@@ -53,17 +56,76 @@ export interface DocumentoRecord {
   created_at: string;
 }
 
+// ─── Stats ────────────────────────────────────────────────────────────────────
+
+export interface EtapaStats {
+  etapa: number;
+  uso_total: number;
+  uso_este_mes: number;
+  mes_actual: string; // "YYYY-MM"
+  tiempo_promedio_ms: number;
+  tiempos_ms: number[];
+}
+
+export interface RevisionEntry {
+  monografia_id: string;
+  etapa: number;
+  count: number;
+}
+
 function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-// Module-level singletons (persist for the lifetime of the Node.js process)
+function mesActual(): string {
+  return new Date().toISOString().slice(0, 7); // "YYYY-MM"
+}
+
+function hashJson(obj: unknown): string {
+  return createHash("sha256").update(JSON.stringify(obj ?? "")).digest("hex").slice(0, 24);
+}
+
+// ─── Users ────────────────────────────────────────────────────────────────────
+
+import type { UserRole, UserPlan } from "@/lib/auth";
+
+export interface UserRecord {
+  id: string;           // Google sub or "demo-*"
+  email: string;
+  name: string;
+  picture?: string;
+  role: UserRole;
+  plan?: UserPlan;
+  active: boolean;
+  registered_at: string;
+  activated_at?: string;
+}
+
+// ─── Error log ────────────────────────────────────────────────────────────────
+
+export interface ErrorLogEntry {
+  id: string;
+  timestamp: string;
+  nivel: "critical" | "warning" | "info";
+  etapa: number | string;
+  monografia_id?: string;
+  mensaje: string;
+  detalle?: string;
+}
+
+// ─── Module-level singletons ──────────────────────────────────────────────────
+export const usersStore = new Map<string, UserRecord>(); // keyed by id
 export const monografiasStore = new Map<string, MonografiaRecord>();
 export const capitulosStore = new Map<string, CapituloRecord[]>();
 export const citasStore = new Map<string, CitaRecord[]>();
 export const documentosStore = new Map<string, DocumentoRecord[]>();
 
-// --- Monografías ---
+// Stats stores
+export const etapaStatsStore = new Map<number, EtapaStats>();
+export const revisionesStore = new Map<string, Record<number, number>>(); // monografia_id → {etapa: count}
+export const errorLogsStore: ErrorLogEntry[] = [];
+
+// ─── Monografías ──────────────────────────────────────────────────────────────
 
 export function createMonografia(data: Omit<MonografiaRecord, "id" | "created_at" | "updated_at">): MonografiaRecord {
   const now = new Date().toISOString();
@@ -88,18 +150,19 @@ export function updateMonografia(id: string, updates: Partial<MonografiaRecord>)
   return updated;
 }
 
-// --- Capítulos ---
+// ─── Capítulos ────────────────────────────────────────────────────────────────
 
-export function upsertCapitulo(data: Omit<CapituloRecord, "id" | "created_at" | "updated_at">): CapituloRecord {
+export function upsertCapitulo(data: Omit<CapituloRecord, "id" | "created_at" | "updated_at" | "checksum">): CapituloRecord {
   const now = new Date().toISOString();
+  const checksum = hashJson(data.contenido_json ?? data.contenido);
   const list = capitulosStore.get(data.monografia_id) ?? [];
   const idx = list.findIndex(c => c.numero === data.numero);
   if (idx >= 0) {
-    list[idx] = { ...list[idx], ...data, updated_at: now };
+    list[idx] = { ...list[idx], ...data, checksum, updated_at: now };
     capitulosStore.set(data.monografia_id, list);
     return list[idx];
   }
-  const record: CapituloRecord = { id: uid(), created_at: now, updated_at: now, ...data };
+  const record: CapituloRecord = { id: uid(), created_at: now, updated_at: now, checksum, ...data };
   list.push(record);
   capitulosStore.set(data.monografia_id, list);
   return record;
@@ -113,7 +176,7 @@ export function getCapitulos(monografiaId: string): CapituloRecord[] {
   return capitulosStore.get(monografiaId) ?? [];
 }
 
-// --- Citas ---
+// ─── Citas ────────────────────────────────────────────────────────────────────
 
 export function addCita(data: Omit<CitaRecord, "id" | "created_at">): CitaRecord {
   const record: CitaRecord = { id: uid(), created_at: new Date().toISOString(), ...data };
@@ -127,7 +190,7 @@ export function getCitas(monografiaId: string): CitaRecord[] {
   return citasStore.get(monografiaId) ?? [];
 }
 
-// --- Documentos ---
+// ─── Documentos ───────────────────────────────────────────────────────────────
 
 export function addDocumento(data: Omit<DocumentoRecord, "id" | "created_at">): DocumentoRecord {
   const record: DocumentoRecord = { id: uid(), created_at: new Date().toISOString(), ...data };
@@ -141,10 +204,186 @@ export function getDocumentos(monografiaId: string): DocumentoRecord[] {
   return documentosStore.get(monografiaId) ?? [];
 }
 
-// --- Admin helpers ---
+// ─── Stats: usage tracking ────────────────────────────────────────────────────
+
+export function incrementEtapaUsage(etapa: number, duracion_ms: number): void {
+  const mes = mesActual();
+  const existing = etapaStatsStore.get(etapa) ?? {
+    etapa,
+    uso_total: 0,
+    uso_este_mes: 0,
+    mes_actual: mes,
+    tiempo_promedio_ms: 0,
+    tiempos_ms: [],
+  };
+
+  // Reset monthly counter when month changes
+  if (existing.mes_actual !== mes) {
+    existing.uso_este_mes = 0;
+    existing.mes_actual = mes;
+  }
+
+  existing.uso_total += 1;
+  existing.uso_este_mes += 1;
+  existing.tiempos_ms.push(duracion_ms);
+  // Keep only last 100 timings to avoid unbounded growth
+  if (existing.tiempos_ms.length > 100) existing.tiempos_ms.shift();
+  existing.tiempo_promedio_ms = Math.round(
+    existing.tiempos_ms.reduce((a, b) => a + b, 0) / existing.tiempos_ms.length
+  );
+
+  etapaStatsStore.set(etapa, existing);
+}
+
+export function logError(entry: Omit<ErrorLogEntry, "id" | "timestamp">): void {
+  const record: ErrorLogEntry = {
+    id: uid(),
+    timestamp: new Date().toISOString(),
+    ...entry,
+  };
+  errorLogsStore.unshift(record); // newest first
+  if (errorLogsStore.length > 200) errorLogsStore.pop(); // cap at 200 entries
+}
+
+export function getErrorLogs(nivel?: ErrorLogEntry["nivel"], limit = 50): ErrorLogEntry[] {
+  const filtered = nivel ? errorLogsStore.filter(e => e.nivel === nivel) : errorLogsStore;
+  return filtered.slice(0, limit);
+}
+
+export function trackRevision(monografiaId: string, etapa: number): void {
+  const map = revisionesStore.get(monografiaId) ?? {};
+  map[etapa] = (map[etapa] ?? 0) + 1;
+  revisionesStore.set(monografiaId, map);
+}
+
+export function getRevisionesPorEtapa(): Record<number, number> {
+  const totals: Record<number, number> = {};
+  const counts: Record<number, number> = {};
+  for (const map of revisionesStore.values()) {
+    for (const [etapa, count] of Object.entries(map)) {
+      const n = Number(etapa);
+      totals[n] = (totals[n] ?? 0) + count;
+      counts[n] = (counts[n] ?? 0) + 1;
+    }
+  }
+  const avgs: Record<number, number> = {};
+  for (const n of Object.keys(totals)) {
+    const key = Number(n);
+    avgs[key] = Math.round((totals[key] / counts[key]) * 10) / 10;
+  }
+  return avgs;
+}
+
+// ─── Admin helpers ────────────────────────────────────────────────────────────
 
 export function listAllMonografias(): MonografiaRecord[] {
   return [...monografiasStore.values()].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
+}
+
+export function getAggregateStats() {
+  const todas = listAllMonografias();
+  const completadas = todas.filter(m => m.status === "completa" || m.etapa_actual >= 3);
+  const mes = mesActual();
+  const estesMes = todas.filter(m => m.created_at.startsWith(mes));
+
+  // Top temas: extraer del titulo
+  const temaCount = new Map<string, number>();
+  for (const m of todas) {
+    const palabras = (m.tema ?? m.titulo ?? "").split(/\s+/).slice(0, 3).join(" ");
+    if (palabras) temaCount.set(palabras, (temaCount.get(palabras) ?? 0) + 1);
+  }
+  const temasPopulares = [...temaCount.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([tema, cantidad]) => ({ tema, cantidad }));
+
+  const prompts: Array<{
+    etapa: number;
+    nombre: string;
+    uso_total: number;
+    uso_este_mes: number;
+    tiempo_promedio_seg: number;
+  }> = [0, 1, 2, 3].map(etapa => {
+    const s = etapaStatsStore.get(etapa);
+    const nombres: Record<number, string> = {
+      0: "Generar Tema Viable",
+      1: "Capítulo I — Planteamiento",
+      2: "Capítulo II — Marco Teórico",
+      3: "Caps. III-V + Bibliografía",
+    };
+    return {
+      etapa,
+      nombre: nombres[etapa],
+      uso_total: s?.uso_total ?? 0,
+      uso_este_mes: s?.uso_este_mes ?? 0,
+      tiempo_promedio_seg: s ? Math.round(s.tiempo_promedio_ms / 100) / 10 : 0,
+    };
+  });
+
+  const revisionesPorEtapa = getRevisionesPorEtapa();
+  const etapasConMasCambios = [1, 2, 3].map(etapa => ({
+    etapa,
+    cambios_promedio: revisionesPorEtapa[etapa] ?? 0,
+  })).sort((a, b) => b.cambios_promedio - a.cambios_promedio);
+
+  return {
+    total_monografias_generadas: todas.length,
+    completadas: completadas.length,
+    este_mes: estesMes.length,
+    promedio_tiempo_generacion_seg: prompts.reduce((a, p) => a + p.tiempo_promedio_seg, 0),
+    temas_mas_populares: temasPopulares,
+    prompts,
+    etapas_con_mas_cambios: etapasConMasCambios,
+  };
+}
+
+// ─── User management ──────────────────────────────────────────────────────────
+
+export function upsertUser(data: Omit<UserRecord, "registered_at"> & { registered_at?: string }): UserRecord {
+  const existing = usersStore.get(data.id);
+  const record: UserRecord = {
+    registered_at: existing?.registered_at ?? new Date().toISOString(),
+    ...existing,
+    ...data,
+  };
+  usersStore.set(record.id, record);
+  return record;
+}
+
+export function getUser(id: string): UserRecord | undefined {
+  return usersStore.get(id);
+}
+
+export function getUserByEmail(email: string): UserRecord | undefined {
+  return [...usersStore.values()].find(u => u.email.toLowerCase() === email.toLowerCase());
+}
+
+export function listUsers(): UserRecord[] {
+  return [...usersStore.values()].sort(
+    (a, b) => new Date(b.registered_at).getTime() - new Date(a.registered_at).getTime()
+  );
+}
+
+export function activateUser(id: string, role: UserRole, plan: UserPlan): UserRecord | null {
+  const user = usersStore.get(id);
+  if (!user) return null;
+  const updated: UserRecord = {
+    ...user,
+    role,
+    plan,
+    active: true,
+    activated_at: new Date().toISOString(),
+  };
+  usersStore.set(id, updated);
+  return updated;
+}
+
+export function deactivateUser(id: string): UserRecord | null {
+  const user = usersStore.get(id);
+  if (!user) return null;
+  const updated: UserRecord = { ...user, active: false };
+  usersStore.set(id, updated);
+  return updated;
 }

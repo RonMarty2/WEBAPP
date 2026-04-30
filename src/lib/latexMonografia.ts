@@ -19,9 +19,9 @@ export interface MonografiaLatexInput {
 }
 
 /**
- * Escapes special LaTeX characters in plain text.
+ * Escapes special LaTeX characters in plain text (non-formatted).
  */
-export function escaparLatex(text: string): string {
+export function escaparLatexPlain(text: string): string {
   if (!text) return "";
   return text
     .replace(/\\/g, "\\textbackslash{}")
@@ -36,27 +36,170 @@ export function escaparLatex(text: string): string {
     .replace(/~/g, "\\textasciitilde{}")
     .replace(/</g, "\\textless{}")
     .replace(/>/g, "\\textgreater{}")
-    .replace(/\*\*(.*?)\*\*/g, "\\textbf{$1}")
-    .replace(/\*(.*?)\*/g, "\\textit{$1}")
-    .replace(/\n\n/g, "\n\n\\noindent ")
-    .replace(/\n/g, " \\\\\n");
+    .replace(/«/g, "\\guillemotleft{}")
+    .replace(/»/g, "\\guillemotright{}");
+}
+
+// Keep old name for backward compat
+export const escaparLatex = escaparLatexPlain;
+
+/**
+ * Converts Markdown-flavored text to LaTeX, handling:
+ * - # ## ### headings → \section \subsection \subsubsection
+ * - **bold** → \textbf, *italic* → \textit
+ * - | table | rows | → tabular environment
+ * - - bullet items → itemize
+ * - Numbered lists → enumerate
+ * - Blank lines → paragraph breaks
+ */
+export function mdALatex(text: string): string {
+  if (!text) return "";
+  const lines = text.split("\n");
+  const out: string[] = [];
+  let inItemize = false;
+  let inEnumerate = false;
+  let inTabular = false;
+  let tabularCols = 0;
+
+  function closeList() {
+    if (inItemize) { out.push("\\end{itemize}"); inItemize = false; }
+    if (inEnumerate) { out.push("\\end{enumerate}"); inEnumerate = false; }
+  }
+  function closeTabular() {
+    if (inTabular) {
+      out.push("\\end{tabular}");
+      out.push("\\end{center}");
+      inTabular = false;
+    }
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const raw = lines[i];
+    const line = raw.trimEnd();
+
+    // Table row detection
+    if (/^\s*\|/.test(line)) {
+      const isSep = /^\s*\|[\s\-|:]+\|?\s*$/.test(line);
+      if (isSep) continue; // skip separator rows
+
+      closeList();
+      const cells = line
+        .replace(/^\s*\|/, "")
+        .replace(/\|?\s*$/, "")
+        .split("|")
+        .map(c => escaparLatexPlain(c.trim()));
+
+      if (!inTabular) {
+        tabularCols = cells.length;
+        const colSpec = Array(tabularCols).fill("p{\\dimexpr\\linewidth/" + tabularCols + "-2\\tabcolsep}").join("|");
+        out.push("\\begin{center}");
+        out.push(`\\begin{tabular}{|${colSpec}|}`);
+        out.push("\\hline");
+        inTabular = true;
+      }
+      out.push(cells.join(" & ") + " \\\\ \\hline");
+      continue;
+    }
+
+    // Non-table line: close tabular if open
+    if (inTabular) closeTabular();
+
+    // Headings
+    const h1 = line.match(/^# (.+)$/);
+    const h2 = line.match(/^## (.+)$/);
+    const h3 = line.match(/^### (.+)$/);
+    const h4 = line.match(/^#### (.+)$/);
+    if (h1 || h2 || h3 || h4) {
+      closeList();
+      const title = escaparLatexPlain((h1 || h2 || h3 || h4)![1]);
+      if (h1) out.push(`\\section{${title}}`);
+      else if (h2) out.push(`\\subsection{${title}}`);
+      else if (h3) out.push(`\\subsubsection{${title}}`);
+      else out.push(`\\paragraph{${title}}`);
+      continue;
+    }
+
+    // Bullet list
+    const bullet = line.match(/^[-*] (.+)$/);
+    if (bullet) {
+      if (!inItemize) { closeList(); out.push("\\begin{itemize}"); inItemize = true; }
+      out.push(`  \\item ${inlineLatex(bullet[1])}`);
+      continue;
+    }
+
+    // Numbered list
+    const numbered = line.match(/^\d+\. (.+)$/);
+    if (numbered) {
+      if (!inEnumerate) { closeList(); out.push("\\begin{enumerate}"); inEnumerate = true; }
+      out.push(`  \\item ${inlineLatex(numbered[1])}`);
+      continue;
+    }
+
+    // Close list on blank or normal line
+    if (line.trim() === "") {
+      closeList();
+      out.push("");
+      continue;
+    }
+
+    closeList();
+    out.push(inlineLatex(line));
+  }
+
+  closeList();
+  closeTabular();
+  return out.join("\n");
+}
+
+function inlineLatex(text: string): string {
+  // Escape special chars first (but not * which we need for bold/italic)
+  let t = text
+    .replace(/\\/g, "\\textbackslash{}")
+    .replace(/\{/g, "\\{")
+    .replace(/\}/g, "\\}")
+    .replace(/\$/g, "\\$")
+    .replace(/%/g, "\\%")
+    .replace(/#/g, "\\#")
+    .replace(/_/g, "\\_")
+    .replace(/\^/g, "\\textasciicircum{}")
+    .replace(/</g, "\\textless{}")
+    .replace(/>/g, "\\textgreater{}")
+    .replace(/&/g, "\\&");
+  // Bold and italic
+  t = t.replace(/\*\*(.+?)\*\*/g, "\\textbf{$1}");
+  t = t.replace(/\*(.+?)\*/g, "\\textit{$1}");
+  return t;
 }
 
 /**
  * Converts a list of APA citations to LaTeX thebibliography entries.
  */
 function generarBibliografiaLatex(citas: CitaBiblio[]): string {
-  const ordenadas = [...citas].sort((a, b) =>
-    (a.autor ?? "").localeCompare(b.autor ?? "")
+  const unicas = new Map<string, CitaBiblio>();
+  for (const c of citas) {
+    const key = `${c.autor}_${c.ano}_${c.titulo_obra}`.toLowerCase().replace(/\s+/g, "");
+    if (!unicas.has(key)) unicas.set(key, c);
+  }
+
+  const ordenadas = [...unicas.values()].sort((a, b) =>
+    (a.autor ?? "").localeCompare(b.autor ?? "", "es")
   );
 
   const items = ordenadas.map((c, i) => {
     const key = `ref${i + 1}`;
-    const apa = c.formato_apa ?? `${c.autor} (${c.ano ?? "s.f."}). ${c.titulo_obra}. ${c.fuente ?? ""}.`;
-    return `  \\bibitem{${key}} ${escaparLatex(apa)}`;
+    const apa = c.formato_apa
+      ?? `${c.autor} (${c.ano ?? "s.f."}). ${c.titulo_obra}. ${c.fuente ?? ""}.`;
+    return `  \\bibitem{${key}} ${inlineLatex(apa)}`;
   });
 
-  return `\\section*{REFERENCIAS BIBLIOGRÁFICAS}\n\\begin{thebibliography}{99}\n${items.join("\n")}\n\\end{thebibliography}`;
+  return [
+    "\\newpage",
+    "\\section*{REFERENCIAS BIBLIOGRÁFICAS}",
+    "\\addcontentsline{toc}{section}{REFERENCIAS BIBLIOGRÁFICAS}",
+    "\\begin{thebibliography}{99}",
+    ...items,
+    "\\end{thebibliography}",
+  ].join("\n");
 }
 
 /**
@@ -78,13 +221,28 @@ export function generarLatexMonografia(input: MonografiaLatexInput): string {
     .sort((a, b) => a.numero - b.numero)
     .map(c => {
       const tituloSec = capTitulos[c.numero] ?? c.titulo ?? `CAPÍTULO ${c.numero}`;
-      return `\\section{${escaparLatex(tituloSec)}}\n\n${escaparLatex(c.contenido)}`;
+      const body = mdALatex(c.contenido);
+      return [
+        `\\newpage`,
+        `\\section{${escaparLatexPlain(tituloSec)}}`,
+        `\\addcontentsline{toc}{section}{${escaparLatexPlain(tituloSec)}}`,
+        "",
+        body,
+      ].join("\n");
     })
-    .join("\n\n\\newpage\n\n");
+    .join("\n\n");
 
-  const caratulaLine = caratulaPdf
-    ? `\\includepdf{${caratulaPdf}}\n\\newpage\n`
-    : `\\begin{titlepage}\n  \\centering\n  \\vspace*{3cm}\n  {\\LARGE \\textbf{${escaparLatex(titulo)}}}\\\\[1cm]\n  {\\large ${escaparLatex(diplomado ?? "")}}\\\\[3cm]\n  {\\large \\today}\n\\end{titlepage}\n\\newpage\n`;
+  const caratulaBlock = caratulaPdf
+    ? `\\includepdf[pages=1]{${caratulaPdf}}\n\\newpage`
+    : [
+        "\\begin{titlepage}",
+        "  \\centering",
+        "  \\vspace*{3cm}",
+        `  {\\LARGE \\textbf{${escaparLatexPlain(titulo)}}}\\\\[1.2cm]`,
+        `  {\\large ${escaparLatexPlain(diplomado ?? "")}}\\\\[3cm]`,
+        "  {\\large \\today}",
+        "\\end{titlepage}",
+      ].join("\n");
 
   return `\\documentclass[12pt, letterpaper]{article}
 
@@ -98,26 +256,50 @@ export function generarLatexMonografia(input: MonografiaLatexInput): string {
 \\usepackage{float}
 \\usepackage{array}
 \\usepackage{tabularx}
+\\usepackage{xcolor}
 \\usepackage{parskip}
 \\setlength{\\parskip}{0.45em}
+\\usepackage{fancyhdr}
+\\usepackage{hyperref}
+\\hypersetup{hidelinks}
 ${caratulaPdf ? "\\usepackage{pdfpages}" : ""}
 
-% ─── Numeración de secciones sin reseteo ────────────────────
+% ─── Encabezados y pies de página ───────────────────────────
+\\pagestyle{fancy}
+\\fancyhf{}
+\\rfoot{\\thepage}
+\\renewcommand{\\headrulewidth}{0pt}
+
+% ─── Profundidad de secciones ───────────────────────────────
 \\setcounter{secnumdepth}{4}
-\\setcounter{tocdepth}{4}
+\\setcounter{tocdepth}{3}
+
+% ─── Sin numeración automática en \\section ──────────────────
+\\renewcommand{\\thesection}{}
+\\renewcommand{\\thesubsection}{\\arabic{subsection}}
+\\renewcommand{\\thesubsubsection}{\\arabic{subsection}.\\arabic{subsubsection}}
+
+\\title{${escaparLatexPlain(titulo)}}
+\\author{}
+\\date{}
 
 \\begin{document}
+\\thispagestyle{empty}
 
 % ─── Carátula ───────────────────────────────────────────────
-${caratulaLine}
+${caratulaBlock}
+
 % ─── Tabla de contenidos ────────────────────────────────────
+\\pagenumbering{roman}
+\\setcounter{page}{2}
 \\tableofcontents
 \\newpage
 
 % ─── Capítulos ──────────────────────────────────────────────
-${capitulosLatex}
+\\pagenumbering{arabic}
+\\setcounter{page}{1}
 
-\\newpage
+${capitulosLatex}
 
 % ─── Bibliografía ───────────────────────────────────────────
 ${generarBibliografiaLatex(bibliografia)}

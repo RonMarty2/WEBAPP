@@ -390,26 +390,55 @@ export default function MonografiaPage() {
     reader.readAsDataURL(file);
   }
 
-  // ── Exportar PDF con todas las etapas ────────────────────────────────────
+  // ── Exportar vista previa HTML (impresión navegador) ─────────────────────
 
   async function exportarPDF() {
     function mdAHtml(text: string) {
       return text
+        .replace(/&/g, "&amp;")
         .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
         .replace(/\*(.*?)\*/g, "<em>$1</em>")
-        .replace(/^#{1,3} (.+)$/gm, "<h3>$1</h3>")
+        .replace(/^#### (.+)$/gm, "<h4>$1</h4>")
+        .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+        .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+        .replace(/^# (.+)$/gm, "<h2>$1</h2>")
+        .replace(/^\|(.+)\|$/gm, (_, row) => {
+          const cells = row.split("|").map((c: string) =>
+            `<td style="border:1px solid #000;padding:4px 8px">${c.trim()}</td>`
+          );
+          return `<tr>${cells.join("")}</tr>`;
+        })
+        .replace(/(<tr>[\s\S]*?<\/tr>)/g, '<table style="border-collapse:collapse;width:100%;margin:1em 0">$1</table>')
+        .replace(/^[-*] (.+)$/gm, "<li>$1</li>")
+        .replace(/(<li>[\s\S]*?<\/li>)/g, "<ul>$1</ul>")
+        .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
         .replace(/\n\n/g, "</p><p>")
         .replace(/\n/g, "<br/>");
     }
 
-    const tituloDoc = propuestaElegida?.titulo || texto0.split("\n")[0] || "Monografía";
+    const tituloDoc = propuestaElegida?.titulo || "Monografía";
 
     const caratulaHtml = caratulaUrl
       ? `<div class="caratula-page"><img src="${caratulaUrl}" alt="Carátula" style="max-width:100%;max-height:100%;object-fit:contain;" /></div>`
-      : `<div class="caratula-page" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">
-          <p style="font-size:11pt;color:#555;text-transform:uppercase;letter-spacing:2px;">Monografía</p>
-          <h1 style="font-size:18pt;font-weight:bold;text-align:center;margin-top:40px;line-height:1.4;">${tituloDoc}</h1>
+      : `<div class="caratula-page" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;">
+          <p style="font-size:11pt;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:20px;">Monografía de Diplomado</p>
+          <h1 style="font-size:18pt;font-weight:bold;line-height:1.4;margin-bottom:40px;">${tituloDoc}</h1>
+          <p style="font-size:11pt;color:#888;">${new Date().toLocaleDateString("es-BO")}</p>
         </div>`;
+
+    const caps = [
+      { titulo: "CAPÍTULO I: PLANTEAMIENTO DEL PROBLEMA", texto: texto1 },
+      { titulo: "CAPÍTULO II: MARCO TEÓRICO Y REFERENCIAL", texto: texto2 },
+      { titulo: "CAPÍTULOS III, IV, V: METODOLOGÍA, RESULTADOS Y CONCLUSIONES", texto: texto3 },
+    ];
+
+    const capsHtml = caps
+      .filter(c => c.texto)
+      .map(c => `<div class="capitulo">
+        <div class="cap-titulo">${c.titulo}</div>
+        <div class="cap-body"><p>${mdAHtml(c.texto)}</p></div>
+      </div>`)
+      .join("\n");
 
     const html = `<!DOCTYPE html>
 <html lang="es">
@@ -417,23 +446,24 @@ export default function MonografiaPage() {
 <meta charset="UTF-8">
 <title>${tituloDoc}</title>
 <style>
-  @page { size: A4; margin: 3cm 2.5cm 2.5cm 3cm; }
+  @page { size: Letter; margin: 2.54cm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.8; color: #000; }
+  body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.5; color: #000; }
   .caratula-page { page-break-after: always; height: 24cm; padding: 2cm; }
-  .capitulo { page-break-before: always; padding-top: 1cm; }
-  .cap-titulo { font-size: 14pt; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 24px; letter-spacing: 1px; }
-  .cap-body { text-align: justify; white-space: pre-wrap; }
-  p { margin-bottom: 1em; }
-  h3 { font-size: 13pt; font-weight: bold; margin: 1.2em 0 0.5em; }
-  strong { font-weight: bold; }
+  .capitulo { page-break-before: always; padding-top: 0.5cm; }
+  .cap-titulo { font-size: 13pt; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 20px; }
+  .cap-body { text-align: justify; }
+  p { margin-bottom: 0.8em; }
+  h2, h3, h4 { font-size: 12pt; font-weight: bold; margin: 1em 0 0.4em; }
+  ul { margin: 0.5em 0 0.5em 1.5em; }
+  li { margin-bottom: 0.3em; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 11pt; }
+  td { border: 1px solid #000; padding: 4px 8px; }
 </style>
 </head>
 <body>
   ${caratulaHtml}
-  ${texto1 ? `<div class="capitulo"><div class="cap-titulo">Capítulo I — Planteamiento del Problema</div><div class="cap-body">${mdAHtml(texto1)}</div></div>` : ""}
-  ${texto2 ? `<div class="capitulo"><div class="cap-titulo">Capítulo II — Marco Teórico</div><div class="cap-body">${mdAHtml(texto2)}</div></div>` : ""}
-  ${texto3 ? `<div class="capitulo"><div class="cap-titulo">Capítulos III, IV, V — Metodología, Resultados y Bibliografía</div><div class="cap-body">${mdAHtml(texto3)}</div></div>` : ""}
+  ${capsHtml}
 </body>
 </html>`;
 
@@ -446,7 +476,7 @@ export default function MonografiaPage() {
     setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
 
-  // ── Compilar LaTeX ────────────────────────────────────────────────────────
+  // ── Compilar LaTeX (descarga .tex) ────────────────────────────────────────
 
   async function compilarLatex() {
     setIsLoading(true);
@@ -455,13 +485,16 @@ export default function MonografiaPage() {
       const res = await fetch(`/api/compilar/${monografiaId}?formato=latex`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({
+          caratula_pdf: caratulaUrl ? "caratula.pdf" : undefined,
+        }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = "monografia.tex"; a.click();
+      const filename = res.headers.get("Content-Disposition")?.match(/filename="?([^"]+)"?/)?.[1] ?? "monografia.tex";
+      a.href = url; a.download = filename; a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
       setError((e as Error).message);
@@ -469,6 +502,24 @@ export default function MonografiaPage() {
       setIsLoading(false);
     }
   }
+
+  // ── Obtener metadata de compilación ──────────────────────────────────────
+
+  const [compileMeta, setCompileMeta] = useState<{
+    lista_para_compilar: boolean;
+    checklist: Record<string, boolean>;
+    total_citas: number;
+    etapas_faltantes: number[];
+  } | null>(null);
+
+  useEffect(() => {
+    if (phase === "final" && monografiaId) {
+      fetch(`/api/compilar/${monografiaId}`)
+        .then(r => r.json())
+        .then(d => setCompileMeta(d))
+        .catch(() => null);
+    }
+  }, [phase, monografiaId]);
 
   function reiniciar() {
     localStorage.removeItem(STORAGE_KEY);
@@ -978,57 +1029,110 @@ export default function MonografiaPage() {
         {/* ── FINAL ───────────────────────────────────────────────────────── */}
         {phase === "final" && !isLoading && (
           <div>
-            <div style={{ textAlign: "center", marginBottom: "32px" }}>
-              <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎓</div>
-              <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "8px" }}>¡Monografía lista para descargar!</h2>
-              <p style={{ color: "#94a3b8" }}>Todos los capítulos generados y aprobados. Descarga tu documento.</p>
+            {/* Header */}
+            <div style={{ textAlign: "center", marginBottom: "28px" }}>
+              <div style={{ fontSize: "56px", marginBottom: "12px" }}>🎓</div>
+              <h2 style={{ fontSize: "22px", color: "#f1f5f9", marginBottom: "6px" }}>¡Monografía completada!</h2>
+              <p style={{ color: "#94a3b8", fontSize: "14px" }}>Todos los capítulos generados. Descarga tu documento final.</p>
             </div>
 
-            {/* Acciones de descarga */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
-              <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "10px", padding: "20px" }}>
-                <div style={{ fontSize: "32px", marginBottom: "10px" }}>📄</div>
-                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "15px" }}>Exportar PDF</h3>
-                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "16px" }}>
-                  {caratulaUrl ? "Incluye tu carátula como primera página." : "Documento completo con todos los capítulos."}
+            {/* Checklist de validación */}
+            <div className="card" style={{ marginBottom: "20px", padding: "16px 20px" }}>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+                Validación del documento
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                {[
+                  { label: "Capítulo I generado", ok: Boolean(texto1) },
+                  { label: "Capítulo II generado", ok: Boolean(texto2) },
+                  { label: "Capítulos III-V generados", ok: Boolean(texto3) },
+                  { label: "Carátula incluida", ok: Boolean(caratulaUrl) },
+                  { label: "Citas registradas", ok: (compileMeta?.total_citas ?? 0) > 0 },
+                  { label: "Listo para compilar", ok: compileMeta?.lista_para_compilar ?? Boolean(texto1 && texto2 && texto3) },
+                ].map(({ label, ok }) => (
+                  <div key={label} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
+                    <span style={{ color: ok ? "#4ade80" : "#f87171", fontSize: "16px" }}>{ok ? "✓" : "✗"}</span>
+                    <span style={{ color: ok ? "#cbd5e1" : "#94a3b8" }}>{label}</span>
+                  </div>
+                ))}
+              </div>
+              {compileMeta?.total_citas !== undefined && (
+                <div style={{ marginTop: "10px", fontSize: "12px", color: "#475569", borderTop: "1px solid #1e293b", paddingTop: "10px" }}>
+                  📚 {compileMeta.total_citas} citas registradas en bibliografía
+                  {!caratulaUrl && <span style={{ marginLeft: "16px", color: "#f59e0b" }}>⚠ Sin carátula — se generará portada automática</span>}
+                </div>
+              )}
+            </div>
+
+            {/* Opciones de descarga */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "20px" }}>
+              {/* Vista previa imprimible */}
+              <div className="card" style={{ padding: "20px" }}>
+                <div style={{ fontSize: "28px", marginBottom: "10px" }}>🖨️</div>
+                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "14px", fontWeight: 700 }}>Vista previa / Imprimir</h3>
+                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "14px", lineHeight: 1.5 }}>
+                  Abre el documento formateado en el navegador. Usa <strong style={{ color: "#94a3b8" }}>Ctrl+P → Guardar como PDF</strong> para obtener el archivo.
+                  {caratulaUrl ? " Incluye tu carátula." : ""}
                 </p>
-                <button onClick={exportarPDF} style={{ ...btnPrimaryStyle, fontSize: "14px" }}>
-                  ⬇️ Descargar PDF
+                <button onClick={exportarPDF} style={{ ...btnPrimaryStyle, fontSize: "13px", width: "100%", justifyContent: "center" }}>
+                  Vista previa PDF →
                 </button>
               </div>
 
-              <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "10px", padding: "20px" }}>
-                <div style={{ fontSize: "32px", marginBottom: "10px" }}>📝</div>
-                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "15px" }}>Fuente LaTeX</h3>
-                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "16px" }}>
-                  Para edición avanzada y compilación en Overleaf.
+              {/* LaTeX / Overleaf */}
+              <div className="card" style={{ padding: "20px" }}>
+                <div style={{ fontSize: "28px", marginBottom: "10px" }}>📄</div>
+                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "14px", fontWeight: 700 }}>LaTeX profesional (.tex)</h3>
+                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "14px", lineHeight: 1.5 }}>
+                  Descarga el fuente LaTeX con márgenes 2.54 cm, Times 12pt e interlineado 1.5.
+                  Compila en <strong style={{ color: "#06b6d4" }}>Overleaf</strong> para obtener el PDF final.
                 </p>
-                <button onClick={compilarLatex} disabled={isLoading} style={{ ...btnSecondaryStyle, fontSize: "14px", width: "100%" }}>
-                  ⬇️ Descargar .tex
+                <button onClick={compilarLatex} disabled={isLoading} style={{ ...btnSecondaryStyle, fontSize: "13px", width: "100%", justifyContent: "center" }}>
+                  Descargar .tex →
                 </button>
               </div>
             </div>
+
+            {/* Instrucciones Overleaf */}
+            <details className="card" style={{ padding: "14px 18px", marginBottom: "20px" }}>
+              <summary style={{ color: "#06b6d4", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}>
+                📋 Cómo compilar el PDF profesional en Overleaf (gratis)
+              </summary>
+              <ol style={{ marginTop: "12px", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", color: "#94a3b8", lineHeight: 1.6 }}>
+                <li>Descarga el archivo <strong style={{ color: "#e2e8f0" }}>.tex</strong> con el botón de arriba.</li>
+                <li>Ve a <strong style={{ color: "#e2e8f0" }}>overleaf.com</strong> y crea un proyecto en blanco.</li>
+                <li>Sube el archivo <code style={{ background: "#1e293b", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>.tex</code> reemplazando el <code style={{ background: "#1e293b", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>main.tex</code> predeterminado.</li>
+                {caratulaUrl && <li>Sube también la carátula con el nombre exacto <code style={{ background: "#1e293b", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>caratula.pdf</code>.</li>}
+                <li>Haz clic en <strong style={{ color: "#e2e8f0" }}>Recompile</strong> dos veces (la segunda genera el índice correctamente).</li>
+                <li>Descarga el PDF desde el botón <strong style={{ color: "#e2e8f0" }}>Download PDF</strong> en Overleaf.</li>
+              </ol>
+              <div style={{ marginTop: "10px", padding: "8px 12px", background: "rgba(6,182,212,0.08)", borderRadius: "6px", fontSize: "12px", color: "#67e8f9" }}>
+                Alternativa local: <code>pdflatex monografia.tex</code> (ejecutar dos veces) con TeX Live o MiKTeX instalado.
+              </div>
+            </details>
 
             {/* Vistas previas de capítulos */}
-            <h3 style={{ color: "#a5b4fc", marginBottom: "12px", fontSize: "15px" }}>📖 Vista previa de capítulos</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>
+              Vista previa de capítulos
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
               {[
                 { label: "Capítulo I — Planteamiento del Problema", texto: texto1 },
-                { label: "Capítulo II — Marco Teórico", texto: texto2 },
-                { label: "Capítulos III-V + Bibliografía", texto: texto3 },
-              ].map(({ label, texto }) => (
+                { label: "Capítulo II — Marco Teórico y Referencial", texto: texto2 },
+                { label: "Capítulos III, IV, V + Bibliografía", texto: texto3 },
+              ].map(({ label, texto }) =>
                 texto ? (
-                  <details key={label} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", padding: "12px" }}>
-                    <summary style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}>{label}</summary>
-                    <div style={{ marginTop: "12px", whiteSpace: "pre-wrap", fontSize: "12px", color: "#94a3b8", maxHeight: "300px", overflowY: "auto", lineHeight: 1.7 }}>
+                  <details key={label} className="card" style={{ padding: "12px 16px" }}>
+                    <summary style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600, fontSize: "13px" }}>{label}</summary>
+                    <div style={{ marginTop: "10px", whiteSpace: "pre-wrap", fontSize: "12px", color: "#64748b", maxHeight: "280px", overflowY: "auto", lineHeight: 1.7 }}>
                       {texto}
                     </div>
                   </details>
                 ) : null
-              ))}
+              )}
             </div>
 
-            <button onClick={reiniciar} style={{ ...btnSecondaryStyle, marginTop: "24px", width: "100%", justifyContent: "center" }}>
+            <button onClick={reiniciar} style={{ ...btnSecondaryStyle, width: "100%", justifyContent: "center" }}>
               ↩ Comenzar nueva monografía
             </button>
           </div>

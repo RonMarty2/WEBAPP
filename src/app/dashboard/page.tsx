@@ -2,303 +2,184 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { SECTION_STEPS } from "@/lib/data";
-
-interface SavedProject {
-  id: string;
-  title: string;
-  universityName: string;
-  modality: string;
-  programa: string;
-  plan: string;
-  sections: Record<string, string>;
-  currentStep: number;
-  savedAt: string;
-  params: string;
-}
-
-const PLAN_COLORS: Record<string, string> = {
-  demo: "badge-amber",
-  standard: "badge-cyan",
-  pro: "badge-purple",
-};
-
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("es-BO", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
+import type { SessionUser } from "@/lib/auth";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [projects, setProjects] = useState<SavedProject[]>([]);
-  const [plan, setPlan] = useState("demo");
-  const [credits, setCredits] = useState(10);
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load all saved projects from localStorage
-    const all: SavedProject[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith("lab_project_")) {
-        try {
-          const raw = localStorage.getItem(key);
-          if (raw) all.push(JSON.parse(raw));
-        } catch {}
-      }
-    }
-    // Sort newest first
-    all.sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
-    setProjects(all);
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.user) { router.replace("/login"); return; }
+        setUser(d.user);
+        setLoading(false);
+      })
+      .catch(() => router.replace("/login"));
+  }, [router]);
 
-    // Current session info
-    const session = localStorage.getItem("lab_session");
-    if (session) {
-      try {
-        const s = JSON.parse(session);
-        setPlan(s.plan || "demo");
-        setCredits(s.credits ?? (s.plan === "demo" ? 10 : s.plan === "standard" ? 100 : 999));
-      } catch {}
-    }
-  }, []);
-
-  const handleNewProject = () => {
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
-  };
+    router.refresh();
+  }
 
-  const handleContinue = (project: SavedProject) => {
-    router.push(`/laboratorio?${project.params}`);
-  };
+  if (loading) {
+    return (
+      <div
+        className="gradient-bg min-h-screen"
+        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <div className="spinner" />
+      </div>
+    );
+  }
 
-  const handleDelete = (projectId: string) => {
-    if (!confirm("¿Eliminar este proyecto? Esta acción no se puede deshacer.")) return;
-    localStorage.removeItem(`lab_project_${projectId}`);
-    setProjects((prev) => prev.filter((p) => p.id !== projectId));
-  };
-
-  const completedSections = (p: SavedProject) =>
-    SECTION_STEPS.filter((s) => p.sections?.[s.key]).length;
-
-  const progress = (p: SavedProject) =>
-    Math.round((completedSections(p) / SECTION_STEPS.length) * 100);
+  if (!user) return null;
 
   return (
-    <div className="gradient-bg" style={{ minHeight: "100vh" }}>
-      {/* Header */}
-      <header style={{ borderBottom: "1px solid rgba(6,182,212,0.15)", padding: "0 32px" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 64 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <button className="btn-ghost" onClick={() => router.push("/")} style={{ fontSize: 13, padding: "6px 14px" }}>
-              ← Inicio
-            </button>
-            <span style={{ color: "#334155" }}>|</span>
-            <span style={{ fontSize: 20 }}>🧪</span>
-            <span style={{ fontWeight: 800, fontSize: 17, color: "#e2e8f0" }}>Laboratorio</span>
-            <span style={{ fontWeight: 800, fontSize: 17, color: "#06b6d4" }}>Académico</span>
-          </div>
+    <div className="gradient-bg min-h-screen" style={{ padding: 24 }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 32,
+            flexWrap: "wrap",
+            gap: 12,
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ fontSize: 13, color: "#94a3b8" }}>
-              Créditos:{" "}
-              <span style={{ color: plan === "pro" ? "#a78bfa" : credits > 3 ? "#06b6d4" : "#f97316", fontWeight: 700 }}>
-                {plan === "pro" ? "∞" : credits}
-              </span>
+            {user.picture ? (
+              <img
+                src={user.picture}
+                alt=""
+                style={{ width: 42, height: 42, borderRadius: "50%", border: "2px solid #06b6d4" }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 42, height: 42, borderRadius: "50%", background: "#0e7490",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, fontWeight: 700, color: "#e2e8f0",
+                }}
+              >
+                {user.name[0]}
+              </div>
+            )}
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0" }}>{user.name}</div>
+              <div style={{ fontSize: 12, color: "#94a3b8" }}>{user.email}</div>
             </div>
-            <span className={`badge ${PLAN_COLORS[plan] || "badge-cyan"}`}>Plan {plan}</span>
+          </div>
+
+          <div style={{ display: "flex", gap: 10 }}>
+            <a
+              href="/"
+              style={{
+                padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b",
+                color: "#94a3b8", textDecoration: "none", fontSize: 13,
+              }}
+            >
+              Inicio
+            </a>
+            <button
+              onClick={handleLogout}
+              style={{
+                padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)",
+                background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer",
+              }}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </div>
-      </header>
 
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 32px" }}>
-        {/* Page header */}
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 40 }}>
-          <div>
-            <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>
-              📂 Mis Proyectos
-            </h1>
-            <p style={{ color: "#94a3b8", fontSize: 15 }}>
-              Retoma tus investigaciones o comienza una nueva.
-            </p>
-          </div>
-          <button
-            className="btn-cyan"
-            onClick={handleNewProject}
-            style={{ padding: "12px 24px", fontSize: 15, flexShrink: 0 }}
-          >
-            ＋ Nuevo Proyecto
-          </button>
+        {/* Welcome banner */}
+        <div
+          className="card"
+          style={{
+            marginBottom: 28,
+            background: "linear-gradient(135deg, rgba(6,182,212,0.1), rgba(14,116,144,0.05))",
+            borderColor: "rgba(6,182,212,0.2)",
+          }}
+        >
+          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+            Bienvenido, {user.name.split(" ")[0]}
+          </h1>
+          <p style={{ color: "#94a3b8", fontSize: 14 }}>
+            Desde aquí puedes crear y gestionar tus documentos académicos.
+          </p>
         </div>
 
-        {/* Stats bar */}
+        {/* Products */}
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: "#94a3b8", marginBottom: 16 }}>
+          Documentos disponibles
+        </h2>
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
             gap: 16,
-            marginBottom: 40,
           }}
         >
+          {/* Monografía — available */}
+          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ fontSize: 32 }}>📄</div>
+            <div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>
+                Monografía
+              </div>
+              <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.5 }}>
+                5 capítulos completos, bibliografía APA 7 y exportación LaTeX.
+              </div>
+            </div>
+            <a
+              href="/monografia"
+              className="btn-cyan"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                textDecoration: "none", padding: "10px", marginTop: "auto", fontSize: 14,
+              }}
+            >
+              Crear monografía →
+            </a>
+          </div>
+
+          {/* Coming soon */}
           {[
-            { label: "Total proyectos", value: projects.length, icon: "📁", color: "#06b6d4" },
-            {
-              label: "Completados",
-              value: projects.filter((p) => completedSections(p) === SECTION_STEPS.length).length,
-              icon: "✅",
-              color: "#4ade80",
-            },
-            {
-              label: "En progreso",
-              value: projects.filter(
-                (p) => completedSections(p) > 0 && completedSections(p) < SECTION_STEPS.length
-              ).length,
-              icon: "⚡",
-              color: "#f97316",
-            },
-            {
-              label: "Secciones totales",
-              value: projects.reduce((acc, p) => acc + completedSections(p), 0),
-              icon: "📝",
-              color: "#8b5cf6",
-            },
-          ].map((stat) => (
-            <div key={stat.label} className="card" style={{ textAlign: "center", padding: "20px 16px" }}>
-              <div style={{ fontSize: 24, marginBottom: 6 }}>{stat.icon}</div>
-              <div style={{ fontSize: 28, fontWeight: 800, color: stat.color }}>{stat.value}</div>
-              <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>{stat.label}</div>
+            { icon: "🎓", name: "Tesis" },
+            { icon: "📝", name: "Ensayo académico" },
+            { icon: "📊", name: "Trabajo final" },
+          ].map((p) => (
+            <div
+              key={p.name}
+              className="card"
+              style={{ opacity: 0.45, display: "flex", flexDirection: "column", gap: 12 }}
+            >
+              <div style={{ fontSize: 32 }}>{p.icon}</div>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>
+                  {p.name}
+                </div>
+                <div style={{ fontSize: 13, color: "#94a3b8" }}>Próximamente disponible.</div>
+              </div>
+              <div
+                style={{
+                  padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b",
+                  color: "#475569", fontSize: 13, textAlign: "center",
+                }}
+              >
+                Próximamente
+              </div>
             </div>
           ))}
         </div>
-
-        {/* Projects list */}
-        {projects.length === 0 ? (
-          <div
-            className="card"
-            style={{ textAlign: "center", padding: "80px 32px", borderStyle: "dashed", borderColor: "#334155" }}
-          >
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🔬</div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 12 }}>Aún no hay proyectos</h2>
-            <p style={{ color: "#94a3b8", marginBottom: 28, fontSize: 15 }}>
-              Comienza tu primer perfil de investigación y aparecerá aquí.
-            </p>
-            <button className="btn-cyan" onClick={handleNewProject} style={{ padding: "12px 28px", fontSize: 15 }}>
-              ＋ Crear primer proyecto
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {projects.map((project) => {
-              const done = completedSections(project);
-              const pct = progress(project);
-              const isComplete = done === SECTION_STEPS.length;
-
-              return (
-                <div
-                  key={project.id}
-                  className="card"
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto",
-                    gap: 24,
-                    alignItems: "center",
-                    transition: "all 0.2s",
-                    borderColor: isComplete ? "rgba(34,197,94,0.25)" : undefined,
-                  }}
-                >
-                  <div style={{ minWidth: 0 }}>
-                    {/* Title row */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-                      <h3
-                        style={{
-                          fontSize: 16,
-                          fontWeight: 700,
-                          color: "#e2e8f0",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          maxWidth: 480,
-                        }}
-                      >
-                        {project.title || "Proyecto sin título"}
-                      </h3>
-                      {isComplete && <span className="badge badge-green">✓ Completo</span>}
-                      <span className={`badge ${PLAN_COLORS[project.plan] || "badge-cyan"}`}>
-                        {project.plan}
-                      </span>
-                    </div>
-
-                    {/* Meta info */}
-                    <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 13, color: "#64748b", marginBottom: 16 }}>
-                      <span>🏫 {project.universityName || "Universidad"}</span>
-                      <span>📋 {project.modality || "Modalidad"}</span>
-                      <span>📚 {project.programa?.substring(0, 50) || "Programa"}</span>
-                      <span>🕒 {formatDate(project.savedAt)}</span>
-                    </div>
-
-                    {/* Progress bar */}
-                    <div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          fontSize: 12,
-                          color: "#64748b",
-                          marginBottom: 6,
-                        }}
-                      >
-                        <span>
-                          {done}/{SECTION_STEPS.length} secciones —{" "}
-                          {SECTION_STEPS.filter((s) => project.sections?.[s.key])
-                            .map((s) => s.label)
-                            .join(", ") || "Sin secciones"}
-                        </span>
-                        <span style={{ color: isComplete ? "#4ade80" : "#06b6d4", fontWeight: 700 }}>
-                          {pct}%
-                        </span>
-                      </div>
-                      <div style={{ background: "#1e293b", borderRadius: 999, height: 6 }}>
-                        <div
-                          style={{
-                            width: `${pct}%`,
-                            background: isComplete
-                              ? "linear-gradient(90deg,#16a34a,#4ade80)"
-                              : "linear-gradient(90deg,#0891b2,#06b6d4)",
-                            height: "100%",
-                            borderRadius: 999,
-                            transition: "width 0.5s ease",
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, minWidth: 140 }}>
-                    <button
-                      className="btn-cyan"
-                      onClick={() => handleContinue(project)}
-                      style={{ justifyContent: "center", width: "100%", fontSize: 13 }}
-                    >
-                      {isComplete ? "📄 Ver / Exportar" : "▶ Continuar"}
-                    </button>
-                    <button
-                      className="btn-ghost"
-                      onClick={() => handleDelete(project.id)}
-                      style={{ justifyContent: "center", width: "100%", fontSize: 12, color: "#ef4444", borderColor: "rgba(239,68,68,0.3)" }}
-                    >
-                      🗑 Eliminar
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </main>
+      </div>
     </div>
   );
 }
