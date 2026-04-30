@@ -62,15 +62,30 @@ export default function NuevoProyectoPage() {
     init();
   }, [router]);
 
+  // Obtiene servicioId; si no se cargó al montar, lo reintenta aquí.
+  async function resolverServicioId(): Promise<string> {
+    if (servicioId) return servicioId;
+    const res = await fetch("/api/services");
+    if (!res.ok) return "";
+    const data = await res.json();
+    const svcs: Servicio[] = data.servicios ?? [];
+    const mono = svcs.find(s => s.nombre.toLowerCase().includes("monograf"));
+    const sid = mono?.id ?? svcs[0]?.id ?? "";
+    if (sid) setServicioId(sid);
+    return sid;
+  }
+
   async function startConTema() {
-    if (!temaPropio.trim() || !servicioId) { setError("Escribe el tema y asegúrate de tener conexión."); return; }
+    if (!temaPropio.trim()) { setError("Escribe el tema de investigación antes de continuar."); return; }
     setError("");
     setStep("creando");
     try {
+      const sid = await resolverServicioId();
+      if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ servicio_id: servicioId, tema_aprobado: temaPropio.trim(), titulo_provisional: temaPropio.trim() }),
+        body: JSON.stringify({ servicio_id: sid, tema_aprobado: temaPropio.trim(), titulo_provisional: temaPropio.trim() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -82,16 +97,18 @@ export default function NuevoProyectoPage() {
   }
 
   async function startSinTema() {
-    if (!programa.trim() || !servicioId) { setError("Completa el campo Programa / Posgrado."); return; }
+    if (!programa.trim()) { setError("Completa el campo Programa / Posgrado."); return; }
     setError("");
     setStep("creando");
 
     let proyId: string;
     try {
+      const sid = await resolverServicioId();
+      if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ servicio_id: servicioId, tema_aprobado: "(Por definir)", titulo_provisional: `Proyecto — ${programa}` }),
+        body: JSON.stringify({ servicio_id: sid, tema_aprobado: "(Por definir)", titulo_provisional: `Proyecto — ${programa}` }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
