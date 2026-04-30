@@ -100,6 +100,14 @@ export async function POST(req: Request, { params }: { params: Params }) {
         tema_seleccionado: temaSeleccionado as Record<string, unknown>,
         ...inputs,
         tiene_hipotesis: inputs.tiene_hipotesis ?? false,
+        // Campos opcionales nuevos
+        subpreguntas: inputs.subpreguntas as Record<string, string> | undefined,
+        alcance_institucional: inputs.alcance_institucional as string | undefined,
+        hipotesis_principal: inputs.hipotesis_principal as string | undefined,
+        variables_hipotesis: inputs.variables_hipotesis as Array<{
+          nombre: string; tipo: string; definicion_conceptual: string;
+          definicion_operacional: string; indicador: string; escala_medicion: string;
+        }> | undefined,
       });
 
     } else if (etapa === 2) {
@@ -113,11 +121,20 @@ export async function POST(req: Request, { params }: { params: Params }) {
 
       const citasCap1 = getCitas(monografia_id).filter(c => c.capitulo === 1);
       const documentos = getDocumentos(monografia_id);
-      const docsFmt = documentos.map(d => ({
-        nombre: d.nombre,
-        contenido_extraido: d.contenido_extraido ?? "",
-        tipo: d.tipo ?? "txt",
-      }));
+      // Documentos del store + documentos inline del request
+      const docsInline = (inputs.documentos_usuario as Array<{
+        nombre: string; contenido_extraido: string; tipo: string; seccion_aplicable?: string;
+      }> | undefined) ?? [];
+
+      const docsFmt = [
+        ...documentos.map(d => ({
+          nombre: d.nombre,
+          contenido_extraido: d.contenido_extraido ?? "",
+          tipo: d.tipo ?? "txt",
+          seccion_aplicable: d.capitulo_asignado === 2 ? "2.1" : undefined,
+        })),
+        ...docsInline,
+      ];
 
       const cap1Json = cap1.contenido_json as Record<string, unknown>;
       const teorias = (inputs.teorias_a_desarrollar as string[] | undefined)
@@ -132,6 +149,7 @@ export async function POST(req: Request, { params }: { params: Params }) {
         documentos_usuario: docsFmt.length > 0 ? docsFmt : undefined,
         estudios_relacionados_cantidad: inputs.estudios_relacionados_cantidad ?? 5,
         marcos_adicionales: inputs.marcos_adicionales,
+        contexto_actual: inputs.contexto_actual as string | undefined,
       });
 
     } else {

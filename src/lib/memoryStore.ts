@@ -140,3 +140,11 @@ export function addDocumento(data: Omit<DocumentoRecord, "id" | "created_at">): 
 export function getDocumentos(monografiaId: string): DocumentoRecord[] {
   return documentosStore.get(monografiaId) ?? [];
 }
+
+// --- Admin helpers ---
+
+export function listAllMonografias(): MonografiaRecord[] {
+  return [...monografiasStore.values()].sort(
+    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}

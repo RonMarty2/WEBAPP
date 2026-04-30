@@ -3,7 +3,10 @@
     "allow": [
       "Bash(python3 -c ' *)",
       "Bash(npx tsc *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(mkdir -p \"c:/Users/lmigu/Desktop/WEBAPP/src/app/api/etapas/0/tema-directo\")",
+      "Bash(mkdir -p \"c:/Users/lmigu/Desktop/WEBAPP/src/app/admin/usuarios\")"
     ]
   }
 }

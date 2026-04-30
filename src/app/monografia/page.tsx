@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,6 +10,7 @@ type Phase =
   | "form1" | "generando1" | "cap1"
   | "generando2" | "cap2"
   | "generando3" | "cap3"
+  | "caratula"
   | "final";
 
 interface Propuesta {
@@ -24,27 +25,26 @@ interface Propuesta {
   viabilidad: string;
 }
 
+interface ChatMsg { role: "user" | "assistant"; text: string; }
+
 const STORAGE_KEY = "mono_session";
 
 function loadSession() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MonografiaPage() {
-  // Session
   const [monografiaId, setMonografiaId] = useState("");
   const [phase, setPhase] = useState<Phase>("inicio");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Outputs per stage
+  // Salidas por etapa
   const [texto0, setTexto0] = useState("");
   const [texto1, setTexto1] = useState("");
   const [texto2, setTexto2] = useState("");
@@ -52,12 +52,18 @@ export default function MonografiaPage() {
   const [propuestas, setPropuestas] = useState<Propuesta[]>([]);
   const [propuestaElegida, setPropuestaElegida] = useState<Propuesta | null>(null);
 
-  // ── Setup form ──
+  // ── Setup base ──
   const [diplomado, setDiplomado] = useState("");
   const [temas, setTemas] = useState("");
   const [interes, setInteres] = useState("");
   const [contexto, setContexto] = useState("Bolivia");
   const [trabajasEn, setTrabajasEn] = useState("");
+
+  // ── Tiene tema propio ──
+  const [hasTema, setHasTema] = useState<boolean | null>(null);
+  const [temaPropio, setTemaPropio] = useState("");
+  const [objPropio, setObjPropio] = useState("");
+  const [preguntaPropia, setPreguntaPropia] = useState("");
 
   // ── Etapa 1 inputs ──
   const [antecedentes, setAntecedentes] = useState("");
@@ -71,19 +77,33 @@ export default function MonografiaPage() {
   const [justSocial, setJustSocial] = useState("");
   const [alcanceTemporal, setAlcanceTemporal] = useState("");
   const [alcanceGeo, setAlcanceGeo] = useState("");
+  const [alcanceInstitucional, setAlcanceInstitucional] = useState("");
   const [limitaciones, setLimitaciones] = useState("");
   const [tipoInvestigacion, setTipoInvestigacion] = useState("cuantitativa");
   const [tieneHipotesis, setTieneHipotesis] = useState(false);
+  // Subpreguntas (opcionales)
+  const [subDiagnostica, setSubDiagnostica] = useState("");
+  const [subTeorica, setSubTeorica] = useState("");
+  const [subComparativa, setSubComparativa] = useState("");
+  const [subPropositiva, setSubPropositiva] = useState("");
+  const [showSubpreguntas, setShowSubpreguntas] = useState(false);
+  // Hipótesis (opcionales, solo si cuantitativa + tieneHipotesis)
+  const [hipotesisPrincipal, setHipotesisPrincipal] = useState("");
 
   // ── Etapa 2 inputs ──
   const [documentoPegado, setDocumentoPegado] = useState("");
   const [cantEstudios, setCantEstudios] = useState("5");
+  const [contextoActual, setContextoActual] = useState("");
 
   // ── Etapa 3 inputs ──
   const [fuentesDatos, setFuentesDatos] = useState("");
   const [observaciones3, setObservaciones3] = useState("");
 
-  // Restore session from localStorage
+  // ── Carátula ──
+  const [caratulaUrl, setCaratulaUrl] = useState("");
+  const caratulaInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Restaurar sesión ──
   useEffect(() => {
     const s = loadSession();
     if (s?.monografiaId) {
@@ -94,6 +114,7 @@ export default function MonografiaPage() {
       if (s.texto2) setTexto2(s.texto2);
       if (s.texto3) setTexto3(s.texto3);
       if (s.propuestaElegida) setPropuestaElegida(s.propuestaElegida);
+      if (s.caratulaUrl) setCaratulaUrl(s.caratulaUrl);
       if (s.setupData) {
         setDiplomado(s.setupData.diplomado ?? "");
         setTemas(s.setupData.temas ?? "");
@@ -129,9 +150,22 @@ export default function MonografiaPage() {
     });
   }
 
-  // ── API calls ────────────────────────────────────────────────────────────
+  // ── API: Crear monografía ─────────────────────────────────────────────────
 
-  async function crearMonografia() {
+  async function crearMonografia(data: Record<string, unknown>): Promise<string> {
+    const res = await fetch("/api/monografias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error);
+    return json.monografia.id;
+  }
+
+  // ── Flujo SIN tema → etapa 0 ─────────────────────────────────────────────
+
+  async function iniciarSinTema() {
     if (!diplomado || !interes || !contexto) {
       setError("Completa: Diplomado, Área de interés y País/Región.");
       return;
@@ -139,21 +173,14 @@ export default function MonografiaPage() {
     setIsLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/monografias", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: `user_${Date.now()}`,
-          diplomado,
-          temas_abordados: splitLines(temas),
-          area_interes: interes,
-          contexto_geografico: contexto,
-          trabajas_en: trabajasEn || undefined,
-        }),
+      const id = await crearMonografia({
+        user_id: `user_${Date.now()}`,
+        diplomado,
+        temas_abordados: splitLines(temas),
+        area_interes: interes,
+        contexto_geografico: contexto,
+        trabajas_en: trabajasEn || undefined,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      const id = data.monografia.id;
       setMonografiaId(id);
       saveSession({ monografiaId: id, phase: "generando0", setupData: { diplomado, temas, interes, contexto, trabajasEn } });
       setPhase("generando0");
@@ -165,6 +192,72 @@ export default function MonografiaPage() {
     }
   }
 
+  // ── Flujo CON tema propio → skip etapa 0 ────────────────────────────────
+
+  async function iniciarConTemaPropio() {
+    if (!diplomado || !temaPropio.trim()) {
+      setError("Completa: Diplomado y el título de tu tema.");
+      return;
+    }
+    setIsLoading(true);
+    setError("");
+    try {
+      const id = await crearMonografia({
+        user_id: `user_${Date.now()}`,
+        diplomado,
+        temas_abordados: splitLines(temas),
+        area_interes: temaPropio,
+        contexto_geografico: contexto || "Bolivia",
+        trabajas_en: trabajasEn || undefined,
+      });
+      setMonografiaId(id);
+
+      // Guardar tema propio como cap0 sin IA
+      const res = await fetch("/api/etapas/0/tema-directo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          monografia_id: id,
+          titulo: temaPropio,
+          objetivo_general: objPropio || undefined,
+          pregunta_investigacion: preguntaPropia || undefined,
+          metodologia: "cuantitativa",
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error);
+      }
+
+      const propuesta: Propuesta = {
+        numero: 0,
+        titulo: temaPropio,
+        problema_central: "",
+        pregunta_investigacion: preguntaPropia,
+        objetivo_general: objPropio,
+        fuentes_datos: [],
+        requiere_entrevistas: false,
+        viabilidad: "ALTA",
+      };
+      setPropuestaElegida(propuesta);
+      setAlcanceGeo(contexto || "Bolivia");
+
+      saveSession({
+        monografiaId: id,
+        phase: "form1",
+        propuestaElegida: propuesta,
+        setupData: { diplomado, temas, interes: temaPropio, contexto, trabajasEn },
+      });
+      setPhase("form1");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // ── Generar etapa ─────────────────────────────────────────────────────────
+
   async function generarEtapa(etapa: number, idOverride?: string) {
     const mid = idOverride ?? monografiaId;
     setIsLoading(true);
@@ -173,6 +266,10 @@ export default function MonografiaPage() {
     let body: Record<string, unknown> = { monografia_id: mid };
 
     if (etapa === 1) {
+      const subpreguntasPayload = (subDiagnostica || subTeorica || subComparativa || subPropositiva)
+        ? { diagnostica: subDiagnostica || undefined, teorica: subTeorica || undefined, comparativa: subComparativa || undefined, propositiva: subPropositiva || undefined }
+        : undefined;
+
       body.inputs = {
         antecedentes_problema: antecedentes,
         literatura_relevante: parseLiteratura(literatura),
@@ -185,17 +282,24 @@ export default function MonografiaPage() {
         justificacion_social: justSocial,
         alcance_temporal: alcanceTemporal,
         alcance_geografico: alcanceGeo,
+        alcance_institucional: alcanceInstitucional || undefined,
         limitaciones: splitLines(limitaciones),
         tipo_investigacion: tipoInvestigacion,
         tiene_hipotesis: tieneHipotesis,
+        subpreguntas: subpreguntasPayload,
+        hipotesis_principal: tieneHipotesis && hipotesisPrincipal ? hipotesisPrincipal : undefined,
       };
     } else if (etapa === 2) {
-      const extras: Record<string, unknown> = { estudios_relacionados_cantidad: parseInt(cantEstudios, 10) };
+      const extras: Record<string, unknown> = {
+        estudios_relacionados_cantidad: parseInt(cantEstudios, 10),
+        contexto_actual: contextoActual.trim() || undefined,
+      };
       if (documentoPegado.trim()) {
         extras.documentos_usuario = [{
           nombre: "documento_usuario.txt",
           contenido_extraido: documentoPegado,
           tipo: "txt",
+          seccion_aplicable: "2.1",
         }];
       }
       body.inputs = extras;
@@ -238,7 +342,6 @@ export default function MonografiaPage() {
       }
     } catch (e) {
       setError((e as Error).message);
-      // Revert phase to allow retry
       const revert: Record<number, Phase> = { 0: "inicio", 1: "form1", 2: "cap1", 3: "cap2" };
       setPhase(revert[etapa] ?? "inicio");
     } finally {
@@ -251,27 +354,97 @@ export default function MonografiaPage() {
     saveSession({ propuestaElegida: p });
     setPhase("form1");
     saveSession({ phase: "form1" });
-    // Pre-fill some fields
     setAlcanceTemporal(p.periodo_temporal ?? "2020-2024");
     setAlcanceGeo(contexto);
     setFuentesDatos((p.fuentes_datos ?? []).join("\n"));
   }
 
+  // ── Carátula ─────────────────────────────────────────────────────────────
+
+  function handleCaratulaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const url = ev.target?.result as string;
+      setCaratulaUrl(url);
+      saveSession({ caratulaUrl: url });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Exportar PDF con todas las etapas ────────────────────────────────────
+
+  async function exportarPDF() {
+    function mdAHtml(text: string) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*(.*?)\*/g, "<em>$1</em>")
+        .replace(/^#{1,3} (.+)$/gm, "<h3>$1</h3>")
+        .replace(/\n\n/g, "</p><p>")
+        .replace(/\n/g, "<br/>");
+    }
+
+    const tituloDoc = propuestaElegida?.titulo || texto0.split("\n")[0] || "Monografía";
+
+    const caratulaHtml = caratulaUrl
+      ? `<div class="caratula-page"><img src="${caratulaUrl}" alt="Carátula" style="max-width:100%;max-height:100%;object-fit:contain;" /></div>`
+      : `<div class="caratula-page" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">
+          <p style="font-size:11pt;color:#555;text-transform:uppercase;letter-spacing:2px;">Monografía</p>
+          <h1 style="font-size:18pt;font-weight:bold;text-align:center;margin-top:40px;line-height:1.4;">${tituloDoc}</h1>
+        </div>`;
+
+    const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>${tituloDoc}</title>
+<style>
+  @page { size: A4; margin: 3cm 2.5cm 2.5cm 3cm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.8; color: #000; }
+  .caratula-page { page-break-after: always; height: 24cm; padding: 2cm; }
+  .capitulo { page-break-before: always; padding-top: 1cm; }
+  .cap-titulo { font-size: 14pt; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 24px; letter-spacing: 1px; }
+  .cap-body { text-align: justify; white-space: pre-wrap; }
+  p { margin-bottom: 1em; }
+  h3 { font-size: 13pt; font-weight: bold; margin: 1.2em 0 0.5em; }
+  strong { font-weight: bold; }
+</style>
+</head>
+<body>
+  ${caratulaHtml}
+  ${texto1 ? `<div class="capitulo"><div class="cap-titulo">Capítulo I — Planteamiento del Problema</div><div class="cap-body">${mdAHtml(texto1)}</div></div>` : ""}
+  ${texto2 ? `<div class="capitulo"><div class="cap-titulo">Capítulo II — Marco Teórico</div><div class="cap-body">${mdAHtml(texto2)}</div></div>` : ""}
+  ${texto3 ? `<div class="capitulo"><div class="cap-titulo">Capítulos III, IV, V — Metodología, Resultados y Bibliografía</div><div class="cap-body">${mdAHtml(texto3)}</div></div>` : ""}
+</body>
+</html>`;
+
+    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, "_blank", "width=900,height=1000");
+    if (w) {
+      w.addEventListener("load", () => { setTimeout(() => w.print(), 400); });
+    }
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+
+  // ── Compilar LaTeX ────────────────────────────────────────────────────────
+
   async function compilarLatex() {
     setIsLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/compilar/${monografiaId}?formato=latex`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({}) });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error);
-      }
+      const res = await fetch(`/api/compilar/${monografiaId}?formato=latex`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = "monografia.tex";
-      a.click();
+      a.href = url; a.download = "monografia.tex"; a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
       setError((e as Error).message);
@@ -286,6 +459,8 @@ export default function MonografiaPage() {
     setMonografiaId("");
     setTexto0(""); setTexto1(""); setTexto2(""); setTexto3("");
     setPropuestas([]); setPropuestaElegida(null);
+    setHasTema(null); setTemaPropio(""); setObjPropio(""); setPreguntaPropia("");
+    setCaratulaUrl("");
     setError("");
   }
 
@@ -296,6 +471,7 @@ export default function MonografiaPage() {
     { label: "Capítulo I", phases: ["form1", "generando1", "cap1"] },
     { label: "Capítulo II", phases: ["generando2", "cap2"] },
     { label: "Caps. III-V", phases: ["generando3", "cap3"] },
+    { label: "Carátula", phases: ["caratula"] },
     { label: "Descarga", phases: ["final"] },
   ];
 
@@ -310,10 +486,10 @@ export default function MonografiaPage() {
       <div style={{ background: "#1e293b", borderBottom: "1px solid #334155", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#f8fafc" }}>📄 Generador de Monografía</h1>
-          <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#94a3b8" }}>Sistema v2.1 — Anti-alucinación · APA 7 · LaTeX</p>
+          <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#94a3b8" }}>Anti-alucinación · APA 7 · LaTeX · Chat por etapa</p>
         </div>
         {monografiaId && (
-          <button onClick={reiniciar} style={{ background: "transparent", border: "1px solid #475569", color: "#94a3b8", padding: "6px 12px", borderRadius: "6px", cursor: "pointer", fontSize: "13px" }}>
+          <button onClick={reiniciar} style={btnSecondaryStyle}>
             ↩ Nueva monografía
           </button>
         )}
@@ -322,20 +498,17 @@ export default function MonografiaPage() {
       {/* Progress */}
       {phase !== "inicio" && (
         <div style={{ padding: "12px 24px", background: "#1e293b", borderBottom: "1px solid #334155" }}>
-          <div style={{ display: "flex", gap: "0", maxWidth: "700px" }}>
+          <div style={{ display: "flex", gap: 0, maxWidth: "760px" }}>
             {PASOS.map((p, i) => (
               <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{
                   width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                   background: i < pasoActual ? "#22c55e" : i === pasoActual ? "#6366f1" : "#334155",
-                  color: "#fff", fontSize: "12px", fontWeight: 700, zIndex: 1
+                  color: "#fff", fontSize: "12px", fontWeight: 700,
                 }}>
                   {i < pasoActual ? "✓" : i + 1}
                 </div>
                 <span style={{ fontSize: "10px", color: i === pasoActual ? "#a5b4fc" : "#64748b", marginTop: "4px", textAlign: "center" }}>{p.label}</span>
-                {i < PASOS.length - 1 && (
-                  <div style={{ position: "absolute", marginTop: "14px", marginLeft: "80px", height: "2px", width: "calc(100%/5 - 28px)", background: i < pasoActual ? "#22c55e" : "#334155" }} />
-                )}
               </div>
             ))}
           </div>
@@ -345,59 +518,120 @@ export default function MonografiaPage() {
       {/* Content */}
       <div style={{ maxWidth: "860px", margin: "0 auto", padding: "32px 24px" }}>
 
-        {/* Error */}
         {error && (
           <div style={{ background: "#450a0a", border: "1px solid #dc2626", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px", color: "#fca5a5", fontSize: "14px" }}>
             ⚠️ {error}
           </div>
         )}
 
-        {/* Loading */}
         {isLoading && (
           <div style={{ background: "#1e293b", border: "1px solid #4f46e5", borderRadius: "8px", padding: "24px", marginBottom: "20px", textAlign: "center" }}>
             <div style={{ fontSize: "32px", marginBottom: "12px" }}>🤖</div>
             <p style={{ color: "#a5b4fc", fontWeight: 600, margin: "0 0 8px" }}>Generando con IA...</p>
-            <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>Esto puede tardar 30-60 segundos. No cierres la página.</p>
+            <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>Esto puede tardar 30-90 segundos. No cierres la página.</p>
           </div>
         )}
 
         {/* ── INICIO ─────────────────────────────────────────────────────── */}
         {phase === "inicio" && !isLoading && (
           <div>
-            <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "8px" }}>¡Hola! Comencemos tu monografía</h2>
-            <p style={{ color: "#94a3b8", marginBottom: "28px" }}>Responde 5 preguntas simples y la IA generará tu documento completo paso a paso.</p>
+            <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "6px" }}>¡Hola! Comencemos tu monografía</h2>
+            <p style={{ color: "#94a3b8", marginBottom: "28px" }}>Primero dinos: ¿ya tienes un tema definido?</p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-              <div>
-                <label style={labelStyle}>1. ¿Qué diplomado o carrera estás cursando?</label>
-                <input value={diplomado} onChange={e => setDiplomado(e.target.value)} placeholder="Ej: Diplomado en Gestión Empresarial y Finanzas" style={inputStyle} />
+            {/* Elección: tiene tema o no */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
+              <div
+                onClick={() => setHasTema(true)}
+                style={{
+                  padding: "16px", borderRadius: "10px", cursor: "pointer", textAlign: "center",
+                  background: hasTema === true ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.04)",
+                  border: hasTema === true ? "2px solid rgba(34,197,94,0.5)" : "2px solid #1e293b",
+                  transition: "all 0.15s",
+                }}
+              >
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>✅</div>
+                <div style={{ fontWeight: 700, color: "#e2e8f0", marginBottom: "4px" }}>Sí, tengo mi tema</div>
+                <div style={{ fontSize: "12px", color: "#64748b" }}>Ingreso el título y voy directo al Capítulo I</div>
               </div>
-
-              <div>
-                <label style={labelStyle}>2. ¿Qué temas abordaron en el programa? (uno por línea)</label>
-                <textarea value={temas} onChange={e => setTemas(e.target.value)} rows={4} placeholder={"Finanzas corporativas\nMarketing digital\nGestión de proyectos"} style={textareaStyle} />
+              <div
+                onClick={() => setHasTema(false)}
+                style={{
+                  padding: "16px", borderRadius: "10px", cursor: "pointer", textAlign: "center",
+                  background: hasTema === false ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.04)",
+                  border: hasTema === false ? "2px solid rgba(99,102,241,0.5)" : "2px solid #1e293b",
+                  transition: "all 0.15s",
+                }}
+              >
+                <div style={{ fontSize: "28px", marginBottom: "8px" }}>🤖</div>
+                <div style={{ fontWeight: 700, color: "#e2e8f0", marginBottom: "4px" }}>No, necesito ayuda</div>
+                <div style={{ fontSize: "12px", color: "#64748b" }}>La IA me propone 3 temas viables para elegir</div>
               </div>
-
-              <div>
-                <label style={labelStyle}>3. ¿Cuál es tu área o sector de interés?</label>
-                <textarea value={interes} onChange={e => setInteres(e.target.value)} rows={3} placeholder="Ej: El sector bancario boliviano, específicamente microcréditos para emprendedores rurales" style={textareaStyle} />
-              </div>
-
-              <div>
-                <label style={labelStyle}>4. ¿País o región donde realizarás el estudio?</label>
-                <input value={contexto} onChange={e => setContexto(e.target.value)} placeholder="Bolivia" style={inputStyle} />
-              </div>
-
-              <div>
-                <label style={labelStyle}>5. ¿Trabajas actualmente en alguna empresa o institución? (opcional)</label>
-                <input value={trabajasEn} onChange={e => setTrabajasEn(e.target.value)} placeholder="Ej: Banco BISA, empresa minera, institución pública, etc." style={inputStyle} />
-                <p style={{ fontSize: "12px", color: "#64748b", marginTop: "4px" }}>Si trabajas en el sector, puedes proponer temas con datos internos.</p>
-              </div>
-
-              <button onClick={crearMonografia} disabled={isLoading} style={btnPrimaryStyle}>
-                🚀 Iniciar — Generar propuestas de tema
-              </button>
             </div>
+
+            {/* Formulario condicional */}
+            {hasTema !== null && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+
+                <div>
+                  <label style={labelStyle}>Diplomado o carrera *</label>
+                  <input value={diplomado} onChange={e => setDiplomado(e.target.value)}
+                    placeholder="Ej: Diplomado en Gestión Empresarial y Finanzas" style={inputStyle} />
+                </div>
+
+                {hasTema ? (
+                  <>
+                    <div>
+                      <label style={labelStyle}>Título de tu tema *</label>
+                      <input value={temaPropio} onChange={e => setTemaPropio(e.target.value)}
+                        placeholder="Ej: Análisis del impacto del microcrédito en el sector rural boliviano 2018-2023" style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Objetivo general <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                      <input value={objPropio} onChange={e => setObjPropio(e.target.value)}
+                        placeholder="Ej: Analizar el impacto del microcrédito en la reducción de la pobreza rural..." style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Pregunta de investigación <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                      <input value={preguntaPropia} onChange={e => setPreguntaPropia(e.target.value)}
+                        placeholder="Ej: ¿Cuál es el impacto del microcrédito en el ingreso familiar rural de Bolivia 2018-2023?" style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Temas del programa <span style={{ color: "#475569", fontWeight: 400 }}>(opcional — mejora la generación)</span></label>
+                      <textarea value={temas} onChange={e => setTemas(e.target.value)} rows={3}
+                        placeholder={"Finanzas corporativas\nMicroeconomía\nGestión de proyectos"} style={textareaStyle} />
+                    </div>
+                    <button onClick={iniciarConTemaPropio} disabled={isLoading || !diplomado || !temaPropio.trim()} style={btnSuccessStyle}>
+                      🚀 Comenzar con mi tema → Generar Capítulo I
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label style={labelStyle}>Temas abordados en el programa (uno por línea) *</label>
+                      <textarea value={temas} onChange={e => setTemas(e.target.value)} rows={4}
+                        placeholder={"Finanzas corporativas\nMarketing digital\nGestión de proyectos"} style={textareaStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Área o sector de interés *</label>
+                      <textarea value={interes} onChange={e => setInteres(e.target.value)} rows={3}
+                        placeholder="Ej: El sector bancario boliviano, específicamente microcréditos para emprendedores rurales" style={textareaStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>País o región *</label>
+                      <input value={contexto} onChange={e => setContexto(e.target.value)} placeholder="Bolivia" style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>¿Trabajas en alguna empresa o institución? <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                      <input value={trabajasEn} onChange={e => setTrabajasEn(e.target.value)}
+                        placeholder="Ej: Banco BISA, empresa minera, institución pública..." style={inputStyle} />
+                    </div>
+                    <button onClick={iniciarSinTema} disabled={isLoading || !diplomado || !temas || !interes} style={btnPrimaryStyle}>
+                      🤖 Generar 3 propuestas de tema con IA
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -405,7 +639,7 @@ export default function MonografiaPage() {
         {(phase === "propuestas" || phase === "generando0") && !isLoading && (
           <div>
             <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>Etapa 0 — Propuestas de Tema</h2>
-            <p style={{ color: "#94a3b8", marginBottom: "20px", fontSize: "14px" }}>La IA generó 3 opciones viables con datos secundarios públicos. Elige la que más te interese.</p>
+            <p style={{ color: "#94a3b8", marginBottom: "20px", fontSize: "14px" }}>La IA generó 3 opciones viables. Elige la que más te interese.</p>
 
             {propuestas.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -418,10 +652,10 @@ export default function MonografiaPage() {
                       </span>
                     </div>
                     <h3 style={{ fontSize: "16px", color: "#e2e8f0", marginBottom: "8px" }}>{p.titulo}</h3>
-                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "8px" }}>
+                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "6px" }}>
                       <strong style={{ color: "#cbd5e1" }}>Pregunta:</strong> {p.pregunta_investigacion}
                     </p>
-                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "8px" }}>
+                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "10px" }}>
                       <strong style={{ color: "#cbd5e1" }}>Objetivo:</strong> {p.objetivo_general}
                     </p>
                     {p.fuentes_datos?.length > 0 && (
@@ -430,14 +664,14 @@ export default function MonografiaPage() {
                       </p>
                     )}
                     <button onClick={() => elegirPropuesta(p)} style={btnSuccessStyle}>
-                      ✓ Elegir este tema → Generar Capítulo I
+                      ✓ Elegir este tema → Continuar al Capítulo I
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
               <div style={{ background: "#1e293b", borderRadius: "8px", padding: "20px" }}>
-                <p style={{ color: "#94a3b8", fontSize: "14px", marginBottom: "16px" }}>La IA devolvió el texto completo. Lee las propuestas y elige una:</p>
+                <p style={{ color: "#94a3b8", fontSize: "14px", marginBottom: "16px" }}>Lee las propuestas y elige una:</p>
                 <div style={{ background: "#0f172a", borderRadius: "6px", padding: "16px", whiteSpace: "pre-wrap", fontSize: "13px", color: "#cbd5e1", maxHeight: "400px", overflowY: "auto", lineHeight: 1.7 }}>
                   {texto0}
                 </div>
@@ -458,50 +692,53 @@ export default function MonografiaPage() {
           <div>
             <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>Etapa 1 — Datos para el Capítulo I</h2>
             {propuestaElegida && (
-              <div style={{ background: "#1e3a1e", border: "1px solid #166534", borderRadius: "8px", padding: "12px 16px", marginBottom: "20px" }}>
-                <p style={{ margin: 0, fontSize: "13px", color: "#86efac" }}>✓ Tema elegido: <strong>{propuestaElegida.titulo}</strong></p>
+              <div style={{ background: "#1e3a1e", border: "1px solid #166534", borderRadius: "8px", padding: "10px 14px", marginBottom: "20px" }}>
+                <p style={{ margin: 0, fontSize: "13px", color: "#86efac" }}>✓ Tema: <strong>{propuestaElegida.titulo}</strong></p>
               </div>
             )}
-            <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "14px" }}>Completa los siguientes datos. La IA usará exactamente esta información para generar el Capítulo I sin inventar nada.</p>
+            <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "14px" }}>
+              La IA usará exactamente estos datos para el Capítulo I sin inventar nada adicional.
+            </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
 
-              <Field label="Antecedentes del problema (2-3 párrafos de contexto histórico del tema)"
+              <Field label="Antecedentes del problema (2-3 párrafos de contexto histórico)"
                 value={antecedentes} onChange={setAntecedentes} rows={5}
-                placeholder="Ej: El sector microfinanciero boliviano experimentó un crecimiento significativo desde 2010. Según el Banco Central de Bolivia (2022), las carteras de crédito de entidades de microfinanzas crecieron un 12% anual..." />
+                placeholder="Ej: El sector microfinanciero boliviano experimentó un crecimiento significativo desde 2010. Según el Banco Central de Bolivia (2022)..." />
 
-              <Field label="Referencias bibliográficas — MÍNIMO 5 (una por línea, formato: Autor (Año). Título. Método. Conclusión)"
+              <Field label="Referencias bibliográficas — MÍNIMO 5 (una por línea: Autor (Año). Título. Fuente.)"
                 value={literatura} onChange={setLiteratura} rows={7}
-                placeholder={"García, Juan (2022). Microfinanzas en Bolivia. Descriptivo. Las tasas de morosidad aumentaron post-COVID.\nLópez, María (2021). Crédito informal en áreas rurales. Revisión bibliográfica. El acceso al crédito formal es del 35% en zonas rurales.\nPérez, Carlos (2020). Regulación del sistema financiero. Análisis normativo. La Ley 393 estableció límites de tasas."} />
+                placeholder={"García, Juan (2022). Microfinanzas en Bolivia. BCB. Las tasas de morosidad aumentaron post-COVID.\nLópez, María (2021). Crédito informal rural. UDAPE. El acceso al crédito formal es del 35% en zonas rurales."} />
 
               <Field label="Causas raíz del problema (una por línea)"
                 value={causas} onChange={setCausas} rows={4}
-                placeholder={"Alta tasa de interés en créditos formales\nFalta de educación financiera en la población\nEscasa presencia bancaria en zonas rurales"} />
+                placeholder={"Alta tasa de interés en créditos formales\nFalta de educación financiera\nEscasa presencia bancaria en zonas rurales"} />
 
-              <Field label="Efectos proyectados si el problema continúa (uno por línea)"
+              <Field label="Efectos proyectados (uno por línea)"
                 value={efectos} onChange={setEfectos} rows={3}
                 placeholder={"Exclusión financiera de sectores vulnerables\nAumento de informalidad en el mercado crediticio"} />
 
               <Field label="Situación controlada — ¿cómo debería ser la situación ideal?"
                 value={situacion} onChange={setSituacion} rows={2}
-                placeholder="Acceso equitativo al crédito formal con tasas reguladas y educación financiera para todos los sectores." />
+                placeholder="Acceso equitativo al crédito con tasas reguladas y educación financiera para todos los sectores." />
 
               <Field label="Objetivos específicos (3-4, uno por línea — empezar con verbo: Analizar, Determinar, Proponer...)"
                 value={objetivosEsp} onChange={setObjetivosEsp} rows={4}
-                placeholder={"Analizar la evolución de la morosidad en el sistema microfinanciero 2019-2023\nDeterminar los factores que inciden en el acceso al crédito formal\nProponer lineamientos de mejora para la inclusión financiera"} />
+                placeholder={"Analizar la evolución de la morosidad 2019-2023\nDeterminar los factores que inciden en el acceso al crédito\nProponer lineamientos de mejora para la inclusión financiera"} />
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                <Field label="Justificación TEÓRICA (brecha de conocimiento)" value={justTeorica} onChange={setJustTeorica} rows={3}
+                <Field label="Justificación TEÓRICA" value={justTeorica} onChange={setJustTeorica} rows={3}
                   placeholder="No existen estudios post-pandemia que analicen..." />
-                <Field label="Justificación PRÁCTICA (beneficio concreto)" value={justPractica} onChange={setJustPractica} rows={3}
+                <Field label="Justificación PRÁCTICA" value={justPractica} onChange={setJustPractica} rows={3}
                   placeholder="Los resultados permitirán a las entidades financieras..." />
               </div>
-              <Field label="Justificación SOCIAL (impacto en la sociedad)" value={justSocial} onChange={setJustSocial} rows={2}
+
+              <Field label="Justificación SOCIAL" value={justSocial} onChange={setJustSocial} rows={2}
                 placeholder="Mejorará el acceso al crédito para más de 500,000 familias..." />
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 <div>
-                  <label style={labelStyle}>Período temporal del estudio</label>
+                  <label style={labelStyle}>Período temporal</label>
                   <input value={alcanceTemporal} onChange={e => setAlcanceTemporal(e.target.value)} placeholder="Ej: 2019-2023" style={inputStyle} />
                 </div>
                 <div>
@@ -510,8 +747,14 @@ export default function MonografiaPage() {
                 </div>
               </div>
 
+              <div>
+                <label style={labelStyle}>Alcance institucional <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                <input value={alcanceInstitucional} onChange={e => setAlcanceInstitucional(e.target.value)}
+                  placeholder="Ej: Sector microfinanciero boliviano / Empresa XYZ / Subsector agroindustrial" style={inputStyle} />
+              </div>
+
               <Field label="Limitaciones del estudio (una por línea)" value={limitaciones} onChange={setLimitaciones} rows={3}
-                placeholder={"Disponibilidad limitada de datos desagregados por región\nAcceso restringido a información confidencial de entidades"} />
+                placeholder={"Disponibilidad limitada de datos desagregados por región\nAcceso restringido a información confidencial"} />
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
                 <div>
@@ -528,54 +771,191 @@ export default function MonografiaPage() {
                 </div>
               </div>
 
-              <button onClick={() => { setPhase("generando1"); generarEtapa(1); }} disabled={!antecedentes || !literatura || !causas || !objetivosEsp} style={btnPrimaryStyle}>
+              {/* Hipótesis principal (opcional, solo si cuantitativa + tieneHipotesis) */}
+              {tieneHipotesis && tipoInvestigacion !== "cualitativa" && (
+                <div style={{ background: "rgba(79,70,229,0.06)", border: "1px solid rgba(79,70,229,0.2)", borderRadius: "8px", padding: "14px" }}>
+                  <label style={{ ...labelStyle, color: "#a5b4fc" }}>Hipótesis principal <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                  <input value={hipotesisPrincipal} onChange={e => setHipotesisPrincipal(e.target.value)}
+                    placeholder='Ej: "Si X aumenta, entonces Y disminuye porque Z..."' style={inputStyle} />
+                  <p style={{ fontSize: "11px", color: "#64748b", marginTop: "6px" }}>Si la dejas vacía, la IA la derivará del tema y causas.</p>
+                </div>
+              )}
+
+              {/* Subpreguntas (sección colapsable opcional) */}
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setShowSubpreguntas(!showSubpreguntas)}
+                  style={{ background: "transparent", border: "1px solid #334155", borderRadius: "6px", color: "#94a3b8", padding: "8px 14px", fontSize: "13px", cursor: "pointer", width: "100%", textAlign: "left" }}
+                >
+                  {showSubpreguntas ? "▲" : "▼"} Subpreguntas de investigación <span style={{ color: "#475569" }}>(opcionales — la IA las genera si las dejas vacías)</span>
+                </button>
+                {showSubpreguntas && (
+                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px", padding: "14px", background: "rgba(255,255,255,0.02)", borderRadius: "6px", border: "1px solid #1e293b" }}>
+                    <div>
+                      <label style={{ ...labelStyle, fontSize: "12px" }}>Diagnóstica — ¿Cuáles son las fortalezas/debilidades de...?</label>
+                      <input value={subDiagnostica} onChange={e => setSubDiagnostica(e.target.value)} style={inputStyle}
+                        placeholder="¿Cuál es la situación actual del sector X en Bolivia?" />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle, fontSize: "12px" }}>Teórica — ¿Cuál es el aporte de [teoría] para...?</label>
+                      <input value={subTeorica} onChange={e => setSubTeorica(e.target.value)} style={inputStyle}
+                        placeholder="¿Qué teorías explican el comportamiento de X en Y?" />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle, fontSize: "12px" }}>Comparativa — ¿Cuál de [opciones] es más efectivo en...?</label>
+                      <input value={subComparativa} onChange={e => setSubComparativa(e.target.value)} style={inputStyle}
+                        placeholder="¿Cómo se compara X con Y en el período 2019-2023?" />
+                    </div>
+                    <div>
+                      <label style={{ ...labelStyle, fontSize: "12px" }}>Propositiva — ¿Cuáles deberían ser las acciones/políticas para...?</label>
+                      <input value={subPropositiva} onChange={e => setSubPropositiva(e.target.value)} style={inputStyle}
+                        placeholder="¿Qué estrategias deberían implementarse para mejorar X?" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={() => { setPhase("generando1"); generarEtapa(1); }}
+                disabled={!antecedentes || !literatura || !causas || !objetivosEsp}
+                style={btnPrimaryStyle}
+              >
                 🤖 Generar Capítulo I completo
               </button>
               {(!antecedentes || !literatura || !causas || !objetivosEsp) && (
-                <p style={{ fontSize: "12px", color: "#f59e0b", textAlign: "center", margin: "-8px 0 0" }}>* Completa al menos: Antecedentes, Referencias, Causas y Objetivos específicos.</p>
+                <p style={{ fontSize: "12px", color: "#f59e0b", textAlign: "center", marginTop: "-8px" }}>
+                  * Completa: Antecedentes, Referencias, Causas y Objetivos específicos.
+                </p>
               )}
             </div>
           </div>
         )}
 
-        {/* ── RESULTADO CAPS 1, 2, 3 ──────────────────────────────────────── */}
-        {["cap1", "cap2", "cap3"].includes(phase) && !isLoading && (
-          <ResultadoEtapa
-            titulo={phase === "cap1" ? "Capítulo I — Planteamiento del Problema" : phase === "cap2" ? "Capítulo II — Marco Teórico" : "Capítulos III, IV, V + Bibliografía"}
-            texto={phase === "cap1" ? texto1 : phase === "cap2" ? texto2 : texto3}
-            onAprobar={() => {
-              if (phase === "cap1") { setPhase("generando2"); generarEtapa(2); }
-              else if (phase === "cap2") { setPhase("generando3"); generarEtapa(3); }
-              else { setPhase("final"); saveSession({ phase: "final" }); }
-            }}
-            onVolver={() => {
-              if (phase === "cap1") setPhase("form1");
-              else if (phase === "cap2") setPhase("cap1");
-              else setPhase("cap2");
-            }}
-            btnLabel={phase === "cap3" ? "✅ Aprobar y compilar documento final" : "✅ Aprobar y generar siguiente capítulo"}
+        {/* ── RESULTADOS CON CHAT ──────────────────────────────────────────── */}
+        {phase === "cap1" && !isLoading && (
+          <ResultadoEtapaConChat
+            titulo="Capítulo I — Planteamiento del Problema"
+            texto={texto1}
+            onTextoChange={(t) => { setTexto1(t); saveSession({ texto1: t }); }}
+            etapaNum={1}
+            monografiaId={monografiaId}
+            onAprobar={() => { setPhase("generando2"); generarEtapa(2); }}
+            onVolver={() => setPhase("form1")}
+            btnLabel="✅ Aprobar y generar Capítulo II →"
             extraContent={
-              phase === "cap1" ? (
-                <div style={{ marginTop: "16px" }}>
-                  <p style={{ color: "#94a3b8", fontSize: "13px", margin: "0 0 8px" }}>¿Deseas agregar un documento propio para el Capítulo II? (opcional)</p>
-                  <textarea value={documentoPegado} onChange={e => setDocumentoPegado(e.target.value)} rows={4} placeholder="Pega aquí el texto de cualquier documento tuyo (artículo, informe, nota de clase...)..." style={textareaStyle} />
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center", marginTop: "8px" }}>
-                    <label style={{ ...labelStyle, margin: 0, fontSize: "12px" }}>Estudios relacionados a incluir:</label>
-                    <select value={cantEstudios} onChange={e => setCantEstudios(e.target.value)} style={{ ...inputStyle, width: "80px" }}>
-                      {[5, 6, 7, 8, 9, 10].map(n => <option key={n}>{n}</option>)}
-                    </select>
-                  </div>
+              <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div>
+                  <label style={{ ...labelStyle, fontSize: "13px" }}>
+                    Contexto actual del tema <span style={{ color: "#475569", fontWeight: 400 }}>(opcional — coyuntura, situación reciente)</span>
+                  </label>
+                  <textarea value={contextoActual} onChange={e => setContextoActual(e.target.value)} rows={3}
+                    placeholder="Ej: A 2024, el sector microfinanciero boliviano registra un crecimiento del 8% anual según el BCB. La Ley 393 de Servicios Financieros estableció..."
+                    style={textareaStyle} />
+                  <p style={{ fontSize: "11px", color: "#475569", marginTop: "4px" }}>Se integrará como sección de contexto actual en el Capítulo II.</p>
                 </div>
-              ) : phase === "cap2" ? (
-                <div style={{ marginTop: "16px" }}>
-                  <p style={{ color: "#94a3b8", fontSize: "13px", margin: "0 0 8px" }}>Fuentes de datos disponibles para el análisis (opcionales, una por línea):</p>
-                  <textarea value={fuentesDatos} onChange={e => setFuentesDatos(e.target.value)} rows={3} placeholder={"INE — Instituto Nacional de Estadística 2019-2023\nBCB — Banco Central de Bolivia 2020-2023\nASFI — Autoridad de Supervisión del Sistema Financiero"} style={textareaStyle} />
-                  <Field label="Observaciones adicionales para la IA (opcional)" value={observaciones3} onChange={setObservaciones3} rows={2}
-                    placeholder="Ej: Enfocarse en microfinanzas rurales, incluir análisis de la Ley 393..." />
+                <div>
+                  <label style={{ ...labelStyle, fontSize: "13px" }}>
+                    Documentos del docente o propios <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span>
+                  </label>
+                  <textarea value={documentoPegado} onChange={e => setDocumentoPegado(e.target.value)} rows={4}
+                    placeholder="Pega aquí texto de artículos, informes, apuntes o notas del curso que quieras incluir en el marco teórico..." style={textareaStyle} />
                 </div>
-              ) : null
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <label style={{ ...labelStyle, margin: 0, fontSize: "12px" }}>Estudios relacionados a incluir:</label>
+                  <select value={cantEstudios} onChange={e => setCantEstudios(e.target.value)} style={{ ...inputStyle, width: "80px" }}>
+                    {[5, 6, 7, 8, 9, 10].map(n => <option key={n}>{n}</option>)}
+                  </select>
+                </div>
+              </div>
             }
           />
+        )}
+
+        {phase === "cap2" && !isLoading && (
+          <ResultadoEtapaConChat
+            titulo="Capítulo II — Marco Teórico"
+            texto={texto2}
+            onTextoChange={(t) => { setTexto2(t); saveSession({ texto2: t }); }}
+            etapaNum={2}
+            monografiaId={monografiaId}
+            onAprobar={() => { setPhase("generando3"); generarEtapa(3); }}
+            onVolver={() => setPhase("cap1")}
+            btnLabel="✅ Aprobar y generar Capítulos III-V →"
+            extraContent={
+              <div style={{ marginTop: "16px" }}>
+                <p style={{ color: "#94a3b8", fontSize: "13px", margin: "0 0 8px" }}>Fuentes de datos para el análisis (opcionales, una por línea):</p>
+                <textarea value={fuentesDatos} onChange={e => setFuentesDatos(e.target.value)} rows={3}
+                  placeholder={"INE — Instituto Nacional de Estadística 2019-2023\nBCB — Banco Central de Bolivia 2020-2023"} style={textareaStyle} />
+                <Field label="Observaciones adicionales para los capítulos finales (opcional)" value={observaciones3} onChange={setObservaciones3} rows={2}
+                  placeholder="Ej: Enfocarse en microfinanzas rurales, incluir análisis de la Ley 393..." />
+              </div>
+            }
+          />
+        )}
+
+        {phase === "cap3" && !isLoading && (
+          <ResultadoEtapaConChat
+            titulo="Capítulos III, IV, V + Bibliografía"
+            texto={texto3}
+            onTextoChange={(t) => { setTexto3(t); saveSession({ texto3: t }); }}
+            etapaNum={3}
+            monografiaId={monografiaId}
+            onAprobar={() => { setPhase("caratula"); saveSession({ phase: "caratula" }); }}
+            onVolver={() => setPhase("cap2")}
+            btnLabel="✅ Aprobar y subir carátula →"
+          />
+        )}
+
+        {/* ── CARÁTULA ─────────────────────────────────────────────────────── */}
+        {phase === "caratula" && !isLoading && (
+          <div>
+            <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "6px" }}>Carátula del documento</h2>
+            <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "14px" }}>
+              Sube la carátula que te entregó la institución o que ya tienes diseñada. Se incluirá como primera página del PDF.
+            </p>
+
+            {caratulaUrl ? (
+              <div style={{ marginBottom: "20px" }}>
+                <div style={{ background: "#1e293b", borderRadius: "8px", padding: "12px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
+                  <span style={{ color: "#4ade80", fontSize: "20px" }}>✓</span>
+                  <span style={{ color: "#e2e8f0", fontSize: "14px" }}>Carátula cargada correctamente</span>
+                  <button onClick={() => setCaratulaUrl("")} style={{ ...btnSecondaryStyle, marginLeft: "auto", padding: "4px 12px", fontSize: "12px" }}>
+                    Cambiar
+                  </button>
+                </div>
+                <img src={caratulaUrl} alt="Vista previa carátula" style={{ maxWidth: "300px", maxHeight: "400px", borderRadius: "6px", border: "1px solid #334155", objectFit: "contain" }} />
+              </div>
+            ) : (
+              <div
+                onClick={() => caratulaInputRef.current?.click()}
+                style={{
+                  border: "2px dashed #334155", borderRadius: "10px", padding: "40px 24px",
+                  textAlign: "center", cursor: "pointer", marginBottom: "20px", transition: "all 0.2s",
+                  background: "rgba(255,255,255,0.02)",
+                }}
+                onMouseOver={e => (e.currentTarget.style.borderColor = "#6366f1")}
+                onMouseOut={e => (e.currentTarget.style.borderColor = "#334155")}
+              >
+                <div style={{ fontSize: "40px", marginBottom: "12px" }}>📎</div>
+                <p style={{ color: "#e2e8f0", fontWeight: 600, marginBottom: "6px" }}>Subir carátula</p>
+                <p style={{ color: "#64748b", fontSize: "13px" }}>PNG o JPG · Máx. 5 MB</p>
+                <input ref={caratulaInputRef} type="file" accept="image/*" onChange={handleCaratulaChange} style={{ display: "none" }} />
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "12px" }}>
+              <button
+                onClick={() => { setPhase("final"); saveSession({ phase: "final" }); }}
+                style={{ ...btnSuccessStyle, flex: 2, padding: "12px 24px", fontSize: "15px" }}
+              >
+                {caratulaUrl ? "📥 Continuar a descarga →" : "⏭ Saltar — sin carátula →"}
+              </button>
+              <button onClick={() => setPhase("cap3")} style={btnSecondaryStyle}>
+                ← Volver
+              </button>
+            </div>
+          </div>
         )}
 
         {/* ── FINAL ───────────────────────────────────────────────────────── */}
@@ -583,37 +963,184 @@ export default function MonografiaPage() {
           <div>
             <div style={{ textAlign: "center", marginBottom: "32px" }}>
               <div style={{ fontSize: "64px", marginBottom: "16px" }}>🎓</div>
-              <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "8px" }}>¡Monografía completa!</h2>
-              <p style={{ color: "#94a3b8" }}>Todos los capítulos fueron generados y aprobados. Descarga el archivo LaTeX.</p>
+              <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "8px" }}>¡Monografía lista para descargar!</h2>
+              <p style={{ color: "#94a3b8" }}>Todos los capítulos generados y aprobados. Descarga tu documento.</p>
             </div>
 
-            <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "10px", padding: "24px", marginBottom: "20px" }}>
-              <h3 style={{ color: "#a5b4fc", marginBottom: "16px" }}>📥 Descargar documento</h3>
-              <button onClick={compilarLatex} disabled={isLoading} style={{ ...btnPrimaryStyle, fontSize: "16px", padding: "14px 28px" }}>
-                ⬇️ Descargar monografia.tex
-              </button>
-              <div style={{ marginTop: "20px", background: "#0f172a", borderRadius: "8px", padding: "16px" }}>
-                <p style={{ color: "#f59e0b", fontWeight: 600, margin: "0 0 10px", fontSize: "14px" }}>📌 ¿Cómo convertir .tex a PDF?</p>
-                <ol style={{ color: "#94a3b8", fontSize: "13px", lineHeight: "1.8", margin: 0, paddingLeft: "20px" }}>
-                  <li>Ve a <strong style={{ color: "#e2e8f0" }}>overleaf.com</strong> (gratis, sin instalación)</li>
-                  <li>Crea un proyecto nuevo → sube el archivo .tex</li>
-                  <li>Haz clic en <strong style={{ color: "#e2e8f0" }}>Compilar</strong> → descarga el PDF</li>
-                  <li>Si tienes carátula, sube también tu PDF de carátula</li>
-                </ol>
+            {/* Acciones de descarga */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
+              <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "10px", padding: "20px" }}>
+                <div style={{ fontSize: "32px", marginBottom: "10px" }}>📄</div>
+                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "15px" }}>Exportar PDF</h3>
+                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "16px" }}>
+                  {caratulaUrl ? "Incluye tu carátula como primera página." : "Documento completo con todos los capítulos."}
+                </p>
+                <button onClick={exportarPDF} style={{ ...btnPrimaryStyle, fontSize: "14px" }}>
+                  ⬇️ Descargar PDF
+                </button>
+              </div>
+
+              <div style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "10px", padding: "20px" }}>
+                <div style={{ fontSize: "32px", marginBottom: "10px" }}>📝</div>
+                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "15px" }}>Fuente LaTeX</h3>
+                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "16px" }}>
+                  Para edición avanzada y compilación en Overleaf.
+                </p>
+                <button onClick={compilarLatex} disabled={isLoading} style={{ ...btnSecondaryStyle, fontSize: "14px", width: "100%" }}>
+                  ⬇️ Descargar .tex
+                </button>
               </div>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              {[{ etapa: 1, label: "📖 Ver Capítulo I", texto: texto1 }, { etapa: 2, label: "📖 Ver Capítulo II", texto: texto2 }, { etapa: 3, label: "📖 Ver Capítulos III-V", texto: texto3 }].map(({ etapa, label, texto }) => (
-                <details key={etapa} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", padding: "12px" }}>
-                  <summary style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}>{label}</summary>
-                  <div style={{ marginTop: "12px", whiteSpace: "pre-wrap", fontSize: "12px", color: "#94a3b8", maxHeight: "300px", overflowY: "auto", lineHeight: 1.7 }}>{texto}</div>
-                </details>
+            {/* Vistas previas de capítulos */}
+            <h3 style={{ color: "#a5b4fc", marginBottom: "12px", fontSize: "15px" }}>📖 Vista previa de capítulos</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              {[
+                { label: "Capítulo I — Planteamiento del Problema", texto: texto1 },
+                { label: "Capítulo II — Marco Teórico", texto: texto2 },
+                { label: "Capítulos III-V + Bibliografía", texto: texto3 },
+              ].map(({ label, texto }) => (
+                texto ? (
+                  <details key={label} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "8px", padding: "12px" }}>
+                    <summary style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}>{label}</summary>
+                    <div style={{ marginTop: "12px", whiteSpace: "pre-wrap", fontSize: "12px", color: "#94a3b8", maxHeight: "300px", overflowY: "auto", lineHeight: 1.7 }}>
+                      {texto}
+                    </div>
+                  </details>
+                ) : null
               ))}
             </div>
+
+            <button onClick={reiniciar} style={{ ...btnSecondaryStyle, marginTop: "24px", width: "100%", justifyContent: "center" }}>
+              ↩ Comenzar nueva monografía
+            </button>
           </div>
         )}
 
+      </div>
+    </div>
+  );
+}
+
+// ─── Resultado con Chat ───────────────────────────────────────────────────────
+
+function ResultadoEtapaConChat({ titulo, texto, onTextoChange, etapaNum, monografiaId, onAprobar, onVolver, btnLabel, extraContent }: {
+  titulo: string;
+  texto: string;
+  onTextoChange: (t: string) => void;
+  etapaNum: number;
+  monografiaId: string;
+  onAprobar: () => void;
+  onVolver: () => void;
+  btnLabel: string;
+  extraContent?: React.ReactNode;
+}) {
+  const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMsgs]);
+
+  async function enviarChat() {
+    const msg = chatInput.trim();
+    if (!msg || chatLoading) return;
+    setChatInput("");
+    setChatMsgs(prev => [...prev, { role: "user", text: msg }]);
+    setChatLoading(true);
+    try {
+      const res = await fetch(`/api/etapas/${etapaNum}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monografia_id: monografiaId, mensaje: msg, contenido_actual: texto }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      onTextoChange(data.texto);
+      setChatMsgs(prev => [...prev, { role: "assistant", text: "✅ Capítulo actualizado con tus observaciones. Revisa el contenido arriba." }]);
+    } catch (e) {
+      setChatMsgs(prev => [...prev, { role: "assistant", text: `⚠️ Error: ${(e as Error).message}` }]);
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
+  return (
+    <div>
+      <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>{titulo}</h2>
+      <p style={{ color: "#94a3b8", marginBottom: "16px", fontSize: "13px" }}>
+        Revisa el contenido. Puedes usar el chat para pedir modificaciones antes de aprobar.
+      </p>
+
+      {/* Contenido generado */}
+      <div style={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "20px", whiteSpace: "pre-wrap", fontSize: "13px", color: "#cbd5e1", maxHeight: "480px", overflowY: "auto", lineHeight: 1.8, marginBottom: "16px" }}>
+        {texto || "Sin contenido generado."}
+      </div>
+
+      {extraContent}
+
+      {/* Botones de acción */}
+      <div style={{ display: "flex", gap: "12px", marginTop: "20px", flexWrap: "wrap" }}>
+        <button onClick={onAprobar} style={btnSuccessStyle}>{btnLabel}</button>
+        <button onClick={onVolver} style={btnSecondaryStyle}>← Volver y modificar datos</button>
+      </div>
+
+      {/* Chat panel */}
+      <div style={{ marginTop: "24px", border: "1px solid #1e293b", borderRadius: "10px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", background: "#1e293b", borderBottom: "1px solid #334155", display: "flex", alignItems: "center", gap: "8px" }}>
+          <span style={{ fontSize: "16px" }}>💬</span>
+          <span style={{ fontWeight: 600, fontSize: "14px", color: "#e2e8f0" }}>Solicitar modificaciones a la IA</span>
+          {chatLoading && <span style={{ fontSize: "12px", color: "#a5b4fc", marginLeft: "auto" }}>Procesando...</span>}
+        </div>
+
+        {chatMsgs.length > 0 && (
+          <div style={{ padding: "12px 16px", maxHeight: "220px", overflowY: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
+            {chatMsgs.map((msg, i) => (
+              <div key={i} style={{
+                padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
+                background: msg.role === "user" ? "rgba(79,70,229,0.15)" : "rgba(6,182,212,0.08)",
+                border: msg.role === "user" ? "1px solid rgba(79,70,229,0.2)" : "1px solid rgba(6,182,212,0.1)",
+                alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+                maxWidth: "90%",
+              }}>
+                <span style={{ fontWeight: 700, color: msg.role === "user" ? "#a5b4fc" : "#67e8f9" }}>
+                  {msg.role === "user" ? "Tú" : "IA"}:
+                </span>{" "}
+                <span style={{ color: "#cbd5e1" }}>{msg.text}</span>
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+        )}
+
+        <div style={{ padding: "12px 16px", display: "flex", gap: "8px", background: "#080f1d" }}>
+          <textarea
+            value={chatInput}
+            onChange={e => setChatInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && e.ctrlKey) enviarChat(); }}
+            placeholder="Ej: Agrega más contexto sobre el sector boliviano... / Hazlo más conciso... / Agrega una sección sobre..."
+            rows={2}
+            disabled={chatLoading}
+            style={{ ...textareaStyle, flex: 1, resize: "none" }}
+          />
+          <button
+            onClick={enviarChat}
+            disabled={chatLoading || !chatInput.trim()}
+            style={{
+              background: chatLoading || !chatInput.trim() ? "#1e293b" : "#4f46e5",
+              color: "#fff", border: "none", borderRadius: "8px",
+              padding: "0 16px", cursor: chatLoading ? "wait" : "pointer",
+              fontWeight: 700, fontSize: "18px", flexShrink: 0,
+            }}
+          >
+            {chatLoading ? "⏳" : "↑"}
+          </button>
+        </div>
+        <p style={{ padding: "0 16px 10px", fontSize: "11px", color: "#334155" }}>
+          Ctrl+Enter para enviar · El capítulo se actualiza sin perder las citas ni la estructura
+        </p>
       </div>
     </div>
   );
@@ -632,51 +1159,32 @@ function Field({ label, value, onChange, rows, placeholder }: {
   );
 }
 
-function ResultadoEtapa({ titulo, texto, onAprobar, onVolver, btnLabel, extraContent }: {
-  titulo: string; texto: string; onAprobar: () => void; onVolver: () => void; btnLabel: string; extraContent?: React.ReactNode;
-}) {
-  return (
-    <div>
-      <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>{titulo}</h2>
-      <p style={{ color: "#94a3b8", marginBottom: "16px", fontSize: "13px" }}>Revisa el contenido generado. Puedes aprobarlo o volver para modificar los datos.</p>
-      <div style={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "20px", whiteSpace: "pre-wrap", fontSize: "13px", color: "#cbd5e1", maxHeight: "500px", overflowY: "auto", lineHeight: 1.8, marginBottom: "16px" }}>
-        {texto || "Sin contenido generado."}
-      </div>
-      {extraContent}
-      <div style={{ display: "flex", gap: "12px", marginTop: "20px", flexWrap: "wrap" }}>
-        <button onClick={onAprobar} style={btnSuccessStyle}>{btnLabel}</button>
-        <button onClick={onVolver} style={{ ...btnSecondaryStyle }}>← Volver y modificar</button>
-      </div>
-    </div>
-  );
-}
-
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const labelStyle: React.CSSProperties = {
-  display: "block", fontSize: "13px", fontWeight: 600, color: "#cbd5e1", marginBottom: "6px"
+  display: "block", fontSize: "13px", fontWeight: 600, color: "#cbd5e1", marginBottom: "6px",
 };
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "10px 12px", background: "#0f172a", border: "1px solid #334155",
-  borderRadius: "6px", color: "#e2e8f0", fontSize: "14px", boxSizing: "border-box"
+  borderRadius: "6px", color: "#e2e8f0", fontSize: "14px", boxSizing: "border-box",
 };
 
 const textareaStyle: React.CSSProperties = {
-  ...inputStyle, resize: "vertical", lineHeight: "1.6", fontFamily: "system-ui, sans-serif"
+  ...inputStyle, resize: "vertical", lineHeight: "1.6", fontFamily: "system-ui, sans-serif",
 };
 
 const btnPrimaryStyle: React.CSSProperties = {
   background: "#4f46e5", color: "#fff", border: "none", borderRadius: "8px",
-  padding: "12px 24px", fontSize: "15px", fontWeight: 600, cursor: "pointer", width: "100%"
+  padding: "12px 24px", fontSize: "15px", fontWeight: 600, cursor: "pointer", width: "100%",
 };
 
 const btnSuccessStyle: React.CSSProperties = {
   background: "#15803d", color: "#fff", border: "none", borderRadius: "8px",
-  padding: "10px 20px", fontSize: "14px", fontWeight: 600, cursor: "pointer"
+  padding: "10px 20px", fontSize: "14px", fontWeight: 600, cursor: "pointer",
 };
 
 const btnSecondaryStyle: React.CSSProperties = {
   background: "transparent", color: "#94a3b8", border: "1px solid #475569",
-  borderRadius: "8px", padding: "10px 20px", fontSize: "14px", cursor: "pointer"
+  borderRadius: "8px", padding: "10px 20px", fontSize: "14px", cursor: "pointer",
 };
