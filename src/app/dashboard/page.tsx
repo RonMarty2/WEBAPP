@@ -4,21 +4,61 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { SessionUser } from "@/lib/auth";
 
+interface Proyecto {
+  id: string;
+  tema_aprobado: string | null;
+  titulo_provisional: string | null;
+  estado_fase: number;
+  completado: boolean;
+  created_at: string;
+  servicios: { id: string; nombre: string } | null;
+}
+
+const FASE_LABELS = ["Planteamiento", "Cap. I", "Cap. II", "Caps. III-V", "Revisión", "Final"];
+
+function FaseProgress({ fase }: { fase: number }) {
+  return (
+    <div style={{ display: "flex", gap: 3, alignItems: "center" }}>
+      {FASE_LABELS.map((_, i) => (
+        <div
+          key={i}
+          title={FASE_LABELS[i]}
+          style={{
+            width: 18, height: 4, borderRadius: 2,
+            background: i <= fase ? "#06b6d4" : "#1e293b",
+          }}
+        />
+      ))}
+      <span style={{ fontSize: 11, color: "#64748b", marginLeft: 4 }}>{fase + 1}/6</span>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<SessionUser | null>(null);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingProyectos, setLoadingProyectos] = useState(true);
 
   useEffect(() => {
     fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d) => {
+      .then(r => r.json())
+      .then(d => {
         if (!d.user) { router.replace("/login"); return; }
         setUser(d.user);
         setLoading(false);
       })
       .catch(() => router.replace("/login"));
   }, [router]);
+
+  useEffect(() => {
+    if (!user) return;
+    fetch("/api/projects")
+      .then(r => r.json())
+      .then(d => { setProyectos(d.proyectos ?? []); setLoadingProyectos(false); })
+      .catch(() => setLoadingProyectos(false));
+  }, [user]);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -28,10 +68,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div
-        className="gradient-bg min-h-screen"
-        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
+      <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className="spinner" />
       </div>
     );
@@ -40,146 +77,133 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="gradient-bg min-h-screen" style={{ padding: 24 }}>
-      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+    <div className="gradient-bg" style={{ minHeight: "100vh", padding: 24 }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 32,
-            flexWrap: "wrap",
-            gap: 12,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {user.picture ? (
-              <img
-                src={user.picture}
-                alt=""
-                style={{ width: 42, height: 42, borderRadius: "50%", border: "2px solid #06b6d4" }}
-              />
+              <img src={user.picture} alt="" style={{ width: 42, height: 42, borderRadius: "50%", border: "2px solid #06b6d4" }} />
             ) : (
-              <div
-                style={{
-                  width: 42, height: 42, borderRadius: "50%", background: "#0e7490",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 18, fontWeight: 700, color: "#e2e8f0",
-                }}
-              >
+              <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#0e7490", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#e2e8f0" }}>
                 {user.name[0]}
               </div>
             )}
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0" }}>{user.name}</div>
-              <div style={{ fontSize: 12, color: "#94a3b8" }}>{user.email}</div>
+              <div style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 6 }}>
+                <span>{user.email}</span>
+                {user.plan && (
+                  <span className={`badge ${user.plan === "pro" ? "badge-purple" : "badge-cyan"}`} style={{ fontSize: 10 }}>
+                    {user.plan.toUpperCase()}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-
           <div style={{ display: "flex", gap: 10 }}>
-            <a
-              href="/"
-              style={{
-                padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b",
-                color: "#94a3b8", textDecoration: "none", fontSize: 13,
-              }}
-            >
+            <a href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b", color: "#94a3b8", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </a>
-            <button
-              onClick={handleLogout}
-              style={{
-                padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)",
-                background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer",
-              }}
-            >
+            <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)", background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
               Cerrar sesión
             </button>
           </div>
         </div>
 
-        {/* Welcome banner */}
-        <div
-          className="card"
-          style={{
-            marginBottom: 28,
-            background: "linear-gradient(135deg, rgba(6,182,212,0.1), rgba(14,116,144,0.05))",
-            borderColor: "rgba(6,182,212,0.2)",
-          }}
-        >
-          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
-            Bienvenido, {user.name.split(" ")[0]}
-          </h1>
-          <p style={{ color: "#94a3b8", fontSize: 14 }}>
-            Desde aquí puedes crear y gestionar tus documentos académicos.
-          </p>
+        {/* Welcome */}
+        <div className="card" style={{ marginBottom: 28, background: "linear-gradient(135deg, rgba(6,182,212,0.08), rgba(14,116,144,0.04))", borderColor: "rgba(6,182,212,0.2)" }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Bienvenido, {user.name.split(" ")[0]}</h1>
+          <p style={{ color: "#94a3b8", fontSize: 14 }}>Desde aquí puedes crear y gestionar tus documentos académicos.</p>
         </div>
 
-        {/* Products */}
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: "#94a3b8", marginBottom: 16 }}>
-          Documentos disponibles
-        </h2>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: 16,
-          }}
-        >
-          {/* Monografía — available */}
-          <div className="card" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ fontSize: 32 }}>📄</div>
-            <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>
-                Monografía
-              </div>
-              <div style={{ fontSize: 13, color: "#94a3b8", lineHeight: 1.5 }}>
-                5 capítulos completos, bibliografía APA 7 y exportación LaTeX.
-              </div>
-            </div>
-            <a
-              href="/monografia"
-              className="btn-cyan"
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                textDecoration: "none", padding: "10px", marginTop: "auto", fontSize: 14,
-              }}
-            >
-              Crear monografía →
+        {/* Mis Proyectos */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#94a3b8" }}>Mis proyectos</h2>
+          <a href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
+            + Nuevo proyecto
+          </a>
+        </div>
+
+        {loadingProyectos ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginBottom: 32 }}>
+            {[1, 2, 3].map(i => <div key={i} className="card shimmer" style={{ height: 140 }} />)}
+          </div>
+        ) : proyectos.length === 0 ? (
+          <div className="card" style={{ textAlign: "center", padding: "48px 24px", marginBottom: 32, borderStyle: "dashed", borderColor: "#334155" }}>
+            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>📄</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#475569", marginBottom: 8 }}>Aún no tienes proyectos</div>
+            <div style={{ fontSize: 14, color: "#334155", marginBottom: 24 }}>Crea tu primer documento académico con IA</div>
+            <a href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", display: "inline-flex", padding: "10px 24px" }}>
+              Crear mi primer proyecto →
             </a>
           </div>
-
-          {/* Coming soon */}
-          {[
-            { icon: "🎓", name: "Tesis" },
-            { icon: "📝", name: "Ensayo académico" },
-            { icon: "📊", name: "Trabajo final" },
-          ].map((p) => (
-            <div
-              key={p.name}
-              className="card"
-              style={{ opacity: 0.45, display: "flex", flexDirection: "column", gap: 12 }}
-            >
-              <div style={{ fontSize: 32 }}>{p.icon}</div>
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>
-                  {p.name}
-                </div>
-                <div style={{ fontSize: 13, color: "#94a3b8" }}>Próximamente disponible.</div>
-              </div>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginBottom: 32 }}>
+            {proyectos.map(p => (
               <div
-                style={{
-                  padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b",
-                  color: "#475569", fontSize: 13, textAlign: "center",
-                }}
+                key={p.id}
+                className="card card-hover"
+                onClick={() => router.push(`/projects/${p.id}/workspace`)}
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
               >
-                Próximamente
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>
+                  {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  {p.tema_aprobado || p.titulo_provisional || "Proyecto sin título"}
+                </div>
+                <FaseProgress fase={p.estado_fase} />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4 }}>
+                  <span style={{ fontSize: 11, color: "#334155" }}>
+                    {new Date(p.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short" })}
+                  </span>
+                  <span style={{ fontSize: 12, color: "#06b6d4", fontWeight: 600 }}>Continuar →</span>
+                </div>
+              </div>
+            ))}
+            <div
+              className="card card-hover"
+              onClick={() => router.push("/projects/new")}
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 140, borderStyle: "dashed", borderColor: "#334155", background: "transparent" }}
+            >
+              <div style={{ fontSize: 28, color: "#334155" }}>+</div>
+              <div style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>Nuevo proyecto</div>
+            </div>
+          </div>
+        )}
+
+        {/* Próximamente */}
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: "#94a3b8", marginBottom: 14 }}>Próximamente</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
+          {[{ icon: "🎓", name: "Tesis" }, { icon: "📝", name: "Ensayo académico" }, { icon: "📊", name: "Trabajo final" }].map(pr => (
+            <div key={pr.name} className="card" style={{ opacity: 0.4, display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ fontSize: 28 }}>{pr.icon}</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{pr.name}</div>
+                <div style={{ fontSize: 12, color: "#64748b" }}>Próximamente</div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Modo Dios — botón flotante solo para admin */}
+      {user.role === "admin" && (
+        <div style={{ position: "fixed", bottom: 28, right: 28, zIndex: 200 }}>
+          <a href="/admin" style={{ textDecoration: "none" }}>
+            <button
+              className="btn-purple"
+              title="Panel Admin — Modo Dios"
+              style={{ borderRadius: "50%", width: 52, height: 52, padding: 0, fontSize: 22, boxShadow: "0 0 24px rgba(139,92,246,0.5)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(139,92,246,0.4)" }}
+            >
+              ⚡
+            </button>
+          </a>
+        </div>
+      )}
     </div>
   );
 }

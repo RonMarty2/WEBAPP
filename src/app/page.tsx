@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+type Audiencia = "estudiante" | "docente";
 
 const GARANTIAS = [
   { icono: "🔒", texto: "Sin alucinación — solo datos verificables" },
@@ -73,7 +76,7 @@ const DOCENTES_PRODUCTOS = [
   },
 ];
 
-const PLANES = [
+const PLANES_ESTUDIANTE = [
   {
     id: "estandar",
     nombre: "Estándar",
@@ -82,14 +85,14 @@ const PLANES = [
     color: "#06b6d4",
     popular: true,
     items: [
-      "1 documento académico",
+      "1 monografía o trabajo académico",
       "IA avanzada (mejor calidad)",
       "Chat de modificaciones ilimitado",
       "Descarga PDF + LaTeX profesional",
       "Bibliografía APA 7 automática",
       "Soporte prioritario",
     ],
-    cta: "Elegir Estándar",
+    cta: "Empezar con Estándar",
   },
   {
     id: "pro",
@@ -106,7 +109,44 @@ const PLANES = [
       "Acceso anticipado a nuevos productos",
       "Soporte prioritario 24/7",
     ],
-    cta: "Elegir Pro",
+    cta: "Empezar con Pro",
+  },
+];
+
+const PLANES_DOCENTE = [
+  {
+    id: "estandar",
+    nombre: "Estándar",
+    precio: "Bs. 150",
+    nota: "pago único",
+    color: "#06b6d4",
+    popular: true,
+    items: [
+      "1 planificación o rúbrica de evaluación",
+      "IA avanzada (mejor calidad)",
+      "Ajustes ilimitados por chat",
+      "Descarga PDF + LaTeX profesional",
+      "Alineación curricular automática",
+      "Soporte prioritario",
+    ],
+    cta: "Empezar con Estándar",
+  },
+  {
+    id: "pro",
+    nombre: "Pro",
+    precio: "Bs. 300",
+    nota: "3 documentos / mes",
+    color: "#8b5cf6",
+    popular: false,
+    items: [
+      "Hasta 3 planificaciones o rúbricas al mes",
+      "Mejor modelo de IA disponible",
+      "Generación de material completo",
+      "PDF + LaTeX + historial de versiones",
+      "Acceso anticipado a módulos docentes",
+      "Soporte prioritario 24/7",
+    ],
+    cta: "Empezar con Pro",
   },
 ];
 
@@ -149,10 +189,14 @@ function ProductoCard({ p, onStart }: { p: typeof ESTUDIANTES_PRODUCTOS[0]; onSt
 
 export default function HomePage() {
   const router = useRouter();
+  const [audiencia, setAudiencia] = useState<Audiencia>("estudiante");
+
+  const planesActivos = audiencia === "estudiante" ? PLANES_ESTUDIANTE : PLANES_DOCENTE;
 
   function handlePlan(planId: string) {
     if (typeof window !== "undefined") {
       localStorage.setItem("plan_elegido", planId);
+      localStorage.setItem("audiencia_elegida", audiencia);
     }
     router.push("/login");
   }
@@ -303,15 +347,47 @@ export default function HomePage() {
 
         {/* ── Planes ─────────────────────────────────────────────────────────── */}
         <section id="planes" style={{ marginBottom: 88 }}>
-          <div style={{ textAlign: "center", marginBottom: 48 }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
             <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 10 }}>Planes y precios</h2>
-            <p style={{ color: "#64748b", fontSize: 16 }}>
-              Válidos para estudiantes y docentes · Sin suscripción obligatoria
+            <p style={{ color: "#64748b", fontSize: 16, marginBottom: 28 }}>
+              Sin suscripción obligatoria · Pago único o mensual
             </p>
+
+            {/* ── Selector Dual Estudiante / Docente ── */}
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <div style={{
+                display: "inline-flex", background: "rgba(255,255,255,0.03)",
+                border: "1px solid #1e293b", borderRadius: 12, padding: 4, gap: 4,
+              }}>
+                {(["estudiante", "docente"] as Audiencia[]).map(a => (
+                  <button
+                    key={a}
+                    onClick={() => setAudiencia(a)}
+                    style={{
+                      padding: "10px 28px", borderRadius: 8, border: "none",
+                      cursor: "pointer", fontSize: 14, fontWeight: 600,
+                      transition: "all 0.2s ease",
+                      background: audiencia === a
+                        ? (a === "estudiante"
+                          ? "linear-gradient(135deg, #0891b2, #06b6d4)"
+                          : "linear-gradient(135deg, #7c3aed, #8b5cf6)")
+                        : "transparent",
+                      color: audiencia === a ? "#fff" : "#64748b",
+                      boxShadow: audiencia === a
+                        ? `0 0 20px ${a === "estudiante" ? "rgba(6,182,212,0.25)" : "rgba(139,92,246,0.25)"}`
+                        : "none",
+                    }}
+                  >
+                    {a === "estudiante" ? "🎓 Estudiante" : "👨‍🏫 Docente"}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
+          {/* Plan cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, alignItems: "start", maxWidth: 680, margin: "0 auto" }}>
-            {PLANES.map(plan => (
+            {planesActivos.map(plan => (
               <div
                 key={plan.id}
                 className="card"
@@ -320,12 +396,15 @@ export default function HomePage() {
                   border: plan.popular ? `2px solid ${plan.color}` : undefined,
                   boxShadow: plan.popular ? `0 0 48px ${plan.color}22` : undefined,
                   paddingTop: plan.popular ? 32 : undefined,
+                  transition: "all 0.2s",
                 }}
               >
                 {plan.popular && (
                   <div style={{
                     position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
-                    background: "linear-gradient(135deg,#06b6d4,#0284c7)",
+                    background: audiencia === "estudiante"
+                      ? "linear-gradient(135deg,#06b6d4,#0284c7)"
+                      : "linear-gradient(135deg,#8b5cf6,#7c3aed)",
                     color: "#fff", borderRadius: 20, padding: "3px 14px",
                     fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
                   }}>⭐ Más popular</div>
@@ -345,18 +424,36 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
+
+                {/* CTA con placeholder QR / Libélula */}
                 <button
                   onClick={() => handlePlan(plan.id)}
                   style={{
                     width: "100%", padding: "12px", borderRadius: 9,
                     fontSize: 14, fontWeight: 700, cursor: "pointer",
                     border: plan.popular ? "none" : `1px solid ${plan.color}55`,
-                    background: plan.popular ? "linear-gradient(135deg,#06b6d4,#0284c7)" : `${plan.color}14`,
+                    background: plan.popular
+                      ? (audiencia === "estudiante"
+                        ? "linear-gradient(135deg,#06b6d4,#0284c7)"
+                        : "linear-gradient(135deg,#8b5cf6,#7c3aed)")
+                      : `${plan.color}14`,
                     color: plan.popular ? "#fff" : plan.color,
+                    marginBottom: 8,
                   }}
                 >
                   {plan.cta}
                 </button>
+
+                {/* QR / Libélula placeholder */}
+                <div style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  padding: "7px 10px", borderRadius: 7,
+                  background: "rgba(255,255,255,0.03)", border: "1px dashed #1e293b",
+                  fontSize: 11, color: "#334155",
+                }}>
+                  <span>📱</span>
+                  <span>Pago por <strong style={{ color: "#475569" }}>QR / Libélula</strong> · Activación en 24h</span>
+                </div>
               </div>
             ))}
           </div>

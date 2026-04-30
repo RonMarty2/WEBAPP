@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: "📊" },
   { href: "/admin/usuarios", label: "Usuarios & Docs", icon: "👥" },
+  { href: "/admin/proyectos", label: "Proyectos", icon: "📁" },
   { href: "/admin/estadisticas", label: "Estadísticas", icon: "📈" },
   { href: "/admin/logs", label: "Logs de errores", icon: "🪵" },
   { href: "/admin/modelos", label: "Modelos & APIs", icon: "🤖" },
@@ -63,10 +64,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         <div style={{ marginTop: 16 }}>
           <a
-            href="/"
-            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", fontSize: 13, color: "#94a3b8", textDecoration: "none", borderRadius: 8 }}
+            href="/dashboard"
+            style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 12px", fontSize: 13, color: "#06b6d4", textDecoration: "none", borderRadius: 8, border: "1px solid rgba(6,182,212,0.2)", background: "rgba(6,182,212,0.05)" }}
           >
-            🔗 Ver app cliente
+            ⚡ Vista Usuario (Modo Dios)
           </a>
           <button
             onClick={handleLogout}

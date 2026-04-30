@@ -140,7 +140,7 @@ export default function PromptsPage() {
                     </div>
                     <input
                       className="input-dark"
-                      value={(currentPrompt as Record<string, string>)?.[fieldMap[plan]] || ""}
+                      value={(currentPrompt as unknown as Record<string, string>)?.[fieldMap[plan]] || ""}
                       onChange={(e) => updateField(fieldMap[plan], e.target.value)}
                       style={{ fontSize: 12, fontFamily: "monospace" }}
                     />
