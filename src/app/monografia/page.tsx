@@ -304,9 +304,26 @@ export default function MonografiaPage() {
       }
       body.inputs = extras;
     } else if (etapa === 3) {
+      const subpregObj: Record<string, string> = {};
+      if (subDiagnostica.trim()) subpregObj.diagnostica = subDiagnostica.trim();
+      if (subTeorica.trim()) subpregObj.teorica = subTeorica.trim();
+      if (subComparativa.trim()) subpregObj.comparativa = subComparativa.trim();
+      if (subPropositiva.trim()) subpregObj.propositiva = subPropositiva.trim();
+
       body.inputs = {
         fuentes_datos: splitLines(fuentesDatos),
         observaciones_adicionales: observaciones3 || undefined,
+        objetivo_general: propuestaElegida?.objetivo_general || undefined,
+        objetivos_especificos: splitLines(objetivosEsp).length > 0 ? splitLines(objetivosEsp) : undefined,
+        preguntas_investigacion: {
+          central: propuestaElegida?.pregunta_investigacion || undefined,
+          subpreguntas: Object.keys(subpregObj).length > 0 ? subpregObj : undefined,
+        },
+        hipotesis: tieneHipotesis && hipotesisPrincipal ? {
+          principal: hipotesisPrincipal,
+        } : undefined,
+        tipo_investigacion: tipoInvestigacion || undefined,
+        periodo_temporal: propuestaElegida?.periodo_temporal || alcanceTemporal || undefined,
       };
     }
 

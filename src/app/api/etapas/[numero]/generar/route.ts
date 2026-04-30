@@ -170,8 +170,16 @@ export async function POST(req: Request, { params }: { params: Params }) {
         cap1_output: cap1.contenido_json as Record<string, unknown>,
         cap2_output: cap2.contenido_json as Record<string, unknown>,
         citas_totales: todasLasCitas,
-        fuentes_datos: inputs.fuentes_datos,
-        observaciones_adicionales: inputs.observaciones_adicionales,
+        fuentes_datos: inputs.fuentes_datos as string[] | undefined,
+        observaciones_adicionales: inputs.observaciones_adicionales as string | undefined,
+        objetivo_general: inputs.objetivo_general as string | undefined,
+        objetivos_especificos: inputs.objetivos_especificos as string[] | undefined,
+        preguntas_investigacion: inputs.preguntas_investigacion as { central?: string; subpreguntas?: Record<string, string> } | undefined,
+        hipotesis: inputs.hipotesis as { principal?: string; variables?: unknown[] } | undefined,
+        tipo_investigacion: inputs.tipo_investigacion as string | undefined,
+        variables: inputs.variables as unknown[] | undefined,
+        periodo_temporal: inputs.periodo_temporal as string | undefined,
+        metodologia_tipo: inputs.metodologia_tipo as string | undefined,
       });
     }
 

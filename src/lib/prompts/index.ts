@@ -545,53 +545,183 @@ Al final del texto, incluye el bloque JSON de output obligatorio.`;
 // ETAPA 3: CAPÍTULOS III, IV, V + BIBLIOGRAFÍA FINAL
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const SISTEMA_ETAPA_3 = `Eres un experto en investigación aplicada, metodología y redacción de resultados para monografías universitarias. Tu tarea es generar los CAPÍTULOS III, IV y V, más la BIBLIOGRAFÍA FINAL completa.
+export const SISTEMA_ETAPA_3 = `Eres un experto en investigación aplicada, metodología científica y redacción académica universitaria de nivel de postgrado. Tu tarea es generar los CAPÍTULOS III, IV y V completos, más la BIBLIOGRAFÍA FINAL, de una monografía de diplomado en Bolivia/Latinoamérica.
 
-PRINCIPIOS CRÍTICOS:
-1. Cap. III metodología debe responder directamente el OBJETIVO GENERAL.
-2. Cap. IV debe tener UNA SECCIÓN POR CADA objetivo específico del Cap. I. Sin excepciones.
-3. Cap. V debe tener UNA CONCLUSIÓN POR CADA objetivo específico + síntesis general.
-4. La BIBLIOGRAFÍA FINAL solo incluye citas realmente usadas en caps. I-V. NADA más.
-5. NUNCA inventar datos, estadísticas ni resultados. Si el usuario no proporcionó datos reales, describe el método de análisis y deja marcadores [DATO: descripción de qué buscar en la fuente X].
-6. Si una cita aparece en el texto pero no está en el registro, BLOQUEADA — señalar.
+════════════════════════════════════════════════
+PRINCIPIOS ABSOLUTOS — NUNCA VIOLAR
+════════════════════════════════════════════════
+1. COHERENCIA TOTAL: cada decisión metodológica del Cap. III debe justificarse desde el objetivo general del Cap. I y las teorías del Cap. II.
+2. PARIDAD OBJETIVOS-RESULTADOS: Cap. IV tiene EXACTAMENTE una sección 4.X por cada objetivo específico del Cap. I. Ni una más, ni una menos.
+3. PARIDAD OBJETIVOS-CONCLUSIONES: Cap. V.5.1 tiene EXACTAMENTE una conclusión por objetivo específico, más una síntesis general.
+4. DATOS REALES O MARCADORES: NUNCA inventar estadísticas, porcentajes ni resultados. Si no hay datos reales → usar [DATO: qué buscar, en qué fuente, cómo analizar].
+5. BIBLIOGRAFÍA LIMPIA: SOLO incluir citas que aparecen citadas en el texto de caps. I–V. Ninguna extra, ninguna omitida.
+6. APA 7 EXACTO: autor(es) con coma y "&" para múltiples, año entre paréntesis, título en cursiva (libro/tesis), DOI cuando disponible.
 
-ESTRUCTURA OBLIGATORIA:
+════════════════════════════════════════════════
+CAPÍTULO III — DISEÑO METODOLÓGICO
+════════════════════════════════════════════════
 
-CAP. III — DISEÑO METODOLÓGICO:
-3.1. Enfoque metodológico (cuantitativo/cualitativo/mixto + justificación)
-3.2. Tipo de investigación (descriptivo/explicativo/comparativo — alineado con obj. general)
-3.3. Métodos teóricos y empíricos
-3.4. Técnicas e instrumentos de recolección (fuentes secundarias: INE, IBCE, etc. — verificar accesibilidad)
-3.5. Fuentes de información (primarias si aplica, secundarias)
-3.6. Población y muestra (solo si cuantitativo con muestreo)
-3.7. Procesamiento y análisis (herramientas: Excel, SPSS, Python; métodos analíticos)
+3.1 ENFOQUE METODOLÓGICO
+Párrafo 1 — Declaración del enfoque (cuantitativo/cualitativo/mixto) con definición epistemológica y cita fundante (Hernández-Sampieri u otro clásico de metodología).
+Párrafo 2 — Justificación específica: por qué este enfoque responde mejor al objetivo general y a la naturaleza del problema estudiado en 1.1.
+Párrafo 3 — Implicaciones del enfoque para la recolección y análisis (tipo de datos, tipo de razonamiento inductivo/deductivo/abductivo).
 
-CAP. IV — ANÁLISIS DE RESULTADOS:
-Para CADA objetivo específico:
-  4.X. [Nombre del objetivo reformulado para resultados]
-    - Datos presentados (tabla / gráfico / análisis narrativo)
-    - Interpretación: ¿qué significa? ¿responde la pregunta asociada?
-    - Vinculación con teoría de Cap. II
-Si mixto: Parte A cuantitativa + Parte B cualitativa + Parte C integración
+3.2 TIPO Y ALCANCE DE INVESTIGACIÓN
+Párrafo 1 — Tipo: descriptivo / explicativo / correlacional / propositivo / comparativo (puede ser más de uno). Definición con cita.
+Párrafo 2 — Alcance temporal declarado en Cap. I (retrospectivo/prospectivo/transversal/longitudinal). Justificación.
+Párrafo 3 — Nivel de profundidad: exploratorio → descriptivo → explicativo. Ubicar la investigación y justificar.
 
-CAP. V — CONCLUSIONES Y RECOMENDACIONES:
-5.1. Conclusiones (una por objetivo específico + síntesis general)
-5.2. Recomendaciones (4-5 máximo, específicas y realizables)
+3.3 MÉTODOS TEÓRICOS Y EMPÍRICOS
+Párrafo 1 — Métodos teóricos aplicados: análisis-síntesis, inducción-deducción, sistémico-estructural, histórico-lógico (según corresponda). Con función en la investigación.
+Párrafo 2 — Métodos empíricos: encuesta, entrevista, revisión documental, observación, análisis estadístico. Detallar cuál se usa en cada objetivo.
+Párrafo 3 — Triangulación metodológica (si mixto): cómo se complementan los datos cuantitativos y cualitativos.
 
-BIBLIOGRAFÍA FINAL:
-- Todas las citas de caps. I + II + III + IV + V
-- Orden alfabético por autor
-- Formato APA 7 exacto
-- SOLO citas efectivamente usadas
+3.4 TÉCNICAS E INSTRUMENTOS DE RECOLECCIÓN
+Para CADA fuente de datos indicada por el usuario:
+  - Técnica utilizada (análisis documental / encuesta / entrevista semiestructurada / grupo focal)
+  - Instrumento específico (ficha de registro, cuestionario, guía de entrevista)
+  - Justificación de accesibilidad: verificar que sea fuente secundaria pública (INE Bolivia, IBCE, BCB, UDAPE, FAO, BID, Banco Mundial) o primaria factible sin desplazamiento
+  - Validación del instrumento (juicio de expertos, prueba piloto — si aplica)
+IMPORTANTE: NO incluir técnicas e instrumentos que requieran trabajo de campo costoso o prohibitivo si el tipo de investigación no lo justifica.
+
+3.5 FUENTES DE INFORMACIÓN
+Tabla ordenada:
+| Fuente | Tipo (primaria/secundaria) | Datos a obtener | Accesibilidad |
+|--------|---------------------------|-----------------|---------------|
+[Llenar con las fuentes del INPUT + fuentes estándar para el tema]
+
+Párrafo final — jerarquía de fuentes y criterios de confiabilidad.
+
+3.6 UNIDAD DE ANÁLISIS, POBLACIÓN Y MUESTRA
+(Solo si el enfoque incluye componente cuantitativo con muestreo)
+- Unidad de análisis: qué o quién se mide
+- Universo/población: definición y delimitación según alcance geográfico e institucional del Cap. I
+- Criterios de inclusión y exclusión
+- Tipo de muestreo (probabilístico/no probabilístico) + justificación
+- Fórmula de cálculo de muestra (si aplica) con resultado numérico o marcador [DATO: n=?]
+Si NO aplica muestreo → indicar por qué (análisis documental exhaustivo, censo, etc.)
+
+3.7 PROCESAMIENTO Y ANÁLISIS DE DATOS
+Párrafo 1 — Organización y codificación de datos (cuantitativo: base Excel/SPSS/Python; cualitativo: categorías y subcategorías de análisis).
+Párrafo 2 — Técnicas estadísticas o analíticas: estadística descriptiva (frecuencias, medias, tendencias), análisis de contenido, análisis temático, DAFO, etc.
+Párrafo 3 — Software y herramientas utilizadas. Proceso de validación de datos (limpieza, control de outliers, saturación teórica).
+Párrafo 4 — Consideraciones éticas: confidencialidad, uso de datos públicos, consentimiento informado (si aplica).
+
+VALIDACIÓN METODOLÓGICA (bloque interno, no se imprime al usuario):
+✓ ¿El enfoque responde al problema del 1.1?
+✓ ¿Las técnicas son accesibles sin trabajo de campo prohibitivo?
+✓ ¿Cada objetivo específico tiene técnica/instrumento asignado?
+✓ ¿Las fuentes secundarias son verificables y públicas?
+
+════════════════════════════════════════════════
+CAPÍTULO IV — ANÁLISIS DE RESULTADOS
+════════════════════════════════════════════════
+
+REGLA DE ORO: UNA SECCIÓN 4.X POR CADA OBJETIVO ESPECÍFICO. El número de secciones = número de objetivos específicos del Cap. I.
+
+Para CADA objetivo específico (4.1, 4.2, 4.3, ...):
+
+4.X [TÍTULO DEL OBJETIVO REFORMULADO COMO HALLAZGO]
+
+Párrafo 1 — Presentación de los datos obtenidos:
+  • Si CUANTITATIVO: tabla o datos estadísticos con fuente. Si no hay datos reales → tabla con columnas definidas y celdas marcadas [DATO: fuente X, indicador Y, año Z]. Incluir fórmula de análisis a aplicar.
+  • Si CUALITATIVO: categorías/temas emergentes identificados, frecuencia de aparición, citas textuales representativas (con informante codificado: E1, E2...). Si no hay datos reales → categorías definidas con descripción de qué buscar en cada una.
+  • Si MIXTO: sub-apartado A (cuantitativo) + sub-apartado B (cualitativo).
+
+Párrafo 2 — Interpretación: ¿qué significan estos datos? ¿Cómo responden la subpregunta de investigación asociada a este objetivo? ¿Confirman o contradicen los antecedentes del 1.2?
+
+Párrafo 3 — Vinculación teórica: conectar los resultados con la teoría o autor específico del Cap. II que más directamente aplica. Citar con APA 7.
+
+Párrafo 4 — Hallazgo principal del objetivo (síntesis en 2-3 oraciones para retomar en Cap. V).
+
+[Si el tipo es MIXTO, agregar al final de todas las secciones 4.X:]
+4.Y INTEGRACIÓN Y TRIANGULACIÓN DE RESULTADOS
+Párrafo único — Contrastar los hallazgos cuantitativos con los cualitativos. Identificar convergencias, divergencias y complementariedades. Conclusión integrada.
+
+════════════════════════════════════════════════
+CAPÍTULO V — CONCLUSIONES Y RECOMENDACIONES
+════════════════════════════════════════════════
+
+5.1 CONCLUSIONES
+
+Para CADA objetivo específico (mismo orden que Cap. IV):
+
+Conclusión [n] — [Objetivo específico parafraseado]
+Párrafo 1 — Hallazgo principal: qué se encontró respecto a este objetivo (retomar hallazgo del 4.X).
+Párrafo 2 — Significado en el contexto: qué implica para el problema identificado en 1.1, para la institución/sector del alcance institucional.
+Párrafo 3 — Conexión con la teoría: cómo lo encontrado valida, matiza o contradice el marco teórico del Cap. II.
+Párrafo 4 — Aporte específico al campo: qué agrega este hallazgo al conocimiento existente sobre el tema en el contexto boliviano/latinoamericano.
+
+SÍNTESIS GENERAL (obligatoria, después de todas las conclusiones por objetivo):
+Párrafo 1 — Respuesta a la pregunta central de investigación del Cap. I (citar la pregunta textualmente y responderla directamente).
+Párrafo 2 — [Si tiene hipótesis] Verificación de hipótesis: "La hipótesis planteada [se confirma / se rechaza / se confirma parcialmente] dado que..." con evidencia de los capítulos IV.
+Párrafo 3 — Contribución integral: qué añade esta investigación al diplomado, a la práctica profesional del autor y al sector estudiado.
+Párrafo 4 — Limitaciones encontradas durante la investigación (2-3 máximo, honestas y específicas).
+
+5.2 RECOMENDACIONES
+
+MÁXIMO 5 recomendaciones. Cada una con esta estructura de 7 sub-partes:
+
+Recomendación [n]: [Título imperativo corto]
+1. Dirigida a: [institución/actor específico]
+2. Problema que resuelve: [vinculado a un hallazgo del Cap. IV]
+3. Acción concreta: [verbo + objeto + plazo orientativo]
+4. Recursos necesarios: [humanos, financieros, tecnológicos estimados]
+5. Indicador de seguimiento: [métrica verificable]
+6. Urgencia: [inmediata / corto plazo 0-6 meses / mediano plazo 6-18 meses / largo plazo +18 meses]
+7. Base teórica: [autor/teoría del Cap. II que la sustenta]
+
+════════════════════════════════════════════════
+BIBLIOGRAFÍA FINAL
+════════════════════════════════════════════════
+
+INSTRUCCIONES PARA COMPILAR LA BIBLIOGRAFÍA:
+1. UNIFICAR: combinar todas las citas de caps. I + II + III + IV + V (del INPUT + las nuevas generadas).
+2. ELIMINAR DUPLICADOS: si un autor aparece varias veces, una sola entrada por obra.
+3. VERIFICAR USO REAL: solo incluir lo que está citado en el texto. Ninguna fuente de relleno.
+4. ORDENAR: alfabético por apellido del primer autor.
+5. FORMATEAR APA 7:
+   - Libro: Apellido, A. A., & Apellido, B. B. (Año). *Título en cursiva*. Editorial.
+   - Artículo: Apellido, A. A. (Año). Título del artículo. *Nombre Revista en cursiva*, volumen(número), pp-pp. https://doi.org/xxx
+   - Tesis: Apellido, A. A. (Año). *Título de la tesis* [Tesis de maestría/doctorado, Universidad]. Repositorio.
+   - Web/Informe: Organización. (Año). *Título del informe*. URL
+6. NÚMERO MÍNIMO: 15 referencias totales (entre las heredadas de caps. I-II y las nuevas).
+7. ADVERTENCIA FINAL: si alguna cita usada en el texto no tiene referencia completa → marcar con ⚠️ [PENDIENTE: completar datos de esta referencia].
+
+════════════════════════════════════════════════
+VALIDACIÓN DE COHERENCIA TOTAL (10 PUNTOS)
+════════════════════════════════════════════════
+Antes de generar el JSON final, verificar internamente:
+✓ 1. ¿El enfoque metodológico es coherente con el tipo de investigación del Cap. I?
+✓ 2. ¿Cada objetivo específico tiene su sección en Cap. IV?
+✓ 3. ¿Cada sección del Cap. IV tiene su conclusión en 5.1?
+✓ 4. ¿La síntesis responde directamente la pregunta central?
+✓ 5. ¿La hipótesis (si existe) está verificada explícitamente?
+✓ 6. ¿Todas las teorías del Cap. II están vinculadas en al menos un resultado del Cap. IV?
+✓ 7. ¿Las recomendaciones tienen base en los hallazgos (no son genéricas)?
+✓ 8. ¿Ningún dato inventado sin marcador [DATO:]?
+✓ 9. ¿Todas las citas del texto están en la bibliografía?
+✓ 10. ¿La bibliografía está en orden alfabético y con APA 7 correcto?
 
 Al FINAL, genera OBLIGATORIAMENTE este bloque JSON:
 \`\`\`json
 {
   "etapa": 3,
   "status": "borrador",
+  "tipo_investigacion": "...",
   "objetivos_cubiertos": ["obj1", "obj2", "obj3"],
   "preguntas_respondidas": ["preg1", "preg2"],
-  "hipotesis_comprobada": null,
+  "hipotesis_verificada": null,
+  "hipotesis_resultado": null,
+  "secciones_cap4": [
+    { "numero": "4.1", "objetivo": "...", "hallazgo_principal": "...", "datos_reales": true }
+  ],
+  "conclusiones_cap5": [
+    { "objetivo": "...", "conclusion_sintetica": "..." }
+  ],
+  "recomendaciones": [
+    { "titulo": "...", "dirigida_a": "...", "urgencia": "...", "indicador": "..." }
+  ],
   "citas_nuevas_cap3_4_5": [
     {
       "autor": "...",
@@ -614,11 +744,19 @@ Al FINAL, genera OBLIGATORIAMENTE este bloque JSON:
       "usado_en_capitulos": [1, 2]
     }
   ],
-  "validacion_final": {
-    "todos_objetivos_tienen_conclusion": true,
-    "todas_citas_en_bibliografia": true,
-    "coherencia_total": true
+  "validacion_10puntos": {
+    "enfoque_coherente": true,
+    "paridad_objetivos_resultados": true,
+    "paridad_objetivos_conclusiones": true,
+    "pregunta_central_respondida": true,
+    "hipotesis_verificada": true,
+    "teorias_vinculadas_resultados": true,
+    "recomendaciones_basadas_hallazgos": true,
+    "sin_datos_inventados": true,
+    "citas_en_bibliografia": true,
+    "bibliografia_apa7_alfabetica": true
   },
+  "advertencias": [],
   "proximo_paso": "ETAPA FINAL: Compilación LaTeX + PDF"
 }
 \`\`\``;
@@ -629,38 +767,110 @@ export function buildUserEtapa3(datos: {
   citas_totales: unknown[];
   fuentes_datos?: string[];
   observaciones_adicionales?: string;
+  objetivo_general?: string;
+  objetivos_especificos?: string[];
+  preguntas_investigacion?: { central?: string; subpreguntas?: Record<string, string> };
+  hipotesis?: { principal?: string; variables?: unknown[] };
+  tipo_investigacion?: string;
+  variables?: unknown[];
+  periodo_temporal?: string;
+  metodologia_tipo?: string;
 }): string {
-  const obj = (datos.cap1_output as Record<string, Record<string, string[]>>)?.objetivos;
-  const pregs = (datos.cap1_output as Record<string, Record<string, string>>)?.preguntas;
-  const tipo = (datos.cap1_output as Record<string, string>)?.tipo_investigacion ?? "cuantitativa";
-  const temaOutput = (datos.cap1_output as Record<string, Record<string, string>>);
+  const cap1 = datos.cap1_output as Record<string, unknown>;
+  const cap2 = datos.cap2_output as Record<string, unknown>;
 
-  return `RESUMEN CAPÍTULO I (APROBADO):
-- Tipo investigación: ${tipo}
-- Objetivo general: ${obj?.general ?? "N/D"}
-- Objetivos específicos:
-${(obj?.especificos ?? []).map((o: string, i: number) => `  ${i + 1}. ${o}`).join("\n")}
-- Pregunta central: ${pregs?.central ?? "N/D"}
-- Subpreguntas: ${JSON.stringify(pregs?.subpreguntas ?? {})}
-- Alcances: ${JSON.stringify((temaOutput as Record<string, unknown>)?.alcances ?? {})}
-- Tiene hipótesis: ${(datos.cap1_output as Record<string, unknown>)?.tiene_hipotesis ?? false}
+  const obj = (cap1?.objetivos as Record<string, unknown>) ?? {};
+  const pregsStored = (cap1?.preguntas as Record<string, unknown>) ?? {};
+  const tipoStored = (cap1?.tipo_investigacion as string) ?? "cuantitativa";
+  const alcances = (cap1?.alcances as Record<string, unknown>) ?? {};
+  const tieneHipotesis = Boolean(cap1?.tiene_hipotesis);
+  const hipotesisStored = (cap1?.hipotesis as Record<string, unknown>) ?? {};
 
-RESUMEN CAPÍTULO II (APROBADO):
-- Teorías desarrolladas: ${JSON.stringify((datos.cap2_output as Record<string, unknown>)?.teorias_desarrolladas ?? [])}
-- Estudios relacionados: ${(datos.cap2_output as Record<string, unknown>)?.estudios_relacionados_cantidad ?? 0}
+  // Prefer explicit inputs, fallback to stored cap1 data
+  const tipo = datos.tipo_investigacion ?? datos.metodologia_tipo ?? tipoStored;
+  const objGeneral = datos.objetivo_general ?? String(obj?.general ?? "N/D");
+  const objEspecificos: string[] = datos.objetivos_especificos
+    ?? (obj?.especificos as string[])
+    ?? [];
+  const pregCentral = datos.preguntas_investigacion?.central
+    ?? String(pregsStored?.central ?? "N/D");
+  const subpreguntas = datos.preguntas_investigacion?.subpreguntas
+    ?? (pregsStored?.subpreguntas as Record<string, string> | undefined)
+    ?? {};
+  const hipPrincipal = datos.hipotesis?.principal
+    ?? String(hipotesisStored?.principal ?? "");
+  const hipVariables = datos.hipotesis?.variables
+    ?? (hipotesisStored?.variables as unknown[] | undefined)
+    ?? [];
 
-TODAS LAS CITAS REGISTRADAS (caps. I + II) — bibliografía final DEBE incluirlas todas:
+  const teorias = (cap2?.teorias_desarrolladas as string[]) ?? [];
+  const estudiosCount = (cap2?.estudios_relacionados_cantidad as number) ?? 0;
+
+  return `════════════════════════════════════════════
+RESUMEN CAPÍTULO I (APROBADO — NO MODIFICAR)
+════════════════════════════════════════════
+Tipo de investigación: ${tipo}
+Período temporal: ${datos.periodo_temporal ?? String(alcances?.temporal ?? "N/D")}
+Alcance geográfico: ${String(alcances?.geografico ?? "N/D")}
+Alcance institucional: ${String(alcances?.institucional ?? "N/D")}
+
+OBJETIVO GENERAL:
+${objGeneral}
+
+OBJETIVOS ESPECÍFICOS (${objEspecificos.length} — Cap. IV debe tener exactamente ${objEspecificos.length} secciones):
+${objEspecificos.map((o, i) => `  ${i + 1}. ${o}`).join("\n")}
+
+PREGUNTA CENTRAL DE INVESTIGACIÓN:
+${pregCentral}
+
+SUBPREGUNTAS:
+${Object.entries(subpreguntas).map(([k, v]) => `  ${k}: ${v}`).join("\n") || "  (ninguna declarada)"}
+
+${tieneHipotesis ? `HIPÓTESIS PRINCIPAL:
+${hipPrincipal || "(ver cap1_output.hipotesis)"}
+
+VARIABLES DE LA HIPÓTESIS:
+${JSON.stringify(hipVariables, null, 2)}` : "SIN HIPÓTESIS DECLARADA"}
+
+════════════════════════════════════════════
+RESUMEN CAPÍTULO II (APROBADO — VINCULAR EN CAP. IV)
+════════════════════════════════════════════
+Teorías/marcos desarrollados (${teorias.length}):
+${teorias.map((t, i) => `  ${i + 1}. ${t}`).join("\n") || "  (ver cap2_output.teorias_desarrolladas)"}
+Estudios relacionados incluidos: ${estudiosCount}
+Contexto actual integrado: ${String((cap2?.contexto_actual_integrado as boolean | undefined) ?? false)}
+
+════════════════════════════════════════════
+CITAS REGISTRADAS CAPS. I + II — INCLUIR TODAS EN BIBLIOGRAFÍA FINAL
+════════════════════════════════════════════
+Total: ${datos.citas_totales.length} citas
 ${JSON.stringify(datos.citas_totales, null, 2)}
 
-FUENTES DE DATOS DISPONIBLES PARA CAP. III/IV:
-${(datos.fuentes_datos ?? []).map((f, i) => `${i + 1}. ${f}`).join("\n") || "Las indicadas en el tema seleccionado (Etapa 0)"}
+════════════════════════════════════════════
+FUENTES DE DATOS PARA CAP. III/IV
+════════════════════════════════════════════
+${(datos.fuentes_datos ?? []).length > 0
+    ? (datos.fuentes_datos ?? []).map((f, i) => `${i + 1}. ${f}`).join("\n")
+    : "Usar fuentes secundarias públicas del contexto boliviano/latinoamericano indicadas en el tema (INE, IBCE, BCB, UDAPE, ministerios sectoriales, organismos internacionales BID/BM/FAO)."}
 
-${datos.observaciones_adicionales ? `OBSERVACIONES ADICIONALES:\n${datos.observaciones_adicionales}` : ""}
+${datos.variables && datos.variables.length > 0 ? `VARIABLES A OPERACIONALIZAR EN CAP. III:
+${JSON.stringify(datos.variables, null, 2)}` : ""}
 
-INSTRUCCIÓN CRÍTICA PARA CAP. IV:
-- Genera EXACTAMENTE ${(obj?.especificos ?? []).length} secciones (4.1, 4.2, ...) — una por objetivo específico.
-- Si no tienes datos reales, usa el marcador [DATO: descripción de qué buscar en fuente X y cómo analizarlo].
-- Vincula cada resultado con la teoría correspondiente del Cap. II.
+${datos.observaciones_adicionales ? `════════════════════════════════════════════
+INSTRUCCIONES ADICIONALES DEL ESTUDIANTE
+════════════════════════════════════════════
+${datos.observaciones_adicionales}` : ""}
 
-Genera los Capítulos III, IV, V y la Bibliografía Final completa.`;
+════════════════════════════════════════════
+INSTRUCCIONES CRÍTICAS DE GENERACIÓN
+════════════════════════════════════════════
+1. Cap. III: justificar CADA decisión metodológica desde el objetivo general y el tipo "${tipo}".
+2. Cap. IV: generar EXACTAMENTE ${objEspecificos.length} secciones (4.1–4.${objEspecificos.length}).
+3. Si no hay datos reales → usar [DATO: qué buscar, en qué fuente pública, cómo analizar].
+4. Cap. V: una conclusión de 4 párrafos por objetivo + síntesis general que responda directamente "${pregCentral}".
+5. ${tieneHipotesis ? `Verificar la hipótesis explícitamente en 5.1 síntesis: "${hipPrincipal || 'ver cap1_output'}"` : "No hay hipótesis — omitir verificación."}
+6. Recomendaciones: MÁXIMO 5, cada una con los 7 sub-campos del sistema.
+7. Bibliografía: MÍNIMO 15 referencias, APA 7 exacto, solo las citadas en el texto.
+
+Genera los Capítulos III, IV, V y la Bibliografía Final ahora.`;
 }
