@@ -12,9 +12,16 @@ const STORE_FILE = path.join(STORE_DIR, "data.json");
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
-interface StoreData {
+interface WorkspacePrompts {
+  hilos: string[];
+  phases: Record<string, string>;
+}
+
+export interface StoreData {
   proyectos: Record<string, unknown>;
   users: Record<string, unknown>;
+  aiConfig?: Record<string, unknown>;
+  workspacePrompts?: WorkspacePrompts;
 }
 
 function ensureDir() {

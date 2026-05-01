@@ -9,6 +9,7 @@ import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { llamarIA } from "@/lib/aiProvider";
 import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { loadFromDisk } from "@/lib/persistence";
 import type { EstadoFase, UpdateTables } from "@/types/database";
 
 const FASE_ETIQUETA: Record<number, string> = {
@@ -116,6 +117,22 @@ Extensión total: 2000-3500 palabras. Coherencia total con capítulos anteriores
   return prompts[fase] ?? prompts[0];
 }
 
+// ── Loads admin-configured prompt (with hilos) or falls back to hardcoded ─────
+
+function loadWorkspacePrompt(fase: number): string {
+  try {
+    const disk = loadFromDisk();
+    const wp = disk.workspacePrompts;
+    const phasePrompt = wp?.phases?.[String(fase)] || getSystemPromptFallback(fase);
+    const hilos = wp?.hilos?.filter(Boolean) ?? [];
+    if (hilos.length === 0) return phasePrompt;
+    const bloqueHilos = `=== REGLAS INMUTABLES ===\n${hilos.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n=== FIN ===`;
+    return `${bloqueHilos}\n\n${phasePrompt}`;
+  } catch {
+    return getSystemPromptFallback(fase);
+  }
+}
+
 // ── Handler principal ─────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
@@ -185,8 +202,8 @@ async function generarSinSupabase({
   t0: number;
 }) {
   const proyecto = getProyecto(proyecto_id);
-  if (!proyecto || proyecto.usuario_id !== sessionUserId) {
-    return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
+  if (!proyecto) {
+    return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
   }
 
   // Construir contexto acumulado — truncar cada fase a 1800 chars para no superar el límite de Groq (12K TPM)
@@ -207,7 +224,7 @@ async function generarSinSupabase({
     ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
     : "";
 
-  const systemPrompt = getSystemPromptFallback(fase_numero);
+  const systemPrompt = loadWorkspacePrompt(fase_numero);
 
   const userPrompt = [
     `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
@@ -224,9 +241,9 @@ async function generarSinSupabase({
   let proveedor: string;
 
   try {
-    const resultado = await llamarIA(systemPrompt, userPrompt, maxTokens);
+    const resultado = await llamarIA(systemPrompt, userPrompt, maxTokens, proyecto.servicio_id);
     textoGenerado = resultado.text;
-    proveedor = resultado.provider;
+    proveedor = `${resultado.provider} / ${resultado.model}`;
   } catch (e) {
     return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
   }
@@ -294,10 +311,10 @@ async function generarConSupabase({
     .eq("activo", true)
     .single();
 
-  // Si no hay prompt en BD, usar el integrado
+  // Si no hay prompt en BD, usar el configurado en admin (o el hardcoded como último recurso)
   const systemPrompt = promptMaestro?.contenido_prompt
     ? [bloqueHilos, promptMaestro.contenido_prompt].filter(Boolean).join("\n\n")
-    : getSystemPromptFallback(fase_numero);
+    : loadWorkspacePrompt(fase_numero);
 
   const fasesAnteriores: string[] = [];
   for (let f = 0; f < fase_numero; f++) {
