@@ -6,6 +6,7 @@ import { DEFAULT_UNIVERSITIES, University } from "@/lib/data";
 const EMPTY_UNIVERSITY: Omit<University, "id"> = {
   name: "",
   logo_url: "",
+  latex_prompt: "",
   format: {
     font: "Times New Roman",
     size: 12,
@@ -65,6 +66,7 @@ export default function UniversidadesPage() {
     setForm({
       name: univ.name,
       logo_url: univ.logo_url || "",
+      latex_prompt: univ.latex_prompt || "",
       format: { ...univ.format, margins: { ...univ.format.margins } },
       modalities: [...univ.modalities],
       is_active: univ.is_active,
@@ -121,11 +123,18 @@ export default function UniversidadesPage() {
                   {univ.is_active ? "Activa" : "Inactiva"}
                 </span>
               </div>
-              <div style={{ display: "flex", gap: 20, fontSize: 13, color: "#94a3b8", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", gap: 20, fontSize: 13, color: "#94a3b8", flexWrap: "wrap", marginBottom: 6 }}>
                 <span>📝 {univ.format.font} {univ.format.size}pt</span>
                 <span>📏 Interlineado: {univ.format.lineHeight}</span>
                 <span>📐 Márgenes: {univ.format.margins.top}/{univ.format.margins.left}/{univ.format.margins.bottom}/{univ.format.margins.right}cm</span>
               </div>
+              {univ.latex_prompt ? (
+                <div style={{ fontSize: 11, color: "#475569", fontFamily: "monospace", background: "rgba(8,12,24,0.5)", padding: "6px 10px", borderRadius: 6, marginBottom: 6, lineHeight: 1.5, maxHeight: 48, overflow: "hidden" }}>
+                  🧾 {univ.latex_prompt.slice(0, 140)}{univ.latex_prompt.length > 140 ? "…" : ""}
+                </div>
+              ) : (
+                <div style={{ fontSize: 11, color: "#334155", fontStyle: "italic", marginBottom: 6 }}>Sin prompt LaTeX — haz clic en Editar para configurar</div>
+              )}
               <div style={{ display: "flex", gap: 6, marginTop: 10, flexWrap: "wrap" }}>
                 {univ.modalities.map((m) => (
                   <span key={m} className="badge badge-cyan" style={{ fontSize: 11 }}>{m}</span>
@@ -199,6 +208,22 @@ export default function UniversidadesPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <label className="label">Prompt LaTeX — Instrucciones de formato para el documento final</label>
+                <p style={{ fontSize: 11, color: "#475569", marginBottom: 8, lineHeight: 1.6 }}>
+                  Describe los requisitos de formato: márgenes, fuente, interlineado, estructura de portada, numeración, etc.
+                  El sistema usará esto al generar el archivo .tex del estudiante.
+                </p>
+                <textarea
+                  className="input-dark"
+                  rows={5}
+                  style={{ resize: "vertical", fontFamily: "monospace", fontSize: 12 }}
+                  placeholder="Ej: Formato UMSS — clase report, Times New Roman 12pt, interlineado 1.5, márgenes: superior 3cm, inferior 2.5cm, izquierdo 3cm, derecho 2.5cm. Portada con nombre de universidad, facultad, carrera, título, autor y año..."
+                  value={form.latex_prompt ?? ""}
+                  onChange={(e) => setForm((p) => ({ ...p, latex_prompt: e.target.value }))}
+                />
               </div>
 
               <div>

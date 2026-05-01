@@ -5,6 +5,7 @@ export interface University {
   id: string;
   name: string;
   logo_url?: string;
+  latex_prompt?: string;
   format: {
     font: string;
     size: number;
@@ -39,25 +40,65 @@ export const DEFAULT_UNIVERSITIES: University[] = [
   {
     id: "umss-001",
     name: "Universidad Mayor de San Simón (UMSS)",
-    format: {
-      font: "Times New Roman",
-      size: 12,
-      lineHeight: 1.5,
-      margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 },
-    },
+    latex_prompt: "Formato UMSS — Cochabamba: clase report, Times New Roman 12pt, interlineado 1.5, márgenes superior 3cm, inferior 2.5cm, izquierdo 3cm, derecho 2.5cm. Portada con nombre de la universidad, facultad, carrera, título, autor y año. Numeración de páginas centrada abajo. Capítulos en mayúsculas y negrita.",
+    format: { font: "Times New Roman", size: 12, lineHeight: 1.5, margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 } },
     modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado", "Trabajo Dirigido"],
     is_active: true,
   },
   {
     id: "umsa-001",
     name: "Universidad Mayor de San Andrés (UMSA)",
-    format: {
-      font: "Times New Roman",
-      size: 12,
-      lineHeight: 1.5,
-      margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 },
-    },
+    latex_prompt: "Formato UMSA — La Paz: clase report, Times New Roman 12pt, interlineado doble, márgenes superior 3cm, inferior 2.5cm, izquierdo 3.5cm, derecho 2.5cm. Portada con escudo de la UMSA, carrera, título, autor, tutor y año. Numeración en esquina inferior derecha.",
+    format: { font: "Times New Roman", size: 12, lineHeight: 2.0, margins: { top: 3, left: 3.5, bottom: 2.5, right: 2.5 } },
     modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado"],
+    is_active: true,
+  },
+  {
+    id: "uagrm-001",
+    name: "Universidad Autónoma Gabriel René Moreno (UAGRM)",
+    latex_prompt: "Formato UAGRM — Santa Cruz: clase report, Arial 12pt equivalente (helvet), interlineado 1.5, márgenes uniformes 2.5cm. Portada con logo UAGRM, facultad, carrera, título, nombre del autor, ciudad y año. Páginas numeradas en la parte superior derecha.",
+    format: { font: "Arial", size: 12, lineHeight: 1.5, margins: { top: 2.5, left: 2.5, bottom: 2.5, right: 2.5 } },
+    modalities: ["Tesis de Grado", "Monografía", "Trabajo Final"],
+    is_active: true,
+  },
+  {
+    id: "uto-001",
+    name: "Universidad Técnica de Oruro (UTO)",
+    latex_prompt: "Formato UTO — Oruro: clase report, Times New Roman 12pt, interlineado 1.5, márgenes superior 3cm, inferior 2.5cm, izquierdo 3cm, derecho 2.5cm. Portada con escudo UTO, facultad, carrera, mención, título, autor y año. Numeración centrada en pie de página.",
+    format: { font: "Times New Roman", size: 12, lineHeight: 1.5, margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 } },
+    modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado"],
+    is_active: true,
+  },
+  {
+    id: "usfx-001",
+    name: "Universidad Mayor Real y Pontificia San Francisco Xavier (USFX)",
+    latex_prompt: "Formato USFX — Sucre: clase report, Times New Roman 12pt, interlineado 1.5, márgenes superior 3cm, inferior 2.5cm, izquierdo 3cm, derecho 2.5cm. Portada con sello pontificio, facultad, carrera, título, autor, tutor y año. Bibliografía en formato APA 7.",
+    format: { font: "Times New Roman", size: 12, lineHeight: 1.5, margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 } },
+    modalities: ["Tesis de Grado", "Monografía"],
+    is_active: true,
+  },
+  {
+    id: "upb-001",
+    name: "Universidad Privada Boliviana (UPB)",
+    latex_prompt: "Formato UPB: clase report, Arial 11pt equivalente, interlineado 1.15, márgenes 2.5cm todos los lados. Portada con logo UPB, programa, título, autor, tutor y fecha. Estilo más moderno, numeración superior derecha, bibliografía APA 7.",
+    format: { font: "Arial", size: 11, lineHeight: 1.15, margins: { top: 2.5, left: 2.5, bottom: 2.5, right: 2.5 } },
+    modalities: ["Tesis de Grado", "Monografía", "Trabajo de Investigación"],
+    is_active: true,
+  },
+  {
+    id: "emi-001",
+    name: "Escuela Militar de Ingeniería (EMI)",
+    latex_prompt: "Formato EMI: clase report, Times New Roman 12pt, interlineado 1.5, márgenes superior 3cm, inferior 2.5cm, izquierdo 3cm, derecho 2.5cm. Portada formal con emblema EMI, unidad académica, título, grado militar/académico, autor y año. Numeración centrada.",
+    format: { font: "Times New Roman", size: 12, lineHeight: 1.5, margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 } },
+    modalities: ["Tesis de Grado", "Monografía", "Proyecto Final"],
+    is_active: true,
+  },
+  {
+    id: "otro-001",
+    name: "Otra institución / Formato personalizado",
+    latex_prompt: "Formato académico estándar: clase report, Times New Roman 12pt, interlineado 1.5, márgenes 3cm izquierdo/superior y 2.5cm derecho/inferior. Portada con nombre de la institución, programa, título, autor y año. Bibliografía en formato APA 7.",
+    format: { font: "Times New Roman", size: 12, lineHeight: 1.5, margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 } },
+    modalities: ["Monografía", "Trabajo de Investigación", "Tesis"],
     is_active: true,
   },
 ];

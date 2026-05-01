@@ -9,20 +9,32 @@ interface Servicio {
   descripcion: string | null;
 }
 
+interface Universidad {
+  id: string;
+  name: string;
+  modalities: string[];
+  is_active: boolean;
+}
+
 type Step =
   | "loading"
-  | "elegir-tipo"      // ¿Tienes tema?
-  | "con-tema"         // Input tema propio
-  | "sin-tema"         // 3 inputs para sugerir
-  | "generando"        // IA generando sugerencias
-  | "eligiendo"        // Mostrar sugerencias, elegir
-  | "creando";         // Creando/redirigiendo
+  | "seleccionar-universidad"
+  | "elegir-tipo"
+  | "con-tema"
+  | "sin-tema"
+  | "generando"
+  | "eligiendo"
+  | "creando";
 
 export default function NuevoProyectoPage() {
   const router = useRouter();
   const [step, setStep] = useState<Step>("loading");
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
+
+  // Universidad
+  const [universidades, setUniversidades] = useState<Universidad[]>([]);
+  const [universidadId, setUniversidadId] = useState("");
 
   // Con tema
   const [temaPropio, setTemaPropio] = useState("");
@@ -40,9 +52,10 @@ export default function NuevoProyectoPage() {
   useEffect(() => {
     async function init() {
       try {
-        const [meRes, svcRes] = await Promise.all([
+        const [meRes, svcRes, univRes] = await Promise.all([
           fetch("/api/auth/me"),
           fetch("/api/services"),
+          fetch("/api/admin/universities"),
         ]);
         const meData = await meRes.json();
         if (!meData.user) { router.replace("/login"); return; }
@@ -54,7 +67,13 @@ export default function NuevoProyectoPage() {
           if (mono) setServicioId(mono.id);
           else if (svcs.length > 0) setServicioId(svcs[0].id);
         }
-        setStep("elegir-tipo");
+
+        if (univRes.ok) {
+          const univData: Universidad[] = await univRes.json();
+          setUniversidades(univData.filter(u => u.is_active));
+        }
+
+        setStep("seleccionar-universidad");
       } catch {
         router.replace("/login");
       }
@@ -62,7 +81,6 @@ export default function NuevoProyectoPage() {
     init();
   }, [router]);
 
-  // Obtiene servicioId; si no se cargó al montar, lo reintenta aquí.
   async function resolverServicioId(): Promise<string> {
     if (servicioId) return servicioId;
     const res = await fetch("/api/services");
@@ -85,7 +103,12 @@ export default function NuevoProyectoPage() {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ servicio_id: sid, tema_aprobado: temaPropio.trim(), titulo_provisional: temaPropio.trim() }),
+        body: JSON.stringify({
+          servicio_id: sid,
+          universidad_id: universidadId || undefined,
+          tema_aprobado: temaPropio.trim(),
+          titulo_provisional: temaPropio.trim(),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -108,7 +131,12 @@ export default function NuevoProyectoPage() {
       const res = await fetch("/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ servicio_id: sid, tema_aprobado: "(Por definir)", titulo_provisional: `Proyecto — ${programa}` }),
+        body: JSON.stringify({
+          servicio_id: sid,
+          universidad_id: universidadId || undefined,
+          tema_aprobado: "(Por definir)",
+          titulo_provisional: `Proyecto — ${programa}`,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -163,7 +191,7 @@ export default function NuevoProyectoPage() {
     }
   }
 
-  // ── Loading ──────────────────────────────────────────────────────────────
+  // ── Loading / Creando ────────────────────────────────────────────────────
 
   if (step === "loading" || step === "creando") {
     return (
@@ -185,19 +213,14 @@ export default function NuevoProyectoPage() {
     );
   }
 
-  // ── Shell común ───────────────────────────────────────────────────────────
-
   return (
     <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
+      <div style={{ width: "100%", maxWidth: 600 }}>
 
-      <div style={{ width: "100%", maxWidth: 560 }}>
-
-        {/* Back */}
         <a href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748b", textDecoration: "none", fontSize: 13, marginBottom: 24 }}>
           ← Volver al dashboard
         </a>
 
-        {/* Error banner */}
         {error && (
           <div style={{ marginBottom: 16, padding: "10px 14px", background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.3)", borderRadius: 8, fontSize: 13, color: "#f87171", display: "flex", justifyContent: "space-between" }}>
             <span>{error}</span>
@@ -205,14 +228,58 @@ export default function NuevoProyectoPage() {
           </div>
         )}
 
-        {/* ── ELEGIR TIPO ────────────────────────────────────────────────────── */}
+        {/* ── PASO 1: SELECCIONAR UNIVERSIDAD ─────────────────────────────────── */}
+        {step === "seleccionar-universidad" && (
+          <div className="card fade-in" style={{ padding: 32 }}>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                Paso 1 de 2 — Universidad
+              </div>
+              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿En qué universidad estudias?</h1>
+              <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6 }}>
+                El formato LaTeX del documento final se adaptará automáticamente a los requerimientos de tu institución.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+              {universidades.map(u => (
+                <button
+                  key={u.id}
+                  onClick={() => setUniversidadId(u.id)}
+                  style={{
+                    padding: "14px 12px", borderRadius: 10, cursor: "pointer", textAlign: "left",
+                    background: universidadId === u.id ? "rgba(6,182,212,0.12)" : "rgba(30,41,59,0.6)",
+                    border: universidadId === u.id ? "2px solid #06b6d4" : "1.5px solid #1e293b",
+                    color: "#e2e8f0", transition: "all 0.15s",
+                  }}
+                >
+                  <div style={{ fontSize: 11, fontWeight: 700, color: universidadId === u.id ? "#06b6d4" : "#64748b", marginBottom: 4 }}>
+                    {universidadId === u.id ? "✓ " : ""}Seleccionada
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.4 }}>{u.name}</div>
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={() => { if (!universidadId) { setError("Selecciona tu universidad para continuar."); return; } setError(""); setStep("elegir-tipo"); }}
+              className="btn-cyan"
+              style={{ width: "100%", justifyContent: "center", padding: "12px" }}
+            >
+              Continuar →
+            </button>
+          </div>
+        )}
+
+        {/* ── PASO 2: ELEGIR TIPO ──────────────────────────────────────────────── */}
         {step === "elegir-tipo" && (
           <div className="card fade-in" style={{ padding: 32 }}>
+            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
-                Nuevo proyecto
+                Paso 2 de 2 — Tema
               </div>
-              <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 8 }}>¿Tienes un tema de investigación?</h1>
+              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿Tienes un tema de investigación?</h1>
               <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.6 }}>
                 Si ya tienes tu tema definido, ve directo al trabajo. Si no, la IA te sugerirá 3 opciones viables según tu contexto.
               </p>
@@ -252,7 +319,7 @@ export default function NuevoProyectoPage() {
           </div>
         )}
 
-        {/* ── CON TEMA PROPIO ─────────────────────────────────────────────────── */}
+        {/* ── CON TEMA PROPIO ──────────────────────────────────────────────────── */}
         {step === "con-tema" && (
           <div className="card fade-in" style={{ padding: 32 }}>
             <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>

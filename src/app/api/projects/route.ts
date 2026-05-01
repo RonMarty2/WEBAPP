@@ -66,7 +66,7 @@ export async function POST(req: Request) {
     const { user } = await requireAuth();
 
     const body = await req.json();
-    const { servicio_id, tema_aprobado, titulo_provisional } = body;
+    const { servicio_id, universidad_id, tema_aprobado, titulo_provisional } = body;
 
     if (!servicio_id) {
       return NextResponse.json({ error: "servicio_id es requerido" }, { status: 400 });
@@ -76,6 +76,7 @@ export async function POST(req: Request) {
       const proyecto = createProyecto({
         usuario_id: user.id,
         servicio_id,
+        universidad_id: universidad_id ?? undefined,
         tema_aprobado: tema_aprobado ?? null,
         titulo_provisional: titulo_provisional ?? null,
         estado_fase: 0,
@@ -104,6 +105,7 @@ export async function POST(req: Request) {
       const proyecto = createProyecto({
         usuario_id: user.id,
         servicio_id,
+        universidad_id: universidad_id ?? undefined,
         tema_aprobado: tema_aprobado ?? null,
         titulo_provisional: titulo_provisional ?? null,
         estado_fase: 0,
@@ -138,6 +140,7 @@ export async function POST(req: Request) {
       const proyecto = createProyecto({
         usuario_id: user.id,
         servicio_id,
+        universidad_id: universidad_id ?? undefined,
         tema_aprobado: tema_aprobado ?? null,
         titulo_provisional: titulo_provisional ?? null,
         estado_fase: 0,

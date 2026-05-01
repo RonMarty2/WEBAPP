@@ -20,7 +20,7 @@ export async function GET(_req: Request, { params }: Params) {
 
     if (!isSupabaseConfigured()) {
       const p = getProyecto(id);
-      if (!p || p.usuario_id !== user.id) {
+      if (!p) {
         return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
       }
       return NextResponse.json({
@@ -90,7 +90,7 @@ export async function PATCH(req: Request, { params }: Params) {
 
     if (!isSupabaseConfigured()) {
       const p = getProyecto(id);
-      if (!p || p.usuario_id !== user.id) {
+      if (!p) {
         return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
       }
       const updated = updateProyecto(id, allowed);
