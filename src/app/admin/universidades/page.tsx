@@ -7,15 +7,32 @@ const EMPTY_UNIVERSITY: Omit<University, "id"> = {
   name: "",
   logo_url: "",
   latex_prompt: "",
+  cover_template: "",
+  facultad: "",
+  departamento: "",
+  ciudad: "",
+  pais: "Bolivia",
+  tipo_documento: "MONOGRAFÍA",
+  tipo_modalidad: "",
+  campos_portada: [],
   format: {
     font: "Times New Roman",
     size: 12,
     lineHeight: 1.5,
     margins: { top: 3, left: 3, bottom: 2.5, right: 2.5 },
+    alineacion: "justify",
+    numero_paginas_posicion: "top-right",
   },
   modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado"],
   is_active: true,
 };
+
+const CAMPOS_PORTADA_OPCIONES = [
+  { key: "programa", label: "Nombre del programa/diplomado" },
+  { key: "version", label: "Versión del programa" },
+  { key: "tutor", label: "Tutor/a de tesis" },
+  { key: "carrera", label: "Carrera" },
+];
 
 export default function UniversidadesPage() {
   const [universities, setUniversities] = useState<University[]>([...DEFAULT_UNIVERSITIES]);
@@ -67,7 +84,20 @@ export default function UniversidadesPage() {
       name: univ.name,
       logo_url: univ.logo_url || "",
       latex_prompt: univ.latex_prompt || "",
-      format: { ...univ.format, margins: { ...univ.format.margins } },
+      cover_template: univ.cover_template || "",
+      facultad: univ.facultad || "",
+      departamento: univ.departamento || "",
+      ciudad: univ.ciudad || "",
+      pais: univ.pais || "Bolivia",
+      tipo_documento: univ.tipo_documento || "MONOGRAFÍA",
+      tipo_modalidad: univ.tipo_modalidad || "",
+      campos_portada: [...(univ.campos_portada ?? [])],
+      format: {
+        ...univ.format,
+        margins: { ...univ.format.margins },
+        alineacion: univ.format.alineacion ?? "justify",
+        numero_paginas_posicion: univ.format.numero_paginas_posicion ?? "top-right",
+      },
       modalities: [...univ.modalities],
       is_active: univ.is_active,
     });
@@ -173,45 +203,155 @@ export default function UniversidadesPage() {
                 <input className="input-dark" placeholder="Ej: Universidad Mayor de San Simón (UMSS)" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} />
               </div>
 
-              <div style={{ display: "flex", gap: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <label className="label">Fuente</label>
-                  <select className="input-dark" value={form.format.font} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, font: e.target.value } }))}>
-                    <option>Times New Roman</option>
-                    <option>Arial</option>
-                    <option>Calibri</option>
-                    <option>Garamond</option>
-                  </select>
-                </div>
-                <div style={{ width: 100 }}>
-                  <label className="label">Tamaño</label>
-                  <input type="number" className="input-dark" value={form.format.size} min={10} max={14} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, size: Number(e.target.value) } }))} />
-                </div>
-                <div style={{ width: 120 }}>
-                  <label className="label">Interlineado</label>
-                  <select className="input-dark" value={form.format.lineHeight} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, lineHeight: Number(e.target.value) } }))}>
-                    <option value={1.0}>1.0 (Simple)</option>
-                    <option value={1.5}>1.5</option>
-                    <option value={2.0}>2.0 (Doble)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="label">Márgenes (cm): Superior / Izquierdo / Inferior / Derecho</label>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
-                  {(["top", "left", "bottom", "right"] as const).map((side) => (
-                    <div key={side}>
-                      <div style={{ fontSize: 11, color: "#475569", marginBottom: 4 }}>{side === "top" ? "Superior" : side === "left" ? "Izquierdo" : side === "bottom" ? "Inferior" : "Derecho"}</div>
-                      <input type="number" className="input-dark" step={0.5} value={form.format.margins[side]}
-                        onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, margins: { ...p.format.margins, [side]: Number(e.target.value) } } }))} />
+              {/* ── Identidad institucional ── */}
+              <div style={{ borderTop: "1px solid rgba(6,182,212,0.1)", paddingTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#06b6d4", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>🏛️ Identidad Institucional</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div>
+                    <label className="label">Logo URL</label>
+                    <input className="input-dark" placeholder="https://...logo.png (dejar vacío si no hay)" value={form.logo_url ?? ""} onChange={(e) => setForm((p) => ({ ...p, logo_url: e.target.value }))} />
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label className="label">Facultad</label>
+                      <input className="input-dark" placeholder="Ej: Facultad de Ciencias Económicas" value={form.facultad ?? ""} onChange={(e) => setForm((p) => ({ ...p, facultad: e.target.value }))} />
                     </div>
-                  ))}
+                    <div>
+                      <label className="label">Departamento / Unidad</label>
+                      <input className="input-dark" placeholder="Ej: Departamento de Posgrado" value={form.departamento ?? ""} onChange={(e) => setForm((p) => ({ ...p, departamento: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="label">Ciudad</label>
+                      <input className="input-dark" placeholder="Ej: Cochabamba" value={form.ciudad ?? ""} onChange={(e) => setForm((p) => ({ ...p, ciudad: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="label">País</label>
+                      <input className="input-dark" placeholder="Bolivia" value={form.pais ?? ""} onChange={(e) => setForm((p) => ({ ...p, pais: e.target.value }))} />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <label className="label">Prompt LaTeX — Instrucciones de formato para el documento final</label>
+              {/* ── Formato de página ── */}
+              <div style={{ borderTop: "1px solid rgba(6,182,212,0.1)", paddingTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#06b6d4", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>📄 Formato de Página</div>
+                <div style={{ display: "flex", gap: 12, marginBottom: 10 }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="label">Fuente</label>
+                    <select className="input-dark" value={form.format.font} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, font: e.target.value } }))}>
+                      <option>Times New Roman</option>
+                      <option>Arial</option>
+                      <option>Calibri</option>
+                      <option>Garamond</option>
+                    </select>
+                  </div>
+                  <div style={{ width: 90 }}>
+                    <label className="label">Tamaño</label>
+                    <input type="number" className="input-dark" value={form.format.size} min={10} max={14} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, size: Number(e.target.value) } }))} />
+                  </div>
+                  <div style={{ width: 120 }}>
+                    <label className="label">Interlineado</label>
+                    <select className="input-dark" value={form.format.lineHeight} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, lineHeight: Number(e.target.value) } }))}>
+                      <option value={1.0}>1.0 (Simple)</option>
+                      <option value={1.5}>1.5</option>
+                      <option value={2.0}>2.0 (Doble)</option>
+                    </select>
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                  <div>
+                    <label className="label">Alineación del texto</label>
+                    <select className="input-dark" value={form.format.alineacion ?? "justify"} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, alineacion: e.target.value as "justify" | "left" } }))}>
+                      <option value="justify">Justificado</option>
+                      <option value="left">Izquierda (APA monografía)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="label">Numeración de páginas</label>
+                    <select className="input-dark" value={form.format.numero_paginas_posicion ?? "top-right"} onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, numero_paginas_posicion: e.target.value as "top-right" | "bottom-center" | "top-center" } }))}>
+                      <option value="top-right">Superior derecha</option>
+                      <option value="top-center">Superior centro</option>
+                      <option value="bottom-center">Inferior centro</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="label">Márgenes (cm): Superior / Izquierdo / Inferior / Derecho</label>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 10 }}>
+                    {(["top", "left", "bottom", "right"] as const).map((side) => (
+                      <div key={side}>
+                        <div style={{ fontSize: 11, color: "#475569", marginBottom: 4 }}>{side === "top" ? "Superior" : side === "left" ? "Izquierdo" : side === "bottom" ? "Inferior" : "Derecho"}</div>
+                        <input type="number" className="input-dark" step={0.5} value={form.format.margins[side]}
+                          onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, margins: { ...p.format.margins, [side]: Number(e.target.value) } } }))} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Portada y documento ── */}
+              <div style={{ borderTop: "1px solid rgba(6,182,212,0.1)", paddingTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#06b6d4", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>📋 Portada del Documento</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+                    <div>
+                      <label className="label">Tipo de documento</label>
+                      <input className="input-dark" placeholder="Ej: MONOGRAFÍA" value={form.tipo_documento ?? ""} onChange={(e) => setForm((p) => ({ ...p, tipo_documento: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="label">Tipo de modalidad</label>
+                      <input className="input-dark" placeholder="Ej: DIPLOMADO COMO MODALIDAD DE TITULACIÓN" value={form.tipo_modalidad ?? ""} onChange={(e) => setForm((p) => ({ ...p, tipo_modalidad: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="label">Datos adicionales que debe llenar el estudiante en la portada</label>
+                    <p style={{ fontSize: 11, color: "#475569", marginBottom: 8, lineHeight: 1.5 }}>
+                      Marca los campos que el sistema pedirá al estudiante al generar la portada del PDF.
+                    </p>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                      {CAMPOS_PORTADA_OPCIONES.map(({ key, label }) => {
+                        const checked = (form.campos_portada ?? []).includes(key);
+                        return (
+                          <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "#cbd5e1", padding: "6px 12px", background: checked ? "rgba(6,182,212,0.12)" : "rgba(8,12,24,0.5)", border: `1px solid ${checked ? "rgba(6,182,212,0.4)" : "rgba(30,41,59,1)"}`, borderRadius: 8, userSelect: "none" }}>
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => setForm((p) => {
+                                const cur = p.campos_portada ?? [];
+                                return { ...p, campos_portada: checked ? cur.filter(x => x !== key) : [...cur, key] };
+                              })}
+                              style={{ accentColor: "#06b6d4" }}
+                            />
+                            {label}
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Plantilla HTML de portada ── */}
+              <div style={{ borderTop: "1px solid rgba(6,182,212,0.1)", paddingTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#06b6d4", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>🎨 Plantilla de Carátula (HTML)</div>
+                <p style={{ fontSize: 11, color: "#475569", marginBottom: 8, lineHeight: 1.6 }}>
+                  HTML libre para la carátula del PDF. Si está vacío, se usa la portada generada automáticamente.
+                  Usa estas variables: <code style={{ color: "#67e8f9" }}>{`{nombre_estudiante} {titulo} {mes} {anio} {universidad} {facultad} {departamento} {ciudad} {pais} {programa} {version} {tutor} {carrera} {tipo_documento} {tipo_modalidad} {logo_url}`}</code>
+                </p>
+                <textarea
+                  className="input-dark"
+                  rows={8}
+                  style={{ resize: "vertical", fontFamily: "monospace", fontSize: 11 }}
+                  placeholder={`<div style="text-align:center; padding: 40px;">\n  <img src="{logo_url}" style="height:80px"/>\n  <h2>{universidad}</h2>\n  <h3>{facultad}</h3>\n  <p>{tipo_modalidad}</p>\n  <h1>{titulo}</h1>\n  <p>Estudiante: {nombre_estudiante}</p>\n  <p>{ciudad}, {mes} {anio}</p>\n</div>`}
+                  value={form.cover_template ?? ""}
+                  onChange={(e) => setForm((p) => ({ ...p, cover_template: e.target.value }))}
+                />
+              </div>
+
+              {/* ── LaTeX prompt (colapsado al final) ── */}
+              <div style={{ borderTop: "1px solid rgba(6,182,212,0.1)", paddingTop: 14 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#06b6d4", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.08em" }}>🧾 Prompt LaTeX / IA</div>
+                <label className="label">Instrucciones de formato para el documento final</label>
                 <p style={{ fontSize: 11, color: "#475569", marginBottom: 8, lineHeight: 1.6 }}>
                   Describe los requisitos de formato: márgenes, fuente, interlineado, estructura de portada, numeración, etc.
                   El sistema usará esto al generar el archivo .tex del estudiante.

@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import type { SessionUser } from "@/lib/auth";
+import type { University } from "@/lib/data";
+import { generatePdfHtml, MESES, type StudentCoverData } from "@/lib/pdfTemplate";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -12,12 +14,14 @@ interface Proyecto {
   titulo_provisional: string | null;
   estado_fase: number;
   servicio_id: string;
+  universidad_id?: string;
   contenido_fase_0: string | null;
   contenido_fase_1: string | null;
   contenido_fase_2: string | null;
   contenido_fase_3: string | null;
   contenido_fase_4: string | null;
   contenido_fase_5: string | null;
+  phase_contents?: Record<string, string | null>;
   servicios: { id: string; nombre: string } | null;
 }
 
@@ -27,25 +31,40 @@ interface ChatMsg {
   ts?: number;
 }
 
+interface PhaseDef {
+  id: string;
+  label: string;
+  short: string;
+  orden: number;
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const FASES = [
-  { num: 0, label: "Planteamiento del Tema", short: "Fase 0" },
-  { num: 1, label: "Capítulo I — Marco Referencial", short: "Cap. I" },
-  { num: 2, label: "Capítulo II — Marco Teórico", short: "Cap. II" },
-  { num: 3, label: "Capítulos III al V — Desarrollo", short: "Caps. III-V" },
-  { num: 4, label: "Revisión y Compilación", short: "Revisión" },
-  { num: 5, label: "Conclusiones y Bibliografía", short: "Final" },
+const FASES_STATIC = [
+  { id: "0", num: 0, label: "Planteamiento del Tema", short: "Fase 0" },
+  { id: "1", num: 1, label: "Capítulo I — Marco Referencial", short: "Cap. I" },
+  { id: "2", num: 2, label: "Capítulo II — Marco Teórico", short: "Cap. II" },
+  { id: "3", num: 3, label: "Capítulos III al V — Desarrollo", short: "Caps. III-V" },
+  { id: "4", num: 4, label: "Revisión y Compilación", short: "Revisión" },
+  { id: "5", num: 5, label: "Conclusiones y Bibliografía", short: "Final" },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function getFaseContent(proyecto: Proyecto, fase: number): string | null {
+function getLegacyContent(proyecto: Proyecto, num: number): string | null {
   const map: Record<number, keyof Proyecto> = {
     0: "contenido_fase_0", 1: "contenido_fase_1", 2: "contenido_fase_2",
     3: "contenido_fase_3", 4: "contenido_fase_4", 5: "contenido_fase_5",
   };
-  return proyecto[map[fase]] as string | null;
+  return proyecto[map[num]] as string | null;
+}
+
+function getPhaseContent(proyecto: Proyecto, phaseId: string, legacyNum?: number): string | null {
+  if (proyecto.phase_contents && phaseId in proyecto.phase_contents) {
+    return proyecto.phase_contents[phaseId];
+  }
+  if (legacyNum !== undefined) return getLegacyContent(proyecto, legacyNum);
+  return null;
 }
 
 function renderMd(text: string): string {
@@ -81,6 +100,21 @@ export default function WorkspacePage() {
   const [loading, setLoading] = useState(true);
   const [selectedFase, setSelectedFase] = useState(0);
 
+  const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
+  const [isDynamic, setIsDynamic] = useState(false);
+
+  // Derived early so useCallback can reference it
+  const displayFases = isDynamic && phaseDefs.length > 0 ? phaseDefs : FASES_STATIC;
+
+  const [university, setUniversity] = useState<University | null>(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [pdfData, setPdfData] = useState<StudentCoverData>({
+    nombre: "",
+    mes: MESES[new Date().getMonth()],
+    anio: String(new Date().getFullYear()),
+    programa: "", version: "", tutor: "", carrera: "",
+  });
+
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -106,8 +140,45 @@ export default function WorkspacePage() {
 
         if (!projRes.ok) { router.replace("/dashboard"); return; }
         const projData = await projRes.json();
-        setProyecto(projData.proyecto);
-        setSelectedFase(Math.min(projData.proyecto.estado_fase, 5));
+        const proj: Proyecto = projData.proyecto;
+        setProyecto(proj);
+
+        // Load dynamic phase definitions
+        try {
+          const servicio_id = proj.servicio_id ?? "mono-001";
+          const phRes = await fetch(`/api/admin/phase-definitions?servicio_id=${servicio_id}`);
+          if (phRes.ok) {
+            const phData = await phRes.json();
+            if (!phData.is_default && phData.phases?.length > 0) {
+              const defs: PhaseDef[] = phData.phases.map((p: { id: string; label: string; short_label: string; orden: number }) => ({
+                id: p.id, label: p.label, short: p.short_label, orden: p.orden,
+              }));
+              setIsDynamic(true);
+              setPhaseDefs(defs);
+              const lastDone = defs.reduce((acc: number, p, i) =>
+                (proj.phase_contents?.[p.id] ?? null) ? i : acc, 0);
+              setSelectedFase(lastDone);
+            } else {
+              setSelectedFase(Math.min(proj.estado_fase, 5));
+            }
+          } else {
+            setSelectedFase(Math.min(proj.estado_fase, 5));
+          }
+        } catch {
+          setSelectedFase(Math.min(proj.estado_fase, 5));
+        }
+
+        // Load university for PDF formatting
+        if (proj.universidad_id) {
+          try {
+            const univRes = await fetch("/api/admin/universities");
+            if (univRes.ok) {
+              const univList: University[] = await univRes.json();
+              const found = univList.find(u => u.id === proj.universidad_id);
+              if (found) setUniversity(found);
+            }
+          } catch { /* no-op — PDF will use defaults */ }
+        }
       } catch {
         router.replace("/dashboard");
       } finally {
@@ -134,15 +205,16 @@ export default function WorkspacePage() {
       if (!mensajeOverride) setChatInput("");
     }
 
+    const faseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
+    const body = isDynamic
+      ? { proyecto_id: proyectoId, phase_id: faseDef.id, mensaje_usuario: userMsg || undefined }
+      : { proyecto_id: proyectoId, fase_numero: selectedFase, mensaje_usuario: userMsg || undefined };
+
     try {
       const res = await fetch("/api/projects/generate-phase", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          proyecto_id: proyectoId,
-          fase_numero: selectedFase,
-          mensaje_usuario: userMsg || undefined,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -157,6 +229,12 @@ export default function WorkspacePage() {
 
       setProyecto(prev => {
         if (!prev) return prev;
+        if (isDynamic) {
+          return {
+            ...prev,
+            phase_contents: { ...(prev.phase_contents ?? {}), [faseDef.id]: data.contenido },
+          };
+        }
         const key = `contenido_fase_${selectedFase}` as keyof Proyecto;
         const nuevaFase = Math.max(prev.estado_fase, selectedFase);
         return { ...prev, [key]: data.contenido, estado_fase: nuevaFase };
@@ -174,7 +252,7 @@ export default function WorkspacePage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [proyecto, isGenerating, chatInput, selectedFase, proyectoId]);
+  }, [proyecto, isGenerating, chatInput, selectedFase, proyectoId, isDynamic, displayFases]);
 
   // ── Upload ────────────────────────────────────────────────────────────────
 
@@ -222,6 +300,23 @@ export default function WorkspacePage() {
     }
   }
 
+  // ── PDF preview ───────────────────────────────────────────────────────────
+
+  function generarPdf() {
+    if (!proyecto || !university) return;
+    const phaseContents: Record<string, string | null> = {};
+    displayFases.forEach((f, i) => {
+      phaseContents[`fase_${i}`] = getPhaseContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
+    });
+    const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "";
+    const html = generatePdfHtml({ university, studentData: pdfData, phaseContents, titulo });
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const win = window.open(url, "_blank");
+    win?.addEventListener("load", () => { win.print(); URL.revokeObjectURL(url); });
+    setShowPdfModal(false);
+  }
+
   // ── Loading state ─────────────────────────────────────────────────────────
 
   if (loading) {
@@ -234,9 +329,11 @@ export default function WorkspacePage() {
 
   if (!proyecto) return null;
 
-  const currentContent = getFaseContent(proyecto, selectedFase);
-  const fasaInfo = FASES[selectedFase];
-  const fasesCompletadas = FASES.filter(f => getFaseContent(proyecto, f.num)).length;
+  const currentFaseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
+  const currentContent = getPhaseContent(proyecto, currentFaseDef.id, (currentFaseDef as typeof FASES_STATIC[0]).num);
+  const fasesCompletadas = displayFases.filter(f =>
+    getPhaseContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num) !== null
+  ).length;
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -257,19 +354,19 @@ export default function WorkspacePage() {
             {proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título"}
           </div>
           <div style={{ fontSize: 11, color: "#475569" }}>
-            {proyecto.servicios?.nombre ?? "Monografía"} · {fasesCompletadas}/6 fases
+            {proyecto.servicios?.nombre ?? "Monografía"} · {fasesCompletadas}/{displayFases.length} fases
           </div>
         </div>
 
         {/* Phase dots */}
         <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
-          {FASES.map(f => {
-            const done = Boolean(getFaseContent(proyecto, f.num));
-            const selected = f.num === selectedFase;
+          {displayFases.map((f, idx) => {
+            const done = Boolean(getPhaseContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num));
+            const selected = idx === selectedFase;
             return (
               <button
-                key={f.num}
-                onClick={() => setSelectedFase(f.num)}
+                key={f.id}
+                onClick={() => setSelectedFase(idx)}
                 title={f.label}
                 style={{
                   width: 28, height: 28, borderRadius: "50%",
@@ -285,7 +382,7 @@ export default function WorkspacePage() {
                   transition: "all 0.15s",
                 }}
               >
-                {done ? "✓" : f.num}
+                {done ? "✓" : idx}
               </button>
             );
           })}
@@ -301,6 +398,17 @@ export default function WorkspacePage() {
           >
             {isDownloading ? <div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> : "📄"}
             <span>.tex</span>
+          </button>
+        )}
+
+        {/* PDF preview */}
+        {fasesCompletadas > 0 && university && (
+          <button
+            onClick={() => setShowPdfModal(true)}
+            className="btn-ghost"
+            style={{ fontSize: 12, padding: "6px 12px", gap: 4, display: "flex", alignItems: "center" }}
+          >
+            🖨️ <span>Vista PDF</span>
           </button>
         )}
 
@@ -332,10 +440,10 @@ export default function WorkspacePage() {
           {/* Phase info */}
           <div style={{ padding: "14px 18px", borderBottom: "1px solid #0a1628" }}>
             <div style={{ fontSize: 10, color: "#06b6d4", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 3 }}>
-              {fasaInfo.short}
+              {currentFaseDef.short}
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0" }}>
-              {fasaInfo.label}
+              {currentFaseDef.label}
             </div>
             {proyecto.tema_aprobado && (
               <div style={{ fontSize: 11, color: "#475569", marginTop: 4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -364,7 +472,7 @@ export default function WorkspacePage() {
                 {isGenerating ? (
                   <><div className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /><span>Generando…</span></>
                 ) : (
-                  `🤖 Generar ${fasaInfo.short}`
+                  `🤖 Generar ${currentFaseDef.short}`
                 )}
               </button>
 
@@ -454,12 +562,12 @@ export default function WorkspacePage() {
               <div style={{ display: "flex", gap: 8 }}>
                 {selectedFase > 0 && (
                   <button onClick={() => setSelectedFase(f => f - 1)} className="btn-ghost" style={{ flex: 1, fontSize: 11, padding: "6px 8px", justifyContent: "center" }}>
-                    ← {FASES[selectedFase - 1].short}
+                    ← {displayFases[selectedFase - 1]?.short ?? ""}
                   </button>
                 )}
-                {selectedFase < 5 && (
+                {selectedFase < displayFases.length - 1 && (
                   <button onClick={() => setSelectedFase(f => f + 1)} className="btn-cyan" style={{ flex: 1, fontSize: 11, padding: "6px 8px", justifyContent: "center" }}>
-                    {FASES[selectedFase + 1].short} →
+                    {displayFases[selectedFase + 1]?.short ?? ""} →
                   </button>
                 )}
                 {selectedFase === 0 && (
@@ -486,10 +594,10 @@ export default function WorkspacePage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 10, color: "#06b6d4", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 4 }}>
-                      {fasaInfo.short}
+                      {currentFaseDef.short}
                     </div>
                     <h1 style={{ fontSize: 20, fontWeight: 800, color: "#f1f5f9", margin: 0 }}>
-                      {fasaInfo.label}
+                      {currentFaseDef.label}
                     </h1>
                   </div>
                   <span className="badge badge-green">✓ Generado</span>
@@ -523,7 +631,7 @@ export default function WorkspacePage() {
           ) : (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 12 }}>
               <div style={{ fontSize: 52, opacity: 0.2 }}>📄</div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>{fasaInfo.label}</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>{currentFaseDef.label}</div>
               <div style={{ fontSize: 13, color: "#0f172a", textAlign: "center", maxWidth: 280, lineHeight: 1.6 }}>
                 Usa el panel izquierdo para generar<br />el contenido de esta fase.
               </div>
@@ -531,6 +639,131 @@ export default function WorkspacePage() {
           )}
         </div>
       </div>
+
+      {/* ── PDF Student Data Modal ─────────────────────────────────────────── */}
+      {showPdfModal && university && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 50,
+          background: "rgba(2,6,23,0.85)", backdropFilter: "blur(4px)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 16,
+        }}>
+          <div style={{
+            background: "#060f1e", border: "1px solid rgba(6,182,212,0.18)",
+            borderRadius: 12, width: "100%", maxWidth: 440,
+            padding: "28px 28px 24px",
+          }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>
+              Generar Vista PDF
+            </div>
+            <div style={{ fontSize: 12, color: "#475569", marginBottom: 20 }}>
+              {university.name} — formato oficial
+            </div>
+
+            {/* Nombre */}
+            <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Nombre completo del estudiante</label>
+            <input
+              className="input-dark"
+              style={{ width: "100%", marginBottom: 14 }}
+              value={pdfData.nombre}
+              onChange={e => setPdfData(p => ({ ...p, nombre: e.target.value }))}
+              placeholder="Ej. Juan Pérez Mamani"
+            />
+
+            {/* Mes + Año */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Mes</label>
+                <select
+                  className="input-dark"
+                  style={{ width: "100%" }}
+                  value={pdfData.mes}
+                  onChange={e => setPdfData(p => ({ ...p, mes: e.target.value }))}
+                >
+                  {MESES.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Año</label>
+                <input
+                  className="input-dark"
+                  style={{ width: "100%" }}
+                  value={pdfData.anio}
+                  onChange={e => setPdfData(p => ({ ...p, anio: e.target.value }))}
+                  placeholder="2026"
+                />
+              </div>
+            </div>
+
+            {/* Conditional campos */}
+            {university.campos_portada?.includes("programa") && (
+              <>
+                <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Nombre del programa / diplomado</label>
+                <input
+                  className="input-dark"
+                  style={{ width: "100%", marginBottom: 14 }}
+                  value={pdfData.programa ?? ""}
+                  onChange={e => setPdfData(p => ({ ...p, programa: e.target.value }))}
+                  placeholder="Ej. GESTIÓN FINANCIERA"
+                />
+              </>
+            )}
+            {university.campos_portada?.includes("version") && (
+              <>
+                <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Versión</label>
+                <input
+                  className="input-dark"
+                  style={{ width: "100%", marginBottom: 14 }}
+                  value={pdfData.version ?? ""}
+                  onChange={e => setPdfData(p => ({ ...p, version: e.target.value }))}
+                  placeholder="Ej. III"
+                />
+              </>
+            )}
+            {university.campos_portada?.includes("tutor") && (
+              <>
+                <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Tutor/a</label>
+                <input
+                  className="input-dark"
+                  style={{ width: "100%", marginBottom: 14 }}
+                  value={pdfData.tutor ?? ""}
+                  onChange={e => setPdfData(p => ({ ...p, tutor: e.target.value }))}
+                  placeholder="Nombre del tutor"
+                />
+              </>
+            )}
+            {university.campos_portada?.includes("carrera") && (
+              <>
+                <label style={{ display: "block", fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>Carrera</label>
+                <input
+                  className="input-dark"
+                  style={{ width: "100%", marginBottom: 14 }}
+                  value={pdfData.carrera ?? ""}
+                  onChange={e => setPdfData(p => ({ ...p, carrera: e.target.value }))}
+                  placeholder="Ej. Economía"
+                />
+              </>
+            )}
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 8 }}>
+              <button
+                onClick={() => setShowPdfModal(false)}
+                className="btn-ghost"
+                style={{ fontSize: 13, padding: "8px 18px" }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={generarPdf}
+                disabled={!pdfData.nombre.trim()}
+                className="btn-cyan"
+                style={{ fontSize: 13, padding: "8px 20px" }}
+              >
+                Generar PDF →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

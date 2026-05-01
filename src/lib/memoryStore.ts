@@ -125,12 +125,15 @@ export interface ProyectoRecord {
   titulo_provisional: string | null;
   estado_fase: number;
   completado: boolean;
+  // Legacy fixed-phase columns (kept for backward compat)
   contenido_fase_0: string | null;
   contenido_fase_1: string | null;
   contenido_fase_2: string | null;
   contenido_fase_3: string | null;
   contenido_fase_4: string | null;
   contenido_fase_5: string | null;
+  // Dynamic phase contents: phase_id → content
+  phase_contents?: Record<string, string | null>;
   created_at: string;
   updated_at: string;
 }

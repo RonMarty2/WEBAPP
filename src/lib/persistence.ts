@@ -17,11 +17,21 @@ interface WorkspacePrompts {
   phases: Record<string, string>;
 }
 
+export interface PhaseDefinition {
+  id: string;          // unique ID e.g. "ph-abc123"
+  servicio_id: string;
+  orden: number;       // 0, 10, 20... (gaps allow inserting between)
+  label: string;       // "Planteamiento del Tema"
+  short_label: string; // "Planteamiento"
+  prompt: string;      // full system prompt for this phase
+}
+
 export interface StoreData {
   proyectos: Record<string, unknown>;
   users: Record<string, unknown>;
   aiConfig?: Record<string, unknown>;
   workspacePrompts?: WorkspacePrompts;
+  phaseDefinitions?: Record<string, PhaseDefinition[]>; // servicio_id → phases
 }
 
 function ensureDir() {

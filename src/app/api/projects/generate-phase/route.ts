@@ -13,12 +13,12 @@ import { loadFromDisk } from "@/lib/persistence";
 import type { EstadoFase, UpdateTables } from "@/types/database";
 
 const FASE_ETIQUETA: Record<number, string> = {
-  0: "Fase 0 — Tema y Planteamiento",
-  1: "Fase 1 — Capítulo I",
-  2: "Fase 2 — Capítulo II",
-  3: "Fase 3 — Capítulos III-V",
+  0: "Fase 0 — Planteamiento del Tema",
+  1: "Fase 1 — Capítulo I: Marco Referencial",
+  2: "Fase 2 — Capítulo II: Marco Teórico",
+  3: "Fase 3 — Capítulos III-V: Desarrollo",
   4: "Fase 4 — Revisión y Compilación",
-  5: "Fase 5 — Entrega Final",
+  5: "Fase 5 — Conclusiones y Bibliografía",
 };
 
 const FASE_A_COLUMNA: Record<number, string> = {
@@ -30,107 +30,30 @@ const FASE_A_COLUMNA: Record<number, string> = {
   5: "contenido_fase_5",
 };
 
-// ── Prompts integrados (usados cuando Supabase no está configurado) ────────────
+// ── Prompt loader — reads admin config from disk, falls back to API defaults ───
 
-function getSystemPromptFallback(fase: number): string {
-  const prompts: Record<number, string> = {
-    0: `Eres un asesor académico experto en monografías para diplomados y postgrados en Bolivia.
-Genera exactamente 3 propuestas de tema de investigación viables para una monografía académica.
-Cada tema debe:
-- Ser investigable con datos secundarios públicos (INE, IBCE, BCB, ministerios bolivianos)
-- NO requerir entrevistas ni datos primarios propios
-- Tener metodología cuantitativa o descriptiva clara
-- Ser relevante para Bolivia o Latinoamérica
+import { DEFAULT_PHASES } from "@/app/api/admin/workspace-prompts/route";
 
-Formato de respuesta para cada opción:
-## OPCIÓN [N]: [TÍTULO]
-- **Problema central:** ...
-- **Pregunta de investigación:** ...
-- **Objetivo general:** ...
-- **Fuentes de datos:** [entidades reales + períodos]
-- **Viabilidad:** ✅ ALTA / ⚠️ MEDIA
-
-Al final incluye una recomendación breve de cuál elegir y por qué.`,
-
-    1: `Eres un redactor académico experto en monografías universitarias bolivianas.
-Genera el CAPÍTULO I completo (Planteamiento del Problema) con las siguientes secciones:
-
-## 1.1. Planteamiento y Formulación del Problema
-(3-4 párrafos: contexto, problema específico, pregunta de investigación)
-
-## 1.2. Objetivos de la Investigación
-**Objetivo General:**
-**Objetivos Específicos:**
-(3-4 objetivos con verbo observable)
-
-## 1.3. Justificación
-**Justificación Teórica:**
-**Justificación Práctica:**
-**Justificación Social:**
-
-## 1.4. Alcances y Delimitación
-(temporal, espacial, temática)
-
-## 1.5. Hipótesis (si aplica)
-(planteamiento + variables)
-
-Usa un tono académico formal. Extensión: 1200-1800 palabras. Sin inventar datos ni citas que no conozcas.`,
-
-    2: `Eres un redactor académico experto. Basándote en el Capítulo I ya aprobado, genera el CAPÍTULO II completo:
-
-## 2.1. Marco Teórico y Conceptual
-(teorías principales que sustentan la investigación, definiciones clave)
-
-## 2.2. Marco Referencial
-(estudios previos relacionados, estado del arte en Bolivia/Latinoamérica)
-
-## 2.3. Marco Legal e Institucional (si aplica)
-(normativa relevante)
-
-Extensión: 1500-2500 palabras. Coherencia total con el Capítulo I. Sin inventar autores ni citas.`,
-
-    3: `Eres un redactor académico experto. Basándote en los capítulos anteriores, genera los CAPÍTULOS III, IV y V:
-
-## CAPÍTULO III: DISEÑO METODOLÓGICO
-(tipo de investigación, enfoque, población/muestra, técnicas de recolección, fuentes de datos)
-
-## CAPÍTULO IV: ANÁLISIS DE RESULTADOS
-(presentación y análisis de los hallazgos principales, tablas o datos relevantes si aplica)
-
-## CAPÍTULO V: CONCLUSIONES Y RECOMENDACIONES
-**Conclusiones:** (una por objetivo específico)
-**Recomendaciones:** (prácticas y concretas)
-
-## REFERENCIAS BIBLIOGRÁFICAS
-(fuentes reales en formato APA 7, ordenadas alfabéticamente)
-
-Extensión total: 2000-3500 palabras. Coherencia total con capítulos anteriores.`,
-
-    4: `Eres un editor académico. Revisa el documento completo y proporciona:
-1. Resumen ejecutivo del documento
-2. Lista de aspectos a mejorar (si los hay)
-3. Verificación de coherencia entre capítulos
-4. Sugerencias finales antes de la entrega`,
-
-    5: `Eres un asistente académico. Genera el resumen final del documento y las instrucciones para exportar a PDF usando Overleaf.`,
-  };
-  return prompts[fase] ?? prompts[0];
-}
-
-// ── Loads admin-configured prompt (with hilos) or falls back to hardcoded ─────
-
-function loadWorkspacePrompt(fase: number): string {
+function loadPromptByKey(key: string): string {
   try {
     const disk = loadFromDisk();
     const wp = disk.workspacePrompts;
-    const phasePrompt = wp?.phases?.[String(fase)] || getSystemPromptFallback(fase);
+    const phasePrompt = wp?.phases?.[key] ?? DEFAULT_PHASES[key as keyof typeof DEFAULT_PHASES] ?? DEFAULT_PHASES["0"];
     const hilos = wp?.hilos?.filter(Boolean) ?? [];
     if (hilos.length === 0) return phasePrompt;
     const bloqueHilos = `=== REGLAS INMUTABLES ===\n${hilos.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n=== FIN ===`;
     return `${bloqueHilos}\n\n${phasePrompt}`;
   } catch {
-    return getSystemPromptFallback(fase);
+    return DEFAULT_PHASES[key as keyof typeof DEFAULT_PHASES] ?? DEFAULT_PHASES["0"];
   }
+}
+
+function loadWorkspacePrompt(fase: number): string {
+  return loadPromptByKey(String(fase));
+}
+
+function loadOnboardingPrompt(): string {
+  return loadPromptByKey("onboarding");
 }
 
 // ── Handler principal ─────────────────────────────────────────────────────────
@@ -143,17 +66,19 @@ export async function POST(req: Request) {
 
     let proyecto_id: string;
     let fase_numero: number;
+    let phase_id: string | undefined;
     let mensaje_usuario: string | undefined;
 
     try {
       const body = await req.json();
       proyecto_id = body.proyecto_id;
-      fase_numero = Number(body.fase_numero);
+      phase_id = body.phase_id ?? undefined;
+      fase_numero = Number(body.fase_numero ?? 0);
       mensaje_usuario = body.mensaje_usuario ?? undefined;
 
-      if (!proyecto_id || isNaN(fase_numero) || fase_numero < 0 || fase_numero > 5) {
+      if (!proyecto_id || (!phase_id && (isNaN(fase_numero) || fase_numero < 0 || fase_numero > 5))) {
         return NextResponse.json(
-          { error: "proyecto_id y fase_numero (0-5) son requeridos" },
+          { error: "proyecto_id requerido, y también fase_numero (0-5) o phase_id" },
           { status: 400 }
         );
       }
@@ -167,6 +92,7 @@ export async function POST(req: Request) {
         sessionUserId: sessionUser.id,
         proyecto_id,
         fase_numero,
+        phase_id,
         mensaje_usuario,
         t0,
       });
@@ -193,11 +119,12 @@ export async function POST(req: Request) {
 // ── Sin Supabase — usa memoryStore + prompts integrados ───────────────────────
 
 async function generarSinSupabase({
-  sessionUserId, proyecto_id, fase_numero, mensaje_usuario, t0,
+  sessionUserId, proyecto_id, fase_numero, phase_id, mensaje_usuario, t0,
 }: {
   sessionUserId: string;
   proyecto_id: string;
   fase_numero: number;
+  phase_id?: string;
   mensaje_usuario?: string;
   t0: number;
 }) {
@@ -206,8 +133,86 @@ async function generarSinSupabase({
     return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
   }
 
-  // Construir contexto acumulado — truncar cada fase a 1800 chars para no superar el límite de Groq (12K TPM)
   const MAX_CHARS_POR_FASE = 1800;
+
+  // ── Modo dinámico: phase_id proporcionado ─────────────────────────────────
+  if (phase_id) {
+    const disk = loadFromDisk();
+    const servicio_id = proyecto.servicio_id ?? "mono-001";
+    const phaseDefs = disk.phaseDefinitions?.[servicio_id];
+
+    if (!phaseDefs?.length) {
+      return NextResponse.json({ error: "No hay fases personalizadas para este servicio" }, { status: 404 });
+    }
+
+    const currentPhase = phaseDefs.find((p) => p.id === phase_id);
+    if (!currentPhase) {
+      return NextResponse.json({ error: "Fase no encontrada" }, { status: 404 });
+    }
+
+    const sorted = [...phaseDefs].sort((a, b) => a.orden - b.orden);
+    const previousPhases = sorted.filter((p) => p.orden < currentPhase.orden);
+    const phaseContents = proyecto.phase_contents ?? {};
+
+    const fasesAnteriores: string[] = [];
+    for (const prev of previousPhases) {
+      let contenido = phaseContents[prev.id] ?? null;
+      if (contenido) {
+        if (contenido.length > MAX_CHARS_POR_FASE) {
+          contenido = contenido.slice(0, MAX_CHARS_POR_FASE) + "\n[... contenido truncado ...]";
+        }
+        fasesAnteriores.push(`=== ${prev.label} ===\n${contenido}\n=== FIN ===`);
+      }
+    }
+
+    const bloqueContexto = fasesAnteriores.length > 0
+      ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
+      : "";
+
+    // Sistema: prompt de la fase + hilos conductores
+    const wp = disk.workspacePrompts;
+    const hilos = wp?.hilos?.filter(Boolean) ?? [];
+    const phasePrompt = currentPhase.prompt || DEFAULT_PHASES["0"];
+    const systemPrompt = hilos.length > 0
+      ? `=== REGLAS INMUTABLES ===\n${hilos.map((h, i) => `${i + 1}. ${h}`).join("\n")}\n=== FIN ===\n\n${phasePrompt}`
+      : phasePrompt;
+
+    const userPrompt = [
+      `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
+      proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
+      bloqueContexto,
+      mensaje_usuario ? `\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}` : null,
+      `\nGenera el contenido de ${currentPhase.label}.`,
+    ].filter(Boolean).join("\n");
+
+    let textoGenerado: string;
+    let proveedor: string;
+
+    try {
+      const resultado = await llamarIA(systemPrompt, userPrompt, 5000, proyecto.servicio_id);
+      textoGenerado = resultado.text;
+      proveedor = `${resultado.provider} / ${resultado.model}`;
+    } catch (e) {
+      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+    }
+
+    updateProyecto(proyecto_id, {
+      phase_contents: { ...phaseContents, [phase_id]: textoGenerado },
+    });
+
+    return NextResponse.json({
+      ok: true,
+      phase_id,
+      fase_etiqueta: currentPhase.label,
+      proveedor,
+      duracion_ms: Date.now() - t0,
+      contenido: textoGenerado,
+    });
+  }
+
+  // ── Modo legacy: fase_numero ──────────────────────────────────────────────
+
+  // Construir contexto acumulado — truncar cada fase a 1800 chars
   const fasesAnteriores: string[] = [];
   for (let f = 0; f < fase_numero; f++) {
     const key = FASE_A_COLUMNA[f] as keyof typeof proyecto;
@@ -224,7 +229,10 @@ async function generarSinSupabase({
     ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
     : "";
 
-  const systemPrompt = loadWorkspacePrompt(fase_numero);
+  // Onboarding: fase 0 sin tema aprobado → prompt de propuesta de temas
+  const systemPrompt = (fase_numero === 0 && !proyecto.tema_aprobado)
+    ? loadOnboardingPrompt()
+    : loadWorkspacePrompt(fase_numero);
 
   const userPrompt = [
     `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
@@ -234,7 +242,6 @@ async function generarSinSupabase({
     `\nGenera el contenido de la ${FASE_ETIQUETA[fase_numero]}.`,
   ].filter(Boolean).join("\n");
 
-  // Reducir tokens de salida en fases con mucho contexto acumulado
   const maxTokens = fase_numero <= 1 ? 6000 : fase_numero <= 3 ? 4500 : 3000;
 
   let textoGenerado: string;
@@ -248,7 +255,6 @@ async function generarSinSupabase({
     return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
   }
 
-  // Guardar en memoria
   const nuevaFase = Math.max(proyecto.estado_fase, fase_numero);
   const colKey = FASE_A_COLUMNA[fase_numero];
   updateProyecto(proyecto_id, {
