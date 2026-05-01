@@ -26,12 +26,24 @@ export interface PhaseDefinition {
   prompt: string;      // full system prompt for this phase
 }
 
+export interface CalibracionPregunta {
+  id: string;
+  servicio_id: string;
+  pregunta: string;
+  descripcion?: string;
+  orden: number;
+  minimo_palabras: number;
+  activo: boolean;
+}
+
 export interface StoreData {
   proyectos: Record<string, unknown>;
   users: Record<string, unknown>;
   aiConfig?: Record<string, unknown>;
   workspacePrompts?: WorkspacePrompts;
   phaseDefinitions?: Record<string, PhaseDefinition[]>; // servicio_id → phases
+  calibracionPreguntas?: CalibracionPregunta[];          // global list, filtered by servicio_id
+  estiloAnalizadorPrompt?: string;                       // system prompt for style analysis
 }
 
 function ensureDir() {
