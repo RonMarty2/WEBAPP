@@ -4,6 +4,16 @@ import type { Database } from "@/types/database";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+/** Returns true only when real Supabase credentials are configured. */
+export function isSupabaseConfigured(): boolean {
+  return !!(
+    supabaseUrl &&
+    !supabaseUrl.includes("your-project") &&
+    supabaseAnonKey &&
+    supabaseAnonKey.length > 20
+  );
+}
+
 /** Cliente público (browser / componentes cliente) */
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 

@@ -1,39 +1,54 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
+import { verifySessionToken, verifyAdminToken, SESSION_COOKIE } from "@/lib/auth";
+
+async function checkAdminAuth(req: NextRequest): Promise<boolean> {
+  const adminToken = req.cookies.get("admin_session")?.value;
+  if (adminToken && await verifyAdminToken(adminToken)) return true;
+  const labToken = req.cookies.get(SESSION_COOKIE)?.value;
+  if (labToken) {
+    const user = await verifySessionToken(labToken);
+    if (user?.role === "admin") return true;
+  }
+  return false;
+}
 
 export async function proxy(req: NextRequest) {
-  const path = req.nextUrl.pathname;
-  const token = req.cookies.get(SESSION_COOKIE)?.value;
-  const user = token ? await verifySessionToken(token) : null;
+  try {
+    const path = req.nextUrl.pathname;
 
-  // /admin/* requires admin role
-  if (path.startsWith("/admin") && path !== "/admin/login") {
-    if (!user || user.role !== "admin") {
-      return NextResponse.redirect(new URL("/login", req.url));
+    // /admin/* requires admin — checked via admin_session JWT or lab_session with role=admin
+    if (path.startsWith("/admin") && path !== "/admin/login") {
+      const isAdmin = await checkAdminAuth(req);
+      if (!isAdmin) {
+        return NextResponse.redirect(new URL("/admin/login", req.url));
+      }
+      return NextResponse.next();
     }
-  }
 
-  // /dashboard y /monografia requieren sesión activa
-  if (path.startsWith("/dashboard") || path.startsWith("/monografia")) {
-    if (!user) return NextResponse.redirect(new URL("/login", req.url));
-    if (!user.active) return NextResponse.redirect(new URL("/pendiente", req.url));
-  }
+    // Student routes — use lab_session
+    const token = req.cookies.get(SESSION_COOKIE)?.value;
+    const user = token ? await verifySessionToken(token) : null;
 
-  // /pendiente solo para usuarios autenticados pero inactivos
-  if (path === "/pendiente" && user?.active) {
-    const dest = user.role === "admin" ? "/admin" : "/dashboard";
-    return NextResponse.redirect(new URL(dest, req.url));
-  }
+    if (path.startsWith("/dashboard") || path.startsWith("/monografia")) {
+      if (!user) return NextResponse.redirect(new URL("/login", req.url));
+      if (!user.active) return NextResponse.redirect(new URL("/pendiente", req.url));
+    }
 
-  // Redirigir usuarios ya autenticados fuera del login
-  if (path === "/login" && user) {
-    if (!user.active) return NextResponse.redirect(new URL("/pendiente", req.url));
-    const dest = user.role === "admin" ? "/admin" : "/dashboard";
-    return NextResponse.redirect(new URL(dest, req.url));
-  }
+    if (path === "/pendiente" && user?.active) {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
 
-  return NextResponse.next();
+    if (path === "/login" && user) {
+      if (!user.active) return NextResponse.redirect(new URL("/pendiente", req.url));
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+
+    return NextResponse.next();
+  } catch {
+    // Never crash the middleware — let the request through
+    return NextResponse.next();
+  }
 }
 
 export const config = {

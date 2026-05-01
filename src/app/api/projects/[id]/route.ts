@@ -5,7 +5,8 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient } from "@/lib/supabase";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
+import { getProyecto, updateProyecto } from "@/lib/memoryStore";
 import type { UpdateTables, EstadoFase } from "@/types/database";
 
 type Params = { params: Promise<{ id: string }> };
@@ -16,6 +17,17 @@ export async function GET(_req: Request, { params }: Params) {
   try {
     const { user } = await requireAuth();
     const { id } = await params;
+
+    if (!isSupabaseConfigured()) {
+      const p = getProyecto(id);
+      if (!p || p.usuario_id !== user.id) {
+        return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
+      }
+      return NextResponse.json({
+        proyecto: { ...p, servicios: { id: p.servicio_id, nombre: "Monografía Académica" } },
+      });
+    }
+
     const db = createAdminClient();
 
     const { data, error } = await db
@@ -31,6 +43,13 @@ export async function GET(_req: Request, { params }: Params) {
       .single();
 
     if (error || !data) {
+      // Intentar en memoria como respaldo
+      const p = getProyecto(id);
+      if (p && p.usuario_id === user.id) {
+        return NextResponse.json({
+          proyecto: { ...p, servicios: { id: p.servicio_id, nombre: "Monografía Académica" } },
+        });
+      }
       return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
     }
 
@@ -52,27 +71,39 @@ export async function PATCH(req: Request, { params }: Params) {
 
     const body = await req.json();
 
-    // Campos permitidos para actualización por el usuario
-    const updates: UpdateTables<"proyectos_fases"> = {};
-
-    if (typeof body.tema_aprobado === "string") {
-      updates.tema_aprobado = body.tema_aprobado;
-    }
-    if (typeof body.titulo_provisional === "string") {
-      updates.titulo_provisional = body.titulo_provisional;
-    }
-    if (typeof body.completado === "boolean") {
-      updates.completado = body.completado;
-    }
+    const allowed: Record<string, unknown> = {};
+    if (typeof body.tema_aprobado === "string") allowed.tema_aprobado = body.tema_aprobado;
+    if (typeof body.titulo_provisional === "string") allowed.titulo_provisional = body.titulo_provisional;
+    if (typeof body.completado === "boolean") allowed.completado = body.completado;
     if (typeof body.estado_fase === "number" && body.estado_fase >= 0 && body.estado_fase <= 5) {
-      updates.estado_fase = body.estado_fase as EstadoFase;
+      allowed.estado_fase = body.estado_fase;
+    }
+    // Permitir actualización de contenido de fases
+    for (let i = 0; i <= 5; i++) {
+      const key = `contenido_fase_${i}`;
+      if (typeof body[key] === "string") allowed[key] = body[key];
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(allowed).length === 0) {
       return NextResponse.json({ error: "No hay campos válidos para actualizar" }, { status: 400 });
     }
 
+    if (!isSupabaseConfigured()) {
+      const p = getProyecto(id);
+      if (!p || p.usuario_id !== user.id) {
+        return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
+      }
+      const updated = updateProyecto(id, allowed);
+      return NextResponse.json({ proyecto: updated });
+    }
+
     const db = createAdminClient();
+
+    const updates: UpdateTables<"proyectos_fases"> = {};
+    if (typeof allowed.tema_aprobado === "string") updates.tema_aprobado = allowed.tema_aprobado;
+    if (typeof allowed.titulo_provisional === "string") updates.titulo_provisional = allowed.titulo_provisional;
+    if (typeof allowed.completado === "boolean") updates.completado = allowed.completado;
+    if (typeof allowed.estado_fase === "number") updates.estado_fase = allowed.estado_fase as EstadoFase;
 
     const { data, error } = await db
       .from("proyectos_fases")
@@ -83,6 +114,12 @@ export async function PATCH(req: Request, { params }: Params) {
       .single();
 
     if (error || !data) {
+      // Intentar en memoria como respaldo
+      const p = getProyecto(id);
+      if (p && p.usuario_id === user.id) {
+        const updated = updateProyecto(id, allowed);
+        return NextResponse.json({ proyecto: updated });
+      }
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 

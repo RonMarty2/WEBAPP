@@ -9,24 +9,41 @@ export interface AICallResult {
 async function callGroq(system: string, user: string, maxTokens: number): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY no configurada");
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      temperature: 0.35,
-      max_tokens: maxTokens,
-    }),
-  });
-  if (!res.ok) {
+
+  // Intentar primero con el modelo grande; si supera el límite TPM, usar el modelo pequeño.
+  const models = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"];
+  let lastError = "";
+
+  for (const model of models) {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+        temperature: 0.35,
+        max_tokens: maxTokens,
+      }),
+    });
+
+    if (res.ok) {
+      return (await res.json()).choices[0].message.content as string;
+    }
+
     const err = await res.json();
-    throw new Error(err.error?.message || `Groq error ${res.status}`);
+    lastError = err.error?.message || `Groq error ${res.status}`;
+
+    // Solo reintentar con modelo más pequeño si el error es por tamaño/límite de tokens
+    const esLimiteTpm = lastError.toLowerCase().includes("too large") ||
+                        lastError.toLowerCase().includes("rate_limit") ||
+                        lastError.toLowerCase().includes("tokens per minute");
+    if (!esLimiteTpm) break;
   }
-  return (await res.json()).choices[0].message.content as string;
+
+  throw new Error(lastError);
 }
 
 async function callAnthropic(system: string, user: string, maxTokens: number): Promise<string> {

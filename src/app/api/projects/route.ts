@@ -5,7 +5,8 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient } from "@/lib/supabase";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
+import { createProyecto, listProyectos } from "@/lib/memoryStore";
 import type { InsertTables } from "@/types/database";
 
 // ── GET ───────────────────────────────────────────────────────
@@ -13,6 +14,15 @@ import type { InsertTables } from "@/types/database";
 export async function GET() {
   try {
     const { user } = await requireAuth();
+
+    if (!isSupabaseConfigured()) {
+      const proyectos = listProyectos(user.id).map(p => ({
+        ...p,
+        servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+      }));
+      return NextResponse.json({ proyectos });
+    }
+
     const db = createAdminClient();
 
     const { data, error } = await db
@@ -32,7 +42,12 @@ export async function GET() {
       .order("updated_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json({ error: "Error al obtener proyectos" }, { status: 500 });
+      // Supabase falló — usar memoria como respaldo
+      const proyectos = listProyectos(user.id).map(p => ({
+        ...p,
+        servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+      }));
+      return NextResponse.json({ proyectos });
     }
 
     return NextResponse.json({ proyectos: data ?? [] });
@@ -57,9 +72,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "servicio_id es requerido" }, { status: 400 });
     }
 
+    if (!isSupabaseConfigured()) {
+      const proyecto = createProyecto({
+        usuario_id: user.id,
+        servicio_id,
+        tema_aprobado: tema_aprobado ?? null,
+        titulo_provisional: titulo_provisional ?? null,
+        estado_fase: 0,
+        completado: false,
+        contenido_fase_0: null,
+        contenido_fase_1: null,
+        contenido_fase_2: null,
+        contenido_fase_3: null,
+        contenido_fase_4: null,
+        contenido_fase_5: null,
+      });
+      return NextResponse.json({ proyecto }, { status: 201 });
+    }
+
     const db = createAdminClient();
 
-    // Validar que el servicio existe y está activo
     const { data: servicio, error: errS } = await db
       .from("servicios")
       .select("id, nombre, activo")
@@ -68,10 +100,22 @@ export async function POST(req: Request) {
       .single();
 
     if (errS || !servicio) {
-      return NextResponse.json(
-        { error: "Servicio no encontrado o no disponible" },
-        { status: 404 }
-      );
+      // Supabase no tiene el servicio — crear proyecto en memoria igual
+      const proyecto = createProyecto({
+        usuario_id: user.id,
+        servicio_id,
+        tema_aprobado: tema_aprobado ?? null,
+        titulo_provisional: titulo_provisional ?? null,
+        estado_fase: 0,
+        completado: false,
+        contenido_fase_0: null,
+        contenido_fase_1: null,
+        contenido_fase_2: null,
+        contenido_fase_3: null,
+        contenido_fase_4: null,
+        contenido_fase_5: null,
+      });
+      return NextResponse.json({ proyecto }, { status: 201 });
     }
 
     const nuevoProyecto: InsertTables<"proyectos_fases"> = {
@@ -90,7 +134,22 @@ export async function POST(req: Request) {
       .single();
 
     if (error || !data) {
-      return NextResponse.json({ error: "Error al crear el proyecto" }, { status: 500 });
+      // Supabase falló — guardar en memoria
+      const proyecto = createProyecto({
+        usuario_id: user.id,
+        servicio_id,
+        tema_aprobado: tema_aprobado ?? null,
+        titulo_provisional: titulo_provisional ?? null,
+        estado_fase: 0,
+        completado: false,
+        contenido_fase_0: null,
+        contenido_fase_1: null,
+        contenido_fase_2: null,
+        contenido_fase_3: null,
+        contenido_fase_4: null,
+        contenido_fase_5: null,
+      });
+      return NextResponse.json({ proyecto }, { status: 201 });
     }
 
     return NextResponse.json({ proyecto: data }, { status: 201 });

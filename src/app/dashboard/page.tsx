@@ -106,6 +106,9 @@ export default function DashboardPage() {
             <a href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b", color: "#94a3b8", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </a>
+            <a href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13 }}>
+              ⚡ Admin
+            </a>
             <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)", background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
               Cerrar sesión
             </button>

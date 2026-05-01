@@ -9,7 +9,22 @@
       "Bash(mkdir -p \"c:/Users/lmigu/Desktop/WEBAPP/src/app/admin/usuarios\")",
       "Bash(grep -v \"^$\")",
       "Bash(xargs grep *)",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(npm install *)",
+      "Bash(grep -E \"\\\\.\\(ts|tsx|md\\)$\")",
+      "Bash(curl -s http://localhost:3000/api/auth/me)",
+      "Bash(curl -s http://localhost:3000/api/services -H \"Cookie: lab_session=invalid\")",
+      "Bash(taskkill /PID 20944 /F)",
+      "Bash(taskkill /F /IM node.exe)",
+      "PowerShell(taskkill /PID 20944 /F)",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/api/services)",
+      "Bash(Remove-Item -Recurse -Force \".next\" -ErrorAction SilentlyContinue)",
+      "Bash(node -e \"require\\('./node_modules/jose/package.json'\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('dependencies',{}\\).get\\('jose','NOT FOUND'\\)\\)\")",
+      "PowerShell($pkg = Get-Content \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\package.json\" | ConvertFrom-Json; $pkg.dependencies.jose; Test-Path \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\node_modules\\\\jose\")"
     ]
   }
 }

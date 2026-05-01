@@ -1,7 +1,8 @@
 // In-memory store for development when Supabase is not configured.
-// NOTE: Data is lost on server restart. Configure Supabase for persistence.
+// Data is persisted to .store/data.json so it survives server restarts.
 
 import { createHash } from "crypto";
+import { loadFromDisk, saveToDisk } from "@/lib/persistence";
 
 export interface MonografiaRecord {
   id: string;
@@ -113,12 +114,33 @@ export interface ErrorLogEntry {
   detalle?: string;
 }
 
+// ─── Proyectos (workspace flow) ───────────────────────────────────────────────
+
+export interface ProyectoRecord {
+  id: string;
+  usuario_id: string;
+  servicio_id: string;
+  tema_aprobado: string | null;
+  titulo_provisional: string | null;
+  estado_fase: number;
+  completado: boolean;
+  contenido_fase_0: string | null;
+  contenido_fase_1: string | null;
+  contenido_fase_2: string | null;
+  contenido_fase_3: string | null;
+  contenido_fase_4: string | null;
+  contenido_fase_5: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── Module-level singletons ──────────────────────────────────────────────────
 export const usersStore = new Map<string, UserRecord>(); // keyed by id
 export const monografiasStore = new Map<string, MonografiaRecord>();
 export const capitulosStore = new Map<string, CapituloRecord[]>();
 export const citasStore = new Map<string, CitaRecord[]>();
 export const documentosStore = new Map<string, DocumentoRecord[]>();
+export const proyectosStore = new Map<string, ProyectoRecord>();
 
 // Stats stores
 export const etapaStatsStore = new Map<number, EtapaStats>();
@@ -385,5 +407,76 @@ export function deactivateUser(id: string): UserRecord | null {
   if (!user) return null;
   const updated: UserRecord = { ...user, active: false };
   usersStore.set(id, updated);
+  return updated;
+}
+
+// ─── Proyectos (workspace flow) — con persistencia en disco ──────────────────
+
+// Cargar datos guardados al iniciar el módulo
+(function initProyectos() {
+  try {
+    const disk = loadFromDisk();
+    if (disk.proyectos) {
+      for (const [k, v] of Object.entries(disk.proyectos)) {
+        proyectosStore.set(k, v as ProyectoRecord);
+      }
+    }
+  } catch { /* ignorar si falla */ }
+})();
+
+function persistProyectos() {
+  const disk: Record<string, unknown> = {};
+  for (const [k, v] of proyectosStore.entries()) disk[k] = v;
+  saveToDisk({ proyectos: disk, users: {} });
+}
+
+export function createProyecto(data: Omit<ProyectoRecord, "id" | "created_at" | "updated_at">): ProyectoRecord {
+  const now = new Date().toISOString();
+  const record: ProyectoRecord = { id: uid(), created_at: now, updated_at: now, ...data };
+  proyectosStore.set(record.id, record);
+  persistProyectos();
+  return record;
+}
+
+export function getProyecto(id: string): ProyectoRecord | undefined {
+  // Intentar desde la memoria primero; si no está, recargar del disco
+  if (proyectosStore.has(id)) return proyectosStore.get(id);
+  try {
+    const disk = loadFromDisk();
+    if (disk.proyectos?.[id]) {
+      const record = disk.proyectos[id] as ProyectoRecord;
+      proyectosStore.set(id, record);
+      return record;
+    }
+  } catch { /* ignorar */ }
+  return undefined;
+}
+
+export function listProyectos(userId: string): ProyectoRecord[] {
+  // Asegurar que la memoria esté sincronizada con el disco
+  try {
+    const disk = loadFromDisk();
+    if (disk.proyectos) {
+      for (const [k, v] of Object.entries(disk.proyectos)) {
+        if (!proyectosStore.has(k)) proyectosStore.set(k, v as ProyectoRecord);
+      }
+    }
+  } catch { /* ignorar */ }
+
+  return [...proyectosStore.values()]
+    .filter(p => p.usuario_id === userId)
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+}
+
+export function updateProyecto(id: string, updates: Partial<ProyectoRecord>): ProyectoRecord | null {
+  // Si no está en memoria, intentar cargar del disco
+  if (!proyectosStore.has(id)) {
+    getProyecto(id); // esto carga del disco si existe
+  }
+  const existing = proyectosStore.get(id);
+  if (!existing) return null;
+  const updated: ProyectoRecord = { ...existing, ...updates, updated_at: new Date().toISOString() };
+  proyectosStore.set(id, updated);
+  persistProyectos();
   return updated;
 }

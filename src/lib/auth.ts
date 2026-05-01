@@ -1,5 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 
+const ADMIN_SECRET = new TextEncoder().encode(
+  process.env.ADMIN_JWT_SECRET || "laboratorio-academico-super-secret-key-2024"
+);
+
 const SECRET = new TextEncoder().encode(
   process.env.AUTH_SECRET ?? "laboratorio-academico-secret-change-in-production"
 );
@@ -45,6 +49,15 @@ export async function verifySessionToken(token: string): Promise<SessionUser | n
     return (payload as { user: SessionUser }).user;
   } catch {
     return null;
+  }
+}
+
+export async function verifyAdminToken(token: string): Promise<boolean> {
+  try {
+    const { payload } = await jwtVerify(token, ADMIN_SECRET);
+    return payload.role === "admin";
+  } catch {
+    return false;
   }
 }
 
