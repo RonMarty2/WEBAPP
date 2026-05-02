@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Particle = {
-  baseNx: number; baseNy: number; baseNz: number;  // 3D position inside the unit sphere
-  rDist: number;                       // Distance from center (0 to 1)
+  nx: number; ny: number; nz: number;  // 3D position inside the unit sphere
   ph1: number;                         // Random phase for organic variety
   baseSize: number;                    // Base size multiplier
 };
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
-const COUNT = 600;
-const FOV   = 550;
+const COUNT = 800; // Increased count for a lush point-cloud
+const FOV   = 600;
 
-const ROT_Y = 0.0010;
-const ROT_X = 0.0005;
+const ROT_Y = 0.0015;
+const ROT_X = 0.0008;
 
 const HUE_SPEED = 0.002; 
 
@@ -23,22 +23,21 @@ const HUE_SPEED = 0.002;
 function buildParticles(): Particle[] {
   const golden = Math.PI * (3 - Math.sqrt(5));
   return Array.from({ length: COUNT }, (_, i) => {
-    // 1. Surface Fibonacci distribution (Perfectly ordered and symmetric)
+    // 1. Surface Fibonacci distribution
     const ny = 1 - (i / (COUNT - 1)) * 2;
     const surfaceR = Math.sqrt(Math.max(0, 1 - ny * ny));
     const th = golden * i;
     
-    // 2. Volume distribution
-    // Pulls them closer to the center, creating a dense core symmetrically
-    const rDist = Math.pow(Math.random(), 0.8);
+    // 2. Thick shell distribution for a premium "nebula" feel
+    // Not perfectly hollow, but not a solid dense core either.
+    const shellDepth = 0.85 + Math.random() * 0.15;
     
     return {
-      baseNx: Math.cos(th) * surfaceR * rDist,
-      baseNy: ny * rDist,
-      baseNz: Math.sin(th) * surfaceR * rDist,
-      rDist,
+      nx: Math.cos(th) * surfaceR * shellDepth,
+      ny: ny * shellDepth,
+      nz: Math.sin(th) * surfaceR * shellDepth,
       ph1: Math.random() * Math.PI * 2,
-      baseSize: 0.8 + Math.random() * 1.5,
+      baseSize: 0.8 + Math.random() * 1.2,
     };
   });
 }
@@ -57,6 +56,7 @@ function rot3(
 
 // ─── Component ───────────────────────────────────────────────────────────────
 export default function ParticleSphere() {
+  const pathname = usePathname();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const parts     = useRef<Particle[]>(buildParticles());
   const raf       = useRef<number>(0);
@@ -64,10 +64,9 @@ export default function ParticleSphere() {
   const tRef      = useRef(0);
   const mouseRef  = useRef({ x: 0, y: 0, active: false });
   
-  // Physics body for the entire fluid mass
+  // Physics body for the entire point-cloud mass
   const gcRef     = useRef({ x: 0, y: 0, vx: 0, vy: 0, ready: false });
   const condenseRef = useRef(0);
-  const scrollFadeRef = useRef(1);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -97,7 +96,6 @@ export default function ParticleSphere() {
     function onMove(e: PointerEvent) {
       mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
       window.clearTimeout(idleTimeout);
-      // Start wandering if mouse is inactive for 2 seconds
       idleTimeout = window.setTimeout(() => {
         mouseRef.current.active = false;
       }, 2000);
@@ -107,19 +105,18 @@ export default function ParticleSphere() {
       window.clearTimeout(idleTimeout);
     }
 
-    // ── Scroll → fade canvas outside hero ─────────────────────────────────
+    // ── Scroll Parallax ───────────────────────────────────────────────────
+    let lastScrollY = window.scrollY;
     function onScroll() {
-      const heroH = window.innerHeight;
       const s = window.scrollY;
-      const fadeStart = heroH * 0.35;
-      const fadeEnd   = heroH * 1.1;
-      if (s <= fadeStart) {
-        scrollFadeRef.current = 1;
-      } else if (s >= fadeEnd) {
-        scrollFadeRef.current = 0.08;
-      } else {
-        const t = (s - fadeStart) / (fadeEnd - fadeStart);
-        scrollFadeRef.current = 1 - t * 0.92;
+      const delta = s - lastScrollY;
+      lastScrollY = s;
+
+      // Elastic Scroll Parallax: 
+      // Instantly displace the sphere in the opposite direction of the scroll.
+      // The physics engine will then smoothly glide it back to the viewport target.
+      if (gcRef.current.ready) {
+        gcRef.current.y -= delta;
       }
     }
 
@@ -143,102 +140,118 @@ export default function ParticleSphere() {
         targetX = m.x;
         targetY = m.y;
       } else {
-        // Prominent Lissajous wandering exploring a large part of the screen
-        targetX = W * 0.5 + Math.sin(t * 0.008) * (W * 0.35);
-        targetY = H * 0.5 + Math.cos(t * 0.005 + 1.2) * (H * 0.30);
+        // Elegant wandering
+        targetX = W * 0.5 + Math.sin(t * 0.005) * (W * 0.35);
+        targetY = H * 0.5 + Math.cos(t * 0.003 + 1.2) * (H * 0.30);
       }
 
-      // Smooth physics for the entire mass - perfectly tracking the center
-      gc.vx += (targetX - gc.x) * 0.015;
-      gc.vy += (targetY - gc.y) * 0.015;
-      gc.vx *= 0.88; // Friction
-      gc.vy *= 0.88;
+      // Smooth transition logic to prevent abrupt "snapping" when mouse enters
+      const dx = targetX - gc.x;
+      const dy = targetY - gc.y;
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+
+      // We cap the pulling force. At large distances, it won't violently accelerate.
+      const pullForce = Math.min(dist * 0.004, 1.5); 
+
+      // Extremely smooth, high-inertia physics
+      gc.vx += (dx / dist) * pullForce;
+      gc.vy += (dy / dist) * pullForce;
+      gc.vx *= 0.93; // Glossy friction (smooth gliding)
+      gc.vy *= 0.93;
       gc.x += gc.vx;
       gc.y += gc.vy;
 
-      // ── Dough Convergence ─────────────────────────────────────────────────
-      // When mouse is active, symmetrically condense the sphere
+      // ── Condensation ──────────────────────────────────────────────────────
+      // Shrink the sphere elegantly when the mouse interacts
       const targetCondense = m.active ? 1.0 : 0.0;
-      condenseRef.current += (targetCondense - condenseRef.current) * 0.05;
+      // Much slower transition (0.015 instead of 0.05) so the change is harmonious
+      condenseRef.current += (targetCondense - condenseRef.current) * 0.015;
       const condense = condenseRef.current;
 
-      // Overall Breathing (perfectly symmetric scaling)
-      const globalBreathe = 1 + 0.10 * Math.sin(t * 0.015);
-      const baseR = Math.max(200, Math.min(W, H) * 0.40) * globalBreathe;
+      // Gentle organic breathing
+      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.015);
+      // Condense by only 12% (instead of 25%) so it's a subtle, premium reaction
+      const mouseScale = 1.0 - (condense * 0.12); 
+      const baseR = Math.max(200, Math.min(W, H) * 0.40) * globalBreathe * mouseScale;
 
       ctx.clearRect(0, 0, W, H);
-      const canvasAlpha = scrollFadeRef.current;
+      
+      // Full color on home page, subtle 25% opacity on all other pages
+      const isHome = pathname === "/";
+      const canvasAlpha = isHome ? 1.0 : 0.25;
 
       // ── Build draw commands ──────────────────────────────────────────────
       const cmds = parts.current.map(p => {
-        // Compress dough perfectly symmetrically towards center
-        const pullFactor = 1.0 - (condense * 0.3);
-        const nx = p.baseNx * pullFactor;
-        const ny = p.baseNy * pullFactor;
-        const nz = p.baseNz * pullFactor;
-
         // 1. Rotation
         const [rx, ry, rz] = rot3(
-          nx * baseR, ny * baseR, nz * baseR,
+          p.nx * baseR, p.ny * baseR, p.nz * baseR,
           ro.y, ro.x,
         );
 
-        // 2. Spatial Wave (La Ola)
-        // Now it ONLY affects size and color, NOT the physical position.
-        // This ensures the shape remains perfectly spherical and non-deformed.
-        const wavePhase = (ry + rz) * 0.01 - t * 0.01 + p.ph1 * 0.1;
-        const wave = Math.sin(wavePhase);
+        // 2. Premium Light Scanner (La Ola)
+        // Travels through the sphere acting purely as a light/size modifier, 
+        // keeping the geometry perfectly spherical and flawless.
+        const wavePhase = (ry + rz) * 0.01 - t * 0.02 + p.ph1 * 0.1;
+        const wave = (Math.sin(wavePhase) + 1) * 0.5; // Normalized 0 to 1
 
         // 3. Perspective
         const depth = rz + FOV;
         const sc    = FOV / depth;
 
-        // Perfectly ordered positions around the center
+        // Perfectly rigid geometric alignment
         const hx = gc.x + rx * sc;
         const hy = gc.y + ry * sc;
 
-        // 4. Visual Size
-        const pulse = 1 + wave * 0.4; 
-        const sizeK = pulse * sc * p.baseSize;
-
-        const w = Math.max(0.6, Math.min(4.0, sizeK * 1.5));
-        const h = Math.max(3.0, Math.min(22.0, sizeK * 6.0));
+        // 4. Visual Size (Swells beautifully when light hits them)
+        // Scaled down to a third of the previous maximum size
+        const sizeK = p.baseSize * sc * (1 + wave * 1.5) * 0.33;
+        
+        // Transform into delicate, small dashed lines
+        const w = Math.max(0.6, sizeK * 1.5);
+        const h = Math.max(1.5, sizeK * 6.0);
 
         // 5. Symmetric Orientation (Radial)
         // Point perfectly towards the center of gravity.
         // "si vienen de arriba entonces miran hacia abajo"
         const angle = Math.atan2(hy - gc.y, hx - gc.x) + Math.PI / 2;
 
-        // 6. Depth and Color
-        const zNorm   = (rz + baseR) / (baseR * 2);
-        const alpha   = Math.min(0.92, 0.25 + zNorm * 0.75);
+        // 6. Stunning 3D Gradient & Depth Opacity
+        const zNormFront = 1 - (rz + baseR) / (baseR * 2); // 1 = front, 0 = back
+        const alpha = Math.min(0.95, 0.05 + zNormFront * 0.85 + wave * 0.15);
 
         const globalHue = (t * HUE_SPEED * (180 / Math.PI)) % 360;
-        const hue       = (210 + globalHue + wave * 20 + p.baseNy * 30) % 360;
-        const sat       = 75 + wave * 15;
-        const lit       = 46 + zNorm * 18 + wave * 10;
+        // Gradient from cyan/blue to deep purple mapping natively to 3D position
+        const hue = (220 + globalHue + (p.nx + p.ny) * 35) % 360;
+        
+        // Softened saturation to avoid the "exaggerated neon" look (yellow/pink)
+        const sat = 65 + wave * 15; 
+        
+        // Reduced lightness so it NEVER reaches white (which makes it disappear on light backgrounds)
+        // Max lightness is now 65% instead of 90%
+        const lit = 45 + zNormFront * 10 + wave * 10; 
 
         return {
           x: hx, y: hy, w, h, angle, alpha, sc,
-          color: `hsl(${hue.toFixed(1)} ${sat.toFixed(1)}% ${lit.toFixed(1)}%)`,
+          color: `hsla(${hue.toFixed(1)}, ${sat.toFixed(1)}%, ${lit.toFixed(1)}%, ${alpha.toFixed(2)})`,
         };
       });
 
-      // Depth sort (draw back to front)
+      // Depth sort (draw back to front for proper alpha blending)
       cmds.sort((a, b) => a.sc - b.sc);
 
       ctx.save();
       ctx.globalAlpha = canvasAlpha;
 
+      // Draw flawlessly soft dashed lines (perfectly rounded pills)
       for (const d of cmds) {
+        ctx.fillStyle = d.color;
         ctx.save();
-        ctx.globalAlpha = canvasAlpha * d.alpha;
-        ctx.fillStyle   = d.color;
         ctx.translate(d.x, d.y);
         ctx.rotate(d.angle);
         ctx.beginPath();
         if (ctx.roundRect) {
-          ctx.roundRect(-d.w / 2, -d.h / 2, d.w, d.h, Math.min(d.w / 2, 2));
+          // Use d.w / 2 for perfectly rounded pill-shaped caps
+          ctx.roundRect(-d.w / 2, -d.h / 2, d.w, d.h, d.w / 2);
         } else {
           ctx.rect(-d.w / 2, -d.h / 2, d.w, d.h);
         }
@@ -255,14 +268,11 @@ export default function ParticleSphere() {
     resize();
     onScroll();
     window.addEventListener("resize",       resize);
-    // Use pointer events on document to ensure we catch movements
     document.addEventListener("pointermove",  onMove);
     document.addEventListener("pointerleave", onLeave);
     window.addEventListener("scroll",       onScroll, { passive: true });
     
-    // Initial start to idle mode so it wanders immediately on load/mobile
     mouseRef.current.active = false;
-    
     raf.current = requestAnimationFrame(tick);
 
     return () => {
