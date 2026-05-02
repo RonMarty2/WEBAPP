@@ -1,13 +1,19 @@
 /**
  * File-based persistence for in-memory stores.
- * Writes to .store/data.json — survives server hot-reloads and restarts.
- * Only used when Supabase is not configured.
+ * Writes to OS temp dir — fuera del directorio del proyecto para evitar que
+ * el file watcher de Turbopack detecte cambios y dispare Hot Module Replacement.
+ * Solo se usa cuando Supabase no está configurado.
  */
 
 import fs from "fs";
+import os from "os";
 import path from "path";
 
-const STORE_DIR = path.join(process.cwd(), ".store");
+// ─ Usar directorio temporal del OS para evitar disparar el watcher de Turbopack ─
+// Si la variable de entorno STORE_PATH está definida, úsala; si no, usa os.tmpdir().
+const STORE_DIR = process.env.STORE_PATH
+  ? path.resolve(process.env.STORE_PATH)
+  : path.join(os.tmpdir(), "laboratorio-academico-store");
 const STORE_FILE = path.join(STORE_DIR, "data.json");
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;

@@ -29,19 +29,19 @@ const FASE_LABELS = [
   "Final",
 ];
 
-const FASE_COLORES: Record<number, { bg: string; color: string }> = {
-  0: { bg: "rgba(71,85,105,0.3)", color: "#94a3b8" },
-  1: { bg: "rgba(6,182,212,0.12)", color: "#67e8f9" },
-  2: { bg: "rgba(6,182,212,0.2)", color: "#06b6d4" },
-  3: { bg: "rgba(139,92,246,0.15)", color: "#a78bfa" },
-  4: { bg: "rgba(251,191,36,0.12)", color: "#fbbf24" },
-  5: { bg: "rgba(34,197,94,0.12)", color: "#4ade80" },
+const FASE_TW: Record<number, string> = {
+  0: "bg-slate-100 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400",
+  1: "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400",
+  2: "bg-cyan-50 text-cyan-600 dark:bg-cyan-950/40 dark:text-cyan-400",
+  3: "bg-violet-50 text-violet-600 dark:bg-violet-950/40 dark:text-violet-400",
+  4: "bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400",
+  5: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400",
 };
 
 function FaseBadge({ fase }: { fase: number }) {
-  const { bg, color } = FASE_COLORES[fase] ?? FASE_COLORES[0];
+  const tw = FASE_TW[fase] ?? FASE_TW[0];
   return (
-    <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 9px", borderRadius: 999, background: bg, color }}>
+    <span className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${tw}`}>
       {FASE_LABELS[fase]?.split("—")[0].trim() ?? `Fase ${fase}`}
     </span>
   );
@@ -52,26 +52,24 @@ function ContenidoFase({ label, contenido }: { label: string; contenido: string 
   if (!contenido) return null;
   const preview = contenido.slice(0, 200).replace(/\n/g, " ");
   return (
-    <div style={{ marginBottom: 12, border: "1px solid #1e293b", borderRadius: 8, overflow: "hidden" }}>
+    <div className="mb-3 border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
       <button
         onClick={() => setAbierto(!abierto)}
-        style={{
-          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "10px 14px", background: "rgba(15,23,42,0.8)", border: "none", cursor: "pointer",
-          color: "#e2e8f0", fontSize: 13, fontWeight: 600, textAlign: "left",
-        }}
+        className="w-full flex items-center justify-between px-4 py-2.5
+                   bg-gray-50 dark:bg-slate-800/80 border-0 cursor-pointer text-left
+                   text-gray-700 dark:text-slate-200 text-[13px] font-semibold"
       >
         <span>✅ {label}</span>
-        <span style={{ color: "#475569", fontSize: 18 }}>{abierto ? "▲" : "▼"}</span>
+        <span className="text-gray-400 dark:text-slate-500 text-[16px]">{abierto ? "▲" : "▼"}</span>
       </button>
       {!abierto && (
-        <div style={{ padding: "8px 14px 10px", fontSize: 12, color: "#64748b", fontStyle: "italic", background: "#020617" }}>
+        <div className="px-4 py-2 text-[12px] text-gray-400 dark:text-slate-500 italic bg-white dark:bg-slate-900">
           {preview}…
         </div>
       )}
       {abierto && (
-        <div style={{ padding: "14px", background: "#020617", maxHeight: 400, overflowY: "auto" }}>
-          <pre style={{ fontSize: 12, color: "#cbd5e1", lineHeight: 1.8, whiteSpace: "pre-wrap", fontFamily: "monospace", margin: 0 }}>
+        <div className="p-4 bg-white dark:bg-slate-900 max-h-[400px] overflow-y-auto">
+          <pre className="text-[12px] text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-mono m-0">
             {contenido}
           </pre>
         </div>
@@ -111,84 +109,91 @@ function DetalleProyecto({ proyectoId, onClose }: { proyectoId: string; onClose:
   const contenidoActual = fases[faseVista]?.contenido ?? "";
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "flex" }}>
-      <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)" }} />
-      <div style={{
-        position: "relative", zIndex: 1, marginLeft: "auto", width: "min(95vw, 860px)",
-        background: "#0f172a", borderLeft: "1px solid rgba(6,182,212,0.2)",
-        display: "flex", flexDirection: "column", height: "100vh",
-      }}>
+    <div className="fixed inset-0 z-[1000] flex">
+      {/* Backdrop */}
+      <div onClick={onClose} className="absolute inset-0 bg-black/60" />
+
+      {/* Panel lateral */}
+      <div className="relative z-10 ml-auto flex flex-col h-screen
+                      w-[min(95vw,860px)]
+                      bg-white dark:bg-slate-950
+                      border-l border-gray-200 dark:border-slate-800">
+
         {/* Header */}
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid #1e293b", flexShrink: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
-            <div>
-              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+        <div className="px-6 py-5 border-b border-gray-100 dark:border-slate-800 shrink-0">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] font-semibold text-sky-500 dark:text-sky-400 uppercase tracking-[0.08em] mb-1">
                 Vista Admin — Proyecto completo
               </div>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0", lineHeight: 1.4, margin: 0 }}>
+              <h2 className="text-[16px] font-semibold text-gray-900 dark:text-white leading-snug m-0 truncate">
                 {proyecto.tema_aprobado || proyecto.titulo_provisional || "Sin título"}
               </h2>
-              <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>
+              <div className="text-[11px] text-gray-400 dark:text-slate-500 mt-1 font-mono">
                 ID: {proyecto.id} · Usuario: {proyecto.usuario_id}
               </div>
             </div>
-            <button onClick={onClose} style={{ background: "none", border: "1px solid #334155", borderRadius: 6, color: "#94a3b8", padding: "6px 10px", cursor: "pointer", fontSize: 14, flexShrink: 0 }}>
+            <button
+              onClick={onClose}
+              className="shrink-0 px-3 py-1.5 rounded-lg text-[13px] cursor-pointer
+                         bg-transparent border border-gray-200 dark:border-slate-700
+                         text-gray-500 dark:text-slate-400
+                         hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+            >
               ✕ Cerrar
             </button>
           </div>
 
           {/* Tabs de fases */}
-          <div style={{ display: "flex", gap: 6, marginTop: 16, flexWrap: "wrap" }}>
+          <div className="flex gap-2 mt-4 flex-wrap">
             {fases.map((f, i) => (
               <button
                 key={f.num}
                 onClick={() => setFaseVista(i)}
-                style={{
-                  padding: "5px 12px", borderRadius: 6, fontSize: 12, fontWeight: 600, cursor: "pointer",
-                  border: faseVista === i ? "1px solid #06b6d4" : "1px solid #1e293b",
-                  background: faseVista === i ? "rgba(6,182,212,0.15)" : "transparent",
-                  color: faseVista === i ? "#06b6d4" : "#64748b",
-                }}
+                className={`px-3 py-1.5 rounded-lg text-[12px] font-semibold cursor-pointer transition-colors
+                  ${
+                    faseVista === i
+                      ? "bg-black text-white dark:bg-white dark:text-black border border-transparent"
+                      : "bg-transparent border border-gray-200 dark:border-slate-700 text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-800"
+                  }`}
               >
                 ✅ {f.label.split("—")[0].trim()}
               </button>
             ))}
             {fases.length === 0 && (
-              <span style={{ fontSize: 13, color: "#475569" }}>Este proyecto aún no tiene contenido generado.</span>
+              <span className="text-[13px] text-gray-400 dark:text-slate-500">Este proyecto aún no tiene contenido generado.</span>
             )}
           </div>
         </div>
 
         {/* Contenido de la fase seleccionada */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div className="flex-1 overflow-y-auto px-6 py-5">
           {fases.length > 0 && contenidoActual ? (
             <>
-              <div style={{ fontSize: 11, color: "#475569", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>
+              <div className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.08em] mb-3">
                 {fases[faseVista]?.label}
               </div>
-              <pre style={{
-                fontSize: 13, color: "#cbd5e1", lineHeight: 1.9, whiteSpace: "pre-wrap",
-                fontFamily: "'Inter', sans-serif", margin: 0,
-              }}>
+              <pre className="text-[13px] text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap font-sans m-0">
                 {contenidoActual}
               </pre>
             </>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", color: "#334155" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>📄</div>
-              <div>Este proyecto aún no tiene contenido generado.</div>
+            <div className="flex flex-col items-center justify-center h-full text-gray-300 dark:text-slate-700">
+              <div className="text-5xl mb-4">📄</div>
+              <div className="text-[14px]">Este proyecto aún no tiene contenido generado.</div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div style={{ padding: "14px 24px", borderTop: "1px solid #1e293b", display: "flex", gap: 10, flexShrink: 0 }}>
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-slate-800 flex gap-3 shrink-0">
           <a
             href={`/projects/${proyecto.id}/workspace`}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-cyan"
-            style={{ textDecoration: "none", fontSize: 13, padding: "8px 16px" }}
+            className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-[13px] font-medium no-underline
+                       bg-black text-white dark:bg-white dark:text-black
+                       hover:-translate-y-0.5 hover:shadow-md transition-all duration-150"
           >
             Abrir workspace del estudiante →
           </a>
@@ -223,10 +228,12 @@ export default function AdminProyectosPage() {
   return (
     <div className="fade-in">
 
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>📁 Proyectos & Contenido</h1>
-        <p style={{ color: "#94a3b8", fontSize: 14 }}>
-          Haz clic en "Ver detalle" para ver todo el contenido generado por fase y los prompts usados.
+      <div className="mb-8">
+        <h1 className="text-[26px] font-bold tracking-tight text-gray-900 dark:text-white mb-1.5">
+          Proyectos &amp; Contenido
+        </h1>
+        <p className="text-[14px] text-gray-400 dark:text-slate-500">
+          Haz clic en &quot;Ver detalle&quot; para ver todo el contenido generado por fase y los prompts usados.
         </p>
       </div>
 
@@ -238,34 +245,43 @@ export default function AdminProyectosPage() {
       )}
 
       {/* Stats */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 14, marginBottom: 28 }}>
+      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
         {[
-          { label: "Total proyectos", value: proyectos.length, color: "#06b6d4" },
-          { label: "En proceso", value: proyectos.filter(p => !p.completado).length, color: "#f59e0b" },
-          { label: "Completados", value: proyectos.filter(p => p.completado).length, color: "#22c55e" },
-          { label: "Avanzados (≥ fase 3)", value: proyectos.filter(p => p.estado_fase >= 3).length, color: "#8b5cf6" },
+          { label: "Total proyectos",   value: proyectos.length,                                  color: "text-blue-500 dark:text-blue-400" },
+          { label: "En proceso",        value: proyectos.filter(p => !p.completado).length,        color: "text-amber-500 dark:text-amber-400" },
+          { label: "Completados",       value: proyectos.filter(p => p.completado).length,         color: "text-emerald-500 dark:text-emerald-400" },
+          { label: "Avanzados (≥ f.3)", value: proyectos.filter(p => p.estado_fase >= 3).length,   color: "text-violet-500 dark:text-violet-400" },
         ].map(s => (
-          <div key={s.label} className="card" style={{ padding: "16px 18px" }}>
-            <div style={{ fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{s.label}</div>
+          <div key={s.label} className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-4">
+            <div className={`text-[28px] font-bold ${s.color}`}>{s.value}</div>
+            <div className="text-[12px] text-gray-400 dark:text-slate-500 mt-1">{s.label}</div>
           </div>
         ))}
       </div>
 
       {/* Filtros */}
-      <div style={{ display: "flex", gap: 12, marginBottom: 18, flexWrap: "wrap" }}>
+      <div className="flex gap-3 mb-5 flex-wrap">
         <input
-          className="input-dark"
+          className="flex-1 min-w-[200px] px-3 py-2 rounded-xl text-[13px]
+                     bg-white dark:bg-slate-800
+                     border border-gray-200 dark:border-slate-700
+                     text-gray-900 dark:text-slate-100
+                     placeholder-gray-400 dark:placeholder-slate-500
+                     focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10
+                     focus:border-gray-400 dark:focus:border-slate-500 transition-colors"
           value={busqueda}
           onChange={e => setBusqueda(e.target.value)}
           placeholder="Buscar por tema o usuario ID…"
-          style={{ flex: 1, minWidth: 200, padding: "8px 12px", fontSize: 13 }}
         />
         <select
-          className="input-dark"
+          className="w-[190px] px-3 py-2 rounded-xl text-[13px]
+                     bg-white dark:bg-slate-800
+                     border border-gray-200 dark:border-slate-700
+                     text-gray-900 dark:text-slate-100
+                     focus:outline-none focus:ring-2 focus:ring-black/10 dark:focus:ring-white/10
+                     focus:border-gray-400 dark:focus:border-slate-500 transition-colors"
           value={filtroFase}
           onChange={e => setFiltroFase(e.target.value === "" ? "" : Number(e.target.value))}
-          style={{ width: 180, padding: "8px 12px", fontSize: 13 }}
         >
           <option value="">Todas las fases</option>
           {FASE_LABELS.map((label, i) => <option key={i} value={i}>{label.split("—")[0].trim()}</option>)}
@@ -278,53 +294,60 @@ export default function AdminProyectosPage() {
           {[1, 2, 3].map(i => <div key={i} className="card shimmer" style={{ height: 64 }} />)}
         </div>
       ) : proyectosFiltrados.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: "48px 24px", borderStyle: "dashed", borderColor: "#334155" }}>
-          <div style={{ fontSize: 40, marginBottom: 12, opacity: 0.3 }}>📁</div>
-          <div style={{ color: "#475569", fontSize: 14 }}>No hay proyectos todavía.</div>
+        <div className="bg-white dark:bg-slate-900/50 border border-dashed border-gray-200 dark:border-slate-700 rounded-2xl text-center p-12">
+          <div className="text-4xl mb-3 opacity-30">📁</div>
+          <div className="text-[14px] text-gray-400 dark:text-slate-500">No hay proyectos todavía.</div>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div className="flex flex-col gap-3">
           {proyectosFiltrados.map(p => {
             const titulo = p.tema_aprobado || p.titulo_provisional || "Sin título";
             const fasesConContenido = [0,1,2,3,4,5].filter(n => p[`contenido_fase_${n}` as keyof Proyecto]);
             return (
-              <div key={p.id} className="card" style={{ padding: "14px 18px" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0", marginBottom: 4 }}>
+              <div key={p.id} className="bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-sm p-5">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div className="min-w-0 flex-1">
+                    {/* Título — forzado visible */}
+                    <div className="text-gray-900 dark:text-white font-semibold text-[15px] mb-2 truncate">
                       {titulo}
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                    <div className="flex items-center gap-2 flex-wrap">
                       <FaseBadge fase={p.estado_fase} />
-                      {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
-                      <span style={{ fontSize: 11, color: "#334155" }}>
+                      {p.completado && <span className="badge badge-green text-[10px]">✓ Completo</span>}
+                      <span className="text-gray-500 dark:text-gray-400 text-[12px]">
                         {new Date(p.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
                       {fasesConContenido.length > 0 && (
-                        <span style={{ fontSize: 11, color: "#4ade80" }}>
+                        <span className="text-emerald-500 dark:text-emerald-400 text-[12px] font-medium">
                           {fasesConContenido.length} fase(s) con contenido
                         </span>
                       )}
                     </div>
-                    <div style={{ fontSize: 11, color: "#334155", marginTop: 4, fontFamily: "monospace" }}>
+                    <div className="text-gray-400 dark:text-slate-500 text-[12px] mt-1.5 font-mono">
                       Usuario: {p.usuario_id}
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                  {/* Botones Antigravity */}
+                  <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => setProyectoDetalle(p.id)}
-                      className="btn-purple"
-                      style={{ fontSize: 12, padding: "7px 14px" }}
+                      className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium
+                                 bg-black text-white dark:bg-white dark:text-black
+                                 hover:-translate-y-0.5 hover:shadow-md
+                                 transition-all duration-150 cursor-pointer border-0"
                     >
-                      🔍 Ver detalle & fases
+                      Ver detalle
                     </button>
                     <a
                       href={`/projects/${p.id}/workspace`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn-ghost"
-                      style={{ fontSize: 12, padding: "7px 14px", textDecoration: "none" }}
+                      className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium no-underline
+                                 border border-gray-300 dark:border-slate-700
+                                 text-gray-900 dark:text-white
+                                 hover:bg-gray-50 dark:hover:bg-slate-800
+                                 transition-colors duration-150"
                     >
                       Workspace →
                     </a>
@@ -336,7 +359,7 @@ export default function AdminProyectosPage() {
         </div>
       )}
 
-      <div style={{ marginTop: 16, fontSize: 12, color: "#334155" }}>
+      <div className="mt-4 text-[12px] text-gray-400 dark:text-slate-500">
         {proyectosFiltrados.length} de {proyectos.length} proyectos
       </div>
 
