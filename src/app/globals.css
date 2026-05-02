@@ -80,17 +80,22 @@ html, body {
 
 a { color: inherit; }
 
+.antigravity-particles {
+  opacity: 1;
+}
+
+.app-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
 .gradient-bg {
-  background:
-    radial-gradient(circle at 78% 10%, rgba(37, 99, 235, 0.08), transparent 28vw),
-    radial-gradient(circle at 12% 92%, rgba(80, 160, 255, 0.06), transparent 26vw),
-    linear-gradient(180deg, #ffffff 0%, var(--bg-base) 54%, #ffffff 100%);
+  background: transparent;
 }
 
 .ag-shell {
-  background:
-    radial-gradient(circle at 74% 18%, rgba(37, 99, 235, 0.10), transparent 24vw),
-    linear-gradient(180deg, #ffffff 0%, var(--bg-base) 100%);
+  background: transparent;
 }
 
 .ag-kicker {
@@ -369,9 +374,7 @@ a { color: inherit; }
 .gradient-bg,
 .admin-layout,
 .admin-layout main {
-  background:
-    radial-gradient(circle at 78% 10%, rgba(37, 99, 235, 0.08), transparent 28vw),
-    linear-gradient(180deg, #ffffff 0%, var(--bg-base) 58%, #ffffff 100%) !important;
+  background: transparent !important;
   color: var(--fg-primary) !important;
 }
 
@@ -414,13 +417,23 @@ a { color: inherit; }
 
 [style*="background: #0f172a"],
 [style*="background: rgb(15, 23, 42)"],
+[style*="background:#0f172a"],
+[style*="background:rgb(15, 23, 42)"],
+[style*="background: #020617"],
+[style*="background: rgb(2, 6, 23)"],
+[style*="background:#020617"],
+[style*="background:rgb(2, 6, 23)"],
 [style*="background: #080f1d"],
-[style*="background: rgb(8, 15, 29)"] {
-  background: rgba(255, 255, 255, 0.90) !important;
+[style*="background: rgb(8, 15, 29)"],
+[style*="background:#080f1d"],
+[style*="background:rgb(8, 15, 29)"] {
+  background: transparent !important;
 }
 
 [style*="background: #1e293b"],
-[style*="background: rgb(30, 41, 59)"] {
+[style*="background: rgb(30, 41, 59)"],
+[style*="background:#1e293b"],
+[style*="background:rgb(30, 41, 59)"] {
   background: var(--bg-subtle) !important;
 }
 

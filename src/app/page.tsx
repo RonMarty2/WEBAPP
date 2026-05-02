@@ -2,16 +2,11 @@
 
 import HeroSection from "@/components/landing/HeroSection";
 import FeaturesSection from "@/components/landing/FeaturesSection";
-import ParticleSphere from "@/components/ParticleSphere";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function HomePage() {
   return (
     <div className="ag-shell" style={{ minHeight: "100vh", position: "relative" }}>
-
-      {/* ── Particle sphere — landing only, fixed behind content ── */}
-      <ParticleSphere />
-
       {/* ── All content sits above canvas (z:1) ── */}
       <div style={{ position: "relative", zIndex: 1 }}>
 

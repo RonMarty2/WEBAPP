@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import ParticleSphere from "@/components/ParticleSphere";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,7 +30,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full" suppressHydrationWarning>
-        {children}
+        <ParticleSphere />
+        <div className="app-content">
+          {children}
+        </div>
       </body>
     </html>
   );
