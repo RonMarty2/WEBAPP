@@ -14,8 +14,8 @@ type Particle = {
 const COUNT = 800; // Increased count for a lush point-cloud
 const FOV   = 600;
 
-const ROT_Y = 0.0015;
-const ROT_X = 0.0008;
+const ROT_Y = 0.00075;
+const ROT_X = 0.0004;
 
 const HUE_SPEED = 0.002; 
 
@@ -65,7 +65,7 @@ export default function ParticleSphere() {
   const mouseRef  = useRef({ x: 0, y: 0, active: false });
   
   // Physics body for the entire point-cloud mass
-  const gcRef     = useRef({ x: 0, y: 0, vx: 0, vy: 0, ready: false });
+  const gcRef     = useRef({ x: 0, y: 0, vx: 0, vy: 0, ghostX: 0, ghostY: 0, ready: false });
   const condenseRef = useRef(0);
 
   useEffect(() => {
@@ -87,6 +87,8 @@ export default function ParticleSphere() {
       if (!gcRef.current.ready) {
         gcRef.current.x = window.innerWidth / 2;
         gcRef.current.y = window.innerHeight / 2;
+        gcRef.current.ghostX = gcRef.current.x;
+        gcRef.current.ghostY = gcRef.current.y;
         gcRef.current.ready = true;
       }
     }
@@ -114,9 +116,12 @@ export default function ParticleSphere() {
 
       // Elastic Scroll Parallax: 
       // Instantly displace the sphere in the opposite direction of the scroll.
-      // The physics engine will then smoothly glide it back to the viewport target.
+      // We clamp the delta and multiply by a fraction so it doesn't teleport violently on fast mobile swipes.
       if (gcRef.current.ready) {
-        gcRef.current.y -= delta;
+        const clampedDelta = Math.max(-100, Math.min(100, delta));
+        gcRef.current.y -= clampedDelta * 0.35;
+        // Also displace the ghost target slightly so it follows the parallax gracefully
+        gcRef.current.ghostY -= clampedDelta * 0.35;
       }
     }
 
@@ -135,29 +140,60 @@ export default function ParticleSphere() {
       ro.x += ROT_X;
 
       // ── Gravity Center (Fluid Mass Target) ────────────────────────────────
-      let targetX: number, targetY: number;
+      let rawTargetX: number, rawTargetY: number;
       if (m.active) {
-        targetX = m.x;
-        targetY = m.y;
+        rawTargetX = m.x;
+        rawTargetY = m.y;
       } else {
-        // Elegant wandering
-        targetX = W * 0.5 + Math.sin(t * 0.005) * (W * 0.35);
-        targetY = H * 0.5 + Math.cos(t * 0.003 + 1.2) * (H * 0.30);
+        // Elegant wandering (halved speed)
+        rawTargetX = W * 0.5 + Math.sin(t * 0.0025) * (W * 0.35);
+        rawTargetY = H * 0.5 + Math.cos(t * 0.0015 + 1.2) * (H * 0.30);
       }
 
-      // Smooth transition logic to prevent abrupt "snapping" when mouse enters
-      const dx = targetX - gc.x;
-      const dy = targetY - gc.y;
+      // The "Ghost Target" smoothly glides towards the raw target.
+      // This absorbs any abrupt mathematical jumps (e.g. mouse entering from far away)
+      gc.ghostX += (rawTargetX - gc.ghostX) * 0.025; 
+      gc.ghostY += (rawTargetY - gc.ghostY) * 0.025;
+
+      // ── Orbital Steering Behavior (Boids / Seeking) ───────────────────────
+      const dx = gc.ghostX - gc.x;
+      const dy = gc.ghostY - gc.y;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
 
-      // We cap the pulling force. At large distances, it won't violently accelerate.
-      const pullForce = Math.min(dist * 0.004, 1.5); 
+      // 1. Velocidad de Crucero
+      // La esfera no se detiene ni acelera como loca, mantiene una velocidad majestuosa.
+      const MAX_SPEED = 4.0; 
+      const desiredVx = (dx / dist) * MAX_SPEED;
+      const desiredVy = (dy / dist) * MAX_SPEED;
 
-      // Extremely smooth, high-inertia physics
-      gc.vx += (dx / dist) * pullForce;
-      gc.vy += (dy / dist) * pullForce;
-      gc.vx *= 0.93; // Glossy friction (smooth gliding)
-      gc.vy *= 0.93;
+      // 2. Fuerza de Giro (Steering)
+      // La diferencia entre a dónde va y a dónde quiere ir.
+      const steerX = desiredVx - gc.vx;
+      const steerY = desiredVy - gc.vy;
+      
+      // Limitamos qué tan rápido puede "girar el volante". 
+      // Un número muy bajo (0.05) crea curvas extremadamente amplias y rebases orbitales.
+      const MAX_STEER = 0.05; 
+      const steerDist = Math.sqrt(steerX * steerX + steerY * steerY) || 1;
+      
+      let appliedSteerX = steerX;
+      let appliedSteerY = steerY;
+      if (steerDist > MAX_STEER) {
+        appliedSteerX = (steerX / steerDist) * MAX_STEER;
+        appliedSteerY = (steerY / steerDist) * MAX_STEER;
+      }
+
+      // 3. Aplicar física
+      gc.vx += appliedSteerX;
+      gc.vy += appliedSteerY;
+
+      // Asegurar que siempre viaje a su velocidad de crucero constante (no hay fricción de frenado)
+      const currentSpeed = Math.sqrt(gc.vx * gc.vx + gc.vy * gc.vy) || 1;
+      if (currentSpeed > MAX_SPEED) {
+        gc.vx = (gc.vx / currentSpeed) * MAX_SPEED;
+        gc.vy = (gc.vy / currentSpeed) * MAX_SPEED;
+      }
+
       gc.x += gc.vx;
       gc.y += gc.vy;
 
@@ -168,8 +204,8 @@ export default function ParticleSphere() {
       condenseRef.current += (targetCondense - condenseRef.current) * 0.015;
       const condense = condenseRef.current;
 
-      // Gentle organic breathing
-      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.015);
+      // Gentle organic breathing (halved speed)
+      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.0075);
       // Condense by only 12% (instead of 25%) so it's a subtle, premium reaction
       const mouseScale = 1.0 - (condense * 0.12); 
       const baseR = Math.max(200, Math.min(W, H) * 0.40) * globalBreathe * mouseScale;
@@ -188,21 +224,36 @@ export default function ParticleSphere() {
           ro.y, ro.x,
         );
 
-        // 2. Premium Light Scanner (La Ola)
-        // Travels through the sphere acting purely as a light/size modifier, 
-        // keeping the geometry perfectly spherical and flawless.
-        const wavePhase = (ry + rz) * 0.01 - t * 0.02 + p.ph1 * 0.1;
+        // 2. Organic Amorphism (Subtle 3D Noise)
+        // Normalized coordinates for consistent math
+        const nrx = rx / baseR;
+        const nry = ry / baseR;
+        const nrz = rz / baseR;
+        
+        // Create an elegant, non-chaotic blob surface using low-frequency waves.
+        // It bulges out by up to ~15% in different areas at different times (halved speed).
+        const deform = 1.0 
+          + 0.06 * Math.sin(nrx * 3.5 + t * 0.0075) 
+          + 0.06 * Math.cos(nry * 2.8 - t * 0.006) 
+          + 0.05 * Math.sin(nrz * 4.2 + t * 0.009);
+
+        const finalRx = rx * deform;
+        const finalRy = ry * deform;
+        const finalRz = rz * deform;
+
+        // 3. Premium Light Scanner (La Ola) - Halved speed
+        const wavePhase = (finalRy + finalRz) * 0.01 - t * 0.01 + p.ph1 * 0.1;
         const wave = (Math.sin(wavePhase) + 1) * 0.5; // Normalized 0 to 1
 
-        // 3. Perspective
-        const depth = rz + FOV;
+        // 4. Perspective
+        const depth = finalRz + FOV;
         const sc    = FOV / depth;
 
-        // Perfectly rigid geometric alignment
-        const hx = gc.x + rx * sc;
-        const hy = gc.y + ry * sc;
+        // Perfectly rigid geometric alignment, but surface is gently bumpy
+        const hx = gc.x + finalRx * sc;
+        const hy = gc.y + finalRy * sc;
 
-        // 4. Visual Size (Swells beautifully when light hits them)
+        // 5. Visual Size (Swells beautifully when light hits them)
         // Scaled down to a third of the previous maximum size
         const sizeK = p.baseSize * sc * (1 + wave * 1.5) * 0.33;
         
@@ -210,25 +261,30 @@ export default function ParticleSphere() {
         const w = Math.max(0.6, sizeK * 1.5);
         const h = Math.max(1.5, sizeK * 6.0);
 
-        // 5. Symmetric Orientation (Radial)
+        // 6. Symmetric Orientation (Radial)
         // Point perfectly towards the center of gravity.
         // "si vienen de arriba entonces miran hacia abajo"
         const angle = Math.atan2(hy - gc.y, hx - gc.x) + Math.PI / 2;
 
-        // 6. Stunning 3D Gradient & Depth Opacity
-        const zNormFront = 1 - (rz + baseR) / (baseR * 2); // 1 = front, 0 = back
-        const alpha = Math.min(0.95, 0.05 + zNormFront * 0.85 + wave * 0.15);
+        // 7. Stunning 3D Gradient & Depth Opacity
+        const zNormFront = 1 - (finalRz + baseR) / (baseR * 2); // 1 = front, 0 = back
+        const alpha = Math.max(0, Math.min(0.95, 0.05 + zNormFront * 0.85 + wave * 0.15));
 
         const globalHue = (t * HUE_SPEED * (180 / Math.PI)) % 360;
         // Gradient from cyan/blue to deep purple mapping natively to 3D position
         const hue = (220 + globalHue + (p.nx + p.ny) * 35) % 360;
         
-        // Softened saturation to avoid the "exaggerated neon" look (yellow/pink)
-        const sat = 65 + wave * 15; 
-        
-        // Reduced lightness so it NEVER reaches white (which makes it disappear on light backgrounds)
-        // Max lightness is now 65% instead of 90%
-        const lit = 45 + zNormFront * 10 + wave * 10; 
+        // Base saturation and lightness
+        let sat = 55 + wave * 15; 
+        let lit = 45 + zNormFront * 10 + wave * 10; 
+
+        // Perceptual color correction:
+        // Yellows and Greens (hues ~40 to ~160) inherently look much brighter and more 
+        // "neon" to the human eye. We specifically dim them so they match the elegance of the blues.
+        if (hue > 40 && hue < 160) {
+          sat *= 0.70; // 30% less saturated
+          lit *= 0.85; // 15% darker
+        }
 
         return {
           x: hx, y: hy, w, h, angle, alpha, sc,
