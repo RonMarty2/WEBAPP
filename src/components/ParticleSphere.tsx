@@ -2,47 +2,70 @@
 
 import { useEffect, useRef } from "react";
 
-// ── Config ────────────────────────────────────────────────────────────────────
-const N         = 320;     // partículas
-const FOV       = 400;     // distancia focal Google
-const ROT_Y     = 0.003;   // rotación horizontal principal
-const ROT_X     = 0.0008;  // inclinación vertical leve
-const HUE_SPEED = 0.15;    // grados de hue por frame → ciclo ~40s
+// ─── TUNE THESE ──────────────────────────────────────────────────────────────
+const N            = 380;    // particle count — more = denser field
+const ROT_Y        = 0.0020; // base sphere rotation speed
+const ROT_X        = 0.0005;
+const SPHERE_R     = 0.52;   // larger → particles spread further across screen
+const FOV          = 420;    // perspective focal length
 
-// Ola / wave — da el efecto de agrupado-desagrupado
-const WAVE_SPEED = 0.00045;   // velocidad de propagación de la ola en el tiempo
-const WAVE_AMP   = 0.58;      // amplitud (0.58 → partículas oscilan entre ×0.08 y ×1.58 de tamaño)
-const WAVE_FREQ_Y     = 2.8;  // frecuencia de la ola en eje latitudinal (Y)
-const WAVE_FREQ_THETA = 1.2;  // frecuencia en eje longitudinal (theta)
+// Wave effect — particles pulse in size as a traveling wave
+const WAVE_SPD     = 0.00040;
+const WAVE_AMP     = 0.58;
+const WAVE_FY      = 2.7;
+const WAVE_FT      = 1.15;
 
-// ── Fibonacci Lattice en esfera → distribución uniforme igual que Google ──────
-function buildParticles() {
-  const goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ≈ 2.3999632
+// 2-D physics — particles live in screen space, attracted to sphere + mouse
+const K_SPRING     = 0.040;  // spring back to home position
+const K_MOUSE      = 8.5;    // mouse gravity strength — higher = more pull
+const MOUSE_REACH  = 450;    // how far mouse gravity reaches (px)
+const DAMPING      = 0.87;   // velocity damping per frame
+
+// Visual — tuned for dark background
+const HUE_SPD      = 0.06;   // slower hue cycle — keeps colors in right range
+const LIGHTNESS    = 70;     // % — bright enough for dark bg
+const SATURATION   = 85;     // % saturation
+const GLOW_BLUR    = 3;      // subtle glow, not too heavy
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface Particle {
+  // unit-sphere position
+  nx: number; ny: number; nz: number; theta: number;
+  // base size
+  bw: number; bh: number;
+  // 2D screen position (with physics)
+  x: number; y: number;
+  // 2D velocity
+  vx: number; vy: number;
+  // whether positioned yet
+  ready: boolean;
+}
+
+function buildParticles(): Particle[] {
+  const φ = Math.PI * (3 - Math.sqrt(5)); // golden angle
   return Array.from({ length: N }, (_, i) => {
-    const y     = 1 - (i / (N - 1)) * 2;           // -1 (norte) → +1 (sur)
-    const r     = Math.sqrt(Math.max(0, 1 - y * y)); // radio en plano XZ
-    const theta = goldenAngle * i;
-
+    const ny    = 1 - (i / (N - 1)) * 2;
+    const r     = Math.sqrt(Math.max(0, 1 - ny * ny));
+    const theta = φ * i;
     return {
-      x: Math.cos(theta) * r,
-      y,
-      z: Math.sin(theta) * r,
-      theta,                          // ángulo longitudinal propio
-      // Tamaño base (pequeña variación aleatoria)
-      bw: Math.random() * 0.8 + 0.9, // ancho base ≈ 1–1.7
-      bh: Math.random() * 3.0 + 3.5, // alto  base ≈ 3.5–6.5
+      nx: Math.cos(theta) * r,
+      ny,
+      nz: Math.sin(theta) * r,
+      theta,
+      bw: Math.random() * 1.1 + 1.0,   // bar width  ≈ 1.0–2.1
+      bh: Math.random() * 5.0 + 6.0,   // bar height ≈ 6–11 (bigger for dark bg)
+      x: 0, y: 0,
+      vx: 0, vy: 0,
+      ready: false,
     };
   });
 }
 
-type P = ReturnType<typeof buildParticles>[0];
-
-// ── Rotación 3D (Yaw luego Pitch) ─────────────────────────────────────────────
-function rot3(x: number, y: number, z: number, ry: number, rx: number): [number, number, number] {
-  // Yaw (eje Y)
+function rot3(
+  x: number, y: number, z: number, ry: number, rx: number,
+): [number, number, number] {
   const x1 = x * Math.cos(ry) - z * Math.sin(ry);
   const z1 = x * Math.sin(ry) + z * Math.cos(ry);
-  // Pitch (eje X)
   const y2 =  y * Math.cos(rx) - z1 * Math.sin(rx);
   const z2 =  y * Math.sin(rx) + z1 * Math.cos(rx);
   return [x1, y2, z2];
@@ -50,8 +73,9 @@ function rot3(x: number, y: number, z: number, ry: number, rx: number): [number,
 
 export default function ParticleSphere() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ptRef     = useRef<P[]>(buildParticles());
-  const stateRef  = useRef({ rotY: 0, rotX: 0, hue: 220, waveT: 0 });
+  const ptsRef    = useRef<Particle[]>(buildParticles());
+  const rotRef    = useRef({ ry: 0, rx: 0, hue: 220, wt: 0 });
+  const mouseRef  = useRef({ x: -9999, y: -9999, on: false });
   const rafRef    = useRef<number>(0);
 
   useEffect(() => {
@@ -60,8 +84,8 @@ export default function ParticleSphere() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // ── Retina-ready resize ────────────────────────────────────────────────
     let dpr = window.devicePixelRatio || 1;
+
     function resize() {
       if (!canvas || !ctx) return;
       dpr = window.devicePixelRatio || 1;
@@ -70,104 +94,127 @@ export default function ParticleSphere() {
       canvas.style.width  = window.innerWidth  + "px";
       canvas.style.height = window.innerHeight + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Force repositioning after resize
+      ptsRef.current.forEach(p => { p.ready = false; });
     }
     resize();
     window.addEventListener("resize", resize);
 
-    // ── Loop de animación ──────────────────────────────────────────────────
+    function onMove(e: MouseEvent) {
+      mouseRef.current = { x: e.clientX, y: e.clientY, on: true };
+    }
+    function onLeave() { mouseRef.current.on = false; }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseleave", onLeave);
+
+    // ─── Draw loop ────────────────────────────────────────────────────────
     function tick() {
       if (!canvas || !ctx) return;
-      const W  = window.innerWidth;
-      const H  = window.innerHeight;
-      const cx = W * 0.5;
-      const cy = H * 0.5;
-      const R  = Math.min(W, H) * 0.46;
+
+      const W   = window.innerWidth;
+      const H   = window.innerHeight;
+      const cx  = W / 2;
+      const cy  = H / 2;
+      const R   = Math.min(W, H) * SPHERE_R;
+      const rot = rotRef.current;
+      const m   = mouseRef.current;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Avanzar estado
-      const s = stateRef.current;
-      s.rotY  += ROT_Y;
-      s.rotX  += ROT_X;
-      s.hue   += HUE_SPEED;
-      s.waveT += WAVE_SPEED;
+      rot.ry  += ROT_Y;
+      rot.rx  += ROT_X;
+      rot.hue += HUE_SPD;
+      rot.wt  += WAVE_SPD;
 
-      // ── Proyectar todas las partículas ────────────────────────────────
-      type Proj = {
-        sx: number; sy: number; scale: number;
+      // ── Per-particle: compute sphere home → apply physics → render ──────
+      type DrawCmd = {
+        x: number; y: number; scale: number;
         w: number; h: number; angle: number;
         alpha: number; hue: number;
       };
+      const cmds: DrawCmd[] = [];
 
-      const out: Proj[] = ptRef.current.map((p) => {
-        // Posición en el espacio
-        const [rx, ry, rz] = rot3(p.x * R, p.y * R, p.z * R, s.rotY, s.rotX);
-
-        // Perspectiva (FOV = 400, idéntico a Google)
+      for (const p of ptsRef.current) {
+        // ── 1. Sphere home position (3-D → 2-D) ──────────────────────────
+        const [rx, ry, rz] = rot3(p.nx * R, p.ny * R, p.nz * R, rot.ry, rot.rx);
         const depth  = rz + FOV;
         const scale  = FOV / depth;
-        const sx     = cx + rx * scale;
-        const sy     = cy + ry * scale;
+        const hx     = cx + rx * scale; // home x
+        const hy     = cy + ry * scale; // home y
 
-        // ── Ola viajera que agrupa/desagrupa ──────────────────────────
-        // La fase combina posición Y (latitud) + theta (longitud) + tiempo
-        // → crea una onda que "viaja" por la superficie esférica
-        // → regiones del frente se agrandan, otras se achican → efecto ola
-        const wavePhase  = p.y * WAVE_FREQ_Y + p.theta * WAVE_FREQ_THETA - s.waveT * Math.PI * 2;
-        const waveFactor = Math.max(0.06, 0.42 + Math.sin(wavePhase) * WAVE_AMP);
-        // waveFactor oscila entre ~0.06 (casi invisible) y ~1.0 (tamaño completo)
+        // On first frame (or after resize) snap to home
+        if (!p.ready) { p.x = hx; p.y = hy; p.ready = true; }
 
-        // Tamaño final = base × perspectiva × ola
-        const w = p.bw * scale * waveFactor;
-        const h = p.bh * scale * waveFactor;
+        // ── 2. Spring force → home ────────────────────────────────────────
+        p.vx += (hx - p.x) * K_SPRING;
+        p.vy += (hy - p.y) * K_SPRING;
 
-        // Opacidad: perspectiva × ola (frente=opaco, fondo+ola=transparente)
-        const alpha = Math.max(0.04, Math.min(0.95, scale * 0.88 * waveFactor));
-
-        // ── Color: gradiente hue-rotante por posición Y (igual que Google) ──
-        // y = -1 (norte): azul      hue ≈ 220
-        // y =  0 (ecua.): morado    hue ≈ 270
-        // y = +1 (sur):   naranja/rojo hue ≈ 410 % 360 = 50
-        const baseHue = 220 + (p.y + 1) * 0.5 * 190; // 220 → 410
-        const hue     = (baseHue + s.hue) % 360;
-
-        // ── Ángulo tangente de la barra ──────────────────────────────
-        const sinPhi = Math.sqrt(Math.max(0, 1 - p.y * p.y)) || 0.001;
-        const [trx, try_] = rot3(
-          -p.z * R,  // vector tangente en dirección theta
-           0,
-           p.x * R,
-          s.rotY, s.rotX,
-        );
-        const angle = Math.atan2(try_, trx);
-
-        return { sx, sy, scale, w, h, angle, alpha, hue };
-      });
-
-      // ── Painter's algorithm: fondo primero (por scale ascendente) ──────
-      out.sort((a, b) => a.scale - b.scale);
-
-      // ── Dibujar ────────────────────────────────────────────────────────
-      for (const p of out) {
-        if (p.w < 0.3 || p.h < 0.3) continue; // skip invisibles
-
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle   = `hsl(${p.hue.toFixed(1)}, 78%, 58%)`;
-        ctx.translate(p.sx, p.sy);
-        ctx.rotate(p.angle);
-
-        const hw = p.w * 0.5;
-        const hh = p.h * 0.5;
-
-        if (ctx.roundRect) {
-          ctx.beginPath();
-          ctx.roundRect(-hw, -hh, p.w, p.h, Math.min(hw, 1.2));
-          ctx.fill();
-        } else {
-          ctx.fillRect(-hw, -hh, p.w, p.h);
+        // ── 3. Mouse gravity ──────────────────────────────────────────────
+        if (m.on) {
+          const dx   = m.x - p.x;
+          const dy   = m.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          if (dist < MOUSE_REACH) {
+            // Gravity falls off with distance²; strongest near cursor
+            const f = K_MOUSE / (dist * dist) * (1 - dist / MOUSE_REACH);
+            p.vx += dx * f;
+            p.vy += dy * f;
+          }
         }
 
+        // ── 4. Integrate + damp ───────────────────────────────────────────
+        p.vx *= DAMPING;
+        p.vy *= DAMPING;
+        p.x  += p.vx;
+        p.y  += p.vy;
+
+        // ── 5. Wave effect — size pulse traveling across the sphere ────────
+        const wavePhase  = p.ny * WAVE_FY + p.theta * WAVE_FT - rot.wt * Math.PI * 2;
+        const wf         = Math.max(0.06, 0.42 + Math.sin(wavePhase) * WAVE_AMP);
+
+        const w  = p.bw * scale * wf;
+        const h  = p.bh * scale * wf;
+
+        // ── 6. Opacity: perspective × wave — boosted for dark bg ──────────
+        const alpha = Math.max(0.10, Math.min(0.98, scale * 1.1 * wf));
+
+        // ── 7. Color: hue gradient by latitude (blue→violet→orange) ───────
+        const baseHue = 220 + (p.ny + 1) * 0.5 * 190;
+        const hue     = (baseHue + rot.hue) % 360;
+
+        // ── 8. Bar angle: tangent to sphere surface ────────────────────────
+        const [trx, try_] = rot3(-p.nz * R, 0, p.nx * R, rot.ry, rot.rx);
+        const angle = Math.atan2(try_, trx);
+
+        cmds.push({ x: p.x, y: p.y, scale, w, h, angle, alpha, hue });
+      }
+
+      // Painter's algorithm: back-to-front (smallest scale = furthest away)
+      cmds.sort((a, b) => a.scale - b.scale);
+
+      for (const c of cmds) {
+        if (c.w < 0.3 || c.h < 0.3) continue;
+
+        const fill = `hsl(${c.hue.toFixed(1)},${SATURATION}%,${LIGHTNESS}%)`;
+
+        ctx.save();
+        ctx.globalAlpha = c.alpha;
+        ctx.fillStyle   = fill;
+        ctx.shadowBlur  = GLOW_BLUR;
+        ctx.shadowColor = fill;
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.angle);
+
+        const hw = c.w / 2, hh = c.h / 2;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(-hw, -hh, c.w, c.h, Math.min(hw, 1.5));
+        } else {
+          ctx.rect(-hw, -hh, c.w, c.h);
+        }
+        ctx.fill();
+        // Reset shadow to avoid bleed across particles
+        ctx.shadowBlur = 0;
         ctx.restore();
       }
 
@@ -179,6 +226,8 @@ export default function ParticleSphere() {
     return () => {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseleave", onLeave);
     };
   }, []);
 

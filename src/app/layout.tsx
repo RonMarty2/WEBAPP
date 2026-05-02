@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,14 +16,13 @@ export default function RootLayout({
     <html lang="es" className="h-full" suppressHydrationWarning>
       <head>
         {/*
-          Anti-flash script: lee el tema guardado y lo aplica ANTES del primer
-          paint. suppressHydrationWarning en <html> evita que React haga un
-          re-mount completo cuando detecta la diferencia de className.
-          NOTA: Este script corre síncronamente en el parser — nunca bloquea
-          la hidratación de los componentes hijos.
+          Anti-flash script: detecta el tema guardado y lo aplica ANTES del
+          primer paint para evitar el parpadeo blanco→oscuro.
+          strategy="beforeInteractive" garantiza ejecución antes de hidratación.
         */}
-        <script
-          suppressHydrationWarning
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`,
           }}

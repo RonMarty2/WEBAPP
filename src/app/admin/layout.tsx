@@ -127,12 +127,21 @@ const NAV_ITEMS = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  // Always start as null — server and client must render identically on first pass.
+  // Reading localStorage here would cause a hydration mismatch (server can't access it).
   const [authed, setAuthed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (pathname === "/admin/login") { setAuthed(true); return; }
-    const flag = typeof window !== "undefined" && localStorage.getItem("adminAuthed");
-    if (flag) { setAuthed(true); } else { window.location.replace("/admin/login"); }
+    // Don't act until we have a real pathname, and skip the login page itself.
+    if (!pathname || pathname.includes("/admin/login")) return;
+
+    const flag = localStorage.getItem("adminAuthed") === "1";
+    if (flag) {
+      setAuthed(true);
+    } else {
+      window.location.replace("/admin/login");
+    }
   }, [pathname]);
 
   const handleLogout = async () => {
@@ -141,13 +150,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     window.location.replace("/admin/login");
   };
 
-  // Login page — no sidebar
-  if (pathname === "/admin/login") return <>{children}</>;
+  // Login page — render children directly, no sidebar, no auth check.
+  // This guard fires BEFORE the authed===null spinner check below,
+  // so the login page never shows a loading state.
+  if (!pathname || pathname.includes("/admin/login")) return <>{children}</>;
 
-  // Auth check loading
+  // Brief spinner while useEffect reads localStorage on first mount.
   if (authed === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0B0F19]">
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0B0F19" }}>
         <div className="spinner" style={{ width: 32, height: 32 }} />
       </div>
     );

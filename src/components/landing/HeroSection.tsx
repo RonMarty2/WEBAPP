@@ -19,17 +19,17 @@ export default function HeroSection() {
         justifyContent: "center",
       }}
     >
-      {/* Radial halo — ensures text stays legible in both themes */}
+      {/* Radial halo — ensures text stays legible but lets particles show through */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "min(820px, 95vw)",
-          height: "520px",
-          background: "radial-gradient(ellipse at center, var(--bg-base) 28%, transparent 72%)",
-          opacity: 0.88,
+          width: "min(680px, 85vw)",
+          height: "420px",
+          background: "radial-gradient(ellipse at center, var(--bg-base) 18%, transparent 68%)",
+          opacity: 0.72,
           pointerEvents: "none",
           zIndex: 0,
           borderRadius: "50%",
