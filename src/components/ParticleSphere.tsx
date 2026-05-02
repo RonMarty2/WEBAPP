@@ -4,44 +4,41 @@ import { useEffect, useRef } from "react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Particle = {
-  nx: number; ny: number; nz: number;  // unit-sphere Fibonacci position
-  ph1: number;                         // random phase for organic variety
-  baseSize: number;                    // base size multiplier
-  spring: number;                      // per-particle spring (fluid smearing)
-  damping: number;                     // per-particle damping
-  x: number; y: number;                // live screen position
-  vx: number; vy: number;              // velocity
-  ready: boolean;
+  baseNx: number; baseNy: number; baseNz: number;  // 3D position inside the unit sphere
+  rDist: number;                       // Distance from center (0 to 1)
+  ph1: number;                         // Random phase for organic variety
+  baseSize: number;                    // Base size multiplier
 };
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
-const COUNT = 560;
+const COUNT = 600;
 const FOV   = 550;
 
-const ROT_Y = 0.0015;
-const ROT_X = 0.0008;
+const ROT_Y = 0.0010;
+const ROT_X = 0.0005;
 
-// Colours shift extremely slowly
 const HUE_SPEED = 0.002; 
 
-// ─── Fibonacci sphere ────────────────────────────────────────────────────────
+// ─── Volumetric Sphere ───────────────────────────────────────────────────────
 function buildParticles(): Particle[] {
   const golden = Math.PI * (3 - Math.sqrt(5));
   return Array.from({ length: COUNT }, (_, i) => {
+    // 1. Surface Fibonacci distribution (Perfectly ordered and symmetric)
     const ny = 1 - (i / (COUNT - 1)) * 2;
-    const r  = Math.sqrt(Math.max(0, 1 - ny * ny));
+    const surfaceR = Math.sqrt(Math.max(0, 1 - ny * ny));
     const th = golden * i;
+    
+    // 2. Volume distribution
+    // Pulls them closer to the center, creating a dense core symmetrically
+    const rDist = Math.pow(Math.random(), 0.8);
+    
     return {
-      nx: Math.cos(th) * r,
-      ny,
-      nz: Math.sin(th) * r,
+      baseNx: Math.cos(th) * surfaceR * rDist,
+      baseNy: ny * rDist,
+      baseNz: Math.sin(th) * surfaceR * rDist,
+      rDist,
       ph1: Math.random() * Math.PI * 2,
-      baseSize: 0.8 + Math.random() * 1.2,
-      // Extremely slow spring and very high damping for dramatic fluid drag
-      spring: 0.0015 + Math.random() * 0.0035, 
-      damping: 0.93 + Math.random() * 0.05,
-      x: 0, y: 0, vx: 0, vy: 0,
-      ready: false,
+      baseSize: 0.8 + Math.random() * 1.5,
     };
   });
 }
@@ -66,8 +63,10 @@ export default function ParticleSphere() {
   const rotRef    = useRef({ y: 0, x: 0 });
   const tRef      = useRef(0);
   const mouseRef  = useRef({ x: 0, y: 0, active: false });
-  // 'Gravity Center' that smoothly follows mouse or wanders
-  const gcRef     = useRef({ x: 0, y: 0, ready: false });
+  
+  // Physics body for the entire fluid mass
+  const gcRef     = useRef({ x: 0, y: 0, vx: 0, vy: 0, ready: false });
+  const condenseRef = useRef(0);
   const scrollFadeRef = useRef(1);
 
   useEffect(() => {
@@ -91,7 +90,6 @@ export default function ParticleSphere() {
         gcRef.current.y = window.innerHeight / 2;
         gcRef.current.ready = true;
       }
-      parts.current.forEach(p => { p.ready = false; });
     }
 
     // ── Mouse ─────────────────────────────────────────────────────────────────
@@ -99,10 +97,10 @@ export default function ParticleSphere() {
     function onMove(e: PointerEvent) {
       mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
       window.clearTimeout(idleTimeout);
-      // If mouse stops moving for 1.5 seconds, start wandering
+      // Start wandering if mouse is inactive for 2 seconds
       idleTimeout = window.setTimeout(() => {
         mouseRef.current.active = false;
-      }, 1500);
+      }, 2000);
     }
     function onLeave() { 
       mouseRef.current.active = false; 
@@ -139,112 +137,94 @@ export default function ParticleSphere() {
       ro.y += ROT_Y;
       ro.x += ROT_X;
 
-      // ── Gravity Center ────────────────────────────────────────────────────
-      // Where the fluid wants to converge.
+      // ── Gravity Center (Fluid Mass Target) ────────────────────────────────
       let targetX: number, targetY: number;
       if (m.active) {
         targetX = m.x;
         targetY = m.y;
       } else {
-        // Slow Lissajous wandering exploring extreme edges of the viewport
-        targetX = W * 0.5 + Math.sin(t * 0.0015) * (W * 0.45);
-        targetY = H * 0.5 + Math.cos(t * 0.0011 + 1.2) * (H * 0.42);
+        // Prominent Lissajous wandering exploring a large part of the screen
+        targetX = W * 0.5 + Math.sin(t * 0.008) * (W * 0.35);
+        targetY = H * 0.5 + Math.cos(t * 0.005 + 1.2) * (H * 0.30);
       }
 
-      // Smoothly move the gravity center itself (EXTREMELY SLOW for high latency drag)
-      gc.x += (targetX - gc.x) * 0.008;
-      gc.y += (targetY - gc.y) * 0.008;
+      // Smooth physics for the entire mass - perfectly tracking the center
+      gc.vx += (targetX - gc.x) * 0.015;
+      gc.vy += (targetY - gc.y) * 0.015;
+      gc.vx *= 0.88; // Friction
+      gc.vy *= 0.88;
+      gc.x += gc.vx;
+      gc.y += gc.vy;
 
-      // ── Overall Breathing ─────────────────────────────────────────────────
-      // The sphere grows and shrinks amorphously
-      const globalBreathe = 1 + 0.25 * Math.sin(t * 0.015) + 0.15 * Math.sin(t * 0.008);
-      // When mouse is active, the fluid "groups up" tighter
-      const tightness = m.active ? 0.75 : 1.0; 
-      const baseR = Math.max(200, Math.min(W, H) * 0.35) * globalBreathe * tightness;
+      // ── Dough Convergence ─────────────────────────────────────────────────
+      // When mouse is active, symmetrically condense the sphere
+      const targetCondense = m.active ? 1.0 : 0.0;
+      condenseRef.current += (targetCondense - condenseRef.current) * 0.05;
+      const condense = condenseRef.current;
+
+      // Overall Breathing (perfectly symmetric scaling)
+      const globalBreathe = 1 + 0.10 * Math.sin(t * 0.015);
+      const baseR = Math.max(200, Math.min(W, H) * 0.40) * globalBreathe;
 
       ctx.clearRect(0, 0, W, H);
       const canvasAlpha = scrollFadeRef.current;
 
       // ── Build draw commands ──────────────────────────────────────────────
       const cmds = parts.current.map(p => {
+        // Compress dough perfectly symmetrically towards center
+        const pullFactor = 1.0 - (condense * 0.3);
+        const nx = p.baseNx * pullFactor;
+        const ny = p.baseNy * pullFactor;
+        const nz = p.baseNz * pullFactor;
+
         // 1. Rotation
         const [rx, ry, rz] = rot3(
-          p.nx * baseR, p.ny * baseR, p.nz * baseR,
+          nx * baseR, ny * baseR, nz * baseR,
           ro.y, ro.x,
         );
 
         // 2. Spatial Wave (La Ola)
-        // Travels diagonally across the sphere, distorting shape and pulsing size
-        const wavePhase = (ry + rz) * 0.015 - t * 0.04 + p.ph1 * 0.2;
+        // Now it ONLY affects size and color, NOT the physical position.
+        // This ensures the shape remains perfectly spherical and non-deformed.
+        const wavePhase = (ry + rz) * 0.01 - t * 0.01 + p.ph1 * 0.1;
         const wave = Math.sin(wavePhase);
 
-        // Amorphous surface offset based on the wave
-        const rOffset = 1 + wave * 0.25;
-        const finalRx = rx * rOffset;
-        const finalRy = ry * rOffset;
-        const finalRz = rz * rOffset;
-
         // 3. Perspective
-        const depth = finalRz + FOV;
+        const depth = rz + FOV;
         const sc    = FOV / depth;
-        // Home position around the gravity center
-        const hx    = gc.x + finalRx * sc;
-        const hy    = gc.y + finalRy * sc;
 
-        if (!p.ready) { p.x = hx; p.y = hy; p.ready = true; }
+        // Perfectly ordered positions around the center
+        const hx = gc.x + rx * sc;
+        const hy = gc.y + ry * sc;
 
-        // 4. Fluid Physics (Per-particle spring)
-        // Because each particle has a different spring/damping, they smear
-        // when `gc` moves fast, looking like a tearing fluid.
-        p.vx += (hx - p.x) * p.spring;
-        p.vy += (hy - p.y) * p.spring;
-        p.vx *= p.damping;
-        p.vy *= p.damping;
-        p.x  += p.vx;
-        p.y  += p.vy;
-
-        // 5. Visual Size & Wave Pulse
-        // The wave strongly affects particle size to make "la ola" visible
-        const pulse = 1 + wave * 0.8; 
+        // 4. Visual Size
+        const pulse = 1 + wave * 0.4; 
         const sizeK = pulse * sc * p.baseSize;
 
-        // Stretch along velocity vector for fluid look
-        const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        const stretch = 1 + speed * 0.12; 
+        const w = Math.max(0.6, Math.min(4.0, sizeK * 1.5));
+        const h = Math.max(3.0, Math.min(22.0, sizeK * 6.0));
 
-        const w = Math.max(0.5, Math.min(4.0, sizeK * 1.5 / stretch));
-        const h = Math.max(2.0, Math.min(25.0, sizeK * 6.0 * stretch));
+        // 5. Symmetric Orientation (Radial)
+        // Point perfectly towards the center of gravity.
+        // "si vienen de arriba entonces miran hacia abajo"
+        const angle = Math.atan2(hy - gc.y, hx - gc.x) + Math.PI / 2;
 
-        // 6. Tangent / Velocity alignment
-        const [tx, ty] = rot3(-p.nz, 0, p.nx, ro.y, ro.x);
-        let dirX = tx;
-        let dirY = ty;
-        // Blend rotation towards velocity if moving fast (fluid streaks)
-        if (speed > 0.5) {
-          const vDirX = p.vx / speed;
-          const vDirY = p.vy / speed;
-          const blend = Math.min(1, (speed - 0.5) * 0.1);
-          dirX = dirX * (1 - blend) + vDirX * blend;
-          dirY = dirY * (1 - blend) + vDirY * blend;
-        }
-        const angle = Math.atan2(dirY, dirX);
-
-        // 7. Depth and Color
-        const zNorm   = (finalRz + baseR) / (baseR * 2);
-        const alpha   = Math.min(0.95, 0.2 + zNorm * 0.7);
+        // 6. Depth and Color
+        const zNorm   = (rz + baseR) / (baseR * 2);
+        const alpha   = Math.min(0.92, 0.25 + zNorm * 0.75);
 
         const globalHue = (t * HUE_SPEED * (180 / Math.PI)) % 360;
-        const hue       = (210 + globalHue + wave * 25 + p.ny * 40) % 360;
-        const sat       = 70 + wave * 20;
-        const lit       = 45 + zNorm * 15 + wave * 10;
+        const hue       = (210 + globalHue + wave * 20 + p.baseNy * 30) % 360;
+        const sat       = 75 + wave * 15;
+        const lit       = 46 + zNorm * 18 + wave * 10;
 
         return {
-          x: p.x, y: p.y, w, h, angle, alpha, sc,
+          x: hx, y: hy, w, h, angle, alpha, sc,
           color: `hsl(${hue.toFixed(1)} ${sat.toFixed(1)}% ${lit.toFixed(1)}%)`,
         };
       });
 
-      // Depth sort
+      // Depth sort (draw back to front)
       cmds.sort((a, b) => a.sc - b.sc);
 
       ctx.save();
@@ -275,10 +255,14 @@ export default function ParticleSphere() {
     resize();
     onScroll();
     window.addEventListener("resize",       resize);
-    // Use pointer events on document to ensure we catch movements correctly
+    // Use pointer events on document to ensure we catch movements
     document.addEventListener("pointermove",  onMove);
     document.addEventListener("pointerleave", onLeave);
     window.addEventListener("scroll",       onScroll, { passive: true });
+    
+    // Initial start to idle mode so it wanders immediately on load/mobile
+    mouseRef.current.active = false;
+    
     raf.current = requestAnimationFrame(tick);
 
     return () => {
