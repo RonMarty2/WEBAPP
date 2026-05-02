@@ -45,10 +45,11 @@ export default function UniversityCard({ univ, onEdit, onDelete }: UniversityCar
 
   return (
     <div className="
-      group flex items-start gap-4 p-5 rounded-2xl
-      bg-white border border-gray-100 shadow-sm
-      dark:bg-slate-900/80 dark:backdrop-blur-md dark:border-slate-800
-      transition-shadow duration-200 hover:shadow-md dark:hover:shadow-slate-900
+      group flex items-start gap-4 p-5 rounded-[24px]
+      bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl
+      border border-white/50 dark:border-white/10
+      shadow-[0_8px_32px_rgba(0,0,0,0.04)]
+      transition-all duration-300 hover:shadow-[0_16px_40px_rgba(99,102,241,0.15)] hover:-translate-y-1 hover:border-indigo-500/30
     ">
 
       {/* ── Main info ───────────────────────────────────────────────── */}
@@ -85,9 +86,9 @@ export default function UniversityCard({ univ, onEdit, onDelete }: UniversityCar
 
         {/* LaTeX prompt preview */}
         {univ.latex_prompt ? (
-          <div className="flex items-start gap-2 px-3 py-2 rounded-lg mb-3
-            bg-gray-100 dark:bg-black/50
-            border border-gray-200 dark:border-slate-700">
+          <div className="flex items-start gap-2 px-4 py-3 rounded-xl mb-3
+            bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm
+            border border-white/60 dark:border-white/10 shadow-[inset_0_2px_10px_rgba(255,255,255,0.6)]">
             <span className="mt-0.5 shrink-0 text-gray-400 dark:text-slate-500">
               <IconCode />
             </span>
@@ -123,12 +124,11 @@ export default function UniversityCard({ univ, onEdit, onDelete }: UniversityCar
         <button
           onClick={() => onEdit(univ)}
           className="
-            inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium
-            border border-gray-200 dark:border-slate-700
+            inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium
+            border border-gray-200/50 dark:border-white/10
             text-gray-600 dark:text-slate-300
-            hover:bg-gray-50 dark:hover:bg-slate-800
-            hover:border-gray-300 dark:hover:border-slate-600
-            transition-colors duration-150 cursor-pointer
+            hover:bg-indigo-500 hover:text-white hover:border-indigo-500
+            transition-all duration-200 cursor-pointer shadow-sm
           "
         >
           <IconEdit /> Editar
@@ -138,12 +138,11 @@ export default function UniversityCard({ univ, onEdit, onDelete }: UniversityCar
           <button
             onClick={() => onDelete(univ.id)}
             className="
-              inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-medium
-              border border-red-200 dark:border-red-900/50
+              inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-[12px] font-medium
+              border border-red-200/50 dark:border-red-900/30
               text-red-500 dark:text-red-400
-              hover:bg-red-50 dark:hover:bg-red-950/30
-              hover:border-red-300 dark:hover:border-red-800
-              transition-colors duration-150 cursor-pointer
+              hover:bg-red-500 hover:text-white hover:border-red-500
+              transition-all duration-200 cursor-pointer shadow-sm
             "
           >
             <IconTrash /> Eliminar

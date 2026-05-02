@@ -252,7 +252,7 @@ export default function AdminProyectosPage() {
           { label: "Completados",       value: proyectos.filter(p => p.completado).length,         color: "text-emerald-500 dark:text-emerald-400" },
           { label: "Avanzados (≥ f.3)", value: proyectos.filter(p => p.estado_fase >= 3).length,   color: "text-violet-500 dark:text-violet-400" },
         ].map(s => (
-          <div key={s.label} className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-4">
+          <div key={s.label} className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-5">
             <div className={`text-[28px] font-bold ${s.color}`}>{s.value}</div>
             <div className="text-[12px] text-gray-400 dark:text-slate-500 mt-1">{s.label}</div>
           </div>
@@ -294,7 +294,7 @@ export default function AdminProyectosPage() {
           {[1, 2, 3].map(i => <div key={i} className="card shimmer" style={{ height: 64 }} />)}
         </div>
       ) : proyectosFiltrados.length === 0 ? (
-        <div className="bg-white dark:bg-slate-900/50 border border-dashed border-gray-200 dark:border-slate-700 rounded-2xl text-center p-12">
+        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-dashed border-white/50 dark:border-white/10 rounded-3xl text-center p-12">
           <div className="text-4xl mb-3 opacity-30">📁</div>
           <div className="text-[14px] text-gray-400 dark:text-slate-500">No hay proyectos todavía.</div>
         </div>
@@ -304,7 +304,7 @@ export default function AdminProyectosPage() {
             const titulo = p.tema_aprobado || p.titulo_provisional || "Sin título";
             const fasesConContenido = [0,1,2,3,4,5].filter(n => p[`contenido_fase_${n}` as keyof Proyecto]);
             return (
-              <div key={p.id} className="bg-white dark:bg-slate-900/50 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-sm p-5">
+              <div key={p.id} className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.04)] p-6 transition-all duration-300 hover:shadow-[0_16px_40px_rgba(99,102,241,0.15)] hover:-translate-y-1 hover:border-indigo-500/30">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="min-w-0 flex-1">
                     {/* Título — forzado visible */}
@@ -343,11 +343,11 @@ export default function AdminProyectosPage() {
                       href={`/projects/${p.id}/workspace`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full text-[13px] font-medium no-underline
-                                 border border-gray-300 dark:border-slate-700
+                      className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-[13px] font-medium no-underline
+                                 border border-gray-300/50 dark:border-white/10
                                  text-gray-900 dark:text-white
-                                 hover:bg-gray-50 dark:hover:bg-slate-800
-                                 transition-colors duration-150"
+                                 hover:bg-indigo-500 hover:text-white hover:border-indigo-500
+                                 transition-all duration-200 shadow-sm"
                     >
                       Workspace →
                     </a>

@@ -165,12 +165,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="admin-layout flex min-h-screen bg-gray-50 dark:bg-[#0B0F19]">
+    <div className="admin-layout flex min-h-screen bg-transparent relative z-10">
 
       {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      <aside className="w-[240px] shrink-0 flex flex-col sticky top-0 h-screen overflow-y-auto
-                        bg-white dark:bg-slate-950
-                        border-r border-gray-200 dark:border-slate-800">
+      <aside className="w-[240px] shrink-0 flex flex-col sticky top-0 h-screen overflow-y-auto glass-sidebar shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
 
         {/* Logo */}
         <div className="flex items-center gap-2.5 px-6 pt-6 pb-3">
@@ -202,8 +200,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={[
                   "flex items-center gap-2.5 px-4 py-2 rounded-xl text-[13px] transition-colors duration-150 no-underline",
                   isActive
-                    ? "bg-gray-100 dark:bg-slate-800 text-black dark:text-white font-semibold"
-                    : "font-medium text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800",
+                    ? "bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-semibold shadow-[inset_2px_0_0_#6366f1]"
+                    : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-all",
                 ].join(" ")}
               >
                 <span className="shrink-0 opacity-80"><Icon /></span>
@@ -218,8 +216,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <a
             href="/dashboard"
             className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-[12px] font-medium
-                       text-blue-600 dark:text-blue-400
-                       hover:bg-blue-50 dark:hover:bg-blue-950/40
+                       text-indigo-600 dark:text-indigo-400
+                       hover:bg-indigo-50 dark:hover:bg-indigo-950/40
                        transition-colors duration-150 no-underline"
           >
             <IconUser /> Vista estudiante

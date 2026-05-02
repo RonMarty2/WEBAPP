@@ -160,10 +160,10 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── KPI cards ───────────────────────────────── */}
-      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
+      <div className="grid gap-6 mb-10" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
         {STATS.map(stat => (
           <div key={stat.label}
-            className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-5 flex flex-col items-center text-center"
+            className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex flex-col items-center text-center"
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${stat.ring} ${stat.accent}`}>
               {stat.icon}
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
 
       {/* ── IA usage ────────────────────────────────── */}
       {stats && (
-        <div className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-5 mb-8">
+        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] mb-10">
           <div className="text-[11px] font-700 text-gray-400 dark:text-slate-500 uppercase tracking-[0.07em] mb-4 font-semibold">
             Llamadas a IA esta sesión
           </div>
@@ -203,16 +203,17 @@ export default function AdminDashboard() {
       <h2 className="text-[17px] font-semibold text-gray-900 dark:text-white tracking-tight mb-4">
         Acciones Rápidas
       </h2>
-      <div className="grid gap-4 mb-8" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
+      <div className="grid gap-6 mb-10" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
         {QUICK_ACTIONS.map(action => (
           <a key={action.href} href={action.href}
-            className="group bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-5
-                       no-underline block hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+            className="group bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6
+                       no-underline block hover:shadow-[0_16px_40px_rgba(99,102,241,0.15)] hover:-translate-y-1 hover:border-indigo-500/30 transition-all duration-300"
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3
-                            bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-slate-400
-                            group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black
-                            transition-colors duration-200">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4
+                            bg-white/60 dark:bg-slate-800 text-gray-600 dark:text-slate-300 shadow-[inset_0_2px_10px_rgba(255,255,255,0.6)]
+                            group-hover:bg-indigo-500 group-hover:text-white dark:group-hover:bg-indigo-500 dark:group-hover:text-white
+                            group-hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]
+                            transition-all duration-300">
               {action.icon}
             </div>
             <h3 className="text-[14px] font-semibold text-gray-900 dark:text-white mb-1.5">{action.title}</h3>
@@ -226,7 +227,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* ── System status ────────────────────────────── */}
-      <div className="bg-white dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 rounded-2xl shadow-sm p-5">
+      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
         <div className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.07em] mb-4">
           Estado del sistema
         </div>

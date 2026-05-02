@@ -291,11 +291,11 @@ export default function PromptsPage() {
   const autoCtx = AUTO_CONTEXT[selected];
 
   return (
-    <div className="fade-in" style={{ display: "flex", gap: 24, height: "calc(100vh - 64px)" }}>
+    <div className="fade-in" style={{ display: "flex", gap: 32, height: "calc(100vh - 64px)" }}>
 
       {/* ── Sidebar ── */}
-      <div style={{ width: 230, flexShrink: 0, display: "flex", flexDirection: "column", gap: 4 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 800, marginBottom: 14 }}>✍️ Prompts del Workspace</h1>
+      <div className="glass-panel" style={{ width: 280, flexShrink: 0, display: "flex", flexDirection: "column", gap: 4, padding: "28px 24px" }}>
+        <h1 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16 }}>✍️ Prompts del Workspace</h1>
 
         {SIDEBAR_ITEMS.map((item, idx) => {
           const isSelected = selected === item.key;
@@ -351,7 +351,7 @@ export default function PromptsPage() {
       </div>
 
       {/* ── Editor ── */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div className="glass-panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", padding: "32px 40px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
@@ -393,10 +393,10 @@ export default function PromptsPage() {
 
         {/* ── Calibration CRUD ── */}
         {isCalib && (
-          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 24, paddingRight: 8 }}>
             {/* Add new question */}
-            <div className="card" style={{ padding: 18 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>Agregar nueva pregunta</h3>
+            <div style={{ paddingBottom: 24, borderBottom: "1px solid var(--border)" }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, color: "var(--accent)" }}>Agregar nueva pregunta</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <div>
                   <label className="label">Pregunta *</label>
@@ -445,9 +445,9 @@ export default function PromptsPage() {
             {loadingCalib ? (
               <div style={{ textAlign: "center", padding: 24 }}><div className="spinner" style={{ width: 24, height: 24 }} /></div>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {calibPreguntas.map((q, i) => (
-                  <div key={q.id} className="card" style={{ padding: 16 }}>
+                  <div key={q.id} style={{ padding: 16, background: "rgba(255,255,255,0.4)", borderRadius: 16, border: "1px solid var(--border)" }}>
                     {editingId === q.id ? (
                       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                         <textarea
@@ -525,11 +525,11 @@ export default function PromptsPage() {
 
         {/* ── Style Analyzer Prompt ── */}
         {isEstiloAnalizador && (
-          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ padding: "9px 14px", background: "rgba(52,211,153,0.04)", borderRadius: 8, border: "1px solid rgba(52,211,153,0.12)", fontSize: 12, color: "var(--fg-muted)" }}>
+          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 16, paddingRight: 8 }}>
+            <div style={{ padding: "12px 16px", background: "rgba(52,211,153,0.08)", borderRadius: 12, border: "1px solid rgba(52,211,153,0.2)", fontSize: 13, color: "var(--fg-primary)", fontWeight: 500 }}>
               🧬 Este prompt se usa cuando el estudiante completa la calibración de estilo en Modo Guiado. Recibe las respuestas del estudiante y debe generar un PERFIL DE ESTILO que la IA usará en todas las fases.
             </div>
-            <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: 8 }}>
               <label className="label">Prompt del Analizador de Estilo</label>
               <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                 El User Message contendrá automáticamente las respuestas de calibración del estudiante.
@@ -547,8 +547,8 @@ export default function PromptsPage() {
 
         {/* ── Hilos Conductores ── */}
         {isHilos && (
-          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12, paddingRight: 8 }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               <label className="label">Reglas inmutables (una por línea)</label>
               <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                 Se añaden al final del prompt de sistema de CADA fase, con menor prioridad que el prompt de fase y el perfil de estilo del usuario.
@@ -572,25 +572,25 @@ export default function PromptsPage() {
 
         {/* ── Onboarding prompt (single) ── */}
         {isOnboarding && (
-          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 16, paddingRight: 8 }}>
             {autoCtx && (
-              <div style={{ borderRadius: 8, border: "1px solid rgba(37,99,235,0.15)", overflow: "hidden" }}>
+              <div style={{ borderRadius: 12, border: "1px solid rgba(37,99,235,0.2)", overflow: "hidden", background: "rgba(255,255,255,0.5)" }}>
                 <button
                   onClick={() => setShowContext(v => !v)}
-                  style={{ width: "100%", padding: "9px 14px", background: "rgba(37,99,235,0.06)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--fg-muted)", textAlign: "left" }}
+                  style={{ width: "100%", padding: "12px 16px", background: "rgba(37,99,235,0.08)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--fg-primary)", fontWeight: 500, textAlign: "left" }}
                 >
                   <span style={{ color: "var(--accent)" }}>📥</span>
                   <span style={{ flex: 1 }}>Datos del estudiante inyectados automáticamente</span>
                   <span style={{ fontSize: 10 }}>{showContext ? "▲" : "▼"}</span>
                 </button>
                 {showContext && (
-                  <pre style={{ margin: 0, padding: "10px 14px", background: "rgba(0,0,0,0.2)", fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                  <pre style={{ margin: 0, padding: "16px", background: "rgba(0,0,0,0.03)", fontFamily: "JetBrains Mono, monospace", fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                     {autoCtx}
                   </pre>
                 )}
               </div>
             )}
-            <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: 8 }}>
               <label className="label">Prompt del Generador de Temas</label>
               <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                 Instrucciones para que la IA proponga 3 temas viables. Los datos del estudiante llegan automáticamente en el User Message.
@@ -610,9 +610,9 @@ export default function PromptsPage() {
 
         {/* ── Phase prompts (dual: borrador / final) ── */}
         {isPhase && (
-          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 16, paddingRight: 8 }}>
             {/* Context notice */}
-            <div style={{ padding: "9px 14px", background: "rgba(37,99,235,0.04)", borderRadius: 8, border: "1px solid rgba(37,99,235,0.1)", fontSize: 12, color: "var(--fg-muted)" }}>
+            <div style={{ padding: "12px 16px", background: "rgba(37,99,235,0.08)", borderRadius: 12, border: "1px solid rgba(37,99,235,0.2)", fontSize: 13, color: "var(--fg-primary)", fontWeight: 500 }}>
               🔄{" "}
               {selected === "0"
                 ? "Primera fase del workspace — el tema aprobado llega en el User Message."
@@ -621,14 +621,15 @@ export default function PromptsPage() {
             </div>
 
             {/* Dual prompt tab selector */}
-            <div style={{ display: "flex", gap: 8 }}>
+            <div style={{ display: "flex", gap: 12, marginTop: 4 }}>
               <button
                 onClick={() => setActiveTab("borrador")}
                 style={{
-                  flex: 1, padding: "10px", fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
-                  background: activeTab === "borrador" ? "rgba(167,139,250,0.12)" : "transparent",
-                  border: activeTab === "borrador" ? "1.5px solid rgba(167,139,250,0.4)" : "1.5px solid var(--border)",
-                  color: activeTab === "borrador" ? "#a78bfa" : "var(--fg-secondary)",
+                  flex: 1, padding: "12px", fontSize: 14, fontWeight: 600, borderRadius: 12, cursor: "pointer",
+                  background: activeTab === "borrador" ? "rgba(167,139,250,0.15)" : "rgba(255,255,255,0.5)",
+                  border: activeTab === "borrador" ? "1.5px solid rgba(167,139,250,0.5)" : "1.5px solid var(--border)",
+                  color: activeTab === "borrador" ? "#8b5cf6" : "var(--fg-secondary)",
+                  transition: "all 0.2s"
                 }}
               >
                 📝 Prompt Borrador
@@ -636,10 +637,11 @@ export default function PromptsPage() {
               <button
                 onClick={() => setActiveTab("final")}
                 style={{
-                  flex: 1, padding: "10px", fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
-                  background: activeTab === "final" ? "rgba(37,99,235,0.12)" : "transparent",
-                  border: activeTab === "final" ? "1.5px solid rgba(37,99,235,0.4)" : "1.5px solid var(--border)",
+                  flex: 1, padding: "12px", fontSize: 14, fontWeight: 600, borderRadius: 12, cursor: "pointer",
+                  background: activeTab === "final" ? "rgba(37,99,235,0.15)" : "rgba(255,255,255,0.5)",
+                  border: activeTab === "final" ? "1.5px solid rgba(37,99,235,0.5)" : "1.5px solid var(--border)",
                   color: activeTab === "final" ? "var(--accent)" : "var(--fg-secondary)",
+                  transition: "all 0.2s"
                 }}
               >
                 ✨ Prompt Final
@@ -647,14 +649,14 @@ export default function PromptsPage() {
             </div>
 
             {/* Info for current tab */}
-            <div style={{ padding: "8px 12px", background: activeTab === "borrador" ? "rgba(167,139,250,0.05)" : "rgba(37,99,235,0.05)", borderRadius: 6, border: `1px solid ${activeTab === "borrador" ? "rgba(167,139,250,0.15)" : "rgba(37,99,235,0.15)"}`, fontSize: 12, color: "var(--fg-muted)" }}>
+            <div style={{ padding: "10px 14px", background: activeTab === "borrador" ? "rgba(167,139,250,0.06)" : "rgba(37,99,235,0.06)", borderRadius: 8, border: `1px solid ${activeTab === "borrador" ? "rgba(167,139,250,0.2)" : "rgba(37,99,235,0.2)"}`, fontSize: 12, color: "var(--fg-muted)" }}>
               {activeTab === "borrador"
                 ? "📝 Se usa en Modo Guiado para la primera pasada. El estudiante lo revisará antes de pedir la versión final."
                 : "✨ Se usa en Modo Guiado para generar la versión final. Recibirá el borrador + feedback del estudiante. En Modo Directo, siempre se usa el Prompt Borrador."}
             </div>
 
             {activeTab === "borrador" ? (
-              <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: 8 }}>
                 <label className="label">Prompt Borrador — {currentPhaseData?.label}</label>
                 <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                   Primera generación. En Modo Directo, este prompt también se usa para el contenido final.
@@ -670,7 +672,7 @@ export default function PromptsPage() {
                 </p>
               </div>
             ) : (
-              <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", marginTop: 8 }}>
                 <label className="label">Prompt Final — {currentPhaseData?.label}</label>
                 <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                   Segunda generación en Modo Guiado. El User Message incluirá automáticamente el borrador previo y el feedback del estudiante.
