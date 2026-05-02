@@ -62,13 +62,13 @@ function ProductCard({ nombre, desc, etiqueta, onStart }: { nombre: string; desc
       <div style={{
         position: "absolute", top: 14, right: 14,
         fontSize: 11, fontWeight: 600,
-        background: available ? "#f0fdf4" : "#f8fafc",
-        border: `1px solid ${available ? "#bbf7d0" : "#e2e8f0"}`,
-        color: available ? "#16a34a" : "#94a3b8",
+        background: available ? "#f0fdf4" : "var(--bg-subtle)",
+        border: `1px solid ${available ? "#bbf7d0" : "var(--border)"}`,
+        color: available ? "#16a34a" : "var(--fg-muted)",
         borderRadius: 6, padding: "2px 8px",
       }}>{etiqueta}</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{nombre}</div>
-      <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.65, flex: 1 }}>{desc}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)" }}>{nombre}</div>
+      <div style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.65, flex: 1 }}>{desc}</div>
       {available && onStart && (
         <button
           onClick={onStart}
@@ -102,13 +102,13 @@ export default function FeaturesSection() {
       {/* ── Garantías strip ──────────────────────────────────────────── */}
       <section style={{ marginBottom: 88 }}>
         <div style={{
-          background: "white", border: "1px solid #e2e8f0",
+          background: "white", border: "1px solid var(--border)",
           borderRadius: 16, padding: "18px 28px",
           display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center",
           boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)",
         }}>
           {GARANTIAS.map(g => (
-            <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "#475569", padding: "4px 10px" }}>
+            <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "var(--fg-secondary)", padding: "4px 10px" }}>
               <span style={{ color: "#16a34a", fontWeight: 700 }}>{g.icono}</span>
               <span>{g.texto}</span>
             </div>
@@ -121,8 +121,8 @@ export default function FeaturesSection() {
         {/* Toggle */}
         <div style={{ display: "flex", justifyContent: "center", marginBottom: 48 }}>
           <div style={{
-            display: "inline-flex", background: "#f8fafc",
-            border: "1px solid #e2e8f0", borderRadius: 12, padding: 4, gap: 4,
+            display: "inline-flex", background: "var(--bg-subtle)",
+            border: "1px solid var(--border)", borderRadius: 12, padding: 4, gap: 4,
           }}>
             {(["estudiante", "docente"] as Audiencia[]).map(a => (
               <button
@@ -133,8 +133,8 @@ export default function FeaturesSection() {
                   padding: "10px 28px", borderRadius: 8, border: "none",
                   cursor: "pointer", fontSize: 14, fontWeight: 600,
                   transition: "all 0.18s ease",
-                  background: audiencia === a ? "#0f172a" : "transparent",
-                  color: audiencia === a ? "white" : "#64748b",
+                  background: audiencia === a ? "#0b0b0b" : "transparent",
+                  color: audiencia === a ? "white" : "var(--fg-muted)",
                 }}
               >
                 {a === "estudiante" ? "Para Estudiantes" : "Para Docentes"}
@@ -145,10 +145,10 @@ export default function FeaturesSection() {
 
         {/* Section title */}
         <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: "#0f172a", marginBottom: 6 }}>
+          <h2 style={{ fontSize: 28, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 6 }}>
             {audiencia === "estudiante" ? "Para Estudiantes" : "Para Docentes"}
           </h2>
-          <p style={{ color: "#64748b", fontSize: 15 }}>
+          <p style={{ color: "var(--fg-muted)", fontSize: 15 }}>
             {audiencia === "estudiante"
               ? "Genera tus trabajos académicos con IA — desde monografías hasta tesis de grado."
               : "Prepara clases, evalúa con rúbricas y crea material didáctico en minutos."}
@@ -169,10 +169,10 @@ export default function FeaturesSection() {
       {/* ── Planes ──────────────────────────────────────────────────── */}
       <section id="planes" style={{ marginBottom: 88 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <h2 style={{ fontSize: 32, fontWeight: 800, color: "#0f172a", marginBottom: 8, letterSpacing: "-0.02em" }}>
+          <h2 style={{ fontSize: 32, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 8, letterSpacing: 0 }}>
             Planes y precios
           </h2>
-          <p style={{ color: "#64748b", fontSize: 16 }}>Sin suscripción obligatoria · Pago único o mensual</p>
+          <p style={{ color: "var(--fg-muted)", fontSize: 16 }}>Sin suscripción obligatoria · Pago único o mensual</p>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, maxWidth: 680, margin: "0 auto" }}>
@@ -182,26 +182,26 @@ export default function FeaturesSection() {
               className="card"
               style={{
                 position: "relative",
-                border: plan.popular ? "2px solid #0f172a" : undefined,
+                border: plan.popular ? "2px solid #0b0b0b" : undefined,
                 paddingTop: plan.popular ? 32 : undefined,
               }}
             >
               {plan.popular && (
                 <div style={{
                   position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
-                  background: "#0f172a", color: "white",
+                  background: "#0b0b0b", color: "white",
                   borderRadius: 999, padding: "3px 16px",
                   fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
                 }}>
                   Más popular
                 </div>
               )}
-              <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a", marginBottom: 6 }}>{plan.nombre}</div>
-              <div style={{ fontSize: 36, fontWeight: 900, color: "#0f172a", lineHeight: 1, marginBottom: 4 }}>{plan.precio}</div>
-              <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: 24 }}>{plan.nota}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)", marginBottom: 6 }}>{plan.nombre}</div>
+              <div style={{ fontSize: 36, fontWeight: 900, color: "var(--fg-primary)", lineHeight: 1, marginBottom: 4 }}>{plan.precio}</div>
+              <div style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 24 }}>{plan.nota}</div>
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9, marginBottom: 28 }}>
                 {plan.items.map(item => (
-                  <li key={item} style={{ display: "flex", gap: 9, fontSize: 14, color: "#475569", alignItems: "flex-start" }}>
+                  <li key={item} style={{ display: "flex", gap: 9, fontSize: 14, color: "var(--fg-secondary)", alignItems: "flex-start" }}>
                     <span style={{ color: "#16a34a", fontWeight: 700, flexShrink: 0 }}>✓</span>
                     <span>{item}</span>
                   </li>
@@ -218,8 +218,8 @@ export default function FeaturesSection() {
               <div style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: "7px 10px", borderRadius: 7,
-                background: "#f8fafc", border: "1px dashed #e2e8f0",
-                fontSize: 11, color: "#94a3b8",
+                background: "var(--bg-subtle)", border: "1px dashed var(--border)",
+                fontSize: 11, color: "var(--fg-muted)",
               }}>
                 Pago por QR / Libélula · Activación en 24h
               </div>
@@ -227,7 +227,7 @@ export default function FeaturesSection() {
           ))}
         </div>
 
-        <p style={{ marginTop: 28, textAlign: "center", fontSize: 13, color: "#94a3b8", lineHeight: 1.8 }}>
+        <p style={{ marginTop: 28, textAlign: "center", fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.8 }}>
           El pago se coordina por QR o transferencia bancaria.<br />
           Recibirás acceso en menos de 24 horas tras confirmar el pago.
         </p>
@@ -236,19 +236,19 @@ export default function FeaturesSection() {
       {/* ── CTA final ───────────────────────────────────────────────── */}
       <section style={{ textAlign: "center", marginBottom: 80 }}>
         <div style={{
-          background: "#0f172a", borderRadius: 24, padding: "56px 32px",
+          background: "#0b0b0b", borderRadius: 8, padding: "56px 32px",
         }}>
-          <h3 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 12, letterSpacing: "-0.02em" }}>
+          <h3 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 12, letterSpacing: 0 }}>
             ¿Listo para empezar?
           </h3>
-          <p style={{ color: "#94a3b8", fontSize: 16, marginBottom: 32, maxWidth: 460, margin: "0 auto 32px" }}>
+          <p style={{ color: "var(--fg-muted)", fontSize: 16, marginBottom: 32, maxWidth: 460, margin: "0 auto 32px" }}>
             Regístrate con tu cuenta Google y espera la activación. En menos de 24 horas tendrás acceso completo.
           </p>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
             <a href="/login" id="cta-final-crear" className="btn-accent" style={{ padding: "14px 36px", fontSize: 15 }}>
               Crear cuenta →
             </a>
-            <a href="#planes" className="btn-secondary" style={{ padding: "14px 28px", fontSize: 14, color: "white", borderColor: "#334155" }}>
+            <a href="#planes" className="btn-secondary" style={{ padding: "14px 28px", fontSize: 14, color: "white", background: "transparent", borderColor: "rgba(255,255,255,0.28)" }}>
               Ver planes
             </a>
           </div>

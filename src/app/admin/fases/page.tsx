@@ -134,11 +134,11 @@ export default function FasesPage() {
   }
 
   const inputStyle: React.CSSProperties = {
-    background: "#0a1628", border: "1px solid #1e293b", borderRadius: 6,
-    color: "#e2e8f0", padding: "8px 10px", fontSize: 13, width: "100%",
+    background: "var(--bg-subtle)", border: "1px solid var(--border)", borderRadius: 6,
+    color: "var(--fg-primary)", padding: "8px 10px", fontSize: 13, width: "100%",
   };
   const labelStyle: React.CSSProperties = {
-    fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase",
+    fontSize: 11, color: "var(--fg-muted)", fontWeight: 600, textTransform: "uppercase",
     letterSpacing: "0.08em", marginBottom: 4, display: "block",
   };
 
@@ -147,7 +147,7 @@ export default function FasesPage() {
       <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>📋 Fases del Proyecto</h1>
-          <p style={{ fontSize: 13, color: "#475569", margin: "4px 0 0" }}>
+          <p style={{ fontSize: 13, color: "var(--fg-secondary)", margin: "4px 0 0" }}>
             Define las fases de generación para cada tipo de proyecto. Cada fase tiene su propio prompt de IA.
           </p>
         </div>
@@ -155,7 +155,7 @@ export default function FasesPage() {
 
       {/* Service selector */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <label style={{ fontSize: 13, color: "#94a3b8", fontWeight: 600 }}>Tipo de proyecto:</label>
+        <label style={{ fontSize: 13, color: "var(--fg-muted)", fontWeight: 600 }}>Tipo de proyecto:</label>
         <select
           value={servicioId}
           onChange={e => setServicioId(e.target.value)}
@@ -209,7 +209,7 @@ export default function FasesPage() {
                 <div
                   key={phase.id}
                   style={{
-                    background: "#060f1e", border: `1px solid ${isEditing ? "rgba(6,182,212,0.35)" : "rgba(6,182,212,0.1)"}`,
+                    background: "rgba(255,255,255,0.90)", border: `1px solid ${isEditing ? "rgba(37,99,235,0.35)" : "rgba(37,99,235,0.1)"}`,
                     borderRadius: 10, padding: "14px 16px", transition: "border-color 0.15s",
                   }}
                 >
@@ -241,7 +241,7 @@ export default function FasesPage() {
                           value={editDraft.prompt ?? phase.prompt}
                           onChange={e => setEditDraft(d => ({ ...d, prompt: e.target.value }))}
                         />
-                        <p style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>
+                        <p style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 4 }}>
                           El contexto de fases anteriores y los Hilos Conductores se añaden automáticamente — no los repitas aquí.
                         </p>
                       </div>
@@ -257,15 +257,15 @@ export default function FasesPage() {
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{
                         width: 28, height: 28, borderRadius: 6,
-                        background: "rgba(6,182,212,0.12)", border: "1px solid rgba(6,182,212,0.25)",
+                        background: "rgba(37,99,235,0.12)", border: "1px solid rgba(37,99,235,0.25)",
                         display: "flex", alignItems: "center", justifyContent: "center",
-                        fontSize: 11, fontWeight: 700, color: "#06b6d4", flexShrink: 0,
+                        fontSize: 11, fontWeight: 700, color: "var(--accent)", flexShrink: 0,
                       }}>
                         {idx + 1}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{phase.label}</div>
-                        <div style={{ fontSize: 11, color: "#475569" }}>
+                        <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)" }}>{phase.label}</div>
+                        <div style={{ fontSize: 11, color: "var(--fg-secondary)" }}>
                           {phase.short_label} · {phase.prompt ? `${phase.prompt.split(/\s+/).slice(0, 8).join(" ")}…` : "Sin prompt"}
                         </div>
                       </div>
@@ -273,12 +273,12 @@ export default function FasesPage() {
                         <button
                           onClick={() => reorder(phase.id, "up")}
                           disabled={idx === 0}
-                          style={{ width: 28, height: 28, background: idx === 0 ? "#0a1628" : "transparent", border: "1px solid #1e293b", borderRadius: 6, color: idx === 0 ? "#1e293b" : "#64748b", cursor: idx === 0 ? "not-allowed" : "pointer", fontSize: 13 }}
+                          style={{ width: 28, height: 28, background: idx === 0 ? "var(--bg-subtle)" : "transparent", border: "1px solid var(--border)", borderRadius: 6, color: idx === 0 ? "var(--border)" : "var(--fg-muted)", cursor: idx === 0 ? "not-allowed" : "pointer", fontSize: 13 }}
                         >↑</button>
                         <button
                           onClick={() => reorder(phase.id, "down")}
                           disabled={idx === phases.length - 1}
-                          style={{ width: 28, height: 28, background: idx === phases.length - 1 ? "#0a1628" : "transparent", border: "1px solid #1e293b", borderRadius: 6, color: idx === phases.length - 1 ? "#1e293b" : "#64748b", cursor: idx === phases.length - 1 ? "not-allowed" : "pointer", fontSize: 13 }}
+                          style={{ width: 28, height: 28, background: idx === phases.length - 1 ? "var(--bg-subtle)" : "transparent", border: "1px solid var(--border)", borderRadius: 6, color: idx === phases.length - 1 ? "var(--border)" : "var(--fg-muted)", cursor: idx === phases.length - 1 ? "not-allowed" : "pointer", fontSize: 13 }}
                         >↓</button>
                         <button
                           onClick={() => { setEditingId(phase.id); setEditDraft({}); }}
@@ -303,7 +303,7 @@ export default function FasesPage() {
           {!isDefault && (
             <div style={{ marginTop: 16 }}>
               {showAddForm ? (
-                <div style={{ background: "#060f1e", border: "1px solid rgba(167,139,250,0.25)", borderRadius: 10, padding: "16px" }}>
+                <div style={{ background: "rgba(255,255,255,0.90)", border: "1px solid rgba(167,139,250,0.25)", borderRadius: 10, padding: "16px" }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: "#a78bfa", marginBottom: 14 }}>➕ Nueva Fase</div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                     <div>
@@ -343,8 +343,8 @@ export default function FasesPage() {
           )}
 
           {/* Info */}
-          <div style={{ marginTop: 28, padding: "14px 16px", background: "rgba(6,182,212,0.04)", borderRadius: 8, border: "1px solid rgba(6,182,212,0.1)", fontSize: 12, color: "#475569", lineHeight: 1.7 }}>
-            <strong style={{ color: "#64748b" }}>¿Cómo funciona?</strong><br />
+          <div style={{ marginTop: 28, padding: "14px 16px", background: "rgba(37,99,235,0.04)", borderRadius: 8, border: "1px solid rgba(37,99,235,0.1)", fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.7 }}>
+            <strong style={{ color: "var(--fg-muted)" }}>¿Cómo funciona?</strong><br />
             Cada fase que crees aquí aparecerá en el workspace del estudiante en el orden definido.
             El <strong>prompt</strong> de cada fase es el System Prompt que recibe la IA.
             El código inyecta automáticamente: el tema aprobado + el contenido de todas las fases anteriores completadas.

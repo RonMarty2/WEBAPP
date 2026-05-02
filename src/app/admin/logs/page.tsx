@@ -15,7 +15,7 @@ interface LogEntry {
 const NIVEL_COLORS: Record<string, string> = {
   critical: "#f87171",
   warning: "#f59e0b",
-  info: "#94a3b8",
+  info: "var(--fg-muted)",
 };
 
 const NIVEL_BG: Record<string, string> = {
@@ -70,7 +70,7 @@ export default function LogsPage() {
     <div className="fade-in">
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>🪵 Logs de Errores</h1>
-        <p style={{ color: "#94a3b8", fontSize: 13 }}>
+        <p style={{ color: "var(--fg-muted)", fontSize: 13 }}>
           Errores de generación registrados en sesión. Se reinician al reiniciar el servidor.
         </p>
       </div>
@@ -78,14 +78,14 @@ export default function LogsPage() {
       {/* Resumen */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
         {[
-          { label: "Total logs", value: total, color: "#94a3b8" },
+          { label: "Total logs", value: total, color: "var(--fg-muted)" },
           { label: "Críticos", value: criticos, color: "#f87171" },
           { label: "Advertencias", value: advertencias, color: "#f59e0b" },
-          { label: "Info", value: total - criticos - advertencias, color: "#64748b" },
+          { label: "Info", value: total - criticos - advertencias, color: "var(--fg-muted)" },
         ].map(s => (
           <div key={s.label} className="card" style={{ textAlign: "center", padding: "14px 10px" }}>
             <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: "#475569", marginTop: 3 }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 3 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -100,16 +100,16 @@ export default function LogsPage() {
               style={{
                 padding: "6px 12px", borderRadius: 6, border: "1px solid",
                 fontSize: 12, cursor: "pointer",
-                background: filtroNivel === n ? "rgba(6,182,212,0.15)" : "transparent",
-                borderColor: filtroNivel === n ? "#06b6d4" : "#1e293b",
-                color: filtroNivel === n ? "#06b6d4" : "#64748b",
+                background: filtroNivel === n ? "rgba(37,99,235,0.15)" : "transparent",
+                borderColor: filtroNivel === n ? "var(--accent)" : "var(--border)",
+                color: filtroNivel === n ? "var(--accent)" : "var(--fg-muted)",
               }}
             >
               {n === "" ? "Todos" : n.charAt(0).toUpperCase() + n.slice(1)}
             </button>
           ))}
         </div>
-        <button onClick={cargarLogs} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid #1e293b", background: "transparent", color: "#94a3b8", fontSize: 12, cursor: "pointer" }}>
+        <button onClick={cargarLogs} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid var(--border)", background: "transparent", color: "var(--fg-muted)", fontSize: 12, cursor: "pointer" }}>
           ↻ Actualizar
         </button>
         <button
@@ -123,12 +123,12 @@ export default function LogsPage() {
 
       {/* Lista de logs */}
       {loading ? (
-        <div className="card" style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>
+        <div className="card" style={{ textAlign: "center", padding: 40, color: "var(--fg-muted)" }}>
           <div className="spinner" style={{ margin: "0 auto 12px" }} />
           Cargando...
         </div>
       ) : logs.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: 48, color: "#475569" }}>
+        <div className="card" style={{ textAlign: "center", padding: 48, color: "var(--fg-secondary)" }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
           {total === 0 ? "Sin errores registrados. El sistema funciona correctamente." : "Sin resultados para el filtro seleccionado."}
         </div>
@@ -139,8 +139,8 @@ export default function LogsPage() {
               key={log.id}
               style={{
                 background: NIVEL_BG[log.nivel] ?? "rgba(255,255,255,0.03)",
-                border: `1px solid ${NIVEL_COLORS[log.nivel] ?? "#1e293b"}22`,
-                borderLeft: `3px solid ${NIVEL_COLORS[log.nivel] ?? "#1e293b"}`,
+                border: `1px solid ${NIVEL_COLORS[log.nivel] ?? "var(--border)"}22`,
+                borderLeft: `3px solid ${NIVEL_COLORS[log.nivel] ?? "var(--border)"}`,
                 borderRadius: "0 8px 8px 0",
                 padding: "12px 16px",
               }}
@@ -150,21 +150,21 @@ export default function LogsPage() {
                   {log.nivel}
                 </span>
                 <span style={{
-                  fontSize: 11, background: "rgba(255,255,255,0.05)", border: "1px solid #1e293b",
-                  borderRadius: 4, padding: "1px 6px", color: "#64748b",
+                  fontSize: 11, background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)",
+                  borderRadius: 4, padding: "1px 6px", color: "var(--fg-muted)",
                 }}>
                   {ETAPA_LABELS[log.etapa] ?? `Etapa ${log.etapa}`}
                 </span>
-                <span style={{ fontSize: 13, color: "#e2e8f0", fontWeight: 500, flex: 1 }}>{log.mensaje}</span>
-                <span style={{ fontSize: 11, color: "#334155", flexShrink: 0 }}>{formatFecha(log.timestamp)}</span>
+                <span style={{ fontSize: 13, color: "var(--fg-primary)", fontWeight: 500, flex: 1 }}>{log.mensaje}</span>
+                <span style={{ fontSize: 11, color: "var(--fg-muted)", flexShrink: 0 }}>{formatFecha(log.timestamp)}</span>
               </div>
               {log.detalle && (
-                <div style={{ fontSize: 12, color: "#64748b", fontFamily: "monospace", paddingLeft: 4, marginTop: 4 }}>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)", fontFamily: "monospace", paddingLeft: 4, marginTop: 4 }}>
                   {log.detalle}
                 </div>
               )}
               {log.monografia_id && (
-                <div style={{ fontSize: 11, color: "#334155", marginTop: 4 }}>
+                <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
                   ID: {log.monografia_id}
                 </div>
               )}

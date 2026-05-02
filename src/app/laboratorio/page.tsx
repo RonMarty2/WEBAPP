@@ -298,24 +298,24 @@ function LaboratorioContent() {
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24, paddingLeft: 8 }}>
           <span style={{ fontSize: 20 }}>🧪</span>
-          <span style={{ fontWeight: 800, fontSize: 15, color: "#e2e8f0" }}>Laboratorio <span style={{ color: "#06b6d4" }}>Académico</span></span>
+          <span style={{ fontWeight: 800, fontSize: 15, color: "var(--fg-primary)" }}>Laboratorio <span style={{ color: "var(--accent)" }}>Académico</span></span>
         </div>
 
         {/* Info */}
-        <div style={{ background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.15)", borderRadius: 8, padding: "10px 12px", marginBottom: 16, fontSize: 12, color: "#94a3b8" }}>
-          <div style={{ color: "#06b6d4", fontWeight: 600, marginBottom: 4 }}>{universityName.split("(")[0]}</div>
+        <div style={{ background: "rgba(37,99,235,0.06)", border: "1px solid rgba(37,99,235,0.15)", borderRadius: 8, padding: "10px 12px", marginBottom: 16, fontSize: 12, color: "var(--fg-muted)" }}>
+          <div style={{ color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>{universityName.split("(")[0]}</div>
           <div>{modality}</div>
-          <div style={{ marginTop: 6, color: "#475569" }}>{programa.substring(0, 40)}{programa.length > 40 ? "..." : ""}</div>
+          <div style={{ marginTop: 6, color: "var(--fg-secondary)" }}>{programa.substring(0, 40)}{programa.length > 40 ? "..." : ""}</div>
         </div>
 
         {/* Progress */}
         <div style={{ marginBottom: 16, paddingLeft: 8 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#94a3b8", marginBottom: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--fg-muted)", marginBottom: 6 }}>
             <span>Progreso</span>
-            <span style={{ color: "#06b6d4", fontWeight: 700 }}>{progressPercent}%</span>
+            <span style={{ color: "var(--accent)", fontWeight: 700 }}>{progressPercent}%</span>
           </div>
-          <div style={{ background: "#1e293b", borderRadius: 999, height: 4 }}>
-            <div style={{ width: `${progressPercent}%`, background: "linear-gradient(90deg, #0891b2, #06b6d4)", height: "100%", borderRadius: 999, transition: "width 0.5s ease" }} />
+          <div style={{ background: "var(--bg-subtle)", borderRadius: 999, height: 4 }}>
+            <div style={{ width: `${progressPercent}%`, background: "linear-gradient(90deg, var(--accent-hover), var(--accent))", height: "100%", borderRadius: 999, transition: "width 0.5s ease" }} />
           </div>
         </div>
 
@@ -334,17 +334,17 @@ function LaboratorioContent() {
               >
                 <div style={{
                   width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0,
-                  background: isCompleted ? "rgba(34,197,94,0.2)" : isActive ? "rgba(6,182,212,0.2)" : "rgba(255,255,255,0.05)",
-                  border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : isActive ? "1px solid rgba(6,182,212,0.4)" : "1px solid rgba(255,255,255,0.1)",
-                  color: isCompleted ? "#4ade80" : isActive ? "#06b6d4" : "#94a3b8",
+                  background: isCompleted ? "rgba(34,197,94,0.2)" : isActive ? "rgba(37,99,235,0.2)" : "rgba(255,255,255,0.05)",
+                  border: isCompleted ? "1px solid rgba(34,197,94,0.4)" : isActive ? "1px solid rgba(37,99,235,0.4)" : "1px solid rgba(255,255,255,0.1)",
+                  color: isCompleted ? "#4ade80" : isActive ? "var(--accent)" : "var(--fg-muted)",
                 }}>
                   {isCompleted ? "✓" : isActive ? <span className="pulse-dot">●</span> : index + 1}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: isActive ? 600 : 400, color: isCompleted ? "#4ade80" : isActive ? "#e2e8f0" : "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  <div style={{ fontSize: 13, fontWeight: isActive ? 600 : 400, color: isCompleted ? "#4ade80" : isActive ? "var(--fg-primary)" : "var(--fg-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {step.icon} {step.label}
                   </div>
-                  {isLocked && <div style={{ fontSize: 10, color: "#475569" }}>🔒 Completa el paso anterior</div>}
+                  {isLocked && <div style={{ fontSize: 10, color: "var(--fg-secondary)" }}>🔒 Completa el paso anterior</div>}
                 </div>
               </div>
             );
@@ -353,8 +353,8 @@ function LaboratorioContent() {
 
         {/* Credits */}
         <div style={{ marginTop: 16, background: "rgba(0,0,0,0.4)", borderRadius: 8, padding: "10px 12px", fontSize: 12 }}>
-          <div style={{ color: "#94a3b8", marginBottom: 4 }}>Créditos disponibles</div>
-          <div style={{ fontSize: 20, fontWeight: 800, color: plan === "pro" ? "#a78bfa" : credits > 3 ? "#06b6d4" : "#f97316" }}>
+          <div style={{ color: "var(--fg-muted)", marginBottom: 4 }}>Créditos disponibles</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: plan === "pro" ? "#a78bfa" : credits > 3 ? "var(--accent)" : "#f97316" }}>
             {plan === "pro" ? "∞" : credits}
           </div>
           <div className={`badge ${plan === "demo" ? "badge-amber" : plan === "pro" ? "badge-purple" : "badge-cyan"}`} style={{ marginTop: 6, fontSize: 10 }}>
@@ -370,12 +370,12 @@ function LaboratorioContent() {
       {/* Main content */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         {/* Top bar */}
-        <div style={{ background: "#0f172a", borderBottom: "1px solid #1e293b", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ background: "rgba(255,255,255,0.9)", borderBottom: "1px solid var(--border)", padding: "16px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700 }}>
               {currentSection?.icon} {currentSection?.label}
             </h1>
-            <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 2 }}>
+            <p style={{ color: "var(--fg-muted)", fontSize: 13, marginTop: 2 }}>
               Paso {currentStep + 1} de {SECTION_STEPS.length}
             </p>
           </div>
@@ -412,8 +412,8 @@ function LaboratorioContent() {
 
             {/* Generate controls */}
             <div className="card" style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 14, color: "#94a3b8", marginBottom: 16 }}>
-                La IA generará la sección <strong style={{ color: "#e2e8f0" }}>{currentSection?.label}</strong> basándose en tu programa, materias {currentStep > 0 ? "y las secciones anteriores que ya completaste" : "e intereses"}.
+              <div style={{ fontSize: 14, color: "var(--fg-muted)", marginBottom: 16 }}>
+                La IA generará la sección <strong style={{ color: "var(--fg-primary)" }}>{currentSection?.label}</strong> basándose en tu programa, materias {currentStep > 0 ? "y las secciones anteriores que ya completaste" : "e intereses"}.
               </div>
 
               {currentStep === 0 && (
@@ -484,7 +484,7 @@ function LaboratorioContent() {
                     onChange={(e) => setEditingText(e.target.value)}
                     style={{ resize: "vertical", fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}
                   />
-                  <div style={{ textAlign: "right", fontSize: 12, color: "#94a3b8", marginTop: 8 }}>
+                  <div style={{ textAlign: "right", fontSize: 12, color: "var(--fg-muted)", marginTop: 8 }}>
                     📝 {wordCount} palabras
                   </div>
                 </>
@@ -525,7 +525,7 @@ function LaboratorioContent() {
 
           {/* Preview panel */}
           {showPreview && (
-            <div style={{ borderLeft: "1px solid #1e293b", padding: 32, overflowY: "auto", background: "#080f1d" }}>
+            <div style={{ borderLeft: "1px solid var(--border)", padding: 32, overflowY: "auto", background: "rgba(255,255,255,0.92)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 700 }}>📄 Vista Previa del Documento</h3>
                 <span className="badge badge-green">{totalCompleted}/{SECTION_STEPS.length} secciones</span>
@@ -577,7 +577,7 @@ export default function LaboratorioPage() {
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#020617" }}>
         <div style={{ textAlign: "center" }}>
           <div className="spinner" style={{ margin: "0 auto 16px" }} />
-          <p style={{ color: "#94a3b8" }}>Cargando laboratorio...</p>
+          <p style={{ color: "var(--fg-muted)" }}>Cargando laboratorio...</p>
         </div>
       </div>
     }>

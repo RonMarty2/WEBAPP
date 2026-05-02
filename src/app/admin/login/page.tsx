@@ -40,29 +40,28 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div style={{
+    <div className="gradient-bg" style={{
       minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-      background: "linear-gradient(135deg, #020617 0%, #0a0f1e 100%)",
       fontFamily: "'Inter', sans-serif",
     }}>
       <div style={{
         width: "100%", maxWidth: 380, padding: 40,
-        background: "rgba(15,23,42,0.9)", border: "1px solid rgba(139,92,246,0.25)",
-        borderRadius: 16, boxShadow: "0 0 40px rgba(139,92,246,0.1)",
+        background: "rgba(255,255,255,0.90)", border: "1px solid var(--border)",
+        borderRadius: 8, boxShadow: "var(--shadow-md)",
       }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 44, marginBottom: 12 }}>⚡</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#e2e8f0", marginBottom: 4, margin: 0 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 4, margin: 0 }}>
             Panel Administrador
           </h1>
-          <p style={{ fontSize: 13, color: "#64748b", marginTop: 6 }}>
+          <p style={{ fontSize: 13, color: "var(--fg-muted)", marginTop: 6 }}>
             Laboratorio Académico — Modo Dios
           </p>
         </div>
 
         <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#94a3b8", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--fg-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Contraseña
             </label>
             <input
@@ -73,8 +72,8 @@ export default function AdminLoginPage() {
               autoFocus
               style={{
                 width: "100%", padding: "10px 12px", fontSize: 14,
-                background: "rgba(30,41,59,0.8)", border: "1px solid #334155",
-                borderRadius: 8, color: "#e2e8f0", outline: "none",
+                background: "rgba(255,255,255,0.88)", border: "1px solid var(--border-hover)",
+                borderRadius: 8, color: "var(--fg-primary)", outline: "none",
                 boxSizing: "border-box",
               }}
             />
@@ -95,8 +94,8 @@ export default function AdminLoginPage() {
             disabled={loading || !password}
             style={{
               width: "100%", padding: "12px", borderRadius: 8,
-              background: loading || !password ? "rgba(139,92,246,0.4)" : "rgba(139,92,246,0.9)",
-              border: "1px solid rgba(139,92,246,0.5)", color: "#e2e8f0",
+              background: loading || !password ? "var(--bg-subtle)" : "#0b0b0b",
+              border: "1px solid var(--border)", color: loading || !password ? "var(--fg-muted)" : "#fff",
               fontSize: 14, fontWeight: 700, cursor: loading || !password ? "not-allowed" : "pointer",
               transition: "all 0.15s",
             }}
@@ -106,7 +105,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div style={{ marginTop: 24, textAlign: "center" }}>
-          <a href="/dashboard" style={{ fontSize: 12, color: "#475569", textDecoration: "none" }}>
+          <a href="/dashboard" style={{ fontSize: 12, color: "var(--fg-secondary)", textDecoration: "none" }}>
             ← Volver al dashboard
           </a>
         </div>

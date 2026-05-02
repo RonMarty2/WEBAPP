@@ -25,11 +25,11 @@ function FaseProgress({ fase }: { fase: number }) {
           title={FASE_LABELS[i]}
           style={{
             width: 18, height: 4, borderRadius: 2,
-            background: i <= fase ? "#06b6d4" : "#1e293b",
+            background: i <= fase ? "var(--accent)" : "var(--border)",
           }}
         />
       ))}
-      <span style={{ fontSize: 11, color: "#64748b", marginLeft: 4 }}>{fase + 1}/6</span>
+      <span style={{ fontSize: 11, color: "var(--fg-muted)", marginLeft: 4 }}>{fase + 1}/6</span>
     </div>
   );
 }
@@ -84,15 +84,15 @@ export default function DashboardPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {user.picture ? (
-              <img src={user.picture} alt="" style={{ width: 42, height: 42, borderRadius: "50%", border: "2px solid #06b6d4" }} />
+              <img src={user.picture} alt="" style={{ width: 42, height: 42, borderRadius: "50%", border: "2px solid var(--accent)" }} />
             ) : (
-              <div style={{ width: 42, height: 42, borderRadius: "50%", background: "#0e7490", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#e2e8f0" }}>
+              <div style={{ width: 42, height: 42, borderRadius: "50%", background: "var(--accent)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff" }}>
                 {user.name[0]}
               </div>
             )}
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "#e2e8f0" }}>{user.name}</div>
-              <div style={{ fontSize: 12, color: "#64748b", display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)" }}>{user.name}</div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", display: "flex", alignItems: "center", gap: 6 }}>
                 <span>{user.email}</span>
                 {user.plan && (
                   <span className={`badge ${user.plan === "pro" ? "badge-purple" : "badge-cyan"}`} style={{ fontSize: 10 }}>
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <a href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #1e293b", color: "#94a3b8", textDecoration: "none", fontSize: 13 }}>
+            <a href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </a>
             <a href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13 }}>
@@ -116,16 +116,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Welcome */}
-        <div className="card" style={{ marginBottom: 28, borderColor: "rgba(6,182,212,0.22)", background: "rgba(6,182,212,0.06)", position: "relative", overflow: "hidden" }}>
+        <div className="card" style={{ marginBottom: 28, borderColor: "rgba(37,99,235,0.22)", background: "rgba(37,99,235,0.06)", position: "relative", overflow: "hidden" }}>
           {/* Micro-sphere glow */}
-          <div style={{ position: "absolute", top: "-60px", right: "-60px", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(6,182,212,0.12) 0%, transparent 70%)", filter: "blur(30px)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", top: "-60px", right: "-60px", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(37,99,235,0.12) 0%, transparent 70%)", filter: "blur(30px)", pointerEvents: "none" }} />
           <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, position: "relative" }}>Bienvenido, {user.name.split(" ")[0]}</h1>
-          <p style={{ color: "#94a3b8", fontSize: 14, position: "relative" }}>Desde aquí puedes crear y gestionar tus documentos académicos.</p>
+          <p style={{ color: "var(--fg-muted)", fontSize: 14, position: "relative" }}>Desde aquí puedes crear y gestionar tus documentos académicos.</p>
         </div>
 
         {/* Mis Proyectos */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#94a3b8" }}>Mis proyectos</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-muted)" }}>Mis proyectos</h2>
           <a href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
             + Nuevo proyecto
           </a>
@@ -136,10 +136,10 @@ export default function DashboardPage() {
             {[1, 2, 3].map(i => <div key={i} className="card shimmer" style={{ height: 140 }} />)}
           </div>
         ) : proyectos.length === 0 ? (
-          <div className="card" style={{ textAlign: "center", padding: "48px 24px", marginBottom: 32, borderStyle: "dashed", borderColor: "#334155" }}>
+          <div className="card" style={{ textAlign: "center", padding: "48px 24px", marginBottom: 32, borderStyle: "dashed", borderColor: "var(--border-hover)" }}>
             <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>📄</div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "#475569", marginBottom: 8 }}>Aún no tienes proyectos</div>
-            <div style={{ fontSize: 14, color: "#334155", marginBottom: 24 }}>Crea tu primer documento académico con IA</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-secondary)", marginBottom: 8 }}>Aún no tienes proyectos</div>
+            <div style={{ fontSize: 14, color: "var(--fg-muted)", marginBottom: 24 }}>Crea tu primer documento académico con IA</div>
             <a href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", display: "inline-flex", padding: "10px 24px" }}>
               Crear mi primer proyecto →
             </a>
@@ -154,41 +154,41 @@ export default function DashboardPage() {
                 style={{ display: "flex", flexDirection: "column", gap: 10 }}
               >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: 11, color: "#64748b", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>
+                  <span style={{ fontSize: 11, color: "var(--fg-muted)", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>
                   {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                   {p.tema_aprobado || p.titulo_provisional || "Proyecto sin título"}
                 </div>
                 <FaseProgress fase={p.estado_fase} />
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4 }}>
-                  <span style={{ fontSize: 11, color: "#334155" }}>
+                  <span style={{ fontSize: 11, color: "var(--fg-muted)" }}>
                     {new Date(p.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short" })}
                   </span>
-                  <span style={{ fontSize: 12, color: "#06b6d4", fontWeight: 600 }}>Continuar →</span>
+                  <span style={{ fontSize: 12, color: "var(--accent)", fontWeight: 600 }}>Continuar →</span>
                 </div>
               </div>
             ))}
             <div
               className="card card-hover"
               onClick={() => router.push("/projects/new")}
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 140, borderStyle: "dashed", borderColor: "#334155", background: "transparent" }}
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, minHeight: 140, borderStyle: "dashed", borderColor: "var(--border-hover)", background: "transparent" }}
             >
-              <div style={{ fontSize: 28, color: "#334155" }}>+</div>
-              <div style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>Nuevo proyecto</div>
+              <div style={{ fontSize: 28, color: "var(--fg-muted)" }}>+</div>
+              <div style={{ fontSize: 13, color: "var(--fg-secondary)", fontWeight: 600 }}>Nuevo proyecto</div>
             </div>
           </div>
         )}
 
         {/* Próximamente */}
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: "#94a3b8", marginBottom: 14 }}>Próximamente</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Próximamente</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
           {[{ icon: "🎓", name: "Tesis" }, { icon: "📝", name: "Ensayo académico" }, { icon: "📊", name: "Trabajo final" }].map(pr => (
             <div key={pr.name} className="card" style={{ opacity: 0.4, display: "flex", gap: 12, alignItems: "center" }}>
               <div style={{ fontSize: 28 }}>{pr.icon}</div>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{pr.name}</div>
-                <div style={{ fontSize: 12, color: "#64748b" }}>Próximamente</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)" }}>{pr.name}</div>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>Próximamente</div>
               </div>
             </div>
           ))}

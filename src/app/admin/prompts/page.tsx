@@ -301,7 +301,7 @@ export default function PromptsPage() {
           const isSelected = selected === item.key;
           const phaseData = item.key !== "hilos" && item.key !== "calibracion" && item.key !== "estilo-analizador"
             ? data?.phases[item.key] : null;
-          const itemColor = item.color ?? "#06b6d4";
+          const itemColor = item.color ?? "var(--accent)";
 
           const showSep = idx === 4; // separator before Fase 0
 
@@ -315,7 +315,7 @@ export default function PromptsPage() {
                   borderRadius: 8, border: "1px solid transparent", cursor: "pointer",
                   textAlign: "left", fontSize: 13, width: "100%",
                   fontWeight: isSelected ? 700 : 400,
-                  color: isSelected ? itemColor : "#94a3b8",
+                  color: isSelected ? itemColor : "var(--fg-muted)",
                   background: isSelected ? `rgba(${itemColor === "#fde68a" ? "253,230,138" : itemColor === "#a78bfa" ? "167,139,250" : itemColor === "#f472b6" ? "244,114,182" : itemColor === "#34d399" ? "52,211,153" : "6,182,212"},0.10)` : "transparent",
                   borderColor: isSelected ? `${itemColor}44` : "transparent",
                   transition: "all 0.15s",
@@ -340,12 +340,12 @@ export default function PromptsPage() {
         })}
 
         {/* Info box */}
-        <div style={{ marginTop: "auto", padding: 12, background: "rgba(6,182,212,0.06)", borderRadius: 8, border: "1px solid rgba(6,182,212,0.12)", fontSize: 11, color: "#64748b" }}>
-          <div style={{ color: "#06b6d4", fontWeight: 700, marginBottom: 6, fontSize: 12 }}>ℹ️ Cómo funciona</div>
+        <div style={{ marginTop: "auto", padding: 12, background: "rgba(37,99,235,0.06)", borderRadius: 8, border: "1px solid rgba(37,99,235,0.12)", fontSize: 11, color: "var(--fg-muted)" }}>
+          <div style={{ color: "var(--accent)", fontWeight: 700, marginBottom: 6, fontSize: 12 }}>ℹ️ Cómo funciona</div>
           <p style={{ margin: 0, lineHeight: 1.6 }}>
-            <strong style={{ color: "#94a3b8" }}>Borrador</strong>: primera pasada en Modo Guiado.
-            <br /><strong style={{ color: "#94a3b8" }}>Final</strong>: con feedback del estudiante.
-            <br />Los <strong style={{ color: "#94a3b8" }}>Hilos</strong> se aplican a todas las fases (menor prioridad que el perfil de estilo).
+            <strong style={{ color: "var(--fg-muted)" }}>Borrador</strong>: primera pasada en Modo Guiado.
+            <br /><strong style={{ color: "var(--fg-muted)" }}>Final</strong>: con feedback del estudiante.
+            <br />Los <strong style={{ color: "var(--fg-muted)" }}>Hilos</strong> se aplican a todas las fases (menor prioridad que el perfil de estilo).
           </p>
         </div>
       </div>
@@ -359,7 +359,7 @@ export default function PromptsPage() {
             <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
               {sidebarItem?.icon} {isHilos ? "Hilos Conductores" : isCalib ? "Preguntas de Calibración" : isEstiloAnalizador ? "Analizador de Estilo" : (currentPhaseData?.label ?? sidebarItem?.label)}
             </h2>
-            <p style={{ fontSize: 12, color: "#475569", margin: "4px 0 0" }}>
+            <p style={{ fontSize: 12, color: "var(--fg-secondary)", margin: "4px 0 0" }}>
               {isHilos
                 ? "Reglas que se aplican a TODAS las fases. Una regla por línea."
                 : isCalib
@@ -410,7 +410,7 @@ export default function PromptsPage() {
                   />
                 </div>
                 <div>
-                  <label className="label">Descripción / Ayuda <span style={{ color: "#475569", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                  <label className="label">Descripción / Ayuda <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
                   <input
                     className="input-dark"
                     value={newPregunta.descripcion}
@@ -464,7 +464,7 @@ export default function PromptsPage() {
                           placeholder="Descripción"
                         />
                         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                          <label style={{ fontSize: 12, color: "#94a3b8" }}>Mín. palabras:</label>
+                          <label style={{ fontSize: 12, color: "var(--fg-muted)" }}>Mín. palabras:</label>
                           <input
                             className="input-dark"
                             type="number" min={10} max={500}
@@ -480,13 +480,13 @@ export default function PromptsPage() {
                       </div>
                     ) : (
                       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                        <span style={{ flexShrink: 0, width: 24, height: 24, borderRadius: "50%", background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#06b6d4" }}>{i + 1}</span>
+                        <span style={{ flexShrink: 0, width: 24, height: 24, borderRadius: "50%", background: "rgba(37,99,235,0.1)", border: "1px solid rgba(37,99,235,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "var(--accent)" }}>{i + 1}</span>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: q.descripcion ? 4 : 0 }}>{q.pregunta}</div>
-                          {q.descripcion && <div style={{ fontSize: 12, color: "#64748b" }}>{q.descripcion}</div>}
-                          <div style={{ fontSize: 11, color: "#475569", marginTop: 6 }}>
+                          {q.descripcion && <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>{q.descripcion}</div>}
+                          <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 6 }}>
                             Mín. {q.minimo_palabras} palabras
-                            {q.id.startsWith("default-") && <span style={{ marginLeft: 8, color: "#334155" }}>· Por defecto</span>}
+                            {q.id.startsWith("default-") && <span style={{ marginLeft: 8, color: "var(--fg-muted)" }}>· Por defecto</span>}
                           </div>
                         </div>
                         <div style={{ display: "flex", gap: 6 }}>
@@ -514,7 +514,7 @@ export default function PromptsPage() {
                   </div>
                 ))}
                 {calibPreguntas.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "32px 0", color: "#334155", fontSize: 14 }}>
+                  <div style={{ textAlign: "center", padding: "32px 0", color: "var(--fg-muted)", fontSize: 14 }}>
                     No hay preguntas configuradas — usa las preguntas por defecto o agrega nuevas arriba.
                   </div>
                 )}
@@ -526,12 +526,12 @@ export default function PromptsPage() {
         {/* ── Style Analyzer Prompt ── */}
         {isEstiloAnalizador && (
           <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ padding: "9px 14px", background: "rgba(52,211,153,0.04)", borderRadius: 8, border: "1px solid rgba(52,211,153,0.12)", fontSize: 12, color: "#64748b" }}>
+            <div style={{ padding: "9px 14px", background: "rgba(52,211,153,0.04)", borderRadius: 8, border: "1px solid rgba(52,211,153,0.12)", fontSize: 12, color: "var(--fg-muted)" }}>
               🧬 Este prompt se usa cuando el estudiante completa la calibración de estilo en Modo Guiado. Recibe las respuestas del estudiante y debe generar un PERFIL DE ESTILO que la IA usará en todas las fases.
             </div>
             <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               <label className="label">Prompt del Analizador de Estilo</label>
-              <p style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
+              <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                 El User Message contendrá automáticamente las respuestas de calibración del estudiante.
               </p>
               <textarea
@@ -550,7 +550,7 @@ export default function PromptsPage() {
           <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
             <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               <label className="label">Reglas inmutables (una por línea)</label>
-              <p style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
+              <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                 Se añaden al final del prompt de sistema de CADA fase, con menor prioridad que el prompt de fase y el perfil de estilo del usuario.
               </p>
               <textarea
@@ -562,7 +562,7 @@ export default function PromptsPage() {
                 style={{ resize: "vertical", fontFamily: "JetBrains Mono, monospace", fontSize: 12.5, lineHeight: 1.75, flex: 1 }}
               />
               {draftHilos.trim() && (
-                <p style={{ fontSize: 11, color: "#475569", marginTop: 8 }}>
+                <p style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 8 }}>
                   {draftHilos.split("\n").filter((l) => l.trim()).length} regla(s) definidas
                 </p>
               )}
@@ -574,17 +574,17 @@ export default function PromptsPage() {
         {isOnboarding && (
           <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
             {autoCtx && (
-              <div style={{ borderRadius: 8, border: "1px solid rgba(6,182,212,0.15)", overflow: "hidden" }}>
+              <div style={{ borderRadius: 8, border: "1px solid rgba(37,99,235,0.15)", overflow: "hidden" }}>
                 <button
                   onClick={() => setShowContext(v => !v)}
-                  style={{ width: "100%", padding: "9px 14px", background: "rgba(6,182,212,0.06)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#64748b", textAlign: "left" }}
+                  style={{ width: "100%", padding: "9px 14px", background: "rgba(37,99,235,0.06)", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--fg-muted)", textAlign: "left" }}
                 >
-                  <span style={{ color: "#06b6d4" }}>📥</span>
+                  <span style={{ color: "var(--accent)" }}>📥</span>
                   <span style={{ flex: 1 }}>Datos del estudiante inyectados automáticamente</span>
                   <span style={{ fontSize: 10 }}>{showContext ? "▲" : "▼"}</span>
                 </button>
                 {showContext && (
-                  <pre style={{ margin: 0, padding: "10px 14px", background: "rgba(0,0,0,0.2)", fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "#94a3b8", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
+                  <pre style={{ margin: 0, padding: "10px 14px", background: "rgba(0,0,0,0.2)", fontFamily: "JetBrains Mono, monospace", fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.7, whiteSpace: "pre-wrap" }}>
                     {autoCtx}
                   </pre>
                 )}
@@ -592,7 +592,7 @@ export default function PromptsPage() {
             )}
             <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
               <label className="label">Prompt del Generador de Temas</label>
-              <p style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
+              <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                 Instrucciones para que la IA proponga 3 temas viables. Los datos del estudiante llegan automáticamente en el User Message.
               </p>
               <textarea
@@ -601,7 +601,7 @@ export default function PromptsPage() {
                 onChange={(e) => { setDraftPrompt(e.target.value); setSaved(false); }}
                 style={{ resize: "vertical", fontFamily: "JetBrains Mono, monospace", fontSize: 12.5, lineHeight: 1.75, flex: 1, minHeight: 340 }}
               />
-              <p style={{ fontSize: 11, color: "#475569", marginTop: 8 }}>
+              <p style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 8 }}>
                 {draftPrompt.split(/\s+/).filter(Boolean).length} palabras · {draftPrompt.length} caracteres
               </p>
             </div>
@@ -612,7 +612,7 @@ export default function PromptsPage() {
         {isPhase && (
           <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 12 }}>
             {/* Context notice */}
-            <div style={{ padding: "9px 14px", background: "rgba(6,182,212,0.04)", borderRadius: 8, border: "1px solid rgba(6,182,212,0.1)", fontSize: 12, color: "#64748b" }}>
+            <div style={{ padding: "9px 14px", background: "rgba(37,99,235,0.04)", borderRadius: 8, border: "1px solid rgba(37,99,235,0.1)", fontSize: 12, color: "var(--fg-muted)" }}>
               🔄{" "}
               {selected === "0"
                 ? "Primera fase del workspace — el tema aprobado llega en el User Message."
@@ -627,8 +627,8 @@ export default function PromptsPage() {
                 style={{
                   flex: 1, padding: "10px", fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
                   background: activeTab === "borrador" ? "rgba(167,139,250,0.12)" : "transparent",
-                  border: activeTab === "borrador" ? "1.5px solid rgba(167,139,250,0.4)" : "1.5px solid #1e293b",
-                  color: activeTab === "borrador" ? "#a78bfa" : "#475569",
+                  border: activeTab === "borrador" ? "1.5px solid rgba(167,139,250,0.4)" : "1.5px solid var(--border)",
+                  color: activeTab === "borrador" ? "#a78bfa" : "var(--fg-secondary)",
                 }}
               >
                 📝 Prompt Borrador
@@ -637,9 +637,9 @@ export default function PromptsPage() {
                 onClick={() => setActiveTab("final")}
                 style={{
                   flex: 1, padding: "10px", fontSize: 13, fontWeight: 600, borderRadius: 8, cursor: "pointer",
-                  background: activeTab === "final" ? "rgba(6,182,212,0.12)" : "transparent",
-                  border: activeTab === "final" ? "1.5px solid rgba(6,182,212,0.4)" : "1.5px solid #1e293b",
-                  color: activeTab === "final" ? "#06b6d4" : "#475569",
+                  background: activeTab === "final" ? "rgba(37,99,235,0.12)" : "transparent",
+                  border: activeTab === "final" ? "1.5px solid rgba(37,99,235,0.4)" : "1.5px solid var(--border)",
+                  color: activeTab === "final" ? "var(--accent)" : "var(--fg-secondary)",
                 }}
               >
                 ✨ Prompt Final
@@ -647,7 +647,7 @@ export default function PromptsPage() {
             </div>
 
             {/* Info for current tab */}
-            <div style={{ padding: "8px 12px", background: activeTab === "borrador" ? "rgba(167,139,250,0.05)" : "rgba(6,182,212,0.05)", borderRadius: 6, border: `1px solid ${activeTab === "borrador" ? "rgba(167,139,250,0.15)" : "rgba(6,182,212,0.15)"}`, fontSize: 12, color: "#64748b" }}>
+            <div style={{ padding: "8px 12px", background: activeTab === "borrador" ? "rgba(167,139,250,0.05)" : "rgba(37,99,235,0.05)", borderRadius: 6, border: `1px solid ${activeTab === "borrador" ? "rgba(167,139,250,0.15)" : "rgba(37,99,235,0.15)"}`, fontSize: 12, color: "var(--fg-muted)" }}>
               {activeTab === "borrador"
                 ? "📝 Se usa en Modo Guiado para la primera pasada. El estudiante lo revisará antes de pedir la versión final."
                 : "✨ Se usa en Modo Guiado para generar la versión final. Recibirá el borrador + feedback del estudiante. En Modo Directo, siempre se usa el Prompt Borrador."}
@@ -656,7 +656,7 @@ export default function PromptsPage() {
             {activeTab === "borrador" ? (
               <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                 <label className="label">Prompt Borrador — {currentPhaseData?.label}</label>
-                <p style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
+                <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                   Primera generación. En Modo Directo, este prompt también se usa para el contenido final.
                 </p>
                 <textarea
@@ -665,14 +665,14 @@ export default function PromptsPage() {
                   onChange={(e) => { setDraftBorrador(e.target.value); setSaved(false); }}
                   style={{ resize: "vertical", fontFamily: "JetBrains Mono, monospace", fontSize: 12.5, lineHeight: 1.75, flex: 1, minHeight: 320 }}
                 />
-                <p style={{ fontSize: 11, color: "#475569", marginTop: 8 }}>
+                <p style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 8 }}>
                   {draftBorrador.split(/\s+/).filter(Boolean).length} palabras · {draftBorrador.length} caracteres
                 </p>
               </div>
             ) : (
               <div className="card" style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                 <label className="label">Prompt Final — {currentPhaseData?.label}</label>
-                <p style={{ fontSize: 12, color: "#475569", marginBottom: 10 }}>
+                <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10 }}>
                   Segunda generación en Modo Guiado. El User Message incluirá automáticamente el borrador previo y el feedback del estudiante.
                 </p>
                 <textarea
@@ -681,7 +681,7 @@ export default function PromptsPage() {
                   onChange={(e) => { setDraftFinal(e.target.value); setSaved(false); }}
                   style={{ resize: "vertical", fontFamily: "JetBrains Mono, monospace", fontSize: 12.5, lineHeight: 1.75, flex: 1, minHeight: 320 }}
                 />
-                <p style={{ fontSize: 11, color: "#475569", marginTop: 8 }}>
+                <p style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 8 }}>
                   {draftFinal.split(/\s+/).filter(Boolean).length} palabras · {draftFinal.length} caracteres
                 </p>
               </div>

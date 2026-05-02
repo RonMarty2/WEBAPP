@@ -111,15 +111,15 @@ export default function AdminUsuariosPage() {
   const pendientes = users.filter((u) => u.role !== "admin" && !u.active).length;
 
   const selectStyle = {
-    background: "#0f172a", border: "1px solid #1e293b", borderRadius: 6,
-    color: "#e2e8f0", padding: "6px 10px", fontSize: 13, cursor: "pointer",
+    background: "rgba(255,255,255,0.9)", border: "1px solid var(--border)", borderRadius: 6,
+    color: "var(--fg-primary)", padding: "6px 10px", fontSize: 13, cursor: "pointer",
   } as React.CSSProperties;
 
   return (
     <div className="fade-in">
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>👥 Usuarios</h1>
-        <p style={{ color: "#94a3b8", fontSize: 13 }}>
+        <p style={{ color: "var(--fg-muted)", fontSize: 13 }}>
           Activa cuentas, asigna rol y plan. Los usuarios pendientes esperan tu aprobación.
         </p>
       </div>
@@ -127,15 +127,15 @@ export default function AdminUsuariosPage() {
       {/* Stats rápidas */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 20 }}>
         {[
-          { label: "Total usuarios", value: users.filter(u => u.role !== "admin").length, color: "#94a3b8" },
+          { label: "Total usuarios", value: users.filter(u => u.role !== "admin").length, color: "var(--fg-muted)" },
           { label: "Pendientes", value: pendientes, color: pendientes > 0 ? "#f59e0b" : "#22c55e" },
           { label: "Activos", value: users.filter(u => u.role !== "admin" && u.active).length, color: "#22c55e" },
-          { label: "Estudiantes", value: users.filter(u => u.role === "estudiante" && u.active).length, color: "#06b6d4" },
+          { label: "Estudiantes", value: users.filter(u => u.role === "estudiante" && u.active).length, color: "var(--accent)" },
           { label: "Docentes", value: users.filter(u => u.role === "docente" && u.active).length, color: "#8b5cf6" },
         ].map((s) => (
           <div key={s.label} className="card" style={{ textAlign: "center", padding: "12px 8px" }}>
             <div style={{ fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 2 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -149,9 +149,9 @@ export default function AdminUsuariosPage() {
             style={{
               padding: "6px 14px", borderRadius: 6, fontSize: 13, cursor: "pointer",
               border: "1px solid",
-              borderColor: filtro === f ? "#06b6d4" : "#1e293b",
-              background: filtro === f ? "rgba(6,182,212,0.12)" : "transparent",
-              color: filtro === f ? "#06b6d4" : "#64748b",
+              borderColor: filtro === f ? "var(--accent)" : "var(--border)",
+              background: filtro === f ? "rgba(37,99,235,0.12)" : "transparent",
+              color: filtro === f ? "var(--accent)" : "var(--fg-muted)",
             }}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -162,18 +162,18 @@ export default function AdminUsuariosPage() {
             )}
           </button>
         ))}
-        <button onClick={cargar} style={{ marginLeft: "auto", padding: "6px 12px", borderRadius: 6, border: "1px solid #1e293b", background: "transparent", color: "#94a3b8", fontSize: 12, cursor: "pointer" }}>
+        <button onClick={cargar} style={{ marginLeft: "auto", padding: "6px 12px", borderRadius: 6, border: "1px solid var(--border)", background: "transparent", color: "var(--fg-muted)", fontSize: 12, cursor: "pointer" }}>
           ↻ Actualizar
         </button>
       </div>
 
       {/* Lista */}
       {loading ? (
-        <div className="card" style={{ textAlign: "center", padding: 40, color: "#94a3b8" }}>
+        <div className="card" style={{ textAlign: "center", padding: 40, color: "var(--fg-muted)" }}>
           <div className="spinner" style={{ margin: "0 auto 12px" }} /> Cargando...
         </div>
       ) : visibles.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: 48, color: "#475569" }}>
+        <div className="card" style={{ textAlign: "center", padding: 48, color: "var(--fg-secondary)" }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
           {filtro === "pendientes" ? "No hay usuarios pendientes." : "No hay usuarios registrados aún."}
         </div>
@@ -195,16 +195,16 @@ export default function AdminUsuariosPage() {
                 {user.picture ? (
                   <img src={user.picture} alt="" style={{ width: 40, height: 40, borderRadius: "50%", flexShrink: 0 }} />
                 ) : (
-                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#1e293b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "#64748b", flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--bg-subtle)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "var(--fg-muted)", flexShrink: 0 }}>
                     {user.name[0]}
                   </div>
                 )}
 
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 160 }}>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: "#e2e8f0" }}>{user.name}</div>
-                  <div style={{ fontSize: 12, color: "#64748b" }}>{user.email}</div>
-                  <div style={{ fontSize: 11, color: "#334155", marginTop: 2 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: "var(--fg-primary)" }}>{user.name}</div>
+                  <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>{user.email}</div>
+                  <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 2 }}>
                     Registro: {formatFecha(user.registered_at)}
                     {user.activated_at && <span style={{ marginLeft: 10 }}>· Activado: {formatFecha(user.activated_at)}</span>}
                   </div>
@@ -265,8 +265,8 @@ export default function AdminUsuariosPage() {
                         onClick={() => actualizar(user)}
                         disabled={isSaving}
                         style={{
-                          padding: "7px 14px", borderRadius: 7, border: "1px solid rgba(6,182,212,0.35)",
-                          background: "rgba(6,182,212,0.08)", color: "#06b6d4", fontSize: 13,
+                          padding: "7px 14px", borderRadius: 7, border: "1px solid rgba(37,99,235,0.35)",
+                          background: "rgba(37,99,235,0.08)", color: "var(--accent)", fontSize: 13,
                           cursor: isSaving ? "not-allowed" : "pointer",
                         }}
                       >

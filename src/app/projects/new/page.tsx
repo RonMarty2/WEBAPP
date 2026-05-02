@@ -205,7 +205,7 @@ export default function NuevoProyectoPage() {
     return (
       <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
         <div className="spinner" style={{ width: 32, height: 32, borderWidth: 3 }} />
-        <div style={{ color: "#64748b", fontSize: 14 }}>Preparando...</div>
+        <div style={{ color: "var(--fg-muted)", fontSize: 14 }}>Preparando...</div>
       </div>
     );
   }
@@ -214,8 +214,8 @@ export default function NuevoProyectoPage() {
     return (
       <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
         <div style={{ fontSize: 48 }}>🤖</div>
-        <div style={{ fontSize: 18, fontWeight: 700, color: "#e2e8f0" }}>Generando sugerencias de tema…</div>
-        <div style={{ color: "#64748b", fontSize: 14 }}>La IA está analizando tu contexto académico. Puede tardar 20-40 segundos.</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--fg-primary)" }}>Generando sugerencias de tema…</div>
+        <div style={{ color: "var(--fg-muted)", fontSize: 14 }}>La IA está analizando tu contexto académico. Puede tardar 20-40 segundos.</div>
         <div className="spinner" style={{ width: 28, height: 28, borderWidth: 3 }} />
       </div>
     );
@@ -225,7 +225,7 @@ export default function NuevoProyectoPage() {
     <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
       <div style={{ width: "100%", maxWidth: 600 }}>
 
-        <a href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "#64748b", textDecoration: "none", fontSize: 13, marginBottom: 24 }}>
+        <a href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--fg-muted)", textDecoration: "none", fontSize: 13, marginBottom: 24 }}>
           ← Volver al dashboard
         </a>
 
@@ -240,11 +240,11 @@ export default function NuevoProyectoPage() {
         {step === "seleccionar-universidad" && (
           <div className="card fade-in" style={{ padding: 32 }}>
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                 Paso 1 de 2 — Universidad
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿En qué universidad estudias?</h1>
-              <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6 }}>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
                 El formato LaTeX del documento final se adaptará automáticamente a los requerimientos de tu institución.
               </p>
             </div>
@@ -256,12 +256,12 @@ export default function NuevoProyectoPage() {
                   onClick={() => setUniversidadId(u.id)}
                   style={{
                     padding: "14px 12px", borderRadius: 10, cursor: "pointer", textAlign: "left",
-                    background: universidadId === u.id ? "rgba(6,182,212,0.12)" : "rgba(30,41,59,0.6)",
-                    border: universidadId === u.id ? "2px solid #06b6d4" : "1.5px solid #1e293b",
-                    color: "#e2e8f0", transition: "all 0.15s",
+                    background: universidadId === u.id ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.84)",
+                    border: universidadId === u.id ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                    color: "var(--fg-primary)", transition: "all 0.15s",
                   }}
                 >
-                  <div style={{ fontSize: 11, fontWeight: 700, color: universidadId === u.id ? "#06b6d4" : "#64748b", marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: universidadId === u.id ? "var(--accent)" : "var(--fg-muted)", marginBottom: 4 }}>
                     {universidadId === u.id ? "✓ " : ""}Seleccionada
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600, lineHeight: 1.4 }}>{u.name}</div>
@@ -288,13 +288,13 @@ export default function NuevoProyectoPage() {
             </div>
 
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                 Paso 2 de 3 — Modalidad
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿Cómo quieres trabajar?</h1>
-              <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.6 }}>
+              <p style={{ color: "var(--fg-muted)", fontSize: 14, lineHeight: 1.6 }}>
                 El Modo Guiado genera primero un borrador, te pide retroalimentación, y luego produce la versión final —
                 adaptada a tu estilo personal de escritura.
               </p>
@@ -308,25 +308,25 @@ export default function NuevoProyectoPage() {
                 style={{
                   padding: "24px 18px", borderRadius: 14, cursor: "pointer", textAlign: "left",
                   background: modalidad === "directa"
-                    ? "rgba(6,182,212,0.14)"
-                    : "rgba(15,23,42,0.5)",
-                  border: modalidad === "directa" ? "2px solid #06b6d4" : "1.5px solid rgba(255,255,255,0.07)",
-                  color: "#e2e8f0",
+                    ? "rgba(37,99,235,0.14)"
+                    : "rgba(255,255,255,0.82)",
+                  border: modalidad === "directa" ? "2px solid var(--accent)" : "1.5px solid rgba(231,231,227,0.95)",
+                  color: "var(--fg-primary)",
                   backdropFilter: "blur(12px)",
                   boxShadow: modalidad === "directa"
-                    ? "0 0 32px rgba(6,182,212,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
+                    ? "0 0 32px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
                     : "inset 0 1px 0 rgba(255,255,255,0.05)",
                 }}
               >
                 <div style={{ fontSize: 32, marginBottom: 10 }}>⚡</div>
-                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15, color: modalidad === "directa" ? "#06b6d4" : "#e2e8f0" }}>
+                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15, color: modalidad === "directa" ? "var(--accent)" : "var(--fg-primary)" }}>
                   Modo Directo
                 </div>
-                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.6 }}>
                   La IA genera el contenido final al instante. Sin pasos intermedios.
                 </div>
                 {modalidad === "directa" && (
-                  <div style={{ marginTop: 12, fontSize: 11, color: "#06b6d4", fontWeight: 700, letterSpacing: "0.05em" }}>✓ SELECCIONADO</div>
+                  <div style={{ marginTop: 12, fontSize: 11, color: "var(--accent)", fontWeight: 700, letterSpacing: "0.05em" }}>✓ SELECCIONADO</div>
                 )}
               </button>
 
@@ -338,9 +338,9 @@ export default function NuevoProyectoPage() {
                   padding: "24px 18px", borderRadius: 14, cursor: "pointer", textAlign: "left",
                   background: modalidad === "guiada"
                     ? "rgba(167,139,250,0.14)"
-                    : "rgba(15,23,42,0.5)",
-                  border: modalidad === "guiada" ? "2px solid #a78bfa" : "1.5px solid rgba(255,255,255,0.07)",
-                  color: "#e2e8f0",
+                    : "rgba(255,255,255,0.82)",
+                  border: modalidad === "guiada" ? "2px solid #a78bfa" : "1.5px solid rgba(231,231,227,0.95)",
+                  color: "var(--fg-primary)",
                   backdropFilter: "blur(12px)",
                   boxShadow: modalidad === "guiada"
                     ? "0 0 32px rgba(167,139,250,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
@@ -348,10 +348,10 @@ export default function NuevoProyectoPage() {
                 }}
               >
                 <div style={{ fontSize: 32, marginBottom: 10 }}>🎓</div>
-                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15, color: modalidad === "guiada" ? "#a78bfa" : "#e2e8f0" }}>
+                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15, color: modalidad === "guiada" ? "#a78bfa" : "var(--fg-primary)" }}>
                   Modo Guiado
                 </div>
-                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.6 }}>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.6 }}>
                   Calibra tu estilo, recibe un borrador, da feedback y obtén la versión final perfecta.
                 </div>
                 {modalidad === "guiada" && (
@@ -361,20 +361,20 @@ export default function NuevoProyectoPage() {
             </div>
 
             {/* Feature comparison */}
-            <div style={{ padding: "12px 14px", background: "rgba(6,182,212,0.04)", border: "1px solid rgba(6,182,212,0.1)", borderRadius: 8, marginBottom: 20 }}>
+            <div style={{ padding: "12px 14px", background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.1)", borderRadius: 8, marginBottom: 20 }}>
               {[
                 ["Calibración de estilo personal", false, true],
                 ["Borrador → Feedback → Versión Final", false, true],
                 ["Generación directa sin pasos extras", true, false],
                 ["Invalidación automática de capítulos", false, true],
               ].map(([feat, directa, guiada]) => (
-                <div key={String(feat)} style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 6, marginBottom: 6, borderBottom: "1px solid rgba(30,41,59,0.5)", fontSize: 12, color: "#64748b" }}>
+                <div key={String(feat)} style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 6, marginBottom: 6, borderBottom: "1px solid rgba(231,231,227,0.9)", fontSize: 12, color: "var(--fg-muted)" }}>
                   <span style={{ flex: 1 }}>{String(feat)}</span>
-                  <span style={{ width: 60, textAlign: "center", color: directa ? "#22c55e" : "#334155" }}>{directa ? "✓" : "–"}</span>
-                  <span style={{ width: 60, textAlign: "center", color: guiada ? "#a78bfa" : "#334155" }}>{guiada ? "✓" : "–"}</span>
+                  <span style={{ width: 60, textAlign: "center", color: directa ? "#22c55e" : "var(--border-hover)" }}>{directa ? "✓" : "–"}</span>
+                  <span style={{ width: 60, textAlign: "center", color: guiada ? "#a78bfa" : "var(--border-hover)" }}>{guiada ? "✓" : "–"}</span>
                 </div>
               ))}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingTop: 2, fontSize: 10, color: "#334155" }}>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingTop: 2, fontSize: 10, color: "var(--fg-muted)" }}>
                 <span style={{ width: 60, textAlign: "center" }}>Directo</span>
                 <span style={{ width: 60, textAlign: "center" }}>Guiado</span>
               </div>
@@ -394,13 +394,13 @@ export default function NuevoProyectoPage() {
         {/* ── PASO 3: ELEGIR TIPO ──────────────────────────────────────────────── */}
         {step === "elegir-tipo" && (
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("elegir-modalidad")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <button onClick={() => setStep("elegir-modalidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                 Paso 3 de 3 — Tema
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿Tienes un tema de investigación?</h1>
-              <p style={{ color: "#64748b", fontSize: 14, lineHeight: 1.6 }}>
+              <p style={{ color: "var(--fg-muted)", fontSize: 14, lineHeight: 1.6 }}>
                 Si ya tienes tu tema definido, ve directo al trabajo. Si no, la IA te sugerirá 3 opciones viables según tu contexto.
               </p>
             </div>
@@ -411,29 +411,29 @@ export default function NuevoProyectoPage() {
                 style={{
                   padding: "20px 16px", borderRadius: 10, cursor: "pointer", textAlign: "center",
                   background: "rgba(34,197,94,0.08)", border: "1.5px solid rgba(34,197,94,0.3)",
-                  color: "#e2e8f0", transition: "all 0.15s",
+                  color: "var(--fg-primary)", transition: "all 0.15s",
                 }}
                 onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(34,197,94,0.6)"; }}
                 onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(34,197,94,0.3)"; }}
               >
                 <div style={{ fontSize: 32, marginBottom: 10 }}>✅</div>
                 <div style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>Sí, tengo mi tema</div>
-                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Ingreso el título y voy directo al trabajo</div>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.5 }}>Ingreso el título y voy directo al trabajo</div>
               </button>
 
               <button
                 onClick={() => setStep("sin-tema")}
                 style={{
                   padding: "20px 16px", borderRadius: 10, cursor: "pointer", textAlign: "center",
-                  background: "rgba(6,182,212,0.06)", border: "1.5px solid rgba(6,182,212,0.25)",
-                  color: "#e2e8f0", transition: "all 0.15s",
+                  background: "rgba(37,99,235,0.06)", border: "1.5px solid rgba(37,99,235,0.25)",
+                  color: "var(--fg-primary)", transition: "all 0.15s",
                 }}
-                onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(6,182,212,0.5)"; }}
-                onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(6,182,212,0.25)"; }}
+                onMouseOver={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(37,99,235,0.5)"; }}
+                onMouseOut={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(37,99,235,0.25)"; }}
               >
                 <div style={{ fontSize: 32, marginBottom: 10 }}>🤖</div>
                 <div style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>No, necesito ayuda</div>
-                <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>La IA me propone 3 temas viables</div>
+                <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.5 }}>La IA me propone 3 temas viables</div>
               </button>
             </div>
           </div>
@@ -442,13 +442,13 @@ export default function NuevoProyectoPage() {
         {/* ── CON TEMA PROPIO ──────────────────────────────────────────────────── */}
         {step === "con-tema" && (
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                 Tengo mi tema ✅
               </div>
               <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 6 }}>Ingresa tu tema de investigación</h2>
-              <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6 }}>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
                 Escribe el título o tema con el mayor detalle posible. La IA lo usará para generar cada capítulo con coherencia.
               </p>
             </div>
@@ -481,13 +481,13 @@ export default function NuevoProyectoPage() {
         {/* ── SIN TEMA ─────────────────────────────────────────────────────────── */}
         {step === "sin-tema" && (
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
             <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                 Sugerencias con IA 🤖
               </div>
               <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 6 }}>Cuéntanos tu contexto</h2>
-              <p style={{ color: "#64748b", fontSize: 13, lineHeight: 1.6 }}>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
                 Con esta información, la IA generará 3 temas viables, concretos y relevantes para tu carrera.
               </p>
             </div>
@@ -504,7 +504,7 @@ export default function NuevoProyectoPage() {
               </div>
 
               <div>
-                <label className="label">Materias destacadas del programa <span style={{ color: "#475569", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                <label className="label">Materias destacadas del programa <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
                 <textarea
                   className="input-dark"
                   value={materias}
@@ -516,7 +516,7 @@ export default function NuevoProyectoPage() {
               </div>
 
               <div>
-                <label className="label">Entorno laboral o sector de interés <span style={{ color: "#475569", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
+                <label className="label">Entorno laboral o sector de interés <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span></label>
                 <input
                   className="input-dark"
                   value={entorno}
@@ -541,10 +541,10 @@ export default function NuevoProyectoPage() {
         {step === "eligiendo" && (
           <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="card" style={{ padding: 24 }}>
-              <div style={{ fontSize: 11, color: "#06b6d4", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
                 Sugerencias de tema IA
               </div>
-              <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "#cbd5e1", lineHeight: 1.9, maxHeight: 340, overflowY: "auto", padding: "4px 0" }}>
+              <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "var(--fg-primary)", lineHeight: 1.9, maxHeight: 340, overflowY: "auto", padding: "4px 0" }}>
                 {sugerenciasTexto}
               </div>
             </div>

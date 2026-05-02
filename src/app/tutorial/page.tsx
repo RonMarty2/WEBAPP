@@ -8,7 +8,7 @@ const PASOS = [
     n: "01",
     titulo: "¿Tienes tema de monografía?",
     icon: "🤔",
-    color: "#06b6d4",
+    color: "var(--accent)",
     contenido: [
       { subtitulo: "Si NO tienes tema", texto: "Ingresa tu diplomado, los módulos que cursaste, tu área de interés y dónde trabajas. La IA genera 3 propuestas de temas viables para Bolivia/Latinoamérica, con fuentes verificables (INE, IBCE, BCB, etc.). Elige la que más te interese." },
       { subtitulo: "Si SÍ tienes tema", texto: "Ingresa directamente el título de tu tema, el objetivo general y la pregunta de investigación. El sistema lo guarda como aprobado y pasa al formulario del Capítulo I." },
@@ -105,14 +105,14 @@ export default function TutorialPage() {
   const [faqAbierta, setFaqAbierta] = useState<number | null>(null);
 
   return (
-    <div style={{ background: "#020617", minHeight: "100vh", color: "#e2e8f0" }}>
+    <div style={{ background: "#020617", minHeight: "100vh", color: "var(--fg-primary)" }}>
       {/* Header */}
-      <header style={{ borderBottom: "1px solid #1e293b", padding: "0 24px" }}>
+      <header style={{ borderBottom: "1px solid var(--border)", padding: "0 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 58 }}>
           <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             <span style={{ fontSize: 20 }}>🧪</span>
-            <span style={{ fontWeight: 800, fontSize: 16, color: "#e2e8f0" }}>Laboratorio</span>
-            <span style={{ fontWeight: 800, fontSize: 16, color: "#06b6d4" }}>Académico</span>
+            <span style={{ fontWeight: 800, fontSize: 16, color: "var(--fg-primary)" }}>Laboratorio</span>
+            <span style={{ fontWeight: 800, fontSize: 16, color: "var(--accent)" }}>Académico</span>
           </a>
           <button
             className="btn-cyan"
@@ -128,7 +128,7 @@ export default function TutorialPage() {
         {/* Hero */}
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <h1 style={{ fontSize: 36, fontWeight: 900, marginBottom: 10 }}>Tutorial completo</h1>
-          <p style={{ color: "#64748b", fontSize: 16, maxWidth: 560, margin: "0 auto" }}>
+          <p style={{ color: "var(--fg-muted)", fontSize: 16, maxWidth: 560, margin: "0 auto" }}>
             Aprende a generar una monografía completa en 30 minutos. Cada paso explicado con ejemplos.
           </p>
         </div>
@@ -136,16 +136,16 @@ export default function TutorialPage() {
         {/* Pasos */}
         <div style={{ display: "flex", flexDirection: "column", gap: 24, marginBottom: 60 }}>
           {PASOS.map(paso => (
-            <div key={paso.n} style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 12, overflow: "hidden" }}>
+            <div key={paso.n} style={{ background: "rgba(255,255,255,0.9)", border: "1px solid var(--border)", borderRadius: 12, overflow: "hidden" }}>
               {/* Header del paso */}
-              <div style={{ padding: "18px 24px", borderBottom: "1px solid #1e293b", display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ padding: "18px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 14 }}>
                 <div style={{
                   width: 40, height: 40, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
                   background: `${paso.color}22`, border: `1px solid ${paso.color}44`,
                   fontSize: 11, fontWeight: 800, color: paso.color, flexShrink: 0,
                 }}>{paso.n}</div>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)" }}>
                     {paso.icon} {paso.titulo}
                   </div>
                 </div>
@@ -155,12 +155,12 @@ export default function TutorialPage() {
                 {paso.contenido.map(c => (
                   <div key={c.subtitulo}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: paso.color, marginBottom: 6 }}>{c.subtitulo}</div>
-                    <p style={{ fontSize: 14, color: "#94a3b8", lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>{c.texto}</p>
+                    <p style={{ fontSize: 14, color: "var(--fg-muted)", lineHeight: 1.7, margin: 0, whiteSpace: "pre-line" }}>{c.texto}</p>
                   </div>
                 ))}
                 <div style={{
                   background: `${paso.color}0f`, border: `1px solid ${paso.color}22`,
-                  borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#64748b",
+                  borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "var(--fg-muted)",
                 }}>
                   {paso.tip}
                 </div>
@@ -174,22 +174,22 @@ export default function TutorialPage() {
           <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 24 }}>Preguntas frecuentes</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {FAQS.map((faq, i) => (
-              <div key={i} style={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 10, overflow: "hidden" }}>
+              <div key={i} style={{ background: "rgba(255,255,255,0.9)", border: "1px solid var(--border)", borderRadius: 10, overflow: "hidden" }}>
                 <button
                   onClick={() => setFaqAbierta(faqAbierta === i ? null : i)}
                   style={{
                     width: "100%", textAlign: "left", padding: "14px 18px", background: "none",
-                    border: "none", color: "#e2e8f0", fontSize: 14, fontWeight: 600,
+                    border: "none", color: "var(--fg-primary)", fontSize: 14, fontWeight: 600,
                     cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center",
                   }}
                 >
                   {faq.q}
-                  <span style={{ color: "#475569", flexShrink: 0, marginLeft: 12 }}>
+                  <span style={{ color: "var(--fg-secondary)", flexShrink: 0, marginLeft: 12 }}>
                     {faqAbierta === i ? "▲" : "▼"}
                   </span>
                 </button>
                 {faqAbierta === i && (
-                  <div style={{ padding: "0 18px 16px", fontSize: 13, color: "#94a3b8", lineHeight: 1.7 }}>
+                  <div style={{ padding: "0 18px 16px", fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.7 }}>
                     {faq.a}
                   </div>
                 )}
@@ -199,10 +199,10 @@ export default function TutorialPage() {
         </div>
 
         {/* CTA */}
-        <div style={{ textAlign: "center", padding: "32px", background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", borderRadius: 12 }}>
+        <div style={{ textAlign: "center", padding: "32px", background: "rgba(37,99,235,0.05)", border: "1px solid rgba(37,99,235,0.15)", borderRadius: 12 }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>🚀</div>
           <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>¿Listo para empezar?</h3>
-          <p style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>El flujo tarda 15-30 minutos. Puedes pausar y retomar desde el mismo navegador.</p>
+          <p style={{ color: "var(--fg-muted)", fontSize: 14, marginBottom: 20 }}>El flujo tarda 15-30 minutos. Puedes pausar y retomar desde el mismo navegador.</p>
           <button
             className="btn-cyan"
             onClick={() => router.push("/monografia")}
@@ -213,10 +213,10 @@ export default function TutorialPage() {
         </div>
       </main>
 
-      <footer style={{ borderTop: "1px solid #1e293b", padding: "20px 24px", textAlign: "center" }}>
-        <div style={{ fontSize: 12, color: "#334155" }}>
-          <a href="/terminos" style={{ color: "#475569", textDecoration: "none", marginRight: 16 }}>Términos</a>
-          <a href="/privacidad" style={{ color: "#475569", textDecoration: "none" }}>Privacidad</a>
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "20px 24px", textAlign: "center" }}>
+        <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>
+          <a href="/terminos" style={{ color: "var(--fg-secondary)", textDecoration: "none", marginRight: 16 }}>Términos</a>
+          <a href="/privacidad" style={{ color: "var(--fg-secondary)", textDecoration: "none" }}>Privacidad</a>
         </div>
       </footer>
     </div>

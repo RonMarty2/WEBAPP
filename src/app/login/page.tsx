@@ -34,10 +34,10 @@ function LoginContent() {
   }
 
   const selectStyle = {
-    background: "#0f172a",
-    border: "1px solid #334155",
+    background: "rgba(255,255,255,0.9)",
+    border: "1px solid var(--border-hover)",
     borderRadius: 8,
-    color: "#e2e8f0",
+    color: "var(--fg-primary)",
     padding: "9px 12px",
     fontSize: 14,
     flex: 1,
@@ -62,10 +62,10 @@ function LoginContent() {
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 44, marginBottom: 10 }}>🧪</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "#e2e8f0" }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)" }}>
             Laboratorio Académico
           </h1>
-          <p style={{ color: "#94a3b8", marginTop: 6, fontSize: 14 }}>
+          <p style={{ color: "var(--fg-muted)", marginTop: 6, fontSize: 14 }}>
             Elige cómo quieres ingresar
           </p>
         </div>
@@ -79,15 +79,15 @@ function LoginContent() {
 
           {/* Google */}
           <div>
-            <p style={{ fontSize: 11, color: "#64748b", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <p style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Con cuenta Google
             </p>
             <a
               href="/api/auth/google"
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
-                padding: "13px 20px", borderRadius: 10, border: "1px solid #334155",
-                background: "#fff", color: "#1e293b", textDecoration: "none", fontWeight: 600, fontSize: 15,
+                padding: "13px 20px", borderRadius: 10, border: "1px solid var(--border-hover)",
+                background: "#fff", color: "var(--fg-primary)", textDecoration: "none", fontWeight: 600, fontSize: 15,
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -98,21 +98,21 @@ function LoginContent() {
               </svg>
               Continuar con Google
             </a>
-            <p style={{ fontSize: 12, color: "#475569", marginTop: 8, textAlign: "center" }}>
+            <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 8, textAlign: "center" }}>
               Nuevo usuario → espera activación del admin
             </p>
           </div>
 
           {/* Divisor */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ flex: 1, height: 1, background: "#1e293b" }} />
-            <span style={{ fontSize: 12, color: "#334155" }}>o</span>
-            <div style={{ flex: 1, height: 1, background: "#1e293b" }} />
+            <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
+            <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>o</span>
+            <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
           </div>
 
           {/* Demo */}
           <div>
-            <p style={{ fontSize: 11, color: "#64748b", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            <p style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
               Modo desarrollo
             </p>
 
@@ -121,8 +121,8 @@ function LoginContent() {
                 onClick={() => setShowDemo(true)}
                 style={{
                   width: "100%", padding: "12px", borderRadius: 10,
-                  border: "1px solid rgba(6,182,212,0.3)", background: "rgba(6,182,212,0.06)",
-                  color: "#06b6d4", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                  border: "1px solid rgba(37,99,235,0.3)", background: "rgba(37,99,235,0.06)",
+                  color: "var(--accent)", fontWeight: 600, fontSize: 14, cursor: "pointer",
                 }}
               >
                 👤 Entrar como usuario de prueba
@@ -132,7 +132,7 @@ function LoginContent() {
                 {/* Selectores */}
                 <div style={{ display: "flex", gap: 10 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6 }}>Tipo de usuario</label>
+                    <label style={{ fontSize: 12, color: "var(--fg-muted)", display: "block", marginBottom: 6 }}>Tipo de usuario</label>
                     <select
                       value={demoRole}
                       onChange={(e) => setDemoRole(e.target.value as "estudiante" | "docente")}
@@ -143,7 +143,7 @@ function LoginContent() {
                     </select>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: 12, color: "#64748b", display: "block", marginBottom: 6 }}>Plan</label>
+                    <label style={{ fontSize: 12, color: "var(--fg-muted)", display: "block", marginBottom: 6 }}>Plan</label>
                     <select
                       value={demoPlan}
                       onChange={(e) => setDemoPlan(e.target.value as "estandar" | "pro")}
@@ -156,10 +156,10 @@ function LoginContent() {
                 </div>
 
                 {/* Vista previa */}
-                <div style={{ background: "rgba(6,182,212,0.05)", border: "1px solid rgba(6,182,212,0.15)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#94a3b8" }}>
-                  Entrando como: <strong style={{ color: "#06b6d4" }}>
+                <div style={{ background: "rgba(37,99,235,0.05)", border: "1px solid rgba(37,99,235,0.15)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "var(--fg-muted)" }}>
+                  Entrando como: <strong style={{ color: "var(--accent)" }}>
                     {demoRole === "estudiante" ? "🎓 Estudiante" : "👨‍🏫 Docente"}
-                  </strong> · Plan <strong style={{ color: "#06b6d4" }}>
+                  </strong> · Plan <strong style={{ color: "var(--accent)" }}>
                     {demoPlan === "estandar" ? "Estándar" : "Pro"}
                   </strong>
                 </div>
@@ -167,7 +167,7 @@ function LoginContent() {
                 <div style={{ display: "flex", gap: 10 }}>
                   <button
                     onClick={() => setShowDemo(false)}
-                    style={{ padding: "10px 16px", borderRadius: 8, border: "1px solid #1e293b", background: "transparent", color: "#64748b", fontSize: 13, cursor: "pointer" }}
+                    style={{ padding: "10px 16px", borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--fg-muted)", fontSize: 13, cursor: "pointer" }}
                   >
                     Cancelar
                   </button>
@@ -176,8 +176,8 @@ function LoginContent() {
                     disabled={loading}
                     style={{
                       flex: 1, padding: "10px", borderRadius: 8,
-                      background: "rgba(6,182,212,0.15)", border: "1px solid rgba(6,182,212,0.4)",
-                      color: "#06b6d4", fontWeight: 700, fontSize: 14,
+                      background: "rgba(37,99,235,0.15)", border: "1px solid rgba(37,99,235,0.4)",
+                      color: "var(--accent)", fontWeight: 700, fontSize: 14,
                       cursor: loading ? "not-allowed" : "pointer", opacity: loading ? 0.7 : 1,
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     }}
@@ -190,12 +190,12 @@ function LoginContent() {
           </div>
         </div>
 
-        <p style={{ textAlign: "center", color: "#475569", fontSize: 12, marginTop: 16 }}>
-          <a href="/terminos" style={{ color: "#06b6d4" }}>Términos</a> ·{" "}
-          <a href="/privacidad" style={{ color: "#06b6d4" }}>Privacidad</a>
+        <p style={{ textAlign: "center", color: "var(--fg-secondary)", fontSize: 12, marginTop: 16 }}>
+          <a href="/terminos" style={{ color: "var(--accent)" }}>Términos</a> ·{" "}
+          <a href="/privacidad" style={{ color: "var(--accent)" }}>Privacidad</a>
         </p>
         <div style={{ textAlign: "center", marginTop: 10 }}>
-          <a href="/" style={{ color: "#475569", fontSize: 13, textDecoration: "none" }}>← Inicio</a>
+          <a href="/" style={{ color: "var(--fg-secondary)", fontSize: 13, textDecoration: "none" }}>← Inicio</a>
         </div>
       </div>
     </div>

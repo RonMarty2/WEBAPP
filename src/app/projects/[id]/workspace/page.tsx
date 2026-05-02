@@ -369,12 +369,12 @@ export default function WorkspacePage() {
   if (showCalibracion) {
     const allOk = calibPreguntas.every(q => countWords(calibRespuestas[q.id] ?? "") >= q.minimo_palabras);
     return (
-      <div style={{ height:"100vh", background:"#020617", color:"#e2e8f0", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 16px", overflow:"auto" }}>
+      <div style={{ height:"100vh", background:"#020617", color:"var(--fg-primary)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 16px", overflow:"auto" }}>
         <div style={{ width:"100%", maxWidth:680 }}>
           <div style={{ marginBottom:28, textAlign:"center" }}>
             <div style={{ fontSize:36, marginBottom:12 }}>🎓</div>
             <h1 style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Calibración de Estilo</h1>
-            <p style={{ color:"#64748b", fontSize:14, lineHeight:1.6, maxWidth:480, margin:"0 auto" }}>
+            <p style={{ color:"var(--fg-muted)", fontSize:14, lineHeight:1.6, maxWidth:480, margin:"0 auto" }}>
               Responde estas preguntas para que la IA aprenda tu estilo de escritura. Cuanto más detallado, más personalizado será el resultado.
             </p>
           </div>
@@ -388,12 +388,12 @@ export default function WorkspacePage() {
               const words = countWords(calibRespuestas[q.id] ?? "");
               const ok = words >= q.minimo_palabras;
               return (
-                <div key={q.id} style={{ background:"rgba(14,22,40,0.8)", border:"1px solid #1e293b", borderRadius:10, padding:"18px 20px" }}>
+                <div key={q.id} style={{ background:"rgba(14,22,40,0.8)", border:"1px solid var(--border)", borderRadius:10, padding:"18px 20px" }}>
                   <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginBottom:8 }}>
                     <span style={{ flexShrink:0, width:22, height:22, borderRadius:"50%", background:"rgba(167,139,250,0.15)", border:"1px solid rgba(167,139,250,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#a78bfa" }}>{i+1}</span>
                     <div>
                       <div style={{ fontSize:14, fontWeight:600, marginBottom:q.descripcion?4:0 }}>{q.pregunta}</div>
-                      {q.descripcion && <div style={{ fontSize:12, color:"#64748b" }}>{q.descripcion}</div>}
+                      {q.descripcion && <div style={{ fontSize:12, color:"var(--fg-muted)" }}>{q.descripcion}</div>}
                     </div>
                   </div>
                   <textarea
@@ -404,7 +404,7 @@ export default function WorkspacePage() {
                     placeholder={q.placeholder || "Escribe tu respuesta aquí..."}
                     style={{ width:"100%", resize:"vertical", fontSize:13 }}
                   />
-                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:6, fontSize:11, color:ok?"#22c55e":"#64748b" }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:6, fontSize:11, color:ok?"#22c55e":"var(--fg-muted)" }}>
                     <span>{words} / {q.minimo_palabras} palabras mínimas</span>
                     {ok && <span>✓ Suficiente</span>}
                   </div>
@@ -430,16 +430,16 @@ export default function WorkspacePage() {
   // ── 3-COLUMN WORKSPACE ────────────────────────────────────────────────────────
 
   return (
-    <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"#020617", color:"#e2e8f0", fontFamily:"'Inter', sans-serif" }}>
+    <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"#020617", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>
 
       {/* HEADER */}
-      <header style={{ display:"flex", alignItems:"center", gap:12, padding:"0 20px", height:52, flexShrink:0, background:"rgba(10,22,40,0.98)", borderBottom:"1px solid rgba(6,182,212,0.12)" }}>
-        <a href="/dashboard" style={{ color:"#64748b", textDecoration:"none", fontSize:18, lineHeight:1 }}>←</a>
+      <header style={{ display:"flex", alignItems:"center", gap:12, padding:"0 20px", height:52, flexShrink:0, background:"rgba(10,22,40,0.98)", borderBottom:"1px solid rgba(37,99,235,0.12)" }}>
+        <a href="/dashboard" style={{ color:"var(--fg-muted)", textDecoration:"none", fontSize:18, lineHeight:1 }}>←</a>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ fontSize:14, fontWeight:700, color:"#e2e8f0", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+          <div style={{ fontSize:14, fontWeight:700, color:"var(--fg-primary)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
             {proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título"}
           </div>
-          <div style={{ fontSize:11, color:"#475569", display:"flex", alignItems:"center", gap:6 }}>
+          <div style={{ fontSize:11, color:"var(--fg-secondary)", display:"flex", alignItems:"center", gap:6 }}>
             <span>{proyecto.servicios?.nombre ?? "Monografía"}</span>
             <span>·</span>
             <span>{fasesCompletadas}/{displayFases.length} fases</span>
@@ -460,9 +460,9 @@ export default function WorkspacePage() {
               <button key={f.id} onClick={() => setSelectedFase(idx)} title={f.label + (needsUpd ? " — ⚠️ Desactualizado" : "")}
                 style={{
                   width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
-                  border: sel ? "2px solid #06b6d4" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid #1e293b",
-                  background: sel ? "rgba(6,182,212,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
-                  color: sel ? "#06b6d4" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "#475569",
+                  border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
+                  background: sel ? "rgba(37,99,235,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
+                  color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "var(--fg-secondary)",
                   display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s",
                 }}>
                 {needsUpd ? "!" : done ? "✓" : hasBorr ? "~" : idx}
@@ -491,12 +491,12 @@ export default function WorkspacePage() {
       <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
 
         {/* ── COL 1: CHAT & GENERATION (fixed 360px) ── */}
-        <div style={{ width:360, flexShrink:0, display:"flex", flexDirection:"column", borderRight:"1px solid rgba(6,182,212,0.08)", background:"#060f1e" }}>
+        <div style={{ width:360, flexShrink:0, display:"flex", flexDirection:"column", borderRight:"1px solid rgba(37,99,235,0.08)", background:"rgba(255,255,255,0.90)" }}>
 
           {/* Phase label */}
-          <div style={{ padding:"12px 16px", borderBottom:"1px solid #0a1628" }}>
-            <div style={{ fontSize:10, color:"#06b6d4", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:2 }}>{currentFaseDef.short}</div>
-            <div style={{ fontSize:14, fontWeight:700, color:"#e2e8f0", lineHeight:1.3 }}>{currentFaseDef.label}</div>
+          <div style={{ padding:"12px 16px", borderBottom:"1px solid var(--bg-subtle)" }}>
+            <div style={{ fontSize:10, color:"var(--accent)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:2 }}>{currentFaseDef.short}</div>
+            <div style={{ fontSize:14, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.3 }}>{currentFaseDef.label}</div>
           </div>
 
           {/* Warnings */}
@@ -513,7 +513,7 @@ export default function WorkspacePage() {
           )}
 
           {/* ── Generate buttons block ── */}
-          <div style={{ padding:"12px 14px", borderBottom:"1px solid #0a1628", display:"flex", flexDirection:"column", gap:8 }}>
+          <div style={{ padding:"12px 14px", borderBottom:"1px solid var(--bg-subtle)", display:"flex", flexDirection:"column", gap:8 }}>
             {/* GUIADO: no borrador yet */}
             {esGuiado && !hasBorrador && !hasFinal && (
               <button onClick={() => generarFase({ tipo:"borrador" })} disabled={isGenerating} className="btn-purple" style={{ width:"100%", justifyContent:"center", padding:"10px", fontSize:12 }}>
@@ -545,8 +545,8 @@ export default function WorkspacePage() {
             {/* GUIADO: has final — vista toggle */}
             {esGuiado && hasFinal && (
               <div style={{ display:"flex", gap:6 }}>
-                <button onClick={() => setVistaActiva("borrador")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="borrador"?"rgba(167,139,250,0.15)":"transparent", border: vistaActiva==="borrador"?"1px solid rgba(167,139,250,0.4)":"1px solid #1e293b", color: vistaActiva==="borrador"?"#a78bfa":"#475569" }}>📝 Borrador</button>
-                <button onClick={() => setVistaActiva("final")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="final"?"rgba(6,182,212,0.15)":"transparent", border: vistaActiva==="final"?"1px solid rgba(6,182,212,0.4)":"1px solid #1e293b", color: vistaActiva==="final"?"#06b6d4":"#475569" }}>✨ Final</button>
+                <button onClick={() => setVistaActiva("borrador")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="borrador"?"rgba(167,139,250,0.15)":"transparent", border: vistaActiva==="borrador"?"1px solid rgba(167,139,250,0.4)":"1px solid var(--border)", color: vistaActiva==="borrador"?"#a78bfa":"var(--fg-secondary)" }}>📝 Borrador</button>
+                <button onClick={() => setVistaActiva("final")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="final"?"rgba(37,99,235,0.15)":"transparent", border: vistaActiva==="final"?"1px solid rgba(37,99,235,0.4)":"1px solid var(--border)", color: vistaActiva==="final"?"var(--accent)":"var(--fg-secondary)" }}>✨ Final</button>
               </div>
             )}
 
@@ -570,20 +570,20 @@ export default function WorkspacePage() {
           {/* Chat messages */}
           <div style={{ flex:1, overflowY:"auto", padding:"8px 14px", display:"flex", flexDirection:"column", gap:7 }}>
             {chatMsgs.length === 0 && (
-              <div style={{ color:"#334155", fontSize:11, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
+              <div style={{ color:"var(--border-hover)", fontSize:11, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
                 {displayContent ? "Contenido generado.\nPide modificaciones aquí." : "Genera la fase o envía instrucciones."}
               </div>
             )}
             {chatMsgs.map((msg, i) => (
-              <div key={i} style={{ padding:"8px 10px", borderRadius:7, fontSize:11, background: msg.role==="user"?"rgba(79,70,229,0.14)":"rgba(6,182,212,0.07)", border: msg.role==="user"?"1px solid rgba(79,70,229,0.22)":"1px solid rgba(6,182,212,0.1)", alignSelf: msg.role==="user"?"flex-end":"flex-start", maxWidth:"94%" }}>
-                <div style={{ fontWeight:700, fontSize:10, color: msg.role==="user"?"#a5b4fc":"#67e8f9", marginBottom:3 }}>{msg.role==="user"?"Tú":"IA"}</div>
-                <div style={{ color:"#cbd5e1", lineHeight:1.5 }}>{msg.text}</div>
+              <div key={i} style={{ padding:"8px 10px", borderRadius:7, fontSize:11, background: msg.role==="user"?"rgba(79,70,229,0.14)":"rgba(37,99,235,0.07)", border: msg.role==="user"?"1px solid rgba(79,70,229,0.22)":"1px solid rgba(37,99,235,0.1)", alignSelf: msg.role==="user"?"flex-end":"flex-start", maxWidth:"94%" }}>
+                <div style={{ fontWeight:700, fontSize:10, color: msg.role==="user"?"var(--accent)":"var(--accent)", marginBottom:3 }}>{msg.role==="user"?"Tú":"IA"}</div>
+                <div style={{ color:"var(--fg-primary)", lineHeight:1.5 }}>{msg.text}</div>
               </div>
             ))}
             {isGenerating && (
-              <div style={{ padding:"8px 10px", borderRadius:7, background:"rgba(6,182,212,0.05)", border:"1px solid rgba(6,182,212,0.08)", alignSelf:"flex-start" }}>
+              <div style={{ padding:"8px 10px", borderRadius:7, background:"rgba(37,99,235,0.05)", border:"1px solid rgba(37,99,235,0.08)", alignSelf:"flex-start" }}>
                 <div style={{ display:"flex", gap:4 }}>
-                  {[0,1,2].map(i => <div key={i} className="pulse-dot" style={{ width:5, height:5, borderRadius:"50%", background:"#06b6d4", animationDelay:`${i*0.2}s` }}/>)}
+                  {[0,1,2].map(i => <div key={i} className="pulse-dot" style={{ width:5, height:5, borderRadius:"50%", background:"var(--accent)", animationDelay:`${i*0.2}s` }}/>)}
                 </div>
               </div>
             )}
@@ -591,7 +591,7 @@ export default function WorkspacePage() {
           </div>
 
           {/* Chat input + navigation */}
-          <div style={{ padding:"8px 14px", borderTop:"1px solid #0a1628", background:"#040b16" }}>
+          <div style={{ padding:"8px 14px", borderTop:"1px solid var(--bg-subtle)", background:"#040b16" }}>
             <div style={{ display:"flex", gap:6, marginBottom: displayContent ? 6 : 0 }}>
               <textarea
                 value={chatInput}
@@ -602,7 +602,7 @@ export default function WorkspacePage() {
                 style={{ flex:1, resize:"none", fontSize:11 }}
               />
               <button onClick={() => { if (chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }} disabled={isGenerating || !chatInput.trim()}
-                style={{ width:36, flexShrink:0, background: isGenerating||!chatInput.trim()?"#0a1628":"#06b6d4", border:"1px solid rgba(6,182,212,0.2)", borderRadius:7, cursor: isGenerating||!chatInput.trim()?"not-allowed":"pointer", color:"#fff", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                style={{ width:36, flexShrink:0, background: isGenerating||!chatInput.trim()?"var(--bg-subtle)":"var(--accent)", border:"1px solid rgba(37,99,235,0.2)", borderRadius:7, cursor: isGenerating||!chatInput.trim()?"not-allowed":"pointer", color:"#fff", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
                 {isGenerating ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "↑"}
               </button>
             </div>
@@ -616,13 +616,13 @@ export default function WorkspacePage() {
         </div>
 
         {/* ── COL 2: CONTENT VIEWER (flex) ── */}
-        <div style={{ flex:1, overflowY:"auto", background:"#020617", borderRight: showPdfPanel ? "1px solid rgba(6,182,212,0.08)" : "none" }}>
+        <div style={{ flex:1, overflowY:"auto", background:"#020617", borderRight: showPdfPanel ? "1px solid rgba(37,99,235,0.08)" : "none" }}>
           {displayContent ? (
             <div className="fade-in" style={{ maxWidth:720, margin:"0 auto", padding:"32px 36px 60px" }}>
-              <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid rgba(6,182,212,0.1)" }}>
+              <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid rgba(37,99,235,0.1)" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
                   <div style={{ flex:1 }}>
-                    <div style={{ fontSize:10, color:"#06b6d4", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:3 }}>{currentFaseDef.short}</div>
+                    <div style={{ fontSize:10, color:"var(--accent)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:3 }}>{currentFaseDef.short}</div>
                     <h1 style={{ fontSize:18, fontWeight:800, color:"#f1f5f9", margin:0 }}>{currentFaseDef.label}</h1>
                   </div>
                   {esGuiado && (vistaActiva==="final" && hasFinal
@@ -639,22 +639,22 @@ export default function WorkspacePage() {
               </div>
               <style>{`
                 .md-h1{font-size:19px;font-weight:800;color:#f1f5f9;margin:24px 0 10px}
-                .md-h2{font-size:16px;font-weight:700;color:#e2e8f0;margin:20px 0 9px}
-                .md-h3{font-size:14px;font-weight:700;color:#cbd5e1;margin:15px 0 7px}
-                .md-h4{font-size:13px;font-weight:700;color:#94a3b8;margin:10px 0 5px}
-                .md-p{margin:9px 0;color:#cbd5e1;line-height:1.85;font-size:13.5px}
-                .md-strong{color:#67e8f9;font-weight:700}
-                .md-em{color:#94a3b8;font-style:italic}
+                .md-h2{font-size:16px;font-weight:700;color:var(--fg-primary);margin:20px 0 9px}
+                .md-h3{font-size:14px;font-weight:700;color:var(--fg-primary);margin:15px 0 7px}
+                .md-h4{font-size:13px;font-weight:700;color:var(--fg-muted);margin:10px 0 5px}
+                .md-p{margin:9px 0;color:var(--fg-primary);line-height:1.85;font-size:13.5px}
+                .md-strong{color:var(--accent);font-weight:700}
+                .md-em{color:var(--fg-muted);font-style:italic}
                 .md-ul{margin:9px 0;padding-left:20px}
-                .md-li{color:#cbd5e1;margin:4px 0;line-height:1.65;font-size:13.5px}
+                .md-li{color:var(--fg-primary);margin:4px 0;line-height:1.65;font-size:13.5px}
               `}</style>
               <div className="doc-preview" dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }} style={{ fontSize:13.5, lineHeight:1.85 }}/>
             </div>
           ) : (
             <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10 }}>
               <div style={{ fontSize:48, opacity:0.15 }}>📄</div>
-              <div style={{ fontSize:15, fontWeight:700, color:"#1e293b" }}>{currentFaseDef.label}</div>
-              <div style={{ fontSize:12, color:"#0f172a", textAlign:"center", maxWidth:240, lineHeight:1.6 }}>
+              <div style={{ fontSize:15, fontWeight:700, color:"var(--border)" }}>{currentFaseDef.label}</div>
+              <div style={{ fontSize:12, color:"var(--fg-primary)", textAlign:"center", maxWidth:240, lineHeight:1.6 }}>
                 {esGuiado ? "Genera el borrador para iniciar el proceso guiado." : "Usa el panel izquierdo para generar el contenido."}
               </div>
             </div>
@@ -663,17 +663,17 @@ export default function WorkspacePage() {
 
         {/* ── COL 3: PDF PREVIEW (fixed 340px, toggleable) ── */}
         {showPdfPanel && (
-          <div style={{ width:340, flexShrink:0, display:"flex", flexDirection:"column", background:"rgba(4,8,16,0.95)", borderLeft:"1px solid rgba(6,182,212,0.06)" }}>
+          <div style={{ width:340, flexShrink:0, display:"flex", flexDirection:"column", background:"rgba(4,8,16,0.95)", borderLeft:"1px solid rgba(37,99,235,0.06)" }}>
             {/* Panel header */}
-            <div style={{ padding:"10px 16px", borderBottom:"1px solid #0a1628", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
+            <div style={{ padding:"10px 16px", borderBottom:"1px solid var(--bg-subtle)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
               <div>
-                <div style={{ fontSize:11, fontWeight:700, color:"#94a3b8" }}>Vista Previa del Documento</div>
-                <div style={{ fontSize:10, color:"#334155", marginTop:1 }}>
+                <div style={{ fontSize:11, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa del Documento</div>
+                <div style={{ fontSize:10, color:"var(--border-hover)", marginTop:1 }}>
                   {fasesCompletadas} capítulo{fasesCompletadas !== 1 ? "s" : ""} finalizados
                 </div>
               </div>
               {university && (
-                <div style={{ fontSize:10, color:"#475569", textAlign:"right", maxWidth:120, lineHeight:1.4 }}>
+                <div style={{ fontSize:10, color:"var(--fg-secondary)", textAlign:"right", maxWidth:120, lineHeight:1.4 }}>
                   {university.name}
                 </div>
               )}
@@ -684,23 +684,23 @@ export default function WorkspacePage() {
               {docHtml ? (
                 <>
                   <style>{`
-                    .doc-root{font-family:'Georgia',serif;color:#cbd5e1}
-                    .doc-main-title{font-size:14px;font-weight:800;color:#e2e8f0;text-align:center;margin:0 0 12px;line-height:1.4;padding:10px;background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12);border-radius:6px}
-                    .doc-hr{border:none;border-top:1px solid rgba(6,182,212,0.15);margin:12px 0}
+                    .doc-root{font-family:'Georgia',serif;color:var(--fg-primary)}
+                    .doc-main-title{font-size:14px;font-weight:800;color:var(--fg-primary);text-align:center;margin:0 0 12px;line-height:1.4;padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.12);border-radius:6px}
+                    .doc-hr{border:none;border-top:1px solid rgba(37,99,235,0.15);margin:12px 0}
                     .doc-chapter{margin-bottom:20px}
-                    .doc-ch-title{font-size:11px;font-weight:700;color:#06b6d4;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;padding:6px 8px;background:rgba(6,182,212,0.06);border-left:2px solid #06b6d4;border-radius:0 4px 4px 0}
-                    .doc-ch-body .md-p{font-size:11px;line-height:1.75;margin:6px 0;color:#94a3b8}
-                    .doc-ch-body .md-h1,.doc-ch-body .md-h2,.doc-ch-body .md-h3,.doc-ch-body .md-h4{font-size:11px;font-weight:700;color:#e2e8f0;margin:10px 0 5px}
-                    .doc-ch-body .md-strong{color:#67e8f9}
-                    .doc-ch-body .md-li{font-size:11px;color:#94a3b8;margin:3px 0}
-                    .doc-ch-sep{border:none;border-top:1px dashed rgba(30,41,59,0.8);margin:16px 0}
+                    .doc-ch-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;padding:6px 8px;background:rgba(37,99,235,0.06);border-left:2px solid var(--accent);border-radius:0 4px 4px 0}
+                    .doc-ch-body .md-p{font-size:11px;line-height:1.75;margin:6px 0;color:var(--fg-muted)}
+                    .doc-ch-body .md-h1,.doc-ch-body .md-h2,.doc-ch-body .md-h3,.doc-ch-body .md-h4{font-size:11px;font-weight:700;color:var(--fg-primary);margin:10px 0 5px}
+                    .doc-ch-body .md-strong{color:var(--accent)}
+                    .doc-ch-body .md-li{font-size:11px;color:var(--fg-muted);margin:3px 0}
+                    .doc-ch-sep{border:none;border-top:1px dashed rgba(255,255,255,0.88);margin:16px 0}
                   `}</style>
                   <div dangerouslySetInnerHTML={{ __html: docHtml }}/>
                 </>
               ) : (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10, padding:"40px 0" }}>
                   <div style={{ fontSize:36, opacity:0.12 }}>📋</div>
-                  <div style={{ fontSize:12, color:"#1e293b", textAlign:"center", lineHeight:1.6 }}>
+                  <div style={{ fontSize:12, color:"var(--border)", textAlign:"center", lineHeight:1.6 }}>
                     Aquí se ensamblará el documento completo a medida que finalizas las fases.
                   </div>
                 </div>
@@ -709,7 +709,7 @@ export default function WorkspacePage() {
 
             {/* Download actions */}
             {fasesCompletadas > 0 && (
-              <div style={{ padding:"10px 14px", borderTop:"1px solid #0a1628", display:"flex", gap:8, flexShrink:0 }}>
+              <div style={{ padding:"10px 14px", borderTop:"1px solid var(--bg-subtle)", display:"flex", gap:8, flexShrink:0 }}>
                 <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center" }}>
                   {isDownloading ? "…" : "📄 Descargar .tex"}
                 </button>

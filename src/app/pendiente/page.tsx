@@ -25,13 +25,13 @@ export default function PendientePage() {
       <div style={{ maxWidth: 480, width: "100%", textAlign: "center" }}>
         <div style={{ fontSize: 56, marginBottom: 20 }}>⏳</div>
 
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: "#e2e8f0", marginBottom: 12 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 12 }}>
           Cuenta pendiente de activación
         </h1>
 
         {user && (
-          <p style={{ color: "#94a3b8", fontSize: 14, marginBottom: 8 }}>
-            Registrado como: <strong style={{ color: "#e2e8f0" }}>{user.name}</strong>{" "}
+          <p style={{ color: "var(--fg-muted)", fontSize: 14, marginBottom: 8 }}>
+            Registrado como: <strong style={{ color: "var(--fg-primary)" }}>{user.name}</strong>{" "}
             ({user.email})
           </p>
         )}
@@ -40,9 +40,9 @@ export default function PendientePage() {
           className="card"
           style={{ marginTop: 28, marginBottom: 24, textAlign: "left" }}
         >
-          <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.7, marginBottom: 0 }}>
+          <p style={{ color: "var(--fg-muted)", fontSize: 14, lineHeight: 1.7, marginBottom: 0 }}>
             Tu solicitud de acceso fue recibida. El administrador revisará tu cuenta y te asignará
-            el plan correspondiente en un plazo de <strong style={{ color: "#e2e8f0" }}>24 horas</strong>.
+            el plan correspondiente en un plazo de <strong style={{ color: "var(--fg-primary)" }}>24 horas</strong>.
             <br /><br />
             Una vez activada, podrás iniciar sesión normalmente con tu cuenta Google.
           </p>
@@ -52,8 +52,8 @@ export default function PendientePage() {
           <button
             onClick={handleLogout}
             style={{
-              padding: "10px 24px", borderRadius: 8, border: "1px solid #334155",
-              background: "transparent", color: "#94a3b8", fontSize: 14, cursor: "pointer",
+              padding: "10px 24px", borderRadius: 8, border: "1px solid var(--border-hover)",
+              background: "transparent", color: "var(--fg-muted)", fontSize: 14, cursor: "pointer",
             }}
           >
             ← Volver al inicio

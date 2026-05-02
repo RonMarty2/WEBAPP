@@ -101,8 +101,7 @@ export default function HeroSection() {
           <button
             id="cta-docentes"
             onClick={() => router.push("/login")}
-            className="btn-primary"
-            style={{ background: "#1e293b" }}
+            className="btn-secondary"
           >
             Para Docentes
           </button>

@@ -1,13 +1,13 @@
 export default function TerminosPage() {
   return (
-    <div style={{ background: "#020617", minHeight: "100vh", color: "#e2e8f0" }}>
+    <div style={{ background: "#020617", minHeight: "100vh", color: "var(--fg-primary)" }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px" }}>
-        <a href="/" style={{ color: "#06b6d4", textDecoration: "none", fontSize: 13, display: "inline-block", marginBottom: 32 }}>
+        <a href="/" style={{ color: "var(--accent)", textDecoration: "none", fontSize: 13, display: "inline-block", marginBottom: 32 }}>
           ← Volver al inicio
         </a>
 
         <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 8 }}>Términos y Condiciones</h1>
-        <p style={{ color: "#64748b", fontSize: 14, marginBottom: 40 }}>Última actualización: 30 de abril de 2026</p>
+        <p style={{ color: "var(--fg-muted)", fontSize: 14, marginBottom: 40 }}>Última actualización: 30 de abril de 2026</p>
 
         {[
           {
@@ -58,12 +58,12 @@ El usuario asume total responsabilidad por el uso del contenido generado.`,
           },
         ].map(sec => (
           <div key={sec.titulo} style={{ marginBottom: 32 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: "#06b6d4", marginBottom: 10 }}>{sec.titulo}</h2>
-            <p style={{ color: "#94a3b8", fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-line" }}>{sec.contenido}</p>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: "var(--accent)", marginBottom: 10 }}>{sec.titulo}</h2>
+            <p style={{ color: "var(--fg-muted)", fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-line" }}>{sec.contenido}</p>
           </div>
         ))}
 
-        <div style={{ borderTop: "1px solid #1e293b", paddingTop: 24, marginTop: 20, fontSize: 12, color: "#334155" }}>
+        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginTop: 20, fontSize: 12, color: "var(--fg-muted)" }}>
           Laboratorio Académico · Sistema de generación de monografías con IA · Bolivia
         </div>
       </div>

@@ -231,7 +231,7 @@ export default function ProjectTypesPage() {
                   key={ic}
                   onClick={() => setNewTipo(p => ({ ...p, icon: ic }))}
                   style={{
-                    fontSize: 16, background: "none", border: newTipo.icon === ic ? "1.5px solid #06b6d4" : "1.5px solid transparent",
+                    fontSize: 16, background: "none", border: newTipo.icon === ic ? "1.5px solid var(--accent)" : "1.5px solid transparent",
                     borderRadius: 6, padding: 4, cursor: "pointer",
                   }}
                 >{ic}</button>
@@ -267,20 +267,20 @@ export default function ProjectTypesPage() {
             style={{
               display: "flex", alignItems: "center", gap: 10, padding: "12px 14px",
               borderRadius: 8, cursor: "pointer", textAlign: "left", width: "100%",
-              background: selectedTipo?.id === t.id ? "rgba(6,182,212,0.1)" : "rgba(14,22,40,0.5)",
-              border: selectedTipo?.id === t.id ? "1.5px solid rgba(6,182,212,0.4)" : "1.5px solid rgba(30,41,59,0.8)",
+              background: selectedTipo?.id === t.id ? "rgba(37,99,235,0.1)" : "rgba(255,255,255,0.84)",
+              border: selectedTipo?.id === t.id ? "1.5px solid rgba(37,99,235,0.4)" : "1.5px solid rgba(255,255,255,0.88)",
               transition: "all 0.12s",
             }}
           >
             <span style={{ fontSize: 22, flexShrink: 0 }}>{t.icon ?? "📄"}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.nombre}</div>
-              <div style={{ fontSize: 11, color: "#64748b" }}>{t.fases_count ?? 0} fases</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.nombre}</div>
+              <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>{t.fases_count ?? 0} fases</div>
             </div>
             {t.id !== "tipo-tesis" && t.id !== "tipo-monografia" && (
               <button
                 onClick={e => { e.stopPropagation(); deleteTipo(t.id); }}
-                style={{ background: "none", border: "none", color: "#475569", cursor: "pointer", fontSize: 14, padding: 2 }}
+                style={{ background: "none", border: "none", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 14, padding: 2 }}
                 title="Eliminar"
               >🗑️</button>
             )}
@@ -293,8 +293,8 @@ export default function ProjectTypesPage() {
         {!selectedTipo ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", flexDirection: "column", gap: 12 }}>
             <div style={{ fontSize: 52, opacity: 0.2 }}>📋</div>
-            <div style={{ fontSize: 16, color: "#334155", fontWeight: 700 }}>Selecciona un Tipo de Proyecto</div>
-            <div style={{ fontSize: 13, color: "#1e293b" }}>Verás su árbol de fases aquí</div>
+            <div style={{ fontSize: 16, color: "var(--fg-muted)", fontWeight: 700 }}>Selecciona un Tipo de Proyecto</div>
+            <div style={{ fontSize: 13, color: "var(--fg-primary)" }}>Verás su árbol de fases aquí</div>
           </div>
         ) : (
           <>
@@ -303,7 +303,7 @@ export default function ProjectTypesPage() {
               <span style={{ fontSize: 32 }}>{selectedTipo.icon ?? "📄"}</span>
               <div>
                 <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>{selectedTipo.nombre}</h2>
-                {selectedTipo.descripcion && <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0" }}>{selectedTipo.descripcion}</p>}
+                {selectedTipo.descripcion && <p style={{ fontSize: 13, color: "var(--fg-muted)", margin: "4px 0 0" }}>{selectedTipo.descripcion}</p>}
               </div>
               <button
                 onClick={() => setShowNewFase(v => !v)}
@@ -329,7 +329,7 @@ export default function ProjectTypesPage() {
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 12 }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#94a3b8", cursor: "pointer" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--fg-muted)", cursor: "pointer" }}>
                     <input
                       type="checkbox"
                       checked={newFase.es_subfase}
@@ -364,7 +364,7 @@ export default function ProjectTypesPage() {
             {/* Phase tree */}
             <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 6 }}>
               {principalesFases.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 0", color: "#334155", fontSize: 14 }}>
+                <div style={{ textAlign: "center", padding: "40px 0", color: "var(--fg-muted)", fontSize: 14 }}>
                   No hay fases aún. Agrega la primera con el botón de arriba.
                 </div>
               ) : (
@@ -399,14 +399,14 @@ export default function ProjectTypesPage() {
                           </div>
                         ) : (
                           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <span style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "#06b6d4" }}>
+                            <span style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 6, background: "rgba(37,99,235,0.1)", border: "1px solid rgba(37,99,235,0.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 700, color: "var(--accent)" }}>
                               {Math.round(fase.orden / 10) + 1}
                             </span>
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 14, fontWeight: 700, color: "#e2e8f0" }}>{fase.nombre}</div>
-                              {fase.descripcion && <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{fase.descripcion}</div>}
+                              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)" }}>{fase.nombre}</div>
+                              {fase.descripcion && <div style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 2 }}>{fase.descripcion}</div>}
                               {subfases.length > 0 && (
-                                <div style={{ fontSize: 11, color: "#475569", marginTop: 3 }}>
+                                <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 3 }}>
                                   {subfases.length} sub-fase{subfases.length > 1 ? "s" : ""}
                                 </div>
                               )}
@@ -415,7 +415,7 @@ export default function ProjectTypesPage() {
                               <button
                                 onClick={() => openPromptEditor(fase)}
                                 className="btn-ghost"
-                                style={{ fontSize: 11, padding: "5px 10px", color: hasPrompts ? "#a78bfa" : "#475569", borderColor: hasPrompts ? "rgba(167,139,250,0.3)" : undefined }}
+                                style={{ fontSize: 11, padding: "5px 10px", color: hasPrompts ? "#a78bfa" : "var(--fg-secondary)", borderColor: hasPrompts ? "rgba(167,139,250,0.3)" : undefined }}
                                 title="Editar prompts"
                               >
                                 {hasPrompts ? "✏️ Prompts" : "➕ Prompts"}
@@ -446,13 +446,13 @@ export default function ProjectTypesPage() {
                               <span style={{ color: "#a78bfa", fontSize: 14 }}>↳</span>
                               <div style={{ flex: 1 }}>
                                 <div style={{ fontSize: 13, fontWeight: 600, color: "#c4b5fd" }}>{sf.nombre}</div>
-                                {sf.descripcion && <div style={{ fontSize: 12, color: "#64748b" }}>{sf.descripcion}</div>}
+                                {sf.descripcion && <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>{sf.descripcion}</div>}
                               </div>
                               <div style={{ display: "flex", gap: 5 }}>
                                 <button
                                   onClick={() => openPromptEditor(sf)}
                                   className="btn-ghost"
-                                  style={{ fontSize: 10, padding: "4px 8px", color: sf.prompt_borrador ? "#a78bfa" : "#475569" }}
+                                  style={{ fontSize: 10, padding: "4px 8px", color: sf.prompt_borrador ? "#a78bfa" : "var(--fg-secondary)" }}
                                 >
                                   {sf.prompt_borrador ? "✏️ P" : "➕ P"}
                                 </button>
@@ -484,7 +484,7 @@ export default function ProjectTypesPage() {
           padding: 16,
         }} onClick={e => { if (e.target === e.currentTarget) setPromptFase(null); }}>
           <div style={{
-            background: "#060f1e", border: "1px solid rgba(6,182,212,0.2)",
+            background: "rgba(255,255,255,0.90)", border: "1px solid rgba(37,99,235,0.2)",
             borderRadius: 12, width: "100%", maxWidth: 640,
             padding: "24px 24px 20px",
             display: "flex", flexDirection: "column", gap: 14,
@@ -493,10 +493,10 @@ export default function ProjectTypesPage() {
             {/* Drawer header */}
             <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 10, color: "#06b6d4", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>
+                <div style={{ fontSize: 10, color: "var(--accent)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 3 }}>
                   Editar Prompts de Fase
                 </div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#e2e8f0" }}>{promptFase.nombre}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-primary)" }}>{promptFase.nombre}</div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 <button
@@ -518,8 +518,8 @@ export default function ProjectTypesPage() {
                 style={{
                   flex: 1, padding: "9px", fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: "pointer",
                   background: promptTab === "borrador" ? "rgba(167,139,250,0.12)" : "transparent",
-                  border: promptTab === "borrador" ? "1.5px solid rgba(167,139,250,0.4)" : "1.5px solid #1e293b",
-                  color: promptTab === "borrador" ? "#a78bfa" : "#475569",
+                  border: promptTab === "borrador" ? "1.5px solid rgba(167,139,250,0.4)" : "1.5px solid var(--border)",
+                  color: promptTab === "borrador" ? "#a78bfa" : "var(--fg-secondary)",
                 }}
               >
                 📝 Prompt Borrador
@@ -528,16 +528,16 @@ export default function ProjectTypesPage() {
                 onClick={() => setPromptTab("final")}
                 style={{
                   flex: 1, padding: "9px", fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: "pointer",
-                  background: promptTab === "final" ? "rgba(6,182,212,0.12)" : "transparent",
-                  border: promptTab === "final" ? "1.5px solid rgba(6,182,212,0.4)" : "1.5px solid #1e293b",
-                  color: promptTab === "final" ? "#06b6d4" : "#475569",
+                  background: promptTab === "final" ? "rgba(37,99,235,0.12)" : "transparent",
+                  border: promptTab === "final" ? "1.5px solid rgba(37,99,235,0.4)" : "1.5px solid var(--border)",
+                  color: promptTab === "final" ? "var(--accent)" : "var(--fg-secondary)",
                 }}
               >
                 ✨ Prompt Final
               </button>
             </div>
 
-            <div style={{ fontSize: 11, color: "#475569", padding: "6px 10px", background: "rgba(6,182,212,0.04)", borderRadius: 6 }}>
+            <div style={{ fontSize: 11, color: "var(--fg-secondary)", padding: "6px 10px", background: "rgba(37,99,235,0.04)", borderRadius: 6 }}>
               {promptTab === "borrador"
                 ? "📝 Primera generación. En Modo Directo este prompt también sirve de final."
                 : "✨ Versión final con feedback del estudiante incorporado (Modo Guiado)."}
@@ -556,7 +556,7 @@ export default function ProjectTypesPage() {
               }}
             />
 
-            <div style={{ fontSize: 11, color: "#334155" }}>
+            <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>
               {(promptTab === "borrador" ? draftBorrador : draftFinal).split(/\s+/).filter(Boolean).length} palabras
             </div>
           </div>

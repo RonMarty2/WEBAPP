@@ -131,23 +131,23 @@ export default function ModelosPage() {
       onClick={() => setActiveTab(tab)}
       style={{
         padding: "9px 20px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer",
-        background: activeTab === tab ? "rgba(6,182,212,0.15)" : "transparent",
-        border: activeTab === tab ? "1px solid rgba(6,182,212,0.4)" : "1px solid transparent",
-        color: activeTab === tab ? "#06b6d4" : "#64748b",
+        background: activeTab === tab ? "rgba(37,99,235,0.15)" : "transparent",
+        border: activeTab === tab ? "1px solid rgba(37,99,235,0.4)" : "1px solid transparent",
+        color: activeTab === tab ? "var(--accent)" : "var(--fg-muted)",
       }}
     >
       {label}
     </button>
   );
 
-  if (loading) return <div style={{ textAlign: "center", padding: 48, color: "#475569" }}>Cargando configuración...</div>;
+  if (loading) return <div style={{ textAlign: "center", padding: 48, color: "var(--fg-secondary)" }}>Cargando configuración...</div>;
 
   return (
-    <div style={{ color: "#e2e8f0" }}>
+    <div style={{ color: "var(--fg-primary)" }}>
       {/* Header */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>🤖 Modelos & APIs</h1>
-        <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.6 }}>
+        <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.6 }}>
           Configura los proveedores de IA y asigna qué IA usa cada servicio de la plataforma.
           Puedes tener proveedores diferentes para cada tipo de documento.
         </p>
@@ -159,7 +159,7 @@ export default function ModelosPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 24, background: "rgba(15,23,42,0.6)", padding: 4, borderRadius: 10, width: "fit-content" }}>
+      <div style={{ display: "flex", gap: 6, marginBottom: 24, background: "rgba(255,255,255,0.84)", padding: 4, borderRadius: 10, width: "fit-content" }}>
         {tabBtn("providers", "🔑 Proveedores de IA")}
         {tabBtn("services", "⚙️ IA por Servicio")}
       </div>
@@ -169,27 +169,27 @@ export default function ModelosPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {providers.map(p => (
             <div key={p.id} style={{
-              background: "rgba(15,23,42,0.7)", border: `1px solid ${p.configured ? "rgba(34,197,94,0.25)" : "#1e293b"}`,
+              background: "rgba(255,255,255,0.86)", border: `1px solid ${p.configured ? "rgba(34,197,94,0.25)" : "var(--border)"}`,
               borderRadius: 12, padding: 20,
             }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: 14, flexWrap: "wrap" }}>
                 {/* Indicator dot + name */}
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 200 }}>
-                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: p.configured ? "#4ade80" : "#334155", flexShrink: 0 }} />
+                  <div style={{ width: 10, height: 10, borderRadius: "50%", background: p.configured ? "#4ade80" : "var(--border-hover)", flexShrink: 0 }} />
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{p.name}</div>
-                    <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>
+                    <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 2 }}>
                       {p.configured ? <span style={{ color: "#4ade80" }}>✓ Configurado — {p.keyMasked}</span> : "Sin API key"}
                     </div>
                   </div>
                 </div>
 
                 {/* Models list (compact) */}
-                <div style={{ fontSize: 11, color: "#475569", flex: 1, minWidth: 160 }}>
+                <div style={{ fontSize: 11, color: "var(--fg-secondary)", flex: 1, minWidth: 160 }}>
                   {p.models.slice(0, 3).map(m => (
                     <div key={m.id} style={{ marginBottom: 2 }}>• {m.label}</div>
                   ))}
-                  {p.models.length > 3 && <div style={{ color: "#334155" }}>+{p.models.length - 3} más</div>}
+                  {p.models.length > 3 && <div style={{ color: "var(--fg-muted)" }}>+{p.models.length - 3} más</div>}
                 </div>
 
                 {/* Get API key link */}
@@ -197,7 +197,7 @@ export default function ModelosPage() {
                   href={p.apiDocsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ fontSize: 11, color: "#06b6d4", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}
+                  style={{ fontSize: 11, color: "var(--accent)", textDecoration: "none", whiteSpace: "nowrap", flexShrink: 0 }}
                 >
                   Obtener API Key →
                 </a>
@@ -212,14 +212,14 @@ export default function ModelosPage() {
                     value={keyInputs[p.id] ?? ""}
                     onChange={e => setKeyInputs(prev => ({ ...prev, [p.id]: e.target.value }))}
                     style={{
-                      width: "100%", padding: "9px 40px 9px 12px", background: "rgba(8,12,24,0.8)",
-                      border: "1px solid #334155", borderRadius: 8, color: "#e2e8f0", fontSize: 13,
+                      width: "100%", padding: "9px 40px 9px 12px", background: "rgba(255,255,255,0.90)",
+                      border: "1px solid var(--border-hover)", borderRadius: 8, color: "var(--fg-primary)", fontSize: 13,
                       fontFamily: "JetBrains Mono, monospace", boxSizing: "border-box", outline: "none",
                     }}
                   />
                   <button
                     onClick={() => setShowKey(prev => ({ ...prev, [p.id]: !prev[p.id] }))}
-                    style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#475569", cursor: "pointer", fontSize: 13 }}
+                    style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 13 }}
                   >
                     {showKey[p.id] ? "🙈" : "👁"}
                   </button>
@@ -228,8 +228,8 @@ export default function ModelosPage() {
                   onClick={() => saveProviderKey(p.id)}
                   disabled={!keyInputs[p.id]?.trim() || savingKey === p.id}
                   style={{
-                    padding: "9px 16px", background: keyInputs[p.id]?.trim() ? "rgba(6,182,212,0.9)" : "rgba(30,41,59,0.8)",
-                    border: "1px solid rgba(6,182,212,0.4)", borderRadius: 8, color: keyInputs[p.id]?.trim() ? "#0f172a" : "#475569",
+                    padding: "9px 16px", background: keyInputs[p.id]?.trim() ? "rgba(37,99,235,0.9)" : "rgba(255,255,255,0.88)",
+                    border: "1px solid rgba(37,99,235,0.4)", borderRadius: 8, color: keyInputs[p.id]?.trim() ? "var(--fg-primary)" : "var(--fg-secondary)",
                     fontSize: 13, fontWeight: 700, cursor: keyInputs[p.id]?.trim() ? "pointer" : "not-allowed", whiteSpace: "nowrap",
                   }}
                 >
@@ -270,12 +270,12 @@ export default function ModelosPage() {
             const availableModels = selectedProvider?.models ?? [];
 
             return (
-              <div key={svc.id} style={{ background: "rgba(15,23,42,0.7)", border: `1px solid ${savedCfg ? "rgba(139,92,246,0.25)" : "#1e293b"}`, borderRadius: 12, padding: 22 }}>
+              <div key={svc.id} style={{ background: "rgba(255,255,255,0.86)", border: `1px solid ${savedCfg ? "rgba(139,92,246,0.25)" : "var(--border)"}`, borderRadius: 12, padding: 22 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                   <span style={{ fontSize: 24 }}>{svc.icon}</span>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{svc.nombre}</div>
-                    <div style={{ fontSize: 12, color: "#475569" }}>{svc.desc}</div>
+                    <div style={{ fontSize: 12, color: "var(--fg-secondary)" }}>{svc.desc}</div>
                   </div>
                   {savedCfg && (
                     <span style={{ marginLeft: "auto", fontSize: 11, padding: "3px 10px", background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.3)", borderRadius: 20, color: "#a78bfa" }}>
@@ -286,7 +286,7 @@ export default function ModelosPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 14 }}>
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
                       Proveedor de IA
                     </label>
                     <select
@@ -298,7 +298,7 @@ export default function ModelosPage() {
                           [svc.id]: { provider_id: e.target.value, model: prov?.defaultModel ?? "" }
                         }));
                       }}
-                      style={{ width: "100%", padding: "9px 12px", background: "rgba(8,12,24,0.8)", border: "1px solid #334155", borderRadius: 8, color: cfg.provider_id ? "#e2e8f0" : "#475569", fontSize: 13, outline: "none" }}
+                      style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,0.90)", border: "1px solid var(--border-hover)", borderRadius: 8, color: cfg.provider_id ? "var(--fg-primary)" : "var(--fg-secondary)", fontSize: 13, outline: "none" }}
                     >
                       <option value="">— Seleccionar proveedor —</option>
                       {providers.filter(p => p.configured).map(p => (
@@ -315,14 +315,14 @@ export default function ModelosPage() {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
+                    <label style={{ fontSize: 11, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>
                       Modelo
                     </label>
                     <select
                       value={cfg.model}
                       onChange={e => setServiceEdits(prev => ({ ...prev, [svc.id]: { ...cfg, model: e.target.value } }))}
                       disabled={!cfg.provider_id}
-                      style={{ width: "100%", padding: "9px 12px", background: "rgba(8,12,24,0.8)", border: "1px solid #334155", borderRadius: 8, color: cfg.model ? "#e2e8f0" : "#475569", fontSize: 13, outline: "none" }}
+                      style={{ width: "100%", padding: "9px 12px", background: "rgba(255,255,255,0.90)", border: "1px solid var(--border-hover)", borderRadius: 8, color: cfg.model ? "var(--fg-primary)" : "var(--fg-secondary)", fontSize: 13, outline: "none" }}
                     >
                       <option value="">— Seleccionar modelo —</option>
                       {availableModels.map(m => (
@@ -333,8 +333,8 @@ export default function ModelosPage() {
                 </div>
 
                 {savedCfg && (
-                  <div style={{ fontSize: 11, color: "#475569", marginBottom: 12 }}>
-                    Actual: <span style={{ color: "#94a3b8" }}>{providers.find(p => p.id === savedCfg.provider_id)?.name ?? savedCfg.provider_id}</span> — {savedCfg.model}
+                  <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginBottom: 12 }}>
+                    Actual: <span style={{ color: "var(--fg-muted)" }}>{providers.find(p => p.id === savedCfg.provider_id)?.name ?? savedCfg.provider_id}</span> — {savedCfg.model}
                   </div>
                 )}
 
@@ -344,9 +344,9 @@ export default function ModelosPage() {
                     disabled={!cfg.provider_id || !cfg.model || savingSvc === svc.id}
                     style={{
                       padding: "9px 18px", borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: cfg.provider_id && cfg.model ? "pointer" : "not-allowed",
-                      background: cfg.provider_id && cfg.model ? "rgba(139,92,246,0.9)" : "rgba(30,41,59,0.8)",
+                      background: cfg.provider_id && cfg.model ? "rgba(139,92,246,0.9)" : "rgba(255,255,255,0.88)",
                       border: "1px solid rgba(139,92,246,0.4)",
-                      color: cfg.provider_id && cfg.model ? "#e2e8f0" : "#475569",
+                      color: cfg.provider_id && cfg.model ? "var(--fg-primary)" : "var(--fg-secondary)",
                     }}
                   >
                     {savingSvc === svc.id ? "Guardando..." : "💾 Guardar configuración"}

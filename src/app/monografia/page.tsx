@@ -548,13 +548,13 @@ export default function MonografiaPage() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div style={{ minHeight: "100vh", background: "#0f172a", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: "rgba(255,255,255,0.9)", color: "var(--fg-primary)", fontFamily: "system-ui, sans-serif" }}>
 
       {/* Header */}
-      <div style={{ background: "#1e293b", borderBottom: "1px solid #334155", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-hover)", padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#f8fafc" }}>📄 Generador de Monografía</h1>
-          <p style={{ margin: "2px 0 0", fontSize: "13px", color: "#94a3b8" }}>Anti-alucinación · APA 7 · LaTeX · Chat por etapa</p>
+          <p style={{ margin: "2px 0 0", fontSize: "13px", color: "var(--fg-muted)" }}>Anti-alucinación · APA 7 · LaTeX · Chat por etapa</p>
         </div>
         {monografiaId && (
           <button onClick={reiniciar} style={btnSecondaryStyle}>
@@ -565,18 +565,18 @@ export default function MonografiaPage() {
 
       {/* Progress */}
       {phase !== "inicio" && (
-        <div style={{ padding: "12px 24px", background: "#1e293b", borderBottom: "1px solid #334155" }}>
+        <div style={{ padding: "12px 24px", background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-hover)" }}>
           <div style={{ display: "flex", gap: 0, maxWidth: "760px" }}>
             {PASOS.map((p, i) => (
               <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div style={{
                   width: "28px", height: "28px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                  background: i < pasoActual ? "#22c55e" : i === pasoActual ? "#6366f1" : "#334155",
+                  background: i < pasoActual ? "#22c55e" : i === pasoActual ? "var(--accent)" : "var(--border-hover)",
                   color: "#fff", fontSize: "12px", fontWeight: 700,
                 }}>
                   {i < pasoActual ? "✓" : i + 1}
                 </div>
-                <span style={{ fontSize: "10px", color: i === pasoActual ? "#a5b4fc" : "#64748b", marginTop: "4px", textAlign: "center" }}>{p.label}</span>
+                <span style={{ fontSize: "10px", color: i === pasoActual ? "var(--accent)" : "var(--fg-muted)", marginTop: "4px", textAlign: "center" }}>{p.label}</span>
               </div>
             ))}
           </div>
@@ -593,10 +593,10 @@ export default function MonografiaPage() {
         )}
 
         {isLoading && (
-          <div style={{ background: "#1e293b", border: "1px solid #4f46e5", borderRadius: "8px", padding: "24px", marginBottom: "20px", textAlign: "center" }}>
+          <div style={{ background: "var(--bg-subtle)", border: "1px solid var(--accent)", borderRadius: "8px", padding: "24px", marginBottom: "20px", textAlign: "center" }}>
             <div style={{ fontSize: "32px", marginBottom: "12px" }}>🤖</div>
-            <p style={{ color: "#a5b4fc", fontWeight: 600, margin: "0 0 8px" }}>Generando con IA...</p>
-            <p style={{ color: "#64748b", fontSize: "13px", margin: 0 }}>Esto puede tardar 30-90 segundos. No cierres la página.</p>
+            <p style={{ color: "var(--accent)", fontWeight: 600, margin: "0 0 8px" }}>Generando con IA...</p>
+            <p style={{ color: "var(--fg-muted)", fontSize: "13px", margin: 0 }}>Esto puede tardar 30-90 segundos. No cierres la página.</p>
           </div>
         )}
 
@@ -604,7 +604,7 @@ export default function MonografiaPage() {
         {phase === "inicio" && !isLoading && (
           <div>
             <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "6px" }}>¡Hola! Comencemos tu monografía</h2>
-            <p style={{ color: "#94a3b8", marginBottom: "28px" }}>Primero dinos: ¿ya tienes un tema definido?</p>
+            <p style={{ color: "var(--fg-muted)", marginBottom: "28px" }}>Primero dinos: ¿ya tienes un tema definido?</p>
 
             {/* Elección: tiene tema o no */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
@@ -613,26 +613,26 @@ export default function MonografiaPage() {
                 style={{
                   padding: "16px", borderRadius: "10px", cursor: "pointer", textAlign: "center",
                   background: hasTema === true ? "rgba(34,197,94,0.12)" : "rgba(255,255,255,0.04)",
-                  border: hasTema === true ? "2px solid rgba(34,197,94,0.5)" : "2px solid #1e293b",
+                  border: hasTema === true ? "2px solid rgba(34,197,94,0.5)" : "2px solid var(--border)",
                   transition: "all 0.15s",
                 }}
               >
                 <div style={{ fontSize: "28px", marginBottom: "8px" }}>✅</div>
-                <div style={{ fontWeight: 700, color: "#e2e8f0", marginBottom: "4px" }}>Sí, tengo mi tema</div>
-                <div style={{ fontSize: "12px", color: "#64748b" }}>Ingreso el título y voy directo al Capítulo I</div>
+                <div style={{ fontWeight: 700, color: "var(--fg-primary)", marginBottom: "4px" }}>Sí, tengo mi tema</div>
+                <div style={{ fontSize: "12px", color: "var(--fg-muted)" }}>Ingreso el título y voy directo al Capítulo I</div>
               </div>
               <div
                 onClick={() => setHasTema(false)}
                 style={{
                   padding: "16px", borderRadius: "10px", cursor: "pointer", textAlign: "center",
                   background: hasTema === false ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.04)",
-                  border: hasTema === false ? "2px solid rgba(99,102,241,0.5)" : "2px solid #1e293b",
+                  border: hasTema === false ? "2px solid rgba(99,102,241,0.5)" : "2px solid var(--border)",
                   transition: "all 0.15s",
                 }}
               >
                 <div style={{ fontSize: "28px", marginBottom: "8px" }}>🤖</div>
-                <div style={{ fontWeight: 700, color: "#e2e8f0", marginBottom: "4px" }}>No, necesito ayuda</div>
-                <div style={{ fontSize: "12px", color: "#64748b" }}>La IA me propone 3 temas viables para elegir</div>
+                <div style={{ fontWeight: 700, color: "var(--fg-primary)", marginBottom: "4px" }}>No, necesito ayuda</div>
+                <div style={{ fontSize: "12px", color: "var(--fg-muted)" }}>La IA me propone 3 temas viables para elegir</div>
               </div>
             </div>
 
@@ -654,17 +654,17 @@ export default function MonografiaPage() {
                         placeholder="Ej: Análisis del impacto del microcrédito en el sector rural boliviano 2018-2023" style={inputStyle} />
                     </div>
                     <div>
-                      <label style={labelStyle}>Objetivo general <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                      <label style={labelStyle}>Objetivo general <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional)</span></label>
                       <input value={objPropio} onChange={e => setObjPropio(e.target.value)}
                         placeholder="Ej: Analizar el impacto del microcrédito en la reducción de la pobreza rural..." style={inputStyle} />
                     </div>
                     <div>
-                      <label style={labelStyle}>Pregunta de investigación <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                      <label style={labelStyle}>Pregunta de investigación <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional)</span></label>
                       <input value={preguntaPropia} onChange={e => setPreguntaPropia(e.target.value)}
                         placeholder="Ej: ¿Cuál es el impacto del microcrédito en el ingreso familiar rural de Bolivia 2018-2023?" style={inputStyle} />
                     </div>
                     <div>
-                      <label style={labelStyle}>Temas del programa <span style={{ color: "#475569", fontWeight: 400 }}>(opcional — mejora la generación)</span></label>
+                      <label style={labelStyle}>Temas del programa <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional — mejora la generación)</span></label>
                       <textarea value={temas} onChange={e => setTemas(e.target.value)} rows={3}
                         placeholder={"Finanzas corporativas\nMicroeconomía\nGestión de proyectos"} style={textareaStyle} />
                     </div>
@@ -689,7 +689,7 @@ export default function MonografiaPage() {
                       <input value={contexto} onChange={e => setContexto(e.target.value)} placeholder="Bolivia" style={inputStyle} />
                     </div>
                     <div>
-                      <label style={labelStyle}>¿Trabajas en alguna empresa o institución? <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                      <label style={labelStyle}>¿Trabajas en alguna empresa o institución? <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional)</span></label>
                       <input value={trabajasEn} onChange={e => setTrabajasEn(e.target.value)}
                         placeholder="Ej: Banco BISA, empresa minera, institución pública..." style={inputStyle} />
                     </div>
@@ -707,27 +707,27 @@ export default function MonografiaPage() {
         {(phase === "propuestas" || phase === "generando0") && !isLoading && (
           <div>
             <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>Etapa 0 — Propuestas de Tema</h2>
-            <p style={{ color: "#94a3b8", marginBottom: "20px", fontSize: "14px" }}>La IA generó 3 opciones viables. Elige la que más te interese.</p>
+            <p style={{ color: "var(--fg-muted)", marginBottom: "20px", fontSize: "14px" }}>La IA generó 3 opciones viables. Elige la que más te interese.</p>
 
             {propuestas.length > 0 ? (
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 {propuestas.map((p, i) => (
-                  <div key={i} style={{ background: "#1e293b", border: "1px solid #334155", borderRadius: "10px", padding: "20px" }}>
+                  <div key={i} style={{ background: "var(--bg-subtle)", border: "1px solid var(--border-hover)", borderRadius: "10px", padding: "20px" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
-                      <span style={{ background: "#312e81", color: "#a5b4fc", padding: "3px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: 700 }}>Opción {p.numero}</span>
+                      <span style={{ background: "#312e81", color: "var(--accent)", padding: "3px 10px", borderRadius: "20px", fontSize: "12px", fontWeight: 700 }}>Opción {p.numero}</span>
                       <span style={{ color: p.viabilidad === "ALTA" ? "#22c55e" : "#f59e0b", fontSize: "13px", fontWeight: 600 }}>
                         {p.viabilidad === "ALTA" ? "✅ Alta viabilidad" : "⚠️ Viabilidad media"}
                       </span>
                     </div>
-                    <h3 style={{ fontSize: "16px", color: "#e2e8f0", marginBottom: "8px" }}>{p.titulo}</h3>
-                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "6px" }}>
-                      <strong style={{ color: "#cbd5e1" }}>Pregunta:</strong> {p.pregunta_investigacion}
+                    <h3 style={{ fontSize: "16px", color: "var(--fg-primary)", marginBottom: "8px" }}>{p.titulo}</h3>
+                    <p style={{ fontSize: "13px", color: "var(--fg-muted)", marginBottom: "6px" }}>
+                      <strong style={{ color: "var(--fg-primary)" }}>Pregunta:</strong> {p.pregunta_investigacion}
                     </p>
-                    <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "10px" }}>
-                      <strong style={{ color: "#cbd5e1" }}>Objetivo:</strong> {p.objetivo_general}
+                    <p style={{ fontSize: "13px", color: "var(--fg-muted)", marginBottom: "10px" }}>
+                      <strong style={{ color: "var(--fg-primary)" }}>Objetivo:</strong> {p.objetivo_general}
                     </p>
                     {p.fuentes_datos?.length > 0 && (
-                      <p style={{ fontSize: "12px", color: "#64748b", marginBottom: "12px" }}>
+                      <p style={{ fontSize: "12px", color: "var(--fg-muted)", marginBottom: "12px" }}>
                         📊 Fuentes: {p.fuentes_datos.join(" · ")}
                       </p>
                     )}
@@ -738,9 +738,9 @@ export default function MonografiaPage() {
                 ))}
               </div>
             ) : (
-              <div style={{ background: "#1e293b", borderRadius: "8px", padding: "20px" }}>
-                <p style={{ color: "#94a3b8", fontSize: "14px", marginBottom: "16px" }}>Lee las propuestas y elige una:</p>
-                <div style={{ background: "#0f172a", borderRadius: "6px", padding: "16px", whiteSpace: "pre-wrap", fontSize: "13px", color: "#cbd5e1", maxHeight: "400px", overflowY: "auto", lineHeight: 1.7 }}>
+              <div style={{ background: "var(--bg-subtle)", borderRadius: "8px", padding: "20px" }}>
+                <p style={{ color: "var(--fg-muted)", fontSize: "14px", marginBottom: "16px" }}>Lee las propuestas y elige una:</p>
+                <div style={{ background: "rgba(255,255,255,0.9)", borderRadius: "6px", padding: "16px", whiteSpace: "pre-wrap", fontSize: "13px", color: "var(--fg-primary)", maxHeight: "400px", overflowY: "auto", lineHeight: 1.7 }}>
                   {texto0}
                 </div>
                 <div style={{ marginTop: "16px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -764,7 +764,7 @@ export default function MonografiaPage() {
                 <p style={{ margin: 0, fontSize: "13px", color: "#86efac" }}>✓ Tema: <strong>{propuestaElegida.titulo}</strong></p>
               </div>
             )}
-            <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "14px" }}>
+            <p style={{ color: "var(--fg-muted)", marginBottom: "24px", fontSize: "14px" }}>
               La IA usará exactamente estos datos para el Capítulo I sin inventar nada adicional.
             </p>
 
@@ -816,7 +816,7 @@ export default function MonografiaPage() {
               </div>
 
               <div>
-                <label style={labelStyle}>Alcance institucional <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                <label style={labelStyle}>Alcance institucional <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional)</span></label>
                 <input value={alcanceInstitucional} onChange={e => setAlcanceInstitucional(e.target.value)}
                   placeholder="Ej: Sector microfinanciero boliviano / Empresa XYZ / Subsector agroindustrial" style={inputStyle} />
               </div>
@@ -842,10 +842,10 @@ export default function MonografiaPage() {
               {/* Hipótesis principal (opcional, solo si cuantitativa + tieneHipotesis) */}
               {tieneHipotesis && tipoInvestigacion !== "cualitativa" && (
                 <div style={{ background: "rgba(79,70,229,0.06)", border: "1px solid rgba(79,70,229,0.2)", borderRadius: "8px", padding: "14px" }}>
-                  <label style={{ ...labelStyle, color: "#a5b4fc" }}>Hipótesis principal <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span></label>
+                  <label style={{ ...labelStyle, color: "var(--accent)" }}>Hipótesis principal <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional)</span></label>
                   <input value={hipotesisPrincipal} onChange={e => setHipotesisPrincipal(e.target.value)}
                     placeholder='Ej: "Si X aumenta, entonces Y disminuye porque Z..."' style={inputStyle} />
-                  <p style={{ fontSize: "11px", color: "#64748b", marginTop: "6px" }}>Si la dejas vacía, la IA la derivará del tema y causas.</p>
+                  <p style={{ fontSize: "11px", color: "var(--fg-muted)", marginTop: "6px" }}>Si la dejas vacía, la IA la derivará del tema y causas.</p>
                 </div>
               )}
 
@@ -854,12 +854,12 @@ export default function MonografiaPage() {
                 <button
                   type="button"
                   onClick={() => setShowSubpreguntas(!showSubpreguntas)}
-                  style={{ background: "transparent", border: "1px solid #334155", borderRadius: "6px", color: "#94a3b8", padding: "8px 14px", fontSize: "13px", cursor: "pointer", width: "100%", textAlign: "left" }}
+                  style={{ background: "transparent", border: "1px solid var(--border-hover)", borderRadius: "6px", color: "var(--fg-muted)", padding: "8px 14px", fontSize: "13px", cursor: "pointer", width: "100%", textAlign: "left" }}
                 >
-                  {showSubpreguntas ? "▲" : "▼"} Subpreguntas de investigación <span style={{ color: "#475569" }}>(opcionales — la IA las genera si las dejas vacías)</span>
+                  {showSubpreguntas ? "▲" : "▼"} Subpreguntas de investigación <span style={{ color: "var(--fg-secondary)" }}>(opcionales — la IA las genera si las dejas vacías)</span>
                 </button>
                 {showSubpreguntas && (
-                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px", padding: "14px", background: "rgba(255,255,255,0.02)", borderRadius: "6px", border: "1px solid #1e293b" }}>
+                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "10px", padding: "14px", background: "rgba(255,255,255,0.72)", borderRadius: "6px", border: "1px solid var(--border)" }}>
                     <div>
                       <label style={{ ...labelStyle, fontSize: "12px" }}>Diagnóstica — ¿Cuáles son las fortalezas/debilidades de...?</label>
                       <input value={subDiagnostica} onChange={e => setSubDiagnostica(e.target.value)} style={inputStyle}
@@ -915,16 +915,16 @@ export default function MonografiaPage() {
               <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
                 <div>
                   <label style={{ ...labelStyle, fontSize: "13px" }}>
-                    Contexto actual del tema <span style={{ color: "#475569", fontWeight: 400 }}>(opcional — coyuntura, situación reciente)</span>
+                    Contexto actual del tema <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional — coyuntura, situación reciente)</span>
                   </label>
                   <textarea value={contextoActual} onChange={e => setContextoActual(e.target.value)} rows={3}
                     placeholder="Ej: A 2024, el sector microfinanciero boliviano registra un crecimiento del 8% anual según el BCB. La Ley 393 de Servicios Financieros estableció..."
                     style={textareaStyle} />
-                  <p style={{ fontSize: "11px", color: "#475569", marginTop: "4px" }}>Se integrará como sección de contexto actual en el Capítulo II.</p>
+                  <p style={{ fontSize: "11px", color: "var(--fg-secondary)", marginTop: "4px" }}>Se integrará como sección de contexto actual en el Capítulo II.</p>
                 </div>
                 <div>
                   <label style={{ ...labelStyle, fontSize: "13px" }}>
-                    Documentos del docente o propios <span style={{ color: "#475569", fontWeight: 400 }}>(opcional)</span>
+                    Documentos del docente o propios <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional)</span>
                   </label>
                   <textarea value={documentoPegado} onChange={e => setDocumentoPegado(e.target.value)} rows={4}
                     placeholder="Pega aquí texto de artículos, informes, apuntes o notas del curso que quieras incluir en el marco teórico..." style={textareaStyle} />
@@ -952,7 +952,7 @@ export default function MonografiaPage() {
             btnLabel="✅ Aprobar y generar Capítulos III-V →"
             extraContent={
               <div style={{ marginTop: "16px" }}>
-                <p style={{ color: "#94a3b8", fontSize: "13px", margin: "0 0 8px" }}>Fuentes de datos para el análisis (opcionales, una por línea):</p>
+                <p style={{ color: "var(--fg-muted)", fontSize: "13px", margin: "0 0 8px" }}>Fuentes de datos para el análisis (opcionales, una por línea):</p>
                 <textarea value={fuentesDatos} onChange={e => setFuentesDatos(e.target.value)} rows={3}
                   placeholder={"INE — Instituto Nacional de Estadística 2019-2023\nBCB — Banco Central de Bolivia 2020-2023"} style={textareaStyle} />
                 <Field label="Observaciones adicionales para los capítulos finales (opcional)" value={observaciones3} onChange={setObservaciones3} rows={2}
@@ -979,35 +979,35 @@ export default function MonografiaPage() {
         {phase === "caratula" && !isLoading && (
           <div>
             <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "6px" }}>Carátula del documento</h2>
-            <p style={{ color: "#94a3b8", marginBottom: "24px", fontSize: "14px" }}>
+            <p style={{ color: "var(--fg-muted)", marginBottom: "24px", fontSize: "14px" }}>
               Sube la carátula que te entregó la institución o que ya tienes diseñada. Se incluirá como primera página del PDF.
             </p>
 
             {caratulaUrl ? (
               <div style={{ marginBottom: "20px" }}>
-                <div style={{ background: "#1e293b", borderRadius: "8px", padding: "12px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ background: "var(--bg-subtle)", borderRadius: "8px", padding: "12px", marginBottom: "12px", display: "flex", alignItems: "center", gap: "12px" }}>
                   <span style={{ color: "#4ade80", fontSize: "20px" }}>✓</span>
-                  <span style={{ color: "#e2e8f0", fontSize: "14px" }}>Carátula cargada correctamente</span>
+                  <span style={{ color: "var(--fg-primary)", fontSize: "14px" }}>Carátula cargada correctamente</span>
                   <button onClick={() => setCaratulaUrl("")} style={{ ...btnSecondaryStyle, marginLeft: "auto", padding: "4px 12px", fontSize: "12px" }}>
                     Cambiar
                   </button>
                 </div>
-                <img src={caratulaUrl} alt="Vista previa carátula" style={{ maxWidth: "300px", maxHeight: "400px", borderRadius: "6px", border: "1px solid #334155", objectFit: "contain" }} />
+                <img src={caratulaUrl} alt="Vista previa carátula" style={{ maxWidth: "300px", maxHeight: "400px", borderRadius: "6px", border: "1px solid var(--border-hover)", objectFit: "contain" }} />
               </div>
             ) : (
               <div
                 onClick={() => caratulaInputRef.current?.click()}
                 style={{
-                  border: "2px dashed #334155", borderRadius: "10px", padding: "40px 24px",
+                  border: "2px dashed var(--border-hover)", borderRadius: "10px", padding: "40px 24px",
                   textAlign: "center", cursor: "pointer", marginBottom: "20px", transition: "all 0.2s",
-                  background: "rgba(255,255,255,0.02)",
+                  background: "rgba(255,255,255,0.72)",
                 }}
-                onMouseOver={e => (e.currentTarget.style.borderColor = "#6366f1")}
-                onMouseOut={e => (e.currentTarget.style.borderColor = "#334155")}
+                onMouseOver={e => (e.currentTarget.style.borderColor = "var(--accent)")}
+                onMouseOut={e => (e.currentTarget.style.borderColor = "var(--border-hover)")}
               >
                 <div style={{ fontSize: "40px", marginBottom: "12px" }}>📎</div>
-                <p style={{ color: "#e2e8f0", fontWeight: 600, marginBottom: "6px" }}>Subir carátula</p>
-                <p style={{ color: "#64748b", fontSize: "13px" }}>PNG o JPG · Máx. 5 MB</p>
+                <p style={{ color: "var(--fg-primary)", fontWeight: 600, marginBottom: "6px" }}>Subir carátula</p>
+                <p style={{ color: "var(--fg-muted)", fontSize: "13px" }}>PNG o JPG · Máx. 5 MB</p>
                 <input ref={caratulaInputRef} type="file" accept="image/*" onChange={handleCaratulaChange} style={{ display: "none" }} />
               </div>
             )}
@@ -1033,12 +1033,12 @@ export default function MonografiaPage() {
             <div style={{ textAlign: "center", marginBottom: "28px" }}>
               <div style={{ fontSize: "56px", marginBottom: "12px" }}>🎓</div>
               <h2 style={{ fontSize: "22px", color: "#f1f5f9", marginBottom: "6px" }}>¡Monografía completada!</h2>
-              <p style={{ color: "#94a3b8", fontSize: "14px" }}>Todos los capítulos generados. Descarga tu documento final.</p>
+              <p style={{ color: "var(--fg-muted)", fontSize: "14px" }}>Todos los capítulos generados. Descarga tu documento final.</p>
             </div>
 
             {/* Checklist de validación */}
             <div className="card" style={{ marginBottom: "20px", padding: "16px 20px" }}>
-              <div style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "12px" }}>
                 Validación del documento
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
@@ -1052,12 +1052,12 @@ export default function MonografiaPage() {
                 ].map(({ label, ok }) => (
                   <div key={label} style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px" }}>
                     <span style={{ color: ok ? "#4ade80" : "#f87171", fontSize: "16px" }}>{ok ? "✓" : "✗"}</span>
-                    <span style={{ color: ok ? "#cbd5e1" : "#94a3b8" }}>{label}</span>
+                    <span style={{ color: ok ? "var(--fg-primary)" : "var(--fg-muted)" }}>{label}</span>
                   </div>
                 ))}
               </div>
               {compileMeta?.total_citas !== undefined && (
-                <div style={{ marginTop: "10px", fontSize: "12px", color: "#475569", borderTop: "1px solid #1e293b", paddingTop: "10px" }}>
+                <div style={{ marginTop: "10px", fontSize: "12px", color: "var(--fg-secondary)", borderTop: "1px solid var(--border)", paddingTop: "10px" }}>
                   📚 {compileMeta.total_citas} citas registradas en bibliografía
                   {!caratulaUrl && <span style={{ marginLeft: "16px", color: "#f59e0b" }}>⚠ Sin carátula — se generará portada automática</span>}
                 </div>
@@ -1069,9 +1069,9 @@ export default function MonografiaPage() {
               {/* Vista previa imprimible */}
               <div className="card" style={{ padding: "20px" }}>
                 <div style={{ fontSize: "28px", marginBottom: "10px" }}>🖨️</div>
-                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "14px", fontWeight: 700 }}>Vista previa / Imprimir</h3>
-                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "14px", lineHeight: 1.5 }}>
-                  Abre el documento formateado en el navegador. Usa <strong style={{ color: "#94a3b8" }}>Ctrl+P → Guardar como PDF</strong> para obtener el archivo.
+                <h3 style={{ color: "var(--fg-primary)", marginBottom: "6px", fontSize: "14px", fontWeight: 700 }}>Vista previa / Imprimir</h3>
+                <p style={{ color: "var(--fg-muted)", fontSize: "12px", marginBottom: "14px", lineHeight: 1.5 }}>
+                  Abre el documento formateado en el navegador. Usa <strong style={{ color: "var(--fg-muted)" }}>Ctrl+P → Guardar como PDF</strong> para obtener el archivo.
                   {caratulaUrl ? " Incluye tu carátula." : ""}
                 </p>
                 <button onClick={exportarPDF} style={{ ...btnPrimaryStyle, fontSize: "13px", width: "100%", justifyContent: "center" }}>
@@ -1082,10 +1082,10 @@ export default function MonografiaPage() {
               {/* LaTeX / Overleaf */}
               <div className="card" style={{ padding: "20px" }}>
                 <div style={{ fontSize: "28px", marginBottom: "10px" }}>📄</div>
-                <h3 style={{ color: "#e2e8f0", marginBottom: "6px", fontSize: "14px", fontWeight: 700 }}>LaTeX profesional (.tex)</h3>
-                <p style={{ color: "#64748b", fontSize: "12px", marginBottom: "14px", lineHeight: 1.5 }}>
+                <h3 style={{ color: "var(--fg-primary)", marginBottom: "6px", fontSize: "14px", fontWeight: 700 }}>LaTeX profesional (.tex)</h3>
+                <p style={{ color: "var(--fg-muted)", fontSize: "12px", marginBottom: "14px", lineHeight: 1.5 }}>
                   Descarga el fuente LaTeX con márgenes 2.54 cm, Times 12pt e interlineado 1.5.
-                  Compila en <strong style={{ color: "#06b6d4" }}>Overleaf</strong> para obtener el PDF final.
+                  Compila en <strong style={{ color: "var(--accent)" }}>Overleaf</strong> para obtener el PDF final.
                 </p>
                 <button onClick={compilarLatex} disabled={isLoading} style={{ ...btnSecondaryStyle, fontSize: "13px", width: "100%", justifyContent: "center" }}>
                   Descargar .tex →
@@ -1095,24 +1095,24 @@ export default function MonografiaPage() {
 
             {/* Instrucciones Overleaf */}
             <details className="card" style={{ padding: "14px 18px", marginBottom: "20px" }}>
-              <summary style={{ color: "#06b6d4", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}>
+              <summary style={{ color: "var(--accent)", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}>
                 📋 Cómo compilar el PDF profesional en Overleaf (gratis)
               </summary>
-              <ol style={{ marginTop: "12px", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", color: "#94a3b8", lineHeight: 1.6 }}>
-                <li>Descarga el archivo <strong style={{ color: "#e2e8f0" }}>.tex</strong> con el botón de arriba.</li>
-                <li>Ve a <strong style={{ color: "#e2e8f0" }}>overleaf.com</strong> y crea un proyecto en blanco.</li>
-                <li>Sube el archivo <code style={{ background: "#1e293b", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>.tex</code> reemplazando el <code style={{ background: "#1e293b", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>main.tex</code> predeterminado.</li>
-                {caratulaUrl && <li>Sube también la carátula con el nombre exacto <code style={{ background: "#1e293b", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>caratula.pdf</code>.</li>}
-                <li>Haz clic en <strong style={{ color: "#e2e8f0" }}>Recompile</strong> dos veces (la segunda genera el índice correctamente).</li>
-                <li>Descarga el PDF desde el botón <strong style={{ color: "#e2e8f0" }}>Download PDF</strong> en Overleaf.</li>
+              <ol style={{ marginTop: "12px", paddingLeft: "20px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "13px", color: "var(--fg-muted)", lineHeight: 1.6 }}>
+                <li>Descarga el archivo <strong style={{ color: "var(--fg-primary)" }}>.tex</strong> con el botón de arriba.</li>
+                <li>Ve a <strong style={{ color: "var(--fg-primary)" }}>overleaf.com</strong> y crea un proyecto en blanco.</li>
+                <li>Sube el archivo <code style={{ background: "var(--bg-subtle)", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>.tex</code> reemplazando el <code style={{ background: "var(--bg-subtle)", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>main.tex</code> predeterminado.</li>
+                {caratulaUrl && <li>Sube también la carátula con el nombre exacto <code style={{ background: "var(--bg-subtle)", padding: "1px 5px", borderRadius: "4px", fontSize: "12px" }}>caratula.pdf</code>.</li>}
+                <li>Haz clic en <strong style={{ color: "var(--fg-primary)" }}>Recompile</strong> dos veces (la segunda genera el índice correctamente).</li>
+                <li>Descarga el PDF desde el botón <strong style={{ color: "var(--fg-primary)" }}>Download PDF</strong> en Overleaf.</li>
               </ol>
-              <div style={{ marginTop: "10px", padding: "8px 12px", background: "rgba(6,182,212,0.08)", borderRadius: "6px", fontSize: "12px", color: "#67e8f9" }}>
+              <div style={{ marginTop: "10px", padding: "8px 12px", background: "rgba(37,99,235,0.08)", borderRadius: "6px", fontSize: "12px", color: "var(--accent)" }}>
                 Alternativa local: <code>pdflatex monografia.tex</code> (ejecutar dos veces) con TeX Live o MiKTeX instalado.
               </div>
             </details>
 
             {/* Vistas previas de capítulos */}
-            <div style={{ fontSize: "13px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>
+            <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>
               Vista previa de capítulos
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
@@ -1123,8 +1123,8 @@ export default function MonografiaPage() {
               ].map(({ label, texto }) =>
                 texto ? (
                   <details key={label} className="card" style={{ padding: "12px 16px" }}>
-                    <summary style={{ color: "#a5b4fc", cursor: "pointer", fontWeight: 600, fontSize: "13px" }}>{label}</summary>
-                    <div style={{ marginTop: "10px", whiteSpace: "pre-wrap", fontSize: "12px", color: "#64748b", maxHeight: "280px", overflowY: "auto", lineHeight: 1.7 }}>
+                    <summary style={{ color: "var(--accent)", cursor: "pointer", fontWeight: 600, fontSize: "13px" }}>{label}</summary>
+                    <div style={{ marginTop: "10px", whiteSpace: "pre-wrap", fontSize: "12px", color: "var(--fg-muted)", maxHeight: "280px", overflowY: "auto", lineHeight: 1.7 }}>
                       {texto}
                     </div>
                   </details>
@@ -1191,12 +1191,12 @@ function ResultadoEtapaConChat({ titulo, texto, onTextoChange, etapaNum, monogra
   return (
     <div>
       <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>{titulo}</h2>
-      <p style={{ color: "#94a3b8", marginBottom: "16px", fontSize: "13px" }}>
+      <p style={{ color: "var(--fg-muted)", marginBottom: "16px", fontSize: "13px" }}>
         Revisa el contenido. Puedes usar el chat para pedir modificaciones antes de aprobar.
       </p>
 
       {/* Contenido generado */}
-      <div style={{ background: "#0f172a", border: "1px solid #334155", borderRadius: "8px", padding: "20px", whiteSpace: "pre-wrap", fontSize: "13px", color: "#cbd5e1", maxHeight: "480px", overflowY: "auto", lineHeight: 1.8, marginBottom: "16px" }}>
+      <div style={{ background: "rgba(255,255,255,0.9)", border: "1px solid var(--border-hover)", borderRadius: "8px", padding: "20px", whiteSpace: "pre-wrap", fontSize: "13px", color: "var(--fg-primary)", maxHeight: "480px", overflowY: "auto", lineHeight: 1.8, marginBottom: "16px" }}>
         {texto || "Sin contenido generado."}
       </div>
 
@@ -1209,11 +1209,11 @@ function ResultadoEtapaConChat({ titulo, texto, onTextoChange, etapaNum, monogra
       </div>
 
       {/* Chat panel */}
-      <div style={{ marginTop: "24px", border: "1px solid #1e293b", borderRadius: "10px", overflow: "hidden" }}>
-        <div style={{ padding: "12px 16px", background: "#1e293b", borderBottom: "1px solid #334155", display: "flex", alignItems: "center", gap: "8px" }}>
+      <div style={{ marginTop: "24px", border: "1px solid var(--border)", borderRadius: "10px", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", background: "var(--bg-subtle)", borderBottom: "1px solid var(--border-hover)", display: "flex", alignItems: "center", gap: "8px" }}>
           <span style={{ fontSize: "16px" }}>💬</span>
-          <span style={{ fontWeight: 600, fontSize: "14px", color: "#e2e8f0" }}>Solicitar modificaciones a la IA</span>
-          {chatLoading && <span style={{ fontSize: "12px", color: "#a5b4fc", marginLeft: "auto" }}>Procesando...</span>}
+          <span style={{ fontWeight: 600, fontSize: "14px", color: "var(--fg-primary)" }}>Solicitar modificaciones a la IA</span>
+          {chatLoading && <span style={{ fontSize: "12px", color: "var(--accent)", marginLeft: "auto" }}>Procesando...</span>}
         </div>
 
         {chatMsgs.length > 0 && (
@@ -1221,22 +1221,22 @@ function ResultadoEtapaConChat({ titulo, texto, onTextoChange, etapaNum, monogra
             {chatMsgs.map((msg, i) => (
               <div key={i} style={{
                 padding: "8px 12px", borderRadius: "6px", fontSize: "13px",
-                background: msg.role === "user" ? "rgba(79,70,229,0.15)" : "rgba(6,182,212,0.08)",
-                border: msg.role === "user" ? "1px solid rgba(79,70,229,0.2)" : "1px solid rgba(6,182,212,0.1)",
+                background: msg.role === "user" ? "rgba(79,70,229,0.15)" : "rgba(37,99,235,0.08)",
+                border: msg.role === "user" ? "1px solid rgba(79,70,229,0.2)" : "1px solid rgba(37,99,235,0.1)",
                 alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
                 maxWidth: "90%",
               }}>
-                <span style={{ fontWeight: 700, color: msg.role === "user" ? "#a5b4fc" : "#67e8f9" }}>
+                <span style={{ fontWeight: 700, color: msg.role === "user" ? "var(--accent)" : "var(--accent)" }}>
                   {msg.role === "user" ? "Tú" : "IA"}:
                 </span>{" "}
-                <span style={{ color: "#cbd5e1" }}>{msg.text}</span>
+                <span style={{ color: "var(--fg-primary)" }}>{msg.text}</span>
               </div>
             ))}
             <div ref={chatEndRef} />
           </div>
         )}
 
-        <div style={{ padding: "12px 16px", display: "flex", gap: "8px", background: "#080f1d" }}>
+        <div style={{ padding: "12px 16px", display: "flex", gap: "8px", background: "rgba(255,255,255,0.92)" }}>
           <textarea
             value={chatInput}
             onChange={e => setChatInput(e.target.value)}
@@ -1250,7 +1250,7 @@ function ResultadoEtapaConChat({ titulo, texto, onTextoChange, etapaNum, monogra
             onClick={enviarChat}
             disabled={chatLoading || !chatInput.trim()}
             style={{
-              background: chatLoading || !chatInput.trim() ? "#1e293b" : "#4f46e5",
+              background: chatLoading || !chatInput.trim() ? "var(--border)" : "var(--accent)",
               color: "#fff", border: "none", borderRadius: "8px",
               padding: "0 16px", cursor: chatLoading ? "wait" : "pointer",
               fontWeight: 700, fontSize: "18px", flexShrink: 0,
@@ -1259,7 +1259,7 @@ function ResultadoEtapaConChat({ titulo, texto, onTextoChange, etapaNum, monogra
             {chatLoading ? "⏳" : "↑"}
           </button>
         </div>
-        <p style={{ padding: "0 16px 10px", fontSize: "11px", color: "#334155" }}>
+        <p style={{ padding: "0 16px 10px", fontSize: "11px", color: "var(--fg-muted)" }}>
           Ctrl+Enter para enviar · El capítulo se actualiza sin perder las citas ni la estructura
         </p>
       </div>
@@ -1283,12 +1283,12 @@ function Field({ label, value, onChange, rows, placeholder }: {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const labelStyle: React.CSSProperties = {
-  display: "block", fontSize: "13px", fontWeight: 600, color: "#cbd5e1", marginBottom: "6px",
+  display: "block", fontSize: "13px", fontWeight: 600, color: "var(--fg-primary)", marginBottom: "6px",
 };
 
 const inputStyle: React.CSSProperties = {
-  width: "100%", padding: "10px 12px", background: "#0f172a", border: "1px solid #334155",
-  borderRadius: "6px", color: "#e2e8f0", fontSize: "14px", boxSizing: "border-box",
+  width: "100%", padding: "10px 12px", background: "rgba(255,255,255,0.9)", border: "1px solid var(--border-hover)",
+  borderRadius: "6px", color: "var(--fg-primary)", fontSize: "14px", boxSizing: "border-box",
 };
 
 const textareaStyle: React.CSSProperties = {
@@ -1296,7 +1296,7 @@ const textareaStyle: React.CSSProperties = {
 };
 
 const btnPrimaryStyle: React.CSSProperties = {
-  background: "#4f46e5", color: "#fff", border: "none", borderRadius: "8px",
+  background: "var(--accent)", color: "#fff", border: "none", borderRadius: "8px",
   padding: "12px 24px", fontSize: "15px", fontWeight: 600, cursor: "pointer", width: "100%",
 };
 
@@ -1306,6 +1306,6 @@ const btnSuccessStyle: React.CSSProperties = {
 };
 
 const btnSecondaryStyle: React.CSSProperties = {
-  background: "transparent", color: "#94a3b8", border: "1px solid #475569",
+  background: "transparent", color: "var(--fg-muted)", border: "1px solid var(--fg-secondary)",
   borderRadius: "8px", padding: "10px 20px", fontSize: "14px", cursor: "pointer",
 };
