@@ -81,7 +81,7 @@ SaaS boliviano para generación de monografías académicas con IA.
 | `src/app/globals.css` | CSS global con design tokens, utilidades admin, dark mode, animaciones. |
 | `src/app/layout.tsx` | Root layout. Contiene script anti-flash de tema (dark/light). Usa `<Script strategy="beforeInteractive">`. |
 | `src/components/ThemeToggle.tsx` | Botón de cambio dark/light mode. |
-| `src/components/ParticleSphere.tsx` | Esfera de partículas 3D del hero (canvas, Fibonacci lattice). |
+| `src/components/ParticleSphere.tsx` | Esfera 3D Antigravity (canvas, Fibonacci). Usa físicas de "Persecución Orbital" (Steering Behavior), amorfismo matemático y Corrección Perceptual de Color. |
 
 ### Variables de Entorno (`.env.local`)
 ```
@@ -113,6 +113,8 @@ AUTH_SECRET=...             ← secret para JWT de sesiones de estudiantes
 | Admin auth: localStorage + JWT cookie | Doble capa: localStorage para UI (evitar spinner), cookie para middleware | May 2026 |
 | `.store/` ignorado por webpack watcher | Evitar HMR infinito al escribir datos en desarrollo | May 2026 |
 | `<Script strategy="beforeInteractive">` para tema | React 19 no permite `<script>` raw con dangerouslySetInnerHTML en árbol JSX | May 2026 |
+| Físicas Orbitales en Canvas 3D | Uso de Craig Reynolds Steering Behavior en vez de resortes evita latigazos visuales al mover el mouse rápido. | May 2026 |
+| Corrección Perceptual de Color | Bajar saturación/luz programáticamente en colores verde/amarillo (40-160 hue) evita looks "radiactivos" en el canvas. | May 2026 |
 
 ---
 
