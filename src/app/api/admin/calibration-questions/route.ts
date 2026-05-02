@@ -1,7 +1,7 @@
 /**
- * GET  /api/admin/calibration-questions?servicio_id=xxx  — List questions
- * POST /api/admin/calibration-questions                  — Create / Update (id in body = update)
- * DELETE /api/admin/calibration-questions                — Delete by id
+ * GET    /api/admin/calibration-questions?servicio_id=xxx
+ * POST   /api/admin/calibration-questions  — create (no id) or update (id in body)
+ * DELETE /api/admin/calibration-questions  — delete by id
  */
 
 import { NextResponse } from "next/server";
@@ -9,20 +9,22 @@ import { loadFromDisk, saveToDisk } from "@/lib/persistence";
 import type { CalibracionPregunta } from "@/lib/persistence";
 
 function uid(): string {
-  return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  return "cq-" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
 }
 
 const DEFAULT_PREGUNTAS: Omit<CalibracionPregunta, "id" | "servicio_id">[] = [
   {
     pregunta: "Describe brevemente tu estilo preferido de escritura académica.",
-    descripcion: "Formal, técnico, narrativo, descriptivo... ¿Cómo describes tu forma natural de escribir?",
+    descripcion: "Formal, técnico, narrativo, descriptivo...",
+    placeholder: "Ej: Prefiero un estilo formal y técnico, con oraciones cortas y argumentos directamente respaldados por datos. Evito la voz pasiva y uso conectores lógicos frecuentemente.",
     orden: 0,
     minimo_palabras: 30,
     activo: true,
   },
   {
     pregunta: "Escribe un párrafo de ejemplo sobre cualquier tema académico de tu carrera.",
-    descripcion: "Este párrafo ayuda a la IA a calibrar tu vocabulario, estructura de oraciones y tono.",
+    descripcion: "Este párrafo ayuda a la IA a calibrar tu vocabulario, estructura y tono.",
+    placeholder: "Ej: La gestión financiera en las PyMEs bolivianas presenta desafíos particulares derivados del contexto macroeconómico...",
     orden: 10,
     minimo_palabras: 80,
     activo: true,
@@ -30,6 +32,7 @@ const DEFAULT_PREGUNTAS: Omit<CalibracionPregunta, "id" | "servicio_id">[] = [
   {
     pregunta: "¿Qué aspectos de tu escritura consideras más importantes o distintivos?",
     descripcion: "Por ejemplo: precisión técnica, claridad, uso de ejemplos, argumentación, etc.",
+    placeholder: "Ej: Valoro la precisión en los datos y siempre cito fuentes institucionales. Me esfuerzo por que cada párrafo tenga una idea central clara y bien sustentada.",
     orden: 20,
     minimo_palabras: 20,
     activo: true,
@@ -42,9 +45,8 @@ export async function GET(req: Request) {
 
   const disk = loadFromDisk();
   const todas = disk.calibracionPreguntas ?? [];
-  const paraServicio = todas.filter(q => q.servicio_id === servicio_id);
+  const paraServicio = todas.filter(q => q.servicio_id === servicio_id && q.activo !== false);
 
-  // If none configured for this service, return defaults with virtual IDs
   if (paraServicio.length === 0) {
     const defaults = DEFAULT_PREGUNTAS.map((q, i) => ({
       ...q,
@@ -60,25 +62,26 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json() as Partial<CalibracionPregunta> & { servicio_id: string };
+    const body = await req.json() as Partial<CalibracionPregunta> & { servicio_id?: string };
+
     if (!body.pregunta?.trim()) {
       return NextResponse.json({ error: "pregunta es requerida" }, { status: 400 });
-    }
-    if (!body.servicio_id) {
-      return NextResponse.json({ error: "servicio_id es requerido" }, { status: 400 });
     }
 
     const disk = loadFromDisk();
     if (!disk.calibracionPreguntas) disk.calibracionPreguntas = [];
 
+    // UPDATE existing (id present and not a default-* placeholder)
     if (body.id && !body.id.startsWith("default-")) {
-      // Update existing
       const idx = disk.calibracionPreguntas.findIndex(q => q.id === body.id);
-      if (idx === -1) return NextResponse.json({ error: "Pregunta no encontrada" }, { status: 404 });
+      if (idx === -1) {
+        return NextResponse.json({ error: "Pregunta no encontrada" }, { status: 404 });
+      }
       disk.calibracionPreguntas[idx] = {
         ...disk.calibracionPreguntas[idx],
         pregunta: body.pregunta.trim(),
-        descripcion: body.descripcion ?? disk.calibracionPreguntas[idx].descripcion,
+        descripcion: body.descripcion !== undefined ? body.descripcion : disk.calibracionPreguntas[idx].descripcion,
+        placeholder: body.placeholder !== undefined ? body.placeholder : disk.calibracionPreguntas[idx].placeholder,
         orden: body.orden ?? disk.calibracionPreguntas[idx].orden,
         minimo_palabras: body.minimo_palabras ?? disk.calibracionPreguntas[idx].minimo_palabras,
         activo: body.activo ?? disk.calibracionPreguntas[idx].activo,
@@ -87,14 +90,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ pregunta: disk.calibracionPreguntas[idx] });
     }
 
-    // Create new
-    const existing = disk.calibracionPreguntas.filter(q => q.servicio_id === body.servicio_id);
-    const maxOrden = existing.length > 0 ? Math.max(...existing.map(q => q.orden)) : -10;
+    // CREATE new (also handles "clone from default" when id starts with "default-")
+    const servicio_id = body.servicio_id ?? "mono-001";
+    const existentes = disk.calibracionPreguntas.filter(q => q.servicio_id === servicio_id);
+    const maxOrden = existentes.length > 0 ? Math.max(...existentes.map(q => q.orden)) : -10;
+
     const nueva: CalibracionPregunta = {
       id: uid(),
-      servicio_id: body.servicio_id,
+      servicio_id,
       pregunta: body.pregunta.trim(),
       descripcion: body.descripcion ?? "",
+      placeholder: body.placeholder ?? "",
       orden: body.orden ?? maxOrden + 10,
       minimo_palabras: body.minimo_palabras ?? 30,
       activo: body.activo ?? true,
@@ -102,6 +108,7 @@ export async function POST(req: Request) {
     disk.calibracionPreguntas.push(nueva);
     saveToDisk(disk);
     return NextResponse.json({ pregunta: nueva }, { status: 201 });
+
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
@@ -111,10 +118,11 @@ export async function DELETE(req: Request) {
   try {
     const { id } = await req.json() as { id: string };
     if (!id) return NextResponse.json({ error: "id es requerido" }, { status: 400 });
-
+    if (id.startsWith("default-")) {
+      return NextResponse.json({ error: "Las preguntas por defecto no se pueden eliminar. Agrega las tuyas primero." }, { status: 400 });
+    }
     const disk = loadFromDisk();
     if (!disk.calibracionPreguntas) return NextResponse.json({ ok: true });
-
     disk.calibracionPreguntas = disk.calibracionPreguntas.filter(q => q.id !== id);
     saveToDisk(disk);
     return NextResponse.json({ ok: true });

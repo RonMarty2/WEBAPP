@@ -31,9 +31,31 @@ export interface CalibracionPregunta {
   servicio_id: string;
   pregunta: string;
   descripcion?: string;
+  placeholder?: string;   // hint text shown inside the student textarea
   orden: number;
   minimo_palabras: number;
   activo: boolean;
+}
+
+export interface TipoProyecto {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  icon?: string;
+  activo: boolean;
+  created_at: string;
+}
+
+export interface FaseTipoProyecto {
+  id: string;
+  tipo_proyecto_id: string;
+  nombre: string;
+  descripcion?: string;
+  orden: number;
+  prompt_borrador?: string;
+  prompt_final?: string;
+  es_subfase: boolean;
+  padre_id?: string;
 }
 
 export interface StoreData {
@@ -42,8 +64,10 @@ export interface StoreData {
   aiConfig?: Record<string, unknown>;
   workspacePrompts?: WorkspacePrompts;
   phaseDefinitions?: Record<string, PhaseDefinition[]>; // servicio_id → phases
-  calibracionPreguntas?: CalibracionPregunta[];          // global list, filtered by servicio_id
-  estiloAnalizadorPrompt?: string;                       // system prompt for style analysis
+  calibracionPreguntas?: CalibracionPregunta[];
+  estiloAnalizadorPrompt?: string;
+  tiposProyecto?: TipoProyecto[];
+  fasesTipoProyecto?: FaseTipoProyecto[];
 }
 
 function ensureDir() {

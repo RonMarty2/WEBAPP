@@ -206,9 +206,9 @@ export default function HomePage() {
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header style={{
-        borderBottom: "1px solid rgba(6,182,212,0.12)", padding: "0 32px",
+        borderBottom: "1px solid rgba(255,255,255,0.06)", padding: "0 32px",
         position: "sticky", top: 0,
-        background: "rgba(2,6,23,0.92)", backdropFilter: "blur(14px)", zIndex: 50,
+        background: "rgba(2,6,23,0.80)", backdropFilter: "blur(20px) saturate(180%)", zIndex: 50,
       }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 62 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
@@ -238,60 +238,80 @@ export default function HomePage() {
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
 
         {/* ── Hero ───────────────────────────────────────────────────────────── */}
-        <section style={{ textAlign: "center", padding: "96px 0 72px" }}>
+        <section style={{ textAlign: "center", padding: "96px 0 72px", position: "relative" }}>
+
+          {/* Breathing sphere — decorative glow behind content */}
           <div style={{
-            display: "inline-flex", alignItems: "center", gap: 8,
-            background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.2)",
-            borderRadius: 20, padding: "5px 16px", fontSize: 13, color: "#67e8f9", marginBottom: 28,
+            position: "absolute", top: "50%", left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 0, pointerEvents: "none", opacity: 0.55,
           }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
-            Plataforma académica con inteligencia artificial
+            <div className="sphere sphere-lg float" />
           </div>
 
-          <h1 style={{ fontSize: "clamp(36px, 5.5vw, 60px)", fontWeight: 900, lineHeight: 1.08, letterSpacing: "-0.03em", marginBottom: 22 }}>
-            Documentos académicos{" "}<br />
-            <span style={{ background: "linear-gradient(135deg, #06b6d4 30%, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              de calidad, sin esfuerzo
-            </span>
-          </h1>
+          {/* Hero content — above sphere */}
+          <div style={{ position: "relative", zIndex: 1 }}>
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.22)",
+              borderRadius: 20, padding: "5px 16px", fontSize: 13, color: "#67e8f9", marginBottom: 28,
+              backdropFilter: "blur(8px)",
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+              Plataforma académica con inteligencia artificial
+            </div>
 
-          <p style={{ color: "#94a3b8", fontSize: 18, maxWidth: 520, margin: "0 auto 40px", lineHeight: 1.65 }}>
-            Para estudiantes y docentes. Genera monografías, planificaciones y material
-            académico con IA — coherente, preciso y listo para presentar.
-          </p>
+            <h1 style={{ fontSize: "clamp(36px, 5.5vw, 62px)", fontWeight: 900, lineHeight: 1.06, letterSpacing: "-0.035em", marginBottom: 22 }}>
+              Documentos académicos{" "}<br />
+              <span style={{ background: "linear-gradient(135deg, #06b6d4 30%, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                de calidad, sin esfuerzo
+              </span>
+            </h1>
 
-          <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-            <a href="#estudiantes" style={{
-              padding: "14px 32px", fontSize: 15, fontWeight: 700,
-              background: "linear-gradient(135deg, #06b6d4, #0284c7)",
-              color: "#fff", borderRadius: 10, textDecoration: "none",
-              boxShadow: "0 0 32px rgba(6,182,212,0.3)",
-            }}>
-              🎓 Para Estudiantes
-            </a>
-            <a href="#docentes" style={{
-              padding: "14px 32px", fontSize: 15, fontWeight: 700,
-              background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
-              color: "#fff", borderRadius: 10, textDecoration: "none",
-              boxShadow: "0 0 32px rgba(139,92,246,0.25)",
-            }}>
-              👨‍🏫 Para Docentes
-            </a>
-            <a href="/tutorial" style={{
-              padding: "14px 22px", fontSize: 14, color: "#94a3b8",
-              textDecoration: "none", border: "1px solid #1e293b", borderRadius: 10,
-            }}>
-              Cómo funciona
-            </a>
+            <p style={{ color: "#94a3b8", fontSize: 18, maxWidth: 520, margin: "0 auto 40px", lineHeight: 1.65 }}>
+              Para estudiantes y docentes. Genera monografías, planificaciones y material
+              académico con IA — coherente, preciso y listo para presentar.
+            </p>
+
+            <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+              <a href="#estudiantes" style={{
+                padding: "14px 32px", fontSize: 15, fontWeight: 700,
+                background: "linear-gradient(135deg, #06b6d4, #0284c7)",
+                color: "#fff", borderRadius: 12, textDecoration: "none",
+                boxShadow: "0 0 40px rgba(6,182,212,0.35)",
+                transition: "all 0.25s ease",
+              }}>
+                🎓 Para Estudiantes
+              </a>
+              <a href="#docentes" style={{
+                padding: "14px 32px", fontSize: 15, fontWeight: 700,
+                background: "linear-gradient(135deg, #8b5cf6, #7c3aed)",
+                color: "#fff", borderRadius: 12, textDecoration: "none",
+                boxShadow: "0 0 40px rgba(139,92,246,0.30)",
+                transition: "all 0.25s ease",
+              }}>
+                👨‍🏫 Para Docentes
+              </a>
+              <a href="/tutorial" style={{
+                padding: "14px 22px", fontSize: 14, color: "#94a3b8",
+                textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12,
+                backdropFilter: "blur(8px)",
+                background: "rgba(255,255,255,0.03)",
+              }}>
+                Cómo funciona
+              </a>
+            </div>
           </div>
         </section>
 
         {/* ── Garantías ──────────────────────────────────────────────────────── */}
         <section style={{ marginBottom: 88 }}>
           <div style={{
-            background: "rgba(255,255,255,0.02)", border: "1px solid #1e293b",
-            borderRadius: 12, padding: "18px 28px",
+            background: "rgba(15,23,42,0.45)", border: "1px solid rgba(255,255,255,0.07)",
+            backdropFilter: "blur(16px)", borderRadius: 16, padding: "18px 28px",
             display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06)",
           }}>
             {GARANTIAS.map(g => (
               <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "#64748b", padding: "4px 10px" }}>
@@ -469,8 +489,10 @@ export default function HomePage() {
         {/* ── CTA final ──────────────────────────────────────────────────────── */}
         <section style={{ textAlign: "center", marginBottom: 80 }}>
           <div style={{
-            background: "linear-gradient(135deg, rgba(6,182,212,0.07), rgba(139,92,246,0.07))",
-            border: "1px solid rgba(6,182,212,0.15)", borderRadius: 16, padding: "56px 32px",
+            background: "rgba(15,23,42,0.5)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(6,182,212,0.18)", borderRadius: 20, padding: "56px 32px",
+            boxShadow: "0 0 80px rgba(6,182,212,0.06), 0 0 160px rgba(139,92,246,0.04), inset 0 1px 0 rgba(255,255,255,0.06)",
           }}>
             <h3 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>¿Listo para empezar?</h3>
             <p style={{ color: "#64748b", fontSize: 16, marginBottom: 32, maxWidth: 460, margin: "0 auto 32px" }}>

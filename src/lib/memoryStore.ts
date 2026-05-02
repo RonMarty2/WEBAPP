@@ -435,9 +435,11 @@ export function deactivateUser(id: string): UserRecord | null {
 })();
 
 function persistProyectos() {
-  const disk: Record<string, unknown> = {};
-  for (const [k, v] of proyectosStore.entries()) disk[k] = v;
-  saveToDisk({ proyectos: disk, users: {} });
+  // Merge: only update the 'proyectos' key, preserve everything else (workspacePrompts, calibracion, etc.)
+  const existing = loadFromDisk();
+  const proyectosObj: Record<string, unknown> = {};
+  for (const [k, v] of proyectosStore.entries()) proyectosObj[k] = v;
+  saveToDisk({ ...existing, proyectos: proyectosObj });
 }
 
 export function createProyecto(data: Omit<ProyectoRecord, "id" | "created_at" | "updated_at">): ProyectoRecord {

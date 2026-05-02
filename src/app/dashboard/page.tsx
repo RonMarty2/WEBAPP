@@ -116,9 +116,11 @@ export default function DashboardPage() {
         </div>
 
         {/* Welcome */}
-        <div className="card" style={{ marginBottom: 28, background: "linear-gradient(135deg, rgba(6,182,212,0.08), rgba(14,116,144,0.04))", borderColor: "rgba(6,182,212,0.2)" }}>
-          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>Bienvenido, {user.name.split(" ")[0]}</h1>
-          <p style={{ color: "#94a3b8", fontSize: 14 }}>Desde aquí puedes crear y gestionar tus documentos académicos.</p>
+        <div className="card" style={{ marginBottom: 28, borderColor: "rgba(6,182,212,0.22)", background: "rgba(6,182,212,0.06)", position: "relative", overflow: "hidden" }}>
+          {/* Micro-sphere glow */}
+          <div style={{ position: "absolute", top: "-60px", right: "-60px", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(6,182,212,0.12) 0%, transparent 70%)", filter: "blur(30px)", pointerEvents: "none" }} />
+          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, position: "relative" }}>Bienvenido, {user.name.split(" ")[0]}</h1>
+          <p style={{ color: "#94a3b8", fontSize: 14, position: "relative" }}>Desde aquí puedes crear y gestionar tus documentos académicos.</p>
         </div>
 
         {/* Mis Proyectos */}

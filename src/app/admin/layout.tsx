@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/admin/estadisticas", label: "Estadísticas", icon: "📈" },
   { href: "/admin/logs", label: "Logs", icon: "🪵" },
   { href: "/admin/modelos", label: "Modelos & APIs", icon: "🤖" },
+  { href: "/admin/project-types", label: "Tipos de Proyecto", icon: "🗂️" },
   { href: "/admin/fases", label: "Fases del Proyecto", icon: "📋" },
   { href: "/admin/prompts", label: "Prompts Maestros", icon: "✍️" },
 ];

@@ -47,9 +47,18 @@ function LoginContent() {
   return (
     <div
       className="gradient-bg min-h-screen"
-      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+      style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24, position: "relative", overflow: "hidden" }}
     >
-      <div style={{ width: "100%", maxWidth: 420 }}>
+      {/* Breathing sphere — ambient glow behind the login card */}
+      <div style={{
+        position: "absolute", top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        zIndex: 0, pointerEvents: "none", opacity: 0.70,
+      }}>
+        <div className="sphere sphere-lg" style={{ animationDelay: "-3s" }} />
+      </div>
+
+      <div style={{ width: "100%", maxWidth: 420, position: "relative", zIndex: 1 }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div style={{ fontSize: 44, marginBottom: 10 }}>🧪</div>
