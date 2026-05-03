@@ -82,6 +82,7 @@ function renderMd(text: string): string {
     .replace(/\*(.+?)\*/g,    '<em class="md-em">$1</em>')
     .replace(/^[-*] (.+)$/gm, '<li class="md-li">$1</li>')
     .replace(/((?:<li class="md-li">.*<\/li>\n?)+)/g,'<ul class="md-ul">$1</ul>')
+    .replace(/\[COMPLETAR(.*?)\]/gi, '<span class="marker-completar">[COMPLETAR$1]</span>')
     .replace(/\n\n+/g,'</p><p class="md-p">')
     .replace(/\n/g,'<br/>')
     .replace(/^/,'<p class="md-p">') + '</p>';
@@ -145,6 +146,10 @@ export default function WorkspacePage() {
 
   const [feedbackTexto, setFeedbackTexto] = useState("");
   const [vistaActiva, setVistaActiva] = useState<"borrador" | "final">("borrador");
+
+  // Missing data marker state
+  const [replacementValue, setReplacementValue] = useState("");
+  const [isReplacing, setIsReplacing] = useState(false);
 
   // Calibration
   const [showCalibracion, setShowCalibracion] = useState(false);
@@ -324,6 +329,51 @@ export default function WorkspacePage() {
     abortRef.current?.abort();
   }, []);
 
+  // ── Replace Marker ────────────────────────────────────────────────────────────
+
+  async function handleReplaceMarker() {
+    if (!proyecto || !displayContent || !replacementValue.trim()) return;
+    setIsReplacing(true);
+    try {
+      const newContent = displayContent.replace(/\[COMPLETAR(.*?)\]/i, replacementValue.trim());
+      
+      const isDraft = (esGuiado && vistaActiva === "borrador");
+      const phaseId = currentFaseDef.id;
+      const keyStr = isDynamic
+        ? (isDraft ? `${phaseId}_borrador` : phaseId)
+        : (isDraft ? `${selectedFase}_borrador` : String(selectedFase));
+      
+      const payload: any = { phase_contents: { ...proyecto.phase_contents, [keyStr]: newContent } };
+      
+      // If it's the final version and static, also update the legacy fields
+      if (!isDynamic && !isDraft) {
+        payload[`contenido_fase_${selectedFase}`] = newContent;
+      }
+      
+      const res = await fetch(`/api/projects/${proyectoId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!res.ok) throw new Error("Error al guardar el dato");
+      
+      setProyecto(prev => {
+        if (!prev) return prev;
+        const np = { ...prev, phase_contents: { ...prev.phase_contents, [keyStr]: newContent } };
+        if (!isDynamic && !isDraft) {
+          np[`contenido_fase_${selectedFase}` as keyof Proyecto] = newContent as never;
+        }
+        return np;
+      });
+      setReplacementValue("");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setIsReplacing(false);
+    }
+  }
+
   // ── Upload ────────────────────────────────────────────────────────────────────
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -380,6 +430,13 @@ export default function WorkspacePage() {
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
   const docHtml = buildDocPreview(proyecto, displayFases as typeof FASES_STATIC);
+
+  // Missing data analysis
+  const markerRegex = /\[COMPLETAR(.*?)\]/gi;
+  const markerMatch = displayContent ? displayContent.match(markerRegex) : null;
+  const numMarkers = markerMatch ? markerMatch.length : 0;
+  const hasMarkers = numMarkers > 0;
+  const firstMarkerText = hasMarkers ? markerMatch![0] : "";
 
   // ── Calibration fullscreen ────────────────────────────────────────────────────
 
@@ -560,8 +617,8 @@ export default function WorkspacePage() {
                   style={{ resize:"vertical", fontSize:11 }}
                 />
                 <div style={{ display:"flex", gap:7 }}>
-                  <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11 }}>
-                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando final…</span></> : "Generar Versión Final"}
+                  <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating || (hasMarkers && vistaActiva === "borrador")} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11, opacity: (hasMarkers && vistaActiva === "borrador") ? 0.5 : 1 }}>
+                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando final…</span></> : ((hasMarkers && vistaActiva === "borrador") ? "Completa datos para avanzar" : "Generar Versión Final")}
                   </button>
                   {isGenerating ? (
                     <button onClick={cancelGeneracion} className="btn-ghost" style={{ padding:"9px 11px", fontSize:11, color:"#ef4444" }}>
@@ -596,14 +653,15 @@ export default function WorkspacePage() {
               </div>
             )}
 
-            {selectedFase === 0 && (
-              <>
-                <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-ghost" style={{ width:"100%", fontSize:11, padding:"7px", justifyContent:"center" }}>
-                  {isUploading ? "Subiendo…" : "📎 Adjuntar documento (PDF/TXT)"}
-                </button>
-                <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleUpload} style={{ display:"none" }} />
-              </>
-            )}
+            <div style={{ marginTop: 8, padding: "10px", background: "rgba(167,139,250,0.05)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 8 }}>
+              <div style={{ fontSize: 10, color: "var(--fg-secondary)", marginBottom: 8, textAlign: "center", lineHeight: 1.4 }}>
+                <strong>Insumos de Información:</strong> Sube PDFs o textos (papers, datos) en cualquier fase para que la IA los use como base teórica o analítica.
+              </div>
+              <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-ghost" style={{ width:"100%", fontSize:11, padding:"7px", justifyContent:"center", background: "rgba(167,139,250,0.1)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.2)" }}>
+                {isUploading ? "Analizando y Subiendo…" : "📎 Adjuntar PDF / TXT"}
+              </button>
+              <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleUpload} style={{ display:"none" }} />
+            </div>
           </div>
 
           {/* Chat messages */}
@@ -648,7 +706,7 @@ export default function WorkspacePage() {
             {displayContent && (
               <div style={{ display:"flex", gap:6 }}>
                 {selectedFase > 0 && <button onClick={() => setSelectedFase(f => f-1)} className="btn-ghost" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>← {displayFases[selectedFase-1]?.short}</button>}
-                {selectedFase < displayFases.length-1 && <button onClick={() => setSelectedFase(f => f+1)} className="btn-cyan" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>{displayFases[selectedFase+1]?.short} →</button>}
+                {selectedFase < displayFases.length-1 && <button onClick={() => setSelectedFase(f => f+1)} disabled={hasMarkers} className={hasMarkers ? "btn-ghost" : "btn-cyan"} style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center", cursor: hasMarkers ? "not-allowed" : "pointer" }} title={hasMarkers ? "Faltan datos por completar" : ""}>{displayFases[selectedFase+1]?.short} →</button>}
               </div>
             )}
           </div>
@@ -677,6 +735,41 @@ export default function WorkspacePage() {
                   </div>
                 )}
               </div>
+
+              {/* Data Replacement Panel */}
+              {hasMarkers && (
+                <div style={{ marginBottom: 24, padding: "16px 20px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                    <span style={{ fontSize: 18 }}>🛑</span>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "#fbbf24", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Acción Requerida: Faltan {numMarkers} dato{numMarkers > 1 ? "s" : ""} por completar
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 12, lineHeight: 1.5 }}>
+                    La IA ha dejado marcadores indicados como <strong style={{ color: "#fbbf24", background: "rgba(245,158,11,0.2)", padding: "2px 4px", borderRadius: 4 }}>{firstMarkerText}</strong>. Ingresa el valor real de la investigación para el primer marcador:
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input 
+                      className="input-dark" 
+                      value={replacementValue} 
+                      onChange={e => setReplacementValue(e.target.value)} 
+                      onKeyDown={e => { if (e.key === "Enter" && replacementValue.trim()) handleReplaceMarker(); }}
+                      placeholder="Ej: 25%, Aduana Nacional, $us 50,000, etc." 
+                      style={{ flex: 1, fontSize: 12 }} 
+                      disabled={isReplacing}
+                    />
+                    <button 
+                      onClick={handleReplaceMarker} 
+                      disabled={!replacementValue.trim() || isReplacing}
+                      className="btn-purple" 
+                      style={{ padding: "8px 16px", fontSize: 12, opacity: (!replacementValue.trim() || isReplacing) ? 0.5 : 1 }}
+                    >
+                      {isReplacing ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> Guardando...</> : "Guardar e inyectar dato →"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <style>{`
                 .md-h1{font-size:22px;font-weight:800;color:#f1f5f9;margin:24px 0 10px;line-height:1.3}
                 .md-h2{font-size:17px;font-weight:700;color:var(--fg-primary);margin:20px 0 9px;line-height:1.4}
@@ -687,6 +780,23 @@ export default function WorkspacePage() {
                 .md-em{color:var(--fg-muted);font-style:italic}
                 .md-ul{margin:9px 0;padding-left:20px}
                 .md-li{color:var(--fg-primary);margin:4px 0;line-height:1.65;font-size:15px;font-family:var(--font-crimson), serif}
+                .marker-completar {
+                  background: rgba(245,158,11,0.2);
+                  color: #fbbf24;
+                  padding: 2px 6px;
+                  border-radius: 4px;
+                  border: 1px dashed #fbbf24;
+                  font-weight: 700;
+                  font-size: 0.9em;
+                  display: inline-block;
+                  line-height: 1.2;
+                  animation: pulse-orange 2s infinite;
+                }
+                @keyframes pulse-orange {
+                  0% { box-shadow: 0 0 0 0 rgba(245,158,11, 0.4); }
+                  70% { box-shadow: 0 0 0 6px rgba(245,158,11, 0); }
+                  100% { box-shadow: 0 0 0 0 rgba(245,158,11, 0); }
+                }
               `}</style>
               <div className="doc-preview" dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }} style={{ fontSize:13.5, lineHeight:1.85 }}/>
             </div>

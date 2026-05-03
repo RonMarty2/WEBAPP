@@ -264,7 +264,7 @@ export default function ParticleSphere() {
       } catch (e) {}
     };
 
-    window.addEventListener("ui_particle_update", loadConfig as EventListener);
+    window.addEventListener("ui_particle_update", loadConfig as unknown as EventListener);
     window.addEventListener("ui_particle_route_change", handleRouteChange);
     window.addEventListener("ui_particle_preview", handlePreview);
     const canvas = canvasRef.current;
@@ -565,7 +565,7 @@ export default function ParticleSphere() {
       document.removeEventListener("pointermove",  onMove);
       document.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll",       onScroll);
-      window.removeEventListener("ui_particle_update", loadConfig as EventListener);
+      window.removeEventListener("ui_particle_update", loadConfig as unknown as EventListener);
       window.removeEventListener("ui_particle_route_change", handleRouteChange);
       window.removeEventListener("ui_particle_preview", handlePreview);
       window.clearTimeout(idleTimeout);
