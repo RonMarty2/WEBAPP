@@ -12,9 +12,9 @@ export default function AdminLoginPage() {
   // Si ya está autenticado, ir directo al panel
   useEffect(() => {
     if (localStorage.getItem("adminAuthed") === "1") {
-      router.replace("/admin");
+      window.location.replace("/admin");
     }
-  }, [router]);
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -33,8 +33,13 @@ export default function AdminLoginPage() {
         setLoading(false);
         return;
       }
+      
+      // Force hard navigation to ensure layout mounts with new state
       localStorage.setItem("adminAuthed", "1");
-      router.replace("/admin");
+      window.location.href = "/admin";
+      
+      // Fallback in case window.location hangs (it shouldn't)
+      setTimeout(() => setLoading(false), 2000);
     } catch {
       setError("Error de conexión");
       setLoading(false);
