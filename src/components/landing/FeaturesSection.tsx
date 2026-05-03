@@ -97,7 +97,7 @@ export default function FeaturesSection() {
   }
 
   return (
-    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
+    <div className="max-w-[1100px] mx-auto px-4 md:px-8">
 
       {/* ── Garantías strip ──────────────────────────────────────────── */}
       <section style={{ marginBottom: 88 }}>

@@ -178,13 +178,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="admin-layout flex min-h-screen bg-transparent relative z-10 p-4 md:p-6 lg:p-8 gap-6 lg:gap-8">
+    <div className="admin-layout flex flex-col md:flex-row min-h-screen bg-transparent relative z-10 p-4 md:p-6 lg:p-8 gap-4 md:gap-6 lg:gap-8">
 
       {/* ── Floating Sidebar ────────────────────────────────────────────── */}
-      <aside className="w-[260px] shrink-0 flex flex-col sticky top-8 h-[calc(100vh-64px)] 
+      <aside className="w-full md:w-[260px] shrink-0 flex flex-col relative md:sticky top-0 md:top-8 h-auto md:h-[calc(100vh-64px)] 
                         bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl 
                         border border-white/60 dark:border-white/10 
-                        rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
+                        rounded-[24px] md:rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20">
 
         {/* Logo */}
         <div className="flex items-center gap-3 px-8 pt-8 pb-4">
@@ -233,14 +233,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="mx-6 my-2 h-px bg-gray-200/50 dark:bg-slate-700/50" />
 
         {/* Nav */}
-        <nav className="flex flex-col gap-1.5 flex-1 px-4 py-4 overflow-y-auto">
+        <nav className="flex flex-row md:flex-col gap-2 md:gap-1.5 flex-1 px-4 py-4 overflow-x-auto md:overflow-y-auto whitespace-nowrap md:whitespace-normal no-scrollbar">
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = pathname === href;
             return (
               <a
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold transition-all duration-300 no-underline
+                className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-xl md:rounded-2xl text-[12px] md:text-[13px] font-semibold transition-all duration-300 no-underline shrink-0
                   ${isActive
                     ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
                     : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
@@ -249,7 +249,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
                   <Icon />
                 </span>
-                {label}
+                <span className="inline-block">{label}</span>
               </a>
             );
           })}
@@ -279,7 +279,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main content ────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col overflow-y-auto min-h-screen py-8 pr-4 md:pr-6 lg:pr-8">
+      <main className="flex-1 flex flex-col overflow-y-auto min-h-screen py-4 md:py-8 pr-0 md:pr-6 lg:pr-8">
         <div className="flex-1 w-full max-w-5xl mx-auto">
           {children}
         </div>

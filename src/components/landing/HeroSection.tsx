@@ -7,10 +7,10 @@ export default function HeroSection() {
 
   return (
     <section
+      className="px-4 md:px-8 pt-[108px] pb-20"
       style={{
         position: "relative",
         textAlign: "center",
-        padding: "108px 32px 80px",
         overflow: "hidden",
         minHeight: "100vh",
         display: "flex",

@@ -12,11 +12,7 @@ export default function HomePage() {
 
       {/* ── Navbar ──────────────────────────────────────────────────── */}
       <header className="navbar">
-        <div style={{
-          maxWidth: 1100, margin: "0 auto", padding: "0 32px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          height: 62,
-        }}>
+        <div className="max-w-[1100px] mx-auto px-4 md:px-8 w-full flex items-center justify-between h-[62px]">
           {/* Logo */}
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -29,10 +25,10 @@ export default function HomePage() {
           </div>
 
           {/* Nav links */}
-          <nav style={{ display: "flex", gap: 4, alignItems: "center" }}>
-            <a href="#productos" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Productos</a>
-            <a href="#planes"    style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Precios</a>
-            <a href="/tutorial"  style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Tutorial</a>
+          <nav className="flex items-center gap-2 md:gap-4">
+            <a href="#productos" className="hidden md:inline-block" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Productos</a>
+            <a href="#planes"    className="hidden md:inline-block" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Precios</a>
+            <a href="/tutorial"  className="hidden md:inline-block" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Tutorial</a>
             <a href="/login"     id="nav-login"
               style={{
                 fontSize: 14, color: "var(--fg-muted)", textDecoration: "none",
@@ -40,10 +36,10 @@ export default function HomePage() {
                 border: "1px solid var(--border)", marginLeft: 4,
                 transition: "border-color 0.15s",
               }}>
-              Iniciar sesión
+              Acceder
             </a>
             <a href="#planes" id="nav-ver-planes"
-              className="btn-primary"
+              className="btn-primary hidden sm:inline-flex"
               style={{ padding: "8px 18px", fontSize: 14, borderRadius: 999, marginLeft: 4 }}>
               Ver planes
             </a>
@@ -61,16 +57,12 @@ export default function HomePage() {
       </main>
 
       {/* ── Footer ──────────────────────────────────────────────────── */}
-      <footer style={{ borderTop: "1px solid var(--border)", padding: "28px 32px" }}>
-        <div style={{
-          maxWidth: 1100, margin: "0 auto",
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          flexWrap: "wrap", gap: 14,
-        }}>
+      <footer className="border-t border-gray-200 dark:border-white/10 px-4 md:px-8 py-8">
+        <div className="max-w-[1100px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <span style={{ fontSize: 13, color: "var(--fg-muted)" }}>
             Laboratorio Académico © 2026
           </span>
-          <nav style={{ display: "flex", gap: 20 }}>
+          <nav className="flex flex-wrap justify-center gap-4 md:gap-5">
             <a href="#productos"   style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Productos</a>
             <a href="/tutorial"    style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Tutorial</a>
             <a href="/terminos"    style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Términos</a>
