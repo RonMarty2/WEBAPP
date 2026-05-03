@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm?: () => void;
   title: string;
-  message: string;
+  message?: string;
   confirmText?: string;
   cancelText?: string;
   isDestructive?: boolean;
+  children?: React.ReactNode;
 }
 
 export default function GlassModal({
@@ -22,6 +23,7 @@ export default function GlassModal({
   confirmText = "Confirmar",
   cancelText = "Cancelar",
   isDestructive = false,
+  children,
 }: ConfirmModalProps) {
   const [show, setShow] = useState(false);
 
@@ -107,51 +109,57 @@ export default function GlassModal({
           <h2 style={{ fontSize: "20px", fontWeight: 700, margin: 0, fontFamily: "var(--font-atkinson), sans-serif", color: "#1e293b" }}>
             {title}
           </h2>
-          <p style={{ fontSize: "14px", lineHeight: 1.5, color: "#64748b", margin: "0 0 16px 0", fontFamily: "var(--font-atkinson), sans-serif" }}>
-            {message}
-          </p>
+          {message && (
+            <p style={{ fontSize: "14px", lineHeight: 1.5, color: "#64748b", margin: "0 0 16px 0", fontFamily: "var(--font-atkinson), sans-serif" }}>
+              {message}
+            </p>
+          )}
 
-          <div style={{ display: "flex", gap: "12px", width: "100%", marginTop: "8px" }}>
-            <button
-              onClick={onClose}
-              style={{
-                flex: 1,
-                padding: "10px 16px",
-                borderRadius: "10px",
-                background: "rgba(255, 255, 255, 0.6)",
-                border: "1px solid rgba(0, 0, 0, 0.08)",
-                color: "#334155",
-                fontWeight: 600,
-                fontSize: "14px",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
-                transition: "all 0.2s"
-              }}
-            >
-              {cancelText}
-            </button>
-            <button
-              onClick={() => {
-                onConfirm();
-                onClose();
-              }}
-              style={{
-                flex: 1,
-                padding: "10px 16px",
-                borderRadius: "10px",
-                background: isDestructive ? "#ef4444" : "#6366f1",
-                border: `1px solid ${isDestructive ? "#dc2626" : "#4f46e5"}`,
-                color: "white",
-                fontWeight: 600,
-                fontSize: "14px",
-                cursor: "pointer",
-                boxShadow: isDestructive ? "0 4px 12px rgba(239,68,68,0.25)" : "0 4px 12px rgba(99,102,241,0.25)",
-                transition: "all 0.2s"
-              }}
-            >
-              {confirmText}
-            </button>
-          </div>
+          {children}
+
+          {onConfirm && (
+            <div style={{ display: "flex", gap: "12px", width: "100%", marginTop: "8px" }}>
+              <button
+                onClick={onClose}
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  borderRadius: "10px",
+                  background: "rgba(255, 255, 255, 0.6)",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  color: "#334155",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
+                  transition: "all 0.2s"
+                }}
+              >
+                {cancelText}
+              </button>
+              <button
+                onClick={() => {
+                  onConfirm();
+                  onClose();
+                }}
+                style={{
+                  flex: 1,
+                  padding: "10px 16px",
+                  borderRadius: "10px",
+                  background: isDestructive ? "#ef4444" : "#6366f1",
+                  border: `1px solid ${isDestructive ? "#dc2626" : "#4f46e5"}`,
+                  color: "white",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  boxShadow: isDestructive ? "0 4px 12px rgba(239,68,68,0.25)" : "0 4px 12px rgba(99,102,241,0.25)",
+                  transition: "all 0.2s"
+                }}
+              >
+                {confirmText}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
