@@ -2,246 +2,252 @@
 
 import { useState, useEffect } from "react";
 
-export default function UIConfigPage() {
-  const [config, setConfig] = useState({
-    shape: "sphere",
-    palette: "antigravity",
-    wave: "magnetic",
-    speed: 1.0,
-    particleSize: 1.0,
-    particleLength: 1.0,
-    swarmSize: 1.0,
-    density: 1000
-  });
+const DEFAULT_CONFIGS: Record<string, any> = {
+  scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
+  axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
+  lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
+  mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
+  nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1500 }
+};
 
+const MODULES = [
+  { id: "scribe", name: "SCRIBE (Proyectos y Lógica)" },
+  { id: "axiom", name: "AXIOM (Simulador de Exámenes)" },
+  { id: "lumen", name: "LUMEN (Generador Docente)" },
+  { id: "mentor", name: "MENTOR (Tutoría y Feedback)" },
+  { id: "nucleo", name: "NŪCLEO (Hub Padre)" },
+];
+
+const SHAPES = [
+  { id: "sphere", name: "Esfera Neuronal" },
+  { id: "torus", name: "Toroide Cuántico (Anillo)" },
+  { id: "rings", name: "Anillos de Saturno" },
+  { id: "dna", name: "Doble Hélice Celular" },
+  { id: "cube", name: "Tesseract (Cubo)" },
+  { id: "blackhole", name: "Agujero Negro" }
+];
+
+const PALETTES = [
+  { id: "antigravity", name: "Antigravity (Cyan/Azul)" },
+  { id: "plasma", name: "Plasma (Naranja/Rojo)" },
+  { id: "matrix", name: "Matrix (Esmeralda)" },
+  { id: "monochrome", name: "Platino (Gris)" },
+  { id: "gold", name: "Oro Cyber (Ámbar)" },
+  { id: "synthwave", name: "Synthwave (Violeta/Fucsia)" },
+  { id: "blood", name: "Crimson (Rojo Profundo)" },
+  { id: "toxic", name: "Tóxico (Lima)" }
+];
+
+const WAVES = [
+  { id: "magnetic", name: "Desintegración Magnética" },
+  { id: "ocean", name: "Océano Constante" },
+  { id: "none", name: "Masa Pesada (Inercia)" }
+];
+
+export default function UIConfigPage() {
+  const [targetModule, setTargetModule] = useState("scribe");
+  const [config, setConfig] = useState(DEFAULT_CONFIGS["scribe"]);
+  
+  // Estados para UX
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Cargar configuración cuando cambia el módulo
   useEffect(() => {
-    const stored = localStorage.getItem("ui_particle_config");
+    const storageKey = `ui_particle_config_${targetModule}`;
+    const stored = localStorage.getItem(storageKey);
+    let loadedConfig = DEFAULT_CONFIGS[targetModule];
+    
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setConfig(prev => ({
-          ...prev,
-          ...parsed,
-          // Handle migration from 'size' to 'particleSize' if needed
-          particleSize: parsed.particleSize ?? parsed.size ?? prev.particleSize,
-          particleLength: parsed.particleLength ?? prev.particleLength,
-          swarmSize: parsed.swarmSize ?? prev.swarmSize,
-          density: parsed.density ?? prev.density
-        }));
+        loadedConfig = { ...loadedConfig, ...parsed };
       } catch (e) {}
     }
-  }, []);
+    
+    setConfig(loadedConfig);
+    setHasChanges(false);
+    
+    // Al cambiar de módulo, previsualizamos inmediatamente su configuración guardada
+    window.dispatchEvent(new CustomEvent("ui_particle_preview", { detail: loadedConfig }));
+  }, [targetModule]);
 
   const handleChange = (key: string, value: any) => {
     const newConfig = { ...config, [key]: value };
     setConfig(newConfig);
-    localStorage.setItem("ui_particle_config", JSON.stringify(newConfig));
+    setHasChanges(true);
+    setSaved(false);
+    
+    // LIVE PREVIEW: Emitimos el borrador a la Esfera sin guardarlo en disco
+    window.dispatchEvent(new CustomEvent("ui_particle_preview", { detail: newConfig }));
+  };
+
+  const handleSave = () => {
+    const storageKey = `ui_particle_config_${targetModule}`;
+    localStorage.setItem(storageKey, JSON.stringify(config));
+    
+    setHasChanges(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
+    
+    // Confirmamos la actualización permanente
     window.dispatchEvent(new Event("ui_particle_update"));
   };
 
   return (
-    <div className="flex flex-col gap-8 max-w-2xl">
+    <div className="flex flex-col gap-8 max-w-2xl relative">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Apariencia UI (Antigravity)</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Centro de Comando UI</h1>
         <p className="text-sm text-gray-500 dark:text-slate-400">
-          Ajusta los parámetros visuales y físicos de la Esfera de Partículas en tiempo real.
+          Esculpe en vivo la apariencia de la inteligencia artificial. Los cambios se previsualizan instantáneamente en el fondo.
         </p>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col gap-8">
+      <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-gray-200 dark:border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col gap-8 relative z-10">
         
-        {/* Arquitectura Geométrica */}
+        {/* Selector Madre */}
         <div>
-          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-            Arquitectura Geométrica (Forma)
+          <label className="block text-sm font-semibold text-indigo-600 dark:text-indigo-400 mb-2 uppercase tracking-wider">
+            Módulo a Configurar
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { id: "sphere", label: "Esfera Nebular", desc: "La clásica masa de agua redondeada." },
-              { id: "torus", label: "Toroide Cuántico", desc: "Anillo magnético giratorio." },
-              { id: "rings", label: "Anillos de Saturno", desc: "Un disco estelar estirado." },
-              { id: "dna", label: "Doble Hélice Celular", desc: "Estructura genética biológica." },
-              { id: "cube", label: "Tesseract (Cubo)", desc: "Cubo de datos hiperdimensional." },
-              { id: "blackhole", label: "Agujero Negro", desc: "Núcleo denso y disco de acreción." }
-            ].map(opt => (
-              <div 
-                key={opt.id}
-                onClick={() => handleChange("shape", opt.id)}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  config.shape === opt.id 
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" 
-                    : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
-                }`}
-              >
-                <div className={`text-sm font-bold mb-1 ${config.shape === opt.id ? "text-indigo-700 dark:text-indigo-400" : "text-gray-900 dark:text-white"}`}>
-                  {opt.label}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400 leading-tight">
-                  {opt.desc}
-                </div>
-              </div>
+          <select 
+            value={targetModule}
+            onChange={(e) => setTargetModule(e.target.value)}
+            className="w-full bg-indigo-50 dark:bg-indigo-900/40 border border-indigo-200 dark:border-indigo-800 text-gray-900 dark:text-white rounded-xl p-3 font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+          >
+            {MODULES.map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
             ))}
+          </select>
+        </div>
+
+        <hr className="border-gray-200 dark:border-slate-800/50" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Arquitectura Geométrica */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              Patrón Geométrico
+            </label>
+            <select 
+              value={config.shape}
+              onChange={(e) => handleChange("shape", e.target.value)}
+              className="w-full bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 text-gray-900 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer transition-all"
+            >
+              {SHAPES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+          </div>
+
+          {/* Esquema de Color */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              Esquema de Color
+            </label>
+            <select 
+              value={config.palette}
+              onChange={(e) => handleChange("palette", e.target.value)}
+              className="w-full bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 text-gray-900 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer transition-all"
+            >
+              {PALETTES.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+
+          {/* Efecto de Ola */}
+          <div className="sm:col-span-2">
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
+              Comportamiento Físico
+            </label>
+            <select 
+              value={config.wave}
+              onChange={(e) => handleChange("wave", e.target.value)}
+              className="w-full bg-gray-50 dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 text-gray-900 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer transition-all"
+            >
+              {WAVES.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+            </select>
           </div>
         </div>
 
-        {/* Esquema de Color */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-            Esquema de Color
-          </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { id: "antigravity", label: "Antigravity", color: "from-cyan-400 to-indigo-600" },
-              { id: "plasma", label: "Plasma", color: "from-orange-500 to-rose-600" },
-              { id: "matrix", label: "Matrix", color: "from-emerald-400 to-teal-600" },
-              { id: "monochrome", label: "Platino", color: "from-gray-300 to-gray-500" },
-              { id: "gold", label: "Oro Cyber", color: "from-yellow-400 to-amber-600" },
-              { id: "synthwave", label: "Synthwave", color: "from-fuchsia-500 to-cyan-500" },
-              { id: "blood", label: "Crimson", color: "from-red-600 to-rose-900" },
-              { id: "toxic", label: "Tóxico", color: "from-lime-400 to-green-600" }
-            ].map(opt => (
-              <div 
-                key={opt.id}
-                onClick={() => handleChange("palette", opt.id)}
-                className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col items-center gap-2 ${
-                  config.palette === opt.id 
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" 
-                    : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
-                }`}
-              >
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br ${opt.color} shadow-sm`} />
-                <div className={`text-xs font-bold text-center ${config.palette === opt.id ? "text-indigo-700 dark:text-indigo-400" : "text-gray-900 dark:text-white"}`}>
-                  {opt.label}
-                </div>
+        <hr className="border-gray-200 dark:border-slate-800/50" />
+
+        {/* Deslizadores Físicos */}
+        <div className="flex flex-col gap-6">
+          {/* Velocidad de Mutación */}
+          <div>
+            <div className="flex justify-between items-end mb-3">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-white">Velocidad de Mutación</label>
+              <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">{config.speed.toFixed(1)}x</span>
+            </div>
+            <input type="range" min="0.1" max="3.0" step="0.1" value={config.speed} onChange={(e) => handleChange("speed", parseFloat(e.target.value))} className="w-full accent-indigo-500" />
+          </div>
+
+          {/* Tamaño del Enjambre */}
+          <div>
+            <div className="flex justify-between items-end mb-3">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-white">Radio del Patrón (Escala)</label>
+              <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">{config.swarmSize.toFixed(1)}x</span>
+            </div>
+            <input type="range" min="0.3" max="2.0" step="0.1" value={config.swarmSize} onChange={(e) => handleChange("swarmSize", parseFloat(e.target.value))} className="w-full accent-indigo-500" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            {/* Grosor de Partículas */}
+            <div>
+              <div className="flex justify-between items-end mb-3">
+                <label className="block text-xs font-semibold text-gray-900 dark:text-white">Grosor (Ancho)</label>
               </div>
-            ))}
-          </div>
-        </div>
+              <input type="range" min="0.2" max="3.0" step="0.1" value={config.particleSize} onChange={(e) => handleChange("particleSize", parseFloat(e.target.value))} className="w-full accent-indigo-500" />
+            </div>
 
-        {/* Efecto de Ola */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">
-            Efecto de Física y Ola
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {[
-              { id: "magnetic", label: "Desintegración", desc: "Suelta partículas al moverse." },
-              { id: "ocean", label: "Océano Constante", desc: "Crestas de agua continuas." },
-              { id: "none", label: "Masa Pesada", desc: "Sin ola adicional." }
-            ].map(opt => (
-              <div 
-                key={opt.id}
-                onClick={() => handleChange("wave", opt.id)}
-                className={`p-4 rounded-xl border cursor-pointer transition-all ${
-                  config.wave === opt.id 
-                    ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10" 
-                    : "border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600"
-                }`}
-              >
-                <div className={`text-sm font-bold mb-1 ${config.wave === opt.id ? "text-indigo-700 dark:text-indigo-400" : "text-gray-900 dark:text-white"}`}>
-                  {opt.label}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-slate-400 leading-tight">
-                  {opt.desc}
-                </div>
+            {/* Largo de Partículas */}
+            <div>
+              <div className="flex justify-between items-end mb-3">
+                <label className="block text-xs font-semibold text-gray-900 dark:text-white">Estela (Largo)</label>
               </div>
-            ))}
+              <input type="range" min="0.2" max="4.0" step="0.1" value={config.particleLength} onChange={(e) => handleChange("particleLength", parseFloat(e.target.value))} className="w-full accent-indigo-500" />
+            </div>
+          </div>
+
+          {/* Densidad de Partículas */}
+          <div>
+            <div className="flex justify-between items-end mb-3">
+              <label className="block text-sm font-semibold text-gray-900 dark:text-white">Volumen de Nodos (Densidad)</label>
+              <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">{config.density} uds.</span>
+            </div>
+            <input type="range" min="100" max="2500" step="50" value={config.density} onChange={(e) => handleChange("density", parseInt(e.target.value))} className="w-full accent-indigo-500" />
           </div>
         </div>
-
-        {/* Velocidad de Respiración */}
-        <div>
-          <div className="flex justify-between items-end mb-3">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-              Velocidad de Respiración y Vida
-            </label>
-            <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">
-              {config.speed.toFixed(1)}x
-            </span>
+        
+        {/* ACTION BAR (Guardar Cambios) */}
+        <div className="mt-4 pt-6 border-t border-gray-200 dark:border-slate-800/50 flex items-center justify-between">
+          <div className="text-sm">
+            {saved ? (
+              <span className="text-emerald-500 font-bold flex items-center gap-2">
+                ✓ Guardado con éxito
+              </span>
+            ) : hasChanges ? (
+              <span className="text-amber-500 font-medium">
+                Tienes cambios sin guardar...
+              </span>
+            ) : (
+              <span className="text-gray-400 dark:text-slate-500">
+                Todo está actualizado
+              </span>
+            )}
           </div>
-          <input 
-            type="range" 
-            min="0.1" max="3.0" step="0.1" 
-            value={config.speed}
-            onChange={(e) => handleChange("speed", parseFloat(e.target.value))}
-            className="w-full accent-indigo-500"
-          />
-        </div>
-
-        {/* Tamaño del Enjambre */}
-        <div>
-          <div className="flex justify-between items-end mb-3">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-              Tamaño del Enjambre (Radio Geométrico)
-            </label>
-            <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">
-              {config.swarmSize.toFixed(1)}x
-            </span>
-          </div>
-          <input 
-            type="range" 
-            min="0.3" max="2.0" step="0.1" 
-            value={config.swarmSize}
-            onChange={(e) => handleChange("swarmSize", parseFloat(e.target.value))}
-            className="w-full accent-indigo-500"
-          />
-        </div>
-
-        {/* Tamaño de Partículas */}
-        <div>
-          <div className="flex justify-between items-end mb-3">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-              Grosor de Partículas (Ancho)
-            </label>
-            <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">
-              {config.particleSize.toFixed(1)}x
-            </span>
-          </div>
-          <input 
-            type="range" 
-            min="0.2" max="3.0" step="0.1" 
-            value={config.particleSize}
-            onChange={(e) => handleChange("particleSize", parseFloat(e.target.value))}
-            className="w-full accent-indigo-500"
-          />
-        </div>
-
-        {/* Largo de Partículas */}
-        <div>
-          <div className="flex justify-between items-end mb-3">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-              Longitud de Partículas (Largo/Estela)
-            </label>
-            <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">
-              {config.particleLength.toFixed(1)}x
-            </span>
-          </div>
-          <input 
-            type="range" 
-            min="0.2" max="4.0" step="0.1" 
-            value={config.particleLength}
-            onChange={(e) => handleChange("particleLength", parseFloat(e.target.value))}
-            className="w-full accent-indigo-500"
-          />
-        </div>
-
-        {/* Densidad de Partículas */}
-        <div>
-          <div className="flex justify-between items-end mb-3">
-            <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-              Cantidad de Partículas (Densidad)
-            </label>
-            <span className="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-slate-800 px-2 py-1 rounded">
-              {config.density} uds.
-            </span>
-          </div>
-          <input 
-            type="range" 
-            min="100" max="2500" step="50" 
-            value={config.density}
-            onChange={(e) => handleChange("density", parseInt(e.target.value))}
-            className="w-full accent-indigo-500"
-          />
+          
+          <button 
+            onClick={handleSave}
+            disabled={!hasChanges && !saved}
+            className={`px-6 py-3 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2 ${
+              hasChanges 
+                ? "bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-md hover:-translate-y-0.5" 
+                : saved 
+                  ? "bg-emerald-500 text-white"
+                  : "bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-500 cursor-not-allowed"
+            }`}
+          >
+            💾 {saved ? "Guardado" : "Guardar Configuración"}
+          </button>
         </div>
 
       </div>

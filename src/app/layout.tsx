@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Crimson_Pro, Atkinson_Hyperlegible } from "next/font/google";
 import ParticleSphere from "@/components/ParticleSphere";
+import NucleoFooter from "@/components/ui/NucleoFooter";
 import "./globals.css";
 
 const crimsonPro = Crimson_Pro({ 
@@ -49,11 +50,12 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson`} suppressHydrationWarning>
+      <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson flex flex-col`} suppressHydrationWarning>
         <ParticleSphere />
-        <div className="app-content">
+        <div className="app-content flex-1">
           {children}
         </div>
+        <NucleoFooter />
       </body>
     </html>
   );

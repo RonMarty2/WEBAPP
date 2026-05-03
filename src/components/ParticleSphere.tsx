@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 // ─── Types ──────────────────────────────────────────────────────────────────
 type Particle = {
   nx: number; ny: number; nz: number;  // 3D position inside the unit sphere
+  tnx: number; tny: number; tnz: number; // Target 3D position for morphing
   ph1: number;                         // Random phase for organic variety
   baseSize: number;                    // Base size multiplier
 };
@@ -89,6 +90,7 @@ function buildParticles(shape: string = "sphere", count: number = 1000): Particl
     
     return {
       nx, ny, nz,
+      tnx: nx, tny: ny, tnz: nz,
       ph1: Math.random() * Math.PI * 2,
       baseSize: 0.7 + Math.random() * 0.9,
     };
@@ -123,33 +125,148 @@ export default function ParticleSphere() {
   const uiConfigRef = useRef({ shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 });
 
   useEffect(() => {
-    const loadConfig = () => {
-      try {
-        const stored = localStorage.getItem("ui_particle_config");
+    window.dispatchEvent(new CustomEvent("ui_particle_route_change", { detail: pathname }));
+  }, [pathname]);
+
+  // ── Nucleus Morphing Cycle ────────────────────────────────────────────────
+  useEffect(() => {
+    let interval: number;
+    if (pathname === "/nucleo") {
+      const children = ["scribe", "axiom", "lumen", "mentor"];
+      let currentIndex = -1;
+      
+      interval = window.setInterval(() => {
+        currentIndex = (currentIndex + 1) % children.length;
+        const targetModule = children[currentIndex];
+        
+        const DEFAULTS: Record<string, any> = {
+          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
+          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
+          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
+          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 }
+        };
+
+        const storageKey = `ui_particle_config_${targetModule}`;
+        const stored = localStorage.getItem(storageKey);
+        let parsed = DEFAULTS[targetModule];
         if (stored) {
-          const parsed = JSON.parse(stored);
-          const oldShape = uiConfigRef.current.shape;
-          const oldDensity = uiConfigRef.current.density;
-          
-          uiConfigRef.current = {
-            shape: parsed.shape || "sphere",
-            palette: parsed.palette || "antigravity",
-            wave: parsed.wave || "magnetic",
-            speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
-            particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : (typeof parsed.size === "number" ? parsed.size : 1.0),
-            particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
-            swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
-            density: typeof parsed.density === "number" ? parsed.density : 1000
-          };
-          
-          if ((oldShape && oldShape !== uiConfigRef.current.shape) || (oldDensity && oldDensity !== uiConfigRef.current.density)) {
-            parts.current = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
-          }
+          try { parsed = { ...parsed, ...JSON.parse(stored) }; } catch(e){}
+        }
+
+        const oldShape = uiConfigRef.current.shape;
+        const oldDensity = uiConfigRef.current.density;
+        
+        uiConfigRef.current = {
+          shape: parsed.shape,
+          palette: parsed.palette,
+          wave: parsed.wave,
+          speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
+          particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : 1.0,
+          particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
+          swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
+          density: typeof parsed.density === "number" ? parsed.density : 1000
+        };
+
+        if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
+          const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          parts.current = newTargets.map((t, i) => {
+            if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
+            return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz }; // New particles grow from center
+          });
+        }
+      }, 8000); // Morph every 8 seconds
+    }
+    return () => window.clearInterval(interval);
+  }, [pathname]);
+
+  useEffect(() => {
+    const loadConfig = (overridePathname?: string) => {
+      try {
+        const currentPath = typeof overridePathname === "string" ? overridePathname : pathname;
+        let targetModule = "scribe";
+        if (currentPath.startsWith("/axiom")) targetModule = "axiom";
+        else if (currentPath.startsWith("/lumen")) targetModule = "lumen";
+        else if (currentPath.startsWith("/mentor")) targetModule = "mentor";
+        else if (currentPath.startsWith("/nucleo")) targetModule = "nucleo";
+
+        const DEFAULTS: Record<string, any> = {
+          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
+          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
+          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
+          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
+          nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1500 }
+        };
+
+        const storageKey = `ui_particle_config_${targetModule}`;
+        const stored = localStorage.getItem(storageKey);
+        
+        let parsed = DEFAULTS[targetModule] || DEFAULTS["scribe"];
+        if (stored) {
+          try {
+            const userConfig = JSON.parse(stored);
+            parsed = { ...parsed, ...userConfig };
+          } catch(e){}
+        }
+
+        const oldShape = uiConfigRef.current.shape;
+        const oldDensity = uiConfigRef.current.density;
+        
+        uiConfigRef.current = {
+          shape: parsed.shape,
+          palette: parsed.palette,
+          wave: parsed.wave,
+          speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
+          particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : (typeof parsed.size === "number" ? parsed.size : 1.0),
+          particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
+          swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
+          density: typeof parsed.density === "number" ? parsed.density : 1000
+        };
+        
+        if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
+          const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          parts.current = newTargets.map((t, i) => {
+            if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
+            return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz };
+          });
         }
       } catch (e) {}
     };
     loadConfig();
-    window.addEventListener("ui_particle_update", loadConfig);
+
+    const handleRouteChange = (e: Event) => loadConfig((e as CustomEvent).detail);
+    
+    const handlePreview = (e: Event) => {
+      try {
+        const previewConfig = (e as CustomEvent).detail;
+        if (!previewConfig) return;
+
+        const oldShape = uiConfigRef.current.shape;
+        const oldDensity = uiConfigRef.current.density;
+        
+        uiConfigRef.current = {
+          shape: previewConfig.shape || "sphere",
+          palette: previewConfig.palette || "antigravity",
+          wave: previewConfig.wave || "none",
+          speed: typeof previewConfig.speed === "number" ? previewConfig.speed : 1.0,
+          particleSize: typeof previewConfig.particleSize === "number" ? previewConfig.particleSize : 1.0,
+          particleLength: typeof previewConfig.particleLength === "number" ? previewConfig.particleLength : 1.0,
+          swarmSize: typeof previewConfig.swarmSize === "number" ? previewConfig.swarmSize : 1.0,
+          density: typeof previewConfig.density === "number" ? previewConfig.density : 1000
+        };
+
+        if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
+          const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          parts.current = newTargets.map((t, i) => {
+            if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
+            return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz };
+          });
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener("ui_particle_update", loadConfig as EventListener);
+    window.addEventListener("ui_particle_route_change", handleRouteChange);
+    window.addEventListener("ui_particle_preview", handlePreview);
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -276,6 +393,13 @@ export default function ParticleSphere() {
 
       // ── Build draw commands ──────────────────────────────────────────────
       const cmds = parts.current.map(p => {
+        // 0. Liquid Morphing (Interpolation)
+        if (p.tnx !== undefined) {
+          p.nx += (p.tnx - p.nx) * 0.018 * uiConfigRef.current.speed;
+          p.ny += (p.tny - p.ny) * 0.018 * uiConfigRef.current.speed;
+          p.nz += (p.tnz - p.nz) * 0.018 * uiConfigRef.current.speed;
+        }
+
         // 1. Rotation
         const [rx, ry, rz] = rot3(
           p.nx * baseR, p.ny * baseR, p.nz * baseR,
@@ -441,7 +565,9 @@ export default function ParticleSphere() {
       document.removeEventListener("pointermove",  onMove);
       document.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll",       onScroll);
-      window.removeEventListener("ui_particle_update", loadConfig);
+      window.removeEventListener("ui_particle_update", loadConfig as EventListener);
+      window.removeEventListener("ui_particle_route_change", handleRouteChange);
+      window.removeEventListener("ui_particle_preview", handlePreview);
       window.clearTimeout(idleTimeout);
     };
   }, []);

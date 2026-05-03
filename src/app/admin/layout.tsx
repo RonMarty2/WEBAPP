@@ -132,6 +132,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   // Always start as null — server and client must render identically on first pass.
   // Reading localStorage here would cause a hydration mismatch (server can't access it).
   const [authed, setAuthed] = useState<boolean | null>(null);
+  const [activeModule, setActiveModule] = useState<string>("GLOBAL");
 
   useEffect(() => {
     // Don't act until we have a real pathname, and skip the login page itself.
@@ -143,7 +144,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     } else {
       window.location.replace("/admin/login");
     }
+
+    const savedModule = localStorage.getItem("adminActiveModule");
+    if (savedModule) setActiveModule(savedModule);
   }, [pathname]);
+
+  const handleModuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    setActiveModule(val);
+    localStorage.setItem("adminActiveModule", val);
+  };
 
   const handleLogout = async () => {
     localStorage.removeItem("adminAuthed");
@@ -187,6 +197,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tracking-[0.15em] uppercase">
               Admin Pro
             </span>
+          </div>
+        </div>
+
+        {/* Module Selector */}
+        <div className="px-6 pb-2">
+          <div className="relative">
+            <select
+              value={activeModule}
+              onChange={handleModuleChange}
+              className="w-full appearance-none bg-white/50 dark:bg-slate-800/50 
+                         border border-gray-200/50 dark:border-white/10 
+                         text-gray-700 dark:text-slate-300 text-xs font-semibold 
+                         rounded-xl px-4 py-2.5 pr-8 focus:outline-none 
+                         focus:ring-2 focus:ring-indigo-500/50 cursor-pointer
+                         transition-all"
+            >
+              <option value="GLOBAL">🌐 NŪCLEO Global</option>
+              <option value="SCRIBE">📝 SCRIBE (Tesis)</option>
+              <option value="AXIOM">📊 AXIOM (Simulador)</option>
+              <option value="LUMEN">📚 LUMEN (Docencia)</option>
+              <option value="MENTOR">🤝 MENTOR (Tutores)</option>
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
           </div>
         </div>
 
