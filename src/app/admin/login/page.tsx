@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
+  const router = useRouter();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -10,9 +12,9 @@ export default function AdminLoginPage() {
   // Si ya está autenticado, ir directo al panel
   useEffect(() => {
     if (localStorage.getItem("adminAuthed") === "1") {
-      window.location.replace("/admin");
+      router.replace("/admin");
     }
-  }, []);
+  }, [router]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -32,7 +34,7 @@ export default function AdminLoginPage() {
         return;
       }
       localStorage.setItem("adminAuthed", "1");
-      window.location.replace("/admin");
+      router.replace("/admin");
     } catch {
       setError("Error de conexión");
       setLoading(false);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 function IconDashboard() {
@@ -115,7 +115,7 @@ function IconBolt() {
 const NAV_ITEMS = [
   { href: "/admin",               label: "Dashboard",          Icon: IconDashboard },
   { href: "/admin/usuarios",      label: "Usuarios",           Icon: IconUsers     },
-  { href: "/admin/proyectos",     label: "Proyectos & Prompts",Icon: IconFolder    },
+  { href: "/admin/proyectos",     label: "Proyectos de Alumnos", Icon: IconFolder    },
   { href: "/admin/universidades", label: "Universidades",      Icon: IconBuilding  },
   { href: "/admin/estadisticas",  label: "Estadísticas",       Icon: IconBarChart  },
   { href: "/admin/logs",          label: "Logs",               Icon: IconScroll    },
@@ -128,6 +128,8 @@ const NAV_ITEMS = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  const router = useRouter();
 
   // Always start as null — server and client must render identically on first pass.
   // Reading localStorage here would cause a hydration mismatch (server can't access it).
@@ -142,7 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (flag) {
       setAuthed(true);
     } else {
-      window.location.replace("/admin/login");
+      router.replace("/admin/login");
     }
 
     const savedModule = localStorage.getItem("adminActiveModule");

@@ -37,18 +37,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
       <head>
-        {/*
-          Anti-flash script: detecta el tema guardado y lo aplica ANTES del
-          primer paint para evitar el parpadeo blanco→oscuro.
-          strategy="beforeInteractive" garantiza ejecución antes de hidratación.
-        */}
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;if(d)document.documentElement.classList.add('dark');}catch(e){}})();`,
-          }}
-        />
+        {/* Anti-flash theme script removed temporarily to prevent React 19 script tag errors */}
       </head>
       <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson flex flex-col`} suppressHydrationWarning>
         <ParticleSphere />

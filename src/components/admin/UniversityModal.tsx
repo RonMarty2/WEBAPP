@@ -112,9 +112,6 @@ export default function UniversityModal({
             />
           </Field>
 
-          {/* ── Identidad institucional ── */}
-          <Section title="Identidad Institucional" />
-
           <Field label="Logo URL">
             <input
               className={inputCls}
@@ -124,28 +121,13 @@ export default function UniversityModal({
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Facultad">
-              <input className={inputCls} placeholder="Ej: Facultad de Ciencias Económicas"
-                value={form.facultad ?? ""} onChange={(e) => setForm((p) => ({ ...p, facultad: e.target.value }))} />
-            </Field>
-            <Field label="Departamento / Unidad">
-              <input className={inputCls} placeholder="Ej: Departamento de Posgrado"
-                value={form.departamento ?? ""} onChange={(e) => setForm((p) => ({ ...p, departamento: e.target.value }))} />
-            </Field>
-            <Field label="Ciudad">
-              <input className={inputCls} placeholder="Ej: Cochabamba"
-                value={form.ciudad ?? ""} onChange={(e) => setForm((p) => ({ ...p, ciudad: e.target.value }))} />
-            </Field>
-            <Field label="País">
-              <input className={inputCls} placeholder="Bolivia"
-                value={form.pais ?? ""} onChange={(e) => setForm((p) => ({ ...p, pais: e.target.value }))} />
-            </Field>
-          </div>
-
-          {/* ── Formato de página ── */}
-          <Section title="Formato de Página" />
-
+          {/* ── Formato de página (Avanzado) ── */}
+          <details className="group border border-gray-100 dark:border-slate-800 rounded-xl overflow-hidden">
+            <summary className="px-4 py-3 bg-gray-50 dark:bg-slate-800/50 cursor-pointer list-none flex justify-between items-center text-[13px] font-semibold text-gray-700 dark:text-slate-300">
+              ⚙️ Configuración Avanzada del Documento (Capítulos)
+              <span className="group-open:rotate-180 transition-transform text-xs opacity-50">▼</span>
+            </summary>
+            <div className="p-4 flex flex-col gap-4 bg-white dark:bg-slate-900">
           <div className="flex gap-3">
             <Field label="Fuente">
               <select className={inputCls} value={form.format.font}
@@ -206,22 +188,13 @@ export default function UniversityModal({
               ))}
             </div>
           </Field>
+          </div>
+          </details>
 
           {/* ── Portada ── */}
-          <Section title="Portada del Documento" />
+          <Section title="Campos de la Portada Interactiva" />
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Tipo de documento">
-              <input className={inputCls} placeholder="Ej: MONOGRAFÍA"
-                value={form.tipo_documento ?? ""} onChange={(e) => setForm((p) => ({ ...p, tipo_documento: e.target.value }))} />
-            </Field>
-            <Field label="Tipo de modalidad">
-              <input className={inputCls} placeholder="Ej: DIPLOMADO COMO MODALIDAD DE TITULACIÓN"
-                value={form.tipo_modalidad ?? ""} onChange={(e) => setForm((p) => ({ ...p, tipo_modalidad: e.target.value }))} />
-            </Field>
-          </div>
-
-          <Field label="Datos adicionales en la portada del estudiante">
+          <Field label="Datos adicionales que llenará el estudiante">
             <p className="text-[11px] text-gray-400 dark:text-slate-500 -mt-1">
               Marca los campos que el sistema pedirá al estudiante al generar la portada.
             </p>

@@ -17,6 +17,10 @@ export interface ProyectoParaLatex {
   institucion?:       string;
   carrera?:           string;
   anio?:              string;
+  mes?:               string;
+  tutor?:             string;
+  programa?:          string;
+  version?:           string;
   tema_aprobado?:     string;
   // Contenido por fase (texto plano o Markdown simple)
   contenido_fase_0?:  string | null;   // Tema / Planteamiento
@@ -92,6 +96,10 @@ export function generarLatex(proyecto: ProyectoParaLatex): string {
     institucion = "Universidad Mayor de San Simón",
     carrera     = "",
     anio        = new Date().getFullYear().toString(),
+    mes,
+    tutor,
+    programa,
+    version,
     tema_aprobado,
     contenido_fase_0,
     contenido_fase_1,
@@ -153,13 +161,16 @@ export function generarLatex(proyecto: ProyectoParaLatex): string {
   \\vspace*{2cm}
   {\\large\\bfseries ${escapar(institucion)}\\par}
   \\vspace{0.5cm}
+  ${programa ? `{\\large ${escapar(programa)}${version ? ` -- Versión ${escapar(version)}` : ''}\\par}\\vspace{0.5cm}` : ''}
   ${carrera ? `{\\large ${escapar(carrera)}\\par}\n  \\vspace{1.5cm}` : "\\vspace{1.5cm}"}
   {\\Huge\\bfseries ${escapar(titulo)}\\par}
   \\vspace{1cm}
-  ${tema_aprobado ? `{\\large \\textit{${escapar(tema_aprobado)}}\\par}\n  \\vspace{1.5cm}` : "\\vspace{1.5cm}"}
-  {\\large ${escapar(autor)}\\par}
+  ${tema_aprobado ? `{\\large \\textit{${escapar(tema_aprobado)}}}\\par\n  \\vspace{1.5cm}` : "\\vspace{1.5cm}"}
+  {\\large Autor/a: ${escapar(autor)}\\par}
+  \\vspace{0.5cm}
+  ${tutor ? `{\\large Tutor/a: ${escapar(tutor)}\\par}` : ''}
   \\vfill
-  {\\large ${escapar(anio)}\\par}
+  {\\large ${mes ? escapar(mes) + ' ' : ''}${escapar(anio)}\\par}
 \\end{titlepage}`;
 
   // ── Paginación romana para prefacio ──────────────────────

@@ -36,12 +36,6 @@ const SIDEBAR_ITEMS: { key: SelectionKey; icon: string; label: string; color?: s
   { key: "onboarding",         icon: "✨", label: "Generador de Temas",    color: "#a78bfa" },
   { key: "calibracion",        icon: "🎓", label: "Calibración de Estilo", color: "#f472b6" },
   { key: "estilo-analizador",  icon: "🧬", label: "Analizador de Estilo",  color: "#34d399" },
-  { key: "0",                  icon: "📝", label: "Fase 0 — Planteamiento" },
-  { key: "1",                  icon: "📄", label: "Fase 1 — Cap. I" },
-  { key: "2",                  icon: "📚", label: "Fase 2 — Cap. II" },
-  { key: "3",                  icon: "📊", label: "Fase 3 — Caps. III-V" },
-  { key: "4",                  icon: "🔍", label: "Fase 4 — Revisión" },
-  { key: "5",                  icon: "🏁", label: "Fase 5 — Final" },
 ];
 
 const PHASE_KEYS = ["0", "1", "2", "3", "4", "5"] as const;

@@ -6,14 +6,7 @@ export interface University {
   name: string;
   logo_url?: string;
   latex_prompt?: string;
-  // Identidad institucional
-  facultad?: string;
-  departamento?: string;
-  ciudad?: string;
-  pais?: string;
   // Portada
-  tipo_documento?: string;   // "MONOGRAFÍA"
-  tipo_modalidad?: string;   // "DIPLOMADO COMO MODALIDAD DE TITULACIÓN"
   campos_portada?: string[]; // ["programa","version","tutor","carrera"]
   cover_template?: string;   // HTML con variables {nombre_estudiante}, {titulo}, etc.
   format: {
@@ -52,14 +45,8 @@ export const DEFAULT_UNIVERSITIES: University[] = [
   {
     id: "umss-001",
     name: "Universidad Mayor de San Simón (UMSS)",
-    facultad: "Facultad de Ciencias Económicas",
-    departamento: "Departamento de Posgrado",
-    ciudad: "Cochabamba",
-    pais: "Bolivia",
     logo_url: "",
     latex_prompt: "Formato UMSS FCE Posgrado: Times New Roman 12pt, interlineado doble, márgenes 2.54cm todos los lados, alineación izquierda (no justificado). Portada con logo UMSS, facultad, departamento, tipo de modalidad, programa/versión, tipo de documento, título, estudiante, ciudad y año. Numeración en esquina superior derecha. Citas en formato APA 7. Monografía: 30-70 páginas numeradas (sin portada ni índice).",
-    tipo_documento: "MONOGRAFÍA",
-    tipo_modalidad: "DIPLOMADO COMO MODALIDAD DE TITULACIÓN",
     campos_portada: ["programa", "version"],
     format: { font: "Times New Roman", size: 12, lineHeight: 2.0, margins: { top: 2.54, left: 2.54, bottom: 2.54, right: 2.54 }, alineacion: "left", numero_paginas_posicion: "top-right" },
     modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado", "Trabajo Dirigido"],

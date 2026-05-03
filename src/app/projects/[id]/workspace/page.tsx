@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import type { SessionUser } from "@/lib/auth";
 import type { University } from "@/lib/data";
-import { MESES, type StudentCoverData } from "@/lib/pdfTemplate";
+import { MESES, type StudentCoverData, generatePdfHtml, getHtmlCover, buildCss } from "@/lib/pdfTemplate";
+import GlassModal from "@/components/ui/GlassModal";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -89,7 +90,7 @@ function renderMd(text: string): string {
 }
 
 // Assembles all final phases into a document HTML for the PDF preview panel
-function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC): string {
+function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC, university: University | null, pdfData: StudentCoverData): string {
   const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Sin título";
   const chunks: string[] = [];
   for (const f of displayFases) {
@@ -103,8 +104,18 @@ function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC):
     );
   }
   if (chunks.length === 0) return "";
+  
+  let coverHtml = "";
+  let cssStr = "";
+  if (university) {
+    coverHtml = `<div style="transform: scale(0.65); transform-origin: top center; margin-bottom: -30vh;">${getHtmlCover(university, pdfData, titulo)}</div><hr class="doc-ch-sep"/>`;
+    cssStr = `<style>${buildCss(university).replace(/@page/g, '@media print { @page')}</style>`; // Scope @page to print only so it doesn't break the UI
+  }
+
   return `
+    ${cssStr}
     <div class="doc-root">
+      ${coverHtml}
       <h1 class="doc-main-title">${titulo.replace(/</g,"&lt;")}</h1>
       <hr class="doc-hr"/>
       ${chunks.join('<hr class="doc-ch-sep"/>')}
@@ -131,11 +142,12 @@ export default function WorkspacePage() {
     : FASES_STATIC;
 
   const [university, setUniversity] = useState<University | null>(null);
-  const [pdfData] = useState<StudentCoverData>({
+  const [pdfData, setPdfData] = useState<StudentCoverData>({
     nombre: "", mes: MESES[new Date().getMonth()],
     anio: String(new Date().getFullYear()),
     programa: "", version: "", tutor: "", carrera: "",
   });
+  const [showCoverSettings, setShowCoverSettings] = useState(false);
 
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -394,7 +406,16 @@ export default function WorkspacePage() {
   async function descargarLatex() {
     setIsDownloading(true);
     try {
-      const res = await fetch(`/api/projects/${proyectoId}/latex`);
+      const q = new URLSearchParams({
+        nombre: pdfData.nombre,
+        mes: pdfData.mes,
+        anio: pdfData.anio,
+        tutor: pdfData.tutor ?? "",
+        programa: pdfData.programa ?? "",
+        version: pdfData.version ?? "",
+        carrera: pdfData.carrera ?? ""
+      });
+      const res = await fetch(`/api/projects/${proyectoId}/latex?${q.toString()}`);
       if (!res.ok) { const d = await res.json(); throw new Error(d.error); }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -429,7 +450,7 @@ export default function WorkspacePage() {
     : finalContent;
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
-  const docHtml = buildDocPreview(proyecto, displayFases as typeof FASES_STATIC);
+  const docHtml = buildDocPreview(proyecto, displayFases as typeof FASES_STATIC, university, pdfData);
 
   // Missing data analysis
   const markerRegex = /\[COMPLETAR(.*?)\]/gi;
@@ -860,16 +881,30 @@ export default function WorkspacePage() {
 
             {/* Download actions */}
             {fasesCompletadas > 0 && (
-              <div style={{ padding:"10px 14px", borderTop:"1px solid var(--bg-subtle)", display:"flex", gap:8, flexShrink:0 }}>
+              <div style={{ padding:"10px 14px", borderTop:"1px solid var(--bg-subtle)", display:"flex", gap:8, flexShrink:0, flexWrap:"wrap" }}>
+                <button onClick={() => setShowCoverSettings(true)} className="btn-cyan" style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center", minWidth: "100%" }}>
+                  ⚙️ Configurar Carátula
+                </button>
                 <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center" }}>
-                  {isDownloading ? "…" : "📄 Descargar .tex"}
+                  {isDownloading ? "…" : "📄 .tex"}
                 </button>
                 {university && (
                   <button
                     onClick={() => {
-                      const html = docHtml;
+                      const phaseContents = Object.fromEntries(
+                        displayFases.map(f => [
+                          `fase_${(f as typeof FASES_STATIC[0]).num}`,
+                          getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num)
+                        ])
+                      );
+                      const html = generatePdfHtml({
+                        university,
+                        studentData: pdfData,
+                        phaseContents,
+                        titulo: proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento"
+                      });
                       const win = window.open("", "_blank");
-                      if (win) { win.document.write(`<html><head><title>Vista Previa</title><meta charset="utf-8"/><style>body{font-family:Georgia,serif;max-width:760px;margin:40px auto;padding:0 20px;color:#1a1a2e;line-height:1.8}h1{font-size:20px;text-align:center}h2{font-size:14px;font-weight:700;border-bottom:1px solid #ccc;padding-bottom:4px;margin-top:32px}p{font-size:13px;margin:8px 0}ul{margin:8px 0;padding-left:20px}li{font-size:13px}</style></head><body>${html}</body></html>`); win.document.close(); win.print(); }
+                      if (win) { win.document.write(html); win.document.close(); win.setTimeout(() => win.print(), 500); }
                     }}
                     className="btn-ghost"
                     style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center" }}
@@ -882,6 +917,59 @@ export default function WorkspacePage() {
           </div>
         )}
       </div>
+
+      <GlassModal isOpen={showCoverSettings} onClose={() => setShowCoverSettings(false)} title="Configurar Carátula">
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <p style={{ fontSize: 13, color: "var(--fg-secondary)", margin: 0 }}>
+            Completa los datos para generar tu carátula interactiva y aplicar el formato a tu exportación.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Nombre Completo del Estudiante</label>
+            <input className="input-dark" value={pdfData.nombre} onChange={e => setPdfData({ ...pdfData, nombre: e.target.value })} placeholder="Ej. Juan Pérez" />
+          </div>
+          {(!university || (university.campos_portada || []).includes("tutor")) && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Nombre del Tutor/a</label>
+              <input className="input-dark" value={pdfData.tutor || ""} onChange={e => setPdfData({ ...pdfData, tutor: e.target.value })} placeholder="Ej. Dra. María Gómez" />
+            </div>
+          )}
+          {(!university || (university.campos_portada || []).includes("programa")) && (
+            <div style={{ display: "flex", gap: 12 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Programa (Ej. Educación Superior)</label>
+                <input className="input-dark" value={pdfData.programa || ""} onChange={e => setPdfData({ ...pdfData, programa: e.target.value })} placeholder="Educación Superior..." />
+              </div>
+              {(!university || (university.campos_portada || []).includes("version")) && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 120 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Versión</label>
+                  <input className="input-dark" value={pdfData.version || ""} onChange={e => setPdfData({ ...pdfData, version: e.target.value })} placeholder="Ej. VII" />
+                </div>
+              )}
+            </div>
+          )}
+          {(!university || (university.campos_portada || []).includes("carrera")) && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Carrera / Especialidad</label>
+              <input className="input-dark" value={pdfData.carrera || ""} onChange={e => setPdfData({ ...pdfData, carrera: e.target.value })} placeholder="Ej. Ingeniería de Sistemas" />
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 12 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Mes de Presentación</label>
+              <select className="input-dark" value={pdfData.mes} onChange={e => setPdfData({ ...pdfData, mes: e.target.value })} style={{ height: 38 }}>
+                {MESES.map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 100 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Año</label>
+              <input className="input-dark" value={pdfData.anio} onChange={e => setPdfData({ ...pdfData, anio: e.target.value })} placeholder="2026" />
+            </div>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
+            <button className="btn-cyan" onClick={() => setShowCoverSettings(false)} style={{ padding: "10px 24px" }}>Listo</button>
+          </div>
+        </div>
+      </GlassModal>
     </div>
   );
 }

@@ -134,7 +134,7 @@ function mdToHtml(md: string): string {
 
 // ── CSS builder ───────────────────────────────────────────────────────────────
 
-function buildCss(u: University): string {
+export function buildCss(u: University): string {
   const f = u.format;
   const font = f.font || "Times New Roman";
   const size = f.size || 12;
@@ -304,7 +304,7 @@ function buildCss(u: University): string {
 
 // ── Cover page builder ────────────────────────────────────────────────────────
 
-function buildCover(u: University, s: StudentCoverData, titulo: string): string {
+export function buildCover(u: University, s: StudentCoverData, titulo: string): string {
   const logoHtml = u.logo_url
     ? `<img src="${u.logo_url}" class="cover-logo" alt="Logo" />`
     : "";
@@ -312,26 +312,19 @@ function buildCover(u: University, s: StudentCoverData, titulo: string): string 
   const instBlock = `
     <div class="cover-inst">
       <div class="cover-inst-name">${u.name}</div>
-      ${u.facultad ? `<div class="cover-inst-sub">${u.facultad}</div>` : ""}
-      ${u.departamento ? `<div class="cover-inst-sub">${u.departamento}</div>` : ""}
     </div>
   `;
 
-  const modalidadHtml = u.tipo_modalidad
-    ? `<div class="cover-modalidad">${u.tipo_modalidad}</div>`
-    : "";
+  const modalidadHtml = "";
 
   const campos = u.campos_portada ?? [];
   let programaHtml = "";
   if (campos.includes("programa") && s.programa) {
     const ver = campos.includes("version") && s.version ? ` ${s.version} VERSIÓN` : "";
-    const prog = u.tipo_modalidad?.split(" ")[0] ?? "DIPLOMADO";
-    programaHtml = `<div class="cover-modalidad">${prog} ${s.programa}${ver}</div>`;
+    programaHtml = `<div class="cover-modalidad">DIPLOMADO ${s.programa}${ver}</div>`;
   }
 
-  const tipoDocHtml = u.tipo_documento
-    ? `<div class="cover-title-block">${u.tipo_documento}</div>`
-    : "";
+  const tipoDocHtml = "";
 
   const tituloHtml = titulo
     ? `<div class="cover-title-block">${titulo.toUpperCase()}</div>`
@@ -349,11 +342,8 @@ function buildCover(u: University, s: StudentCoverData, titulo: string): string 
     ? `<div class="cover-title-block">Carrera: ${s.carrera}</div>`
     : "";
 
-  const ciudad = u.ciudad || "";
-  const pais = u.pais || "";
-  const lugar = ciudad && pais ? `${ciudad} – ${pais}` : ciudad || pais;
   const fecha = `${s.mes} ${s.anio}`;
-  const footerHtml = `<div class="cover-footer">${[lugar, fecha].filter(Boolean).join(", ")}</div>`;
+  const footerHtml = `<div class="cover-footer">${fecha}</div>`;
 
   return `
     <div class="cover-page">
@@ -381,6 +371,27 @@ function substituteVars(template: string, vars: Record<string, string>): string 
   return template.replace(/\{(\w+)\}/g, (_, key) => vars[key] ?? "");
 }
 
+// ── Cover Generation (Template or Fallback) ───────────────────────────────────
+
+export function getHtmlCover(university: University, studentData: StudentCoverData, titulo: string): string {
+  if (university.cover_template?.trim()) {
+    const vars: Record<string, string> = {
+      nombre_estudiante: studentData.nombre,
+      titulo,
+      mes: studentData.mes,
+      anio: studentData.anio,
+      universidad: university.name,
+      programa: studentData.programa ?? "",
+      version: studentData.version ?? "",
+      tutor: studentData.tutor ?? "",
+      carrera: studentData.carrera ?? "",
+      logo_url: university.logo_url ?? "",
+    };
+    return `<div class="cover-page">${substituteVars(university.cover_template, vars)}</div>`;
+  }
+  return buildCover(university, studentData, titulo);
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export function generatePdfHtml(params: {
@@ -392,32 +403,7 @@ export function generatePdfHtml(params: {
   const { university, studentData, phaseContents, titulo = "" } = params;
 
   const css = buildCss(university);
-
-  // Cover: use admin HTML template if configured, otherwise build programmatically
-  let cover: string;
-  if (university.cover_template?.trim()) {
-    const vars: Record<string, string> = {
-      nombre_estudiante: studentData.nombre,
-      titulo,
-      mes: studentData.mes,
-      anio: studentData.anio,
-      universidad: university.name,
-      facultad: university.facultad ?? "",
-      departamento: university.departamento ?? "",
-      ciudad: university.ciudad ?? "",
-      pais: university.pais ?? "",
-      programa: studentData.programa ?? "",
-      version: studentData.version ?? "",
-      tutor: studentData.tutor ?? "",
-      carrera: studentData.carrera ?? "",
-      tipo_documento: university.tipo_documento ?? "",
-      tipo_modalidad: university.tipo_modalidad ?? "",
-      logo_url: university.logo_url ?? "",
-    };
-    cover = `<div class="cover-page">${substituteVars(university.cover_template, vars)}</div>`;
-  } else {
-    cover = buildCover(university, studentData, titulo);
-  }
+  const cover = getHtmlCover(university, studentData, titulo);
 
   // Body: iterate all fase_N keys in numeric order (supports any number of phases)
   const sortedKeys = Object.keys(phaseContents)

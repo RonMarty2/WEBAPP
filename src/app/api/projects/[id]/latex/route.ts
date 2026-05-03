@@ -13,6 +13,8 @@ type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
   try {
+    const url = new URL(_req.url);
+    const qs = url.searchParams;
     const { user } = await requireAuth();
     const { id } = await params;
 
@@ -49,9 +51,14 @@ export async function GET(_req: Request, { params }: Params) {
 
     const latexSource = generarLatex({
       titulo,
-      autor: user.name,
+      autor: qs.get("nombre") || user.name,
       institucion: universidad?.name,
-      carrera: "Monografía Académica",
+      carrera: qs.get("carrera") || "Documento Académico",
+      anio: qs.get("anio") || new Date().getFullYear().toString(),
+      mes: qs.get("mes") || undefined,
+      tutor: qs.get("tutor") || undefined,
+      programa: qs.get("programa") || undefined,
+      version: qs.get("version") || undefined,
       tema_aprobado: (proyecto.tema_aprobado as string) ?? undefined,
       contenido_fase_0: proyecto.contenido_fase_0 as string | null,
       contenido_fase_1: proyecto.contenido_fase_1 as string | null,
