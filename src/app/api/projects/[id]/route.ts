@@ -6,7 +6,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { getProyecto, updateProyecto, deleteProyecto } from "@/lib/memoryStore";
 import type { UpdateTables, EstadoFase } from "@/types/database";
 
 type Params = { params: Promise<{ id: string }> };
@@ -75,13 +75,17 @@ export async function PATCH(req: Request, { params }: Params) {
     if (typeof body.tema_aprobado === "string") allowed.tema_aprobado = body.tema_aprobado;
     if (typeof body.titulo_provisional === "string") allowed.titulo_provisional = body.titulo_provisional;
     if (typeof body.completado === "boolean") allowed.completado = body.completado;
-    if (typeof body.estado_fase === "number" && body.estado_fase >= 0 && body.estado_fase <= 5) {
+    if (typeof body.estado_fase === "number" && body.estado_fase >= 0) {
       allowed.estado_fase = body.estado_fase;
     }
-    // Permitir actualización de contenido de fases
+    // Permitir actualización de contenido de fases (legacy 0-5)
     for (let i = 0; i <= 5; i++) {
       const key = `contenido_fase_${i}`;
       if (typeof body[key] === "string") allowed[key] = body[key];
+    }
+    // También permitir phase_contents para fases dinámicas
+    if (body.phase_contents && typeof body.phase_contents === "object") {
+      allowed.phase_contents = body.phase_contents;
     }
 
     if (Object.keys(allowed).length === 0) {
@@ -124,6 +128,50 @@ export async function PATCH(req: Request, { params }: Params) {
     }
 
     return NextResponse.json({ proyecto: data });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
+}
+
+// ── DELETE ────────────────────────────────────────────────────
+
+export async function DELETE(req: Request, { params }: Params) {
+  try {
+    const { user } = await requireAuth();
+    const { id } = await params;
+
+    if (!isSupabaseConfigured()) {
+      const p = getProyecto(id);
+      if (!p || p.usuario_id !== user.id) {
+        return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
+      }
+      const success = deleteProyecto(id);
+      return NextResponse.json({ success });
+    }
+
+    const db = createAdminClient();
+
+    const { error } = await db
+      .from("proyectos_fases")
+      .delete()
+      .eq("id", id)
+      .eq("usuario_id", user.id)
+      .select();
+
+    if (error) {
+      // Fallback
+      const p = getProyecto(id);
+      if (p && p.usuario_id === user.id) {
+        deleteProyecto(id);
+        return NextResponse.json({ success: true });
+      }
+      return NextResponse.json({ error: "Error al eliminar el proyecto" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });

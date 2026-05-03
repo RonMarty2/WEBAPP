@@ -1,7 +1,20 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Crimson_Pro, Atkinson_Hyperlegible } from "next/font/google";
 import ParticleSphere from "@/components/ParticleSphere";
 import "./globals.css";
+
+const crimsonPro = Crimson_Pro({ 
+  subsets: ["latin"], 
+  weight: ["400", "500", "600", "700"], 
+  variable: "--font-crimson" 
+});
+
+const atkinson = Atkinson_Hyperlegible({ 
+  subsets: ["latin"], 
+  weight: ["400", "700"], 
+  variable: "--font-atkinson" 
+});
 
 export const metadata: Metadata = {
   title: "Laboratorio Académico — Generador de Monografías con IA",
@@ -36,7 +49,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-full" suppressHydrationWarning>
+      <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson`} suppressHydrationWarning>
         <ParticleSphere />
         <div className="app-content">
           {children}

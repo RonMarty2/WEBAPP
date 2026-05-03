@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 function IconDashboard() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
       <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
     </svg>
@@ -14,7 +14,7 @@ function IconDashboard() {
 }
 function IconUsers() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
       <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
     </svg>
@@ -22,14 +22,14 @@ function IconUsers() {
 }
 function IconFolder() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
     </svg>
   );
 }
 function IconBuilding() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
@@ -37,7 +37,7 @@ function IconBuilding() {
 }
 function IconBarChart() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
       <line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
     </svg>
@@ -45,7 +45,7 @@ function IconBarChart() {
 }
 function IconScroll() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
       <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
       <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
@@ -54,7 +54,7 @@ function IconScroll() {
 }
 function IconCpu() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/>
       <line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/>
       <line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/>
@@ -65,7 +65,7 @@ function IconCpu() {
 }
 function IconLayers() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="12 2 2 7 12 12 22 7 12 2"/>
       <polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
     </svg>
@@ -73,7 +73,7 @@ function IconLayers() {
 }
 function IconList() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
       <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
       <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
@@ -82,7 +82,7 @@ function IconList() {
 }
 function IconEdit() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
       <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
     </svg>
@@ -90,14 +90,14 @@ function IconEdit() {
 }
 function IconUser() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
     </svg>
   );
 }
 function IconLogOut() {
   return (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
       <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
     </svg>
@@ -105,7 +105,7 @@ function IconLogOut() {
 }
 function IconBolt() {
   return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
     </svg>
   );
@@ -165,46 +165,50 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="admin-layout flex min-h-screen bg-transparent relative z-10">
+    <div className="admin-layout flex min-h-screen bg-transparent relative z-10 p-4 md:p-6 lg:p-8 gap-6 lg:gap-8">
 
-      {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-      <aside className="w-[240px] shrink-0 flex flex-col sticky top-0 h-screen overflow-y-auto glass-sidebar shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      {/* ── Floating Sidebar ────────────────────────────────────────────── */}
+      <aside className="w-[260px] shrink-0 flex flex-col sticky top-8 h-[calc(100vh-64px)] 
+                        bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl 
+                        border border-white/60 dark:border-white/10 
+                        rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden">
 
         {/* Logo */}
-        <div className="flex items-center gap-2.5 px-6 pt-6 pb-3">
-          <span className="flex items-center justify-center w-7 h-7 rounded-lg
-                           bg-black dark:bg-white text-white dark:text-black shrink-0">
+        <div className="flex items-center gap-3 px-8 pt-8 pb-4">
+          <span className="flex items-center justify-center w-8 h-8 rounded-xl
+                           bg-indigo-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)] shrink-0">
             <IconBolt />
           </span>
-          <div>
-            <div className="font-bold text-[13px] text-gray-900 dark:text-white leading-tight tracking-tight">
+          <div className="flex flex-col">
+            <span className="font-bold text-[14px] text-gray-900 dark:text-white leading-tight tracking-tight">
               Lab. Académico
-            </div>
-            <div className="text-[10px] font-semibold text-violet-500 dark:text-violet-400 tracking-widest uppercase">
-              Admin
-            </div>
+            </span>
+            <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tracking-[0.15em] uppercase">
+              Admin Pro
+            </span>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="mx-4 my-2 h-px bg-gray-100 dark:bg-slate-800" />
+        <div className="mx-6 my-2 h-px bg-gray-200/50 dark:bg-slate-700/50" />
 
         {/* Nav */}
-        <nav className="flex flex-col gap-0.5 flex-1 px-4 py-2">
+        <nav className="flex flex-col gap-1.5 flex-1 px-4 py-4 overflow-y-auto">
           {NAV_ITEMS.map(({ href, label, Icon }) => {
             const isActive = pathname === href;
             return (
               <a
                 key={href}
                 href={href}
-                className={[
-                  "flex items-center gap-2.5 px-4 py-2 rounded-xl text-[13px] transition-colors duration-150 no-underline",
-                  isActive
-                    ? "bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 font-semibold shadow-[inset_2px_0_0_#6366f1]"
-                    : "font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50/50 dark:hover:bg-slate-800/50 transition-all",
-                ].join(" ")}
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold transition-all duration-300 no-underline
+                  ${isActive
+                    ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
+                    : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
+                  }`}
               >
-                <span className="shrink-0 opacity-80"><Icon /></span>
+                <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
+                  <Icon />
+                </span>
                 {label}
               </a>
             );
@@ -212,22 +216,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-4 flex flex-col gap-1.5 border-t border-gray-100 dark:border-slate-800">
+        <div className="p-4 flex flex-col gap-2 border-t border-gray-200/50 dark:border-slate-700/50 shrink-0 bg-white/20 dark:bg-slate-900/20">
           <a
             href="/dashboard"
-            className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-[12px] font-medium
-                       text-indigo-600 dark:text-indigo-400
-                       hover:bg-indigo-50 dark:hover:bg-indigo-950/40
-                       transition-colors duration-150 no-underline"
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold
+                       text-gray-600 dark:text-slate-300
+                       hover:bg-white/60 dark:hover:bg-slate-800/60 hover:text-gray-900 dark:hover:text-white
+                       transition-all duration-300 no-underline"
           >
             <IconUser /> Vista estudiante
           </a>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-[12px] font-medium
+            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold
                        text-red-500 dark:text-red-400
-                       hover:bg-red-50 dark:hover:bg-red-950/30
-                       transition-colors duration-150 cursor-pointer text-left w-full border-0 bg-transparent"
+                       hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-300
+                       transition-all duration-300 cursor-pointer text-left w-full border-0 bg-transparent"
           >
             <IconLogOut /> Salir del panel
           </button>
@@ -235,8 +239,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main content ────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto min-h-screen p-8">
-        {children}
+      <main className="flex-1 flex flex-col overflow-y-auto min-h-screen py-8 pr-4 md:pr-6 lg:pr-8">
+        <div className="flex-1 w-full max-w-5xl mx-auto">
+          {children}
+        </div>
       </main>
 
     </div>

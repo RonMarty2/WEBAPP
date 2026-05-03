@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { SessionUser } from "@/lib/auth";
+import GlassModal from "@/components/ui/GlassModal";
 
 interface Proyecto {
   id: string;
@@ -30,6 +31,7 @@ function FaseProgress({ fase }: { fase: number }) {
         />
       ))}
       <span style={{ fontSize: 11, color: "var(--fg-muted)", marginLeft: 4 }}>{fase + 1}/6</span>
+
     </div>
   );
 }
@@ -40,6 +42,7 @@ export default function DashboardPage() {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingProyectos, setLoadingProyectos] = useState(true);
+  const [proyectoToDelete, setProyectoToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -60,6 +63,21 @@ export default function DashboardPage() {
       .catch(() => setLoadingProyectos(false));
   }, [user]);
 
+  
+  async function confirmDelete() {
+    if (!proyectoToDelete) return;
+    try {
+      const res = await fetch(`/api/projects/${proyectoToDelete}`, { method: "DELETE" });
+      if (res.ok) {
+        setProyectos(prev => prev.filter(p => p.id !== proyectoToDelete));
+      } else {
+        alert("Error al eliminar el proyecto.");
+      }
+    } catch (err) {
+      alert("Error de conexión al eliminar.");
+    }
+  }
+
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
@@ -68,7 +86,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div className="bg-transparent" style={{ minHeight: "100vh", position: "relative", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <div className="spinner" />
       </div>
     );
@@ -77,7 +95,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="gradient-bg" style={{ minHeight: "100vh", padding: 24 }}>
+    <div className="bg-transparent" style={{ minHeight: "100vh", position: "relative", zIndex: 10, padding: 24 }}>
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* Header */}
@@ -151,9 +169,15 @@ export default function DashboardPage() {
                 key={p.id}
                 className="card card-hover"
                 onClick={() => router.push(`/projects/${p.id}/workspace`)}
-                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}
               >
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setProyectoToDelete(p.id); }} 
+                  className="absolute top-3 right-3 hover:-translate-y-1 hover:shadow-lg transition-all" 
+                  style={{ border: "none", background: "rgba(239,68,68,0.08)", color: "#ef4444", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, zIndex: 20 }} 
+                  title="Eliminar proyecto"
+                >✕</button>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 24 }}>
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>
                   {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
                 </div>
@@ -209,6 +233,17 @@ export default function DashboardPage() {
           </a>
         </div>
       )}
+
+      <GlassModal
+        isOpen={!!proyectoToDelete}
+        onClose={() => setProyectoToDelete(null)}
+        onConfirm={confirmDelete}
+        title="¿Empezar de cero?"
+        message="¿Estás seguro de que deseas eliminar este proyecto por completo? Esta acción es irreversible y borrará todo el progreso actual."
+        confirmText="Eliminar Proyecto"
+        cancelText="Cancelar"
+        isDestructive={true}
+      />
     </div>
   );
 }

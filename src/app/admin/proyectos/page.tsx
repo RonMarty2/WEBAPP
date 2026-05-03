@@ -9,6 +9,7 @@ interface Proyecto {
   titulo_provisional: string | null;
   estado_fase: number;
   completado: boolean;
+  oculto_por_usuario?: boolean;
   created_at: string;
   updated_at: string;
   servicios: { id: string; nombre: string } | null;
@@ -314,6 +315,7 @@ export default function AdminProyectosPage() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <FaseBadge fase={p.estado_fase} />
                       {p.completado && <span className="badge badge-green text-[10px]">✓ Completo</span>}
+                      {p.oculto_por_usuario && <span className="text-[10px] bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 px-2 py-0.5 rounded-full font-semibold border border-red-200 dark:border-red-800/30">Eliminado por usuario</span>}
                       <span className="text-gray-500 dark:text-gray-400 text-[12px]">
                         {new Date(p.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>

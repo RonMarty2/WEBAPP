@@ -89,7 +89,7 @@ import { generarLatex } from '@/lib/latexMonografia'
 - Landing page con planes de precios
 - Login (Google OAuth demo + modo demo)
 - Dashboard de usuario con proyectos
-- Flujo completo de 4 etapas de generación
+- Flujo de 6+ fases dinámicas (configurables desde admin)
 - Export a LaTeX + compilación
 - Panel de administración completo (KPIs, usuarios, prompts, modelos, logs)
 - Sistema de citas APA 7
@@ -130,7 +130,7 @@ import { generarLatex } from '@/lib/latexMonografia'
 | Cascada Groq → Anthropic → OpenAI | Groq es más rápido/barato, fallbacks para disponibilidad | Apr 2026 |
 | LaTeX en vez de PDF directo | Overleaf gratis es más confiable que pdflatex en servidor | Apr 2026 |
 | In-memory store como fallback | Permite desarrollar sin Supabase configurado | Apr 2026 |
-| 4 etapas separadas (max ~10K tokens cada una) | Evita context overflow, mantiene coherencia entre capítulos | Apr 2026 |
+| Fases dinámicas (actualmente 6: 0-5) configurables por servicio | Evita context overflow, mantiene coherencia entre capítulos | Apr 2026 |
 | APA 7 obligatorio con validación | Principal queja de usuarios con ChatGPT es citas inventadas | Apr 2026 |
 
 ---

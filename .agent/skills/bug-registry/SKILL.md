@@ -21,6 +21,7 @@ description: Base de datos de bugs conocidos del proyecto "Laboratorio Académic
 | [BUG-002](#bug-002) | Hydration mismatch: servidor y cliente renderizan HTML diferente | `hydration` `SSR` `localStorage` `useState` `React 19` |
 | [BUG-003](#bug-003) | Console error: "Encountered a script tag while rendering React component" | `script` `dangerouslySetInnerHTML` `React 19` `layout` |
 | [BUG-004](#bug-004) | HMR infinito / página se recarga sola al editar archivos | `HMR` `webpack` `watcher` `.store` `data.json` |
+| [BUG-005](#bug-005) | Cambios de Tailwind (ej. arbitrary values) no se reflejan | `turbopack` `hmr` `tailwind` `cache` |
 
 ---
 
@@ -217,6 +218,29 @@ webpack: (config) => {
 ```
 
 **Archivos:** `next.config.ts`
+
+---
+
+## BUG-005
+
+### Síntoma
+Se modifican las clases de Tailwind de un componente de React, pero los cambios visuales no se reflejan en el navegador en absoluto (incluso después de hacer F5). Sigue renderizando el diseño antiguo.
+
+### Cuándo aparece
+- Usando Next.js 15+ con Turbopack (`next dev --turbo`).
+- Modificando archivos externamente (vía scripts de Python o herramientas CLI) mientras el servidor corre.
+- Al usar valores arbitrarios de Tailwind muy específicos (ej. `bg-white/60`, `rounded-[10px]`).
+
+### Causa 1: Desincronización del Caché de Turbopack + Tailwind
+**Root cause:** Turbopack agrupa y compila agresivamente. Cuando un archivo es modificado fuera del entorno de IDE tradicional, o se inyectan clases arbitrarias complejas, el watcher a veces no invalida correctamente el módulo CSS asociado o el compilador JIT de Tailwind se queda "congelado" con la versión anterior.
+
+**Fix (Escalada de soluciones):**
+1. **Paso 1 (Normalizar Clases):** Cambiar clases arbitrarias (`bg-[#0B0F19]/60`) por clases estándar (`bg-slate-900/60`).
+2. **Paso 2 (Romper Caché de Módulo):** Renombrar el archivo del componente (ej. `ConfirmModal.tsx` -> `GlassModal.tsx`) y actualizar la importación. Esto obliga a Turbopack a crear un nuevo grafo de dependencias y recompilar.
+3. **Paso 3 (Opción Nuclear):** Si Tailwind sigue roto, sobrescribir los estilos críticos usando React Inline Styles (`style={{ background: 'rgba(255,255,255,0.8)' }}`) para saltarse el motor de CSS por completo.
+
+**Archivos afectados típicamente:** Componentes UI (`src/components/ui/*.tsx`)
+**Fecha:** Mayo 2026
 
 ---
 

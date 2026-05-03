@@ -1,0 +1,45 @@
+<h2>¿Cuál debería ser el primer paso del estudiante?</h2>
+<p class="subtitle">Selecciona el enfoque para el inicio de creación de la monografía</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Enfoque "Lienzo en Blanco"</h3>
+      <p>Un buscador grande en el centro. El usuario escribe su tema ("El impacto de la IA en la educación") y la IA asume el control. La universidad y detalles se piden después.</p>
+      <div class="mockup" style="margin-top: 10px; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.5)">
+        <input class="mock-input" placeholder="¿De qué trata tu monografía?..." style="width: 100%" />
+        <button class="mock-button" style="margin-top: 10px; width: 100%">Comenzar Magia →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Enfoque "Asistente Guiado" (Wizard)</h3>
+      <p>Paso a paso estructurado. Primero elige la Universidad (para las reglas APA/Vancouver), luego la Carrera, y finalmente el tema.</p>
+      <div class="mockup" style="margin-top: 10px; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.5)">
+        <div class="mock-nav" style="margin-bottom: 10px">Paso 1: Institución</div>
+        <select class="mock-input" style="width: 100%; margin-bottom: 10px"><option>Selecciona tu Universidad</option></select>
+        <button class="mock-button" style="width: 100%">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Enfoque "Plantillas y Sugerencias"</h3>
+      <p>Se le muestran ejemplos de temas exitosos o plantillas pre-aprobadas para inspirarlo antes de que escriba su propio tema.</p>
+      <div class="mockup" style="margin-top: 10px; padding: 10px; border-radius: 8px; background: rgba(255,255,255,0.5)">
+        <div style="display:flex; gap: 5px; flex-wrap: wrap;">
+          <span style="font-size: 10px; padding: 4px; background: #e0e7ff; border-radius: 4px;">Medicina</span>
+          <span style="font-size: 10px; padding: 4px; background: #e0e7ff; border-radius: 4px;">Derecho</span>
+          <span style="font-size: 10px; padding: 4px; background: #e0e7ff; border-radius: 4px;">Ingeniería</span>
+        </div>
+        <input class="mock-input" placeholder="O escribe el tuyo..." style="width: 100%; margin-top: 10px;" />
+      </div>
+    </div>
+  </div>
+</div>

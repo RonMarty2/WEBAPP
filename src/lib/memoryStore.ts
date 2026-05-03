@@ -125,6 +125,7 @@ export interface ProyectoRecord {
   titulo_provisional: string | null;
   estado_fase: number;
   completado: boolean;
+  oculto_por_usuario?: boolean;
   // Modalidad: 'directa' (sin calibración) | 'guiada' (calibración + borrador/final)
   modalidad_creacion?: 'directa' | 'guiada';
   // Perfil de estilo generado por IA durante la calibración
@@ -476,7 +477,7 @@ export function listProyectos(userId: string): ProyectoRecord[] {
   } catch { /* ignorar */ }
 
   return [...proyectosStore.values()]
-    .filter(p => p.usuario_id === userId)
+    .filter(p => p.usuario_id === userId && !p.oculto_por_usuario)
     .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 }
 
@@ -491,4 +492,14 @@ export function updateProyecto(id: string, updates: Partial<ProyectoRecord>): Pr
   proyectosStore.set(id, updated);
   persistProyectos();
   return updated;
+}
+
+export function deleteProyecto(id: string): boolean {
+  const p = proyectosStore.get(id);
+  if (p) {
+    p.oculto_por_usuario = true;
+    persistProyectos();
+    return true;
+  }
+  return false;
 }

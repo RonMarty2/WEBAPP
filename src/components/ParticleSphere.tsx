@@ -14,10 +14,10 @@ type Particle = {
 const COUNT = 800; // Increased count for a lush point-cloud
 const FOV   = 600;
 
-const ROT_Y = 0.00075;
-const ROT_X = 0.0004;
+const ROT_Y = 0.0003;
+const ROT_X = 0.00015;
 
-const HUE_SPEED = 0.002; 
+const HUE_SPEED = 0.001; 
 
 // ─── Volumetric Sphere ───────────────────────────────────────────────────────
 function buildParticles(): Particle[] {
@@ -146,14 +146,14 @@ export default function ParticleSphere() {
         rawTargetY = m.y;
       } else {
         // Elegant wandering (halved speed)
-        rawTargetX = W * 0.5 + Math.sin(t * 0.0025) * (W * 0.35);
-        rawTargetY = H * 0.5 + Math.cos(t * 0.0015 + 1.2) * (H * 0.30);
+        rawTargetX = W * 0.5 + Math.sin(t * 0.001) * (W * 0.35);
+        rawTargetY = H * 0.5 + Math.cos(t * 0.0006 + 1.2) * (H * 0.30);
       }
 
       // The "Ghost Target" smoothly glides towards the raw target.
       // This absorbs any abrupt mathematical jumps (e.g. mouse entering from far away)
-      gc.ghostX += (rawTargetX - gc.ghostX) * 0.025; 
-      gc.ghostY += (rawTargetY - gc.ghostY) * 0.025;
+      gc.ghostX += (rawTargetX - gc.ghostX) * 0.015; 
+      gc.ghostY += (rawTargetY - gc.ghostY) * 0.015;
 
       // ── Orbital Steering Behavior (Boids / Seeking) ───────────────────────
       const dx = gc.ghostX - gc.x;
@@ -162,7 +162,7 @@ export default function ParticleSphere() {
 
       // 1. Velocidad de Crucero
       // La esfera no se detiene ni acelera como loca, mantiene una velocidad majestuosa.
-      const MAX_SPEED = 4.0; 
+      const MAX_SPEED = 1.5; 
       const desiredVx = (dx / dist) * MAX_SPEED;
       const desiredVy = (dy / dist) * MAX_SPEED;
 
@@ -173,7 +173,7 @@ export default function ParticleSphere() {
       
       // Limitamos qué tan rápido puede "girar el volante". 
       // Un número muy bajo (0.05) crea curvas extremadamente amplias y rebases orbitales.
-      const MAX_STEER = 0.05; 
+      const MAX_STEER = 0.02; 
       const steerDist = Math.sqrt(steerX * steerX + steerY * steerY) || 1;
       
       let appliedSteerX = steerX;
@@ -201,20 +201,19 @@ export default function ParticleSphere() {
       // Shrink the sphere elegantly when the mouse interacts
       const targetCondense = m.active ? 1.0 : 0.0;
       // Much slower transition (0.015 instead of 0.05) so the change is harmonious
-      condenseRef.current += (targetCondense - condenseRef.current) * 0.015;
+      condenseRef.current += (targetCondense - condenseRef.current) * 0.008;
       const condense = condenseRef.current;
 
       // Gentle organic breathing (halved speed)
-      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.0075);
+      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.003);
       // Condense by only 12% (instead of 25%) so it's a subtle, premium reaction
       const mouseScale = 1.0 - (condense * 0.12); 
       const baseR = Math.max(200, Math.min(W, H) * 0.40) * globalBreathe * mouseScale;
 
       ctx.clearRect(0, 0, W, H);
       
-      // Full color on home page, subtle 25% opacity on all other pages
-      const isHome = pathname === "/";
-      const canvasAlpha = isHome ? 1.0 : 0.25;
+      // Full color everywhere
+      const canvasAlpha = 1.0;
 
       // ── Build draw commands ──────────────────────────────────────────────
       const cmds = parts.current.map(p => {
@@ -233,16 +232,16 @@ export default function ParticleSphere() {
         // Create an elegant, non-chaotic blob surface using low-frequency waves.
         // It bulges out by up to ~15% in different areas at different times (halved speed).
         const deform = 1.0 
-          + 0.06 * Math.sin(nrx * 3.5 + t * 0.0075) 
-          + 0.06 * Math.cos(nry * 2.8 - t * 0.006) 
-          + 0.05 * Math.sin(nrz * 4.2 + t * 0.009);
+          + 0.06 * Math.sin(nrx * 3.5 + t * 0.003) 
+          + 0.06 * Math.cos(nry * 2.8 - t * 0.002) 
+          + 0.05 * Math.sin(nrz * 4.2 + t * 0.004);
 
         const finalRx = rx * deform;
         const finalRy = ry * deform;
         const finalRz = rz * deform;
 
         // 3. Premium Light Scanner (La Ola) - Halved speed
-        const wavePhase = (finalRy + finalRz) * 0.01 - t * 0.01 + p.ph1 * 0.1;
+        const wavePhase = (finalRy + finalRz) * 0.01 - t * 0.004 + p.ph1 * 0.1;
         const wave = (Math.sin(wavePhase) + 1) * 0.5; // Normalized 0 to 1
 
         // 4. Perspective

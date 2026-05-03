@@ -8,25 +8,27 @@
   --bg-base:   #fbfbfa;
   --bg-subtle: #f4f5f5;
   --bg-card:   #ffffff;
+  --bg-glass:  rgba(255, 255, 255, 0.92);
+  --bg-glass-heavy: rgba(255, 255, 255, 0.96);
 
   /* ── Text — pure Google palette ── */
-  --fg-primary:   #151515;
-  --fg-secondary: #3f4145;
-  --fg-muted:     #777b82;
+  --fg-primary:   #1E1B4B;
+  --fg-secondary: #312E81;
+  --fg-muted:     #4F46E5;
 
   /* ── Borders ── */
   --border:       #e7e7e3;
   --border-hover: #c9cac5;
 
   /* ── Accent ── */
-  --accent:       #2563eb;
-  --accent-hover: #174ea6;
+  --accent:       #6366F1;
+  --accent-hover: #4F46E5;
   --accent-fg:    #ffffff;
 
   /* ── Status ── */
-  --green:        #137333;
-  --green-bg:     #e6f4ea;
-  --green-border: #a8d5b5;
+  --green:        #10B981;
+  --green-bg:     #D1FAE5;
+  --green-border: #34D399;
 
   /* ── Shadows — nearly invisible ── */
   --shadow-sm: 0 1px 2px rgba(20,20,20,0.03), 0 6px 18px rgba(20,20,20,0.04);
@@ -46,9 +48,11 @@
   --bg-base:      #0B0F19;
   --bg-subtle:    #111827;
   --bg-card:      #1E293B;
+  --bg-glass:     rgba(15, 23, 42, 0.88);
+  --bg-glass-heavy: rgba(15, 23, 42, 0.94);
   --fg-primary:   #ffffff;
   --fg-secondary: #cbd5e1;
-  --fg-muted:     #64748b;
+  --fg-muted:     #94a3b8;
   --border:       #334155;
   --border-hover: #475569;
   --accent:       #6366f1;
@@ -62,15 +66,43 @@
   --shadow-lg: 0 18px 60px rgba(0,0,0,0.5);
 }
 
+/* ═══ GLASSMORPHISM (ANTIGRAVITY UX) ═══════════════════════════════════════ */
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
+}
+
+.dark .glass-panel {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.glass-header {
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.dark .glass-header {
+  background: rgba(15, 23, 42, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* ═══ RESET ════════════════════════════════════════════════════════════ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   color-scheme: light dark;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-atkinson), 'Inter', system-ui, -apple-system, sans-serif;
   background:
-    radial-gradient(circle at 72% 18%, rgba(37, 99, 235, 0.08), transparent 24vw),
+    radial-gradient(circle at 72% 18%, rgba(99, 102, 241, 0.08), transparent 24vw),
     linear-gradient(180deg, #ffffff 0%, var(--bg-base) 48%, #ffffff 100%);
   color: var(--fg-primary);
   min-height: 100vh;
@@ -83,6 +115,14 @@ html, body {
   background:
     radial-gradient(circle at 72% 18%, rgba(99, 102, 241, 0.06), transparent 24vw),
     linear-gradient(180deg, #0B0F19 0%, var(--bg-base) 48%, #0B0F19 100%);
+}
+
+.font-crimson {
+  font-family: var(--font-crimson), 'Crimson Pro', serif;
+}
+
+.font-atkinson {
+  font-family: var(--font-atkinson), 'Atkinson Hyperlegible', sans-serif;
 }
 
 a { color: inherit; }
@@ -256,8 +296,6 @@ a { color: inherit; }
 @supports (-webkit-backdrop-filter: blur(12px)) or (backdrop-filter: blur(12px)) {
   .card {
     background: rgba(255, 255, 255, 0.86);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
 }
 .dark .card {
@@ -437,6 +475,20 @@ a { color: inherit; }
   .navbar nav { gap: 2px !important; }
   #particle-sphere { width: 360px; height: 360px; }
   .content-area { padding: 20px; }
+}
+
+/* ═══ FOCUS VISIBLE STATES (keyboard navigation) ══════════════════════════ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.input-dark:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ═══ DOCUMENT PREVIEW ═══════════════════════════════════════════════════════ */
