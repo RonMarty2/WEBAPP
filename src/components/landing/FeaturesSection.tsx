@@ -62,9 +62,9 @@ function ProductCard({ nombre, desc, etiqueta, onStart }: { nombre: string; desc
       <div style={{
         position: "absolute", top: 14, right: 14,
         fontSize: 11, fontWeight: 600,
-        background: available ? "#f0fdf4" : "var(--bg-subtle)",
-        border: `1px solid ${available ? "#bbf7d0" : "var(--border)"}`,
-        color: available ? "#16a34a" : "var(--fg-muted)",
+        background: available ? "var(--green-bg)" : "var(--bg-subtle)",
+        border: `1px solid ${available ? "var(--green-border)" : "var(--border)"}`,
+        color: available ? "var(--green)" : "var(--fg-muted)",
         borderRadius: 6, padding: "2px 8px",
       }}>{etiqueta}</div>
       <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)" }}>{nombre}</div>
@@ -102,14 +102,14 @@ export default function FeaturesSection() {
       {/* ── Garantías strip ──────────────────────────────────────────── */}
       <section style={{ marginBottom: 88 }}>
         <div style={{
-          background: "white", border: "1px solid var(--border)",
+          background: "var(--bg-card)", border: "1px solid var(--border)",
           borderRadius: 16, padding: "18px 28px",
           display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04)",
+          boxShadow: "var(--shadow-sm)",
         }}>
           {GARANTIAS.map(g => (
-            <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "var(--fg-secondary)", padding: "4px 10px" }}>
-              <span style={{ color: "#16a34a", fontWeight: 700 }}>{g.icono}</span>
+            <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "var(--fg-primary)", padding: "4px 10px" }}>
+              <span style={{ color: "var(--green)", fontWeight: 700 }}>{g.icono}</span>
               <span>{g.texto}</span>
             </div>
           ))}
@@ -133,8 +133,8 @@ export default function FeaturesSection() {
                   padding: "10px 28px", borderRadius: 8, border: "none",
                   cursor: "pointer", fontSize: 14, fontWeight: 600,
                   transition: "all 0.18s ease",
-                  background: audiencia === a ? "#0b0b0b" : "transparent",
-                  color: audiencia === a ? "white" : "var(--fg-muted)",
+                  background: audiencia === a ? "var(--fg-primary)" : "transparent",
+                  color: audiencia === a ? "var(--bg-base)" : "var(--fg-muted)",
                 }}
               >
                 {a === "estudiante" ? "Para Estudiantes" : "Para Docentes"}
@@ -182,14 +182,15 @@ export default function FeaturesSection() {
               className="card"
               style={{
                 position: "relative",
-                border: plan.popular ? "2px solid #0b0b0b" : undefined,
+                border: plan.popular ? "2px solid var(--fg-primary)" : undefined,
                 paddingTop: plan.popular ? 32 : undefined,
+                background: "var(--bg-card)",
               }}
             >
               {plan.popular && (
                 <div style={{
                   position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
-                  background: "#0b0b0b", color: "white",
+                  background: "var(--fg-primary)", color: "var(--bg-base)",
                   borderRadius: 999, padding: "3px 16px",
                   fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
                 }}>
@@ -202,7 +203,7 @@ export default function FeaturesSection() {
               <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9, marginBottom: 28 }}>
                 {plan.items.map(item => (
                   <li key={item} style={{ display: "flex", gap: 9, fontSize: 14, color: "var(--fg-secondary)", alignItems: "flex-start" }}>
-                    <span style={{ color: "#16a34a", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                    <span style={{ color: "var(--green)", fontWeight: 700, flexShrink: 0 }}>✓</span>
                     <span>{item}</span>
                   </li>
                 ))}
@@ -237,6 +238,7 @@ export default function FeaturesSection() {
       <section style={{ textAlign: "center", marginBottom: 80 }}>
         <div style={{
           background: "#0b0b0b", borderRadius: 8, padding: "56px 32px",
+          border: "1px solid rgba(255,255,255,0.1)",
         }}>
           <h3 style={{ fontSize: 28, fontWeight: 800, color: "white", marginBottom: 12, letterSpacing: 0 }}>
             ¿Listo para empezar?

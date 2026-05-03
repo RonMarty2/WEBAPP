@@ -450,7 +450,8 @@ export default function WorkspacePage() {
     <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"transparent", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>
 
       {/* HEADER */}
-      <header style={{ display:"flex", alignItems:"center", gap:12, padding:"0 20px", height:52, flexShrink:0, background:"var(--bg-glass)", backdropFilter:"blur(24px)", WebkitBackdropFilter:"blur(24px)", borderBottom:"1px solid var(--border)", zIndex:10 }}>
+      <header style={{ display:"flex", alignItems:"center", gap:12, padding:"0 20px", height:52, flexShrink:0, borderBottom:"1px solid var(--border)", position:"relative", zIndex:40 }}>
+        <div style={{ position:"absolute", inset:0, background:"var(--bg-card)", zIndex:-1 }} />
         <a href="/dashboard" style={{ color:"var(--fg-muted)", textDecoration:"none", fontSize:18, lineHeight:1 }}>←</a>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:700, color:"var(--fg-primary)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
@@ -508,8 +509,9 @@ export default function WorkspacePage() {
       <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
 
         {/* ── COL 1: CHAT & GENERATION (fixed 360px) ── */}
-        <div style={{ width:360, flexShrink:0, display:"flex", flexDirection:"column", background:"var(--bg-glass)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", borderRight:"1px solid var(--border)", boxShadow:"var(--shadow-sm)", zIndex:10 }}>
-
+        <div style={{ width:360, flexShrink:0, display:"flex", flexDirection:"column", borderRight:"1px solid var(--border)", boxShadow:"var(--shadow-sm)", position:"relative", zIndex:40 }}>
+          <div style={{ position:"absolute", inset:0, background:"var(--bg-card)", zIndex:-1 }} />
+          
           {/* Phase label */}
           <div style={{ padding:"12px 16px", borderBottom:"1px solid var(--bg-subtle)" }}>
             <div style={{ fontSize:10, color:"var(--accent)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:2 }}>{currentFaseDef.short}</div>
@@ -653,10 +655,11 @@ export default function WorkspacePage() {
         </div>
 
         {/* ── COL 2: CONTENT VIEWER (flex) ── */}
-        <div style={{ flex:1, overflowY:"auto", background:"transparent", padding: "32px", zIndex:10 }}>
+        <div style={{ flex:1, overflowY:"auto", background:"transparent", padding: "32px", position:"relative", zIndex:10 }}>
           {displayContent ? (
-            <div className="fade-in" style={{ maxWidth:880, margin:"0 auto", padding:"32px 40px 60px", borderRadius: 16, background:"var(--bg-glass-heavy)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", border:"1px solid var(--border)", boxShadow:"var(--shadow-md)" }}>
-              <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid rgba(150,150,150,0.15)" }}>
+            <div className="fade-in" style={{ maxWidth:880, margin:"0 auto", padding:"32px 40px 60px", borderRadius: 16, background:"var(--bg-card)", border:"1px solid var(--border)", boxShadow:"var(--shadow-md)", position:"relative", overflow:"hidden" }}>
+              {/* Inner wrapper */}
+              <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid var(--bg-subtle)" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
                   <div style={{ flex:1 }}>
                     <div style={{ fontSize:11, color:"var(--accent)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:4 }}>{currentFaseDef.short}</div>
@@ -688,7 +691,7 @@ export default function WorkspacePage() {
               <div className="doc-preview" dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }} style={{ fontSize:13.5, lineHeight:1.85 }}/>
             </div>
           ) : (
-            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", margin:"10vh auto", maxWidth: 400, padding:"50px 30px", borderRadius: 16, gap:12, background:"var(--bg-glass-heavy)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", border:"1px solid var(--border)", boxShadow:"var(--shadow-md)" }}>
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", margin:"10vh auto", maxWidth: 400, padding:"50px 30px", borderRadius: 16, gap:12, background:"var(--bg-card)", border:"1px solid var(--border)", boxShadow:"var(--shadow-md)" }}>
               <div style={{ fontSize:48, opacity:0.3 }}>📄</div>
               <div style={{ fontSize:15, fontWeight:700, color:"var(--border)" }}>{currentFaseDef.label}</div>
               <div style={{ fontSize:12, color:"var(--fg-primary)", textAlign:"center", maxWidth:240, lineHeight:1.6 }}>
@@ -700,7 +703,8 @@ export default function WorkspacePage() {
 
         {/* ── COL 3: PDF PREVIEW (fixed 340px, toggleable) ── */}
         {showPdfPanel && (
-          <div style={{ width:340, flexShrink:0, display:"flex", flexDirection:"column", background:"var(--bg-glass)", backdropFilter:"blur(28px)", WebkitBackdropFilter:"blur(28px)", borderLeft:"1px solid var(--border)", boxShadow:"var(--shadow-sm)", zIndex:10 }}>
+          <div style={{ width:340, flexShrink:0, display:"flex", flexDirection:"column", borderLeft:"1px solid var(--border)", boxShadow:"var(--shadow-sm)", position:"relative", zIndex:40 }}>
+            <div style={{ position:"absolute", inset:0, background:"var(--bg-card)", zIndex:-1 }} />
             {/* Panel header */}
             <div style={{ padding:"10px 16px", borderBottom:"1px solid var(--bg-subtle)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
               <div>

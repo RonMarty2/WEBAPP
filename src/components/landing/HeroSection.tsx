@@ -39,15 +39,12 @@ export default function HeroSection() {
       {/* All content — above halo and canvas */}
       <div style={{ position: "relative", zIndex: 1 }}>
 
-        {/* Status pill */}
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 8,
-          background: "rgba(255,255,255,0.55)",
-          backdropFilter: "blur(10px)",
-          WebkitBackdropFilter: "blur(10px)",
+          background: "var(--bg-card)",
           border: "1px solid var(--border)",
           borderRadius: 999, padding: "6px 16px",
-          fontSize: 13, color: "var(--fg-secondary)",
+          fontSize: 13, color: "var(--fg-primary)",
           marginBottom: 32,
           boxShadow: "var(--shadow-sm)",
         }}>

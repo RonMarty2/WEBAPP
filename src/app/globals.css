@@ -8,8 +8,9 @@
   --bg-base:   #fbfbfa;
   --bg-subtle: #f4f5f5;
   --bg-card:   #ffffff;
-  --bg-glass:  rgba(255, 255, 255, 0.92);
-  --bg-glass-heavy: rgba(255, 255, 255, 0.96);
+  --bg-glass:  rgba(255, 255, 255, 0.98);
+  --bg-glass-heavy: #ffffff;
+  /* FORCE CACHE INVALIDATION 1 */
 
   /* ── Text — pure Google palette ── */
   --fg-primary:   #1E1B4B;
@@ -48,8 +49,9 @@
   --bg-base:      #0B0F19;
   --bg-subtle:    #111827;
   --bg-card:      #1E293B;
-  --bg-glass:     rgba(15, 23, 42, 0.88);
-  --bg-glass-heavy: rgba(15, 23, 42, 0.94);
+  --bg-glass:     rgba(15, 23, 42, 0.98);
+  --bg-glass-heavy: #0F172A;
+  /* FORCE CACHE INVALIDATION 2 */
   --fg-primary:   #ffffff;
   --fg-secondary: #cbd5e1;
   --fg-muted:     #94a3b8;

@@ -123,6 +123,7 @@ const NAV_ITEMS = [
   { href: "/admin/project-types", label: "Tipos de Proyecto",  Icon: IconLayers    },
   { href: "/admin/fases",         label: "Fases del Proyecto", Icon: IconList      },
   { href: "/admin/prompts",       label: "Prompts Maestros",   Icon: IconEdit      },
+  { href: "/admin/ui-config",     label: "Apariencia UI",      Icon: IconLayers    },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

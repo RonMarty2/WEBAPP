@@ -11,7 +11,6 @@ type Particle = {
 };
 
 // ─── Tuning ──────────────────────────────────────────────────────────────────
-const COUNT = 800; // Increased count for a lush point-cloud
 const FOV   = 600;
 
 const ROT_Y = 0.0003;
@@ -20,24 +19,78 @@ const ROT_X = 0.00015;
 const HUE_SPEED = 0.001; 
 
 // ─── Volumetric Sphere ───────────────────────────────────────────────────────
-function buildParticles(): Particle[] {
+function buildParticles(shape: string = "sphere", count: number = 1000): Particle[] {
   const golden = Math.PI * (3 - Math.sqrt(5));
-  return Array.from({ length: COUNT }, (_, i) => {
-    // 1. Surface Fibonacci distribution
-    const ny = 1 - (i / (COUNT - 1)) * 2;
-    const surfaceR = Math.sqrt(Math.max(0, 1 - ny * ny));
-    const th = golden * i;
+  return Array.from({ length: count }, (_, i) => {
+    let nx = 0, ny = 0, nz = 0;
     
-    // 2. Thick shell distribution for a premium "nebula" feel
-    // Not perfectly hollow, but not a solid dense core either.
-    const shellDepth = 0.85 + Math.random() * 0.15;
+    if (shape === "torus") {
+      const th = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI * 2;
+      const R = 0.7; 
+      const r = 0.3 * Math.random(); 
+      nx = (R + r * Math.cos(phi)) * Math.cos(th);
+      nz = (R + r * Math.cos(phi)) * Math.sin(th);
+      ny = r * Math.sin(phi);
+    } else if (shape === "rings") {
+      const th = Math.random() * Math.PI * 2;
+      const r = 0.2 + 0.8 * Math.random(); 
+      nx = Math.cos(th) * r;
+      nz = Math.sin(th) * r;
+      ny = (Math.random() - 0.5) * 0.05; 
+    } else if (shape === "dna") {
+      const t = i / count;
+      const th = t * Math.PI * 8; 
+      const r = 0.4;
+      const strand = i % 2 === 0 ? 1 : -1;
+      nx = Math.cos(th + (strand === 1 ? 0 : Math.PI)) * r;
+      nz = Math.sin(th + (strand === 1 ? 0 : Math.PI)) * r;
+      ny = (t - 0.5) * 2.0; 
+      nx += (Math.random() - 0.5) * 0.15;
+      nz += (Math.random() - 0.5) * 0.15;
+      ny += (Math.random() - 0.5) * 0.15;
+    } else if (shape === "cube") {
+      // Cubo de Datos (Tesseract) - Las partículas se distribuyen en la superficie de un cubo
+      nx = (Math.random() - 0.5) * 2;
+      ny = (Math.random() - 0.5) * 2;
+      nz = (Math.random() - 0.5) * 2;
+      const max = Math.max(Math.abs(nx), Math.abs(ny), Math.abs(nz));
+      // Proyectamos a los bordes del cubo y escalamos
+      nx = (nx / max) * 0.7;
+      ny = (ny / max) * 0.7;
+      nz = (nz / max) * 0.7;
+    } else if (shape === "blackhole") {
+      // Agujero Negro - Centro muy denso y disco de acreción amplio
+      const isDisk = Math.random() > 0.2; // 80% disco, 20% núcleo
+      if (isDisk) {
+        const th = Math.random() * Math.PI * 2;
+        const r = 0.2 + 1.2 * (1 - Math.pow(Math.random(), 4)); // Expansión logarítmica
+        nx = Math.cos(th) * r;
+        nz = Math.sin(th) * r;
+        ny = (Math.random() - 0.5) * 0.05 * r;
+      } else {
+        const nY = 1 - Math.random() * 2;
+        const surfaceR = Math.sqrt(Math.max(0, 1 - nY * nY));
+        const th = Math.random() * Math.PI * 2;
+        const r = 0.18 * Math.pow(Math.random(), 0.5); // Núcleo denso
+        nx = Math.cos(th) * surfaceR * r;
+        ny = nY * r;
+        nz = Math.sin(th) * surfaceR * r;
+      }
+    } else {
+      const nY = 1 - (i / (count - 1)) * 2;
+      const surfaceR = Math.sqrt(Math.max(0, 1 - nY * nY));
+      const th = golden * i;
+      const shellDepth = 0.85 + Math.random() * 0.15;
+      nx = Math.cos(th) * surfaceR * shellDepth;
+      ny = nY * shellDepth;
+      nz = Math.sin(th) * surfaceR * shellDepth;
+    }
     
     return {
-      nx: Math.cos(th) * surfaceR * shellDepth,
-      ny: ny * shellDepth,
-      nz: Math.sin(th) * surfaceR * shellDepth,
+      nx, ny, nz,
       ph1: Math.random() * Math.PI * 2,
-      baseSize: 0.8 + Math.random() * 1.2,
+      baseSize: 0.7 + Math.random() * 0.9,
     };
   });
 }
@@ -58,7 +111,7 @@ function rot3(
 export default function ParticleSphere() {
   const pathname = usePathname();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const parts     = useRef<Particle[]>(buildParticles());
+  const parts     = useRef<Particle[]>(buildParticles("sphere"));
   const raf       = useRef<number>(0);
   const rotRef    = useRef({ y: 0, x: 0 });
   const tRef      = useRef(0);
@@ -67,8 +120,36 @@ export default function ParticleSphere() {
   // Physics body for the entire point-cloud mass
   const gcRef     = useRef({ x: 0, y: 0, vx: 0, vy: 0, ghostX: 0, ghostY: 0, ready: false });
   const condenseRef = useRef(0);
+  const uiConfigRef = useRef({ shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 });
 
   useEffect(() => {
+    const loadConfig = () => {
+      try {
+        const stored = localStorage.getItem("ui_particle_config");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          const oldShape = uiConfigRef.current.shape;
+          const oldDensity = uiConfigRef.current.density;
+          
+          uiConfigRef.current = {
+            shape: parsed.shape || "sphere",
+            palette: parsed.palette || "antigravity",
+            wave: parsed.wave || "magnetic",
+            speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
+            particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : (typeof parsed.size === "number" ? parsed.size : 1.0),
+            particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
+            swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
+            density: typeof parsed.density === "number" ? parsed.density : 1000
+          };
+          
+          if ((oldShape && oldShape !== uiConfigRef.current.shape) || (oldDensity && oldDensity !== uiConfigRef.current.density)) {
+            parts.current = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          }
+        }
+      } catch (e) {}
+    };
+    loadConfig();
+    window.addEventListener("ui_particle_update", loadConfig);
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -102,6 +183,7 @@ export default function ParticleSphere() {
         mouseRef.current.active = false;
       }, 2000);
     }
+    
     function onLeave() { 
       mouseRef.current.active = false; 
       window.clearTimeout(idleTimeout);
@@ -150,50 +232,24 @@ export default function ParticleSphere() {
         rawTargetY = H * 0.5 + Math.cos(t * 0.0006 + 1.2) * (H * 0.30);
       }
 
-      // The "Ghost Target" smoothly glides towards the raw target.
-      // This absorbs any abrupt mathematical jumps (e.g. mouse entering from far away)
-      gc.ghostX += (rawTargetX - gc.ghostX) * 0.015; 
-      gc.ghostY += (rawTargetY - gc.ghostY) * 0.015;
-
-      // ── Orbital Steering Behavior (Boids / Seeking) ───────────────────────
-      const dx = gc.ghostX - gc.x;
-      const dy = gc.ghostY - gc.y;
-      const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-
-      // 1. Velocidad de Crucero
-      // La esfera no se detiene ni acelera como loca, mantiene una velocidad majestuosa.
-      const MAX_SPEED = 1.5; 
-      const desiredVx = (dx / dist) * MAX_SPEED;
-      const desiredVy = (dy / dist) * MAX_SPEED;
-
-      // 2. Fuerza de Giro (Steering)
-      // La diferencia entre a dónde va y a dónde quiere ir.
-      const steerX = desiredVx - gc.vx;
-      const steerY = desiredVy - gc.vy;
+      // ── Física de Fluido / Globo de Agua ──────────────────────────────────
+      // Un "globo de agua" se siente pesado, se arrastra y nunca se detiene de golpe.
+      // Usamos inercia pura en lugar de límites de velocidad estrictos que causan tirones.
       
-      // Limitamos qué tan rápido puede "girar el volante". 
-      // Un número muy bajo (0.05) crea curvas extremadamente amplias y rebases orbitales.
-      const MAX_STEER = 0.02; 
-      const steerDist = Math.sqrt(steerX * steerX + steerY * steerY) || 1;
+      const dx = rawTargetX - gc.x;
+      const dy = rawTargetY - gc.y;
       
-      let appliedSteerX = steerX;
-      let appliedSteerY = steerY;
-      if (steerDist > MAX_STEER) {
-        appliedSteerX = (steerX / steerDist) * MAX_STEER;
-        appliedSteerY = (steerY / steerDist) * MAX_STEER;
-      }
-
-      // 3. Aplicar física
-      gc.vx += appliedSteerX;
-      gc.vy += appliedSteerY;
-
-      // Asegurar que siempre viaje a su velocidad de crucero constante (no hay fricción de frenado)
-      const currentSpeed = Math.sqrt(gc.vx * gc.vx + gc.vy * gc.vy) || 1;
-      if (currentSpeed > MAX_SPEED) {
-        gc.vx = (gc.vx / currentSpeed) * MAX_SPEED;
-        gc.vy = (gc.vy / currentSpeed) * MAX_SPEED;
-      }
-
+      // Aceleración muy suave (simula el peso/masa del agua al arrastrarla)
+      const waterMass = 0.0008; 
+      // Fricción muy baja (hace que fluya y se deslice suavemente al frenar)
+      const waterFriction = 0.94; 
+      
+      gc.vx += dx * waterMass;
+      gc.vy += dy * waterMass;
+      
+      gc.vx *= waterFriction;
+      gc.vy *= waterFriction;
+      
       gc.x += gc.vx;
       gc.y += gc.vy;
 
@@ -204,11 +260,14 @@ export default function ParticleSphere() {
       condenseRef.current += (targetCondense - condenseRef.current) * 0.008;
       const condense = condenseRef.current;
 
-      // Gentle organic breathing (halved speed)
-      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.003);
+      // Gentle organic breathing (speed modified by UI config)
+      const globalBreathe = 1 + 0.08 * Math.sin(t * 0.003 * uiConfigRef.current.speed);
       // Condense by only 12% (instead of 25%) so it's a subtle, premium reaction
       const mouseScale = 1.0 - (condense * 0.12); 
-      const baseR = Math.max(200, Math.min(W, H) * 0.40) * globalBreathe * mouseScale;
+      // Limitamos el radio máximo para que en pantallas grandes (1080p+) no se desborde y mantenga forma de esfera
+      const scaleFactor = Math.min(W, H) * 0.48;
+      // Apply swarmSize from UI Config
+      const baseR = Math.min(450, Math.max(240, scaleFactor)) * globalBreathe * mouseScale * uiConfigRef.current.swarmSize;
 
       ctx.clearRect(0, 0, W, H);
       
@@ -231,34 +290,74 @@ export default function ParticleSphere() {
         
         // Create an elegant, non-chaotic blob surface using low-frequency waves.
         // It bulges out by up to ~15% in different areas at different times (halved speed).
+        
+        // Deformación inercial (Globo de Agua)
+        // Estira la esfera en la dirección del movimiento (squash & stretch)
+        const stretchX = gc.vx * 0.06;
+        const stretchY = gc.vy * 0.06;
+        
+        // Multiplicador direccional: Positivo en la dirección del movimiento (se alarga),
+        // negativo en la dirección opuesta (se aplasta).
+        const inertiaDeform = (nrx * stretchX) + (nry * stretchY);
+
+        // Tambaleo de gelatina (Wobble) proporcional a la velocidad
+        const speed = Math.sqrt(gc.vx * gc.vx + gc.vy * gc.vy);
+        const wobble = Math.sin(t * 0.015) * speed * 0.015 * (nrz + nrx); 
+
         const deform = 1.0 
-          + 0.06 * Math.sin(nrx * 3.5 + t * 0.003) 
-          + 0.06 * Math.cos(nry * 2.8 - t * 0.002) 
-          + 0.05 * Math.sin(nrz * 4.2 + t * 0.004);
+          + 0.06 * Math.sin(nrx * 3.5 + t * 0.003 * uiConfigRef.current.speed) 
+          + 0.06 * Math.cos(nry * 2.8 - t * 0.002 * uiConfigRef.current.speed) 
+          + 0.05 * Math.sin(nrz * 4.2 + t * 0.004 * uiConfigRef.current.speed)
+          + inertiaDeform
+          + wobble;
 
         const finalRx = rx * deform;
         const finalRy = ry * deform;
         const finalRz = rz * deform;
 
         // 3. Premium Light Scanner (La Ola) - Halved speed
-        const wavePhase = (finalRy + finalRz) * 0.01 - t * 0.004 + p.ph1 * 0.1;
+        const wavePhase = (finalRy + finalRz) * 0.01 - t * 0.004 * uiConfigRef.current.speed + p.ph1 * 0.1;
         const wave = (Math.sin(wavePhase) + 1) * 0.5; // Normalized 0 to 1
 
         // 4. Perspective
         const depth = finalRz + FOV;
         const sc    = FOV / depth;
 
+        let trailX = 0;
+        let trailY = 0;
+        
+        if (uiConfigRef.current.wave === "magnetic") {
+          // Efecto Ola Magnética (Desintegración y Agrupación)
+          const dispersionFactor = Math.max(0, speed - 1.5) * 6.0; 
+          if (dispersionFactor > 0) {
+             const isLoose = Math.sin(p.ph1 * 12.5) > 0.4; 
+             if (isLoose) {
+               const lag = Math.abs(Math.cos(p.ph1 * 8.3)) * dispersionFactor; 
+               trailX = -gc.vx * lag;
+               trailY = -gc.vy * lag;
+             }
+          }
+        } else if (uiConfigRef.current.wave === "ocean") {
+          // Efecto Ola Continua (Océano)
+          // Se aplica al finalRx y finalRy temporalmente para simular el desplazamiento
+          const oceanWavePhase = (nrx + nry) * 4.0 - t * 0.025 * uiConfigRef.current.speed;
+          const oceanWaveDeform = Math.pow(Math.sin(oceanWavePhase), 2) * 0.20; 
+          trailX = finalRx * oceanWaveDeform * sc;
+          trailY = finalRy * oceanWaveDeform * sc;
+        }
+
         // Perfectly rigid geometric alignment, but surface is gently bumpy
-        const hx = gc.x + finalRx * sc;
-        const hy = gc.y + finalRy * sc;
+        // And now particles can physically detach from the mesh (trailX, trailY)
+        const hx = gc.x + finalRx * sc + trailX;
+        const hy = gc.y + finalRy * sc + trailY;
 
         // 5. Visual Size (Swells beautifully when light hits them)
-        // Scaled down to a third of the previous maximum size
-        const sizeK = p.baseSize * sc * (1 + wave * 1.5) * 0.33;
+        // Scaled by UI config
+        const sizeK = p.baseSize * sc * (1 + wave * 1.5) * 0.33 * uiConfigRef.current.particleSize;
         
         // Transform into delicate, small dashed lines
         const w = Math.max(0.6, sizeK * 1.5);
-        const h = Math.max(1.5, sizeK * 6.0);
+        const h = Math.max(1.5, sizeK * 6.0 * uiConfigRef.current.particleLength);
 
         // 6. Symmetric Orientation (Radial)
         // Point perfectly towards the center of gravity.
@@ -270,19 +369,26 @@ export default function ParticleSphere() {
         const alpha = Math.max(0, Math.min(0.95, 0.05 + zNormFront * 0.85 + wave * 0.15));
 
         const globalHue = (t * HUE_SPEED * (180 / Math.PI)) % 360;
-        // Gradient from cyan/blue to deep purple mapping natively to 3D position
-        const hue = (220 + globalHue + (p.nx + p.ny) * 35) % 360;
+        let baseHue = 220; // antigravity default
+        if (uiConfigRef.current.palette === "plasma") baseHue = 5; // Reds/Oranges
+        else if (uiConfigRef.current.palette === "matrix") baseHue = 150; // Emerald/Teal
+        else if (uiConfigRef.current.palette === "gold") baseHue = 35; // Yellow/Amber
+        else if (uiConfigRef.current.palette === "synthwave") baseHue = 280; // Fuchsia/Cyan
+        else if (uiConfigRef.current.palette === "blood") baseHue = 350; // Deep Red
+        else if (uiConfigRef.current.palette === "toxic") baseHue = 90; // Lime Green
+        
+        const hue = (baseHue + globalHue + (p.nx + p.ny) * 35) % 360;
         
         // Base saturation and lightness
         let sat = 55 + wave * 15; 
         let lit = 45 + zNormFront * 10 + wave * 10; 
 
-        // Perceptual color correction:
-        // Yellows and Greens (hues ~40 to ~160) inherently look much brighter and more 
-        // "neon" to the human eye. We specifically dim them so they match the elegance of the blues.
-        if (hue > 40 && hue < 160) {
-          sat *= 0.70; // 30% less saturated
-          lit *= 0.85; // 15% darker
+        if (uiConfigRef.current.palette === "monochrome") {
+          sat = 0;
+          lit = 50 + zNormFront * 30 + wave * 20;
+        } else if (hue > 40 && hue < 160 && uiConfigRef.current.palette === "antigravity") {
+          sat *= 0.70; 
+          lit *= 0.85; 
         }
 
         return {
@@ -304,12 +410,11 @@ export default function ParticleSphere() {
         ctx.translate(d.x, d.y);
         ctx.rotate(d.angle);
         ctx.beginPath();
-        if (ctx.roundRect) {
-          // Use d.w / 2 for perfectly rounded pill-shaped caps
-          ctx.roundRect(-d.w / 2, -d.h / 2, d.w, d.h, d.w / 2);
-        } else {
-          ctx.rect(-d.w / 2, -d.h / 2, d.w, d.h);
-        }
+        const r = d.w / 2;
+        const h2 = Math.max(0, d.h / 2 - r); 
+        ctx.arc(0, -h2, r, Math.PI, 0); // Top cap
+        ctx.arc(0, h2, r, 0, Math.PI);  // Bottom cap
+        ctx.closePath();
         ctx.fill();
         ctx.restore();
       }
@@ -336,6 +441,7 @@ export default function ParticleSphere() {
       document.removeEventListener("pointermove",  onMove);
       document.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll",       onScroll);
+      window.removeEventListener("ui_particle_update", loadConfig);
       window.clearTimeout(idleTimeout);
     };
   }, []);

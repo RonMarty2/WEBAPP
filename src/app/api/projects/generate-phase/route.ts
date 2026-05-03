@@ -178,242 +178,24 @@ export async function POST(req: Request) {
 
 // ── Sin Supabase ──────────────────────────────────────────────────────────────
 
-  // ── Modo dinámico: phase_id ───────────────────────────────────────────────
-  if (phase_id) {
-    const disk = loadFromDisk();
-    const servicio_id = proyecto.servicio_id ?? "mono-001";
-    const phaseDefs = disk.phaseDefinitions?.[servicio_id];
-
-    if (!phaseDefs?.length) {
-      return NextResponse.json({ error: "No hay fases personalizadas para este servicio" }, { status: 404 });
-    }
-
-    const currentPhase = phaseDefs.find((p) => p.id === phase_id);
-    if (!currentPhase) {
-      return NextResponse.json({ error: "Fase no encontrada" }, { status: 404 });
-    }
-
-    const sorted = [...phaseDefs].sort((a, b) => a.orden - b.orden);
-    const previousPhases = sorted.filter((p) => p.orden < currentPhase.orden);
-    const phaseContents = proyecto.phase_contents ?? {};
-
-    const fasesAnteriores: string[] = [];
-    for (const prev of previousPhases) {
-      let contenido = phaseContents[prev.id] ?? phaseContents[`${prev.id}_borrador`] ?? null;
-      if (contenido) {
-        if (contenido.length > MAX_CHARS_POR_FASE) {
-          contenido = contenido.slice(0, MAX_CHARS_POR_FASE) + "\n[... contenido truncado ...]";
-        }
-        fasesAnteriores.push(`=== ${prev.label} ===\n${contenido}\n=== FIN ===`);
-      }
-    }
-
-    const bloqueContexto = fasesAnteriores.length > 0
-      ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
-      : "";
-
-    const phasePromptBase = loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
-    const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
-
-    const borradorKey = `${phase_id}_borrador`;
-    const borradorPrev = phaseContents[borradorKey] ?? null;
-
-    const userPromptParts = [
-      `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
-      proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
-      bloqueContexto,
-    ];
-
-    if (tipo === "final" && esGuiado) {
-      if (borradorPrev) {
-        userPromptParts.push(`\n--- BORRADOR PREVIO ---\n${borradorPrev}\n--- FIN BORRADOR ---`);
-      }
-      if (feedback_usuario?.trim()) {
-        userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
-      }
-      userPromptParts.push(`\nGenera la VERSIÓN FINAL de ${currentPhase.label} incorporando el feedback.`);
-    } else {
-      if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
-      userPromptParts.push(`\nGenera el contenido de ${currentPhase.label}.`);
-    }
-
-    const userPrompt = userPromptParts.filter(Boolean).join("\n");
-
-    let textoGenerado: string;
-    let proveedor: string;
-    try {
-      const resultado = await llamarIA(systemPrompt, userPrompt, 5000, proyecto.servicio_id);
-      textoGenerado = resultado.text;
-      proveedor = `${resultado.provider} / ${resultado.model}`;
-    } catch (e) {
-      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
-    }
-
-    let newPhaseContents: Record<string, string | null>;
-    let requiereActualizacion = proyecto.requiere_actualizacion ?? {};
-
-    if (tipo === "borrador" && esGuiado) {
-      newPhaseContents = { ...phaseContents, [borradorKey]: textoGenerado };
-    } else {
-      newPhaseContents = { ...phaseContents, [phase_id]: textoGenerado };
-      const currentOrden = currentPhase.orden;
-      const subsequentPhases = sorted.filter(p => p.orden > currentOrden);
-      for (const sp of subsequentPhases) {
-        if (phaseContents[sp.id] || phaseContents[`${sp.id}_borrador`]) {
-          requiereActualizacion = { ...requiereActualizacion, [sp.id]: true };
-        }
-      }
-      delete requiereActualizacion[phase_id];
-    }
-
-    updateProyecto(proyecto_id, {
-      phase_contents: newPhaseContents,
-      requiere_actualizacion: requiereActualizacion,
-    });
-
-    return NextResponse.json({
-      ok: true, phase_id, tipo,
-      fase_etiqueta: currentPhase.label,
-      proveedor, duracion_ms: Date.now() - t0,
-      contenido: textoGenerado,
-      requiere_actualizacion: requiereActualizacion,
-    });
+async function generarSinSupabase({
+  sessionUserId, proyecto_id, fase_numero, phase_id,
+  mensaje_usuario, tipo, feedback_usuario,
+  t0,
+}: {
+  sessionUserId: string;
+  proyecto_id: string;
+  fase_numero: number;
+  phase_id?: string;
+  mensaje_usuario?: string;
+  tipo: "borrador" | "final";
+  feedback_usuario?: string;
+  t0: number;
+}) {
+  const proyecto = getProyecto(proyecto_id);
+  if (!proyecto || proyecto.usuario_id !== sessionUserId) {
+    return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
   }
-
-  // ── Modo legacy: fase_numero ──────────────────────────────────────────────
-
-  const esOnboarding = fase_numero === 0 && !proyecto.tema_aprobado;
-
-  // Try to load dynamic phase definitions even in legacy mode
-  const disk = loadFromDisk();
-  const servicio_id = proyecto.servicio_id ?? "mono-001";
-  const phaseDefs = disk.phaseDefinitions?.[servicio_id];
-  const legacyPhaseLabel = (phaseDefs?.find(p => p.orden === fase_numero)?.label) ?? `Fase ${fase_numero}`;
-
-  const fasesAnteriores: string[] = [];
-  for (let f = 0; f < fase_numero; f++) {
-    const col = FASE_A_COLUMNA[f];
-    let contenido: string | null = null;
-    if (col) {
-      contenido = proyecto[col] as string | null;
-    }
-    // Also check phase_contents for dynamic phases
-    const phaseContents = proyecto.phase_contents ?? {};
-    if (!contenido && phaseContents[String(f)]) {
-      contenido = phaseContents[String(f)];
-    }
-    if (contenido) {
-      if (contenido.length > MAX_CHARS_POR_FASE) {
-        contenido = contenido.slice(0, MAX_CHARS_POR_FASE) + "\n[... contenido truncado ...]";
-      }
-      const label = phaseDefs?.find(p => p.orden === f)?.label ?? FASE_ETIQUETA[f] ?? `Fase ${f}`;
-      fasesAnteriores.push(`=== ${label} ===\n${contenido}\n=== FIN ===`);
-    }
-  }
-
-  const bloqueContexto = fasesAnteriores.length > 0
-    ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
-    : "";
-
-  const phaseKey = String(fase_numero);
-  const borradorKey = `${phaseKey}_borrador`;
-  const phaseContents = proyecto.phase_contents ?? {};
-  const borradorPrev = phaseContents[borradorKey] ?? (FASE_A_COLUMNA[fase_numero] ? proyecto[FASE_A_COLUMNA[fase_numero]] as string | null : null);
-
-  let phasePromptBase: string;
-  if (esOnboarding) {
-    phasePromptBase = loadOnboardingPrompt();
-  } else {
-    phasePromptBase = loadPhasePromptFromDisk(fase_numero, tipo);
-  }
-
-  const systemPrompt = esOnboarding
-    ? phasePromptBase
-    : buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
-
-  const userPromptParts: (string | null)[] = [
-    `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
-    proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
-    bloqueContexto,
-  ];
-
-  if (tipo === "final" && esGuiado && !esOnboarding) {
-    if (borradorPrev) {
-      userPromptParts.push(`\n--- BORRADOR PREVIO ---\n${borradorPrev}\n--- FIN BORRADOR ---`);
-    }
-    if (feedback_usuario?.trim()) {
-      userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
-    }
-    userPromptParts.push(`\nGenera la VERSIÓN FINAL de ${legacyPhaseLabel} incorporando el feedback.`);
-  } else {
-    if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
-    userPromptParts.push(`\nGenera el contenido de ${legacyPhaseLabel}.`);
-  }
-
-  const userPrompt = userPromptParts.filter(Boolean).join("\n");
-  const maxTokens = fase_numero <= 1 ? 6000 : fase_numero <= 3 ? 4500 : 3000;
-
-  let textoGenerado: string;
-  let proveedor: string;
-  try {
-    const resultado = await llamarIA(systemPrompt, userPrompt, maxTokens, proyecto.servicio_id);
-    textoGenerado = resultado.text;
-    proveedor = `${resultado.provider} / ${resultado.model}`;
-  } catch (e) {
-    return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
-  }
-
-  let requiereActualizacion = proyecto.requiere_actualizacion ?? {};
-  let updates: Partial<typeof proyecto> = {};
-
-  if (tipo === "borrador" && esGuiado) {
-    updates.phase_contents = { ...phaseContents, [borradorKey]: textoGenerado };
-  } else {
-    const nuevaFase = Math.max(proyecto.estado_fase, fase_numero);
-    const colKey = FASE_A_COLUMNA[fase_numero];
-    if (colKey) {
-      (updates as Record<string, unknown>)[colKey] = textoGenerado;
-    }
-    updates = {
-      ...updates,
-      estado_fase: nuevaFase,
-      phase_contents: { ...phaseContents, [phaseKey]: textoGenerado },
-    };
-
-    // Invalidate subsequent phases (check both legacy and dynamic)
-    const allPhaseKeys: string[] = [];
-    // Add legacy phases (0-5)
-    for (let f = fase_numero + 1; f <= 5; f++) {
-      allPhaseKeys.push(String(f));
-    }
-    // Add dynamic phases beyond legacy (by orden)
-    if (phaseDefs) {
-      for (const pd of phaseDefs) {
-        if (pd.orden > fase_numero && pd.orden > 5) {
-          allPhaseKeys.push(pd.id);
-        }
-      }
-    }
-    for (const k of allPhaseKeys) {
-      const hasContent = !!phaseContents[k] || !!(phaseContents[`${k}_borrador`]);
-      if (hasContent) {
-        requiereActualizacion = { ...requiereActualizacion, [k]: true };
-      }
-    }
-    delete requiereActualizacion[phaseKey];
-    updates.requiere_actualizacion = requiereActualizacion;
-  }
-
-  updateProyecto(proyecto_id, updates);
-
-  return NextResponse.json({
-    ok: true, fase: fase_numero, tipo,
-    fase_etiqueta: legacyPhaseLabel,
-    proveedor, duracion_ms: Date.now() - t0,
-    contenido: textoGenerado,
-    requiere_actualizacion: requiereActualizacion,
-  });
-}
 
   const hilos = loadHilosFromDisk();
   const perfilEstilo = proyecto.perfil_estilo_usuario;
@@ -714,7 +496,7 @@ async function generarConSupabase({
     const col = FASE_A_COLUMNA[f];
     let contenido: string | null = null;
     if (col) {
-      contenido = proyecto[col] as string | null;
+      contenido = (proyecto as Record<string, any>)[col] as string | null;
     }
     // Also check phase_contents for dynamic phases
     const pc = (proyecto as unknown as { phase_contents?: Record<string, string> }).phase_contents;
@@ -786,7 +568,7 @@ async function generarConSupabase({
       (updatePayload as Record<string, unknown>)[colKey] = textoGenerado;
     }
     // Always store in phase_contents for dynamic support
-    updatePayload.phase_contents = {
+    (updatePayload as Record<string, any>).phase_contents = {
       ...(((proyecto as unknown as { phase_contents?: Record<string, unknown> }).phase_contents) ?? {}),
       [phaseKey]: textoGenerado,
     };
