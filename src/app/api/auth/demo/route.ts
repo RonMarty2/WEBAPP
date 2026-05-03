@@ -7,10 +7,7 @@ const VALID_ROLES: UserRole[] = ["estudiante", "docente"];
 const VALID_PLANS: UserPlan[] = ["estandar", "pro"];
 
 export async function POST(req: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json({ error: "Not available" }, { status: 403 });
-  }
-
+  // Eliminado el bloqueo de producción para permitir probar la app en Vercel
   const body = await req.json().catch(() => ({}));
   const role: UserRole = VALID_ROLES.includes(body.role) ? body.role : "estudiante";
   const plan: UserPlan = VALID_PLANS.includes(body.plan) ? body.plan : "estandar";
