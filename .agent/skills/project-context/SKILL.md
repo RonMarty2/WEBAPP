@@ -25,9 +25,12 @@ SaaS boliviano para generación de monografías académicas con IA.
 ## Arquitectura de Rutas
 
 ```
-/                    → Landing page (pública)
+/                    → Scribe (Lógica y Proyectos - Dashboard Original)
 /login               → Auth Google OAuth + modo demo
-/dashboard           → Panel del estudiante (protegida)
+/nucleo              → NŪCLEO (Hub Padre y Ecosistema)
+/axiom               → AXIOM (Simulador de Exámenes)
+/lumen               → LUMEN (Generador Docente)
+/mentor              → MENTOR (Tutoría y Feedback)
 /monografia          → Flujo de 4 etapas de generación (protegida)
 /projects/[id]/...   → Workspace de proyecto (protegida)
 /laboratorio         → Vista lab (protegida)
@@ -35,6 +38,7 @@ SaaS boliviano para generación de monografías académicas con IA.
 /pendiente           → Pantalla de cuenta pendiente de activación
 /admin               → Dashboard admin (requiere adminAuthed en localStorage + cookie JWT)
 /admin/login         → Login del panel admin (contraseña única, NO Google OAuth)
+/admin/ui-config     → Centro de Comando UI (Control Modular de la IA con Live Preview)
 /admin/usuarios      → CRUD usuarios
 /admin/proyectos     → CRUD proyectos y prompts
 /admin/universidades → CRUD universidades
@@ -115,6 +119,9 @@ AUTH_SECRET=...             ← secret para JWT de sesiones de estudiantes
 | `<Script strategy="beforeInteractive">` para tema | React 19 no permite `<script>` raw con dangerouslySetInnerHTML en árbol JSX | May 2026 |
 | Físicas Orbitales en Canvas 3D | Uso de Craig Reynolds Steering Behavior en vez de resortes evita latigazos visuales al mover el mouse rápido. | May 2026 |
 | Corrección Perceptual de Color | Bajar saturación/luz programáticamente en colores verde/amarillo (40-160 hue) evita looks "radiactivos" en el canvas. | May 2026 |
+| Ecosistema Fractal y Control Modular | Los dashboards se separan (Scribe, Axiom, Lumen, Mentor) pero el diseño (ADN) se controla desde el Panel Admin (`ui-config`). | May 2026 |
+| Liquid Morphing Engine (ParticleSphere) | Transición interpolada de coordenadas (tnx, tny, tnz) en vez de destrucción de partículas, logra fluidez de metal líquido. | May 2026 |
+| Ciclo Vital de NŪCLEO | El Hub Padre (`/nucleo`) itera inyectando configuraciones de sus hijos cada 8s para demostrar jerarquía visual. | May 2026 |
 
 ---
 
@@ -131,9 +138,7 @@ AUTH_SECRET=...             ← secret para JWT de sesiones de estudiantes
 ## Estado Actual del Desarrollo (May 2026)
 
 ### ✅ Completado y funcionando
-- Landing page con planes de precios y esfera de partículas
 - Login (Google OAuth + modo demo)
-- Dashboard del estudiante con proyectos
 - Flujo completo de 4 etapas de generación con IA
 - Export a LaTeX
 - Panel de administración completo (KPIs, usuarios, prompts, modelos, logs, universidades)
@@ -141,6 +146,9 @@ AUTH_SECRET=...             ← secret para JWT de sesiones de estudiantes
 - RAG para documentos del usuario
 - Dark/Light mode con anti-flash script
 - Auth admin con JWT + localStorage
+- **Ecosistema Fractal:** Dashboards independientes para Nūcleo, Scribe, Axiom, Lumen, Mentor.
+- **Centro de Comando Modular:** Panel Admin UI con Live Preview, Draft State y guardado segmentado por módulo.
+- **Motor Cuántico 3D:** Esfera Antigravity con morphing líquido continuo, previsualización en vivo y Ciclo Vital del NŪCLEO.
 
 ### 🔄 Próximo sprint
 - **PRIORIDAD 1:** Conectar Supabase real (credenciales + schema + RLS)
