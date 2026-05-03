@@ -528,24 +528,23 @@ export default function WorkspacePage() {
     <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"transparent", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>
 
       {/* HEADER */}
-      <header style={{ display:"flex", alignItems:"center", gap:12, padding:"0 20px", height:52, flexShrink:0, borderBottom:"1px solid var(--border)", position:"relative", zIndex:40 }}>
-        <div style={{ position:"absolute", inset:0, background:"var(--bg-card)", zIndex:-1 }} />
+      <header className="flex items-center flex-wrap gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-0 md:h-[52px] shrink-0 border-b border-[var(--border)] relative z-40 bg-[var(--bg-card)]">
         <a href="/dashboard" style={{ color:"var(--fg-muted)", textDecoration:"none", fontSize:18, lineHeight:1 }}>←</a>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:700, color:"var(--fg-primary)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
             {proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título"}
           </div>
-          <div style={{ fontSize:11, color:"var(--fg-secondary)", display:"flex", alignItems:"center", gap:6 }}>
+          <div style={{ fontSize:11, color:"var(--fg-secondary)", display:"flex", alignItems:"center", gap:6, flexWrap: "wrap" }}>
             <span>{proyecto.servicios?.nombre ?? "Monografía"}</span>
-            <span>·</span>
-            <span>{fasesCompletadas}/{displayFases.length} fases</span>
+            <span className="hidden sm:inline">·</span>
+            <span className="hidden sm:inline">{fasesCompletadas}/{displayFases.length} fases</span>
             {esGuiado && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(167,139,250,0.12)", border:"1px solid rgba(167,139,250,0.25)", color:"#a78bfa", fontSize:10, fontWeight:600 }}>GUIADO</span>}
             {esGuiado && proyecto.perfil_estilo_usuario && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(34,197,94,0.08)", border:"1px solid rgba(34,197,94,0.2)", color:"#4ade80", fontSize:10 }}>✓ Estilo calibrado</span>}
           </div>
         </div>
 
         {/* Phase dots */}
-        <div style={{ display:"flex", gap:4, alignItems:"center" }}>
+        <div className="flex gap-1 md:gap-1.5 items-center overflow-x-auto no-scrollbar w-full md:w-auto order-last md:order-none py-1 md:py-0 border-t border-[var(--bg-subtle)] md:border-t-0 mt-1 md:mt-0">
           {displayFases.map((f, idx) => {
             const fId = f.id;
             const done = Boolean(getFinalContent(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
@@ -554,6 +553,7 @@ export default function WorkspacePage() {
             const sel = idx === selectedFase;
             return (
               <button key={f.id} onClick={() => setSelectedFase(idx)} title={f.label + (needsUpd ? " — ⚠️ Desactualizado" : "")}
+                className="shrink-0"
                 style={{
                   width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
                   border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
@@ -568,27 +568,28 @@ export default function WorkspacePage() {
         </div>
 
         {/* Actions */}
-        <button onClick={() => setShowPdfPanel(v => !v)} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", gap:4, display:"flex", alignItems:"center" }}>
-          {showPdfPanel ? "✕ PDF" : "📄 PDF"}
-        </button>
-        {fasesCompletadas > 0 && (
-          <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
-            {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowPdfPanel(v => !v)} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", gap:4, display:"flex", alignItems:"center" }}>
+            {showPdfPanel ? "✕ PDF" : "📄 PDF"}
           </button>
-        )}
-        {user?.role === "admin" && (
-          <a href="/admin" style={{ textDecoration:"none" }}>
-            <button className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>⚡ Admin</button>
-          </a>
-        )}
+          {fasesCompletadas > 0 && (
+            <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
+              {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
+            </button>
+          )}
+          {user?.role === "admin" && (
+            <a href="/admin" style={{ textDecoration:"none" }}>
+              <button className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>⚡ Admin</button>
+            </a>
+          )}
+        </div>
       </header>
 
       {/* 3-COLUMN BODY */}
-      <div style={{ flex:1, display:"flex", overflow:"hidden" }}>
+      <div className="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden relative w-full">
 
-        {/* ── COL 1: CHAT & GENERATION (fixed 360px) ── */}
-        <div style={{ width:360, flexShrink:0, display:"flex", flexDirection:"column", borderRight:"1px solid var(--border)", boxShadow:"var(--shadow-sm)", position:"relative", zIndex:40 }}>
-          <div style={{ position:"absolute", inset:0, background:"var(--bg-card)", zIndex:-1 }} />
+        {/* ── COL 1: CHAT & GENERATION (fixed 360px on desktop) ── */}
+        <div className="w-full xl:w-[360px] shrink-0 flex flex-col border-b xl:border-b-0 xl:border-r border-[var(--border)] shadow-sm relative z-40 bg-[var(--bg-card)] min-h-[500px] xl:min-h-0">
           
           {/* Phase label */}
           <div style={{ padding:"12px 16px", borderBottom:"1px solid var(--bg-subtle)" }}>
@@ -734,9 +735,9 @@ export default function WorkspacePage() {
         </div>
 
         {/* ── COL 2: CONTENT VIEWER (flex) ── */}
-        <div style={{ flex:1, overflowY:"auto", background:"transparent", padding: "32px", position:"relative", zIndex:10 }}>
+        <div className="flex-1 overflow-y-auto bg-transparent p-4 md:p-8 relative z-10 min-h-[600px] xl:min-h-0">
           {displayContent ? (
-            <div className="fade-in" style={{ maxWidth:880, margin:"0 auto", padding:"32px 40px 60px", borderRadius: 16, background:"var(--bg-card)", border:"1px solid var(--border)", boxShadow:"var(--shadow-md)", position:"relative", overflow:"hidden" }}>
+            <div className="fade-in max-w-[880px] mx-auto p-5 md:p-8 lg:p-10 pb-12 lg:pb-16 rounded-[16px] bg-[var(--bg-card)] border border-[var(--border)] shadow-[var(--shadow-md)] relative overflow-hidden">
               {/* Inner wrapper */}
               <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid var(--bg-subtle)" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
@@ -832,10 +833,9 @@ export default function WorkspacePage() {
           )}
         </div>
 
-        {/* ── COL 3: PDF PREVIEW (fixed 340px, toggleable) ── */}
+        {/* ── COL 3: PDF PREVIEW (fixed 340px on desktop, toggleable) ── */}
         {showPdfPanel && (
-          <div style={{ width:340, flexShrink:0, display:"flex", flexDirection:"column", borderLeft:"1px solid var(--border)", boxShadow:"var(--shadow-sm)", position:"relative", zIndex:40 }}>
-            <div style={{ position:"absolute", inset:0, background:"var(--bg-card)", zIndex:-1 }} />
+          <div className="w-full xl:w-[340px] shrink-0 flex flex-col border-t xl:border-t-0 xl:border-l border-[var(--border)] shadow-sm relative z-40 bg-[var(--bg-card)] min-h-[500px] xl:min-h-0">
             {/* Panel header */}
             <div style={{ padding:"10px 16px", borderBottom:"1px solid var(--bg-subtle)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
               <div>
