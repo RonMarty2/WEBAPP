@@ -116,10 +116,10 @@ export default function AdminDashboard() {
   }, []);
 
   const STATS = [
-    { label: "Monografías creadas", value: monoCounts.total,      icon: <IconDoc />,    accent: "text-sky-500 dark:text-sky-400",     ring: "bg-sky-50 dark:bg-sky-950/40" },
-    { label: "Con Capítulo I",      value: monoCounts.cap1,       icon: <IconPencil />, accent: "text-violet-500 dark:text-violet-400", ring: "bg-violet-50 dark:bg-violet-950/40" },
-    { label: "Con Capítulo II",     value: monoCounts.cap2,       icon: <IconBook />,   accent: "text-amber-500 dark:text-amber-400",  ring: "bg-amber-50 dark:bg-amber-950/40" },
-    { label: "Completadas",         value: monoCounts.completadas, icon: <IconCheck />,  accent: "text-emerald-500 dark:text-emerald-400", ring: "bg-emerald-50 dark:bg-emerald-950/40" },
+    { label: "Monografías creadas", value: monoCounts.total,       icon: <IconDoc />,    accent: "text-sky-600",         ring: "bg-sky-50" },
+    { label: "Con Capítulo I",      value: monoCounts.cap1,        icon: <IconPencil />, accent: "text-violet-600",   ring: "bg-violet-50" },
+    { label: "Con Capítulo II",     value: monoCounts.cap2,        icon: <IconBook />,   accent: "text-amber-600",     ring: "bg-amber-50" },
+    { label: "Completadas",         value: monoCounts.completadas, icon: <IconCheck />,  accent: "text-emerald-600", ring: "bg-emerald-50" },
   ];
 
   const usoTotal = stats?.prompts?.reduce((a, p) => a + p.uso_total, 0) ?? 0;
@@ -132,118 +132,135 @@ export default function AdminDashboard() {
   ];
 
   const SYSTEM_STATUS = [
-    { label: "Almacenamiento", estado: "In-memory (sesión)",                      dot: "bg-amber-400",  nota: "Conecta Supabase para persistencia" },
-    { label: "IA Provider",    estado: "Groq → Anthropic → OpenAI (fallback)",    dot: "bg-emerald-400", nota: "Configurado" },
-    { label: "LaTeX compiler", estado: "Generación .tex disponible",              dot: "bg-emerald-400", nota: "Compilación vía Overleaf" },
-    { label: "Pagos",          estado: "Pendiente de integración",                dot: "bg-gray-400",    nota: "QR manual / Stripe próximamente" },
+    { label: "Almacenamiento", estado: "In-memory (sesión)",                      dot: "bg-amber-500",  nota: "Conecta Supabase para persistencia" },
+    { label: "IA Provider",    estado: "Groq → Anthropic → OpenAI (fallback)",    dot: "bg-emerald-500", nota: "Configurado" },
+    { label: "LaTeX compiler", estado: "Generación .tex disponible",              dot: "bg-emerald-500", nota: "Compilación vía Overleaf" },
+    { label: "Pagos",          estado: "Pendiente de integración",                dot: "bg-slate-400",    nota: "QR manual / Stripe próximamente" },
   ];
 
   const AI_LABELS: Record<number, string> = { 0: "Tema", 1: "Cap. I", 2: "Cap. II", 3: "Caps. III-V" };
   const AI_COLORS = [
-    "text-sky-500 dark:text-sky-400",
-    "text-violet-500 dark:text-violet-400",
-    "text-amber-500 dark:text-amber-400",
-    "text-orange-500 dark:text-orange-400",
+    "text-sky-600",
+    "text-violet-600",
+    "text-amber-600",
+    "text-orange-600",
   ];
 
   return (
-    <div className="fade-in">
+    <div className="fade-in max-w-[1400px] mx-auto">
 
       {/* ── Page header ─────────────────────────────── */}
       <div className="mb-8">
-        <h1 className="text-[26px] font-bold tracking-tight text-gray-900 dark:text-white mb-1.5">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 mb-2">
           Dashboard
         </h1>
-        <p className="text-[14px] text-gray-400 dark:text-slate-500">
+        <p className="text-sm text-slate-500 font-medium">
           Panel de control del Laboratorio Académico. Datos en tiempo real de la sesión actual.
         </p>
       </div>
 
-      {/* ── KPI cards ───────────────────────────────── */}
-      <div className="grid gap-6 mb-10" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+      {/* ── KPI cards (4 Columns) ───────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         {STATS.map(stat => (
           <div key={stat.label}
-            className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex flex-col items-center text-center"
+            className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 flex flex-col justify-between"
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${stat.ring} ${stat.accent}`}>
-              {stat.icon}
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-slate-500">
+                {stat.label}
+              </div>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${stat.ring} ${stat.accent}`}>
+                {stat.icon}
+              </div>
             </div>
-            <div className={`text-[34px] font-bold leading-none mb-1 ${stat.accent}`}>{stat.value}</div>
-            <div className="text-[12px] text-gray-400 dark:text-slate-500 mt-1">{stat.label}</div>
+            <div className="text-4xl font-bold text-slate-800 tracking-tight">
+              {stat.value}
+            </div>
           </div>
         ))}
       </div>
 
       {/* ── IA usage ────────────────────────────────── */}
       {stats && (
-        <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] mb-10">
-          <div className="text-[11px] font-700 text-gray-400 dark:text-slate-500 uppercase tracking-[0.07em] mb-4 font-semibold">
+        <div className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-2xl p-6 mb-10">
+          <div className="text-sm font-semibold tracking-wide uppercase text-slate-500 mb-6">
             Llamadas a IA esta sesión
           </div>
-          <div className="grid gap-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(110px, 1fr))" }}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.prompts.map(p => (
-              <div key={p.etapa}
-                className="text-center p-3 bg-gray-50 dark:bg-slate-800/60 rounded-xl border border-gray-100 dark:border-slate-700/50"
-              >
-                <div className={`text-[22px] font-bold ${AI_COLORS[p.etapa] ?? "text-gray-400"}`}>{p.uso_total}</div>
-                <div className="text-[11px] text-gray-400 dark:text-slate-500 mt-1">{AI_LABELS[p.etapa]}</div>
+              <div key={p.etapa} className="flex flex-col border-l-2 border-slate-200 pl-4">
+                <div className="text-xs font-semibold tracking-wider uppercase text-slate-400 mb-1">
+                  {AI_LABELS[p.etapa]}
+                </div>
+                <div className={`text-3xl font-bold ${AI_COLORS[p.etapa] ?? "text-slate-800"}`}>
+                  {p.uso_total}
+                </div>
                 {p.tiempo_promedio_seg > 0 && (
-                  <div className="text-[10px] text-gray-300 dark:text-slate-600 mt-1">{p.tiempo_promedio_seg}s avg</div>
+                  <div className="text-xs text-slate-400 mt-1">
+                    {p.tiempo_promedio_seg}s avg
+                  </div>
                 )}
               </div>
             ))}
           </div>
-          <div className="mt-3 text-[12px] text-gray-400 dark:text-slate-500 text-right">
-            Total llamadas: <strong className="text-gray-700 dark:text-slate-300">{usoTotal}</strong>
+          <div className="mt-6 pt-4 border-t border-slate-200/50 flex justify-end items-center text-sm">
+            <span className="text-slate-500 mr-2 font-medium">Total llamadas:</span>
+            <strong className="text-slate-800 text-lg font-bold">{usoTotal}</strong>
           </div>
         </div>
       )}
 
       {/* ── Quick actions ────────────────────────────── */}
-      <h2 className="text-[17px] font-semibold text-gray-900 dark:text-white tracking-tight mb-4">
-        Acciones Rápidas
-      </h2>
-      <div className="grid gap-6 mb-10" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
-        {QUICK_ACTIONS.map(action => (
-          <a key={action.href} href={action.href}
-            className="group bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6
-                       no-underline block hover:shadow-[0_16px_40px_rgba(99,102,241,0.15)] hover:-translate-y-1 hover:border-indigo-500/30 transition-all duration-300"
-          >
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4
-                            bg-white/60 dark:bg-slate-800 text-gray-600 dark:text-slate-300 shadow-[inset_0_2px_10px_rgba(255,255,255,0.6)]
-                            group-hover:bg-indigo-500 group-hover:text-white dark:group-hover:bg-indigo-500 dark:group-hover:text-white
-                            group-hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]
-                            transition-all duration-300">
-              {action.icon}
-            </div>
-            <h3 className="text-[14px] font-semibold text-gray-900 dark:text-white mb-1.5">{action.title}</h3>
-            <p className="text-[12px] text-gray-400 dark:text-slate-500 leading-relaxed mb-3">{action.desc}</p>
-            <div className="text-[12px] font-medium text-gray-400 dark:text-slate-500
-                            group-hover:text-black dark:group-hover:text-white transition-colors duration-200">
-              Ir al panel →
-            </div>
-          </a>
-        ))}
+      <div className="mb-10">
+        <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-5">
+          Acciones Rápidas
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {QUICK_ACTIONS.map(action => (
+            <a key={action.href} href={action.href}
+              className="group bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl p-6 shadow-sm no-underline flex flex-col hover:border-indigo-500/50 hover:shadow-md transition-all duration-300 overflow-hidden relative"
+            >
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-slate-100 text-slate-600 group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                {action.icon}
+              </div>
+              <h3 className="text-base font-semibold text-slate-800 mb-2">
+                {action.title}
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed mb-5 flex-1">
+                {action.desc}
+              </p>
+              <div className="text-sm font-semibold text-indigo-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform duration-300">
+                Ir al panel
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
 
       {/* ── System status ────────────────────────────── */}
-      <div className="bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl border border-white/50 dark:border-white/10 rounded-3xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
-        <div className="text-[11px] font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-[0.07em] mb-4">
+      <div className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-2xl p-6">
+        <div className="text-sm font-semibold tracking-wide uppercase text-slate-500 mb-4">
           Estado del sistema
         </div>
-        <div className="flex flex-col divide-y divide-gray-100 dark:divide-slate-800">
+        <div className="flex flex-col divide-y divide-slate-200/50">
           {SYSTEM_STATUS.map(item => (
-            <div key={item.label} className="flex items-center gap-3 py-3">
-              <div className={`w-2 h-2 rounded-full shrink-0 ${item.dot}`} />
-              <div className="flex-1 min-w-0">
-                <span className="text-[13px] text-gray-700 dark:text-slate-300 font-medium">{item.label}</span>
-                <span className="text-[12px] text-gray-400 dark:text-slate-500 ml-2">{item.estado}</span>
+            <div key={item.label} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-4">
+              <div className="flex items-center gap-3 w-full sm:w-1/3 shrink-0">
+                <div className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-sm ${item.dot}`} />
+                <span className="text-sm font-semibold text-slate-800">{item.label}</span>
               </div>
-              <span className="text-[11px] text-gray-300 dark:text-slate-600 shrink-0">{item.nota}</span>
+              <div className="flex-1 text-sm text-slate-600 font-medium pl-5 sm:pl-0">
+                {item.estado}
+              </div>
+              <div className="text-xs text-slate-400 pl-5 sm:pl-0 sm:text-right w-full sm:w-1/3 shrink-0">
+                {item.nota}
+              </div>
             </div>
           ))}
         </div>
       </div>
+
     </div>
   );
 }

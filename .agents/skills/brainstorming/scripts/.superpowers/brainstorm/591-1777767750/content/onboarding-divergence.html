@@ -1,0 +1,58 @@
+<h2>Mejorando las 2 Rutas (Autónoma vs. Guiada)</h2>
+<p class="subtitle">Ya tenemos definido que tras elegir la Universidad, el usuario elige si tiene título o necesita ayuda. Aquí propongo mejoras para fortalecer ambas rutas.</p>
+
+<div class="split">
+  <!-- RUTA 1: AUTÓNOMA -->
+  <div class="mockup" style="flex: 1;">
+    <div class="mockup-header" style="background: #1e293b; color: white;">Ruta 1: "Ya tengo mi título"</div>
+    <div class="mockup-body" style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0;">
+      <h3 style="color: #0f172a; margin-top:0">El flujo actual:</h3>
+      <p style="font-size: 14px; color: #475569">Ingresan el título y empieza la Etapa 1.</p>
+      
+      <h3 style="color: #4f46e5; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px">Mejora Propuesta (Anti-Errores):</h3>
+      <p style="font-size: 14px; color: #475569">Antes de gastar tokens generando todo, agregar una <strong>Validación de Viabilidad (Check Rápido)</strong>.</p>
+      <ul style="font-size: 13px; color: #475569; padding-left: 20px;">
+        <li>¿Es un título demasiado amplio? (Ej. "La inteligencia artificial")</li>
+        <li>¿Tiene variable dependiente e independiente?</li>
+      </ul>
+      <div style="background: #fef2f2; border-left: 3px solid #ef4444; padding: 8px; font-size: 12px; margin-top: 10px;">
+        <strong>Feedback IA:</strong> "Tu título es bueno, pero le falta delimitar el año y el lugar. Te sugiero: <em>[Título Mejorado]</em>"
+      </div>
+    </div>
+  </div>
+
+  <!-- RUTA 2: GUIADA -->
+  <div class="mockup" style="flex: 1;">
+    <div class="mockup-header" style="background: #4f46e5; color: white;">Ruta 2: "Necesito ser guiado"</div>
+    <div class="mockup-body" style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0;">
+      <h3 style="color: #0f172a; margin-top:0">El flujo actual:</h3>
+      <p style="font-size: 14px; color: #475569">Les hacemos preguntas para llegar a un título.</p>
+      
+      <h3 style="color: #4f46e5; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top: 10px">Mejora Propuesta (Inspiración):</h3>
+      <p style="font-size: 14px; color: #475569">En lugar de solo un chat en blanco, ofrecerles un <strong>"Menú de Problemas"</strong> de su carrera para arrancar.</p>
+      <div style="display:flex; gap: 5px; flex-direction: column; margin-top: 10px;">
+        <button class="mock-button" style="background: white; color: #334155; border: 1px solid #cbd5e1; font-size: 12px; text-align: left;">🔍 Explorar problemas sociales recientes</button>
+        <button class="mock-button" style="background: white; color: #334155; border: 1px solid #cbd5e1; font-size: 12px; text-align: left;">📈 Ver temas más investigados este año</button>
+        <button class="mock-button" style="background: white; color: #334155; border: 1px solid #cbd5e1; font-size: 12px; text-align: left;">💡 Escribir una idea vaga ("Me gusta la robótica")</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top: 30px;">¿Qué opinas sobre estas dos mejoras para robustecer las rutas?</h3>
+<div class="options" data-multiselect>
+  <div class="option" data-choice="validate" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>Validación de Viabilidad (Ruta 1)</h3>
+      <p>Me gusta la idea de que la IA corrija/mejore el título antes de avanzar a la Etapa 1.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="menu" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>Menú de Problemas (Ruta 2)</h3>
+      <p>Me parece bien darle botones rápidos de inspiración para que no se tranque pensando.</p>
+    </div>
+  </div>
+</div>

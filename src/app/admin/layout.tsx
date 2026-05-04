@@ -222,23 +222,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="admin-layout flex flex-col md:flex-row min-h-screen bg-transparent relative z-10 p-0 md:p-6 lg:p-8 gap-0 md:gap-6 lg:gap-8">
       
       {/* ── Barra Superior Móvil ────────────────────────────────────────── */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 sticky top-0 z-30">
+      <div className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30">
         <div className="flex items-center gap-3">
            <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)] shrink-0">
              <IconBolt />
            </span>
            <div className="flex flex-col">
-             <span className="font-bold text-[14px] text-gray-900 dark:text-white leading-tight tracking-tight">
+             <span className="font-bold text-[14px] text-gray-900 leading-tight tracking-tight">
                Lab. Académico
              </span>
-             <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tracking-[0.15em] uppercase">
+             <span className="text-[10px] font-bold text-indigo-500 tracking-[0.15em] uppercase">
                Admin Pro
              </span>
            </div>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(true)} 
-          className="p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
            <IconMenu />
         </button>
@@ -247,7 +247,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* ── Overlay Fondo Móvil ─────────────────────────────────────────── */}
       {isMobileMenuOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          className="md:hidden fixed inset-0 bg-black/30 z-40 backdrop-blur-sm transition-opacity"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -255,9 +255,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* ── Sidebar Dinámica ────────────────────────────────────────────── */}
       <aside className={`
         fixed md:relative top-0 left-0 h-full md:h-[calc(100vh-64px)] w-[280px] md:w-[260px] 
-        bg-white/95 dark:bg-slate-900/95 md:bg-white/40 md:dark:bg-slate-900/40 backdrop-blur-xl 
-        border-r md:border border-gray-200 dark:border-white/10 md:border-white/60 md:dark:border-white/10 
-        md:rounded-[32px] shadow-[8px_0_32px_rgba(0,0,0,0.1)] md:shadow-[0_8px_32px_rgba(0,0,0,0.04)] z-50 flex flex-col shrink-0
+        bg-white/95 md:bg-white/60 backdrop-blur-xl 
+        border-r md:border border-gray-200 md:border-white/60 
+        md:rounded-[32px] shadow-[8px_0_32px_rgba(0,0,0,0.1)] md:shadow-sm z-50 flex flex-col shrink-0
         transition-transform duration-300 ease-out
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         md:sticky md:top-8
@@ -266,7 +266,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Botón Cerrar (Móvil) */}
         <button 
           onClick={() => setIsMobileMenuOpen(false)} 
-          className="md:hidden absolute top-4 right-4 p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          className="md:hidden absolute top-4 right-4 p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <IconX />
         </button>
@@ -278,10 +278,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <IconBolt />
           </span>
           <div className="flex flex-col">
-            <span className="font-bold text-[14px] text-gray-900 dark:text-white leading-tight tracking-tight">
+            <span className="font-bold text-[14px] text-gray-900 leading-tight tracking-tight">
               Lab. Académico
             </span>
-            <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tracking-[0.15em] uppercase">
+            <span className="text-[10px] font-bold text-indigo-500 tracking-[0.15em] uppercase">
               Admin Pro
             </span>
           </div>
@@ -293,9 +293,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <select
               value={activeModule}
               onChange={handleModuleChange}
-              className="w-full appearance-none bg-white/50 dark:bg-slate-800/50 
-                         border border-gray-200/50 dark:border-white/10 
-                         text-gray-700 dark:text-slate-300 text-xs font-semibold 
+              className="w-full appearance-none bg-white/50 
+                         border border-gray-200/50 
+                         text-gray-700 text-xs font-semibold 
                          rounded-xl px-4 py-2.5 pr-8 focus:outline-none 
                          focus:ring-2 focus:ring-indigo-500/50 cursor-pointer
                          transition-all"
@@ -306,7 +306,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <option value="LUMEN">📚 LUMEN (Docencia)</option>
               <option value="MENTOR">🤝 MENTOR (Tutores)</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-gray-500 dark:text-slate-400">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-gray-500">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -315,7 +315,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Divider */}
-        <div className="mx-6 mb-4 h-px bg-gray-200/50 dark:bg-slate-700/50" />
+        <div className="mx-6 mb-4 h-px bg-gray-200/50" />
 
         {/* Nav Links - Scrollable Area */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 no-scrollbar">
@@ -323,7 +323,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {/* Módulo Específico */}
           {currentModuleNav.length > 0 && (
             <div className="mb-6">
-              <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
+              <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                 Opciones {activeModule}
               </div>
               <nav className="flex flex-col gap-1">
@@ -335,8 +335,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       href={href}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 no-underline
                         ${isActive
-                          ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
-                          : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
+                          ? "bg-indigo-500 text-white shadow-md"
+                          : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
                         }`}
                     >
                       <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
@@ -352,7 +352,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {/* Opciones Globales */}
           <div>
-            <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
+            <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               Configuraciones Globales
             </div>
             <nav className="flex flex-col gap-1">
@@ -364,8 +364,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     href={href}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 no-underline
                       ${isActive
-                        ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
-                        : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
+                        ? "bg-indigo-500 text-white shadow-md"
+                        : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
                       }`}
                   >
                     <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
@@ -381,12 +381,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Footer */}
-        <div className="p-4 flex flex-col gap-2 border-t border-gray-200/50 dark:border-slate-700/50 shrink-0 bg-white/20 dark:bg-slate-900/20">
+        <div className="p-4 flex flex-col gap-2 border-t border-gray-200/50 shrink-0 bg-white/20">
           <a
             href="/dashboard"
             className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold
-                       text-gray-600 dark:text-slate-300
-                       hover:bg-white/60 dark:hover:bg-slate-800/60 hover:text-gray-900 dark:hover:text-white
+                       text-gray-600 
+                       hover:bg-white/60 hover:text-gray-900 
                        transition-all duration-300 no-underline"
           >
             <IconUser /> Vista estudiante
@@ -394,8 +394,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold
-                       text-red-500 dark:text-red-400
-                       hover:bg-red-50 dark:hover:bg-red-950/30 hover:text-red-600 dark:hover:text-red-300
+                       text-red-500 
+                       hover:bg-red-50 hover:text-red-600 
                        transition-all duration-300 cursor-pointer text-left w-full border-0 bg-transparent"
           >
             <IconLogOut /> Salir del panel
