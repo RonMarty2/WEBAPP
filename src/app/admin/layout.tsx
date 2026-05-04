@@ -67,7 +67,7 @@ function IconLayers() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-      <polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+      <polyline points="2 17 12 22 22 17"/><polyline points="2 12 17 22 12"/>
     </svg>
   );
 }
@@ -110,31 +110,67 @@ function IconBolt() {
     </svg>
   );
 }
+function IconMenu() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  );
+}
+function IconX() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  );
+}
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  { href: "/admin",               label: "Dashboard",          Icon: IconDashboard },
+const GLOBAL_NAV = [
+  { href: "/admin",               label: "Dashboard General",  Icon: IconDashboard },
   { href: "/admin/usuarios",      label: "Usuarios",           Icon: IconUsers     },
-  { href: "/admin/proyectos",     label: "Proyectos de Alumnos", Icon: IconFolder    },
-  { href: "/admin/universidades", label: "Universidades",      Icon: IconBuilding  },
   { href: "/admin/estadisticas",  label: "Estadísticas",       Icon: IconBarChart  },
   { href: "/admin/logs",          label: "Logs",               Icon: IconScroll    },
   { href: "/admin/modelos",       label: "Modelos & APIs",     Icon: IconCpu       },
-  { href: "/admin/project-types", label: "Tipos de Proyecto",  Icon: IconLayers    },
-  { href: "/admin/fases",         label: "Fases del Proyecto", Icon: IconList      },
-  { href: "/admin/prompts",       label: "Prompts Maestros",   Icon: IconEdit      },
   { href: "/admin/ui-config",     label: "Apariencia UI",      Icon: IconLayers    },
 ];
 
+const MODULE_NAV: Record<string, Array<{href: string, label: string, Icon: any}>> = {
+  SCRIBE: [
+    { href: "/admin/proyectos",     label: "Proyectos de Alumnos", Icon: IconFolder    },
+    { href: "/admin/universidades", label: "Universidades",      Icon: IconBuilding  },
+    { href: "/admin/project-types", label: "Tipos de Proyecto",  Icon: IconLayers    },
+    { href: "/admin/fases",         label: "Fases del Proyecto", Icon: IconList      },
+    { href: "/admin/prompts",       label: "Prompts Maestros",   Icon: IconEdit      },
+  ],
+  AXIOM: [
+    { href: "/admin/simulaciones",  label: "Simulaciones",       Icon: IconCpu       },
+    { href: "/admin/banco-preguntas",label: "Banco de Preguntas", Icon: IconList      },
+  ],
+  LUMEN: [
+    { href: "/admin/material-docente", label: "Material Docente",Icon: IconFolder    },
+    { href: "/admin/cursos",        label: "Cursos",             Icon: IconBuilding  },
+  ],
+  MENTOR: [
+    { href: "/admin/tutores",       label: "Tutores",            Icon: IconUsers     },
+    { href: "/admin/sesiones",      label: "Sesiones",           Icon: IconList      },
+  ],
+  GLOBAL: [
+    // Global Dashboard is handled in GLOBAL_NAV
+  ]
+};
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-
   const router = useRouter();
 
   // Always start as null — server and client must render identically on first pass.
-  // Reading localStorage here would cause a hydration mismatch (server can't access it).
   const [authed, setAuthed] = useState<boolean | null>(null);
   const [activeModule, setActiveModule] = useState<string>("GLOBAL");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     // Don't act until we have a real pathname, and skip the login page itself.
@@ -149,6 +185,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
     const savedModule = localStorage.getItem("adminActiveModule");
     if (savedModule) setActiveModule(savedModule);
+  }, [pathname, router]);
+
+  // Cerrar menú móvil al cambiar de ruta
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
   }, [pathname]);
 
   const handleModuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -164,8 +205,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   // Login page — render children directly, no sidebar, no auth check.
-  // This guard fires BEFORE the authed===null spinner check below,
-  // so the login page never shows a loading state.
   if (!pathname || pathname.includes("/admin/login")) return <>{children}</>;
 
   // Brief spinner while useEffect reads localStorage on first mount.
@@ -177,16 +216,62 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
+  const currentModuleNav = MODULE_NAV[activeModule] || [];
+
   return (
-    <div className="admin-layout flex flex-col md:flex-row min-h-screen bg-transparent relative z-10 p-4 md:p-6 lg:p-8 gap-4 md:gap-6 lg:gap-8">
+    <div className="admin-layout flex flex-col md:flex-row min-h-screen bg-transparent relative z-10 p-0 md:p-6 lg:p-8 gap-0 md:gap-6 lg:gap-8">
+      
+      {/* ── Barra Superior Móvil ────────────────────────────────────────── */}
+      <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-gray-200 dark:border-white/10 sticky top-0 z-30">
+        <div className="flex items-center gap-3">
+           <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)] shrink-0">
+             <IconBolt />
+           </span>
+           <div className="flex flex-col">
+             <span className="font-bold text-[14px] text-gray-900 dark:text-white leading-tight tracking-tight">
+               Lab. Académico
+             </span>
+             <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 tracking-[0.15em] uppercase">
+               Admin Pro
+             </span>
+           </div>
+        </div>
+        <button 
+          onClick={() => setIsMobileMenuOpen(true)} 
+          className="p-2 text-gray-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+        >
+           <IconMenu />
+        </button>
+      </div>
 
-      {/* ── Floating Sidebar ────────────────────────────────────────────── */}
-      <aside className="w-full md:w-[260px] shrink-0 flex flex-col relative md:sticky top-0 md:top-8 h-auto md:h-[calc(100vh-64px)] 
-                        bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl 
-                        border border-white/60 dark:border-white/10 
-                        rounded-[24px] md:rounded-[32px] shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden z-20">
+      {/* ── Overlay Fondo Móvil ─────────────────────────────────────────── */}
+      {isMobileMenuOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm transition-opacity"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
 
-        {/* Logo */}
+      {/* ── Sidebar Dinámica ────────────────────────────────────────────── */}
+      <aside className={`
+        fixed md:relative top-0 left-0 h-full md:h-[calc(100vh-64px)] w-[280px] md:w-[260px] 
+        bg-white/95 dark:bg-slate-900/95 md:bg-white/40 md:dark:bg-slate-900/40 backdrop-blur-xl 
+        border-r md:border border-gray-200 dark:border-white/10 md:border-white/60 md:dark:border-white/10 
+        md:rounded-[32px] shadow-[8px_0_32px_rgba(0,0,0,0.1)] md:shadow-[0_8px_32px_rgba(0,0,0,0.04)] z-50 flex flex-col shrink-0
+        transition-transform duration-300 ease-out
+        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        md:sticky md:top-8
+      `}>
+        
+        {/* Botón Cerrar (Móvil) */}
+        <button 
+          onClick={() => setIsMobileMenuOpen(false)} 
+          className="md:hidden absolute top-4 right-4 p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+        >
+          <IconX />
+        </button>
+
+        {/* Logo (Desktop & Mobile Drawer) */}
         <div className="flex items-center gap-3 px-8 pt-8 pb-4">
           <span className="flex items-center justify-center w-8 h-8 rounded-xl
                            bg-indigo-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)] shrink-0">
@@ -203,7 +288,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Module Selector */}
-        <div className="px-6 pb-2">
+        <div className="px-6 pb-4">
           <div className="relative">
             <select
               value={activeModule}
@@ -221,7 +306,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <option value="LUMEN">📚 LUMEN (Docencia)</option>
               <option value="MENTOR">🤝 MENTOR (Tutores)</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-gray-500 dark:text-slate-400">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -230,30 +315,70 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         {/* Divider */}
-        <div className="mx-6 my-2 h-px bg-gray-200/50 dark:bg-slate-700/50" />
+        <div className="mx-6 mb-4 h-px bg-gray-200/50 dark:bg-slate-700/50" />
 
-        {/* Nav */}
-        <nav className="flex flex-row md:flex-col gap-2 md:gap-1.5 flex-1 px-4 py-4 overflow-x-auto md:overflow-y-auto whitespace-nowrap md:whitespace-normal no-scrollbar">
-          {NAV_ITEMS.map(({ href, label, Icon }) => {
-            const isActive = pathname === href;
-            return (
-              <a
-                key={href}
-                href={href}
-                className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2.5 md:py-3 rounded-xl md:rounded-2xl text-[12px] md:text-[13px] font-semibold transition-all duration-300 no-underline shrink-0
-                  ${isActive
-                    ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
-                    : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
-                  }`}
-              >
-                <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
-                  <Icon />
-                </span>
-                <span className="inline-block">{label}</span>
-              </a>
-            );
-          })}
-        </nav>
+        {/* Nav Links - Scrollable Area */}
+        <div className="flex-1 overflow-y-auto px-4 pb-4 no-scrollbar">
+          
+          {/* Módulo Específico */}
+          {currentModuleNav.length > 0 && (
+            <div className="mb-6">
+              <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
+                Opciones {activeModule}
+              </div>
+              <nav className="flex flex-col gap-1">
+                {currentModuleNav.map(({ href, label, Icon }) => {
+                  const isActive = pathname === href;
+                  return (
+                    <a
+                      key={href}
+                      href={href}
+                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 no-underline
+                        ${isActive
+                          ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
+                          : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
+                        }`}
+                    >
+                      <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
+                        <Icon />
+                      </span>
+                      <span>{label}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
+          )}
+
+          {/* Opciones Globales */}
+          <div>
+            <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-wider">
+              Configuraciones Globales
+            </div>
+            <nav className="flex flex-col gap-1">
+              {GLOBAL_NAV.map(({ href, label, Icon }) => {
+                const isActive = pathname === href;
+                return (
+                  <a
+                    key={href}
+                    href={href}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 no-underline
+                      ${isActive
+                        ? "bg-indigo-500 text-white shadow-[0_4px_16px_rgba(99,102,241,0.3)]"
+                        : "text-gray-500 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50"
+                      }`}
+                  >
+                    <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
+                      <Icon />
+                    </span>
+                    <span>{label}</span>
+                  </a>
+                );
+              })}
+            </nav>
+          </div>
+
+        </div>
 
         {/* Footer */}
         <div className="p-4 flex flex-col gap-2 border-t border-gray-200/50 dark:border-slate-700/50 shrink-0 bg-white/20 dark:bg-slate-900/20">
@@ -279,7 +404,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ── Main content ────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col overflow-y-auto min-h-screen py-4 md:py-8 pr-0 md:pr-6 lg:pr-8">
+      <main className="flex-1 flex flex-col overflow-y-auto min-h-screen py-6 px-4 md:px-0 md:py-8 pr-0 md:pr-6 lg:pr-8">
         <div className="flex-1 w-full max-w-5xl mx-auto">
           {children}
         </div>
@@ -288,3 +413,4 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+
