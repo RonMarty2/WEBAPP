@@ -60,6 +60,38 @@ function buildParticles(shape: string = "sphere", count: number = 1000): Particl
       nx = (nx / max) * 0.7;
       ny = (ny / max) * 0.7;
       nz = (nz / max) * 0.7;
+    } else if (shape === "neural") {
+      // Red Neuronal - Clusters densos (nodos neuronales)
+      // En lugar de calcular los centros por cada partícula, usamos una pseudo-semilla 
+      // basada en el índice para crear consistencia en los clusters.
+      const numCores = 8;
+      const coreIndex = i % numCores;
+      
+      // Distribución pseudo-aleatoria consistente para los núcleos
+      const phiCore = (coreIndex * 1.618) * Math.PI * 2;
+      const thetaCore = Math.acos(2 * ((coreIndex + 0.5) / numCores) - 1);
+      const rCore = 0.3 + 0.4 * ((coreIndex % 3) / 3);
+      
+      const cx = rCore * Math.sin(thetaCore) * Math.cos(phiCore);
+      const cy = rCore * Math.sin(thetaCore) * Math.sin(phiCore);
+      const cz = rCore * Math.cos(thetaCore);
+      
+      // 85% de las partículas forman los cúmulos, 15% simulan sinapsis vagando libremente
+      if (Math.random() > 0.85) {
+        const r = 0.9 * Math.cbrt(Math.random());
+        const th = Math.random() * Math.PI * 2;
+        const ph = Math.acos(2 * Math.random() - 1);
+        nx = r * Math.sin(ph) * Math.cos(th);
+        ny = r * Math.sin(ph) * Math.sin(th);
+        nz = r * Math.cos(ph);
+      } else {
+        const dist = 0.35 * Math.pow(Math.random(), 2); // Exponencial para centro denso
+        const th = Math.random() * Math.PI * 2;
+        const ph = Math.acos(2 * Math.random() - 1);
+        nx = cx + dist * Math.sin(ph) * Math.cos(th);
+        ny = cy + dist * Math.sin(ph) * Math.sin(th);
+        nz = cz + dist * Math.cos(ph);
+      }
     } else if (shape === "blackhole") {
       // Agujero Negro - Centro muy denso y disco de acreción amplio
       const isDisk = Math.random() > 0.2; // 80% disco, 20% núcleo

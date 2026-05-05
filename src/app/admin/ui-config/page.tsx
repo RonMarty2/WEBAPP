@@ -28,7 +28,8 @@ const SHAPES = [
   { id: "rings", name: "Anillos de Saturno" },
   { id: "dna", name: "Doble Hélice Celular" },
   { id: "cube", name: "Tesseract (Cubo)" },
-  { id: "blackhole", name: "Agujero Negro" }
+  { id: "blackhole", name: "Agujero Negro" },
+  { id: "neural", name: "Red Neuronal (Clusters)" }
 ];
 
 const PALETTES = [
