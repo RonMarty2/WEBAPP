@@ -1,41 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import AdminShell, { StaggerRow, useCountUp } from "@/components/admin/AdminShell";
 
-interface PromptStat {
-  etapa: number;
-  nombre: string;
-  uso_total: number;
-  uso_este_mes: number;
-  tiempo_promedio_seg: number;
-}
-
-interface TemaPopular {
-  tema: string;
-  cantidad: number;
-}
-
-interface EtapaCambios {
-  etapa: number;
-  cambios_promedio: number;
-}
-
+interface PromptStat { etapa: number; nombre: string; uso_total: number; uso_este_mes: number; tiempo_promedio_seg: number; }
+interface TemaPopular { tema: string; cantidad: number; }
+interface EtapaCambios { etapa: number; cambios_promedio: number; }
 interface Stats {
-  total_monografias_generadas: number;
-  completadas: number;
-  este_mes: number;
-  promedio_tiempo_generacion_seg: number;
-  temas_mas_populares: TemaPopular[];
-  prompts: PromptStat[];
-  etapas_con_mas_cambios: EtapaCambios[];
+  total_monografias_generadas: number; completadas: number; este_mes: number;
+  promedio_tiempo_generacion_seg: number; temas_mas_populares: TemaPopular[];
+  prompts: PromptStat[]; etapas_con_mas_cambios: EtapaCambios[];
 }
 
-const ETAPA_LABELS: Record<number, string> = {
-  0: "Etapa 0",
-  1: "Cap. I",
-  2: "Cap. II",
-  3: "Caps. III-V",
-};
+const ETAPA_LABELS: Record<number, string> = { 0: "TEMA", 1: "CAP_I", 2: "CAP_II", 3: "CAP_III-V" };
+
+function KpiBlock({ code, label, value, index }: { code: string; label: string; value: number | string; index: number }) {
+  const num = typeof value === "number" ? value : -1;
+  const counted = useCountUp(num >= 0 ? num : 0, 800, 200 + index * 80);
+  const display = typeof value === "string" ? value : counted;
+  return (
+    <StaggerRow index={index}>
+      <div className="adm-card p-4">
+        <div className="adm-label mb-3">{code}</div>
+        <div style={{ fontSize: 36, fontWeight: 700, color: "#000", lineHeight: 1 }}>{display}</div>
+        <div className="adm-caption mt-2 pt-2" style={{ borderTop: "1px solid #e5e7eb" }}>{label}</div>
+      </div>
+    </StaggerRow>
+  );
+}
 
 export default function EstadisticasPage() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -43,196 +35,102 @@ export default function EstadisticasPage() {
 
   useEffect(() => {
     fetch("/api/admin/estadisticas")
-      .then(r => r.json())
-      .then(d => { setStats(d); setLoading(false); })
+      .then(r => r.json()).then(d => { setStats(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return (
-      <div className="fade-in" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh" }}>
-        <div style={{ textAlign: "center", color: "var(--fg-muted)" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} />
-          Cargando estadísticas...
-        </div>
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <div className="fade-in">
-        <div className="card" style={{ textAlign: "center", padding: 40, color: "var(--fg-muted)" }}>
-          No se pudieron cargar las estadísticas.
-        </div>
-      </div>
-    );
-  }
-
-  const tasaCompletacion = stats.total_monografias_generadas > 0
+  const tasaCompletacion = stats && stats.total_monografias_generadas > 0
     ? Math.round((stats.completadas / stats.total_monografias_generadas) * 100)
     : 0;
 
   return (
-    <div className="fade-in">
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 6 }}>📈 Estadísticas</h1>
-        <p style={{ color: "var(--fg-muted)", fontSize: 14 }}>
-          Métricas en tiempo real de uso del sistema (sesión actual).
-        </p>
-      </div>
+    <AdminShell title="Estadísticas" code="STAT — métricas de sesión" subtitle="Datos en tiempo real (in-memory). Se reinician con el servidor.">
 
-      {/* KPIs principales */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 12, marginBottom: 28 }}>
-        {[
-          { label: "Total generadas", value: stats.total_monografias_generadas, color: "var(--accent)", icon: "📄" },
-          { label: "Completadas", value: stats.completadas, color: "#22c55e", icon: "✅" },
-          { label: "Este mes", value: stats.este_mes, color: "#8b5cf6", icon: "📅" },
-          { label: "Tasa completación", value: `${tasaCompletacion}%`, color: tasaCompletacion >= 50 ? "#4ade80" : "#f59e0b", icon: "🎯" },
-        ].map(s => (
-          <div key={s.label} className="card" style={{ textAlign: "center", padding: "16px 12px" }}>
-            <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 4 }}>{s.label}</div>
+      {loading ? (
+        <div className="adm-muted text-center py-16">// cargando métricas...</div>
+      ) : !stats ? (
+        <div className="adm-card p-8 text-center adm-muted">// sin datos disponibles</div>
+      ) : (
+        <>
+          {/* KPIs */}
+          <div className="adm-label mb-3">// resumen global</div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            <KpiBlock code="TOTAL" label="Generadas"    value={stats.total_monografias_generadas} index={0} />
+            <KpiBlock code="DONE"  label="Completadas"  value={stats.completadas}                  index={1} />
+            <KpiBlock code="MTH"   label="Este mes"     value={stats.este_mes}                     index={2} />
+            <KpiBlock code="RATE"  label="Tasa complet." value={`${tasaCompletacion}%`}            index={3} />
           </div>
-        ))}
-      </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
-        {/* Uso por etapa */}
-        <div className="card">
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 14 }}>
-            Uso por Etapa
-          </div>
-          {stats.prompts.length === 0 || stats.prompts.every(p => p.uso_total === 0) ? (
-            <div style={{ color: "var(--fg-secondary)", fontSize: 13, textAlign: "center", padding: "20px 0" }}>
-              Sin datos aún. Las métricas se registran con cada generación.
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {stats.prompts.map(p => {
-                const maxUso = Math.max(...stats.prompts.map(x => x.uso_total), 1);
-                const pct = Math.round((p.uso_total / maxUso) * 100);
-                return (
-                  <div key={p.etapa}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                      <span style={{ color: "var(--fg-primary)", fontWeight: 500 }}>{p.nombre}</span>
-                      <span style={{ color: "var(--fg-muted)" }}>{p.uso_total} usos · {p.tiempo_promedio_seg}s avg</span>
-                    </div>
-                    <div style={{ height: 6, background: "var(--bg-subtle)", borderRadius: 3, overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${pct}%`, background: "var(--accent)", borderRadius: 3, transition: "width 0.5s" }} />
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 2 }}>{p.uso_este_mes} este mes</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Etapas con más cambios */}
-        <div className="card">
-          <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 14 }}>
-            Revisiones por Etapa (Chat)
-          </div>
-          {stats.etapas_con_mas_cambios.every(e => e.cambios_promedio === 0) ? (
-            <div style={{ color: "var(--fg-secondary)", fontSize: 13, textAlign: "center", padding: "20px 0" }}>
-              Sin revisiones registradas aún.
-            </div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {stats.etapas_con_mas_cambios.map(e => (
-                <div key={e.etapa} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center",
-                    background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.3)",
-                    fontSize: 12, fontWeight: 700, color: "#a78bfa", flexShrink: 0,
-                  }}>
-                    {ETAPA_LABELS[e.etapa]}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, color: "var(--fg-primary)" }}>
-                      {e.cambios_promedio} revisiones promedio
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--fg-secondary)" }}>por monografía en esta etapa</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Temas populares */}
-      <div className="card" style={{ marginBottom: 20 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 14 }}>
-          Temas más frecuentes
-        </div>
-        {stats.temas_mas_populares.length === 0 ? (
-          <div style={{ color: "var(--fg-secondary)", fontSize: 13, textAlign: "center", padding: "16px 0" }}>
-            Sin monografías registradas aún.
-          </div>
-        ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-            {stats.temas_mas_populares.map((t, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 8, padding: "6px 12px",
-                background: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.2)",
-                borderRadius: 20, fontSize: 13,
-              }}>
-                <span style={{ color: "var(--accent)" }}>{t.tema}</span>
-                <span style={{
-                  background: "rgba(37,99,235,0.2)", color: "var(--accent)",
-                  borderRadius: 10, padding: "1px 7px", fontSize: 11, fontWeight: 700,
-                }}>{t.cantidad}</span>
+          {/* Uso por etapa */}
+          <div className="adm-label mb-3">// uso por etapa</div>
+          <div className="adm-card mb-8">
+            {stats.prompts.length === 0 || stats.prompts.every(p => p.uso_total === 0) ? (
+              <div className="adm-muted p-6 text-center">// sin datos — registra una generación primero</div>
+            ) : (
+              <div className="divide-y" style={{ borderColor: "#e5e7eb" }}>
+                {stats.prompts.map((p, i) => {
+                  const maxUso = Math.max(...stats.prompts.map(x => x.uso_total), 1);
+                  const pct = Math.round((p.uso_total / maxUso) * 100);
+                  return (
+                    <StaggerRow key={p.etapa} index={i}>
+                      <div className="adm-row px-4">
+                        <span className="adm-label w-16 shrink-0">{ETAPA_LABELS[p.etapa]}</span>
+                        <div className="flex-1">
+                          <div style={{ height: 4, background: "#f0f0f0" }}>
+                            <div style={{ height: "100%", width: `${pct}%`, background: "#000", transition: "width 0.8s ease" }} />
+                          </div>
+                        </div>
+                        <span className="adm-label w-10 text-right">{p.uso_total}</span>
+                        <span className="adm-muted w-16 text-right">{p.tiempo_promedio_seg > 0 ? `${p.tiempo_promedio_seg}s` : "—"}</span>
+                      </div>
+                    </StaggerRow>
+                  );
+                })}
               </div>
-            ))}
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Tabla detallada de prompts */}
-      <div className="card">
-        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 14 }}>
-          Detalle de Prompts por Etapa
-        </div>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)" }}>
-              {["Etapa", "Nombre", "Usos totales", "Este mes", "Tiempo promedio"].map(h => (
-                <th key={h} style={{ textAlign: "left", padding: "8px 12px", fontSize: 11, color: "var(--fg-secondary)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {stats.prompts.map(p => (
-              <tr key={p.etapa} style={{ borderBottom: "1px solid rgba(30,41,59,0.4)" }}>
-                <td style={{ padding: "10px 12px" }}>
-                  <span style={{
-                    background: "rgba(37,99,235,0.12)", border: "1px solid rgba(37,99,235,0.25)",
-                    color: "var(--accent)", borderRadius: 6, padding: "2px 8px", fontSize: 12, fontWeight: 600,
-                  }}>
-                    {ETAPA_LABELS[p.etapa] ?? `E${p.etapa}`}
-                  </span>
-                </td>
-                <td style={{ padding: "10px 12px", color: "var(--fg-primary)" }}>{p.nombre}</td>
-                <td style={{ padding: "10px 12px", color: "var(--fg-muted)", fontWeight: 600 }}>{p.uso_total}</td>
-                <td style={{ padding: "10px 12px", color: "var(--fg-muted)" }}>{p.uso_este_mes}</td>
-                <td style={{ padding: "10px 12px", color: "var(--fg-muted)" }}>
-                  {p.tiempo_promedio_seg > 0 ? `${p.tiempo_promedio_seg}s` : "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          {/* Temas populares */}
+          <div className="adm-label mb-3">// temas frecuentes</div>
+          <div className="adm-card p-4 mb-8">
+            {stats.temas_mas_populares.length === 0 ? (
+              <div className="adm-muted">// sin monografías registradas</div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {stats.temas_mas_populares.map((t, i) => (
+                  <StaggerRow key={i} index={i}>
+                    <div className="flex items-center gap-2 px-3 py-1.5" style={{ border: "1px solid #e5e7eb" }}>
+                      <span style={{ fontSize: 12, color: "#000" }}>{t.tema}</span>
+                      <span className="adm-label">[{t.cantidad}]</span>
+                    </div>
+                  </StaggerRow>
+                ))}
+              </div>
+            )}
+          </div>
 
-      <div style={{ marginTop: 16, fontSize: 12, color: "var(--fg-muted)", textAlign: "center" }}>
-        Las estadísticas se acumulan en sesión (in-memory). Se reinician al reiniciar el servidor.
-        Conecta Supabase para persistencia entre sesiones.
-      </div>
-    </div>
+          {/* Tabla prompts */}
+          <div className="adm-label mb-3">// detalle por etapa</div>
+          <div className="adm-card">
+            <table className="adm-table">
+              <thead>
+                <tr><th>Etapa</th><th>Nombre</th><th>Total</th><th>Mes</th><th>Avg</th></tr>
+              </thead>
+              <tbody>
+                {stats.prompts.map(p => (
+                  <tr key={p.etapa}>
+                    <td><span className="adm-label">{ETAPA_LABELS[p.etapa]}</span></td>
+                    <td>{p.nombre}</td>
+                    <td style={{ fontWeight: 700 }}>{p.uso_total}</td>
+                    <td className="adm-muted">{p.uso_este_mes}</td>
+                    <td className="adm-muted">{p.tiempo_promedio_seg > 0 ? `${p.tiempo_promedio_seg}s` : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </AdminShell>
   );
 }

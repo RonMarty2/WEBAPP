@@ -110,7 +110,7 @@ function rot3(
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export default function ParticleSphere() {
+export default function ParticleSphere({ isPreview = false, previewConfig }: { isPreview?: boolean, previewConfig?: any }) {
   const pathname = usePathname();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const parts     = useRef<Particle[]>(buildParticles("sphere"));
@@ -125,8 +125,10 @@ export default function ParticleSphere() {
   const uiConfigRef = useRef({ shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 });
 
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent("ui_particle_route_change", { detail: pathname }));
-  }, [pathname]);
+    if (!isPreview) {
+      window.dispatchEvent(new CustomEvent("ui_particle_route_change", { detail: pathname }));
+    }
+  }, [pathname, isPreview]);
 
   // ── Nucleus Morphing Cycle ────────────────────────────────────────────────
   useEffect(() => {
@@ -176,15 +178,16 @@ export default function ParticleSphere() {
         }
       }, 8000); // Morph every 8 seconds
     }
-    return () => window.clearInterval(interval);
-  }, [pathname]);
+    return () => { if (interval) window.clearInterval(interval); };
+  }, [pathname, isPreview]);
 
   useEffect(() => {
     const loadConfig = (overridePathname?: string) => {
       try {
         const currentPath = typeof overridePathname === "string" ? overridePathname : pathname;
         let targetModule = "scribe";
-        if (currentPath.startsWith("/axiom")) targetModule = "axiom";
+        if (currentPath.startsWith("/admin")) targetModule = "admin";
+        else if (currentPath.startsWith("/axiom")) targetModule = "axiom";
         else if (currentPath.startsWith("/lumen")) targetModule = "lumen";
         else if (currentPath.startsWith("/mentor")) targetModule = "mentor";
         else if (currentPath.startsWith("/nucleo")) targetModule = "nucleo";
@@ -194,7 +197,8 @@ export default function ParticleSphere() {
           axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
           lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
           mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
-          nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1500 }
+          nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1500 },
+          admin: { shape: "blackhole", palette: "plasma", wave: "magnetic", speed: 0.8, particleSize: 1.2, particleLength: 1.5, swarmSize: 1.1, density: 1800 }
         };
 
         const storageKey = `ui_particle_config_${targetModule}`;
@@ -231,7 +235,7 @@ export default function ParticleSphere() {
         }
       } catch (e) {}
     };
-    loadConfig();
+    if (!isPreview) loadConfig();
 
     const handleRouteChange = (e: Event) => loadConfig((e as CustomEvent).detail);
     
@@ -264,9 +268,12 @@ export default function ParticleSphere() {
       } catch (e) {}
     };
 
-    window.addEventListener("ui_particle_update", loadConfig as unknown as EventListener);
-    window.addEventListener("ui_particle_route_change", handleRouteChange);
-    window.addEventListener("ui_particle_preview", handlePreview);
+    if (!isPreview) {
+      window.addEventListener("ui_particle_update", loadConfig as unknown as EventListener);
+      window.addEventListener("ui_particle_route_change", handleRouteChange);
+      window.addEventListener("ui_particle_preview", handlePreview);
+    }
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -277,23 +284,38 @@ export default function ParticleSphere() {
     function resize() {
       if (!canvas || !ctx) return;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width  = window.innerWidth  * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width  = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
+      
+      let w = window.innerWidth;
+      let h = window.innerHeight;
+      
+      if (isPreview && canvas.parentElement) {
+        w = canvas.parentElement.clientWidth;
+        h = canvas.parentElement.clientHeight;
+      }
+      
+      canvas.width  = w * dpr;
+      canvas.height = h * dpr;
+      canvas.style.width  = `${w}px`;
+      canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       if (!gcRef.current.ready) {
-        gcRef.current.x = window.innerWidth / 2;
-        gcRef.current.y = window.innerHeight / 2;
+        gcRef.current.x = w / 2;
+        gcRef.current.y = h / 2;
         gcRef.current.ghostX = gcRef.current.x;
         gcRef.current.ghostY = gcRef.current.y;
         gcRef.current.ready = true;
+      } else if (isPreview) {
+        gcRef.current.x = w / 2;
+        gcRef.current.y = h / 2;
+        gcRef.current.ghostX = gcRef.current.x;
+        gcRef.current.ghostY = gcRef.current.y;
       }
     }
 
     // ── Mouse ─────────────────────────────────────────────────────────────────
     let idleTimeout = 0;
     function onMove(e: PointerEvent) {
+      if (isPreview) return; // Deshabilitar seguimiento de mouse en preview
       mouseRef.current = { x: e.clientX, y: e.clientY, active: true };
       window.clearTimeout(idleTimeout);
       idleTimeout = window.setTimeout(() => {
@@ -329,8 +351,8 @@ export default function ParticleSphere() {
       if (!canvas || !ctx) return;
 
       const t  = ++tRef.current;
-      const W  = window.innerWidth;
-      const H  = window.innerHeight;
+      const W  = isPreview && canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
+      const H  = isPreview && canvas.parentElement ? canvas.parentElement.clientHeight : window.innerHeight;
       const m  = mouseRef.current;
       const gc = gcRef.current;
       const ro = rotRef.current;
@@ -340,7 +362,7 @@ export default function ParticleSphere() {
 
       // ── Gravity Center (Fluid Mass Target) ────────────────────────────────
       let rawTargetX: number, rawTargetY: number;
-      if (m.active) {
+      if (m.active && !isPreview) {
         rawTargetX = m.x;
         rawTargetY = m.y;
       } else {
@@ -383,8 +405,14 @@ export default function ParticleSphere() {
       const mouseScale = 1.0 - (condense * 0.12); 
       // Limitamos el radio máximo para que en pantallas grandes (1080p+) no se desborde y mantenga forma de esfera
       const scaleFactor = Math.min(W, H) * 0.48;
+      
       // Apply swarmSize from UI Config
-      const baseR = Math.min(450, Math.max(240, scaleFactor)) * globalBreathe * mouseScale * uiConfigRef.current.swarmSize;
+      let baseR = Math.min(450, Math.max(240, scaleFactor)) * globalBreathe * mouseScale * uiConfigRef.current.swarmSize;
+      
+      if (isPreview) {
+        // En preview, no forzamos mínimo de 240px, simplemente ocupamos un % del cuadrito
+        baseR = Math.min(W, H) * 0.35 * globalBreathe * mouseScale * uiConfigRef.current.swarmSize;
+      }
 
       ctx.clearRect(0, 0, W, H);
       
@@ -565,12 +593,40 @@ export default function ParticleSphere() {
       document.removeEventListener("pointermove",  onMove);
       document.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll",       onScroll);
-      window.removeEventListener("ui_particle_update", loadConfig as unknown as EventListener);
-      window.removeEventListener("ui_particle_route_change", handleRouteChange);
-      window.removeEventListener("ui_particle_preview", handlePreview);
+      if (!isPreview) {
+        window.removeEventListener("ui_particle_update", loadConfig as unknown as EventListener);
+        window.removeEventListener("ui_particle_route_change", handleRouteChange);
+        window.removeEventListener("ui_particle_preview", handlePreview);
+      }
       window.clearTimeout(idleTimeout);
     };
-  }, []);
+  }, [isPreview]);
+
+  useEffect(() => {
+    if (isPreview && previewConfig) {
+      const oldShape = uiConfigRef.current.shape;
+      const oldDensity = uiConfigRef.current.density;
+      
+      uiConfigRef.current = {
+        shape: previewConfig.shape || "sphere",
+        palette: previewConfig.palette || "antigravity",
+        wave: previewConfig.wave || "magnetic",
+        speed: typeof previewConfig.speed === "number" ? previewConfig.speed : 1.0,
+        particleSize: typeof previewConfig.particleSize === "number" ? previewConfig.particleSize : 1.0,
+        particleLength: typeof previewConfig.particleLength === "number" ? previewConfig.particleLength : 1.0,
+        swarmSize: typeof previewConfig.swarmSize === "number" ? previewConfig.swarmSize : 1.0,
+        density: typeof previewConfig.density === "number" ? previewConfig.density : 1000
+      };
+
+      if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
+        const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+        parts.current = newTargets.map((t, i) => {
+          if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
+          return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz };
+        });
+      }
+    }
+  }, [isPreview, previewConfig]);
 
   return (
     <canvas
@@ -578,7 +634,7 @@ export default function ParticleSphere() {
       ref={canvasRef}
       aria-hidden="true"
       style={{
-        position: "fixed",
+        position: isPreview ? "absolute" : "fixed",
         inset: 0,
         width: "100%",
         height: "100%",

@@ -1,46 +1,50 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import AdminShell, { StaggerRow, useCountUp } from "@/components/admin/AdminShell";
 
 interface LogEntry {
-  id: string;
-  timestamp: string;
-  nivel: "critical" | "warning" | "info";
-  etapa: number | string;
-  monografia_id?: string;
-  mensaje: string;
-  detalle?: string;
+  id: string; timestamp: string; nivel: "critical" | "warning" | "info";
+  etapa: number | string; monografia_id?: string; mensaje: string; detalle?: string;
 }
 
-const NIVEL_COLORS: Record<string, string> = {
-  critical: "#f87171",
-  warning: "#f59e0b",
-  info: "var(--fg-muted)",
-};
-
-const NIVEL_BG: Record<string, string> = {
-  critical: "rgba(248,113,113,0.08)",
-  warning: "rgba(245,158,11,0.08)",
-  info: "rgba(148,163,184,0.05)",
-};
+const NIVEL_CODE: Record<string, string> = { critical: "CRIT", warning: "WARN", info: "INFO" };
 
 const ETAPA_LABELS: Record<string | number, string> = {
-  0: "E0 Tema", 1: "E1 Cap.I", 2: "E2 Cap.II", 3: "E3 Caps.III-V",
-  final: "Final", compilar: "Compilar",
+  0: "E0", 1: "E1", 2: "E2", 3: "E3", final: "FIN", compilar: "COMP",
 };
+
+function formatFecha(iso: string) {
+  try {
+    return new Date(iso).toLocaleString("es-BO", {
+      day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+    });
+  } catch { return iso; }
+}
+
+function LogKpi({ code, value, index }: { code: string; value: number; index: number }) {
+  const counted = useCountUp(value, 700, 150 + index * 60);
+  return (
+    <StaggerRow index={index}>
+      <div className="adm-card p-4 text-center">
+        <div className="adm-label mb-2">{code}</div>
+        <div style={{ fontSize: 32, fontWeight: 700, color: "#000" }}>{counted}</div>
+      </div>
+    </StaggerRow>
+  );
+}
 
 export default function LogsPage() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [total, setTotal] = useState(0);
-  const [filtroNivel, setFiltroNivel] = useState<string>("");
+  const [filtroNivel, setFiltroNivel] = useState("");
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
 
   const cargarLogs = useCallback(() => {
     setLoading(true);
     const url = `/api/admin/logs${filtroNivel ? `?nivel=${filtroNivel}` : ""}`;
-    fetch(url)
-      .then(r => r.json())
+    fetch(url).then(r => r.json())
       .then(d => { setLogs(d.logs ?? []); setTotal(d.total ?? 0); setLoading(false); })
       .catch(() => setLoading(false));
   }, [filtroNivel]);
@@ -54,124 +58,80 @@ export default function LogsPage() {
     setLogs([]); setTotal(0); setClearing(false);
   }
 
-  function formatFecha(iso: string) {
-    try {
-      return new Date(iso).toLocaleString("es-BO", {
-        day: "2-digit", month: "2-digit",
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-      });
-    } catch { return iso; }
-  }
-
-  const criticos = logs.filter(l => l.nivel === "critical").length;
+  const criticos     = logs.filter(l => l.nivel === "critical").length;
   const advertencias = logs.filter(l => l.nivel === "warning").length;
+  const infos        = total - criticos - advertencias;
 
   return (
-    <div className="fade-in">
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 6 }}>🪵 Logs de Errores</h1>
-        <p style={{ color: "var(--fg-muted)", fontSize: 13 }}>
-          Errores de generación registrados en sesión. Se reinician al reiniciar el servidor.
-        </p>
-      </div>
+    <AdminShell title="Logs de Errores" code="LOGS — monitor de errores" subtitle="Errores de generación registrados en sesión. Se reinician al reiniciar el servidor.">
 
-      {/* Resumen */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 20 }}>
-        {[
-          { label: "Total logs", value: total, color: "var(--fg-muted)" },
-          { label: "Críticos", value: criticos, color: "#f87171" },
-          { label: "Advertencias", value: advertencias, color: "#f59e0b" },
-          { label: "Info", value: total - criticos - advertencias, color: "var(--fg-muted)" },
-        ].map(s => (
-          <div key={s.label} className="card" style={{ textAlign: "center", padding: "14px 10px" }}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 3 }}>{s.label}</div>
-          </div>
-        ))}
+      {/* KPIs */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        <LogKpi code="TOTAL" value={total}       index={0} />
+        <LogKpi code="CRIT"  value={criticos}    index={1} />
+        <LogKpi code="WARN"  value={advertencias} index={2} />
+        <LogKpi code="INFO"  value={infos}        index={3} />
       </div>
 
       {/* Controles */}
-      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: 6 }}>
-          {["", "critical", "warning", "info"].map(n => (
-            <button
-              key={n}
-              onClick={() => setFiltroNivel(n)}
-              style={{
-                padding: "6px 12px", borderRadius: 6, border: "1px solid",
-                fontSize: 12, cursor: "pointer",
-                background: filtroNivel === n ? "rgba(37,99,235,0.15)" : "transparent",
-                borderColor: filtroNivel === n ? "var(--accent)" : "var(--border)",
-                color: filtroNivel === n ? "var(--accent)" : "var(--fg-muted)",
-              }}
-            >
-              {n === "" ? "Todos" : n.charAt(0).toUpperCase() + n.slice(1)}
-            </button>
-          ))}
-        </div>
-        <button onClick={cargarLogs} style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid var(--border)", background: "transparent", color: "var(--fg-muted)", fontSize: 12, cursor: "pointer" }}>
-          ↻ Actualizar
-        </button>
+      <div className="flex items-center gap-2 mb-6 flex-wrap">
+        <div className="adm-muted mr-2">// filtro:</div>
+        {["", "critical", "warning", "info"].map(n => (
+          <button
+            key={n}
+            onClick={() => setFiltroNivel(n)}
+            className="adm-btn"
+            style={{ fontWeight: filtroNivel === n ? 700 : 400, background: filtroNivel === n ? "#000" : "transparent", color: filtroNivel === n ? "#fff" : "#666" }}
+          >
+            {n === "" ? "TODOS" : NIVEL_CODE[n]}
+          </button>
+        ))}
+        <button onClick={cargarLogs} className="adm-btn ml-2">↻ refresh</button>
         <button
           onClick={limpiarLogs}
           disabled={clearing || total === 0}
-          style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid rgba(248,113,113,0.3)", background: "rgba(248,113,113,0.08)", color: "#f87171", fontSize: 12, cursor: "pointer", marginLeft: "auto", opacity: total === 0 ? 0.5 : 1 }}
+          className="adm-btn adm-btn-danger ml-auto"
+          style={{ opacity: total === 0 ? 0.4 : 1 }}
         >
-          🗑 Limpiar logs
+          [DELETE] limpiar_logs
         </button>
       </div>
 
-      {/* Lista de logs */}
+      {/* Lista */}
       {loading ? (
-        <div className="card" style={{ textAlign: "center", padding: 40, color: "var(--fg-muted)" }}>
-          <div className="spinner" style={{ margin: "0 auto 12px" }} />
-          Cargando...
-        </div>
+        <div className="adm-muted py-12 text-center">// cargando logs...</div>
       ) : logs.length === 0 ? (
-        <div className="card" style={{ textAlign: "center", padding: 48, color: "var(--fg-secondary)" }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>✅</div>
-          {total === 0 ? "Sin errores registrados. El sistema funciona correctamente." : "Sin resultados para el filtro seleccionado."}
+        <div className="adm-card p-12 text-center">
+          <div className="adm-label mb-2">[OK]</div>
+          <div className="adm-muted">
+            {total === 0 ? "// sin errores registrados — sistema operando normalmente" : "// sin resultados para el filtro seleccionado"}
+          </div>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {logs.map(log => (
-            <div
-              key={log.id}
-              style={{
-                background: NIVEL_BG[log.nivel] ?? "rgba(255,255,255,0.03)",
-                border: `1px solid ${NIVEL_COLORS[log.nivel] ?? "var(--border)"}22`,
-                borderLeft: `3px solid ${NIVEL_COLORS[log.nivel] ?? "var(--border)"}`,
-                borderRadius: "0 8px 8px 0",
-                padding: "12px 16px",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: log.detalle ? 6 : 0, flexWrap: "wrap" }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: NIVEL_COLORS[log.nivel], textTransform: "uppercase" }}>
-                  {log.nivel}
+        <div className="adm-card">
+          {logs.map((log, i) => (
+            <StaggerRow key={log.id} index={i}>
+              <div className="adm-row px-4" style={{ alignItems: "flex-start" }}>
+                <span className="adm-label w-10 shrink-0 pt-0.5"
+                  style={{ color: log.nivel === "critical" ? "#c00" : log.nivel === "warning" ? "#888" : "#999" }}>
+                  [{NIVEL_CODE[log.nivel]}]
                 </span>
-                <span style={{
-                  fontSize: 11, background: "rgba(255,255,255,0.05)", border: "1px solid var(--border)",
-                  borderRadius: 4, padding: "1px 6px", color: "var(--fg-muted)",
-                }}>
-                  {ETAPA_LABELS[log.etapa] ?? `Etapa ${log.etapa}`}
-                </span>
-                <span style={{ fontSize: 13, color: "var(--fg-primary)", fontWeight: 500, flex: 1 }}>{log.mensaje}</span>
-                <span style={{ fontSize: 11, color: "var(--fg-muted)", flexShrink: 0 }}>{formatFecha(log.timestamp)}</span>
+                <span className="adm-label w-8 shrink-0 pt-0.5">{ETAPA_LABELS[log.etapa] ?? `E${log.etapa}`}</span>
+                <div className="flex-1 min-w-0">
+                  <div style={{ fontSize: 12, color: "#000", fontWeight: 500 }}>{log.mensaje}</div>
+                  {log.detalle && (
+                    <div className="adm-muted mt-1 font-mono" style={{ fontSize: 11 }}>{log.detalle}</div>
+                  )}
+                  {log.monografia_id && (
+                    <div className="adm-muted mt-0.5" style={{ fontSize: 10 }}>id: {log.monografia_id}</div>
+                  )}
+                </div>
+                <span className="adm-muted shrink-0 text-right" style={{ fontSize: 10 }}>{formatFecha(log.timestamp)}</span>
               </div>
-              {log.detalle && (
-                <div style={{ fontSize: 12, color: "var(--fg-muted)", fontFamily: "monospace", paddingLeft: 4, marginTop: 4 }}>
-                  {log.detalle}
-                </div>
-              )}
-              {log.monografia_id && (
-                <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
-                  ID: {log.monografia_id}
-                </div>
-              )}
-            </div>
+            </StaggerRow>
           ))}
         </div>
       )}
-    </div>
+    </AdminShell>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import AdminShell from "@/components/admin/AdminShell";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -285,11 +286,12 @@ export default function PromptsPage() {
   const autoCtx = AUTO_CONTEXT[selected];
 
   return (
-    <div className="fade-in" style={{ display: "flex", gap: 32, height: "calc(100vh - 64px)" }}>
+    <AdminShell title="Prompts del Workspace" code="PRMT — instrucciones de IA por etapa">
+    <div className="fade-in" style={{ display: "flex", gap: 32, height: "calc(100vh - 160px)" }}>
 
       {/* ── Sidebar ── */}
-      <div className="glass-panel" style={{ width: 280, flexShrink: 0, display: "flex", flexDirection: "column", gap: 4, padding: "28px 24px" }}>
-        <h1 style={{ fontSize: 18, fontWeight: 800, marginBottom: 16 }}>✍️ Prompts del Workspace</h1>
+      <div style={{ width: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: 2, padding: "0", borderRight: "1px solid #e5e7eb", overflowY: "auto" }}>
+        <div className="adm-label mb-4 px-4 pt-4">[PRMT] secciones</div>
 
         {SIDEBAR_ITEMS.map((item, idx) => {
           const isSelected = selected === item.key;
@@ -315,7 +317,7 @@ export default function PromptsPage() {
                   transition: "all 0.15s",
                 }}
               >
-                <span>{item.icon}</span>
+                <span className="adm-label" style={{ fontSize: 9 }}>[{item.key.toUpperCase().slice(0,4)}]</span>
                 <span style={{ flex: 1 }}>{item.label}</span>
                 {item.key === "hilos" && (
                   <span style={{ fontSize: 10, opacity: 0.7 }}>{data?.hilos.length ?? 0} reglas</span>
@@ -333,24 +335,23 @@ export default function PromptsPage() {
           );
         })}
 
-        {/* Info box */}
-        <div style={{ marginTop: "auto", padding: 12, background: "rgba(37,99,235,0.06)", borderRadius: 8, border: "1px solid rgba(37,99,235,0.12)", fontSize: 11, color: "var(--fg-muted)" }}>
-          <div style={{ color: "var(--accent)", fontWeight: 700, marginBottom: 6, fontSize: 12 }}>ℹ️ Cómo funciona</div>
-          <p style={{ margin: 0, lineHeight: 1.6 }}>
-            <strong style={{ color: "var(--fg-muted)" }}>Borrador</strong>: primera pasada en Modo Guiado.
-            <br /><strong style={{ color: "var(--fg-muted)" }}>Final</strong>: con feedback del estudiante.
-            <br />Los <strong style={{ color: "var(--fg-muted)" }}>Hilos</strong> se aplican a todas las fases (menor prioridad que el perfil de estilo).
+        <div style={{ marginTop: "auto", padding: "16px", borderTop: "1px solid #e5e7eb", fontSize: 10, color: "#999", fontFamily: "'IBM Plex Mono', monospace" }}>
+          <div className="adm-label mb-2" style={{ fontSize: 9 }}>// info</div>
+          <p style={{ margin: 0, lineHeight: 1.6, fontSize: 10 }}>
+            <strong>Borrador</strong>: primera pasada Modo Guiado.<br />
+            <strong>Final</strong>: con feedback del estudiante.<br />
+            <strong>Hilos</strong>: aplican a todas las fases.
           </p>
         </div>
       </div>
 
       {/* ── Editor ── */}
-      <div className="glass-panel" style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", padding: "32px 40px" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", padding: "0 0 0 24px" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, margin: 0, color: "#000", fontFamily: "'IBM Plex Mono', monospace" }}>
               {sidebarItem?.icon} {isHilos ? "Hilos Conductores" : isCalib ? "Preguntas de Calibración" : isEstiloAnalizador ? "Analizador de Estilo" : (currentPhaseData?.label ?? sidebarItem?.label)}
             </h2>
             <p style={{ fontSize: 12, color: "var(--fg-secondary)", margin: "4px 0 0" }}>
@@ -686,5 +687,6 @@ export default function PromptsPage() {
         )}
       </div>
     </div>
+    </AdminShell>
   );
 }

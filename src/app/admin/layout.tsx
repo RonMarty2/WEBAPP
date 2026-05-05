@@ -219,28 +219,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentModuleNav = MODULE_NAV[activeModule] || [];
 
   return (
-    <div className="admin-layout flex flex-col md:flex-row min-h-screen bg-transparent relative z-10 p-0 md:p-6 lg:p-8 gap-0 md:gap-6 lg:gap-8">
+    <div className="admin-layout flex flex-col md:flex-row min-h-screen bg-transparent relative z-10">
       
       {/* ── Barra Superior Móvil ────────────────────────────────────────── */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-           <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-indigo-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)] shrink-0">
-             <IconBolt />
-           </span>
-           <div className="flex flex-col">
-             <span className="font-bold text-[14px] text-gray-900 leading-tight tracking-tight">
-               Lab. Académico
-             </span>
-             <span className="text-[10px] font-bold text-indigo-500 tracking-[0.15em] uppercase">
-               Admin Pro
-             </span>
-           </div>
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-[#e5e7eb] sticky top-0 z-30"
+        style={{ fontFamily: "'IBM Plex Mono', monospace" }}
+      >
+        <div>
+          <span className="text-[11px] font-bold text-[#000] tracking-widest uppercase">LAB.ACADÉMICO</span>
+          <span className="text-[9px] text-[#999] ml-2">[ADMIN]</span>
         </div>
-        <button 
-          onClick={() => setIsMobileMenuOpen(true)} 
-          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        <button
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-1.5 text-[#666] hover:bg-[#f5f5f5] transition-colors border border-[#e5e7eb]"
+          style={{ fontFamily: "monospace" }}
         >
-           <IconMenu />
+          <IconMenu />
         </button>
       </div>
 
@@ -253,95 +247,85 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ── Sidebar Dinámica ────────────────────────────────────────────── */}
-      <aside className={`
-        fixed md:relative top-0 left-0 h-full md:h-[calc(100vh-64px)] w-[280px] md:w-[260px] 
-        bg-white/95 md:bg-white/60 backdrop-blur-xl 
-        border-r md:border border-gray-200 md:border-white/60 
-        md:rounded-[32px] shadow-[8px_0_32px_rgba(0,0,0,0.1)] md:shadow-sm z-50 flex flex-col shrink-0
-        transition-transform duration-300 ease-out
-        ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        md:sticky md:top-8
-      `}>
-        
-        {/* Botón Cerrar (Móvil) */}
-        <button 
-          onClick={() => setIsMobileMenuOpen(false)} 
-          className="md:hidden absolute top-4 right-4 p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+      <aside
+        className={`
+          fixed md:relative top-0 left-0 h-full w-[240px]
+          border-r border-[#e5e7eb]/60
+          z-50 flex flex-col shrink-0
+          transition-transform duration-200 ease-out
+          ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+          md:sticky md:top-0 md:h-screen
+        `}
+        style={{
+          fontFamily: "'IBM Plex Mono', ui-monospace, monospace",
+          background: "rgba(255,255,255,0.30)",
+          backdropFilter: "blur(3px)",
+          WebkitBackdropFilter: "blur(3px)",
+        }}
+      >
+        <button
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="md:hidden absolute top-3 right-3 p-1.5 text-[#999] hover:bg-[#f5f5f5] transition-colors"
         >
           <IconX />
         </button>
 
-        {/* Logo (Desktop & Mobile Drawer) */}
-        <div className="flex items-center gap-3 px-8 pt-8 pb-4">
-          <span className="flex items-center justify-center w-8 h-8 rounded-xl
-                           bg-indigo-600 text-white shadow-[0_4px_12px_rgba(79,70,229,0.3)] shrink-0">
-            <IconBolt />
-          </span>
-          <div className="flex flex-col">
-            <span className="font-bold text-[14px] text-gray-900 leading-tight tracking-tight">
-              Lab. Académico
-            </span>
-            <span className="text-[10px] font-bold text-indigo-500 tracking-[0.15em] uppercase">
-              Admin Pro
-            </span>
-          </div>
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-[#e5e7eb]">
+          <div className="text-[10px] text-[#999] mb-1">// sistema</div>
+          <div className="text-[12px] font-bold text-[#000] tracking-tight">LAB.ACADÉMICO</div>
+          <div className="text-[10px] text-[#999]">ADMIN_PRO v1.0</div>
         </div>
 
         {/* Module Selector */}
-        <div className="px-6 pb-4">
+        <div className="px-4 py-3 border-b border-[#e5e7eb]">
+          <div className="text-[9px] font-bold text-[#999] uppercase tracking-widest mb-1.5">// módulo activo</div>
           <div className="relative">
             <select
               value={activeModule}
               onChange={handleModuleChange}
-              className="w-full appearance-none bg-white/50 
-                         border border-gray-200/50 
-                         text-gray-700 text-xs font-semibold 
-                         rounded-xl px-4 py-2.5 pr-8 focus:outline-none 
-                         focus:ring-2 focus:ring-indigo-500/50 cursor-pointer
-                         transition-all"
+              className="w-full appearance-none text-[11px] font-bold text-[#000]
+                         bg-white border border-[#e5e7eb]
+                         px-3 py-2 pr-7 focus:outline-none
+                         focus:border-[#000] cursor-pointer transition-colors"
+              style={{ fontFamily: "'IBM Plex Mono', monospace" }}
             >
-              <option value="GLOBAL">🌐 NŪCLEO Global</option>
-              <option value="SCRIBE">📝 SCRIBE (Tesis)</option>
-              <option value="AXIOM">📊 AXIOM (Simulador)</option>
-              <option value="LUMEN">📚 LUMEN (Docencia)</option>
-              <option value="MENTOR">🤝 MENTOR (Tutores)</option>
+              <option value="GLOBAL">NUCLEO_GLOBAL</option>
+              <option value="SCRIBE">SCRIBE (tesis)</option>
+              <option value="AXIOM">AXIOM (simulador)</option>
+              <option value="LUMEN">LUMEN (docencia)</option>
+              <option value="MENTOR">MENTOR (tutores)</option>
             </select>
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50 text-gray-500">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-[#999] text-[10px]">
+              ▾
             </div>
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="mx-6 mb-4 h-px bg-gray-200/50" />
+        {/* Nav */}
+        <div className="flex-1 overflow-y-auto py-3 no-scrollbar">
 
-        {/* Nav Links - Scrollable Area */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4 no-scrollbar">
-          
-          {/* Módulo Específico */}
           {currentModuleNav.length > 0 && (
-            <div className="mb-6">
-              <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                Opciones {activeModule}
+            <div className="mb-4">
+              <div className="px-4 mb-1 text-[9px] font-bold text-[#bbb] uppercase tracking-widest">
+                // {activeModule.toLowerCase()}
               </div>
-              <nav className="flex flex-col gap-1">
+              <nav className="flex flex-col">
                 {currentModuleNav.map(({ href, label, Icon }) => {
                   const isActive = pathname === href;
                   return (
                     <a
                       key={href}
                       href={href}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 no-underline
-                        ${isActive
-                          ? "bg-indigo-500 text-white shadow-md"
-                          : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
-                        }`}
+                      className="flex items-center gap-2 px-4 py-2 text-[12px] transition-colors duration-100 no-underline"
+                      style={{
+                        color: isActive ? "#000" : "#666",
+                        fontWeight: isActive ? 700 : 400,
+                        background: isActive ? "#f5f5f5" : "transparent",
+                        borderLeft: isActive ? "2px solid #000" : "2px solid transparent",
+                      }}
                     >
-                      <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
-                        <Icon />
-                      </span>
+                      <span className="text-[10px] w-4 shrink-0">{isActive ? "[•]" : "[ ]"}</span>
                       <span>{label}</span>
                     </a>
                   );
@@ -350,62 +334,58 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           )}
 
-          {/* Opciones Globales */}
           <div>
-            <div className="px-3 mb-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-              Configuraciones Globales
+            <div className="px-4 mb-1 text-[9px] font-bold text-[#bbb] uppercase tracking-widest">
+              // global
             </div>
-            <nav className="flex flex-col gap-1">
+            <nav className="flex flex-col">
               {GLOBAL_NAV.map(({ href, label, Icon }) => {
                 const isActive = pathname === href;
                 return (
                   <a
                     key={href}
                     href={href}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-300 no-underline
-                      ${isActive
-                        ? "bg-indigo-500 text-white shadow-md"
-                        : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
-                      }`}
+                    className="flex items-center gap-2 px-4 py-2 text-[12px] transition-colors duration-100 no-underline"
+                    style={{
+                      color: isActive ? "#000" : "#666",
+                      fontWeight: isActive ? 700 : 400,
+                      background: isActive ? "#f5f5f5" : "transparent",
+                      borderLeft: isActive ? "2px solid #000" : "2px solid transparent",
+                    }}
                   >
-                    <span className={`shrink-0 ${isActive ? "opacity-100" : "opacity-70"}`}>
-                      <Icon />
-                    </span>
+                    <span className="text-[10px] w-4 shrink-0">{isActive ? "[•]" : "[ ]"}</span>
                     <span>{label}</span>
                   </a>
                 );
               })}
             </nav>
           </div>
-
         </div>
 
         {/* Footer */}
-        <div className="p-4 flex flex-col gap-2 border-t border-gray-200/50 shrink-0 bg-white/20">
+        <div className="border-t border-[#e5e7eb] py-2">
           <a
             href="/dashboard"
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold
-                       text-gray-600 
-                       hover:bg-white/60 hover:text-gray-900 
-                       transition-all duration-300 no-underline"
+            className="flex items-center gap-2 px-4 py-2 text-[11px] text-[#666] hover:text-[#000] hover:bg-[#f5f5f5] transition-colors no-underline"
           >
-            <IconUser /> Vista estudiante
+            <span className="text-[10px]">[ ]</span> vista_estudiante
           </a>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[13px] font-semibold
-                       text-red-500 
-                       hover:bg-red-50 hover:text-red-600 
-                       transition-all duration-300 cursor-pointer text-left w-full border-0 bg-transparent"
+            className="flex items-center gap-2 px-4 py-2 text-[11px] text-[#c00] hover:bg-[#fff5f5] transition-colors text-left w-full border-0 bg-transparent cursor-pointer"
+            style={{ fontFamily: "'IBM Plex Mono', monospace" }}
           >
-            <IconLogOut /> Salir del panel
+            <span className="text-[10px]">[ ]</span> salir_del_panel
           </button>
         </div>
       </aside>
 
-      {/* ── Main content ────────────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col overflow-y-auto min-h-screen py-6 px-4 md:px-0 md:py-8 pr-0 md:pr-6 lg:pr-8">
-        <div className="flex-1 w-full max-w-5xl mx-auto">
+      {/* ── Main content ─────────────────────────────────────────────── */}
+      <main
+        className="flex-1 min-w-0 overflow-y-auto relative z-0"
+        style={{ background: "transparent" }}
+      >
+        <div className="px-8 py-8 relative z-10">
           {children}
         </div>
       </main>

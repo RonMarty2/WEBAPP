@@ -1,266 +1,306 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 interface DashStats {
   total_monografias_generadas: number;
   completadas: number;
   este_mes: number;
   prompts: Array<{ etapa: number; uso_total: number; uso_este_mes: number; tiempo_promedio_seg: number }>;
 }
+interface MonografiaCount { total: number; cap1: number; cap2: number; completadas: number; }
 
-interface MonografiaCount {
-  total: number;
-  cap1: number;
-  cap2: number;
-  completadas: number;
+// ── Hook: Typewriter ──────────────────────────────────────────────────────────
+function useTypewriter(text: string, speed = 38, delay = 120) {
+  const [displayed, setDisplayed] = useState("");
+  const [done, setDone]           = useState(false);
+  useEffect(() => {
+    setDisplayed("");
+    setDone(false);
+    let i = 0;
+    const t = setTimeout(() => {
+      const id = setInterval(() => {
+        i++;
+        setDisplayed(text.slice(0, i));
+        if (i >= text.length) { clearInterval(id); setDone(true); }
+      }, speed);
+      return () => clearInterval(id);
+    }, delay);
+    return () => clearTimeout(t);
+  }, [text, speed, delay]);
+  return { displayed, done };
 }
 
-// ── SVG Icons ───────────────────────────────────────────────────────
-function IconDoc() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-      <polyline points="14 2 14 8 20 8"/>
-      <line x1="16" y1="13" x2="8" y2="13"/>
-      <line x1="16" y1="17" x2="8" y2="17"/>
-      <polyline points="10 9 9 9 8 9"/>
-    </svg>
-  );
+// ── Hook: Count-up ────────────────────────────────────────────────────────────
+function useCountUp(target: number, duration = 900, delay = 300) {
+  const [value, setValue] = useState(0);
+  const raf = useRef(0);
+  useEffect(() => {
+    if (target === 0) { setValue(0); return; }
+    let start: number | null = null;
+    const step = (ts: number) => {
+      if (!start) start = ts;
+      const elapsed = ts - start;
+      if (elapsed < delay) { raf.current = requestAnimationFrame(step); return; }
+      const progress = Math.min((elapsed - delay) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(ease * target));
+      if (progress < 1) raf.current = requestAnimationFrame(step);
+    };
+    raf.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target, duration, delay]);
+  return value;
 }
-function IconPencil() {
+
+// ── Animated KPI ─────────────────────────────────────────────────────────────
+function KpiCard({ label, code, value }: { label: string; code: string; value: number }) {
+  const n = useCountUp(value, 800, 200);
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-    </svg>
-  );
-}
-function IconBook() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-    </svg>
-  );
-}
-function IconCheck() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  );
-}
-function IconUsers() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-    </svg>
-  );
-}
-function IconChart() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="20" x2="18" y2="10"/>
-      <line x1="12" y1="20" x2="12" y2="4"/>
-      <line x1="6" y1="20" x2="6" y2="14"/>
-    </svg>
-  );
-}
-function IconCpu() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
-      <rect x="9" y="9" width="6" height="6"/>
-      <line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/>
-      <line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/>
-      <line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/>
-      <line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
-    </svg>
-  );
-}
-function IconEdit() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 20h9"/>
-      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-    </svg>
+    <div className="admin-card p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <span className="admin-label">{code}</span>
+        <span className="admin-muted text-[10px]">[LIVE]</span>
+      </div>
+      <div className="admin-number">{n}</div>
+      <div className="admin-caption border-t border-[#e5e7eb] pt-2">{label}</div>
+    </div>
   );
 }
 
+// ── Typewriter line ───────────────────────────────────────────────────────────
+function TypeLine({ text, speed = 22, delay = 0, className = "" }: { text: string; speed?: number; delay?: number; className?: string }) {
+  const { displayed, done } = useTypewriter(text, speed, delay);
+  return (
+    <span className={className}>
+      {displayed}
+      {!done && <span className="admin-cursor">█</span>}
+    </span>
+  );
+}
+
+// ── Staggered row reveal ──────────────────────────────────────────────────────
+function StaggerRow({ children, index }: { children: React.ReactNode; index: number }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 80 * index + 400);
+    return () => clearTimeout(t);
+  }, [index]);
+  return (
+    <div
+      className="transition-all duration-500"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(8px)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashStats | null>(null);
+  const [stats, setStats]           = useState<DashStats | null>(null);
   const [monoCounts, setMonoCounts] = useState<MonografiaCount>({ total: 0, cap1: 0, cap2: 0, completadas: 0 });
+  const [tick, setTick]             = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setTick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     fetch("/api/admin/estadisticas")
-      .then(r => r.json())
-      .then(d => setStats(d))
-      .catch(() => null);
-
+      .then(r => r.json()).then(d => setStats(d)).catch(() => null);
     fetch("/api/admin/monografias")
       .then(r => r.json())
       .then((d: Array<{ etapa_actual: number; status: string }>) => {
         if (!Array.isArray(d)) return;
         setMonoCounts({
-          total: d.length,
-          cap1: d.filter(m => m.etapa_actual >= 1).length,
-          cap2: d.filter(m => m.etapa_actual >= 2).length,
+          total:       d.length,
+          cap1:        d.filter(m => m.etapa_actual >= 1).length,
+          cap2:        d.filter(m => m.etapa_actual >= 2).length,
           completadas: d.filter(m => m.status === "completa" || m.etapa_actual >= 3).length,
         });
-      })
-      .catch(() => null);
+      }).catch(() => null);
   }, []);
 
-  const STATS = [
-    { label: "Monografías creadas", value: monoCounts.total,       icon: <IconDoc />,    accent: "text-sky-600",         ring: "bg-sky-50" },
-    { label: "Con Capítulo I",      value: monoCounts.cap1,        icon: <IconPencil />, accent: "text-violet-600",   ring: "bg-violet-50" },
-    { label: "Con Capítulo II",     value: monoCounts.cap2,        icon: <IconBook />,   accent: "text-amber-600",     ring: "bg-amber-50" },
-    { label: "Completadas",         value: monoCounts.completadas, icon: <IconCheck />,  accent: "text-emerald-600", ring: "bg-emerald-50" },
-  ];
-
   const usoTotal = stats?.prompts?.reduce((a, p) => a + p.uso_total, 0) ?? 0;
+  const now      = new Date();
+  const timeStr  = now.toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
-  const QUICK_ACTIONS = [
-    { href: "/admin/usuarios",    title: "Usuarios & Documentos", desc: "Ver monografías activas, capítulos generados y documentos subidos.", icon: <IconUsers /> },
-    { href: "/admin/estadisticas",title: "Estadísticas de uso",   desc: "Métricas de generación, revisiones por etapa y temas populares.", icon: <IconChart /> },
-    { href: "/admin/modelos",     title: "Modelos & APIs",        desc: "Configura las llaves API de Groq, OpenAI y Anthropic.",            icon: <IconCpu /> },
-    { href: "/admin/prompts",     title: "Prompts Maestros",      desc: "Modifica las instrucciones que recibe la IA para cada etapa.",     icon: <IconEdit /> },
+  const AI_LABELS: Record<number, string> = { 0: "TEMA", 1: "CAP_I", 2: "CAP_II", 3: "CAP_III-V" };
+
+  const ACTIONS = [
+    { href: "/admin/usuarios",     code: "USR", label: "Usuarios & Docs",  desc: "Monografías activas y documentos subidos." },
+    { href: "/admin/estadisticas", code: "STAT", label: "Estadísticas",    desc: "Métricas de generación por etapa." },
+    { href: "/admin/modelos",      code: "API",  label: "Modelos & APIs",  desc: "Groq, OpenAI, Anthropic — cascade fallback." },
+    { href: "/admin/prompts",      code: "PRMT", label: "Prompts",         desc: "Instrucciones de IA por etapa." },
   ];
 
-  const SYSTEM_STATUS = [
-    { label: "Almacenamiento", estado: "In-memory (sesión)",                      dot: "bg-amber-500",  nota: "Conecta Supabase para persistencia" },
-    { label: "IA Provider",    estado: "Groq → Anthropic → OpenAI (fallback)",    dot: "bg-emerald-500", nota: "Configurado" },
-    { label: "LaTeX compiler", estado: "Generación .tex disponible",              dot: "bg-emerald-500", nota: "Compilación vía Overleaf" },
-    { label: "Pagos",          estado: "Pendiente de integración",                dot: "bg-slate-400",    nota: "QR manual / Stripe próximamente" },
+  const STATUS = [
+    { code: "MEM",  label: "Almacenamiento",  value: "IN-MEMORY (session)",            state: "WARN" },
+    { code: "AI",   label: "IA Provider",     value: "Groq > Anthropic > OpenAI",      state: "OK"   },
+    { code: "TEX",  label: "LaTeX Engine",    value: "Generator .tex available",        state: "OK"   },
+    { code: "PAY",  label: "Pagos",           value: "Pending integration",             state: "IDLE" },
   ];
 
-  const AI_LABELS: Record<number, string> = { 0: "Tema", 1: "Cap. I", 2: "Cap. II", 3: "Caps. III-V" };
-  const AI_COLORS = [
-    "text-sky-600",
-    "text-violet-600",
-    "text-amber-600",
-    "text-orange-600",
-  ];
+  const stateColor: Record<string, string> = {
+    OK:   "text-[#000]",
+    WARN: "text-[#555]",
+    IDLE: "text-[#aaa]",
+  };
+  const stateDot: Record<string, string> = {
+    OK:   "bg-[#000]",
+    WARN: "bg-[#888]",
+    IDLE: "bg-[#ccc]",
+  };
 
   return (
-    <div className="fade-in max-w-[1400px] mx-auto">
+    <>
+      {/* ── Scoped styles (only admin) ──────────────────────────────────── */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;400;700&display=swap');
 
-      {/* ── Page header ─────────────────────────────── */}
-      <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 mb-2">
-          Dashboard
-        </h1>
-        <p className="text-sm text-slate-500 font-medium">
-          Panel de control del Laboratorio Académico. Datos en tiempo real de la sesión actual.
-        </p>
-      </div>
+        .admin-mono * { font-family: 'IBM Plex Mono', ui-monospace, monospace !important; }
 
-      {/* ── KPI cards (4 Columns) ───────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {STATS.map(stat => (
-          <div key={stat.label}
-            className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm hover:shadow-md transition-shadow rounded-2xl p-6 flex flex-col justify-between"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="text-xs sm:text-sm font-semibold tracking-wide uppercase text-slate-500">
-                {stat.label}
-              </div>
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${stat.ring} ${stat.accent}`}>
-                {stat.icon}
-              </div>
+        .admin-label  { font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+                        text-transform: uppercase; color: #000; }
+        .admin-muted  { font-size: 10px; color: #999; }
+        .admin-caption{ font-size: 11px; color: #666; line-height: 1.4; }
+        .admin-number { font-size: 40px; font-weight: 700; color: #000; line-height: 1; letter-spacing: -0.02em; }
+        .admin-card   { background: #fff; border: 1px solid #e5e7eb; }
+        .admin-divider{ border: none; border-top: 1px solid #e5e7eb; margin: 0; }
+        .admin-row    { display: flex; align-items: center; gap: 12px;
+                        padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
+        .admin-row:last-child { border-bottom: none; }
+
+        @keyframes admin-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+        .admin-cursor { display:inline-block; animation: admin-blink 1s step-end infinite;
+                        font-size:0.9em; vertical-align:baseline; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .admin-cursor { animation: none; opacity: 1; }
+        }
+      `}</style>
+
+      <div className="admin-mono">
+
+        {/* ── Terminal header bar ──────────────────────────────────────── */}
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#e5e7eb]">
+          <div>
+            <div className="admin-muted mb-1">
+              // SISTEMA CENTRAL — LABORATORIO ACADÉMICO PRO
             </div>
-            <div className="text-4xl font-bold text-slate-800 tracking-tight">
-              {stat.value}
+            <h1 className="text-2xl font-bold text-[#000] tracking-tight leading-none">
+              <TypeLine text="Dashboard" speed={55} delay={80} />
+            </h1>
+          </div>
+          <div className="text-right hidden sm:block">
+            <div className="admin-muted">{tick >= 0 && timeStr}</div>
+            <div className="flex items-center gap-1.5 justify-end mt-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#000] animate-pulse" />
+              <span className="admin-label text-[9px]">ONLINE</span>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* ── IA usage ────────────────────────────────── */}
-      {stats && (
-        <div className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-2xl p-6 mb-10">
-          <div className="text-sm font-semibold tracking-wide uppercase text-slate-500 mb-6">
-            Llamadas a IA esta sesión
+        {/* ── ASCII decoration ─────────────────────────────────────────── */}
+        <div className="admin-muted text-[10px] mb-6 hidden md:block select-none" aria-hidden>
+          {"/*──────────────────────────────────────────────────────────────*/"}
+        </div>
+
+        {/* ── KPIs ─────────────────────────────────────────────────────── */}
+        <div className="admin-label mb-3">// métricas activas</div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          <KpiCard code="MONO" label="Monografías creadas" value={monoCounts.total}       />
+          <KpiCard code="CAP1" label="Con Capítulo I"      value={monoCounts.cap1}        />
+          <KpiCard code="CAP2" label="Con Capítulo II"     value={monoCounts.cap2}        />
+          <KpiCard code="DONE" label="Completadas"         value={monoCounts.completadas} />
+        </div>
+
+        {/* ── IA Monitor ───────────────────────────────────────────────── */}
+        {stats && (
+          <div className="admin-card mb-8">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e5e7eb]">
+              <span className="admin-label">// monitor IA</span>
+              <span className="admin-muted">
+                TOTAL: <strong className="text-[#000]">{usoTotal}</strong>
+              </span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#e5e7eb]">
+              {stats.prompts.map((p, i) => (
+                <div key={p.etapa} className="px-4 py-4">
+                  <div className="admin-label mb-2">{AI_LABELS[p.etapa] ?? `ETG_${p.etapa}`}</div>
+                  <StaggerRow index={i}>
+                    <div className="text-2xl font-bold text-[#000] leading-none">{p.uso_total}</div>
+                    <div className="admin-muted mt-1">
+                      {p.tiempo_promedio_seg > 0 ? `avg: ${p.tiempo_promedio_seg}s` : "avg: —"}
+                    </div>
+                  </StaggerRow>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.prompts.map(p => (
-              <div key={p.etapa} className="flex flex-col border-l-2 border-slate-200 pl-4">
-                <div className="text-xs font-semibold tracking-wider uppercase text-slate-400 mb-1">
-                  {AI_LABELS[p.etapa]}
+        )}
+
+        {/* ── Quick Access ─────────────────────────────────────────────── */}
+        <div className="admin-label mb-3">// acceso rápido</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+          {ACTIONS.map((a, i) => (
+            <StaggerRow key={a.href} index={i}>
+              <a
+                href={a.href}
+                className="admin-card p-4 flex gap-4 items-start no-underline group
+                           hover:border-[#000] transition-colors duration-150"
+              >
+                <span className="admin-label text-[11px] w-10 shrink-0 pt-0.5">[{a.code}]</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[13px] font-bold text-[#000] mb-1">{a.label}</div>
+                  <div className="admin-caption">{a.desc}</div>
                 </div>
-                <div className={`text-3xl font-bold ${AI_COLORS[p.etapa] ?? "text-slate-800"}`}>
-                  {p.uso_total}
+                <span className="admin-muted group-hover:text-[#000] transition-colors text-[16px] leading-none">→</span>
+              </a>
+            </StaggerRow>
+          ))}
+        </div>
+
+        {/* ── System Status ─────────────────────────────────────────────── */}
+        <div className="admin-label mb-3">// estado del sistema</div>
+        <div className="admin-card">
+          <div className="px-4 py-2 border-b border-[#e5e7eb] flex items-center gap-2">
+            <span className="admin-muted text-[10px]">sys.status</span>
+            <span className="admin-muted text-[10px]">—</span>
+            <span className="admin-muted text-[10px]">4 services</span>
+          </div>
+          <div className="px-4 py-2">
+            {STATUS.map((s, i) => (
+              <StaggerRow key={s.code} index={i + 4}>
+                <div className="admin-row">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${stateDot[s.state]}`} />
+                  <span className="admin-label w-12 shrink-0">{s.code}</span>
+                  <span className="text-[12px] font-bold text-[#000] w-28 shrink-0">{s.label}</span>
+                  <span className={`text-[12px] font-mono flex-1 ${stateColor[s.state]}`}>{s.value}</span>
+                  <span className="admin-muted text-[10px] shrink-0">[{s.state}]</span>
                 </div>
-                {p.tiempo_promedio_seg > 0 && (
-                  <div className="text-xs text-slate-400 mt-1">
-                    {p.tiempo_promedio_seg}s avg
-                  </div>
-                )}
-              </div>
+              </StaggerRow>
             ))}
           </div>
-          <div className="mt-6 pt-4 border-t border-slate-200/50 flex justify-end items-center text-sm">
-            <span className="text-slate-500 mr-2 font-medium">Total llamadas:</span>
-            <strong className="text-slate-800 text-lg font-bold">{usoTotal}</strong>
+        </div>
+
+        {/* ── Footer ASCII ─────────────────────────────────────────────── */}
+        <div className="mt-8 pt-4 border-t border-[#e5e7eb]">
+          <div className="admin-muted text-[10px]">
+            {"/*──────────────────────────────────────────────────────────────*/"}
+          </div>
+          <div className="admin-muted text-[10px] mt-1">
+            © LABORATORIO ACADÉMICO PRO — build/session — all rights reserved
           </div>
         </div>
-      )}
 
-      {/* ── Quick actions ────────────────────────────── */}
-      <div className="mb-10">
-        <h2 className="text-lg font-bold text-slate-900 tracking-tight mb-5">
-          Acciones Rápidas
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {QUICK_ACTIONS.map(action => (
-            <a key={action.href} href={action.href}
-              className="group bg-white/60 backdrop-blur-md border border-white/60 rounded-2xl p-6 shadow-sm no-underline flex flex-col hover:border-indigo-500/50 hover:shadow-md transition-all duration-300 overflow-hidden relative"
-            >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 bg-slate-100 text-slate-600 group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300 shadow-sm">
-                {action.icon}
-              </div>
-              <h3 className="text-base font-semibold text-slate-800 mb-2">
-                {action.title}
-              </h3>
-              <p className="text-sm text-slate-500 leading-relaxed mb-5 flex-1">
-                {action.desc}
-              </p>
-              <div className="text-sm font-semibold text-indigo-500 flex items-center gap-1 group-hover:translate-x-1 transition-transform duration-300">
-                Ir al panel
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </div>
-            </a>
-          ))}
-        </div>
       </div>
-
-      {/* ── System status ────────────────────────────── */}
-      <div className="bg-white/60 backdrop-blur-md border border-white/60 shadow-sm rounded-2xl p-6">
-        <div className="text-sm font-semibold tracking-wide uppercase text-slate-500 mb-4">
-          Estado del sistema
-        </div>
-        <div className="flex flex-col divide-y divide-slate-200/50">
-          {SYSTEM_STATUS.map(item => (
-            <div key={item.label} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 py-4">
-              <div className="flex items-center gap-3 w-full sm:w-1/3 shrink-0">
-                <div className={`w-2.5 h-2.5 rounded-full shrink-0 shadow-sm ${item.dot}`} />
-                <span className="text-sm font-semibold text-slate-800">{item.label}</span>
-              </div>
-              <div className="flex-1 text-sm text-slate-600 font-medium pl-5 sm:pl-0">
-                {item.estado}
-              </div>
-              <div className="text-xs text-slate-400 pl-5 sm:pl-0 sm:text-right w-full sm:w-1/3 shrink-0">
-                {item.nota}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-    </div>
+    </>
   );
 }
