@@ -1,8 +1,12 @@
 "use client";
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function NucleoFooter() {
+  const pathname = usePathname();
+  if (pathname?.includes('/workspace')) return null;
+
   return (
     <footer className="w-full py-6 mt-auto relative z-50 pointer-events-none">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-center items-center">

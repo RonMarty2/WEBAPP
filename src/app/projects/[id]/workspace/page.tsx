@@ -99,6 +99,51 @@ function renderMd(text: string): string {
     .replace(/^/,'<p class="md-p">') + '</p>';
 }
 
+function paginateMarkdown(text: string, unitsPerPage = 1850): string[] {
+  const blocks = text
+    .split(/\n{2,}/)
+    .map(block => block.trim())
+    .filter(Boolean);
+  const pages: string[] = [];
+  let current: string[] = [];
+  let currentUnits = 0;
+
+  const blockUnits = (block: string) => {
+    const headingCost = /^#{1,4}\s/.test(block) ? 260 : 0;
+    const listCost = /^[-*]\s/m.test(block) ? 120 : 0;
+    return block.length + headingCost + listCost;
+  };
+
+  const flush = () => {
+    if (!current.length) return;
+    pages.push(current.join("\n\n"));
+    current = [];
+    currentUnits = 0;
+  };
+
+  for (const block of blocks) {
+    const units = blockUnits(block);
+    if (units > unitsPerPage) {
+      const sentences = block.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) ?? [block];
+      for (const sentence of sentences.map(s => s.trim()).filter(Boolean)) {
+        const sentenceUnits = sentence.length;
+        if (current.length && currentUnits + sentenceUnits > unitsPerPage) flush();
+        current.push(sentence);
+        currentUnits += sentenceUnits;
+      }
+      continue;
+    }
+
+    if (current.length && currentUnits + units > unitsPerPage) flush();
+
+    current.push(block);
+    currentUnits += units;
+  }
+
+  flush();
+  return pages.length ? pages : [text];
+}
+
 // Assembles all final phases into a document HTML for the PDF preview panel
 function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC, university: University | null, pdfData: StudentCoverData): string {
   const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Sin título";
@@ -106,29 +151,35 @@ function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC, 
   for (const f of displayFases) {
     const content = getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
     if (!content) continue;
-    chunks.push(
-      `<div class="doc-chapter">` +
-      `<h2 class="doc-ch-title">${f.label}</h2>` +
-      `<div class="doc-ch-body">${renderMd(content)}</div>` +
-      `</div>`
-    );
+    const pages = paginateMarkdown(content);
+    pages.forEach((pageContent, pageIndex) => {
+      chunks.push(
+        `<div class="doc-page">` +
+        `<div class="doc-page-content">` +
+        `<h2 class="doc-ch-title">${f.label}${pages.length > 1 ? ` · ${pageIndex + 1}` : ""}</h2>` +
+        `<div class="doc-ch-body">${renderMd(pageContent)}</div>` +
+        `</div></div>`
+      );
+    });
   }
   if (chunks.length === 0) return "";
   
   let coverHtml = "";
   let cssStr = "";
   if (university) {
-    coverHtml = `<div style="transform: scale(0.5); transform-origin: top center; width: 200%; margin: 0 -50% 14px; max-height: 360px; overflow: hidden;">${getHtmlCover(university, pdfData, titulo)}</div><hr class="doc-ch-sep"/>`;
+    coverHtml = `<div class="doc-page doc-cover-page"><div class="doc-cover-scale">${getHtmlCover(university, pdfData, titulo)}</div></div>`;
     cssStr = `<style>${buildCss(university).replace(/@page/g, '@media print { @page')}</style>`; // Scope @page to print only so it doesn't break the UI
+  } else {
+    coverHtml = `<div class="doc-page"><div class="doc-page-content" style="display:flex; flex-direction:column; justify-content:center; min-height: 400px; text-align:center;">
+      <h1 class="doc-main-title">${titulo.replace(/</g,"&lt;")}</h1>
+    </div></div>`;
   }
 
   return `
     ${cssStr}
     <div class="doc-root">
       ${coverHtml}
-      <h1 class="doc-main-title">${titulo.replace(/</g,"&lt;")}</h1>
-      <hr class="doc-hr"/>
-      ${chunks.join('<hr class="doc-ch-sep"/>')}
+      ${chunks.join('')}
     </div>`;
 }
 
@@ -143,6 +194,7 @@ export default function WorkspacePage() {
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedFase, setSelectedFase] = useState(0);
+  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes">("generacion");
 
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
   const [isDynamic, setIsDynamic] = useState(false);
@@ -611,7 +663,7 @@ export default function WorkspacePage() {
   // ── 3-COLUMN WORKSPACE ────────────────────────────────────────────────────────
 
   return (
-    <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"transparent", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, display:"flex", flexDirection:"column", background:"transparent", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>
 
       {/* HEADER */}
       <header className="flex items-center flex-wrap gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-0 md:h-[52px] shrink-0 border-b relative z-40" style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderBottom: panelBorder }}>
@@ -684,27 +736,47 @@ export default function WorkspacePage() {
           className="w-full xl:w-[360px] shrink-0 flex flex-col border-b xl:border-b-0 relative z-40 min-h-[500px] xl:min-h-0"
           style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderRight: panelBorder, boxShadow: panelShadow }}
         >
-          
-          {/* Phase label */}
-          <div style={{ padding:"14px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)" }}>
-            <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>{currentFaseDef.short}</div>
-            <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
-          </div>
-
-          {/* Warnings */}
-          {needsUpdate && (
-            <div style={{ margin:"10px 14px 0", padding:"10px 12px", background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.24)", borderRadius:10, fontSize:12, color:"#fbbf24", lineHeight:1.5 }}>
-              ⚠️ Una fase anterior fue modificada. Regenera para mantener coherencia.
+          {/* UPPER SCROLLABLE AREA */}
+          <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
+            
+            {/* Phase label */}
+            <div style={{ padding:"14px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
+              <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>{currentFaseDef.short}</div>
+              <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
             </div>
-          )}
-          {error && (
-            <div style={{ margin:"8px 14px 0", padding:"8px 12px", background:"rgba(220,38,38,0.1)", border:"1px solid rgba(220,38,38,0.2)", borderRadius:6, fontSize:11, color:"#f87171", display:"flex", justifyContent:"space-between" }}>
-              <span style={{ flex:1, lineHeight:1.5 }}>{error}</span>
-              <button onClick={() => setError("")} style={{ background:"none", border:"none", color:"#f87171", cursor:"pointer" }}>×</button>
-            </div>
-          )}
 
-          {/* ── Generate buttons block ── */}
+            {/* TABS */}
+            <div style={{ display: "flex", borderBottom: "1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
+              <button 
+                onClick={() => setCol1Tab("generacion")}
+                style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "generacion" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "generacion" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+              >
+                ⚡ Generación
+              </button>
+              <button 
+                onClick={() => setCol1Tab("fuentes")}
+                style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "fuentes" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "fuentes" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+              >
+                📚 Fuentes (PDF)
+              </button>
+            </div>
+
+            {col1Tab === "generacion" && (
+              <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                {/* Warnings */}
+                {needsUpdate && (
+                  <div style={{ margin:"10px 14px 0", padding:"10px 12px", background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.24)", borderRadius:10, fontSize:12, color:"#fbbf24", lineHeight:1.5 }}>
+                    ⚠️ Una fase anterior fue modificada. Regenera para mantener coherencia.
+                  </div>
+                )}
+                {error && (
+                  <div style={{ margin:"8px 14px 0", padding:"8px 12px", background:"rgba(220,38,38,0.1)", border:"1px solid rgba(220,38,38,0.2)", borderRadius:6, fontSize:11, color:"#f87171", display:"flex", justifyContent:"space-between" }}>
+                    <span style={{ flex:1, lineHeight:1.5 }}>{error}</span>
+                    <button onClick={() => setError("")} style={{ background:"none", border:"none", color:"#f87171", cursor:"pointer" }}>×</button>
+                  </div>
+                )}
+
+                {/* ── Generate buttons block ── */}
           <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:10 }}>
             {/* GUIADO: no borrador yet */}
               {esGuiado && !hasBorrador && !hasFinal && (
@@ -769,19 +841,10 @@ export default function WorkspacePage() {
               </div>
             )}
 
-            <div style={{ marginTop: 8, padding: "10px", background: "rgba(167,139,250,0.05)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 10 }}>
-              <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginBottom: 8, textAlign: "center", lineHeight: 1.45 }}>
-                <strong>Insumos de Información:</strong> Sube PDFs o textos (papers, datos) en cualquier fase para que la IA los use como base teórica o analítica.
-              </div>
-              <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-ghost" style={{ width:"100%", fontSize:12, padding:"8px", justifyContent:"center", background: "rgba(167,139,250,0.1)", color: "#8b5cf6", border: "1px solid rgba(167,139,250,0.24)" }}>
-                {isUploading ? "Analizando y Subiendo…" : "📎 Adjuntar PDF / TXT"}
-              </button>
-              <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleUpload} style={{ display:"none" }} />
             </div>
-          </div>
 
-          {/* Chat messages */}
-          <div style={{ flex:1, overflowY:"auto", padding:"10px 14px", display:"flex", flexDirection:"column", gap:9 }}>
+            {/* Chat messages */}
+            <div style={{ flex:1, padding:"10px 14px", display:"flex", flexDirection:"column", gap:9 }}>
             {chatMsgs.length === 0 && (
               <div style={{ color:"var(--border-hover)", fontSize:12, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
                 {displayContent ? "Contenido generado.\nPide modificaciones aquí." : "Genera la fase o envía instrucciones."}
@@ -802,10 +865,33 @@ export default function WorkspacePage() {
             )}
             <div ref={chatEndRef}/>
           </div>
+        </div>
+      )}
 
-          {/* Chat input + navigation */}
-          <div style={{ padding:"10px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", background:"rgba(255,255,255,0.5)", backdropFilter:"blur(6px)" }}>
-            <div
+      {col1Tab === "fuentes" && (
+        <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ fontSize: 13, color: "var(--fg-primary)", fontWeight: 700, lineHeight: 1.4 }}>
+            Archivos de Referencia para la IA
+          </div>
+          <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.6, marginBottom: 8 }}>
+            Sube tus propios <strong>papers, artículos en PDF o datos en TXT</strong>. La IA leerá estos documentos y los usará como base para redactar esta fase, asegurando rigor académico y evitando que invente información.
+          </div>
+          <div style={{ padding: "24px 16px", background: "rgba(167,139,250,0.04)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+            <div style={{ fontSize: 32, opacity: 0.6 }}>📄</div>
+            <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-purple" style={{ width:"100%", fontSize:12, padding:"10px", justifyContent:"center" }}>
+              {isUploading ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Procesando archivo…</span></> : "📎 Subir Archivo (PDF / TXT)"}
+            </button>
+            <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleUpload} style={{ display:"none" }} />
+          </div>
+          
+          {/* Aquí podrías renderizar la lista de archivos subidos si tienes esa funcionalidad */}
+        </div>
+      )}
+    </div> {/* END UPPER SCROLLABLE AREA */}
+
+    {/* LOWER FIXED AREA: Chat input + navigation */}
+    <div style={{ flexShrink: 0, padding:"10px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", background:"rgba(255,255,255,0.5)", backdropFilter:"blur(6px)" }}>
+      <div
               style={{
                 border: "1px solid rgba(148,163,184,0.28)",
                 borderRadius: 16,
@@ -1005,16 +1091,18 @@ export default function WorkspacePage() {
               {docHtml ? (
                 <>
                   <style>{`
-                    .doc-root{font-family:'Georgia',serif;color:var(--fg-primary)}
-                    .doc-main-title{font-size:14px;font-weight:800;color:var(--fg-primary);text-align:center;margin:0 0 12px;line-height:1.45;padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.14);border-radius:8px}
-                    .doc-hr{border:none;border-top:1px solid rgba(37,99,235,0.16);margin:12px 0}
-                    .doc-chapter{margin-bottom:20px}
-                    .doc-ch-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;padding:6px 8px;background:rgba(37,99,235,0.06);border-left:2px solid var(--accent);border-radius:0 6px 6px 0}
-                    .doc-ch-body .md-p{font-size:11px;line-height:1.78;margin:6px 0;color:var(--fg-secondary)}
-                    .doc-ch-body .md-h1,.doc-ch-body .md-h2,.doc-ch-body .md-h3,.doc-ch-body .md-h4{font-size:11px;font-weight:700;color:var(--fg-primary);margin:10px 0 5px}
-                    .doc-ch-body .md-strong{color:var(--accent)}
-                    .doc-ch-body .md-li{font-size:11px;color:var(--fg-secondary);margin:3px 0}
-                    .doc-ch-sep{border:none;border-top:1px dashed rgba(148,163,184,0.35);margin:16px 0}
+                    .doc-root{font-family:'Georgia',serif;color:var(--fg-primary); display:flex; flex-direction:column; gap:26px; align-items:center; padding:10px 0 28px;}
+                    .doc-page{background:white; width:min(100%, 300px); aspect-ratio:210 / 297; box-shadow:0 8px 22px rgba(0,0,0,0.14), 0 0 1px rgba(0,0,0,0.18); border-radius:2px; position:relative; overflow:hidden;}
+                    .doc-page::after{content:""; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 0 1px rgba(15,23,42,0.06);}
+                    .doc-page-content{padding:38px 30px 34px; height:100%; overflow:hidden;}
+                    .doc-cover-page{display:flex; align-items:flex-start; justify-content:center; padding:0;}
+                    .doc-cover-scale{transform:scale(0.5); transform-origin:top center; width:200%; margin:0 -50%; padding-top:34px;}
+                    .doc-main-title{font-size:16px;font-weight:800;color:#000;text-align:center;margin:0 0 12px;line-height:1.45;}
+                    .doc-ch-title{font-size:12px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 12px; border-bottom:1px solid #000; padding-bottom:6px;}
+                    .doc-ch-body .md-p{font-size:9.4px;line-height:1.58;margin:5px 0;color:#222; text-align:justify;}
+                    .doc-ch-body .md-h1,.doc-ch-body .md-h2,.doc-ch-body .md-h3,.doc-ch-body .md-h4{font-size:10.6px;font-weight:700;color:#000;margin:9px 0 5px}
+                    .doc-ch-body .md-strong{font-weight:700;color:#000}
+                    .doc-ch-body .md-li{font-size:9.4px;color:#222;margin:3px 0;line-height:1.55; text-align:justify;}
                   `}</style>
                   <div dangerouslySetInnerHTML={{ __html: docHtml }}/>
                 </>
