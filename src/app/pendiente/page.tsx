@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { SessionUser } from "@/lib/auth";
 
 export default function PendientePage() {
+  const router = useRouter();
   const [user, setUser] = useState<SessionUser | null>(null);
 
   useEffect(() => {
@@ -14,7 +16,7 @@ export default function PendientePage() {
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/";
+    router.replace("/");
   }
 
   return (

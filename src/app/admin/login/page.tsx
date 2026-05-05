@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -11,10 +12,12 @@ export default function AdminLoginPage() {
 
   // Si ya está autenticado, ir directo al panel
   useEffect(() => {
+    router.prefetch("/admin");
+    router.prefetch("/dashboard");
     if (localStorage.getItem("adminAuthed") === "1") {
-      window.location.replace("/admin");
+      router.replace("/admin");
     }
-  }, []);
+  }, [router]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -34,12 +37,8 @@ export default function AdminLoginPage() {
         return;
       }
       
-      // Force hard navigation to ensure layout mounts with new state
       localStorage.setItem("adminAuthed", "1");
-      window.location.href = "/admin";
-      
-      // Fallback in case window.location hangs (it shouldn't)
-      setTimeout(() => setLoading(false), 2000);
+      router.replace("/admin");
     } catch {
       setError("Error de conexión");
       setLoading(false);
@@ -112,9 +111,9 @@ export default function AdminLoginPage() {
         </form>
 
         <div style={{ marginTop: 24, textAlign: "center" }}>
-          <a href="/dashboard" style={{ fontSize: 12, color: "var(--fg-secondary)", textDecoration: "none" }}>
+          <Link href="/dashboard" style={{ fontSize: 12, color: "var(--fg-secondary)", textDecoration: "none" }}>
             ← Volver al dashboard
-          </a>
+          </Link>
         </div>
       </div>
     </div>

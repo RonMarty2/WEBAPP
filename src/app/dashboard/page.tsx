@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import GlassModal from "@/components/ui/GlassModal";
 
@@ -121,12 +122,12 @@ export default function DashboardPage() {
             </div>
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <a href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
+            <Link href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
               Inicio
-            </a>
-            <a href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13 }}>
+            </Link>
+            <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13 }}>
               ⚡ Admin
-            </a>
+            </Link>
             <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)", background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
               Cerrar sesión
             </button>
@@ -144,9 +145,9 @@ export default function DashboardPage() {
         {/* Mis Proyectos */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-muted)" }}>Mis proyectos</h2>
-          <a href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
+          <Link href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
             + Nuevo proyecto
-          </a>
+          </Link>
         </div>
 
         {loadingProyectos ? (
@@ -158,9 +159,9 @@ export default function DashboardPage() {
             <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>📄</div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-secondary)", marginBottom: 8 }}>Aún no tienes proyectos</div>
             <div style={{ fontSize: 14, color: "var(--fg-muted)", marginBottom: 24 }}>Crea tu primer documento académico con IA</div>
-            <a href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", display: "inline-flex", padding: "10px 24px" }}>
+            <Link href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", display: "inline-flex", padding: "10px 24px" }}>
               Crear mi primer proyecto →
-            </a>
+            </Link>
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginBottom: 32 }}>
@@ -222,7 +223,7 @@ export default function DashboardPage() {
       {/* Modo Dios — botón flotante solo para admin */}
       {user.role === "admin" && (
         <div style={{ position: "fixed", bottom: 28, right: 28, zIndex: 200 }}>
-          <a href="/admin" style={{ textDecoration: "none" }}>
+          <Link href="/admin" style={{ textDecoration: "none" }}>
             <button
               className="btn-purple"
               title="Panel Admin — Modo Dios"
@@ -230,7 +231,7 @@ export default function DashboardPage() {
             >
               ⚡
             </button>
-          </a>
+          </Link>
         </div>
       )}
 

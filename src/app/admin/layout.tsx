@@ -202,7 +202,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleLogout = async () => {
     localStorage.removeItem("adminAuthed");
     await fetch("/api/admin/auth", { method: "DELETE" }).catch(() => {});
-    window.location.replace("/admin/login");
+    router.replace("/admin/login");
   };
 
   // Login page — render children directly, no sidebar, no auth check.

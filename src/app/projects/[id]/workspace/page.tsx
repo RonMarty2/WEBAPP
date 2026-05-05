@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import type { University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml, getHtmlCover, buildCss } from "@/lib/pdfTemplate";
@@ -34,6 +35,15 @@ interface PhaseDef { id: string; label: string; short: string; orden: number; }
 interface CalibracionPregunta {
   id: string; pregunta: string; descripcion?: string;
   placeholder?: string; minimo_palabras: number;
+}
+
+interface WorkspaceCache {
+  user: SessionUser | null;
+  proyecto: Proyecto | null;
+  university: University | null;
+  selectedFase: number;
+  isDynamic: boolean;
+  phaseDefs: PhaseDef[];
 }
 
 // ── Static phase definitions ──────────────────────────────────────────────────
@@ -108,7 +118,7 @@ function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC, 
   let coverHtml = "";
   let cssStr = "";
   if (university) {
-    coverHtml = `<div style="transform: scale(0.65); transform-origin: top center; margin-bottom: -30vh;">${getHtmlCover(university, pdfData, titulo)}</div><hr class="doc-ch-sep"/>`;
+    coverHtml = `<div style="transform: scale(0.5); transform-origin: top center; width: 200%; margin: 0 -50% 14px; max-height: 360px; overflow: hidden;">${getHtmlCover(university, pdfData, titulo)}</div><hr class="doc-ch-sep"/>`;
     cssStr = `<style>${buildCss(university).replace(/@page/g, '@media print { @page')}</style>`; // Scope @page to print only so it doesn't break the UI
   }
 
@@ -171,15 +181,38 @@ export default function WorkspacePage() {
 
   // PDF right panel
   const [showPdfPanel, setShowPdfPanel] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const cacheHydratedRef = useRef(false);
+  const cacheKey = `workspace:${proyectoId}`;
 
   // ── Load ──────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(cacheKey);
+      if (!raw) return;
+      const cached = JSON.parse(raw) as WorkspaceCache;
+      setUser(cached.user ?? null);
+      setProyecto(cached.proyecto ?? null);
+      setUniversity(cached.university ?? null);
+      setIsDynamic(Boolean(cached.isDynamic));
+      setPhaseDefs(Array.isArray(cached.phaseDefs) ? cached.phaseDefs : []);
+      if (typeof cached.selectedFase === "number") setSelectedFase(cached.selectedFase);
+      setLoading(false);
+      cacheHydratedRef.current = true;
+    } catch {
+      /* ignore broken cache */
+    }
+  }, [cacheKey]);
+
+  useEffect(() => {
     async function load() {
+      const hasCachedSnapshot = cacheHydratedRef.current;
+      if (hasCachedSnapshot) setIsRefreshing(true);
       try {
         const [meRes, projRes] = await Promise.all([
           fetch("/api/auth/me"),
@@ -225,10 +258,30 @@ export default function WorkspacePage() {
           } catch { /* no-op */ }
         }
       } catch { router.replace("/dashboard"); }
-      finally { setLoading(false); }
+      finally {
+        setLoading(false);
+        if (hasCachedSnapshot) setIsRefreshing(false);
+      }
     }
     load();
   }, [proyectoId, router]);
+
+  useEffect(() => {
+    if (!cacheHydratedRef.current && loading) return;
+    const payload: WorkspaceCache = {
+      user,
+      proyecto,
+      university,
+      selectedFase,
+      isDynamic,
+      phaseDefs,
+    };
+    try {
+      sessionStorage.setItem(cacheKey, JSON.stringify(payload));
+    } catch {
+      /* storage quota or private mode */
+    }
+  }, [cacheKey, user, proyecto, university, selectedFase, isDynamic, phaseDefs, loading]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => { setFeedbackTexto(""); setVistaActiva("borrador"); }, [selectedFase]);
@@ -430,8 +483,37 @@ export default function WorkspacePage() {
 
   if (loading) {
     return (
-      <div className="gradient-bg" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center" }}>
-        <div className="spinner" style={{ width:32, height:32, borderWidth:3 }} />
+      <div className="gradient-bg" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 980,
+            borderRadius: 16,
+            border: "1px solid var(--border)",
+            background: "var(--bg-card)",
+            padding: 18,
+            boxShadow: "var(--shadow-md)",
+          }}
+        >
+          <div style={{ display:"grid", gridTemplateColumns:"280px 1fr 300px", gap:14 }}>
+            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:10 }}>
+              <div style={{ height:16, width:"48%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:10 }} />
+              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)" }} />
+            </div>
+            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:16 }}>
+              <div style={{ height:18, width:"40%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:12 }} />
+              <div style={{ height:12, borderRadius:8, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:12, borderRadius:8, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:12, width:"82%", borderRadius:8, background:"var(--bg-subtle)" }} />
+            </div>
+            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:12 }}>
+              <div style={{ height:14, width:"60%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:10 }} />
+              <div style={{ height:180, borderRadius:10, background:"var(--bg-subtle)" }} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -458,6 +540,10 @@ export default function WorkspacePage() {
   const numMarkers = markerMatch ? markerMatch.length : 0;
   const hasMarkers = numMarkers > 0;
   const firstMarkerText = hasMarkers ? markerMatch![0] : "";
+  const panelBorder = "1px solid rgba(255, 255, 255, 0.4)";
+  const panelBg = "rgba(255, 255, 255, 0.55)";
+  const panelBlur = "blur(28px) saturate(180%)";
+  const panelShadow = "0 4px 30px rgba(0, 0, 0, 0.05)";
 
   // ── Calibration fullscreen ────────────────────────────────────────────────────
 
@@ -528,8 +614,8 @@ export default function WorkspacePage() {
     <div style={{ height:"100vh", display:"flex", flexDirection:"column", background:"transparent", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>
 
       {/* HEADER */}
-      <header className="flex items-center flex-wrap gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-0 md:h-[52px] shrink-0 border-b border-[var(--border)] relative z-40 bg-[var(--bg-card)]">
-        <a href="/dashboard" style={{ color:"var(--fg-muted)", textDecoration:"none", fontSize:18, lineHeight:1 }}>←</a>
+      <header className="flex items-center flex-wrap gap-3 md:gap-4 px-4 md:px-5 py-3 md:py-0 md:h-[52px] shrink-0 border-b relative z-40" style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderBottom: panelBorder }}>
+        <Link href="/dashboard" style={{ color:"var(--fg-muted)", textDecoration:"none", fontSize:18, lineHeight:1 }}>←</Link>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:700, color:"var(--fg-primary)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
             {proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título"}
@@ -540,6 +626,11 @@ export default function WorkspacePage() {
             <span className="hidden sm:inline">{fasesCompletadas}/{displayFases.length} fases</span>
             {esGuiado && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(167,139,250,0.12)", border:"1px solid rgba(167,139,250,0.25)", color:"#a78bfa", fontSize:10, fontWeight:600 }}>GUIADO</span>}
             {esGuiado && proyecto.perfil_estilo_usuario && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(34,197,94,0.08)", border:"1px solid rgba(34,197,94,0.2)", color:"#4ade80", fontSize:10 }}>✓ Estilo calibrado</span>}
+            {isRefreshing && (
+              <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(59,130,246,0.1)", border:"1px solid rgba(59,130,246,0.25)", color:"#60a5fa", fontSize:10 }}>
+                Actualizando...
+              </span>
+            )}
           </div>
         </div>
 
@@ -578,9 +669,9 @@ export default function WorkspacePage() {
             </button>
           )}
           {user?.role === "admin" && (
-            <a href="/admin" style={{ textDecoration:"none" }}>
-              <button className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4 }}>⚡ Admin</button>
-            </a>
+            <Link href="/admin" className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4, textDecoration:"none" }}>
+              ⚡ Admin
+            </Link>
           )}
         </div>
       </header>
@@ -589,17 +680,20 @@ export default function WorkspacePage() {
       <div className="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden relative w-full">
 
         {/* ── COL 1: CHAT & GENERATION (fixed 360px on desktop) ── */}
-        <div className="w-full xl:w-[360px] shrink-0 flex flex-col border-b xl:border-b-0 xl:border-r border-[var(--border)] shadow-sm relative z-40 bg-[var(--bg-card)] min-h-[500px] xl:min-h-0">
+        <div
+          className="w-full xl:w-[360px] shrink-0 flex flex-col border-b xl:border-b-0 relative z-40 min-h-[500px] xl:min-h-0"
+          style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderRight: panelBorder, boxShadow: panelShadow }}
+        >
           
           {/* Phase label */}
-          <div style={{ padding:"12px 16px", borderBottom:"1px solid var(--bg-subtle)" }}>
-            <div style={{ fontSize:10, color:"var(--accent)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:2 }}>{currentFaseDef.short}</div>
-            <div style={{ fontSize:14, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.3 }}>{currentFaseDef.label}</div>
+          <div style={{ padding:"14px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)" }}>
+            <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>{currentFaseDef.short}</div>
+            <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
           </div>
 
           {/* Warnings */}
           {needsUpdate && (
-            <div style={{ margin:"8px 14px 0", padding:"8px 12px", background:"rgba(245,158,11,0.07)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:7, fontSize:11, color:"#fbbf24", lineHeight:1.5 }}>
+            <div style={{ margin:"10px 14px 0", padding:"10px 12px", background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.24)", borderRadius:10, fontSize:12, color:"#fbbf24", lineHeight:1.5 }}>
               ⚠️ Una fase anterior fue modificada. Regenera para mantener coherencia.
             </div>
           )}
@@ -611,7 +705,7 @@ export default function WorkspacePage() {
           )}
 
           {/* ── Generate buttons block ── */}
-          <div style={{ padding:"12px 14px", borderBottom:"1px solid var(--bg-subtle)", display:"flex", flexDirection:"column", gap:8 }}>
+          <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:10 }}>
             {/* GUIADO: no borrador yet */}
               {esGuiado && !hasBorrador && !hasFinal && (
                 <div style={{ display:"flex", gap:8 }}>
@@ -629,14 +723,14 @@ export default function WorkspacePage() {
             {/* GUIADO: has borrador, needs final */}
             {esGuiado && hasBorrador && !hasFinal && (
               <>
-                <div style={{ fontSize:10, color:"#a78bfa", fontWeight:700, letterSpacing:"0.06em", textTransform:"uppercase" }}>Borrador listo — añade feedback</div>
+                <div style={{ fontSize:11, color:"#8b5cf6", fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase" }}>Borrador listo — añade feedback</div>
                 <textarea
                   className="input-dark"
                   rows={2}
                   value={feedbackTexto}
                   onChange={e => setFeedbackTexto(e.target.value)}
                   placeholder="Ej: Ampliar antecedentes, ajustar tono más formal..."
-                  style={{ resize:"vertical", fontSize:11 }}
+                  style={{ resize:"vertical", fontSize:12, lineHeight:1.5 }}
                 />
                 <div style={{ display:"flex", gap:7 }}>
                   <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating || (hasMarkers && vistaActiva === "borrador")} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11, opacity: (hasMarkers && vistaActiva === "borrador") ? 0.5 : 1 }}>
@@ -675,11 +769,11 @@ export default function WorkspacePage() {
               </div>
             )}
 
-            <div style={{ marginTop: 8, padding: "10px", background: "rgba(167,139,250,0.05)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 8 }}>
-              <div style={{ fontSize: 10, color: "var(--fg-secondary)", marginBottom: 8, textAlign: "center", lineHeight: 1.4 }}>
+            <div style={{ marginTop: 8, padding: "10px", background: "rgba(167,139,250,0.05)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 10 }}>
+              <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginBottom: 8, textAlign: "center", lineHeight: 1.45 }}>
                 <strong>Insumos de Información:</strong> Sube PDFs o textos (papers, datos) en cualquier fase para que la IA los use como base teórica o analítica.
               </div>
-              <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-ghost" style={{ width:"100%", fontSize:11, padding:"7px", justifyContent:"center", background: "rgba(167,139,250,0.1)", color: "#a78bfa", border: "1px solid rgba(167,139,250,0.2)" }}>
+              <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-ghost" style={{ width:"100%", fontSize:12, padding:"8px", justifyContent:"center", background: "rgba(167,139,250,0.1)", color: "#8b5cf6", border: "1px solid rgba(167,139,250,0.24)" }}>
                 {isUploading ? "Analizando y Subiendo…" : "📎 Adjuntar PDF / TXT"}
               </button>
               <input ref={fileInputRef} type="file" accept=".pdf,.txt" onChange={handleUpload} style={{ display:"none" }} />
@@ -687,15 +781,15 @@ export default function WorkspacePage() {
           </div>
 
           {/* Chat messages */}
-          <div style={{ flex:1, overflowY:"auto", padding:"8px 14px", display:"flex", flexDirection:"column", gap:7 }}>
+          <div style={{ flex:1, overflowY:"auto", padding:"10px 14px", display:"flex", flexDirection:"column", gap:9 }}>
             {chatMsgs.length === 0 && (
-              <div style={{ color:"var(--border-hover)", fontSize:11, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
+              <div style={{ color:"var(--border-hover)", fontSize:12, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
                 {displayContent ? "Contenido generado.\nPide modificaciones aquí." : "Genera la fase o envía instrucciones."}
               </div>
             )}
             {chatMsgs.map((msg, i) => (
-              <div key={i} style={{ padding:"8px 10px", borderRadius:7, fontSize:11, background: msg.role==="user"?"rgba(79,70,229,0.14)":"rgba(37,99,235,0.07)", border: msg.role==="user"?"1px solid rgba(79,70,229,0.22)":"1px solid rgba(37,99,235,0.1)", alignSelf: msg.role==="user"?"flex-end":"flex-start", maxWidth:"94%" }}>
-                <div style={{ fontWeight:700, fontSize:10, color: msg.role==="user"?"var(--accent)":"var(--accent)", marginBottom:3 }}>{msg.role==="user"?"Tú":"IA"}</div>
+              <div key={i} style={{ padding:"9px 11px", borderRadius:10, fontSize:12, background: msg.role==="user"?"rgba(79,70,229,0.14)":"rgba(37,99,235,0.07)", border: msg.role==="user"?"1px solid rgba(79,70,229,0.22)":"1px solid rgba(37,99,235,0.12)", alignSelf: msg.role==="user"?"flex-end":"flex-start", maxWidth:"94%" }}>
+                <div style={{ fontWeight:700, fontSize:10, color: msg.role==="user"?"var(--accent)":"var(--accent)", marginBottom:4 }}>{msg.role==="user"?"Tú":"IA"}</div>
                 <div style={{ color:"var(--fg-primary)", lineHeight:1.5 }}>{msg.text}</div>
               </div>
             ))}
@@ -710,20 +804,67 @@ export default function WorkspacePage() {
           </div>
 
           {/* Chat input + navigation */}
-          <div style={{ padding:"8px 14px", borderTop:"1px solid var(--bg-subtle)", background:"rgba(255, 255, 255, 0.2)" }}>
-            <div style={{ display:"flex", gap:6, marginBottom: displayContent ? 6 : 0 }}>
-              <textarea
-                value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => { if (e.key==="Enter" && (e.ctrlKey||e.metaKey) && chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }}
-                placeholder="Instrucciones a la IA… (Ctrl+Enter)"
-                rows={2} disabled={isGenerating} className="input-dark"
-                style={{ flex:1, resize:"none", fontSize:11 }}
-              />
-              <button onClick={() => { if (chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }} disabled={isGenerating || !chatInput.trim()}
-                style={{ width:36, flexShrink:0, background: isGenerating||!chatInput.trim()?"var(--bg-subtle)":"var(--accent)", border:"1px solid rgba(37,99,235,0.2)", borderRadius:7, cursor: isGenerating||!chatInput.trim()?"not-allowed":"pointer", color:"#fff", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" }}>
-                {isGenerating ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "↑"}
-              </button>
+          <div style={{ padding:"10px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", background:"rgba(255,255,255,0.5)", backdropFilter:"blur(6px)" }}>
+            <div
+              style={{
+                border: "1px solid rgba(148,163,184,0.28)",
+                borderRadius: 16,
+                background: "rgba(255,255,255,0.92)",
+                boxShadow: "0 10px 24px rgba(2,6,23,0.08)",
+                padding: "10px 10px 10px 12px",
+                marginBottom: displayContent ? 8 : 0,
+              }}
+            >
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
+                <span style={{ fontSize:10, color:"var(--fg-secondary)", padding:"4px 10px", border:"1px solid rgba(148,163,184,0.35)", borderRadius:999, background:"rgba(255,255,255,0.85)" }}>
+                  Prompt rápido
+                </span>
+                <span style={{ fontSize:10, color:"var(--fg-secondary)" }}>Ctrl+Enter para enviar</span>
+              </div>
+
+              <div style={{ display:"flex", gap:8, alignItems:"flex-end" }}>
+                <textarea
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => { if (e.key==="Enter" && (e.ctrlKey||e.metaKey) && chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }}
+                  placeholder="Escribe tu instrucción para mejorar esta fase..."
+                  rows={2}
+                  disabled={isGenerating}
+                  style={{
+                    flex:1,
+                    resize:"none",
+                    fontSize:12,
+                    lineHeight:1.5,
+                    border:"none",
+                    outline:"none",
+                    background:"transparent",
+                    color:"var(--fg-primary)",
+                    padding:"4px 2px",
+                  }}
+                />
+                <button
+                  onClick={() => { if (chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }}
+                  disabled={isGenerating || !chatInput.trim()}
+                  style={{
+                    width:36,
+                    height:36,
+                    flexShrink:0,
+                    background: isGenerating||!chatInput.trim() ? "rgba(148,163,184,0.45)" : "var(--accent)",
+                    border:"none",
+                    borderRadius:"50%",
+                    cursor: isGenerating||!chatInput.trim() ? "not-allowed" : "pointer",
+                    color:"#fff",
+                    fontSize:16,
+                    display:"flex",
+                    alignItems:"center",
+                    justifyContent:"center",
+                    boxShadow: isGenerating||!chatInput.trim() ? "none" : "0 8px 16px rgba(37,99,235,0.32)",
+                  }}
+                  aria-label="Enviar instrucción"
+                >
+                  {isGenerating ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "↑"}
+                </button>
+              </div>
             </div>
             {displayContent && (
               <div style={{ display:"flex", gap:6 }}>
@@ -735,9 +876,14 @@ export default function WorkspacePage() {
         </div>
 
         {/* ── COL 2: CONTENT VIEWER (flex) ── */}
-        <div className="flex-1 overflow-y-auto bg-transparent p-4 md:p-8 relative z-10 min-h-[600px] xl:min-h-0">
+        <div 
+          className="flex-1 overflow-y-auto relative z-10 min-h-[600px] xl:min-h-0"
+          style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur }}
+        >
           {displayContent ? (
-            <div className="fade-in max-w-[880px] mx-auto p-5 md:p-8 lg:p-10 pb-12 lg:pb-16 rounded-[16px] bg-[var(--bg-card)] border border-[var(--border)] shadow-[var(--shadow-md)] relative overflow-hidden">
+            <div
+              className="fade-in w-full max-w-[960px] mx-auto p-6 md:p-10 lg:p-16 pb-20 relative overflow-hidden"
+            >
               {/* Inner wrapper */}
               <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid var(--bg-subtle)" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
@@ -835,12 +981,15 @@ export default function WorkspacePage() {
 
         {/* ── COL 3: PDF PREVIEW (fixed 340px on desktop, toggleable) ── */}
         {showPdfPanel && (
-          <div className="w-full xl:w-[340px] shrink-0 flex flex-col border-t xl:border-t-0 xl:border-l border-[var(--border)] shadow-sm relative z-40 bg-[var(--bg-card)] min-h-[500px] xl:min-h-0">
+          <div
+            className="w-full xl:w-[340px] shrink-0 flex flex-col border-t xl:border-t-0 relative z-40 min-h-[500px] xl:min-h-0"
+            style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
+          >
             {/* Panel header */}
-            <div style={{ padding:"10px 16px", borderBottom:"1px solid var(--bg-subtle)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
+            <div style={{ padding:"12px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
               <div>
-                <div style={{ fontSize:11, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa del Documento</div>
-                <div style={{ fontSize:10, color:"var(--border-hover)", marginTop:1 }}>
+                <div style={{ fontSize:12, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa del Documento</div>
+                <div style={{ fontSize:11, color:"var(--border-hover)", marginTop:1 }}>
                   {fasesCompletadas} capítulo{fasesCompletadas !== 1 ? "s" : ""} finalizados
                 </div>
               </div>
@@ -857,15 +1006,15 @@ export default function WorkspacePage() {
                 <>
                   <style>{`
                     .doc-root{font-family:'Georgia',serif;color:var(--fg-primary)}
-                    .doc-main-title{font-size:14px;font-weight:800;color:var(--fg-primary);text-align:center;margin:0 0 12px;line-height:1.4;padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.12);border-radius:6px}
-                    .doc-hr{border:none;border-top:1px solid rgba(37,99,235,0.15);margin:12px 0}
+                    .doc-main-title{font-size:14px;font-weight:800;color:var(--fg-primary);text-align:center;margin:0 0 12px;line-height:1.45;padding:10px;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.14);border-radius:8px}
+                    .doc-hr{border:none;border-top:1px solid rgba(37,99,235,0.16);margin:12px 0}
                     .doc-chapter{margin-bottom:20px}
-                    .doc-ch-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;padding:6px 8px;background:rgba(37,99,235,0.06);border-left:2px solid var(--accent);border-radius:0 4px 4px 0}
-                    .doc-ch-body .md-p{font-size:11px;line-height:1.75;margin:6px 0;color:var(--fg-muted)}
+                    .doc-ch-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;padding:6px 8px;background:rgba(37,99,235,0.06);border-left:2px solid var(--accent);border-radius:0 6px 6px 0}
+                    .doc-ch-body .md-p{font-size:11px;line-height:1.78;margin:6px 0;color:var(--fg-secondary)}
                     .doc-ch-body .md-h1,.doc-ch-body .md-h2,.doc-ch-body .md-h3,.doc-ch-body .md-h4{font-size:11px;font-weight:700;color:var(--fg-primary);margin:10px 0 5px}
                     .doc-ch-body .md-strong{color:var(--accent)}
-                    .doc-ch-body .md-li{font-size:11px;color:var(--fg-muted);margin:3px 0}
-                    .doc-ch-sep{border:none;border-top:1px dashed rgba(255,255,255,0.88);margin:16px 0}
+                    .doc-ch-body .md-li{font-size:11px;color:var(--fg-secondary);margin:3px 0}
+                    .doc-ch-sep{border:none;border-top:1px dashed rgba(148,163,184,0.35);margin:16px 0}
                   `}</style>
                   <div dangerouslySetInnerHTML={{ __html: docHtml }}/>
                 </>
@@ -881,11 +1030,11 @@ export default function WorkspacePage() {
 
             {/* Download actions */}
             {fasesCompletadas > 0 && (
-              <div style={{ padding:"10px 14px", borderTop:"1px solid var(--bg-subtle)", display:"flex", gap:8, flexShrink:0, flexWrap:"wrap" }}>
-                <button onClick={() => setShowCoverSettings(true)} className="btn-cyan" style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center", minWidth: "100%" }}>
+              <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", display:"flex", gap:8, flexShrink:0, flexWrap:"wrap" }}>
+                <button onClick={() => setShowCoverSettings(true)} className="btn-cyan" style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center", minWidth: "100%" }}>
                   ⚙️ Configurar Carátula
                 </button>
-                <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center" }}>
+                <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center" }}>
                   {isDownloading ? "…" : "📄 .tex"}
                 </button>
                 {university && (
@@ -907,7 +1056,7 @@ export default function WorkspacePage() {
                       if (win) { win.document.write(html); win.document.close(); win.setTimeout(() => win.print(), 500); }
                     }}
                     className="btn-ghost"
-                    style={{ flex:1, fontSize:11, padding:"7px", justifyContent:"center" }}
+                    style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center" }}
                   >
                     🖨️ Imprimir
                   </button>

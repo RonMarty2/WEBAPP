@@ -43,6 +43,7 @@ export default function MonografiaPage() {
   const [phase, setPhase] = useState<Phase>("inicio");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isAdminTester, setIsAdminTester] = useState(false);
 
   // Salidas por etapa
   const [texto0, setTexto0] = useState("");
@@ -125,10 +126,150 @@ export default function MonografiaPage() {
     }
   }, []);
 
+  useEffect(() => {
+    let mounted = true;
+    async function checkTesterAccess() {
+      try {
+        const [adminRes, userRes] = await Promise.all([
+          fetch("/api/admin/auth/check", { credentials: "include" }),
+          fetch("/api/auth/me", { credentials: "include" }),
+        ]);
+
+        let hasAdminSession = adminRes.ok;
+        let hasAdminRole = false;
+
+        if (userRes.ok) {
+          const data = await userRes.json();
+          hasAdminRole = data?.user?.role === "admin";
+        }
+
+        if (mounted) {
+          setIsAdminTester(hasAdminSession || hasAdminRole);
+        }
+      } catch {
+        if (mounted) setIsAdminTester(false);
+      }
+    }
+
+    checkTesterAccess();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const saveSession = useCallback((updates: Record<string, unknown>) => {
     const prev = loadSession() ?? {};
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...prev, ...updates }));
   }, []);
+
+  function prefillInicioDemo() {
+    setHasTema(false);
+    setDiplomado("Diplomado en Gestión Empresarial y Finanzas");
+    setTemas(
+      [
+        "Finanzas corporativas",
+        "Microfinanzas",
+        "Economía aplicada",
+        "Gestión de riesgos",
+        "Planificación estratégica",
+      ].join("\n")
+    );
+    setInteres("Impacto del microcrédito en emprendedores rurales de Bolivia");
+    setContexto("Bolivia");
+    setTrabajasEn("Banco BISA");
+  }
+
+  function prefillForm1Demo() {
+    setAntecedentes(
+      "El acceso al financiamiento formal en áreas rurales de Bolivia sigue siendo limitado, a pesar de la expansión de entidades microfinancieras en la última década. Según reportes del Banco Central de Bolivia, el crecimiento del crédito productivo no ha sido homogéneo por departamento.\n\nDurante el período postpandemia, varios emprendimientos rurales mostraron mayor dependencia del crédito informal, con costos financieros más altos. Esta situación genera brechas de competitividad y limita la sostenibilidad de unidades productivas familiares."
+    );
+    setLiteratura(
+      [
+        "García, Juan (2022). Microfinanzas rurales en Bolivia. Banco Central de Bolivia. El crédito formal crece, pero con brechas territoriales.",
+        "López, María (2021). Inclusión financiera en economías emergentes. UDAPE. La educación financiera mejora la calidad del endeudamiento.",
+        "Fernández, Luis (2020). Evaluación del crédito productivo agropecuario. CEPAL. El acceso al crédito impulsa productividad en pequeños productores.",
+        "Rojas, Elena (2023). Morosidad y microcrédito post-COVID. ASFI. La reprogramación ayudó, pero persisten riesgos en carteras rurales.",
+        "Quispe, Ronald (2019). Barreras al financiamiento formal en el área rural boliviana. UMSA. La distancia geográfica y requisitos documentales reducen acceso.",
+      ].join("\n")
+    );
+    setCausas(
+      [
+        "Escasa cobertura financiera en municipios rurales",
+        "Bajos niveles de educación financiera",
+        "Requisitos formales difíciles de cumplir para pequeños emprendedores",
+      ].join("\n")
+    );
+    setEfectos(
+      [
+        "Mayor dependencia de crédito informal",
+        "Costos financieros elevados para emprendimientos rurales",
+        "Menor crecimiento y sostenibilidad de unidades productivas",
+      ].join("\n")
+    );
+    setSituacion(
+      "Acceso oportuno y equitativo a microcrédito formal, con condiciones adecuadas al contexto rural y acompañamiento técnico-financiero."
+    );
+    setObjetivosEsp(
+      [
+        "Analizar la evolución del microcrédito rural en Bolivia entre 2019 y 2024",
+        "Determinar los factores que limitan el acceso al crédito formal en emprendedores rurales",
+        "Comparar el costo financiero entre crédito formal e informal en zonas seleccionadas",
+        "Proponer lineamientos para mejorar la inclusión financiera rural",
+      ].join("\n")
+    );
+    setJustTeorica(
+      "El estudio aporta evidencia reciente sobre microfinanzas rurales en Bolivia, integrando enfoques de inclusión financiera y desarrollo productivo local."
+    );
+    setJustPractica(
+      "Los resultados permitirán orientar decisiones de entidades financieras y programas públicos para ampliar cobertura y efectividad del microcrédito."
+    );
+    setJustSocial(
+      "Una mejor inclusión financiera rural contribuye a la reducción de brechas económicas y al fortalecimiento de emprendimientos familiares."
+    );
+    setAlcanceTemporal("2019-2024");
+    setAlcanceGeo("Bolivia");
+    setAlcanceInstitucional("Sector microfinanciero boliviano");
+    setLimitaciones(
+      [
+        "Disponibilidad limitada de datos desagregados por municipio",
+        "Acceso parcial a información interna de entidades financieras",
+      ].join("\n")
+    );
+    setTipoInvestigacion("cuantitativa");
+    setTieneHipotesis(true);
+    setHipotesisPrincipal(
+      "A mayor acceso al microcrédito formal, mayor sostenibilidad de los emprendimientos rurales en Bolivia."
+    );
+    setShowSubpreguntas(true);
+    setSubDiagnostica("¿Cuál es la situación actual del acceso al microcrédito formal en zonas rurales de Bolivia?");
+    setSubTeorica("¿Qué enfoques teóricos explican la relación entre inclusión financiera y sostenibilidad productiva rural?");
+    setSubComparativa("¿Qué diferencias existen entre el crédito formal e informal en costo y condiciones para emprendedores rurales?");
+    setSubPropositiva("¿Qué estrategias deberían implementarse para mejorar el acceso y uso efectivo del microcrédito rural?");
+  }
+
+  function prefillCap1ExtrasDemo() {
+    setContextoActual(
+      "En 2024, el sistema financiero boliviano reporta crecimiento del crédito productivo, aunque persisten asimetrías territoriales. La digitalización de servicios financieros avanza en ciudades capitales, pero en zonas rurales la cobertura sigue siendo limitada."
+    );
+    setDocumentoPegado(
+      "Resumen docente: La inclusión financiera rural requiere combinar acceso al crédito con asistencia técnica y alfabetización financiera. Evidencia regional sugiere que el microcrédito sin acompañamiento tiene menor impacto en productividad."
+    );
+    setCantEstudios("7");
+  }
+
+  function prefillCap2ExtrasDemo() {
+    setFuentesDatos(
+      [
+        "INE — Encuesta de Hogares 2019-2024",
+        "BCB — Reportes de intermediación financiera",
+        "ASFI — Boletines de cartera y morosidad",
+        "CEPAL — Estudios de inclusión financiera",
+      ].join("\n")
+    );
+    setObservaciones3(
+      "Enfatizar recomendaciones aplicables al contexto boliviano rural y priorizar propuestas factibles para entidades microfinancieras."
+    );
+  }
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -605,6 +746,13 @@ export default function MonografiaPage() {
           <div>
             <h2 style={{ fontSize: "24px", color: "#f1f5f9", marginBottom: "6px" }}>¡Hola! Comencemos tu monografía</h2>
             <p style={{ color: "var(--fg-muted)", marginBottom: "28px" }}>Primero dinos: ¿ya tienes un tema definido?</p>
+            {isAdminTester && (
+              <div style={{ marginBottom: "16px" }}>
+                <button onClick={prefillInicioDemo} style={btnSecondaryStyle}>
+                  ⚡ Rellenar demo (admin)
+                </button>
+              </div>
+            )}
 
             {/* Elección: tiene tema o no */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "28px" }}>
@@ -759,6 +907,13 @@ export default function MonografiaPage() {
         {phase === "form1" && !isLoading && (
           <div>
             <h2 style={{ fontSize: "20px", color: "#f1f5f9", marginBottom: "4px" }}>Etapa 1 — Datos para el Capítulo I</h2>
+            {isAdminTester && (
+              <div style={{ marginBottom: "12px" }}>
+                <button onClick={prefillForm1Demo} style={btnSecondaryStyle}>
+                  ⚡ Rellenar demo (admin)
+                </button>
+              </div>
+            )}
             {propuestaElegida && (
               <div style={{ background: "#1e3a1e", border: "1px solid #166534", borderRadius: "8px", padding: "10px 14px", marginBottom: "20px" }}>
                 <p style={{ margin: 0, fontSize: "13px", color: "#86efac" }}>✓ Tema: <strong>{propuestaElegida.titulo}</strong></p>
@@ -913,6 +1068,13 @@ export default function MonografiaPage() {
             btnLabel="✅ Aprobar y generar Capítulo II →"
             extraContent={
               <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "14px" }}>
+                {isAdminTester && (
+                  <div>
+                    <button onClick={prefillCap1ExtrasDemo} style={btnSecondaryStyle}>
+                      ⚡ Rellenar demo (admin)
+                    </button>
+                  </div>
+                )}
                 <div>
                   <label style={{ ...labelStyle, fontSize: "13px" }}>
                     Contexto actual del tema <span style={{ color: "var(--fg-secondary)", fontWeight: 400 }}>(opcional — coyuntura, situación reciente)</span>
@@ -952,6 +1114,13 @@ export default function MonografiaPage() {
             btnLabel="✅ Aprobar y generar Capítulos III-V →"
             extraContent={
               <div style={{ marginTop: "16px" }}>
+                {isAdminTester && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <button onClick={prefillCap2ExtrasDemo} style={btnSecondaryStyle}>
+                      ⚡ Rellenar demo (admin)
+                    </button>
+                  </div>
+                )}
                 <p style={{ color: "var(--fg-muted)", fontSize: "13px", margin: "0 0 8px" }}>Fuentes de datos para el análisis (opcionales, una por línea):</p>
                 <textarea value={fuentesDatos} onChange={e => setFuentesDatos(e.target.value)} rows={3}
                   placeholder={"INE — Instituto Nacional de Estadística 2019-2023\nBCB — Banco Central de Bolivia 2020-2023"} style={textareaStyle} />

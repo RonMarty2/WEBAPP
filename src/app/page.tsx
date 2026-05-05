@@ -11,10 +11,10 @@ export default function HomePage() {
       <div style={{ position: "relative", zIndex: 1 }}>
 
       {/* ── Navbar ──────────────────────────────────────────────────── */}
-      <header className="navbar">
-        <div className="max-w-[1100px] mx-auto px-4 md:px-8 w-full flex items-center justify-between h-[62px]">
-          {/* Logo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <header className="navbar w-full">
+        <div className="w-full px-6 md:px-12 flex items-center h-[62px]">
+          {/* 1. Logo (Izquierda) */}
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1 }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <circle cx="12" cy="12" r="10" stroke="var(--fg-primary)" strokeWidth="2"/>
               <path d="M8 12h8M12 8v8" stroke="var(--fg-primary)" strokeWidth="2" strokeLinecap="round"/>
@@ -24,27 +24,31 @@ export default function HomePage() {
             </span>
           </div>
 
-          {/* Nav links */}
-          <nav className="flex items-center gap-2 md:gap-4">
-            <a href="#productos" className="hidden md:inline-block" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Productos</a>
-            <a href="#planes"    className="hidden md:inline-block" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Precios</a>
-            <a href="/tutorial"  className="hidden md:inline-block" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Tutorial</a>
-            <a href="/login"     id="nav-login"
+          {/* 2. Nav links (Centro) */}
+          <nav className="hidden md:flex items-center gap-6 justify-center" style={{ flex: 1 }}>
+            <a href="#productos" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Productos</a>
+            <a href="#planes"    style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Precios</a>
+            <a href="/tutorial"  style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 12px", borderRadius: 999, transition: "color 0.15s" }}>Tutorial</a>
+          </nav>
+
+          {/* 3. Action buttons (Derecha) */}
+          <div className="flex items-center justify-end gap-2 md:gap-4" style={{ flex: 1 }}>
+            <a href="/login" id="nav-login"
               style={{
                 fontSize: 14, color: "var(--fg-muted)", textDecoration: "none",
                 padding: "7px 14px", borderRadius: 999,
-                border: "1px solid var(--border)", marginLeft: 4,
+                border: "1px solid var(--border)",
                 transition: "border-color 0.15s",
               }}>
               Acceder
             </a>
             <a href="#planes" id="nav-ver-planes"
               className="btn-primary hidden sm:inline-flex"
-              style={{ padding: "8px 18px", fontSize: 14, borderRadius: 999, marginLeft: 4 }}>
+              style={{ padding: "8px 18px", fontSize: 14, borderRadius: 999 }}>
               Ver planes
             </a>
             <ThemeToggle />
-          </nav>
+          </div>
         </div>
       </header>
 
