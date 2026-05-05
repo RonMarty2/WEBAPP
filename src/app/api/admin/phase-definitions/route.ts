@@ -7,6 +7,7 @@
 import { NextResponse } from "next/server";
 import { loadFromDisk, saveToDisk, PhaseDefinition } from "@/lib/persistence";
 import { DEFAULT_PHASES } from "@/app/api/admin/workspace-prompts/route";
+import { phaseDefinitionsFromProjectType, projectTypeIdForService } from "@/lib/projectTypePhases";
 
 // Default phase definitions for any service that hasn't been customized
 export function getDefaultPhaseDefinitions(servicio_id: string): PhaseDefinition[] {
@@ -35,6 +36,12 @@ function uid(): string {
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const servicio_id = searchParams.get("servicio_id") ?? "mono-001";
+  const tipo_proyecto_id = searchParams.get("tipo_proyecto_id") ?? projectTypeIdForService(servicio_id);
+
+  const projectTypePhases = phaseDefinitionsFromProjectType(tipo_proyecto_id, servicio_id);
+  if (projectTypePhases.length > 0) {
+    return NextResponse.json({ phases: projectTypePhases, is_default: false, source: "project-types" });
+  }
 
   const disk = loadFromDisk();
   const stored = disk.phaseDefinitions?.[servicio_id];

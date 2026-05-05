@@ -70,6 +70,8 @@ export async function POST(request: Request) {
   const dir = publicLogoDir(universityName);
   await mkdir(dir, { recursive: true });
 
+  let primaryAsset: UniversityLogoAsset | null = null;
+
   for (const file of files) {
     const ext = path.extname(file.name).toLowerCase();
     if (!ALLOWED_EXTENSIONS.has(ext)) {
@@ -83,11 +85,13 @@ export async function POST(request: Request) {
     const fileName = `${baseName}${ext}`;
     const bytes = Buffer.from(await file.arrayBuffer());
     await writeFile(path.join(dir, fileName), bytes);
+    primaryAsset ??= assetFromFile(universityName, fileName);
   }
 
   const assets = await listAssets(universityName);
   return NextResponse.json({
     folder: `/logos/${universityLogoFolder(universityName)}`,
     assets,
+    primaryAsset,
   });
 }

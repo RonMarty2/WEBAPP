@@ -25,6 +25,17 @@ function withBaseHref(html: string, origin: string): string {
     : `${base}${html}`;
 }
 
+function withAbsoluteLocalAssets(html: string, origin: string): string {
+  const normalizedOrigin = origin.replace(/\/$/, "");
+  return html
+    .replace(/\b(src|href)=["']\/(?!\/)([^"']*)["']/g, (_match, attr: string, url: string) => {
+      return `${attr}="${normalizedOrigin}/${url}"`;
+    })
+    .replace(/url\(["']?\/(?!\/)([^"')]+)["']?\)/g, (_match, url: string) => {
+      return `url("${normalizedOrigin}/${url}")`;
+    });
+}
+
 function getChromeCandidates(): string[] {
   const fromEnv = process.env.CHROME_PATH ? [process.env.CHROME_PATH] : [];
   if (process.platform === "win32") {
@@ -100,7 +111,7 @@ export async function POST(request: Request) {
   const fileName = `${sanitizeFileName(title)}.pdf`;
 
   try {
-    await writeFile(htmlPath, withBaseHref(html, origin), "utf8");
+    await writeFile(htmlPath, withBaseHref(withAbsoluteLocalAssets(html, origin), origin), "utf8");
     await execFileAsync(chromePath, [
       "--headless=new",
       "--disable-gpu",

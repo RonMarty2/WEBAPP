@@ -98,9 +98,18 @@ export default function UniversityModal({
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(data => {
         if (cancelled) return;
-        setLogoAssets(data.assets ?? []);
+        const assets = (data.assets ?? []) as UniversityLogoAsset[];
         setAssetFolder(data.folder ?? "");
-        setForm(prev => ({ ...prev, logo_assets: Object.fromEntries((data.assets ?? []).map((asset: UniversityLogoAsset) => [asset.variable, asset.url])) }));
+        setLogoAssets(assets);
+        setForm(prev => {
+          const assetUrls = new Set(assets.map(asset => asset.url));
+          const currentLogoIsUploaded = Boolean(prev.logo_url && assetUrls.has(prev.logo_url));
+          return {
+            ...prev,
+            logo_assets: Object.fromEntries(assets.map(asset => [asset.variable, asset.url])),
+            logo_url: currentLogoIsUploaded ? prev.logo_url : (assets[0]?.url ?? prev.logo_url),
+          };
+        });
       })
       .catch(() => {
         if (!cancelled) setAssetStatus("No se pudieron cargar los archivos.");
@@ -125,12 +134,25 @@ export default function UniversityModal({
       setLogoAssets(data.assets ?? []);
       setAssetFolder(data.folder ?? "");
       const nextAssets = Object.fromEntries((data.assets ?? []).map((asset: UniversityLogoAsset) => [asset.variable, asset.url]));
-      setForm(prev => ({
-        ...prev,
+      const primaryLogoUrl = data.primaryAsset?.url ?? data.assets?.[0]?.url ?? "";
+      const nextForm = {
+        ...form,
         logo_assets: nextAssets,
-        logo_url: prev.logo_url || (data.assets?.[0]?.url ?? ""),
-      }));
-      setAssetStatus("Archivos subidos. Copia las variables en la plantilla HTML.");
+        logo_url: primaryLogoUrl || form.logo_url,
+      };
+      setForm(nextForm);
+
+      if (editingId) {
+        const saveRes = await fetch("/api/admin/universities", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...nextForm, id: editingId }),
+        });
+        if (!saveRes.ok) throw new Error("El logo subio, pero no se pudo guardar la universidad.");
+        setAssetStatus("Logo subido y guardado como principal.");
+      } else {
+        setAssetStatus("Logo subido y marcado como principal. Guarda la universidad para aplicarlo.");
+      }
     } catch (err) {
       setAssetStatus(err instanceof Error ? err.message : "No se pudieron subir los archivos.");
     } finally {
@@ -196,10 +218,9 @@ export default function UniversityModal({
             <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 dark:border-slate-800 p-4">
               <Section title="Archivos de la Universidad" />
               <p className="text-[12px] text-gray-500 dark:text-slate-400 leading-relaxed">
-                Sube uno o varios logos. El nombre del archivo define la variable para el HTML:
-                <code className="mx-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[11px]">logo-principal.png</code>
-                se usa como
-                <code className="ml-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[11px]">{"{logo_principal}"}</code>.
+                Sube el logo oficial. El sistema lo marcara como logo principal y lo usara en
+                <code className="mx-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[11px]">{"{logo_url}"}</code>
+                sin cambiar la plantilla.
               </p>
 
               {!universityName ? (
@@ -245,18 +266,19 @@ export default function UniversityModal({
                           </div>
                           <div className="min-w-0">
                             <div className="text-[12px] font-bold text-gray-900 dark:text-white truncate">{asset.fileName}</div>
-                            <button type="button" onClick={() => copyAssetText(`{${asset.variable}}`)}
-                              className="block text-left text-[11px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
-                              {`{${asset.variable}}`}
-                            </button>
+                            {form.logo_url === asset.url && (
+                              <div className="text-[11px] text-blue-600 dark:text-blue-400 font-semibold">
+                                Logo principal
+                              </div>
+                            )}
                             <button type="button" onClick={() => copyAssetText(asset.url)}
                               className="block text-left text-[11px] text-gray-400 dark:text-slate-500 hover:underline cursor-pointer truncate max-w-full">
                               {asset.url}
                             </button>
                           </div>
-                          <button type="button" onClick={() => copyAssetText(`<img src="{${asset.variable}}" />`)}
+                          <button type="button" onClick={() => setForm(prev => ({ ...prev, logo_url: asset.url }))}
                             className="px-3 py-1.5 rounded-full text-[11px] font-bold border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer">
-                            Copiar HTML
+                            {form.logo_url === asset.url ? "Principal" : "Usar"}
                           </button>
                         </div>
                       ))}

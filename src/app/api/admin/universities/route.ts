@@ -1,11 +1,46 @@
 import { NextResponse } from "next/server";
+import { readdir } from "node:fs/promises";
+import path from "node:path";
 import { DEFAULT_UNIVERSITIES, University } from "@/lib/data";
+import { logoUrlFor, logoVariableFromFileName, universityLogoFolder } from "@/lib/logoAssets";
 
 // In production, stored in Supabase
 let universitiesStore: University[] = [...DEFAULT_UNIVERSITIES];
 
+const ALLOWED_LOGO_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".webp", ".svg"]);
+
+async function logosForUniversity(universityName: string): Promise<Record<string, string>> {
+  const dir = path.join(process.cwd(), "public", "logos", universityLogoFolder(universityName));
+  try {
+    const entries = await readdir(dir, { withFileTypes: true });
+    return Object.fromEntries(
+      entries
+        .filter(entry => entry.isFile())
+        .map(entry => entry.name)
+        .filter(fileName => ALLOWED_LOGO_EXTENSIONS.has(path.extname(fileName).toLowerCase()))
+        .sort((a, b) => a.localeCompare(b))
+        .map(fileName => [logoVariableFromFileName(fileName), logoUrlFor(universityName, fileName)])
+    );
+  } catch {
+    return {};
+  }
+}
+
+async function withDetectedLogos(university: University): Promise<University> {
+  const detectedAssets = await logosForUniversity(university.name);
+  const logo_assets = { ...(university.logo_assets ?? {}), ...detectedAssets };
+  const detectedUrls = Object.values(detectedAssets);
+  const logo_url = detectedUrls.length > 0 && !detectedUrls.includes(university.logo_url ?? "")
+    ? detectedUrls[0]
+    : university.logo_url;
+
+  return { ...university, logo_assets, logo_url };
+}
+
 export async function GET() {
-  return NextResponse.json(universitiesStore);
+  const universities = await Promise.all(universitiesStore.map(withDetectedLogos));
+  universitiesStore = universities;
+  return NextResponse.json(universities);
 }
 
 export async function POST(req: Request) {

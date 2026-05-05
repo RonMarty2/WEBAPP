@@ -120,6 +120,7 @@ export interface ProyectoRecord {
   id: string;
   usuario_id: string;
   servicio_id: string;
+  tipo_proyecto_id?: string;
   universidad_id?: string;
   tema_aprobado: string | null;
   titulo_provisional: string | null;

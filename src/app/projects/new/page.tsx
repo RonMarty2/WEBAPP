@@ -16,6 +16,15 @@ interface Universidad {
   is_active: boolean;
 }
 
+interface TipoProyecto {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  icon?: string;
+  activo: boolean;
+  fases_count?: number;
+}
+
 type Step =
   | "loading"
   | "seleccionar-universidad"
@@ -34,6 +43,8 @@ export default function NuevoProyectoPage() {
   const [step, setStep] = useState<Step>("loading");
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
+  const [tiposProyecto, setTiposProyecto] = useState<TipoProyecto[]>([]);
+  const [tipoProyectoId, setTipoProyectoId] = useState("tipo-tesis");
 
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
@@ -95,6 +106,15 @@ export default function NuevoProyectoPage() {
           setUniversidades(univData.filter(u => u.is_active));
         }
 
+        const tipoRes = await fetch("/api/admin/project-types");
+        if (tipoRes.ok) {
+          const tipoData = await tipoRes.json();
+          const tipos = (tipoData.tipos ?? []).filter((t: TipoProyecto) => t.activo !== false);
+          setTiposProyecto(tipos);
+          if (tipos.some((t: TipoProyecto) => t.id === "tipo-tesis")) setTipoProyectoId("tipo-tesis");
+          else if (tipos[0]?.id) setTipoProyectoId(tipos[0].id);
+        }
+
         setStep("seleccionar-universidad");
       } catch {
         router.replace("/login");
@@ -104,6 +124,8 @@ export default function NuevoProyectoPage() {
   }, [router]);
 
   async function resolverServicioId(): Promise<string> {
+    if (tipoProyectoId === "tipo-tesis") return "tesis-001";
+    if (tipoProyectoId === "tipo-monografia") return "mono-001";
     if (servicioId) return servicioId;
     const res = await fetch("/api/services");
     if (!res.ok) return "";
@@ -127,6 +149,7 @@ export default function NuevoProyectoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           servicio_id: sid,
+          tipo_proyecto_id: tipoProyectoId,
           universidad_id: universidadId || undefined,
           modalidad_creacion: modalidad,
           tema_aprobado: temaPropio.trim(),
@@ -156,6 +179,7 @@ export default function NuevoProyectoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           servicio_id: sid,
+          tipo_proyecto_id: tipoProyectoId,
           universidad_id: universidadId || undefined,
           modalidad_creacion: modalidad,
           tema_aprobado: "(Por definir)",
@@ -315,6 +339,32 @@ export default function NuevoProyectoPage() {
                 adaptada a tu estilo personal de escritura.
               </p>
             </div>
+
+            {tiposProyecto.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
+                {tiposProyecto.map(tipo => (
+                  <button
+                    key={tipo.id}
+                    onClick={() => setTipoProyectoId(tipo.id)}
+                    style={{
+                      padding: "16px 14px", borderRadius: 12, cursor: "pointer", textAlign: "left",
+                      background: tipoProyectoId === tipo.id ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.82)",
+                      border: tipoProyectoId === tipo.id ? "2px solid var(--accent)" : "1.5px solid rgba(231,231,227,0.95)",
+                      color: "var(--fg-primary)",
+                    }}
+                  >
+                    <div style={{ fontSize: 20, marginBottom: 8 }}>{tipo.icon || "ðŸ“„"}</div>
+                    <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>{tipo.nombre}</div>
+                    <div style={{ fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.5 }}>
+                      {tipo.fases_count ?? 0} fases configuradas
+                    </div>
+                    {tipoProyectoId === tipo.id && (
+                      <div style={{ marginTop: 10, fontSize: 11, color: "var(--accent)", fontWeight: 800 }}>âœ“ ESTRUCTURA ACTIVA</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
               {/* Modo Directo */}

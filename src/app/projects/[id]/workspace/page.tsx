@@ -16,6 +16,7 @@ interface Proyecto {
   titulo_provisional: string | null;
   estado_fase: number;
   servicio_id: string;
+  tipo_proyecto_id?: string;
   universidad_id?: string;
   modalidad_creacion?: "directa" | "guiada";
   perfil_estilo_usuario?: string | null;
@@ -98,6 +99,71 @@ function renderMd(text: string): string {
     .replace(/\n\n+/g,'</p><p class="md-p">')
     .replace(/\n/g,'<br/>')
     .replace(/^/,'<p class="md-p">') + '</p>';
+}
+
+function isGenericMarkerDetail(detail: string) {
+  return !detail
+    || /^(dato|dato aqui|dato aquí|valor|informacion|información|pendiente|completar)$/i.test(detail.trim());
+}
+
+function inferExpectedFromContext(beforeWords: string, afterWords: string) {
+  const before = beforeWords.toLowerCase();
+  const after = afterWords.toLowerCase();
+  const immediateAfter = afterWords.match(/^\s*([A-Za-zÁÉÍÓÚáéíóúÑñ0-9%$]+)/)?.[1] ?? "";
+  const immediateBefore = beforeWords.match(/([A-Za-zÁÉÍÓÚáéíóúÑñ0-9%$]+)\s*$/)?.[1] ?? "";
+
+  if (/%|porcentaje|tasa|proporcion|proporción|incremento|crecimiento|variacion|variación/.test(`${before} ${after}`)) {
+    return "Porcentaje o tasa";
+  }
+  if (/\$|bs\.?|monto|costo|presupuesto|precio|ingreso|egreso|financiamiento|inversion|inversión/.test(`${before} ${after}`)) {
+    return "Monto o valor monetario";
+  }
+  if (/año|ano|gesti[oó]n|periodo|per[ií]odo|fecha|mes|trimestre|semestre/.test(`${before} ${after}`)) {
+    return "Periodo o fecha";
+  }
+  if (/fuente|seg[uú]n|instituci[oó]n|entidad|autor|reporte|informe|base de datos/.test(`${before} ${after}`)) {
+    return "Fuente o referencia";
+  }
+  if (/ley|decreto|norma|resoluci[oó]n|reglamento|art[ií]culo/.test(`${before} ${after}`)) {
+    return "Normativa o referencia legal";
+  }
+  if (/muestra|poblaci[oó]n|encuesta|entrevista|participantes|estudiantes|docentes|empresas|usuarios|casos/.test(`${before} ${after}`)) {
+    const noun = immediateAfter || immediateBefore;
+    return noun ? `Cantidad de ${noun.toLowerCase()}` : "Cantidad o tamaño de muestra";
+  }
+  if (/nombre|denominaci[oó]n|instituci[oó]n|universidad|empresa|municipio|departamento|sector/.test(`${before} ${after}`)) {
+    return "Nombre específico";
+  }
+  return "Dato específico";
+}
+
+function markerContextFromContent(content: string, markerStart: number, markerText: string, markerDetail: string) {
+  const before = content.slice(0, markerStart);
+  const after = content.slice(markerStart + markerText.length);
+  const headingMatches = [...before.matchAll(/^#{1,6}\s+(.+)$/gm)];
+  const heading = headingMatches.at(-1)?.[1]?.replace(/\*\*/g, "").trim() ?? "Ubicación en el texto";
+
+  const beforeWords = before
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .slice(-8)
+    .join(" ");
+  const afterWords = after
+    .replace(/\s+/g, " ")
+    .trim()
+    .split(" ")
+    .slice(0, 10)
+    .join(" ");
+  const rawSnippet = `${beforeWords} _____ ${afterWords}`
+    .replace(/\s+/g, " ")
+    .trim();
+  const normalizedDetail = markerDetail.trim().replace(/^[:\s-]+/, "");
+  const expected = isGenericMarkerDetail(normalizedDetail)
+    ? inferExpectedFromContext(beforeWords, afterWords)
+    : normalizedDetail;
+
+  return { heading, snippet: rawSnippet, expected };
 }
 
 function paginateMarkdown(text: string, unitsPerPage = 1850): string[] {
@@ -224,7 +290,7 @@ export default function WorkspacePage() {
   const [vistaActiva, setVistaActiva] = useState<"borrador" | "final">("borrador");
 
   // Missing data marker state
-  const [replacementValue, setReplacementValue] = useState("");
+  const [markerInputs, setMarkerInputs] = useState<Record<number, string>>({});
   const [isReplacing, setIsReplacing] = useState(false);
 
   // Calibration
@@ -287,7 +353,9 @@ export default function WorkspacePage() {
         }
 
         try {
-          const phRes = await fetch(`/api/admin/phase-definitions?servicio_id=${proj.servicio_id ?? "mono-001"}`);
+          const phaseParams = new URLSearchParams({ servicio_id: proj.servicio_id ?? "mono-001" });
+          if (proj.tipo_proyecto_id) phaseParams.set("tipo_proyecto_id", proj.tipo_proyecto_id);
+          const phRes = await fetch(`/api/admin/phase-definitions?${phaseParams.toString()}`);
           if (phRes.ok) {
             const phData = await phRes.json();
             if (!phData.is_default && phData.phases?.length > 0) {
@@ -452,11 +520,17 @@ export default function WorkspacePage() {
 
   // ── Replace Marker ────────────────────────────────────────────────────────────
 
-  async function handleReplaceMarker() {
-    if (!proyecto || !displayContent || !replacementValue.trim()) return;
+  async function handleReplaceMarker(markerIndex = 0) {
+    const rawValue = markerInputs[markerIndex] ?? "";
+    const cleanValue = rawValue.trim();
+    if (!proyecto || !displayContent || !cleanValue) return;
     setIsReplacing(true);
     try {
-      const newContent = displayContent.replace(/\[COMPLETAR(.*?)\]/i, replacementValue.trim());
+      let currentIndex = -1;
+      const newContent = displayContent.replace(/\[COMPLETAR(.*?)\]/gi, (match) => {
+        currentIndex += 1;
+        return currentIndex === markerIndex ? cleanValue : match;
+      });
       
       const isDraft = (esGuiado && vistaActiva === "borrador");
       const phaseId = currentFaseDef.id;
@@ -464,7 +538,7 @@ export default function WorkspacePage() {
         ? (isDraft ? `${phaseId}_borrador` : phaseId)
         : (isDraft ? `${selectedFase}_borrador` : String(selectedFase));
       
-      const payload: any = { phase_contents: { ...proyecto.phase_contents, [keyStr]: newContent } };
+      const payload: Record<string, unknown> = { phase_contents: { ...proyecto.phase_contents, [keyStr]: newContent } };
       
       // If it's the final version and static, also update the legacy fields
       if (!isDynamic && !isDraft) {
@@ -487,7 +561,11 @@ export default function WorkspacePage() {
         }
         return np;
       });
-      setReplacementValue("");
+      setMarkerInputs(prev => {
+        const next = { ...prev };
+        delete next[markerIndex];
+        return next;
+      });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -610,10 +688,23 @@ export default function WorkspacePage() {
 
   // Missing data analysis
   const markerRegex = /\[COMPLETAR(.*?)\]/gi;
-  const markerMatch = displayContent ? displayContent.match(markerRegex) : null;
-  const numMarkers = markerMatch ? markerMatch.length : 0;
+  const markerItems = displayContent
+    ? Array.from(displayContent.matchAll(markerRegex), (match, index) => {
+      const text = match[0];
+      const detail = match[1]?.trim().replace(/^[:\s-]+/, "") || `Dato pendiente ${index + 1}`;
+      const context = markerContextFromContent(displayContent, match.index ?? 0, text, detail);
+      return {
+        index,
+        text,
+        detail,
+        heading: context.heading,
+        snippet: context.snippet,
+        expected: context.expected,
+      };
+    })
+    : [];
+  const numMarkers = markerItems.length;
   const hasMarkers = numMarkers > 0;
-  const firstMarkerText = hasMarkers ? markerMatch![0] : "";
   const panelBorder = "1px solid rgba(255, 255, 255, 0.4)";
   const panelBg = "rgba(255, 255, 255, 0.55)";
   const panelBlur = "blur(28px) saturate(180%)";
@@ -751,11 +842,41 @@ export default function WorkspacePage() {
       </header>
 
       {/* 3-COLUMN BODY */}
-      <div className="flex-1 flex flex-col xl:flex-row overflow-y-auto xl:overflow-hidden relative w-full">
+      <style>{`
+        .workspace-three-pane {
+          display: flex;
+          flex-direction: column;
+        }
+        .workspace-main-column {
+          min-width: 0;
+        }
+        .workspace-editor-inner {
+          width: 100%;
+          max-width: 920px;
+          margin: 0 auto;
+        }
+        @media (min-width: 1280px) {
+          .workspace-three-pane {
+            display: grid;
+            grid-template-columns: minmax(320px, 360px) minmax(0, 1fr) clamp(380px, 22vw, 500px);
+            overflow: hidden;
+          }
+        }
+        @media (min-width: 1920px) {
+          .workspace-three-pane {
+            grid-template-columns: minmax(340px, 380px) minmax(760px, 1fr) clamp(460px, 24vw, 560px);
+          }
+          .workspace-editor-inner {
+            max-width: 980px;
+          }
+        }
+      `}</style>
+
+      <div className="workspace-three-pane flex-1 overflow-y-auto xl:overflow-hidden relative w-full">
 
         {/* ── COL 1: CHAT & GENERATION (fixed 360px on desktop) ── */}
         <div
-          className="w-full xl:w-[360px] shrink-0 flex flex-col border-b xl:border-b-0 relative z-40 min-h-[500px] xl:min-h-0"
+          className="w-full xl:w-auto shrink-0 flex flex-col border-b xl:border-b-0 relative z-40 min-h-[500px] xl:min-h-0"
           style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderRight: panelBorder, boxShadow: panelShadow }}
         >
           {/* UPPER SCROLLABLE AREA */}
@@ -985,12 +1106,12 @@ export default function WorkspacePage() {
 
         {/* ── COL 2: CONTENT VIEWER (flex) ── */}
         <div 
-          className="flex-1 overflow-y-auto relative z-10 min-h-[600px] xl:min-h-0"
+          className="workspace-main-column overflow-y-auto relative z-10 min-h-[600px] xl:min-h-0"
           style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur }}
         >
           {displayContent ? (
             <div
-              className="fade-in w-full max-w-[960px] mx-auto p-6 md:p-10 lg:p-16 pb-20 relative overflow-hidden"
+              className="workspace-editor-inner fade-in p-6 md:p-10 lg:p-16 pb-20 relative overflow-hidden"
             >
               {/* Inner wrapper */}
               <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid var(--bg-subtle)" }}>
@@ -1014,34 +1135,57 @@ export default function WorkspacePage() {
 
               {/* Data Replacement Panel */}
               {hasMarkers && (
-                <div style={{ marginBottom: 24, padding: "16px 20px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 12 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                    <span style={{ fontSize: 18 }}>🛑</span>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: "#fbbf24", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Acción Requerida: Faltan {numMarkers} dato{numMarkers > 1 ? "s" : ""} por completar
+                <div style={{ marginBottom: 24, padding: "16px 18px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 10 }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: "#b45309", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                        Datos requeridos por el documento
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 4, lineHeight: 1.5 }}>
+                        Revisa la ubicación y completa el valor real que corresponde a esa frase.
+                      </div>
                     </div>
+                    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, color: "#92400e", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.24)", borderRadius: 999, padding: "4px 9px" }}>
+                      {numMarkers} pendiente{numMarkers > 1 ? "s" : ""}
+                    </span>
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 12, lineHeight: 1.5 }}>
-                    La IA ha dejado marcadores indicados como <strong style={{ color: "#fbbf24", background: "rgba(245,158,11,0.2)", padding: "2px 4px", borderRadius: 4 }}>{firstMarkerText}</strong>. Ingresa el valor real de la investigación para el primer marcador:
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <input 
-                      className="input-dark" 
-                      value={replacementValue} 
-                      onChange={e => setReplacementValue(e.target.value)} 
-                      onKeyDown={e => { if (e.key === "Enter" && replacementValue.trim()) handleReplaceMarker(); }}
-                      placeholder="Ej: 25%, Aduana Nacional, $us 50,000, etc." 
-                      style={{ flex: 1, fontSize: 12 }} 
-                      disabled={isReplacing}
-                    />
-                    <button 
-                      onClick={handleReplaceMarker} 
-                      disabled={!replacementValue.trim() || isReplacing}
-                      className="btn-purple" 
-                      style={{ padding: "8px 16px", fontSize: 12, opacity: (!replacementValue.trim() || isReplacing) ? 0.5 : 1 }}
-                    >
-                      {isReplacing ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> Guardando...</> : "Guardar e inyectar dato →"}
-                    </button>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {markerItems.map((marker) => {
+                      const value = markerInputs[marker.index] ?? "";
+                      return (
+                        <div key={`${marker.text}-${marker.index}`} style={{ display: "grid", gridTemplateColumns: "minmax(220px, 0.7fr) minmax(200px, 1fr) auto", gap: 10, alignItems: "start", padding: "10px", borderRadius: 8, background: "rgba(255,255,255,0.56)", border: "1px solid rgba(245,158,11,0.16)" }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div style={{ fontSize: 10, fontWeight: 800, color: "#92400e", marginBottom: 3 }}>
+                              Dato {marker.index + 1}: {marker.expected}
+                            </div>
+                            <div style={{ fontSize: 10, color: "#7c2d12", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {marker.heading}
+                            </div>
+                            <div title={marker.snippet} style={{ fontSize: 11, color: "#5b4b2a", lineHeight: 1.45, background: "rgba(245,158,11,0.1)", border: "1px dashed rgba(245,158,11,0.42)", borderRadius: 6, padding: "6px 8px" }}>
+                              {marker.snippet}
+                            </div>
+                          </div>
+                          <input
+                            className="input-dark"
+                            value={value}
+                            onChange={e => setMarkerInputs(prev => ({ ...prev, [marker.index]: e.target.value }))}
+                            onKeyDown={e => { if (e.key === "Enter" && value.trim()) handleReplaceMarker(marker.index); }}
+                            placeholder={`Escribe ${marker.expected.toLowerCase()}`}
+                            style={{ fontSize: 12, minWidth: 0 }}
+                            disabled={isReplacing}
+                          />
+                          <button
+                            onClick={() => handleReplaceMarker(marker.index)}
+                            disabled={!value.trim() || isReplacing}
+                            className="btn-purple"
+                            style={{ padding: "8px 12px", fontSize: 11, opacity: (!value.trim() || isReplacing) ? 0.5 : 1, whiteSpace: "nowrap" }}
+                          >
+                            {isReplacing ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> Guardando</> : "Reemplazar"}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -1087,10 +1231,10 @@ export default function WorkspacePage() {
           )}
         </div>
 
-        {/* ── COL 3: PDF PREVIEW (fixed 340px on desktop, toggleable) ── */}
+        {/* ── COL 3: PDF PREVIEW ── */}
         {showPdfPanel && (
           <div
-            className="w-full xl:w-[340px] shrink-0 flex flex-col border-t xl:border-t-0 relative z-40 min-h-[500px] xl:min-h-0"
+            className="w-full xl:w-auto shrink-0 flex flex-col border-t xl:border-t-0 relative z-40 min-h-[500px] xl:min-h-0"
             style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
           >
             {/* Panel header */}

@@ -18,6 +18,7 @@ import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { llamarIA } from "@/lib/aiProvider";
 import { getProyecto, updateProyecto } from "@/lib/memoryStore";
 import { loadFromDisk } from "@/lib/persistence";
+import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import type { EstadoFase, UpdateTables } from "@/types/database";
 
 const FASE_ETIQUETA: Record<number, string> = {
@@ -60,6 +61,9 @@ function buildSystemPrompt({
   const parts: string[] = [];
 
   parts.push(phasePrompt);
+  parts.push(
+    `\n=== MARCADORES DE DATOS PENDIENTES ===\nSi falta un dato verificable, NO escribas un marcador genérico como [COMPLETAR DATO AQUÍ]. Usa siempre este formato descriptivo:\n[COMPLETAR: descripción específica del dato]\nEjemplos válidos: [COMPLETAR: tamaño de muestra en estudiantes], [COMPLETAR: porcentaje de crecimiento anual], [COMPLETAR: fuente institucional y año], [COMPLETAR: nombre de la normativa aplicable], [COMPLETAR: periodo de análisis].\nLa descripción debe decir qué debe completar el estudiante, no solo que falta un dato.\n=== FIN MARCADORES ===`
+  );
 
   if (perfilEstilo?.trim()) {
     parts.push(
@@ -205,9 +209,11 @@ async function generarSinSupabase({
 
   // ── Modo dinámico: phase_id ───────────────────────────────────────────────
   if (phase_id) {
-    const disk = loadFromDisk();
     const servicio_id = proyecto.servicio_id ?? "mono-001";
-    const phaseDefs = disk.phaseDefinitions?.[servicio_id];
+    const phaseDefs = phaseDefinitionsForProject({
+      servicioId: servicio_id,
+      tipoProyectoId: (proyecto as { tipo_proyecto_id?: string }).tipo_proyecto_id,
+    });
 
     if (!phaseDefs?.length) {
       return NextResponse.json({ error: "No hay fases personalizadas para este servicio" }, { status: 404 });
@@ -238,7 +244,10 @@ async function generarSinSupabase({
       ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
       : "";
 
-    const phasePromptBase = loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
+    const typePrompt = tipo === "borrador"
+      ? currentPhase.prompt_borrador?.trim()
+      : currentPhase.prompt_final?.trim();
+    const phasePromptBase = typePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
 
     const borradorKey = `${phase_id}_borrador`;
@@ -472,8 +481,10 @@ async function generarConSupabase({
   const hilos = hilosData?.map(h => h.regla_inmutable) ?? [];
 
   // Load dynamic phase definitions for labels
-  const disk = loadFromDisk();
-  const phaseDefs = disk.phaseDefinitions?.[servicio_id ?? "mono-001"];
+  const phaseDefs = phaseDefinitionsForProject({
+    servicioId: servicio_id ?? "mono-001",
+    tipoProyectoId: (proyecto as unknown as { tipo_proyecto_id?: string }).tipo_proyecto_id,
+  });
   const legacyPhaseLabel = phaseDefs?.find(p => p.orden === fase_numero)?.label ?? `Fase ${fase_numero}`;
 
   const { data: promptBorradorData } = await db
@@ -485,7 +496,12 @@ async function generarConSupabase({
     .eq("tipo" as never, tipo === "borrador" ? "borrador" : "final")
     .maybeSingle();
 
+  const phaseByOrder = phaseDefs.find(p => p.orden === fase_numero * 10 || p.orden === fase_numero);
+  const typePrompt = tipo === "borrador"
+    ? phaseByOrder?.prompt_borrador?.trim()
+    : phaseByOrder?.prompt_final?.trim();
   const phasePromptBase = promptBorradorData?.contenido_prompt
+    ?? typePrompt
     ?? loadPhasePromptFromDisk(fase_numero, tipo);
 
   const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
@@ -496,7 +512,7 @@ async function generarConSupabase({
     const col = FASE_A_COLUMNA[f];
     let contenido: string | null = null;
     if (col) {
-      contenido = (proyecto as Record<string, any>)[col] as string | null;
+      contenido = (proyecto as Record<string, unknown>)[col] as string | null;
     }
     // Also check phase_contents for dynamic phases
     const pc = (proyecto as unknown as { phase_contents?: Record<string, string> }).phase_contents;
@@ -568,7 +584,7 @@ async function generarConSupabase({
       (updatePayload as Record<string, unknown>)[colKey] = textoGenerado;
     }
     // Always store in phase_contents for dynamic support
-    (updatePayload as Record<string, any>).phase_contents = {
+    (updatePayload as Record<string, unknown>).phase_contents = {
       ...(((proyecto as unknown as { phase_contents?: Record<string, unknown> }).phase_contents) ?? {}),
       [phaseKey]: textoGenerado,
     };

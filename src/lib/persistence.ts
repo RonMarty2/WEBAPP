@@ -1,19 +1,20 @@
 /**
  * File-based persistence for in-memory stores.
- * Writes to OS temp dir — fuera del directorio del proyecto para evitar que
- * el file watcher de Turbopack detecte cambios y dispare Hot Module Replacement.
- * Solo se usa cuando Supabase no está configurado.
+ * Writes to `.store/data.json` by default so admin prompts and project
+ * definitions survive dev-server restarts. Solo se usa cuando Supabase no está
+ * configurado.
  */
 
 import fs from "fs";
 import os from "os";
 import path from "path";
 
-// ─ Usar directorio temporal del OS para evitar disparar el watcher de Turbopack ─
-// Si la variable de entorno STORE_PATH está definida, úsala; si no, usa os.tmpdir().
+// Si la variable de entorno STORE_PATH está definida, úsala; si no, usa .store.
+const DEFAULT_STORE_DIR = path.join(process.cwd(), ".store");
+const LEGACY_STORE_FILE = path.join(os.tmpdir(), "laboratorio-academico-store", "data.json");
 const STORE_DIR = process.env.STORE_PATH
   ? path.resolve(process.env.STORE_PATH)
-  : path.join(os.tmpdir(), "laboratorio-academico-store");
+  : DEFAULT_STORE_DIR;
 const STORE_FILE = path.join(STORE_DIR, "data.json");
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
@@ -26,10 +27,13 @@ interface WorkspacePrompts {
 export interface PhaseDefinition {
   id: string;          // unique ID e.g. "ph-abc123"
   servicio_id: string;
+  tipo_proyecto_id?: string;
   orden: number;       // 0, 10, 20... (gaps allow inserting between)
   label: string;       // "Planteamiento del Tema"
   short_label: string; // "Planteamiento"
   prompt: string;      // full system prompt for this phase
+  prompt_borrador?: string;
+  prompt_final?: string;
 }
 
 export interface CalibracionPregunta {
@@ -82,9 +86,34 @@ function ensureDir() {
   }
 }
 
+function migrateLegacyStoreIfNeeded() {
+  if (!fs.existsSync(LEGACY_STORE_FILE)) return;
+  ensureDir();
+
+  if (!fs.existsSync(STORE_FILE)) {
+    fs.copyFileSync(LEGACY_STORE_FILE, STORE_FILE);
+    return;
+  }
+
+  const legacyMtime = fs.statSync(LEGACY_STORE_FILE).mtimeMs;
+  const currentMtime = fs.statSync(STORE_FILE).mtimeMs;
+  if (currentMtime >= legacyMtime) return;
+
+  const current = JSON.parse(fs.readFileSync(STORE_FILE, "utf8")) as StoreData;
+  const legacy = JSON.parse(fs.readFileSync(LEGACY_STORE_FILE, "utf8")) as StoreData;
+  const merged: StoreData = {
+    ...current,
+    ...legacy,
+    proyectos: { ...(current.proyectos ?? {}), ...(legacy.proyectos ?? {}) },
+    users: { ...(current.users ?? {}), ...(legacy.users ?? {}) },
+  };
+  fs.writeFileSync(STORE_FILE, JSON.stringify(merged, null, 2), "utf8");
+}
+
 export function loadFromDisk(): StoreData {
   try {
     ensureDir();
+    migrateLegacyStoreIfNeeded();
     if (!fs.existsSync(STORE_FILE)) return { proyectos: {}, users: {} };
     const raw = fs.readFileSync(STORE_FILE, "utf8");
     return JSON.parse(raw) as StoreData;

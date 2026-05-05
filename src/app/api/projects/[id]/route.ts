@@ -75,6 +75,7 @@ export async function PATCH(req: Request, { params }: Params) {
     if (typeof body.tema_aprobado === "string") allowed.tema_aprobado = body.tema_aprobado;
     if (typeof body.titulo_provisional === "string") allowed.titulo_provisional = body.titulo_provisional;
     if (typeof body.completado === "boolean") allowed.completado = body.completado;
+    if (typeof body.tipo_proyecto_id === "string") allowed.tipo_proyecto_id = body.tipo_proyecto_id;
     if (typeof body.estado_fase === "number" && body.estado_fase >= 0) {
       allowed.estado_fase = body.estado_fase;
     }

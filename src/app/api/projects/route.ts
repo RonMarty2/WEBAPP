@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { createProyecto, listProyectos } from "@/lib/memoryStore";
+import { projectTypeIdForService, serviceIdForProjectType } from "@/lib/projectTypePhases";
 import type { InsertTables } from "@/types/database";
 
 // ── GET ───────────────────────────────────────────────────────
@@ -66,7 +67,9 @@ export async function POST(req: Request) {
     const { user } = await requireAuth();
 
     const body = await req.json();
-    const { servicio_id, universidad_id, tema_aprobado, titulo_provisional, modalidad_creacion } = body;
+    const { tipo_proyecto_id, universidad_id, tema_aprobado, titulo_provisional, modalidad_creacion } = body;
+    const servicio_id = body.servicio_id || serviceIdForProjectType(tipo_proyecto_id);
+    const resolvedTipoProyectoId = tipo_proyecto_id || projectTypeIdForService(servicio_id);
 
     if (!servicio_id) {
       return NextResponse.json({ error: "servicio_id es requerido" }, { status: 400 });
@@ -76,6 +79,7 @@ export async function POST(req: Request) {
       const proyecto = createProyecto({
         usuario_id: user.id,
         servicio_id,
+        tipo_proyecto_id: resolvedTipoProyectoId,
         universidad_id: universidad_id ?? undefined,
         modalidad_creacion: modalidad_creacion ?? "directa",
         tema_aprobado: tema_aprobado ?? null,
@@ -106,6 +110,7 @@ export async function POST(req: Request) {
       const proyecto = createProyecto({
         usuario_id: user.id,
         servicio_id,
+        tipo_proyecto_id: resolvedTipoProyectoId,
         universidad_id: universidad_id ?? undefined,
         modalidad_creacion: modalidad_creacion ?? "directa",
         tema_aprobado: tema_aprobado ?? null,
@@ -142,6 +147,7 @@ export async function POST(req: Request) {
       const proyecto = createProyecto({
         usuario_id: user.id,
         servicio_id,
+        tipo_proyecto_id: resolvedTipoProyectoId,
         universidad_id: universidad_id ?? undefined,
         modalidad_creacion: modalidad_creacion ?? "directa",
         tema_aprobado: tema_aprobado ?? null,

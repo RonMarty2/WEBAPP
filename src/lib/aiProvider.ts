@@ -1,6 +1,12 @@
 // Unified AI provider — supports all major providers.
 // Per-service configuration: each service can use a different provider + model.
 
+import {
+  isTokenLimitError,
+  maxCompletionTokensForProvider,
+  nextGroqRetryTokenBudget,
+} from "@/lib/aiTokenPolicy.mjs";
+
 export interface AICallResult {
   text: string;
   provider: string;
@@ -327,16 +333,25 @@ export async function llamarIAConConfig(
   }
   // openai-compatible (Groq, OpenAI, Mistral, DeepSeek, xAI, Cohere, Together, Perplexity)
   if (providerId === "groq") {
-    // Groq: retry with smaller model on TPM error
+    // Groq free/dev limits can reject a request when prompt + completion exceed TPM.
     const models = [model, "llama-3.1-8b-instant"].filter((m, i, a) => a.indexOf(m) === i);
     let lastErr = "";
     for (const m of models) {
+      const tokenBudget = maxCompletionTokensForProvider(providerId, maxTokens);
       try {
-        return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, m, system, user, maxTokens);
+        return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, m, system, user, tokenBudget);
       } catch (e) {
         lastErr = (e as Error).message;
-        const isLimit = lastErr.toLowerCase().includes("too large") || lastErr.toLowerCase().includes("rate_limit") || lastErr.toLowerCase().includes("tokens per minute");
-        if (!isLimit) throw e;
+        if (!isTokenLimitError(lastErr)) throw e;
+      }
+
+      const retryTokenBudget = nextGroqRetryTokenBudget(tokenBudget);
+      if (!retryTokenBudget) continue;
+      try {
+        return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, m, system, user, retryTokenBudget);
+      } catch (e) {
+        lastErr = (e as Error).message;
+        if (!isTokenLimitError(lastErr)) throw e;
       }
     }
     throw new Error(lastErr);
