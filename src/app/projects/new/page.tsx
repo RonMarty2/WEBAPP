@@ -66,6 +66,22 @@ export default function NuevoProyectoPage() {
         const meData = await meRes.json();
         if (!meData.user) { router.replace("/login"); return; }
 
+        // Autocompletar datos para facilitar pruebas
+        const u = meData.user;
+        const isTestUser = 
+          u.role === "admin" || 
+          (u.email && (u.email.includes("demo") || u.email.includes("test") || u.email.includes("lmiguellz"))) ||
+          process.env.NODE_ENV === "development" ||
+          (typeof window !== "undefined" && window.location.hostname === "localhost");
+
+        if (isTestUser) {
+          setTemaPropio("Análisis del impacto de la inteligencia artificial en la educación superior boliviana 2024");
+          setPrograma("Diplomado en Educación Superior Tecnológica");
+          setMaterias("Tecnologías Educativas\nPedagogía Moderna\nEvaluación por Competencias");
+          setEntorno("Universidad Mayor de San Andrés, Facultad de Humanidades");
+          setTemaElegido("Estrategias de retención estudiantil basadas en machine learning en universidades privadas");
+        }
+
         if (svcRes.ok) {
           const svcData = await svcRes.json();
           const svcs: Servicio[] = svcData.servicios ?? [];
