@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
 
 // ── SVG Icons ────────────────────────────────────────────────────────────────
 function IconDashboard() {
@@ -314,7 +315,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 {currentModuleNav.map(({ href, label, Icon }) => {
                   const isActive = pathname === href;
                   return (
-                    <a
+                    <Link
                       key={href}
                       href={href}
                       className="flex items-center gap-2 px-4 py-2 text-[12px] transition-colors duration-100 no-underline"
@@ -327,7 +328,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     >
                       <span className="text-[10px] w-4 shrink-0">{isActive ? "[•]" : "[ ]"}</span>
                       <span>{label}</span>
-                    </a>
+                    </Link>
                   );
                 })}
               </nav>
@@ -342,7 +343,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {GLOBAL_NAV.map(({ href, label, Icon }) => {
                 const isActive = pathname === href;
                 return (
-                  <a
+                  <Link
                     key={href}
                     href={href}
                     className="flex items-center gap-2 px-4 py-2 text-[12px] transition-colors duration-100 no-underline"
@@ -355,7 +356,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   >
                     <span className="text-[10px] w-4 shrink-0">{isActive ? "[•]" : "[ ]"}</span>
                     <span>{label}</span>
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
@@ -364,12 +365,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Footer */}
         <div className="border-t border-[#e5e7eb] py-2">
-          <a
+          <Link
             href="/dashboard"
             className="flex items-center gap-2 px-4 py-2 text-[11px] text-[#666] hover:text-[#000] hover:bg-[#f5f5f5] transition-colors no-underline"
           >
             <span className="text-[10px]">[ ]</span> vista_estudiante
-          </a>
+          </Link>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 px-4 py-2 text-[11px] text-[#c00] hover:bg-[#fff5f5] transition-colors text-left w-full border-0 bg-transparent cursor-pointer"
