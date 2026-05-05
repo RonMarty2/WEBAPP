@@ -19,10 +19,12 @@ function IconPlus() {
 const EMPTY: UniversityFormData = {
   name: "",
   logo_url: "",
+  logo_assets: {},
   latex_prompt: "",
   cover_template: "",
   campos_portada: [],
   format: {
+    pageSize: "letter",
     font: "Times New Roman",
     size: 12,
     lineHeight: 1.5,
@@ -84,11 +86,13 @@ export default function UniversidadesPage() {
     setForm({
       name:           univ.name,
       logo_url:       univ.logo_url || "",
+      logo_assets:    { ...(univ.logo_assets ?? {}) },
       latex_prompt:   univ.latex_prompt || "",
       cover_template: univ.cover_template || "",
       campos_portada: [...(univ.campos_portada ?? [])],
       format: {
         ...univ.format,
+        pageSize:                univ.format.pageSize ?? "letter",
         margins:                 { ...univ.format.margins },
         alineacion:              univ.format.alineacion ?? "justify",
         numero_paginas_posicion: univ.format.numero_paginas_posicion ?? "top-right",

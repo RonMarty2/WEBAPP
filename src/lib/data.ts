@@ -5,11 +5,13 @@ export interface University {
   id: string;
   name: string;
   logo_url?: string;
+  logo_assets?: Record<string, string>;
   latex_prompt?: string;
   // Portada
   campos_portada?: string[]; // ["programa","version","tutor","carrera"]
   cover_template?: string;   // HTML con variables {nombre_estudiante}, {titulo}, etc.
   format: {
+    pageSize?: "letter" | "a4" | "legal";
     font: string;
     size: number;
     lineHeight: number;
@@ -45,10 +47,10 @@ export const DEFAULT_UNIVERSITIES: University[] = [
   {
     id: "umss-001",
     name: "Universidad Mayor de San Simón (UMSS)",
-    logo_url: "",
+    logo_url: "/logos/umss.png",
     latex_prompt: "Formato UMSS FCE Posgrado: Times New Roman 12pt, interlineado doble, márgenes 2.54cm todos los lados, alineación izquierda (no justificado). Portada con logo UMSS, facultad, departamento, tipo de modalidad, programa/versión, tipo de documento, título, estudiante, ciudad y año. Numeración en esquina superior derecha. Citas en formato APA 7. Monografía: 30-70 páginas numeradas (sin portada ni índice).",
     campos_portada: ["programa", "version"],
-    format: { font: "Times New Roman", size: 12, lineHeight: 2.0, margins: { top: 2.54, left: 2.54, bottom: 2.54, right: 2.54 }, alineacion: "left", numero_paginas_posicion: "top-right" },
+    format: { pageSize: "letter", font: "Times New Roman", size: 12, lineHeight: 2.0, margins: { top: 2.54, left: 2.54, bottom: 2.54, right: 2.54 }, alineacion: "left", numero_paginas_posicion: "top-right" },
     modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado", "Trabajo Dirigido"],
     is_active: true,
   },

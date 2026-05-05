@@ -15,7 +15,7 @@ export default function AdminLoginPage() {
     router.prefetch("/admin");
     router.prefetch("/dashboard");
     if (localStorage.getItem("adminAuthed") === "1") {
-      router.replace("/admin");
+      window.location.assign("/admin");
     }
   }, [router]);
 
@@ -24,11 +24,14 @@ export default function AdminLoginPage() {
     if (!password || loading) return;
     setLoading(true);
     setError("");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 15_000);
     try {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password }),
+        signal: controller.signal,
       });
       const data = await res.json();
       if (!res.ok) {
@@ -38,10 +41,12 @@ export default function AdminLoginPage() {
       }
       
       localStorage.setItem("adminAuthed", "1");
-      router.replace("/admin");
-    } catch {
-      setError("Error de conexión");
+      window.location.assign("/admin");
+    } catch (err) {
+      setError(err instanceof DOMException && err.name === "AbortError" ? "La verificación tardó demasiado. Intenta de nuevo." : "Error de conexión");
       setLoading(false);
+    } finally {
+      window.clearTimeout(timeout);
     }
   }
 

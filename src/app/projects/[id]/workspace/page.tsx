@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
-import type { University } from "@/lib/data";
+import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml, getHtmlCover, buildCss } from "@/lib/pdfTemplate";
 import GlassModal from "@/components/ui/GlassModal";
 
@@ -41,6 +41,7 @@ interface WorkspaceCache {
   user: SessionUser | null;
   proyecto: Proyecto | null;
   university: University | null;
+  pdfData?: StudentCoverData;
   selectedFase: number;
   isDynamic: boolean;
   phaseDefs: PhaseDef[];
@@ -216,6 +217,7 @@ export default function WorkspacePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isPdfDownloading, setIsPdfDownloading] = useState(false);
   const [error, setError] = useState("");
 
   const [feedbackTexto, setFeedbackTexto] = useState("");
@@ -251,6 +253,7 @@ export default function WorkspacePage() {
       setUser(cached.user ?? null);
       setProyecto(cached.proyecto ?? null);
       setUniversity(cached.university ?? null);
+      if (cached.pdfData) setPdfData(cached.pdfData);
       setIsDynamic(Boolean(cached.isDynamic));
       setPhaseDefs(Array.isArray(cached.phaseDefs) ? cached.phaseDefs : []);
       if (typeof cached.selectedFase === "number") setSelectedFase(cached.selectedFase);
@@ -324,6 +327,7 @@ export default function WorkspacePage() {
       user,
       proyecto,
       university,
+      pdfData,
       selectedFase,
       isDynamic,
       phaseDefs,
@@ -333,7 +337,7 @@ export default function WorkspacePage() {
     } catch {
       /* storage quota or private mode */
     }
-  }, [cacheKey, user, proyecto, university, selectedFase, isDynamic, phaseDefs, loading]);
+  }, [cacheKey, user, proyecto, university, pdfData, selectedFase, isDynamic, phaseDefs, loading]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => { setFeedbackTexto(""); setVistaActiva("borrador"); }, [selectedFase]);
@@ -584,7 +588,25 @@ export default function WorkspacePage() {
     : finalContent;
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
-  const docHtml = buildDocPreview(proyecto, displayFases as typeof FASES_STATIC, university, pdfData);
+  const documentUniversity = university ?? DEFAULT_UNIVERSITIES[0];
+  const phaseContents = Object.fromEntries(
+    displayFases.map((f, index) => [
+      `fase_${index}`,
+      getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num)
+    ])
+  );
+  const phaseLabels = Object.fromEntries(
+    displayFases.map((f, index) => [`fase_${index}`, f.label])
+  );
+  const documentTitle = pdfData.tituloTrabajo?.trim() || proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento";
+  const docHtml = fasesCompletadas > 0 ? generatePdfHtml({
+    university: documentUniversity,
+    studentData: pdfData,
+    phaseContents,
+    phaseLabels,
+    titulo: documentTitle,
+    preview: true,
+  }) : "";
 
   // Missing data analysis
   const markerRegex = /\[COMPLETAR(.*?)\]/gi;
@@ -1087,25 +1109,13 @@ export default function WorkspacePage() {
             </div>
 
             {/* Document preview */}
-            <div style={{ flex:1, overflowY:"auto", padding:"16px 14px" }}>
+            <div style={{ flex:1, overflowY:"hidden", padding:0, background:"rgba(241,245,249,0.72)" }}>
               {docHtml ? (
-                <>
-                  <style>{`
-                    .doc-root{font-family:'Georgia',serif;color:var(--fg-primary); display:flex; flex-direction:column; gap:26px; align-items:center; padding:10px 0 28px;}
-                    .doc-page{background:white; width:min(100%, 300px); aspect-ratio:210 / 297; box-shadow:0 8px 22px rgba(0,0,0,0.14), 0 0 1px rgba(0,0,0,0.18); border-radius:2px; position:relative; overflow:hidden;}
-                    .doc-page::after{content:""; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 0 1px rgba(15,23,42,0.06);}
-                    .doc-page-content{padding:38px 30px 34px; height:100%; overflow:hidden;}
-                    .doc-cover-page{display:flex; align-items:flex-start; justify-content:center; padding:0;}
-                    .doc-cover-scale{transform:scale(0.5); transform-origin:top center; width:200%; margin:0 -50%; padding-top:34px;}
-                    .doc-main-title{font-size:16px;font-weight:800;color:#000;text-align:center;margin:0 0 12px;line-height:1.45;}
-                    .doc-ch-title{font-size:12px;font-weight:700;color:#000;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 12px; border-bottom:1px solid #000; padding-bottom:6px;}
-                    .doc-ch-body .md-p{font-size:9.4px;line-height:1.58;margin:5px 0;color:#222; text-align:justify;}
-                    .doc-ch-body .md-h1,.doc-ch-body .md-h2,.doc-ch-body .md-h3,.doc-ch-body .md-h4{font-size:10.6px;font-weight:700;color:#000;margin:9px 0 5px}
-                    .doc-ch-body .md-strong{font-weight:700;color:#000}
-                    .doc-ch-body .md-li{font-size:9.4px;color:#222;margin:3px 0;line-height:1.55; text-align:justify;}
-                  `}</style>
-                  <div dangerouslySetInnerHTML={{ __html: docHtml }}/>
-                </>
+                <iframe
+                  title="Vista previa del documento final"
+                  srcDoc={docHtml}
+                  style={{ width:"100%", height:"100%", border:0, display:"block", background:"#eef0f3" }}
+                />
               ) : (
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10, padding:"40px 0" }}>
                   <div style={{ fontSize:36, opacity:0.12 }}>📋</div>
@@ -1127,25 +1137,64 @@ export default function WorkspacePage() {
                 </button>
                 {university && (
                   <button
-                    onClick={() => {
-                      const phaseContents = Object.fromEntries(
-                        displayFases.map(f => [
-                          `fase_${(f as typeof FASES_STATIC[0]).num}`,
-                          getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num)
-                        ])
-                      );
+                    disabled={isPdfDownloading}
+                    onClick={async () => {
+                      setIsPdfDownloading(true);
+                      setError("");
                       const html = generatePdfHtml({
-                        university,
+                        university: documentUniversity,
                         studentData: pdfData,
                         phaseContents,
-                        titulo: proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento"
+                        phaseLabels,
+                        titulo: documentTitle
                       });
-                      const win = window.open("", "_blank");
-                      if (win) { win.document.write(html); win.document.close(); win.setTimeout(() => win.print(), 500); }
+                      try {
+                        const res = await fetch("/api/export/pdf", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ html, title: documentTitle, responseMode: "base64" }),
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                          throw new Error(data.error || "No se pudo generar el PDF.");
+                        }
+                        if (!data.pdfBase64 || !data.bytes) {
+                          throw new Error("El PDF se generó vacío. Intenta descargarlo nuevamente.");
+                        }
+                        const binary = atob(data.pdfBase64);
+                        const buffer = new Uint8Array(binary.length);
+                        for (let i = 0; i < binary.length; i += 1) buffer[i] = binary.charCodeAt(i);
+                        if (buffer.byteLength === 0) {
+                          throw new Error("El PDF se generó vacío. Intenta descargarlo nuevamente.");
+                        }
+                        const blob = new Blob([buffer], { type: "application/pdf" });
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement("a");
+                        const safeName = documentTitle
+                          .toLowerCase()
+                          .normalize("NFD")
+                          .replace(/[\u0300-\u036f]/g, "")
+                          .replace(/[^a-z0-9]+/g, "-")
+                          .replace(/^-+|-+$/g, "")
+                          .slice(0, 80) || "documento-academico";
+                        link.href = url;
+                        link.download = `${safeName}.pdf`;
+                        document.body.appendChild(link);
+                        link.click();
+                        window.setTimeout(() => {
+                          link.remove();
+                          URL.revokeObjectURL(url);
+                        }, 60_000);
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : "No se pudo generar el PDF.");
+                      } finally {
+                        setIsPdfDownloading(false);
+                      }
                     }}
                     className="btn-ghost"
-                    style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center" }}
+                    style={{ flex:1, fontSize:0, padding:"8px", justifyContent:"center" }}
                   >
+                    <span style={{ fontSize: 12 }}>{isPdfDownloading ? "Generando..." : "Descargar PDF"}</span>
                     🖨️ Imprimir
                   </button>
                 )}
@@ -1164,19 +1213,23 @@ export default function WorkspacePage() {
             <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Nombre Completo del Estudiante</label>
             <input className="input-dark" value={pdfData.nombre} onChange={e => setPdfData({ ...pdfData, nombre: e.target.value })} placeholder="Ej. Juan Pérez" />
           </div>
-          {(!university || (university.campos_portada || []).includes("tutor")) && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>T&iacute;tulo del Trabajo</label>
+            <input className="input-dark" value={pdfData.tituloTrabajo ?? documentTitle} onChange={e => setPdfData({ ...pdfData, tituloTrabajo: e.target.value })} placeholder="Ej. Estrategias de..." />
+          </div>
+          {(documentUniversity.campos_portada || []).includes("tutor") && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Nombre del Tutor/a</label>
               <input className="input-dark" value={pdfData.tutor || ""} onChange={e => setPdfData({ ...pdfData, tutor: e.target.value })} placeholder="Ej. Dra. María Gómez" />
             </div>
           )}
-          {(!university || (university.campos_portada || []).includes("programa")) && (
+          {(documentUniversity.campos_portada || []).includes("programa") && (
             <div style={{ display: "flex", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
                 <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Programa (Ej. Educación Superior)</label>
                 <input className="input-dark" value={pdfData.programa || ""} onChange={e => setPdfData({ ...pdfData, programa: e.target.value })} placeholder="Educación Superior..." />
               </div>
-              {(!university || (university.campos_portada || []).includes("version")) && (
+              {(documentUniversity.campos_portada || []).includes("version") && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 120 }}>
                   <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Versión</label>
                   <input className="input-dark" value={pdfData.version || ""} onChange={e => setPdfData({ ...pdfData, version: e.target.value })} placeholder="Ej. VII" />
@@ -1184,7 +1237,7 @@ export default function WorkspacePage() {
               )}
             </div>
           )}
-          {(!university || (university.campos_portada || []).includes("carrera")) && (
+          {(documentUniversity.campos_portada || []).includes("carrera") && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Carrera / Especialidad</label>
               <input className="input-dark" value={pdfData.carrera || ""} onChange={e => setPdfData({ ...pdfData, carrera: e.target.value })} placeholder="Ej. Ingeniería de Sistemas" />

@@ -15,10 +15,12 @@ export async function POST(req: Request) {
       id: `univ-${Date.now()}`,
       name: body.name,
       logo_url: body.logo_url || "",
+      logo_assets: body.logo_assets || {},
       campos_portada: body.campos_portada || [],
       cover_template: body.cover_template || "",
       latex_prompt: body.latex_prompt || "",
       format: body.format || {
+        pageSize: "letter",
         font: "Times New Roman",
         size: 12,
         lineHeight: 1.5,

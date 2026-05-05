@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { University } from "@/lib/data";
+import type { UniversityLogoAsset } from "@/lib/logoAssets";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 const CAMPOS_PORTADA_OPCIONES = [
@@ -72,6 +74,77 @@ export default function UniversityModal({
   saving, onSave, onClose,
   onAddModality, onRemoveModality,
 }: UniversityModalProps) {
+  const [activeTab, setActiveTab] = useState<"formato" | "archivos">("formato");
+  const [logoAssets, setLogoAssets] = useState<UniversityLogoAsset[]>([]);
+  const [assetFolder, setAssetFolder] = useState("");
+  const [assetStatus, setAssetStatus] = useState("");
+  const [uploadingAssets, setUploadingAssets] = useState(false);
+
+  const universityName = form.name.trim();
+  const assetMap = useMemo(
+    () => Object.fromEntries(logoAssets.map(asset => [asset.variable, asset.url])),
+    [logoAssets]
+  );
+
+  useEffect(() => {
+    if (!open || !universityName) {
+      setLogoAssets([]);
+      setAssetFolder("");
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/admin/university-assets?universityName=${encodeURIComponent(universityName)}`)
+      .then(res => res.ok ? res.json() : Promise.reject())
+      .then(data => {
+        if (cancelled) return;
+        setLogoAssets(data.assets ?? []);
+        setAssetFolder(data.folder ?? "");
+        setForm(prev => ({ ...prev, logo_assets: Object.fromEntries((data.assets ?? []).map((asset: UniversityLogoAsset) => [asset.variable, asset.url])) }));
+      })
+      .catch(() => {
+        if (!cancelled) setAssetStatus("No se pudieron cargar los archivos.");
+      });
+
+    return () => { cancelled = true; };
+  }, [open, universityName, setForm]);
+
+  async function uploadLogoAssets(files: FileList | null) {
+    if (!files?.length || !universityName) return;
+    setUploadingAssets(true);
+    setAssetStatus("");
+
+    const body = new FormData();
+    body.append("universityName", universityName);
+    Array.from(files).forEach(file => body.append("files", file));
+
+    try {
+      const res = await fetch("/api/admin/university-assets", { method: "POST", body });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "No se pudieron subir los archivos.");
+      setLogoAssets(data.assets ?? []);
+      setAssetFolder(data.folder ?? "");
+      const nextAssets = Object.fromEntries((data.assets ?? []).map((asset: UniversityLogoAsset) => [asset.variable, asset.url]));
+      setForm(prev => ({
+        ...prev,
+        logo_assets: nextAssets,
+        logo_url: prev.logo_url || (data.assets?.[0]?.url ?? ""),
+      }));
+      setAssetStatus("Archivos subidos. Copia las variables en la plantilla HTML.");
+    } catch (err) {
+      setAssetStatus(err instanceof Error ? err.message : "No se pudieron subir los archivos.");
+    } finally {
+      setUploadingAssets(false);
+    }
+  }
+
+  function copyAssetText(text: string) {
+    navigator.clipboard?.writeText(text).then(
+      () => setAssetStatus(`Copiado: ${text}`),
+      () => setAssetStatus(text)
+    );
+  }
+
   if (!open) return null;
 
   return (
@@ -101,6 +174,98 @@ export default function UniversityModal({
 
         {/* Body */}
         <div className="px-6 py-5 flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-50 dark:bg-slate-950 p-1 border border-gray-100 dark:border-slate-800">
+            {(["formato", "archivos"] as const).map(tab => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveTab(tab)}
+                className={[
+                  "px-3 py-2 rounded-lg text-[12px] font-bold transition-colors cursor-pointer",
+                  activeTab === tab
+                    ? "bg-white text-gray-950 shadow-sm dark:bg-slate-800 dark:text-white"
+                    : "text-gray-500 hover:text-gray-900 dark:text-slate-400 dark:hover:text-white",
+                ].join(" ")}
+              >
+                {tab === "formato" ? "Formato y Plantilla" : "Archivos / Logos"}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === "archivos" && (
+            <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 dark:border-slate-800 p-4">
+              <Section title="Archivos de la Universidad" />
+              <p className="text-[12px] text-gray-500 dark:text-slate-400 leading-relaxed">
+                Sube uno o varios logos. El nombre del archivo define la variable para el HTML:
+                <code className="mx-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[11px]">logo-principal.png</code>
+                se usa como
+                <code className="ml-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[11px]">{"{logo_principal}"}</code>.
+              </p>
+
+              {!universityName ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[12px] text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                  Escribe primero el nombre de la universidad para crear su carpeta de logos.
+                </div>
+              ) : (
+                <>
+                  <Field label="Subir logos">
+                    <input
+                      type="file"
+                      multiple
+                      accept=".png,.jpg,.jpeg,.webp,.svg"
+                      className={inputCls}
+                      disabled={uploadingAssets}
+                      onChange={(e) => {
+                        uploadLogoAssets(e.target.files);
+                        e.currentTarget.value = "";
+                      }}
+                    />
+                  </Field>
+
+                  <div className="rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-950 px-4 py-3 text-[12px] text-gray-600 dark:text-slate-300">
+                    Carpeta: <code className="text-blue-600 dark:text-blue-400">{assetFolder || "se creará al subir"}</code>
+                  </div>
+
+                  {assetStatus && (
+                    <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-[12px] text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-300">
+                      {assetStatus}
+                    </div>
+                  )}
+
+                  {logoAssets.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-gray-200 dark:border-slate-700 px-4 py-8 text-center text-[12px] text-gray-400 dark:text-slate-500">
+                      Todavía no hay logos subidos para esta universidad.
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {logoAssets.map(asset => (
+                        <div key={asset.url} className="grid grid-cols-[56px_1fr_auto] gap-3 items-center rounded-xl border border-gray-100 dark:border-slate-800 p-3">
+                          <div className="h-12 w-12 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 flex items-center justify-center overflow-hidden">
+                            <img src={asset.url} alt={asset.fileName} className="max-h-10 max-w-10 object-contain" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[12px] font-bold text-gray-900 dark:text-white truncate">{asset.fileName}</div>
+                            <button type="button" onClick={() => copyAssetText(`{${asset.variable}}`)}
+                              className="block text-left text-[11px] text-blue-600 dark:text-blue-400 hover:underline cursor-pointer">
+                              {`{${asset.variable}}`}
+                            </button>
+                            <button type="button" onClick={() => copyAssetText(asset.url)}
+                              className="block text-left text-[11px] text-gray-400 dark:text-slate-500 hover:underline cursor-pointer truncate max-w-full">
+                              {asset.url}
+                            </button>
+                          </div>
+                          <button type="button" onClick={() => copyAssetText(`<img src="{${asset.variable}}" />`)}
+                            className="px-3 py-1.5 rounded-full text-[11px] font-bold border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 cursor-pointer">
+                            Copiar HTML
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
 
           {/* Nombre */}
           <Field label="Nombre completo *">
@@ -115,7 +280,7 @@ export default function UniversityModal({
           <Field label="Logo URL">
             <input
               className={inputCls}
-              placeholder="https://...logo.png (dejar vacío si no hay)"
+              placeholder="/logos/umss.png o https://...logo.png"
               value={form.logo_url ?? ""}
               onChange={(e) => setForm((p) => ({ ...p, logo_url: e.target.value }))}
             />
@@ -127,7 +292,17 @@ export default function UniversityModal({
               ⚙️ Configuración Avanzada del Documento (Capítulos)
               <span className="group-open:rotate-180 transition-transform text-xs opacity-50">▼</span>
             </summary>
-            <div className="p-4 flex flex-col gap-4 bg-white dark:bg-slate-900">
+          <div className="p-4 flex flex-col gap-4 bg-white dark:bg-slate-900">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Tamaño de papel">
+              <select className={inputCls} value={form.format.pageSize ?? "letter"}
+                onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, pageSize: e.target.value as "letter" | "a4" | "legal" } }))}>
+                <option value="letter">Carta (8.5 x 11)</option>
+                <option value="a4">A4</option>
+                <option value="legal">Oficio / Legal</option>
+              </select>
+            </Field>
+          </div>
           <div className="flex gap-3">
             <Field label="Fuente">
               <select className={inputCls} value={form.format.font}
@@ -227,7 +402,7 @@ export default function UniversityModal({
           <p className="text-[11px] text-gray-400 dark:text-slate-500 -mt-2 leading-relaxed">
             HTML libre para la carátula. Variables disponibles:{" "}
             <code className="px-1 py-0.5 rounded bg-gray-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400 text-[10px]">
-              {`{nombre_estudiante} {titulo} {mes} {anio} {universidad} {facultad} {departamento} {ciudad}`}
+              {`{nombre_estudiante} {titulo} {mes} {anio} {universidad} {ciudad} {logo_url} ${Object.keys(assetMap).map(key => `{${key}}`).join(" ")}`}
             </code>
           </p>
           <textarea
