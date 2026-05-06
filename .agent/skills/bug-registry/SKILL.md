@@ -22,6 +22,9 @@ description: Base de datos de bugs conocidos del proyecto "Laboratorio Académic
 | [BUG-003](#bug-003) | Console error: "Encountered a script tag while rendering React component" | `script` `dangerouslySetInnerHTML` `React 19` `layout` |
 | [BUG-004](#bug-004) | HMR infinito / página se recarga sola al editar archivos | `HMR` `webpack` `watcher` `.store` `data.json` |
 | [BUG-005](#bug-005) | Cambios de Tailwind (ej. arbitrary values) no se reflejan | `turbopack` `hmr` `tailwind` `cache` |
+| [BUG-006](#bug-006) | Proyecto/monografia borrada reaparece despues de refrescar dashboard | `projects` `delete` `dashboard` `store` `supabase` |
+| [BUG-007](#bug-007) | Fase con prompt maestro genera solo referencias/anexos en vez del capitulo | `projects` `generate-phase` `prompt` `referencias` `fallback` |
+| [BUG-008](#bug-008) | Observacion por chat regenera demasiado / PDF queda con titulos huerfanos, referencias repetidas o indices incompletos | `projects` `chat` `pdf` `prompts` `documento-final` |
 
 ---
 
@@ -97,6 +100,29 @@ export default function AdminLayout({ children }) {
 ```
 
 **Regla de oro:** El guard de login en el render debe ir **ANTES** del check `authed === null`. Así la página de login nunca ve el spinner.
+
+---
+
+### Causa 3: `localStorage.adminAuthed` queda viejo, pero la cookie `admin_session` ya expiró
+**Root cause:** El login revisaba solo `localStorage.adminAuthed === "1"` y redirigía directo a `/admin`. Si la cookie HTTP `admin_session` ya no existía o expiró, el proxy devolvía a `/admin/login`; el login veía otra vez `adminAuthed=1` y volvía a mandar a `/admin`. Resultado: `/admin/login` se recarga constantemente y no deja entrar.
+
+**Fix aplicado (May 2026):**
+```tsx
+useEffect(() => {
+  if (localStorage.getItem("adminAuthed") !== "1") return;
+
+  fetch("/api/admin/auth/check")
+    .then((res) => {
+      if (res.ok) router.replace("/admin");
+      else localStorage.removeItem("adminAuthed");
+    })
+    .catch(() => localStorage.removeItem("adminAuthed"));
+}, [router]);
+```
+
+**Archivos:** `src/app/admin/login/page.tsx`, `src/app/admin/layout.tsx`
+
+**Regla de oro:** `localStorage.adminAuthed` solo sirve como ayuda visual del cliente; la fuente real de sesión admin es la cookie `admin_session`.
 
 ---
 
@@ -241,6 +267,106 @@ Se modifican las clases de Tailwind de un componente de React, pero los cambios 
 
 **Archivos afectados típicamente:** Componentes UI (`src/components/ui/*.tsx`)
 **Fecha:** Mayo 2026
+
+---
+
+## BUG-006
+
+### Sintoma
+El usuario borra una monografia/proyecto desde `/dashboard`, la tarjeta desaparece o parece borrarse, pero al refrescar la pagina vuelve a aparecer.
+
+### Cuando aparece
+- En usuario demo estudiante al borrar proyectos listados desde `/api/projects`.
+- Con mezcla de datos entre Supabase y `.store/data.json`.
+- Cuando una instancia del servidor mantiene en memoria una version vieja de `proyectosStore`.
+
+### Causa 1: el listado usaba memoria cacheada y no respetaba la marca persistida de oculto
+**Root cause:** El borrado del usuario guarda `oculto_por_usuario: true` en `.store/data.json`, pero `getProyecto()` y `listProyectos()` podian devolver una version vieja de `proyectosStore` sin volver a leer disco. Entonces `/api/projects` mezclaba Supabase + memoria local y traia otra vez el proyecto.
+
+**Fix aplicado (May 2026):**
+```ts
+export function reloadFromDisk(): StoreData {
+  latestDataCache = null;
+  return loadFromDisk();
+}
+```
+
+**Archivos:** `src/lib/persistence.ts`, `src/lib/memoryStore.ts`, `src/app/api/projects/route.ts`, `src/app/api/projects/[id]/route.ts`
+
+**Regla de oro:** Si el usuario borra desde dashboard, el listado debe consultar una marca persistida de oculto por usuario antes de mostrar cualquier fila que venga de Supabase o memoria.
+
+---
+
+## BUG-007
+
+### Sintoma
+Una fase con prompt maestro configurado, por ejemplo Capitulo I, queda marcada como generada pero el contenido resultante contiene casi solo `REFERENCIAS BIBLIOGRAFICAS` y `ANEXOS`.
+
+### Cuando aparece
+- El prompt maestro de una fase normal incluye directivas de bibliografia, APA 7 o `REFERENCIAS_ETAPA`.
+- La llamada a IA falla o cae al fallback.
+- En el inspector aparece `referencias-respaldadas` como modelo/fallback aunque la fase no era de referencias.
+
+### Causa 1: deteccion de fase de referencias revisaba el prompt completo
+**Root cause:** `isReferencesPhase()` buscaba palabras como `referencias` o `bibliograf` dentro de `label`, `short_label`, `prompt` y `prompt_final`. Como casi todos los prompts maestros incluyen instrucciones finales de bibliografia APA, una fase normal como Capitulo I podia clasificarse como fase de referencias.
+
+**Fix aplicado (May 2026):**
+```js
+export function isReferencesPhase(phase) {
+  const label = normalizeText(`${phase?.label ?? ""} ${phase?.short_label ?? ""}`);
+  return label.includes("referencias") || label.includes("bibliograf");
+}
+```
+
+**Archivos:** `src/lib/phaseClassification.mjs`, `src/app/api/projects/generate-phase/route.ts`, `tests/academicProject.test.mjs`
+
+**Regla de oro:** Solo el nombre de la fase decide si es una fase de referencias. El prompt maestro puede mencionar bibliografia sin convertir la fase completa en bibliografia/anexos.
+
+---
+
+## BUG-008
+
+### Sintoma
+Una observacion del tutor o del estudiante enviada por chat puede cambiar demasiado contenido de la fase. En el PDF final tambien pueden aparecer titulos solos al final de pagina, capitulos sin iniciar en hoja nueva, referencias duplicadas o indices sin tablas/figuras/graficos.
+
+### Cuando aparece
+- El estudiante ya tiene una fase generada y escribe una observacion puntual en el chat.
+- El documento final se consolida en un solo bloque Markdown y luego se exporta a PDF.
+- El contenido incluye bibliografia repetida, tablas, figuras, graficos o imagenes.
+
+### Causa 1: el chat usaba el endpoint de generacion completa
+**Root cause:** El chat del workspace enviaba observaciones a `/api/projects/generate-phase`. Ese flujo esta pensado para generar/regenerar fases completas, no para aplicar una correccion puntual manteniendo estable el resto del capitulo.
+
+**Fix aplicado (May 2026):**
+- Se agrego `/api/projects/edit-phase-section` para aplicar observaciones a la fase existente.
+- El chat usa este endpoint solo cuando ya existe contenido final y el usuario escribe una observacion.
+- El prompt de edicion queda editable en `Admin > Prompts del Workspace > Edicion por Chat`.
+
+**Archivos:** `src/app/api/projects/edit-phase-section/route.ts`, `src/app/projects/[id]/workspace/page.tsx`, `src/app/api/admin/workspace-prompts/route.ts`, `src/app/admin/prompts/page.tsx`
+
+### Causa 2: reglas editoriales mezcladas entre codigo y prompts
+**Root cause:** Algunas reglas del entregable estaban hardcodeadas en el generador o en defaults viejos con marcadores tipo `[DATO: fuente, indicador]`. Eso hacia dificil verlas, auditarlas o cambiarlas desde el admin.
+
+**Fix aplicado (May 2026):**
+- Las reglas globales se consolidaron en `workspacePrompts.hilos`.
+- Se quito la regla editorial hardcodeada de `generate-phase`.
+- Se cambio el default que permitia marcadores por una instruccion de reformular con evidencia verificable sin inventar ni dejar placeholders.
+
+**Archivos:** `.store/data.json`, `src/app/api/projects/generate-phase/route.ts`, `src/app/api/admin/workspace-prompts/route.ts`
+
+### Causa 3: el paginador Markdown no cuidaba unidades academicas
+**Root cause:** El exportador PDF cortaba por capacidad aproximada de texto. No separaba un documento final consolidado por capitulos, no evitaba que un heading quedara huerfano y no creaba indices para tablas/figuras/graficos detectados en Markdown.
+
+**Fix aplicado (May 2026):**
+- El PDF separa capitulos en hojas distintas cuando el documento final viene consolidado.
+- El paginador intenta mantener titulos junto al bloque siguiente.
+- Las referencias repetidas se deduplican durante render.
+- Las lineas `Tabla N`, `Cuadro N`, `Figura N` y `Grafico/Grafico N` generan indices especificos cuando existen.
+- Las imagenes Markdown se renderizan como figura con caption.
+
+**Archivos:** `src/lib/pdfTemplate.ts`
+
+**Regla de oro:** Las reglas del documento deben ser editables desde admin siempre que sea posible. El codigo solo debe ejecutar estructura, paginacion y persistencia.
 
 ---
 

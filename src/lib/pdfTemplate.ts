@@ -33,6 +33,49 @@ function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+function escAttr(s: string): string {
+  return esc(s).replace(/"/g, "&quot;");
+}
+
+function normalizeTextKey(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .replace(/[.,;:]+$/g, "")
+    .trim();
+}
+
+function normalizeReferenceEntry(value: string): string {
+  return normalizeTextKey(value)
+    .replace(/\[url\/doi sugerido:\s*/g, "")
+    .replace(/\[se recomienda anadir url o doi especifico\]/g, "")
+    .replace(/\[url o doi especifico si se consulto en linea\]/g, "")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isCaptionLine(value: string): boolean {
+  return /^(tabla|cuadro|figura|grafico|gr[aá]fico)\s+\d+[\.:]?\s+/i.test(value.trim());
+}
+
+function extractCaptionItems(markdown: string) {
+  const items = [...markdown.matchAll(/^(Tabla|Cuadro|Figura|Gr[aá]fico|Grafico)\s+(\d+)[\.:]?\s+(.+)$/gim)]
+    .map(match => ({
+      type: normalizeTextKey(match[1]).startsWith("tabla") || normalizeTextKey(match[1]).startsWith("cuadro")
+        ? "table"
+        : "figure",
+      label: `${match[1]} ${match[2]}. ${match[3].replace(/\*\*/g, "").trim()}`,
+    }));
+
+  return {
+    tables: items.filter(item => item.type === "table").map(item => item.label),
+    figures: items.filter(item => item.type === "figure").map(item => item.label),
+  };
+}
+
 // ── Markdown → HTML ───────────────────────────────────────────────────────────
 
 function mdToHtml(md: string): string {
@@ -41,6 +84,7 @@ function mdToHtml(md: string): string {
   let inUl = false;
   let inOl = false;
   let inReferences = false;
+  const seenReferences = new Set<string>();
   let i = 0;
 
   const closeList = () => {
@@ -77,6 +121,19 @@ function mdToHtml(md: string): string {
   while (i < lines.length) {
     const raw = lines[i];
     const line = raw.trimEnd();
+
+    const imageMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+    if (imageMatch) {
+      closeList();
+      const alt = imageMatch[1].trim();
+      const src = imageMatch[2].trim();
+      out.push(
+        `<figure class="md-figure"><img src="${escAttr(src)}" alt="${escAttr(alt)}" />${
+          alt ? `<figcaption>${inlineFormat(esc(alt))}</figcaption>` : ""
+        }</figure>`
+      );
+      i++; continue;
+    }
 
     if (isTableRow(line) && isSeparatorRow(lines[i + 1] ?? "")) {
       closeList();
@@ -184,7 +241,20 @@ function mdToHtml(md: string): string {
 
     // Normal paragraph
     closeList();
-    out.push(`<p${inReferences ? ' class="reference-entry"' : ""}>${inlineFormat(line.trim())}</p>`);
+    if (inReferences) {
+      const refKey = normalizeReferenceEntry(line.trim());
+      if (refKey && seenReferences.has(refKey)) {
+        i++;
+        continue;
+      }
+      if (refKey) seenReferences.add(refKey);
+    }
+    const paragraphClass = inReferences
+      ? ' class="reference-entry"'
+      : isCaptionLine(line)
+        ? ' class="caption-entry"'
+        : "";
+    out.push(`<p${paragraphClass}>${inlineFormat(line.trim())}</p>`);
     i++;
   }
 
@@ -232,8 +302,17 @@ function paginateMarkdown(md: string, capacity: number): string[] {
     currentUnits = 0;
   };
 
-  for (const block of blocks) {
+  for (let idx = 0; idx < blocks.length; idx++) {
+    const block = blocks[idx];
+    const headingOnly = /^#{1,6}\s/.test(block) && !block.includes("\n");
+    const nextBlock = headingOnly ? blocks[idx + 1] : undefined;
     const units = blockUnits(block);
+    const keepWithNextUnits = nextBlock ? units + Math.min(blockUnits(nextBlock), Math.floor(capacity * 0.45)) : units;
+
+    if (headingOnly && current.length && currentUnits + keepWithNextUnits > capacity) {
+      flush();
+    }
+
     if (units > capacity) {
       const sentences = block.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) ?? [block];
       for (const sentence of sentences.map(s => s.trim()).filter(Boolean)) {
@@ -451,12 +530,21 @@ export function buildCss(u: University): string {
       margin-bottom: 0.5em;
     }
 
+    p.caption-entry,
+    figcaption {
+      font-size: ${Math.max(9, size - 1)}pt;
+      text-align: center;
+      margin: 0.35em 0 0.7em;
+    }
+
     /* APA 7 headings */
     h1 {
       font-size: ${size}pt;
       font-weight: bold;
       text-align: center;
       margin: 1.5em 0 0.5em;
+      break-after: avoid;
+      page-break-after: avoid;
     }
     h1.doc-title {
       font-size: ${size + 2}pt;
@@ -467,6 +555,8 @@ export function buildCss(u: University): string {
       font-weight: bold;
       text-align: left;
       margin: 1.2em 0 0.4em;
+      break-after: avoid;
+      page-break-after: avoid;
     }
     h3 {
       font-size: ${size}pt;
@@ -474,6 +564,8 @@ export function buildCss(u: University): string {
       font-style: italic;
       text-align: left;
       margin: 1em 0 0.4em;
+      break-after: avoid;
+      page-break-after: avoid;
     }
     /* APA H4 — inline with paragraph */
     p.apa-h4 {
@@ -502,6 +594,8 @@ export function buildCss(u: University): string {
       font-size: ${Math.max(9, size - 1)}pt;
       line-height: 1.25;
       text-align: left;
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
     .md-table th,
     .md-table td {
@@ -512,6 +606,17 @@ export function buildCss(u: University): string {
     .md-table th {
       font-weight: bold;
       text-align: center;
+    }
+    .md-figure {
+      margin: 0.8em 0 1em;
+      text-align: center;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .md-figure img {
+      max-width: 100%;
+      max-height: 15cm;
+      object-fit: contain;
     }
 
     /* Page number fallback for non-Chrome browsers */
@@ -677,6 +782,31 @@ function extractTocFromMarkdown(content: string): { label: string; level: number
   return headings.slice(0, 18);
 }
 
+function isChapterHeadingLine(line: string): boolean {
+  const cleaned = normalizeTextKey(line.replace(/^#{1,6}\s+/, ""));
+  return /^capitulo\s+(i|ii|iii|iv|v|vi|vii|viii|ix|x)\b/i.test(cleaned);
+}
+
+function splitMarkdownByChapters(content: string): string[] {
+  const lines = content.split("\n");
+  const sections: string[] = [];
+  let current: string[] = [];
+
+  for (const line of lines) {
+    if (isChapterHeadingLine(line) && current.some(item => item.trim())) {
+      sections.push(current.join("\n").trim());
+      current = [];
+    }
+    current.push(line);
+  }
+
+  if (current.some(item => item.trim())) {
+    sections.push(current.join("\n").trim());
+  }
+
+  return sections.length ? sections : [content];
+}
+
 export function generatePdfHtml(params: {
   university: University;
   studentData: StudentCoverData;
@@ -698,6 +828,8 @@ export function generatePdfHtml(params: {
     .sort((a, b) => parseInt(a.replace("fase_", ""), 10) - parseInt(b.replace("fase_", ""), 10));
 
   const isSingleFinalDocument = sortedKeys.length === 1 && /monograf/i.test(phaseLabels[sortedKeys[0]] ?? "");
+  const allMarkdown = sortedKeys.map(key => phaseContents[key] ?? "").join("\n\n");
+  const captionItems = extractCaptionItems(allMarkdown);
   const tocItems = isSingleFinalDocument
     ? extractTocFromMarkdown(phaseContents[sortedKeys[0]] ?? "")
     : sortedKeys
@@ -713,7 +845,27 @@ export function generatePdfHtml(params: {
         <ol class="toc-list">
           ${tocItems.map(item => `<li class="toc-level-${item.level}">${esc(item.label)}</li>`).join("\n")}
           ${tocItems.some(item => /referencias|bibliograf/i.test(item.label)) ? "" : `<li class="toc-level-1">Referencias Bibliográficas</li>`}
+          ${captionItems.tables.length ? `<li class="toc-level-1">Índice de Tablas</li>` : ""}
+          ${captionItems.figures.length ? `<li class="toc-level-1">Índice de Figuras y Gráficos</li>` : ""}
           <li class="toc-level-1">Anexos</li>
+        </ol>
+      </section>`
+    : "";
+
+  const tableIndex = captionItems.tables.length
+    ? `<section class="document-sheet toc-sheet">
+        <h1 class="toc-title">Índice de Tablas</h1>
+        <ol class="toc-list">
+          ${captionItems.tables.map(item => `<li class="toc-level-1">${esc(item)}</li>`).join("\n")}
+        </ol>
+      </section>`
+    : "";
+
+  const figureIndex = captionItems.figures.length
+    ? `<section class="document-sheet toc-sheet">
+        <h1 class="toc-title">Índice de Figuras y Gráficos</h1>
+        <ol class="toc-list">
+          ${captionItems.figures.map(item => `<li class="toc-level-1">${esc(item)}</li>`).join("\n")}
         </ol>
       </section>`
     : "";
@@ -724,17 +876,20 @@ export function generatePdfHtml(params: {
     if (!content?.trim()) continue;
     const label = phaseLabels[key] ?? "";
     const phaseIsBibliography = /bibliograf|referencias/i.test(label);
-    const pages = paginateMarkdown(content, capacity);
-    pages.forEach((pageContent, pageIndex) => {
-      const pageIsBibliography = phaseIsBibliography || /(^|\n)#{1,3}\s*(bibliograf|referencias)/i.test(pageContent);
-      const pageTitle = pageIndex === 0 && label && !isSingleFinalDocument ? `<h1 class="doc-title">${esc(label)}</h1>` : "";
-      bodyParts.push(
-        `<section class="document-sheet content-sheet ${pageIsBibliography ? "bibliography references" : ""}">
-          <span class="page-number ${pageNumPos}"></span>
-          ${pageTitle}
-          ${mdToHtml(pageContent)}
-        </section>`
-      );
+    const sections = isSingleFinalDocument ? splitMarkdownByChapters(content) : [content];
+    sections.forEach((sectionContent) => {
+      const pages = paginateMarkdown(sectionContent, capacity);
+      pages.forEach((pageContent, pageIndex) => {
+        const pageIsBibliography = phaseIsBibliography || /(^|\n)#{1,3}\s*(bibliograf|referencias)/i.test(pageContent);
+        const pageTitle = pageIndex === 0 && label && !isSingleFinalDocument ? `<h1 class="doc-title">${esc(label)}</h1>` : "";
+        bodyParts.push(
+          `<section class="document-sheet content-sheet ${pageIsBibliography ? "bibliography references" : ""}">
+            <span class="page-number ${pageNumPos}"></span>
+            ${pageTitle}
+            ${mdToHtml(pageContent)}
+          </section>`
+        );
+      });
     });
   }
 
@@ -751,6 +906,8 @@ export function generatePdfHtml(params: {
     ${cover}
   </section>
   ${toc}
+  ${tableIndex}
+  ${figureIndex}
   ${bodyParts.join("\n")}
 </body>
 </html>`;

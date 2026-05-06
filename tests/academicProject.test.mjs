@@ -15,6 +15,7 @@ import {
   readReferenceCatalog,
   withUpdatedReferenceCatalog,
 } from "../src/lib/projectReferences.mjs";
+import { isReferencesPhase } from "../src/lib/phaseClassification.mjs";
 
 const dirty = `
 # Fase 1 - CAPITULO I
@@ -182,6 +183,23 @@ const options = normalizeRouteOptions({
 assert.equal(options.length, 1);
 assert.equal(options[0].id, "ruta-1");
 assert.equal(options[0].titulo, "Titulo A");
+
+assert.equal(
+  isReferencesPhase({
+    label: "Fase 1 - CAPITULO I: INTRODUCCION Y ANTECEDENTES DEL TEMA DE INVESTIGACION",
+    short_label: "Cap. I: INTRODUCCION Y ANTEC",
+    prompt_final: "Redacta el capitulo. Al final exacto crea una seccion ### REFERENCIAS_ETAPA con bibliografia APA 7.",
+  }),
+  false
+);
+assert.equal(
+  isReferencesPhase({
+    label: "Referencias bibliograficas y anexos",
+    short_label: "Referencias",
+    prompt_final: "Compila todas las fuentes citadas.",
+  }),
+  true
+);
 
 const phaseSummary = summarizePhaseForMemory("Capitulo I", "Uno dos tres cuatro cinco seis siete ocho nueve diez.");
 assert.equal(phaseSummary.phase_label, "Capitulo I");

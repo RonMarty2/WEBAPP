@@ -228,20 +228,25 @@ const LAYOUT_CSS = `
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [authed] = useState<boolean | null>(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("adminAuthed") === "1";
-  });
-  const [activeModule, setActiveModule] = useState(() => {
-    if (typeof window === "undefined") return "GLOBAL";
-    return localStorage.getItem("adminActiveModule") || "GLOBAL";
-  });
+  const [authed, setAuthed] = useState<boolean | null>(null);
+  const [activeModule, setActiveModule] = useState("GLOBAL");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!pathname || pathname.includes("/admin/login")) return;
-    if (authed === false) router.replace("/admin/login");
-  }, [authed, pathname, router]);
+    const flag = localStorage.getItem("adminAuthed") === "1";
+    if (flag) {
+      setAuthed(true);
+      return;
+    }
+    setAuthed(false);
+    router.replace("/admin/login");
+  }, [pathname, router]);
+
+  useEffect(() => {
+    const savedModule = localStorage.getItem("adminActiveModule");
+    if (savedModule) setActiveModule(savedModule);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMobileMenuOpen(false), 0);

@@ -29,6 +29,7 @@ import {
   readReferenceCatalog,
   withUpdatedReferenceCatalog,
 } from "@/lib/projectReferences.mjs";
+import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
 import type { EstadoFase, UpdateTables } from "@/types/database";
 
 const FASE_ETIQUETA: Record<number, string> = {
@@ -71,9 +72,6 @@ function buildSystemPrompt({
   const parts: string[] = [];
 
   parts.push(phasePrompt);
-  parts.push(
-    `\n=== REGLA DE DOCUMENTO ENTREGABLE ===\nNo uses marcadores, placeholders ni instrucciones visibles para el estudiante: prohibido escribir [COMPLETAR], DATO_EDITABLE, PENDIENTE, REFERENCIAS_ETAPA o frases como "complete aqui".\nSi falta un dato exacto, redacta con prudencia academica: explica la situacion sin inventar cifras, leyes, fuentes o instituciones especificas.\nLas fases son solo organizacion interna. No escribas "Fase 1", "Fase 2" ni etiquetas internas como parte del contenido final.\n=== FIN REGLA ===`
-  );
 
   if (perfilEstilo?.trim()) {
     parts.push(
@@ -142,17 +140,54 @@ type AcademicMemory = Record<string, unknown> & {
   reference_catalog?: string[];
 };
 
+function firstNonEmptyString(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+function getAcademicContext(value: unknown): AcademicContext {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? value as AcademicContext
+    : {};
+}
+
+function getContextDocuments(academicContext: AcademicContext): Record<string, unknown>[] {
+  return Array.isArray(academicContext.documentos) ? academicContext.documentos : [];
+}
+
+function buildContextualReferenceInput(
+  academicContext: AcademicContext,
+  ...fallbackTopics: unknown[]
+) {
+  return {
+    topic: firstNonEmptyString(
+      academicContext.contexto_inicial?.tema,
+      academicContext.ruta_elegida?.titulo,
+      ...fallbackTopics
+    ),
+    route: academicContext.ruta_elegida ?? {},
+    studentContext: academicContext.contexto_inicial ?? {},
+    documents: getContextDocuments(academicContext),
+  };
+}
+
 function academicBlockForProject(proyecto: {
   academic_context?: Record<string, unknown>;
   academic_memory?: Record<string, unknown>;
   tema_aprobado?: string | null;
   titulo_provisional?: string | null;
 }) {
-  const academicContext = (proyecto.academic_context ?? {}) as AcademicContext;
+  const academicContext = getAcademicContext(proyecto.academic_context);
   const academicMemory = (proyecto.academic_memory ?? {}) as AcademicMemory;
   const studentContext = {
     ...(academicContext.contexto_inicial ?? {}),
-    tema: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+    tema: firstNonEmptyString(
+      academicContext.contexto_inicial?.tema,
+      proyecto.tema_aprobado,
+      proyecto.titulo_provisional
+    ),
   };
   return buildAcademicContextBlock({
     contract: academicContext.ruta_elegida ?? {
@@ -160,7 +195,7 @@ function academicBlockForProject(proyecto: {
       idea_central: proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
     },
     studentContext,
-    documents: Array.isArray(academicContext.documentos) ? academicContext.documentos : [],
+    documents: getContextDocuments(academicContext),
     phaseMemory: Array.isArray(academicMemory.phase_summaries) ? academicMemory.phase_summaries : [],
   });
 }
@@ -186,14 +221,6 @@ function upsertPhaseSummary(
   };
 }
 
-function isReferencesPhase(phase: { label?: string; short_label?: string; prompt?: string; prompt_final?: string }) {
-  const text = `${phase.label ?? ""} ${phase.short_label ?? ""} ${phase.prompt ?? ""} ${phase.prompt_final ?? ""}`
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-  return text.includes("referencias") || text.includes("bibliograf");
-}
-
 function buildLocalReferencesPhase({
   proyecto,
   previousPhases,
@@ -203,8 +230,8 @@ function buildLocalReferencesPhase({
   previousPhases: { id: string; label: string }[];
   phaseContents: Record<string, string | null | undefined>;
 }) {
-  const academicContext = (proyecto.academic_context ?? {}) as AcademicContext;
-  const documents = Array.isArray(academicContext.documentos) ? academicContext.documentos : [];
+  const academicContext = getAcademicContext(proyecto.academic_context);
+  const documents = getContextDocuments(academicContext);
   const references = normalizeReferenceCatalog([
     readReferenceCatalog(proyecto.academic_memory ?? {}),
     collectReferencesFromPhaseContents(
@@ -212,14 +239,7 @@ function buildLocalReferencesPhase({
         content: phaseContents[phase.id] ?? phaseContents[`${phase.id}_borrador`] ?? null,
       }))
     ),
-    buildContextualReferences({
-      topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
-        ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
-        ?? "",
-      route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
-      studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
-      documents,
-    }),
+    buildContextualReferences(buildContextualReferenceInput(academicContext)),
   ]);
   const anexos = documents.length
     ? documents
@@ -403,6 +423,8 @@ async function generarSinSupabase({
     const borradorKey = `${phase_id}_borrador`;
     const borradorPrev = phaseContents[borradorKey] ?? null;
     const academicBlock = academicBlockForProject(proyecto);
+    const academicContext = getAcademicContext(proyecto.academic_context);
+    const academicDocuments = getContextDocuments(academicContext);
     const referenceCatalog = normalizeReferenceCatalog([
       readReferenceCatalog(proyecto.academic_memory ?? {}),
       collectReferencesFromPhaseContents(
@@ -410,16 +432,7 @@ async function generarSinSupabase({
           content: phaseContents[phase.id] ?? phaseContents[`${phase.id}_borrador`] ?? null,
         }))
       ),
-      buildContextualReferences({
-        topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
-          ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
-          ?? "",
-        route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
-        studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
-        documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
-          ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
-          : [],
-      }),
+      buildContextualReferences(buildContextualReferenceInput(academicContext)),
     ]);
     const referencesPhase = tipo !== "borrador" && isReferencesPhase(currentPhase);
 
@@ -431,19 +444,8 @@ async function generarSinSupabase({
       referencesPhase
         ? `\n--- SOPORTE ESTRUCTURADO PARA REFERENCIAS ---\n${buildReferenceSupportBlock({
             referenceCatalog,
-            documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
-              ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
-              : [],
-            contextualReferences: buildContextualReferences({
-              topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
-                ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
-                ?? "",
-              route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
-              studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
-              documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
-                ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
-                : [],
-            }),
+            documents: academicDocuments,
+            contextualReferences: buildContextualReferences(buildContextualReferenceInput(academicContext)),
           })}\n--- FIN SOPORTE DE REFERENCIAS ---`
         : null,
     ];
@@ -531,16 +533,7 @@ async function generarSinSupabase({
     const nextMemory = withUpdatedReferenceCatalog(
       nextMemoryBase ?? {},
       textoGenerado,
-      buildContextualReferences({
-        topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
-          ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
-          ?? "",
-        route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
-        studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
-        documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
-          ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
-          : [],
-      })
+      buildContextualReferences(buildContextualReferenceInput(academicContext))
     );
 
     const traceEntry = buildAITraceEntry({
@@ -693,6 +686,7 @@ async function generarSinSupabase({
     }
     delete requiereActualizacion[phaseKey];
     updates.requiere_actualizacion = requiereActualizacion;
+    const legacyAcademicContext = getAcademicContext(proyecto.academic_context);
     updates.academic_memory = withUpdatedReferenceCatalog(
       upsertPhaseSummary(
         proyecto.academic_memory,
@@ -701,16 +695,7 @@ async function generarSinSupabase({
         textoGenerado
       ) ?? {},
       textoGenerado,
-      buildContextualReferences({
-        topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
-          ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
-          ?? "",
-        route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
-        studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
-        documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
-          ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
-          : [],
-      })
+      buildContextualReferences(buildContextualReferenceInput(legacyAcademicContext))
     );
   }
 

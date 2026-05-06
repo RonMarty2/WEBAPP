@@ -6,7 +6,13 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import { getProyecto, updateProyecto, deleteProyecto, upsertProyectoSnapshot } from "@/lib/memoryStore";
+import {
+  getProyecto,
+  updateProyecto,
+  deleteProyecto,
+  hideProyectoForUser,
+  upsertProyectoSnapshot,
+} from "@/lib/memoryStore";
 import { getServiceAIStatus } from "@/lib/aiProvider";
 import type { UpdateTables, EstadoFase } from "@/types/database";
 
@@ -251,7 +257,7 @@ export async function DELETE(req: Request, { params }: Params) {
 
     if (error) {
       if (memoryProject && memoryProject.usuario_id === user.id) {
-        deleteProyecto(id);
+        hideProyectoForUser(id, user.id, memoryProject);
         return NextResponse.json({ success: true, source: "memory" });
       }
       return NextResponse.json({ error: "Error al cargar el proyecto para archivarlo" }, { status: 500 });
@@ -259,10 +265,11 @@ export async function DELETE(req: Request, { params }: Params) {
 
     if (!data) {
       if (memoryProject && memoryProject.usuario_id === user.id) {
-        deleteProyecto(id);
+        hideProyectoForUser(id, user.id, memoryProject);
         return NextResponse.json({ success: true, source: "memory" });
       }
-      return NextResponse.json({ error: "Proyecto no encontrado o ya eliminado" }, { status: 404 });
+      hideProyectoForUser(id, user.id);
+      return NextResponse.json({ success: true, source: "local-tombstone" });
     }
 
     const snapshot = {
@@ -281,7 +288,7 @@ export async function DELETE(req: Request, { params }: Params) {
       final_document_validation: memoryProject?.final_document_validation ?? {},
       oculto_por_usuario: true,
     };
-    upsertProyectoSnapshot(snapshot);
+    hideProyectoForUser(id, user.id, snapshot);
 
     return NextResponse.json({ success: true, source: "archived" });
   } catch (e) {

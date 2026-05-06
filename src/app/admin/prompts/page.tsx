@@ -28,13 +28,14 @@ interface CalibracionPregunta {
   activo: boolean;
 }
 
-type SelectionKey = "hilos" | "onboarding" | "calibracion" | "estilo-analizador" | "0" | "1" | "2" | "3" | "4" | "5";
+type SelectionKey = "hilos" | "onboarding" | "edicion-chat" | "calibracion" | "estilo-analizador" | "0" | "1" | "2" | "3" | "4" | "5";
 
 // ── Sidebar config ────────────────────────────────────────────────────────────
 
 const SIDEBAR_ITEMS: { key: SelectionKey; icon: string; label: string; color?: string }[] = [
   { key: "hilos",              icon: "🔗", label: "Hilos Conductores",     color: "#fde68a" },
   { key: "onboarding",         icon: "✨", label: "Generador de Temas",    color: "#a78bfa" },
+  { key: "edicion-chat",       icon: "✂️", label: "Edición por Chat",      color: "#60a5fa" },
   { key: "calibracion",        icon: "🎓", label: "Calibración de Estilo", color: "#f472b6" },
   { key: "estilo-analizador",  icon: "🧬", label: "Analizador de Estilo",  color: "#34d399" },
 ];
@@ -47,6 +48,10 @@ Materias destacadas: [opcional]
 Entorno laboral / institución: [opcional]
 
 Por favor, sugiere 3 temas de investigación viables y concretos para una monografía.`,
+  "edicion-chat": `Contenido actual de la fase: [se inyecta automáticamente]
+Observación del tutor/estudiante: [texto escrito en el chat]
+
+Devuelve la misma fase corregida solo en lo necesario.`,
   "0": `TEMA APROBADO: "[el tema que el estudiante eligió]"
 TÍTULO PROVISIONAL: "[título si existe]"
 
@@ -153,7 +158,7 @@ export default function PromptsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ type: "phase", key: "estilo-analizador", prompt: draftEstiloPrompt }),
         });
-      } else if (PHASE_KEYS.includes(selected as typeof PHASE_KEYS[number]) || selected === "onboarding") {
+      } else if (PHASE_KEYS.includes(selected as typeof PHASE_KEYS[number]) || selected === "onboarding" || selected === "edicion-chat") {
         // Save main prompt + borrador/final variants
         const saves = [
           fetch("/api/admin/workspace-prompts", {
@@ -186,8 +191,12 @@ export default function PromptsPage() {
             phases: {
               ...prev.phases,
               [selected]: { ...prev.phases[selected], prompt: draftPrompt, isCustom: true },
-              [`${selected}_borrador`]: { label: "Borrador", prompt: draftBorrador, isCustom: true },
-              [`${selected}_final`]: { label: "Final", prompt: draftFinal, isCustom: true },
+              ...(PHASE_KEYS.includes(selected as typeof PHASE_KEYS[number])
+                ? {
+                    [`${selected}_borrador`]: { label: "Borrador", prompt: draftBorrador, isCustom: true },
+                    [`${selected}_final`]: { label: "Final", prompt: draftFinal, isCustom: true },
+                  }
+                : {}),
             },
           };
         });
@@ -269,6 +278,7 @@ export default function PromptsPage() {
   const isEstiloAnalizador = selected === "estilo-analizador";
   const isPhase = PHASE_KEYS.includes(selected as typeof PHASE_KEYS[number]);
   const isOnboarding = selected === "onboarding";
+  const isSinglePrompt = selected === "onboarding" || selected === "edicion-chat";
 
   const isDirty = isHilos
     ? draftHilos !== (data?.hilos.join("\n") ?? "")
@@ -361,8 +371,10 @@ export default function PromptsPage() {
                   ? "Preguntas que el estudiante responde para calibrar su perfil de estilo (Modo Guiado)."
                   : isEstiloAnalizador
                     ? "Prompt del sistema para el análisis de estilo de escritura del estudiante."
-                    : isOnboarding
+                    : selected === "onboarding"
                       ? "Se ejecuta cuando el estudiante pide sugerencias de tema."
+                      : selected === "edicion-chat"
+                        ? "Se ejecuta cuando el chat ajusta una fase ya escrita sin regenerarla completa."
                       : "Prompt del sistema para esta fase (aplica a Modo Directo y como base en Modo Guiado)."}
             </p>
           </div>
@@ -566,7 +578,7 @@ export default function PromptsPage() {
         )}
 
         {/* ── Onboarding prompt (single) ── */}
-        {isOnboarding && (
+        {isSinglePrompt && (
           <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column", gap: 16, paddingRight: 8 }}>
             {autoCtx && (
               <div style={{ borderRadius: 12, border: "1px solid rgba(37,99,235,0.2)", overflow: "hidden", background: "rgba(255,255,255,0.5)" }}>

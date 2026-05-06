@@ -128,6 +128,11 @@ export function loadFromDisk(): StoreData {
   }
 }
 
+export function reloadFromDisk(): StoreData {
+  latestDataCache = null;
+  return loadFromDisk();
+}
+
 export function saveToDisk(data: StoreData) {
   latestDataCache = data;
   try {

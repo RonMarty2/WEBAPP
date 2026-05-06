@@ -67,6 +67,24 @@ export const AI_PROVIDERS: AIProviderInfo[] = [
     format: "openai",
   },
   {
+    id: "lmstudio",
+    name: "LM Studio Local",
+    color: "#8b5cf6",
+    website: "http://localhost:1234",
+    apiDocsUrl: "http://localhost:1234",
+    defaultModel: "gemma-4-e4b-uncensored-hauhaucs-aggressive",
+    models: [
+      {
+        id: "gemma-4-e4b-uncensored-hauhaucs-aggressive",
+        label: "Gemma 4 E4B local (LM Studio)",
+        contextK: 128,
+      },
+    ],
+    authHeader: "Bearer",
+    endpoint: "http://localhost:1234/v1/chat/completions",
+    format: "openai",
+  },
+  {
     id: "anthropic",
     name: "Anthropic (Claude)",
     color: "#a78bfa",
@@ -229,7 +247,9 @@ function setServiceIncident(
 
   const provider = getProviderInfo(cfg.provider_id);
   const normalized = String(rawMessage ?? "");
-  const kind = isTokenLimitError(normalized) ? "token_limit" : "provider_capacity";
+  const kind: "token_limit" | "provider_capacity" = isTokenLimitError(normalized)
+    ? "token_limit"
+    : "provider_capacity";
   const incident = {
     servicio_id: servicioId,
     provider_id: cfg.provider_id,
@@ -277,6 +297,7 @@ export function listServiceIncidents() {
 
 export function setServiceAIConfig(servicioId: string, cfg: ServiceConfig) {
   serviceConfigCache.set(servicioId, cfg);
+  clearServiceIncident(servicioId);
 }
 
 export function getServiceAIConfig(servicioId: string): ServiceConfig | undefined {
@@ -304,6 +325,7 @@ const providerKeyCache = new Map<string, string>([
   ["groq",      process.env.GROQ_API_KEY      ?? ""],
   ["anthropic", process.env.ANTHROPIC_API_KEY ?? ""],
   ["openai",    process.env.OPENAI_API_KEY    ?? ""],
+  ["lmstudio",  process.env.LMSTUDIO_API_KEY  ?? "lm-studio-local"],
   ["gemini",    process.env.GEMINI_API_KEY    ?? ""],
   ["mistral",   process.env.MISTRAL_API_KEY   ?? ""],
   ["deepseek",  process.env.DEEPSEEK_API_KEY  ?? ""],

@@ -1,3 +1,9 @@
+/**
+ * @typedef {Record<string, unknown>} UnknownRecord
+ * @typedef {{ referenceCatalog?: unknown[], documents?: UnknownRecord[], contextualReferences?: unknown[] }} ReferenceSupportInput
+ * @typedef {{ topic?: string, route?: UnknownRecord, studentContext?: UnknownRecord, documents?: UnknownRecord[] }} ContextualReferenceInput
+ */
+
 function normalizeForMatch(value) {
   return String(value ?? "")
     .toLowerCase()
@@ -100,6 +106,9 @@ function collectReferencesFromUnknown(source) {
   return [];
 }
 
+/**
+ * @param {unknown[]} [phaseContents]
+ */
 export function collectReferencesFromPhaseContents(phaseContents = []) {
   return normalizeReferenceCatalog(
     phaseContents.flatMap((item) => collectReferencesFromUnknown(item))
@@ -123,6 +132,9 @@ export function withUpdatedReferenceCatalog(memory = {}, ...sources) {
   };
 }
 
+/**
+ * @param {ReferenceSupportInput} [input]
+ */
 export function buildReferenceSupportBlock({
   referenceCatalog = [],
   documents = [],
@@ -151,6 +163,9 @@ ${documentInventory}
 `.trim();
 }
 
+/**
+ * @param {ContextualReferenceInput} [input]
+ */
 export function buildContextualReferences({
   topic = "",
   route = {},

@@ -438,6 +438,10 @@ export default function WorkspacePage() {
       if (!mensajeOverride) setChatInput("");
     }
     const faseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
+    const existingFinal = isDynamic
+      ? getFinalContent(proyecto, faseDef.id)
+      : getFinalContent(proyecto, String(selectedFase), selectedFase);
+    const shouldEditExisting = Boolean(userMsg && !feedback && tipo === "final" && existingFinal?.trim());
     const body = isDynamic
       ? { proyecto_id: proyectoId, phase_id: faseDef.id, mensaje_usuario: userMsg || undefined, tipo, feedback_usuario: feedback || undefined }
       : { proyecto_id: proyectoId, fase_numero: selectedFase, mensaje_usuario: userMsg || undefined, tipo, feedback_usuario: feedback || undefined };
@@ -445,7 +449,7 @@ export default function WorkspacePage() {
     const controller = new AbortController();
     abortRef.current = controller;
     try {
-      const res = await fetch("/api/projects/generate-phase", {
+      const res = await fetch(shouldEditExisting ? "/api/projects/edit-phase-section" : "/api/projects/generate-phase", {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
         signal: controller.signal,
       });
@@ -490,7 +494,9 @@ export default function WorkspacePage() {
       if (userMsg && !feedback) {
         setChatMsgs(prev => [...prev, {
           role: "assistant",
-          text: tipo === "final"
+          text: shouldEditExisting
+            ? "✅ Ajuste puntual aplicado sin regenerar toda la fase."
+            : tipo === "final"
             ? "✅ Versión final generada."
             : "📝 Borrador generado. Revísalo y deja tu feedback.",
           ts: Date.now(),

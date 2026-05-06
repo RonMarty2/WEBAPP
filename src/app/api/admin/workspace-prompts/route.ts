@@ -7,11 +7,12 @@
 import { NextResponse } from "next/server";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
 
-const PHASE_KEYS = ["onboarding", "0", "1", "2", "3", "4", "5"] as const;
+const PHASE_KEYS = ["onboarding", "edicion-chat", "0", "1", "2", "3", "4", "5"] as const;
 type PhaseKey = (typeof PHASE_KEYS)[number];
 
 const PHASE_LABELS: Record<PhaseKey, string> = {
   onboarding: "Generador de Temas",
+  "edicion-chat": "Edicion puntual por Chat",
   0: "Fase 0 — Planteamiento del Tema",
   1: "Fase 1 — Capítulo I: Marco Referencial",
   2: "Fase 2 — Capítulo II: Marco Teórico",
@@ -42,6 +43,22 @@ Genera exactamente 3 propuestas de tema. Para cada una usa el formato:
 - **Viabilidad:** ✅ ALTA / ⚠️ MEDIA + razón breve
 
 Al final incluye una TABLA COMPARATIVA y una recomendación de cuál elegir y por qué.`,
+
+  "edicion-chat": `Eres un editor academico quirurgico. Recibiras el contenido actual de una fase y una observacion del tutor o del estudiante.
+
+OBJETIVO:
+Aplicar SOLO el ajuste pedido, conservando la idea central, objetivos, estructura, citas validas, tono y contenido que no este afectado por la observacion.
+
+REGLAS:
+1. No regeneres todo el capitulo por gusto.
+2. No cambies el tema, enfoque, objetivos ni metodologia salvo que la observacion lo pida explicitamente.
+3. Si la observacion pide mejorar una parte, modifica esa parte y deja el resto estable.
+4. No inventes autores, datos, enlaces, DOI, instituciones ni cifras.
+5. No dejes marcadores internos ni placeholders en el documento final.
+6. Si hace falta tabla, grafico, figura o imagen y existe base real en el expediente o fuentes verificables, integrala con numeracion, titulo/caption, nota de fuente y mencion previa en el texto.
+7. Si no existe base suficiente para sostener un dato o grafico, reformula academicamente con la evidencia disponible; no escribas instrucciones para que el estudiante complete.
+
+Devuelve el contenido completo de la fase, ya corregido, sin explicar el cambio fuera del documento.`,
 
   "0": `Eres un redactor académico experto en monografías universitarias bolivianas.
 El estudiante ya eligió su tema de investigación. Tu tarea es desarrollar el PLANTEAMIENTO DEL TEMA completo con estas secciones:
@@ -105,7 +122,7 @@ Extensión: 1500-2500 palabras. Coherencia total con los capítulos anteriores. 
 ## REFERENCIAS BIBLIOGRÁFICAS
 (fuentes reales en formato APA 7, ordenadas alfabéticamente — solo las citadas en el documento)
 
-Extensión total: 2000-3500 palabras. Coherencia total con capítulos anteriores. Usa marcadores [DATO: fuente, indicador] si no tienes datos exactos.`,
+Extensión total: 2000-3500 palabras. Coherencia total con capítulos anteriores. Usa solo datos verificables del expediente, documentos subidos o fuentes públicas; si no hay base suficiente, reformula el análisis sin inventar ni dejar marcadores.`,
 
   "4": `Eres un editor académico experto. Revisa el documento completo generado en las fases anteriores y proporciona:
 

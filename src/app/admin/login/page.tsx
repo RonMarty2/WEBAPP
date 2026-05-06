@@ -14,9 +14,25 @@ export default function AdminLoginPage() {
   useEffect(() => {
     router.prefetch("/admin");
     router.prefetch("/dashboard");
-    if (localStorage.getItem("adminAuthed") === "1") {
-      window.location.assign("/admin");
-    }
+    if (localStorage.getItem("adminAuthed") !== "1") return;
+
+    let cancelled = false;
+    fetch("/api/admin/auth/check")
+      .then((res) => {
+        if (cancelled) return;
+        if (res.ok) {
+          router.replace("/admin");
+          return;
+        }
+        localStorage.removeItem("adminAuthed");
+      })
+      .catch(() => {
+        if (!cancelled) localStorage.removeItem("adminAuthed");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   async function handleLogin(e: React.FormEvent) {
@@ -41,7 +57,7 @@ export default function AdminLoginPage() {
       }
       
       localStorage.setItem("adminAuthed", "1");
-      window.location.assign("/admin");
+      router.replace("/admin");
     } catch (err) {
       setError(err instanceof DOMException && err.name === "AbortError" ? "La verificación tardó demasiado. Intenta de nuevo." : "Error de conexión");
       setLoading(false);

@@ -32,6 +32,13 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function firstNonEmptyString(...values: unknown[]): string {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
 function getLegacyContent(proyecto: Record<string, unknown>, index: number): string | null {
   const value = proyecto[`contenido_fase_${index}`];
   return typeof value === "string" && value.trim() ? value : null;
@@ -140,10 +147,15 @@ export async function POST(req: Request) {
     const phaseContents = collectPhaseContents(proyecto as unknown as Record<string, unknown>);
     const documents = Array.isArray(academicContext.documentos) ? academicContext.documentos : [];
     const phaseMemory = Array.isArray(academicMemory.phase_summaries) ? academicMemory.phase_summaries : [];
+    const projectTopic = firstNonEmptyString(
+      academicContext.contexto_inicial?.tema,
+      proyecto.tema_aprobado,
+      proyecto.titulo_provisional
+    );
     const referenceCatalog = [
       ...readReferenceCatalog(academicMemory),
       ...buildContextualReferences({
-        topic: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+        topic: projectTopic,
         route: academicContext.ruta_elegida ?? {},
         studentContext: academicContext.contexto_inicial ?? {},
         documents,
@@ -151,7 +163,7 @@ export async function POST(req: Request) {
     ];
     const studentContext = {
       ...asRecord(academicContext.contexto_inicial),
-      tema: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+      tema: projectTopic,
     };
 
     const prompt = buildFinalConsolidationPrompt({
@@ -238,7 +250,7 @@ export async function POST(req: Request) {
       academicMemory,
       finalText,
       buildContextualReferences({
-        topic: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+        topic: projectTopic,
         route: academicContext.ruta_elegida ?? {},
         studentContext: academicContext.contexto_inicial ?? {},
         documents,

@@ -8,6 +8,7 @@ import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import {
   createProyecto,
+  isProyectoOculto,
   listProyectos,
   proyectosStore,
   upsertProyectoSnapshot,
@@ -26,7 +27,7 @@ export async function GET() {
       const proyectos = memoryProjects.map(p => ({
         ...p,
         estado_fase: completedPhaseIndexForProject(p),
-        servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+        servicios: { id: p.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
       }));
       return NextResponse.json({ proyectos });
     }
@@ -54,7 +55,7 @@ export async function GET() {
       const proyectos = memoryProjects.map(p => ({
         ...p,
         estado_fase: completedPhaseIndexForProject(p),
-        servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+        servicios: { id: p.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
       }));
       return NextResponse.json({ proyectos });
     }
@@ -66,7 +67,7 @@ export async function GET() {
     );
 
     const proyectos = (data ?? [])
-      .filter((project) => !memoryById.get(project.id)?.oculto_por_usuario)
+      .filter((project) => !isProyectoOculto(project.id, user.id))
       .map((project) => {
         const memory = memoryById.get(project.id);
         return memory
@@ -84,7 +85,7 @@ export async function GET() {
           .map((project) => ({
             ...project,
             estado_fase: completedPhaseIndexForProject(project),
-            servicios: { id: project.servicio_id, nombre: "Monografía Académica" },
+            servicios: { id: project.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
           }))
       )
       .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());

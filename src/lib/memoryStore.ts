@@ -2,7 +2,7 @@
 // Data is persisted to .store/data.json so it survives server restarts.
 
 import { createHash } from "crypto";
-import { loadFromDisk, saveToDisk } from "@/lib/persistence";
+import { loadFromDisk, reloadFromDisk, saveToDisk } from "@/lib/persistence";
 
 export interface MonografiaRecord {
   id: string;
@@ -465,26 +465,26 @@ export function upsertProyectoSnapshot(record: ProyectoRecord): ProyectoRecord {
 }
 
 export function getProyecto(id: string): ProyectoRecord | undefined {
-  // Intentar desde la memoria primero; si no está, recargar del disco
-  if (proyectosStore.has(id)) return proyectosStore.get(id);
+  // El disco es la fuente autoritativa para respetar borrados hechos por otra instancia dev.
   try {
-    const disk = loadFromDisk();
+    const disk = reloadFromDisk();
     if (disk.proyectos?.[id]) {
       const record = disk.proyectos[id] as ProyectoRecord;
       proyectosStore.set(id, record);
       return record;
     }
   } catch { /* ignorar */ }
+  if (proyectosStore.has(id)) return proyectosStore.get(id);
   return undefined;
 }
 
 export function listProyectos(userId: string): ProyectoRecord[] {
   // Asegurar que la memoria esté sincronizada con el disco
   try {
-    const disk = loadFromDisk();
+    const disk = reloadFromDisk();
     if (disk.proyectos) {
       for (const [k, v] of Object.entries(disk.proyectos)) {
-        if (!proyectosStore.has(k)) proyectosStore.set(k, v as ProyectoRecord);
+        proyectosStore.set(k, v as ProyectoRecord);
       }
     }
   } catch { /* ignorar */ }
@@ -505,6 +505,51 @@ export function updateProyecto(id: string, updates: Partial<ProyectoRecord>): Pr
   proyectosStore.set(id, updated);
   persistProyectos();
   return updated;
+}
+
+export function isProyectoOculto(id: string, userId: string): boolean {
+  const project = getProyecto(id);
+  return project?.usuario_id === userId && project.oculto_por_usuario === true;
+}
+
+export function hideProyectoForUser(
+  id: string,
+  userId: string,
+  seed: Partial<ProyectoRecord> = {}
+): ProyectoRecord {
+  const now = new Date().toISOString();
+  const existing = getProyecto(id);
+  const record: ProyectoRecord = {
+    id,
+    usuario_id: existing?.usuario_id ?? userId,
+    servicio_id: existing?.servicio_id ?? seed.servicio_id ?? "mono-001",
+    tipo_proyecto_id: existing?.tipo_proyecto_id ?? seed.tipo_proyecto_id,
+    universidad_id: existing?.universidad_id ?? seed.universidad_id,
+    tema_aprobado: existing?.tema_aprobado ?? seed.tema_aprobado ?? null,
+    titulo_provisional: existing?.titulo_provisional ?? seed.titulo_provisional ?? null,
+    estado_fase: existing?.estado_fase ?? seed.estado_fase ?? 0,
+    completado: existing?.completado ?? seed.completado ?? false,
+    oculto_por_usuario: true,
+    modalidad_creacion: existing?.modalidad_creacion ?? seed.modalidad_creacion ?? "directa",
+    perfil_estilo_usuario: existing?.perfil_estilo_usuario ?? seed.perfil_estilo_usuario ?? null,
+    requiere_actualizacion: existing?.requiere_actualizacion ?? seed.requiere_actualizacion ?? {},
+    contenido_fase_0: existing?.contenido_fase_0 ?? seed.contenido_fase_0 ?? null,
+    contenido_fase_1: existing?.contenido_fase_1 ?? seed.contenido_fase_1 ?? null,
+    contenido_fase_2: existing?.contenido_fase_2 ?? seed.contenido_fase_2 ?? null,
+    contenido_fase_3: existing?.contenido_fase_3 ?? seed.contenido_fase_3 ?? null,
+    contenido_fase_4: existing?.contenido_fase_4 ?? seed.contenido_fase_4 ?? null,
+    contenido_fase_5: existing?.contenido_fase_5 ?? seed.contenido_fase_5 ?? null,
+    phase_contents: existing?.phase_contents ?? seed.phase_contents ?? {},
+    academic_context: existing?.academic_context ?? seed.academic_context ?? {},
+    academic_memory: existing?.academic_memory ?? seed.academic_memory ?? {},
+    final_document: existing?.final_document ?? seed.final_document ?? null,
+    final_document_validation: existing?.final_document_validation ?? seed.final_document_validation ?? {},
+    created_at: existing?.created_at ?? seed.created_at ?? now,
+    updated_at: now,
+  };
+  proyectosStore.set(id, record);
+  persistProyectos();
+  return record;
 }
 
 export function deleteProyecto(id: string): boolean {
