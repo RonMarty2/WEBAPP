@@ -47,6 +47,13 @@ export default function ModelosPage() {
     return saved ? { provider_id: saved.provider_id, model: saved.model } : { provider_id: "", model: "" };
   }
 
+  function hasUnsavedServiceEdit(svcId: string) {
+    const edit = serviceEdits[svcId];
+    if (!edit) return false;
+    const saved = serviceConfigs.find(s => s.servicio_id === svcId);
+    return !saved || saved.provider_id !== edit.provider_id || saved.model !== edit.model;
+  }
+
   async function saveProviderKey(providerId: string) {
     const key = keyInputs[providerId];
     if (!key?.trim()) return;
@@ -92,6 +99,11 @@ export default function ModelosPage() {
         if (exists) return prev.map(s => s.servicio_id === svcId ? { ...s, ...cfg } : s);
         return [...prev, { servicio_id: svcId, ...cfg, api_key_masked: "" }];
       });
+      setServiceEdits(prev => {
+        const next = { ...prev };
+        delete next[svcId];
+        return next;
+      });
       setSvcMsg(prev => ({ ...prev, [svcId]: "[OK] configuración guardada" }));
       setTimeout(() => setSvcMsg(prev => ({ ...prev, [svcId]: "" })), 3000);
     } catch (e) {
@@ -108,7 +120,7 @@ export default function ModelosPage() {
       subtitle="Configura proveedores de IA y asigna qué modelo usa cada servicio."
     >
       {loading ? (
-        <div className="adm-muted py-12 text-center">// cargando configuración...</div>
+        <div className="adm-muted py-12 text-center">{"// cargando configuracion..."}</div>
       ) : (
         <>
           {/* Status line */}
@@ -214,12 +226,13 @@ export default function ModelosPage() {
             <div className="adm-card">
               {configuredCount === 0 && (
                 <div className="px-5 py-3 adm-muted" style={{ borderBottom: "1px solid #e5e7eb" }}>
-                  // [WARN] configura al menos un proveedor antes de asignar servicios
+                  {"// [WARN] configura al menos un proveedor antes de asignar servicios"}
                 </div>
               )}
               {SERVICIOS.map((svc, i) => {
                 const cfg = getServiceConfig(svc.id);
                 const savedCfg = serviceConfigs.find(s => s.servicio_id === svc.id);
+                const unsaved = hasUnsavedServiceEdit(svc.id);
                 const selectedProvider = providers.find(p => p.id === cfg.provider_id);
                 const availableModels = selectedProvider?.models ?? [];
                 return (
@@ -231,11 +244,19 @@ export default function ModelosPage() {
                           <div style={{ fontSize: 12, fontWeight: 700, color: "#000" }}>{svc.nombre}</div>
                           <div className="adm-muted">{svc.desc}</div>
                         </div>
-                        {savedCfg && <span className="adm-badge-ok ml-auto">[OK] configurado</span>}
+                        {savedCfg && !unsaved && <span className="adm-badge-ok ml-auto">[OK] activo</span>}
+                        {unsaved && <span className="adm-badge-warn ml-auto">[SIN GUARDAR]</span>}
+                      </div>
+                      <div className="adm-muted mb-3">
+                        {unsaved
+                          ? "// esta seleccion todavia NO se usara; presiona guardar_config para activarla"
+                          : savedCfg
+                            ? `// activo ahora: ${savedCfg.provider_id} / ${savedCfg.model}`
+                            : "// sin IA activa para este servicio"}
                       </div>
                       <div className="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                          <div className="adm-label mb-1" style={{ fontSize: 9 }}>// proveedor</div>
+                          <div className="adm-label mb-1" style={{ fontSize: 9 }}>{"// proveedor"}</div>
                           <select value={cfg.provider_id} className="adm-select w-full"
                             onChange={e => {
                               const prov = providers.find(p => p.id === e.target.value);
@@ -248,7 +269,7 @@ export default function ModelosPage() {
                           </select>
                         </div>
                         <div>
-                          <div className="adm-label mb-1" style={{ fontSize: 9 }}>// modelo</div>
+                          <div className="adm-label mb-1" style={{ fontSize: 9 }}>{"// modelo"}</div>
                           <select value={cfg.model} disabled={!cfg.provider_id} className="adm-select w-full"
                             onChange={e => setServiceEdits(prev => ({ ...prev, [svc.id]: { ...cfg, model: e.target.value } }))}>
                             <option value="">— seleccionar —</option>

@@ -38,12 +38,132 @@ function clipWords(value, maxWords) {
 export function stripInternalDocumentMarkers(text) {
   return cleanWhitespace(text)
     .replace(/\[\[DATO_EDITABLE:[\s\S]*?\]\]([\s\S]*?)\[\[\/DATO_EDITABLE\]\]/g, "$1")
-    .replace(/\[COMPLETAR[^\]]*\]/gi, "dato académico no especificado")
+    .replace(/\s*\[COMPLETAR[^\]]*\]\s*/gi, " ")
     .replace(/^#{1,6}\s*Fase\s+\d+\s*[—-]\s*/gim, "# ")
     .replace(/\bFase\s+\d+\s*[—-]\s*/gi, "")
-    .replace(/REFERENCIAS_ETAPA/g, "Referencias Bibliograficas")
+    .replace(/REFERENCIAS\\_ETAPA/g, "")
+    .replace(/REFERENCIAS_ETAPA/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+function normalizeForMatch(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\\_/g, "_")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function isMarkdownHeading(line) {
+  return /^#{1,6}\s+/.test(line.trim());
+}
+
+function isReferenceHeading(line) {
+  const normalized = normalizeForMatch(line).replace(/^#+\s*/, "").trim();
+  return normalized.includes("referencias_etapa")
+    || normalized === "referencias"
+    || normalized.includes("referencias bibliograficas")
+    || normalized.includes("bibliografia");
+}
+
+function isAnnexHeading(line) {
+  const normalized = normalizeForMatch(line).replace(/^#+\s*/, "").trim();
+  return normalized === "anexos" || normalized.startsWith("anexo ");
+}
+
+function cleanReferenceLine(line) {
+  return stripInternalDocumentMarkers(line)
+    .replace(/^[-*]\s*/, "")
+    .replace(/^#{1,6}\s*/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function splitVisibleBodyAndBackMatter(content) {
+  const lines = cleanWhitespace(content).split("\n");
+  const body = [];
+  const references = [];
+  const annexes = [];
+  let mode = "body";
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    if (isReferenceHeading(line)) {
+      mode = "references";
+      continue;
+    }
+    if (isAnnexHeading(line)) {
+      mode = "annexes";
+      continue;
+    }
+    if (isMarkdownHeading(line) && (mode === "references" || mode === "annexes")) {
+      mode = "body";
+    }
+
+    if (mode === "references") {
+      const cleaned = cleanReferenceLine(line);
+      if (
+        cleaned.length > 18 &&
+        !/^nota\b/i.test(cleaned) &&
+        !/^(capitulo|fase|anexos?)\b/i.test(cleaned)
+      ) {
+        references.push(cleaned);
+      }
+      continue;
+    }
+
+    if (mode === "annexes") {
+      const cleaned = stripInternalDocumentMarkers(line);
+      if (cleaned) annexes.push(cleaned);
+      continue;
+    }
+
+    body.push(rawLine);
+  }
+
+  return {
+    body: stripInternalDocumentMarkers(body.join("\n")),
+    references,
+    annexes,
+  };
+}
+
+export function buildDisplayFinalDocument(phaseContents = []) {
+  const bodyParts = [];
+  const referenceSet = new Set();
+  const annexSet = new Set();
+
+  for (const item of phaseContents) {
+    const raw = typeof item === "string" ? item : item?.content;
+    if (!raw?.trim()) continue;
+    const split = splitVisibleBodyAndBackMatter(raw);
+    if (split.body) bodyParts.push(split.body);
+    for (const ref of split.references) referenceSet.add(ref);
+    for (const annex of split.annexes) annexSet.add(annex);
+  }
+
+  const references = [...referenceSet].sort((a, b) => a.localeCompare(b, "es"));
+  const annexes = [...annexSet];
+  const finalParts = bodyParts.filter(Boolean);
+
+  finalParts.push(
+    `# REFERENCIAS BIBLIOGRAFICAS\n\n${
+      references.length
+        ? references.join("\n\n")
+        : "Las referencias bibliograficas se consolidan a partir de las fuentes citadas en el desarrollo del documento."
+    }`
+  );
+
+  finalParts.push(
+    `# ANEXOS\n\n${
+      annexes.length
+        ? annexes.join("\n")
+        : "No se registraron documentos anexos independientes en el sistema."
+    }`
+  );
+
+  return cleanWhitespace(finalParts.join("\n\n"));
 }
 
 export function validateFinalDocument(text) {
@@ -185,10 +305,13 @@ export function buildFinalConsolidationPrompt({
   formatRules = "",
 } = {}) {
   const context = buildAcademicContextBlock({ contract, studentContext, documents, phaseMemory });
+  const internalReferences = new Set();
   const content = phaseContents
     .filter((item) => item?.content?.trim())
     .map((item, index) => {
-      return `=== INSUMO INTERNO ${index + 1}: ${item.label || "Seccion"} ===\n${stripInternalDocumentMarkers(item.content)}`;
+      const split = splitVisibleBodyAndBackMatter(item.content);
+      for (const ref of split.references) internalReferences.add(ref);
+      return `=== INSUMO INTERNO ${index + 1}: ${item.label || "Seccion"} ===\n${split.body}`;
     })
     .join("\n\n");
 
@@ -206,6 +329,9 @@ ${context}
 
 === INSUMOS GENERADOS POR FASES INTERNAS ===
 ${content || "No hay insumos internos suficientes. Genera la monografia desde el contrato y el contexto disponible."}
+
+=== REFERENCIAS INTERNAS DETECTADAS ===
+${[...internalReferences].join("\n") || "No se detectaron referencias internas estructuradas."}
 
 Genera una unica monografia final en Markdown academico con esta estructura:
 # CAPITULO I: INTRODUCCION Y ANTECEDENTES

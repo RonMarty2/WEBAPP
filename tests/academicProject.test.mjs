@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import {
   buildAcademicContextBlock,
+  buildDisplayFinalDocument,
   normalizeRouteOptions,
   stripInternalDocumentMarkers,
   summarizePhaseForMemory,
   validateFinalDocument,
 } from "../src/lib/academicProject.mjs";
+import { appendAITrace, latestAITrace } from "../src/lib/aiTrace.mjs";
 
 const dirty = `
 # Fase 1 - CAPITULO I
@@ -18,7 +20,63 @@ assert.equal(clean.includes("DATO_EDITABLE"), false);
 assert.equal(clean.includes("[COMPLETAR"), false);
 assert.equal(clean.includes("Fase 1"), false);
 assert.match(clean, /INE 2024/);
-assert.match(clean, /dato académico no especificado/);
+assert.equal(clean.includes("dato academico no especificado"), false);
+
+const finalDisplay = buildDisplayFinalDocument([
+  {
+    label: "CAPITULO I",
+    content: `# CAPITULO I: INTRODUCCION
+Texto del capitulo.
+### REFERENCIAS_ETAPA
+Autor A. (2020). Fuente A.
+Autor B. (2021). Fuente B.`,
+  },
+  {
+    label: "CAPITULO II",
+    content: `# CAPITULO II: MARCO TEORICO
+Mas contenido.
+## Referencias Bibliograficas
+Autor A. (2020). Fuente A.
+Autor C. (2022). Fuente C.
+## ANEXOS
+No aplica.`,
+  },
+  {
+    label: "CAPITULO III",
+    content: `# CAPITULO III: DISENO METODOLOGICO
+Texto metodologico.
+## REFERENCIAS\\_ETAPA
+Autor D. (2023). Fuente D.`,
+  },
+]);
+assert.equal((finalDisplay.match(/REFERENCIAS BIBLIOGRAFICAS/g) ?? []).length, 1);
+assert.equal(finalDisplay.includes("REFERENCIAS_ETAPA"), false);
+assert.equal(finalDisplay.includes("REFERENCIAS\\_ETAPA"), false);
+assert.equal(finalDisplay.includes("## ANEXOS\nNo aplica"), false);
+assert.match(finalDisplay, /Autor A\. \(2020\)/);
+assert.match(finalDisplay, /Autor B\. \(2021\)/);
+assert.match(finalDisplay, /Autor C\. \(2022\)/);
+assert.match(finalDisplay, /Autor D\. \(2023\)/);
+
+const tracedMemory = appendAITrace(
+  { ai_trace: [{ id: "old", timestamp: "2026-01-01T00:00:00.000Z" }] },
+  {
+    id: "new",
+    timestamp: "2026-05-06T10:00:00.000Z",
+    scope: "generate-phase",
+    phase_id: "cap-1",
+    phase_label: "Capitulo I",
+    action: "generar fase",
+    provider_id: "gemini",
+    provider_name: "Google Gemini",
+    model: "gemini-2.5-pro",
+    status: "success",
+    duration_ms: 1200,
+  }
+);
+assert.equal(tracedMemory.ai_trace.length, 2);
+assert.equal(latestAITrace(tracedMemory).provider_id, "gemini");
+assert.equal(latestAITrace(tracedMemory).model, "gemini-2.5-pro");
 
 const validation = validateFinalDocument(`
 # CAPITULO I: INTRODUCCION

@@ -18,6 +18,9 @@ declare module "@/lib/academicProject.mjs" {
   }
 
   export function stripInternalDocumentMarkers(text: string): string;
+  export function buildDisplayFinalDocument(
+    phaseContents?: Array<string | { label?: string; content?: string | null }>
+  ): string;
   export function validateFinalDocument(text: string): FinalDocumentValidation;
   export function normalizeRouteOptions(raw: unknown): AcademicRouteOption[];
   export function parseJsonFromAi(text: string): unknown;

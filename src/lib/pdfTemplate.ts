@@ -40,6 +40,7 @@ function mdToHtml(md: string): string {
   const out: string[] = [];
   let inUl = false;
   let inOl = false;
+  let inReferences = false;
   let i = 0;
 
   const closeList = () => {
@@ -53,9 +54,46 @@ function mdToHtml(md: string): string {
       .replace(/\*(.+?)\*/g, "<em>$1</em>")
       .replace(/`(.+?)`/g, "<code>$1</code>");
 
+  const isTableRow = (s: string) => /^\s*\|.+\|\s*$/.test(s);
+  const isSeparatorRow = (s: string) => {
+    const cells = s.trim().replace(/^\|/, "").replace(/\|$/, "").split("|");
+    return cells.length > 1 && cells.every(cell => /^\s*:?-{3,}:?\s*$/.test(cell));
+  };
+  const splitTableCells = (s: string) =>
+    s.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(cell => cell.trim());
+
+  const normalizeHeading = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\\_/g, "_");
+
+  const updateReferenceMode = (headingText: string) => {
+    const normalized = normalizeHeading(headingText);
+    inReferences = normalized.includes("referencias") || normalized.includes("bibliografia");
+  };
+
   while (i < lines.length) {
     const raw = lines[i];
     const line = raw.trimEnd();
+
+    if (isTableRow(line) && isSeparatorRow(lines[i + 1] ?? "")) {
+      closeList();
+      const headers = splitTableCells(line);
+      const rows: string[][] = [];
+      i += 2;
+      while (i < lines.length && isTableRow(lines[i])) {
+        rows.push(splitTableCells(lines[i]));
+        i++;
+      }
+      out.push(
+        `<table class="md-table"><thead><tr>${headers.map(header => `<th>${inlineFormat(header)}</th>`).join("")}</tr></thead><tbody>${
+          rows.map(row => `<tr>${headers.map((_, idx) => `<td>${inlineFormat(row[idx] ?? "")}</td>`).join("")}</tr>`).join("")
+        }</tbody></table>`
+      );
+      continue;
+    }
 
     // H6 → APA Level 5 (inline, bold-italic)
     if (/^###### /.test(line)) {
@@ -91,28 +129,36 @@ function mdToHtml(md: string): string {
     // H4 → APA Level 3
     if (/^#### /.test(line)) {
       closeList();
-      out.push(`<h3>${inlineFormat(line.replace(/^#### /, ""))}</h3>`);
+      const heading = line.replace(/^#### /, "");
+      updateReferenceMode(heading);
+      out.push(`<h3>${inlineFormat(heading)}</h3>`);
       i++; continue;
     }
 
     // H3 → APA Level 2
     if (/^### /.test(line)) {
       closeList();
-      out.push(`<h2>${inlineFormat(line.replace(/^### /, ""))}</h2>`);
+      const heading = line.replace(/^### /, "");
+      updateReferenceMode(heading);
+      out.push(`<h2>${inlineFormat(heading)}</h2>`);
       i++; continue;
     }
 
     // H2 → APA Level 1
     if (/^## /.test(line)) {
       closeList();
-      out.push(`<h1>${inlineFormat(line.replace(/^## /, ""))}</h1>`);
+      const heading = line.replace(/^## /, "");
+      updateReferenceMode(heading);
+      out.push(`<h1>${inlineFormat(heading)}</h1>`);
       i++; continue;
     }
 
     // H1 → document title (centered, larger)
     if (/^# /.test(line)) {
       closeList();
-      out.push(`<h1 class="doc-title">${inlineFormat(line.replace(/^# /, ""))}</h1>`);
+      const heading = line.replace(/^# /, "");
+      updateReferenceMode(heading);
+      out.push(`<h1 class="doc-title">${inlineFormat(heading)}</h1>`);
       i++; continue;
     }
 
@@ -138,7 +184,7 @@ function mdToHtml(md: string): string {
 
     // Normal paragraph
     closeList();
-    out.push(`<p>${inlineFormat(line.trim())}</p>`);
+    out.push(`<p${inReferences ? ' class="reference-entry"' : ""}>${inlineFormat(line.trim())}</p>`);
     i++;
   }
 
@@ -399,8 +445,7 @@ export function buildCss(u: University): string {
     .toc-level-2 { padding-left: 0.35cm; }
     .toc-level-3 { padding-left: 0.7cm; }
 
-    .references p,
-    .bibliography p {
+    p.reference-entry {
       padding-left: 1.27cm;
       text-indent: -1.27cm;
       margin-bottom: 0.5em;
@@ -450,6 +495,24 @@ export function buildCss(u: University): string {
     ul, ol { margin: 0.5em 0 0.5em 2em; }
     li { margin-bottom: 0.25em; }
     code { font-family: 'Courier New', monospace; font-size: 0.9em; }
+    .md-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.7em 0 0.9em;
+      font-size: ${Math.max(9, size - 1)}pt;
+      line-height: 1.25;
+      text-align: left;
+    }
+    .md-table th,
+    .md-table td {
+      border: 1px solid #000;
+      padding: 0.16cm 0.18cm;
+      vertical-align: top;
+    }
+    .md-table th {
+      font-weight: bold;
+      text-align: center;
+    }
 
     /* Page number fallback for non-Chrome browsers */
     .page-num-header {

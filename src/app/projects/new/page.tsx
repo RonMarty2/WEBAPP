@@ -39,7 +39,6 @@ interface RutaAcademica {
 type Step =
   | "loading"
   | "seleccionar-universidad"
-  | "elegir-modalidad"
   | "elegir-tipo"
   | "con-tema"
   | "sin-tema"
@@ -47,7 +46,6 @@ type Step =
   | "eligiendo"
   | "creando";
 
-type Modalidad = "directa" | "guiada";
 
 export default function NuevoProyectoPage() {
   const router = useRouter();
@@ -60,9 +58,6 @@ export default function NuevoProyectoPage() {
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
   const [universidadId, setUniversidadId] = useState("");
-
-  // Modalidad
-  const [modalidad, setModalidad] = useState<Modalidad>("directa");
 
   // Con tema
   const [temaPropio, setTemaPropio] = useState("");
@@ -347,144 +342,6 @@ export default function NuevoProyectoPage() {
               Continuar →
             </button>
           </div>
-        )}
-
-        {/* ── PASO 2: ELEGIR MODALIDAD ────────────────────────────────────────── */}
-        {step === "elegir-modalidad" && (
-          <>
-            {/* Decorative sphere above the card */}
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: 20, pointerEvents: "none" }}>
-              <div className="sphere sphere-sm float" style={{ opacity: 0.85 }} />
-            </div>
-
-          <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
-                Paso 2 de 3 — Modalidad
-              </div>
-              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿Cómo quieres trabajar?</h1>
-              <p style={{ color: "var(--fg-muted)", fontSize: 14, lineHeight: 1.6 }}>
-                El Modo Guiado genera primero un borrador, te pide retroalimentación, y luego produce la versión final —
-                adaptada a tu estilo personal de escritura.
-              </p>
-            </div>
-
-            {tiposProyecto.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
-                {tiposProyecto.map(tipo => (
-                  <button
-                    key={tipo.id}
-                    onClick={() => setTipoProyectoId(tipo.id)}
-                    style={{
-                      padding: "16px 14px", borderRadius: 12, cursor: "pointer", textAlign: "left",
-                      background: tipoProyectoId === tipo.id ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.82)",
-                      border: tipoProyectoId === tipo.id ? "2px solid var(--accent)" : "1.5px solid rgba(231,231,227,0.95)",
-                      color: "var(--fg-primary)",
-                    }}
-                  >
-                    <div style={{ fontSize: 20, marginBottom: 8 }}>{tipo.icon || "ðŸ“„"}</div>
-                    <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 4 }}>{tipo.nombre}</div>
-                    <div style={{ fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.5 }}>
-                      {tipo.fases_count ?? 0} fases configuradas
-                    </div>
-                    {tipoProyectoId === tipo.id && (
-                      <div style={{ marginTop: 10, fontSize: 11, color: "var(--accent)", fontWeight: 800 }}>âœ“ ESTRUCTURA ACTIVA</div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 24 }}>
-              {/* Modo Directo */}
-              <button
-                onClick={() => setModalidad("directa")}
-                className="btn-modality"
-                style={{
-                  padding: "24px 18px", borderRadius: 14, cursor: "pointer", textAlign: "left",
-                  background: modalidad === "directa"
-                    ? "rgba(37,99,235,0.14)"
-                    : "rgba(255,255,255,0.82)",
-                  border: modalidad === "directa" ? "2px solid var(--accent)" : "1.5px solid rgba(231,231,227,0.95)",
-                  color: "var(--fg-primary)",
-                  backdropFilter: "blur(12px)",
-                  boxShadow: modalidad === "directa"
-                    ? "0 0 32px rgba(37,99,235,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
-                    : "inset 0 1px 0 rgba(255,255,255,0.05)",
-                }}
-              >
-                <div style={{ fontSize: 32, marginBottom: 10 }}>⚡</div>
-                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15, color: modalidad === "directa" ? "var(--accent)" : "var(--fg-primary)" }}>
-                  Modo Directo
-                </div>
-                <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.6 }}>
-                  La IA genera el contenido final al instante. Sin pasos intermedios.
-                </div>
-                {modalidad === "directa" && (
-                  <div style={{ marginTop: 12, fontSize: 11, color: "var(--accent)", fontWeight: 700, letterSpacing: "0.05em" }}>✓ SELECCIONADO</div>
-                )}
-              </button>
-
-              {/* Modo Guiado */}
-              <button
-                onClick={() => setModalidad("guiada")}
-                className="btn-modality"
-                style={{
-                  padding: "24px 18px", borderRadius: 14, cursor: "pointer", textAlign: "left",
-                  background: modalidad === "guiada"
-                    ? "rgba(167,139,250,0.14)"
-                    : "rgba(255,255,255,0.82)",
-                  border: modalidad === "guiada" ? "2px solid #a78bfa" : "1.5px solid rgba(231,231,227,0.95)",
-                  color: "var(--fg-primary)",
-                  backdropFilter: "blur(12px)",
-                  boxShadow: modalidad === "guiada"
-                    ? "0 0 32px rgba(167,139,250,0.18), inset 0 1px 0 rgba(255,255,255,0.08)"
-                    : "inset 0 1px 0 rgba(255,255,255,0.05)",
-                }}
-              >
-                <div style={{ fontSize: 32, marginBottom: 10 }}>🎓</div>
-                <div style={{ fontWeight: 700, marginBottom: 6, fontSize: 15, color: modalidad === "guiada" ? "#a78bfa" : "var(--fg-primary)" }}>
-                  Modo Guiado
-                </div>
-                <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.6 }}>
-                  Calibra tu estilo, recibe un borrador, da feedback y obtén la versión final perfecta.
-                </div>
-                {modalidad === "guiada" && (
-                  <div style={{ marginTop: 12, fontSize: 11, color: "#a78bfa", fontWeight: 700, letterSpacing: "0.05em" }}>✓ SELECCIONADO</div>
-                )}
-              </button>
-            </div>
-
-            {/* Feature comparison */}
-            <div style={{ padding: "12px 14px", background: "rgba(37,99,235,0.04)", border: "1px solid rgba(37,99,235,0.1)", borderRadius: 8, marginBottom: 20 }}>
-              {[
-                ["Calibración de estilo personal", false, true],
-                ["Borrador → Feedback → Versión Final", false, true],
-                ["Generación directa sin pasos extras", true, false],
-                ["Invalidación automática de capítulos", false, true],
-              ].map(([feat, directa, guiada]) => (
-                <div key={String(feat)} style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 6, marginBottom: 6, borderBottom: "1px solid rgba(231,231,227,0.9)", fontSize: 12, color: "var(--fg-muted)" }}>
-                  <span style={{ flex: 1 }}>{String(feat)}</span>
-                  <span style={{ width: 60, textAlign: "center", color: directa ? "#22c55e" : "var(--border-hover)" }}>{directa ? "✓" : "–"}</span>
-                  <span style={{ width: 60, textAlign: "center", color: guiada ? "#a78bfa" : "var(--border-hover)" }}>{guiada ? "✓" : "–"}</span>
-                </div>
-              ))}
-              <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, paddingTop: 2, fontSize: 10, color: "var(--fg-muted)" }}>
-                <span style={{ width: 60, textAlign: "center" }}>Directo</span>
-                <span style={{ width: 60, textAlign: "center" }}>Guiado</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => { setError(""); setStep("elegir-tipo"); }}
-              className={modalidad === "guiada" ? "btn-purple" : "btn-cyan"}
-              style={{ width: "100%", justifyContent: "center", padding: "12px" }}
-            >
-              Continuar con Modo {modalidad === "guiada" ? "Guiado 🎓" : "Directo ⚡"} →
-            </button>
-          </div>
-          </>
         )}
 
         {/* ── PASO 3: ELEGIR TIPO ──────────────────────────────────────────────── */}

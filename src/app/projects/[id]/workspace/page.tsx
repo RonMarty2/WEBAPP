@@ -29,10 +29,32 @@ interface Proyecto {
   contenido_fase_5: string | null;
   phase_contents?: Record<string, string | null>;
   academic_context?: Record<string, unknown>;
-  academic_memory?: Record<string, unknown>;
+  academic_memory?: Record<string, unknown> & { ai_trace?: AITraceEntry[] };
+  active_ai_config?: AIStatus;
   final_document?: string | null;
   final_document_validation?: { ok?: boolean; errors?: string[]; warnings?: string[]; wordCount?: number };
   servicios: { id: string; nombre: string } | null;
+}
+
+interface AIStatus {
+  configured: boolean;
+  provider_id: string;
+  provider_name: string;
+  model: string;
+}
+
+interface AITraceEntry {
+  timestamp?: string;
+  scope?: string;
+  phase_id?: string | null;
+  phase_label?: string | null;
+  action?: string;
+  provider_id?: string;
+  provider_name?: string;
+  model?: string;
+  status?: "success" | "error" | "fallback";
+  duration_ms?: number | null;
+  error?: string | null;
 }
 
 interface ChatMsg { role: "user" | "assistant"; text: string; ts?: number; }
@@ -92,11 +114,24 @@ function escapeHtml(value: string) {
   return value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
+function isInspectorUser(user: SessionUser | null) {
+  return user?.role === "admin" || user?.id?.startsWith("demo-") || user?.email?.endsWith("@laboratorio.test");
+}
+
+function formatTraceTime(value?: string) {
+  if (!value) return "sin fecha";
+  try {
+    return new Date(value).toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  } catch {
+    return "sin fecha";
+  }
+}
+
 function renderMd(text: string): string {
   const safe = escapeHtml(
     text
       .replace(/\[\[DATO_EDITABLE:[\s\S]*?\]\]([\s\S]*?)\[\[\/DATO_EDITABLE\]\]/g, "$1")
-      .replace(/\[COMPLETAR[^\]]*\]/gi, "dato academico no especificado")
+      .replace(/\s*\[COMPLETAR[^\]]*\]\s*/gi, " ")
   );
   return safe
     .replace(/^#### (.+)$/gm,'<h4 class="md-h4">$1</h4>')
@@ -158,6 +193,7 @@ function paginateMarkdown(text: string, unitsPerPage = 1850): string[] {
 }
 
 // Assembles all final phases into a document HTML for the PDF preview panel
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC, university: University | null, pdfData: StudentCoverData): string {
   const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Sin título";
   const chunks: string[] = [];
@@ -259,15 +295,17 @@ export default function WorkspacePage() {
       const raw = sessionStorage.getItem(cacheKey);
       if (!raw) return;
       const cached = JSON.parse(raw) as WorkspaceCache;
-      setUser(cached.user ?? null);
-      setProyecto(cached.proyecto ?? null);
-      setUniversity(cached.university ?? null);
-      if (cached.pdfData) setPdfData(cached.pdfData);
-      setIsDynamic(Boolean(cached.isDynamic));
-      setPhaseDefs(Array.isArray(cached.phaseDefs) ? cached.phaseDefs : []);
-      if (typeof cached.selectedFase === "number") setSelectedFase(cached.selectedFase);
-      setLoading(false);
-      cacheHydratedRef.current = true;
+      queueMicrotask(() => {
+        setUser(cached.user ?? null);
+        setProyecto(cached.proyecto ?? null);
+        setUniversity(cached.university ?? null);
+        if (cached.pdfData) setPdfData(cached.pdfData);
+        setIsDynamic(Boolean(cached.isDynamic));
+        setPhaseDefs(Array.isArray(cached.phaseDefs) ? cached.phaseDefs : []);
+        if (typeof cached.selectedFase === "number") setSelectedFase(cached.selectedFase);
+        setLoading(false);
+        cacheHydratedRef.current = true;
+      });
     } catch {
       /* ignore broken cache */
     }
@@ -351,7 +389,12 @@ export default function WorkspacePage() {
   }, [cacheKey, user, proyecto, university, pdfData, selectedFase, isDynamic, phaseDefs, loading]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
-  useEffect(() => { setFeedbackTexto(""); setVistaActiva("borrador"); }, [selectedFase]);
+  useEffect(() => {
+    queueMicrotask(() => {
+      setFeedbackTexto("");
+      setVistaActiva("borrador");
+    });
+  }, [selectedFase]);
 
   // ── Calibration ───────────────────────────────────────────────────────────────
 
@@ -432,6 +475,12 @@ export default function WorkspacePage() {
           }
         }
         if (data.requiere_actualizacion) np.requiere_actualizacion = data.requiere_actualizacion;
+        if (data.ai_trace_entry) {
+          np.academic_memory = {
+            ...(prev.academic_memory ?? {}),
+            ai_trace: [data.ai_trace_entry, ...(prev.academic_memory?.ai_trace ?? [])].slice(0, 20),
+          };
+        }
         np.final_document = null;
         np.final_document_validation = {};
         return np;
@@ -499,6 +548,12 @@ export default function WorkspacePage() {
         final_document: data.final_document,
         final_document_validation: data.validation,
         completado: Boolean(data.validation?.ok),
+        academic_memory: data.ai_trace_entry
+          ? {
+              ...(prev.academic_memory ?? {}),
+              ai_trace: [data.ai_trace_entry, ...(prev.academic_memory?.ai_trace ?? [])].slice(0, 20),
+            }
+          : prev.academic_memory,
         phase_contents: {
           ...(prev.phase_contents ?? {}),
           __final_document: data.final_document,
@@ -626,6 +681,12 @@ export default function WorkspacePage() {
   const panelBg = "rgba(255, 255, 255, 0.55)";
   const panelBlur = "blur(28px) saturate(180%)";
   const panelShadow = "0 4px 30px rgba(0, 0, 0, 0.05)";
+  const showAIInspector = isInspectorUser(user);
+  const activeAI = proyecto.active_ai_config;
+  const latestTrace = proyecto.academic_memory?.ai_trace?.[0] ?? null;
+  const currentAIText = activeAI?.configured
+    ? `${activeAI.provider_name || activeAI.provider_id} / ${activeAI.model}`
+    : "IA sin configurar";
 
   // ── Calibration fullscreen ────────────────────────────────────────────────────
 
@@ -711,6 +772,22 @@ export default function WorkspacePage() {
             {isRefreshing && (
               <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(59,130,246,0.1)", border:"1px solid rgba(59,130,246,0.25)", color:"#60a5fa", fontSize:10 }}>
                 Actualizando...
+              </span>
+            )}
+            {showAIInspector && (
+              <span
+                title="Inspector IA visible solo para admin y usuario demo"
+                style={{
+                  padding: "2px 8px",
+                  borderRadius: 999,
+                  background: activeAI?.configured ? "rgba(37,99,235,0.12)" : "rgba(245,158,11,0.12)",
+                  border: activeAI?.configured ? "1px solid rgba(37,99,235,0.28)" : "1px solid rgba(245,158,11,0.32)",
+                  color: activeAI?.configured ? "var(--accent)" : "#d97706",
+                  fontSize: 10,
+                  fontWeight: 800,
+                }}
+              >
+                IA activa: {currentAIText}
               </span>
             )}
           </div>
@@ -805,19 +882,53 @@ export default function WorkspacePage() {
               <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
             </div>
 
+            {showAIInspector && (
+              <div
+                style={{
+                  margin: "10px 14px",
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "rgba(15,23,42,0.04)",
+                  border: "1px solid rgba(37,99,235,0.22)",
+                  fontSize: 11,
+                  color: "var(--fg-primary)",
+                  lineHeight: 1.45,
+                  flexShrink: 0,
+                }}
+              >
+                <div style={{ display:"flex", justifyContent:"space-between", gap:8, alignItems:"center", marginBottom:5 }}>
+                  <strong style={{ color:"var(--accent)", fontSize:10, letterSpacing:"0.08em", textTransform:"uppercase" }}>Inspector IA</strong>
+                  <span style={{ color: activeAI?.configured ? "#16a34a" : "#d97706", fontWeight:800 }}>
+                    {activeAI?.configured ? "CONFIGURADA" : "SIN CONFIG"}
+                  </span>
+                </div>
+                <div><strong>Usara:</strong> {currentAIText}</div>
+                <div style={{ marginTop:3, color:"var(--fg-secondary)" }}>Sin cambio automatico a otra API.</div>
+                {latestTrace ? (
+                  <div style={{ marginTop:4, color:"var(--fg-secondary)" }}>
+                    <strong>Ultima llamada:</strong> {latestTrace.provider_name || latestTrace.provider_id} / {latestTrace.model}
+                    {" · "}{latestTrace.status}
+                    {" · "}{formatTraceTime(latestTrace.timestamp)}
+                  </div>
+                ) : (
+                  <div style={{ marginTop:4, color:"var(--fg-secondary)" }}>Aun no hay llamadas registradas en este proyecto.</div>
+                )}
+              </div>
+            )}
+
             {/* TABS */}
             <div style={{ display: "flex", borderBottom: "1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
               <button 
                 onClick={() => setCol1Tab("generacion")}
                 style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "generacion" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "generacion" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
               >
-                ⚡ Generación
+                ⚡ Revision
               </button>
               <button 
                 onClick={() => setCol1Tab("fuentes")}
                 style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "fuentes" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "fuentes" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
               >
-                📚 Fuentes (PDF)
+                📚 Material base
               </button>
             </div>
 
@@ -907,7 +1018,9 @@ export default function WorkspacePage() {
             <div style={{ flex:1, padding:"10px 14px", display:"flex", flexDirection:"column", gap:9 }}>
             {chatMsgs.length === 0 && (
               <div style={{ color:"var(--border-hover)", fontSize:12, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
-                {displayContent ? "Contenido generado.\nPide modificaciones aquí." : "Genera la fase o envía instrucciones."}
+                {displayContent
+                  ? "Este espacio es para correcciones puntuales o ajustes por revision del tutor."
+                  : "Primero genera la fase. Luego aqui puedes pedir cambios puntuales."}
               </div>
             )}
             {chatMsgs.map((msg, i) => (
@@ -931,10 +1044,10 @@ export default function WorkspacePage() {
       {col1Tab === "fuentes" && (
         <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ fontSize: 13, color: "var(--fg-primary)", fontWeight: 700, lineHeight: 1.4 }}>
-            Archivos de Referencia para la IA
+            Material Base del Estudiante
           </div>
           <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.6, marginBottom: 8 }}>
-            Sube tus propios <strong>papers, artículos en PDF o datos en TXT</strong>. La IA leerá estos documentos y los usará como base para redactar esta fase, asegurando rigor académico y evitando que invente información.
+            Sube aqui tus <strong>documentos al inicio del proyecto</strong> (PDF o TXT). Este material se prioriza en todas las fases y en el documento final.
           </div>
           <div style={{ padding: "24px 16px", background: "rgba(167,139,250,0.04)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
             <div style={{ fontSize: 32, opacity: 0.6 }}>📄</div>
@@ -963,7 +1076,7 @@ export default function WorkspacePage() {
             >
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
                 <span style={{ fontSize:10, color:"var(--fg-secondary)", padding:"4px 10px", border:"1px solid rgba(148,163,184,0.35)", borderRadius:999, background:"rgba(255,255,255,0.85)" }}>
-                  Prompt rápido
+                  Revision / cambios
                 </span>
                 <span style={{ fontSize:10, color:"var(--fg-secondary)" }}>Ctrl+Enter para enviar</span>
               </div>
@@ -973,7 +1086,7 @@ export default function WorkspacePage() {
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
                   onKeyDown={e => { if (e.key==="Enter" && (e.ctrlKey||e.metaKey) && chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }}
-                  placeholder="Escribe tu instrucción para mejorar esta fase..."
+                  placeholder="Ej: El tutor pide reforzar marco teorico con 2 autores latinoamericanos y mejorar conclusiones..."
                   rows={2}
                   disabled={isGenerating}
                   style={{

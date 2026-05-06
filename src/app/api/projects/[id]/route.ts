@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { getProyecto, updateProyecto, deleteProyecto } from "@/lib/memoryStore";
+import { getServiceAIStatus } from "@/lib/aiProvider";
 import type { UpdateTables, EstadoFase } from "@/types/database";
 
 type Params = { params: Promise<{ id: string }> };
@@ -24,7 +25,11 @@ export async function GET(_req: Request, { params }: Params) {
         return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
       }
       return NextResponse.json({
-        proyecto: { ...p, servicios: { id: p.servicio_id, nombre: "Monografía Académica" } },
+        proyecto: {
+          ...p,
+          active_ai_config: getServiceAIStatus(p.servicio_id),
+          servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+        },
       });
     }
 
@@ -47,13 +52,22 @@ export async function GET(_req: Request, { params }: Params) {
       const p = getProyecto(id);
       if (p && p.usuario_id === user.id) {
         return NextResponse.json({
-          proyecto: { ...p, servicios: { id: p.servicio_id, nombre: "Monografía Académica" } },
+          proyecto: {
+            ...p,
+            active_ai_config: getServiceAIStatus(p.servicio_id),
+            servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+          },
         });
       }
       return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
     }
 
-    return NextResponse.json({ proyecto: data });
+    return NextResponse.json({
+      proyecto: {
+        ...data,
+        active_ai_config: getServiceAIStatus(data.servicio_id),
+      },
+    });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });

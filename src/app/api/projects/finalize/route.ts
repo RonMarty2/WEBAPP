@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { llamarIA } from "@/lib/aiProvider";
+import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
 import { getProyecto, updateProyecto } from "@/lib/memoryStore";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
+import { appendAITrace } from "@/lib/aiTrace.mjs";
 import {
+  buildDisplayFinalDocument,
   buildFinalConsolidationPrompt,
-  stripInternalDocumentMarkers,
   validateFinalDocument,
 } from "@/lib/academicProject.mjs";
 
@@ -56,6 +57,34 @@ function collectPhaseContents(proyecto: Record<string, unknown>) {
       content: typeof raw === "string" ? raw : null,
     };
   }).filter((item) => item.content?.trim());
+}
+
+function buildLocalFinalDocument(phaseContents: { label: string; content: string | null }[]) {
+  return buildDisplayFinalDocument(phaseContents);
+}
+
+function buildFinalAITraceEntry(input: {
+  servicioId: string;
+  status: "success" | "error" | "fallback";
+  providerId?: string;
+  providerName?: string;
+  model?: string;
+  durationMs: number;
+  error?: string | null;
+}) {
+  const configured = getServiceAIStatus(input.servicioId);
+  return {
+    scope: "finalize",
+    action: "generar documento final",
+    phase_id: "__final_document",
+    phase_label: "Documento final",
+    provider_id: input.providerId ?? configured.provider_id,
+    provider_name: input.providerName ?? (input.providerId === "local" ? "Local" : configured.provider_name),
+    model: input.model ?? configured.model,
+    status: input.status,
+    duration_ms: input.durationMs,
+    error: input.error ?? null,
+  };
 }
 
 async function repairFinalDocument(input: {
@@ -118,22 +147,45 @@ export async function POST(req: Request) {
 
     let proveedor = "";
     let finalText = "";
+    let traceStatus: "success" | "fallback" = "success";
+    let traceProviderId = "";
+    let traceModel = "";
+    let traceError: string | null = null;
+    const aiStart = Date.now();
     try {
       const result = await llamarIA(prompt.system, prompt.user, 9000, proyecto.servicio_id);
+      traceProviderId = result.provider;
+      traceModel = result.model;
       proveedor = `${result.provider} / ${result.model}`;
-      finalText = stripInternalDocumentMarkers(result.text);
+      finalText = buildDisplayFinalDocument([{ label: "Documento final", content: result.text }]);
     } catch (e) {
-      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+      traceStatus = "fallback";
+      traceProviderId = "local";
+      traceModel = "ensamblado-sin-ia";
+      traceError = (e as Error).message;
+      proveedor = "local / ensamblado sin IA";
+      finalText = buildLocalFinalDocument(phaseContents);
+      if (!finalText.trim()) {
+        updateProyecto(proyectoId, {
+          academic_memory: appendAITrace(academicMemory, buildFinalAITraceEntry({
+            servicioId: proyecto.servicio_id,
+            status: "error",
+            durationMs: Date.now() - aiStart,
+            error: (e as Error).message,
+          })),
+        });
+        return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+      }
     }
 
     let validation = validateFinalDocument(finalText);
     if (!validation.ok) {
       try {
-        finalText = stripInternalDocumentMarkers(await repairFinalDocument({
+        finalText = buildDisplayFinalDocument([{ label: "Documento final reparado", content: await repairFinalDocument({
           dirtyText: finalText,
           errors: validation.errors,
           servicioId: proyecto.servicio_id,
-        }));
+        }) }]);
         validation = validateFinalDocument(finalText);
       } catch {
         // Return the validation errors below; the first final text is still stored for inspection.
@@ -145,11 +197,21 @@ export async function POST(req: Request) {
       __final_document: finalText,
     };
 
+    const traceEntry = buildFinalAITraceEntry({
+      servicioId: proyecto.servicio_id,
+      status: traceStatus,
+      providerId: traceProviderId,
+      model: traceModel,
+      durationMs: Date.now() - aiStart,
+      error: traceError,
+    });
+
     const updated = updateProyecto(proyectoId, {
       phase_contents: updatedPhaseContents,
       final_document: finalText,
       final_document_validation: validation as unknown as Record<string, unknown>,
       completado: validation.ok,
+      academic_memory: appendAITrace(academicMemory, traceEntry),
     });
 
     return NextResponse.json({
@@ -157,6 +219,7 @@ export async function POST(req: Request) {
       proveedor,
       final_document: finalText,
       validation,
+      ai_trace_entry: traceEntry,
       proyecto: updated,
     }, { status: validation.ok ? 200 : 422 });
   } catch (e) {

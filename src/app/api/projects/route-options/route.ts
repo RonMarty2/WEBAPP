@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { llamarIA } from "@/lib/aiProvider";
 import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { appendAITrace } from "@/lib/aiTrace.mjs";
 import { buildAcademicContextBlock, normalizeRouteOptions, parseJsonFromAi } from "@/lib/academicProject.mjs";
 
 type AcademicContext = Record<string, unknown> & {
@@ -66,11 +67,26 @@ Formato obligatorio:
 
     let parsed: unknown;
     let proveedor = "";
+    const aiStart = Date.now();
     try {
       const result = await llamarIA(system, userPrompt, 1800, proyecto.servicio_id);
       proveedor = `${result.provider} / ${result.model}`;
       parsed = parseJsonFromAi(result.text);
     } catch (e) {
+      updateProyecto(proyectoId, {
+        academic_memory: appendAITrace(proyecto.academic_memory, {
+          scope: "route-options",
+          action: "generar rutas academicas",
+          phase_id: "route-options",
+          phase_label: "Opciones de ruta",
+          status: "error",
+          provider_id: "",
+          provider_name: "",
+          model: "",
+          duration_ms: Date.now() - aiStart,
+          error: (e as Error).message,
+        }),
+      });
       return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
     }
 
@@ -86,6 +102,17 @@ Formato obligatorio:
     };
     const updated = updateProyecto(proyectoId, {
       academic_context: updatedContext,
+      academic_memory: appendAITrace(proyecto.academic_memory, {
+        scope: "route-options",
+        action: "generar rutas academicas",
+        phase_id: "route-options",
+        phase_label: "Opciones de ruta",
+        status: "success",
+        provider_id: proveedor.split(" / ")[0] ?? "",
+        provider_name: proveedor.split(" / ")[0] ?? "",
+        model: proveedor.split(" / ")[1] ?? "",
+        duration_ms: Date.now() - aiStart,
+      }),
       tema_aprobado: typeof contextoInicial.tema === "string" && contextoInicial.tema.trim()
         ? contextoInicial.tema.trim()
         : proyecto.tema_aprobado,

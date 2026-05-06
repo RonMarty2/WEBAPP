@@ -7,7 +7,7 @@ import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { createProyecto, listProyectos } from "@/lib/memoryStore";
-import { projectTypeIdForService, serviceIdForProjectType } from "@/lib/projectTypePhases";
+import { completedPhaseIndexForProject, projectTypeIdForService, serviceIdForProjectType } from "@/lib/projectTypePhases";
 import type { InsertTables } from "@/types/database";
 
 // ── GET ───────────────────────────────────────────────────────
@@ -19,6 +19,7 @@ export async function GET() {
     if (!isSupabaseConfigured()) {
       const proyectos = listProyectos(user.id).map(p => ({
         ...p,
+        estado_fase: completedPhaseIndexForProject(p),
         servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
       }));
       return NextResponse.json({ proyectos });
@@ -46,6 +47,7 @@ export async function GET() {
       // Supabase falló — usar memoria como respaldo
       const proyectos = listProyectos(user.id).map(p => ({
         ...p,
+        estado_fase: completedPhaseIndexForProject(p),
         servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
       }));
       return NextResponse.json({ proyectos });

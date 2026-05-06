@@ -61,3 +61,29 @@ export function phaseDefinitionsForProject({
   const resolvedType = tipoProyectoId || projectTypeIdForService(servicioId);
   return phaseDefinitionsFromProjectType(resolvedType, servicioId || serviceIdForProjectType(resolvedType));
 }
+
+export function completedPhaseIndexForProject(project: {
+  servicio_id?: string | null;
+  tipo_proyecto_id?: string | null;
+  phase_contents?: Record<string, string | null | undefined>;
+  estado_fase?: number;
+}) {
+  const phaseContents = project.phase_contents ?? {};
+  const phaseDefs = phaseDefinitionsForProject({
+    servicioId: project.servicio_id,
+    tipoProyectoId: project.tipo_proyecto_id,
+  });
+
+  if (phaseDefs.length === 0) {
+    return Math.max(0, project.estado_fase ?? 0);
+  }
+
+  const completed = [...phaseDefs]
+    .sort((a, b) => a.orden - b.orden)
+    .reduce((lastCompleted, phase, index) => {
+      const value = phaseContents[phase.id];
+      return typeof value === "string" && value.trim() ? index : lastCompleted;
+    }, -1);
+
+  return Math.max(project.estado_fase ?? 0, completed);
+}

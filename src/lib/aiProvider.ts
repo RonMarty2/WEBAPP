@@ -6,6 +6,7 @@ import {
   maxCompletionTokensForProvider,
   nextGroqRetryTokenBudget,
 } from "@/lib/aiTokenPolicy.mjs";
+import { loadFromDisk } from "@/lib/persistence";
 
 export interface AICallResult {
   text: string;
@@ -85,12 +86,11 @@ export const AI_PROVIDERS: AIProviderInfo[] = [
     color: "#60a5fa",
     website: "https://ai.google.dev",
     apiDocsUrl: "https://aistudio.google.com/app/apikey",
-    defaultModel: "gemini-2.0-flash",
+    defaultModel: "gemini-2.5-pro",
     models: [
+      { id: "gemini-2.5-pro",       label: "Gemini 2.5 Pro (máx calidad)", contextK: 1000 },
+      { id: "gemini-2.5-flash",     label: "Gemini 2.5 Flash (balanceado)",contextK: 1000 },
       { id: "gemini-2.0-flash",     label: "Gemini 2.0 Flash (rápido)",    contextK: 1000 },
-      { id: "gemini-1.5-pro",       label: "Gemini 1.5 Pro (avanzado)",    contextK: 2000 },
-      { id: "gemini-1.5-flash",     label: "Gemini 1.5 Flash",             contextK: 1000 },
-      { id: "gemini-2.5-pro-preview", label: "Gemini 2.5 Pro (preview)",  contextK: 2000 },
     ],
     authHeader: "Bearer",
     endpoint: "https://generativelanguage.googleapis.com/v1beta/models",
@@ -212,7 +212,22 @@ export function setServiceAIConfig(servicioId: string, cfg: ServiceConfig) {
 }
 
 export function getServiceAIConfig(servicioId: string): ServiceConfig | undefined {
+  hydrateAIConfigFromDisk();
   return serviceConfigCache.get(servicioId);
+}
+
+export function getServiceAIStatus(servicioId: string) {
+  const cfg = getServiceAIConfig(servicioId);
+  if (!cfg) {
+    return { configured: false, provider_id: "", provider_name: "", model: "" };
+  }
+  const provider = getProviderInfo(cfg.provider_id);
+  return {
+    configured: Boolean(cfg.api_key),
+    provider_id: cfg.provider_id,
+    provider_name: provider?.name ?? cfg.provider_id,
+    model: cfg.model,
+  };
 }
 
 // ── Provider-level API keys (stored separately, loaded from env or admin) ─────
@@ -230,15 +245,43 @@ const providerKeyCache = new Map<string, string>([
   ["perplexity",process.env.PERPLEXITY_API_KEY?? ""],
 ]);
 
+let diskConfigHydrated = false;
+
+export function hydrateAIConfigFromDisk() {
+  if (diskConfigHydrated) return;
+  diskConfigHydrated = true;
+  try {
+    const disk = loadFromDisk();
+    const aiConfig = (disk as { aiConfig?: Record<string, unknown> }).aiConfig ?? {};
+    const providerKeys = (aiConfig.providerKeys ?? {}) as Record<string, string>;
+    for (const [providerId, key] of Object.entries(providerKeys)) {
+      if (key) providerKeyCache.set(providerId, key);
+    }
+
+    const serviceConfigs = (aiConfig.serviceConfigs ?? {}) as Record<string, ServiceConfig>;
+    for (const [serviceId, cfg] of Object.entries(serviceConfigs)) {
+      if (!cfg?.provider_id || !cfg?.model) continue;
+      serviceConfigCache.set(serviceId, {
+        ...cfg,
+        api_key: providerKeys[cfg.provider_id] || cfg.api_key || "",
+      });
+    }
+  } catch {
+    /* Persistence is optional in development. */
+  }
+}
+
 export function setProviderKey(providerId: string, key: string) {
   providerKeyCache.set(providerId, key);
 }
 
 export function getProviderKey(providerId: string): string {
+  hydrateAIConfigFromDisk();
   return providerKeyCache.get(providerId) ?? "";
 }
 
 export function hasProviderKey(providerId: string): boolean {
+  hydrateAIConfigFromDisk();
   return !!providerKeyCache.get(providerId);
 }
 
@@ -334,21 +377,19 @@ export async function llamarIAConConfig(
   // openai-compatible (Groq, OpenAI, Mistral, DeepSeek, xAI, Cohere, Together, Perplexity)
   if (providerId === "groq") {
     // Groq free/dev limits can reject a request when prompt + completion exceed TPM.
-    const models = [model, "llama-3.1-8b-instant"].filter((m, i, a) => a.indexOf(m) === i);
     let lastErr = "";
-    for (const m of models) {
-      const tokenBudget = maxCompletionTokensForProvider(providerId, maxTokens);
-      try {
-        return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, m, system, user, tokenBudget);
-      } catch (e) {
-        lastErr = (e as Error).message;
-        if (!isTokenLimitError(lastErr)) throw e;
-      }
+    const tokenBudget = maxCompletionTokensForProvider(providerId, maxTokens);
+    try {
+      return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, model, system, user, tokenBudget);
+    } catch (e) {
+      lastErr = (e as Error).message;
+      if (!isTokenLimitError(lastErr)) throw e;
+    }
 
-      const retryTokenBudget = nextGroqRetryTokenBudget(tokenBudget);
-      if (!retryTokenBudget) continue;
+    const retryTokenBudget = nextGroqRetryTokenBudget(tokenBudget);
+    if (retryTokenBudget) {
       try {
-        return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, m, system, user, retryTokenBudget);
+        return await callOpenAIFormat(info.endpoint, apiKey, info.authHeader, model, system, user, retryTokenBudget);
       } catch (e) {
         lastErr = (e as Error).message;
         if (!isTokenLimitError(lastErr)) throw e;
@@ -367,7 +408,6 @@ export async function llamarIA(
   maxTokens = 7000,
   servicioId?: string
 ): Promise<AICallResult> {
-  // 1. Try service-specific config first
   if (servicioId) {
     const cfg = getServiceAIConfig(servicioId);
     if (cfg && cfg.api_key) {
@@ -375,12 +415,13 @@ export async function llamarIA(
         const text = await llamarIAConConfig(cfg.provider_id, cfg.model, cfg.api_key, system, user, maxTokens);
         return { text, provider: cfg.provider_id, model: cfg.model };
       } catch (e) {
-        console.warn(`[AI] Service config failed (${cfg.provider_id}): ${(e as Error).message} — falling back`);
+        throw new Error(`La IA configurada para este servicio fallo (${cfg.provider_id} / ${cfg.model}): ${(e as Error).message}`);
       }
     }
+    throw new Error(`No hay IA configurada para el servicio ${servicioId}. Configurala en Admin -> Modelos & APIs.`);
   }
 
-  // 2. Fall back to env-based provider chain: Groq → Anthropic → OpenAI
+  // Legacy endpoints without service context keep the environment chain.
   const chain: { id: string; model: string }[] = [
     { id: "groq",      model: "llama-3.3-70b-versatile" },
     { id: "anthropic", model: "claude-haiku-4-5-20251001" },
