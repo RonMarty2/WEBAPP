@@ -25,6 +25,17 @@ interface TipoProyecto {
   fases_count?: number;
 }
 
+interface RutaAcademica {
+  id: string;
+  titulo: string;
+  idea_central: string;
+  problema: string;
+  objetivo_general: string;
+  alcance: string;
+  materiales_prioritarios: string[];
+  justificacion: string;
+}
+
 type Step =
   | "loading"
   | "seleccionar-universidad"
@@ -44,7 +55,7 @@ export default function NuevoProyectoPage() {
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
   const [tiposProyecto, setTiposProyecto] = useState<TipoProyecto[]>([]);
-  const [tipoProyectoId, setTipoProyectoId] = useState("tipo-tesis");
+  const [tipoProyectoId, setTipoProyectoId] = useState("tipo-monografia");
 
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
@@ -62,9 +73,10 @@ export default function NuevoProyectoPage() {
   const [entorno, setEntorno] = useState("");
 
   // Resultado IA
-  const [sugerenciasTexto, setSugerenciasTexto] = useState("");
   const [temaElegido, setTemaElegido] = useState("");
   const [proyectoTempId, setProyectoTempId] = useState("");
+  const [rutas, setRutas] = useState<RutaAcademica[]>([]);
+  const [contextoRuta, setContextoRuta] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function init() {
@@ -111,7 +123,8 @@ export default function NuevoProyectoPage() {
           const tipoData = await tipoRes.json();
           const tipos = (tipoData.tipos ?? []).filter((t: TipoProyecto) => t.activo !== false);
           setTiposProyecto(tipos);
-          if (tipos.some((t: TipoProyecto) => t.id === "tipo-tesis")) setTipoProyectoId("tipo-tesis");
+          if (tipos.some((t: TipoProyecto) => t.id === "tipo-monografia")) setTipoProyectoId("tipo-monografia");
+          else if (tipos.some((t: TipoProyecto) => t.id === "tipo-tesis")) setTipoProyectoId("tipo-tesis");
           else if (tipos[0]?.id) setTipoProyectoId(tipos[0].id);
         }
 
@@ -137,28 +150,55 @@ export default function NuevoProyectoPage() {
     return sid;
   }
 
+  async function crearProyectoConContexto(contexto: Record<string, string>) {
+    const sid = await resolverServicioId();
+    if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
+    const temaBase = contexto.tema?.trim() || "(Por definir)";
+    const res = await fetch("/api/projects", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        servicio_id: sid,
+        tipo_proyecto_id: tipoProyectoId,
+        universidad_id: universidadId || undefined,
+        modalidad_creacion: "directa",
+        tema_aprobado: temaBase,
+        titulo_provisional: temaBase,
+        academic_context: { contexto_inicial: contexto },
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setProyectoTempId(data.proyecto.id);
+    setContextoRuta(contexto);
+    return data.proyecto.id as string;
+  }
+
+  async function generarRutas(proyId: string, contexto: Record<string, string>) {
+    const res = await fetch("/api/projects/route-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ proyecto_id: proyId, contexto }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setRutas(data.rutas ?? []);
+    setStep("eligiendo");
+  }
+
   async function startConTema() {
     if (!temaPropio.trim()) { setError("Escribe el tema de investigación antes de continuar."); return; }
     setError("");
-    setStep("creando");
+    setStep("generando");
+    const contexto = {
+      tema: temaPropio.trim(),
+      programa: programa.trim(),
+      modulos: materias.trim(),
+      contexto_laboral: entorno.trim(),
+    };
     try {
-      const sid = await resolverServicioId();
-      if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          servicio_id: sid,
-          tipo_proyecto_id: tipoProyectoId,
-          universidad_id: universidadId || undefined,
-          modalidad_creacion: modalidad,
-          tema_aprobado: temaPropio.trim(),
-          titulo_provisional: temaPropio.trim(),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      router.push(`/projects/${data.proyecto.id}/workspace`);
+      const proyId = await crearProyectoConContexto(contexto);
+      await generarRutas(proyId, contexto);
     } catch (e) {
       setError((e as Error).message);
       setStep("con-tema");
@@ -168,67 +208,43 @@ export default function NuevoProyectoPage() {
   async function startSinTema() {
     if (!programa.trim()) { setError("Completa el campo Programa / Posgrado."); return; }
     setError("");
-    setStep("creando");
-
-    let proyId: string;
+    setStep("generando");
+    const contexto = {
+      tema: "",
+      programa: programa.trim(),
+      modulos: materias.trim(),
+      contexto_laboral: entorno.trim(),
+    };
     try {
-      const sid = await resolverServicioId();
-      if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          servicio_id: sid,
-          tipo_proyecto_id: tipoProyectoId,
-          universidad_id: universidadId || undefined,
-          modalidad_creacion: modalidad,
-          tema_aprobado: "(Por definir)",
-          titulo_provisional: `Proyecto — ${programa}`,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      proyId = data.proyecto.id;
-      setProyectoTempId(proyId);
+      const proyId = await crearProyectoConContexto(contexto);
+      await generarRutas(proyId, contexto);
     } catch (e) {
       setError((e as Error).message);
       setStep("sin-tema");
-      return;
-    }
-
-    setStep("generando");
-    const ctx = [
-      `Programa / Posgrado: ${programa}`,
-      materias ? `Materias destacadas: ${materias}` : null,
-      entorno ? `Entorno laboral / institución: ${entorno}` : null,
-      "Por favor, sugiere 3 temas de investigación viables y concretos para una monografía.",
-    ].filter(Boolean).join("\n");
-
-    try {
-      const res = await fetch("/api/projects/generate-phase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ proyecto_id: proyId, fase_numero: 0, mensaje_usuario: ctx }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSugerenciasTexto(data.contenido);
-      setStep("eligiendo");
-    } catch (e) {
-      setError((e as Error).message);
-      router.push(`/projects/${proyId}/workspace`);
     }
   }
 
-  async function confirmarTema() {
-    if (!temaElegido.trim() || !proyectoTempId) { setError("Escribe el tema elegido."); return; }
+  async function regenerarRutas() {
+    if (!proyectoTempId) return;
+    setError("");
+    setStep("generando");
+    try {
+      await generarRutas(proyectoTempId, contextoRuta);
+    } catch (e) {
+      setError((e as Error).message);
+      setStep("eligiendo");
+    }
+  }
+
+  async function seleccionarRuta(ruta: RutaAcademica) {
+    if (!proyectoTempId) { setError("No se encontró el proyecto temporal."); return; }
     setError("");
     setStep("creando");
     try {
-      const res = await fetch(`/api/projects/${proyectoTempId}`, {
-        method: "PATCH",
+      const res = await fetch("/api/projects/select-route", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tema_aprobado: temaElegido.trim() }),
+        body: JSON.stringify({ proyecto_id: proyectoTempId, ruta_id: ruta.id, ruta }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -237,6 +253,20 @@ export default function NuevoProyectoPage() {
       setError((e as Error).message);
       setStep("eligiendo");
     }
+  }
+
+  async function confirmarTema() {
+    if (!temaElegido.trim() || !proyectoTempId) { setError("Escribe el tema elegido."); return; }
+    await seleccionarRuta({
+      id: "ruta-personalizada",
+      titulo: temaElegido.trim(),
+      idea_central: temaElegido.trim(),
+      problema: "",
+      objetivo_general: "",
+      alcance: "",
+      materiales_prioritarios: [],
+      justificacion: "Ruta escrita manualmente por el estudiante.",
+    });
   }
 
   // ── Loading / Creando ────────────────────────────────────────────────────
@@ -310,7 +340,7 @@ export default function NuevoProyectoPage() {
             </div>
 
             <button
-              onClick={() => { if (!universidadId) { setError("Selecciona tu universidad para continuar."); return; } setError(""); setStep("elegir-modalidad"); }}
+              onClick={() => { if (!universidadId) { setError("Selecciona tu universidad para continuar."); return; } setError(""); setStep("elegir-tipo"); }}
               className="btn-cyan"
               style={{ width: "100%", justifyContent: "center", padding: "12px" }}
             >
@@ -460,14 +490,14 @@ export default function NuevoProyectoPage() {
         {/* ── PASO 3: ELEGIR TIPO ──────────────────────────────────────────────── */}
         {step === "elegir-tipo" && (
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("elegir-modalidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
-                Paso 3 de 3 — Tema
+                Paso 2 de 2 — Datos iniciales
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>¿Tienes un tema de investigación?</h1>
               <p style={{ color: "var(--fg-muted)", fontSize: 14, lineHeight: 1.6 }}>
-                Si ya tienes tu tema definido, ve directo al trabajo. Si no, la IA te sugerirá 3 opciones viables según tu contexto.
+                Si ya tienes tema, lo mejoramos. Si no, la IA propone rutas viables según tu programa, módulos y contexto.
               </p>
             </div>
 
@@ -532,13 +562,45 @@ export default function NuevoProyectoPage() {
                 />
               </div>
 
+              <div>
+                <label className="label">Diplomado / curso / programa</label>
+                <input
+                  className="input-dark"
+                  value={programa}
+                  onChange={e => setPrograma(e.target.value)}
+                  placeholder="Ej: Diplomado en Educación Superior"
+                />
+              </div>
+
+              <div>
+                <label className="label">Módulos o materias que llevaste</label>
+                <textarea
+                  className="input-dark"
+                  value={materias}
+                  onChange={e => setMaterias(e.target.value)}
+                  rows={3}
+                  placeholder={"Ej:\nMetodología de la investigación\nTecnologías educativas\nEvaluación por competencias"}
+                  style={{ resize: "vertical" }}
+                />
+              </div>
+
+              <div>
+                <label className="label">Lugar de trabajo o contexto de interés</label>
+                <input
+                  className="input-dark"
+                  value={entorno}
+                  onChange={e => setEntorno(e.target.value)}
+                  placeholder="Ej: universidad, colegio, empresa, sector o ciudad"
+                />
+              </div>
+
               <button
                 onClick={startConTema}
                 disabled={!temaPropio.trim()}
                 className="btn-cyan"
                 style={{ width: "100%", justifyContent: "center", padding: "12px", opacity: !temaPropio.trim() ? 0.5 : 1 }}
               >
-                Ir a la mesa de trabajo →
+                Generar rutas posibles →
               </button>
             </div>
           </div>
@@ -608,21 +670,58 @@ export default function NuevoProyectoPage() {
           <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div className="card" style={{ padding: 24 }}>
               <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
-                Sugerencias de tema IA
+                Rutas academicas propuestas
               </div>
-              <div style={{ whiteSpace: "pre-wrap", fontSize: 13, color: "var(--fg-primary)", lineHeight: 1.9, maxHeight: 340, overflowY: "auto", padding: "4px 0" }}>
-                {sugerenciasTexto}
+              <p style={{ margin: "0 0 16px", color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
+                Elige la ruta que mejor encaje. Esto se guarda como contrato académico para mantener coherencia en todas las fases internas.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {rutas.map((ruta, index) => (
+                  <button
+                    key={ruta.id}
+                    onClick={() => seleccionarRuta(ruta)}
+                    style={{
+                      width: "100%",
+                      textAlign: "left",
+                      padding: "16px",
+                      borderRadius: 10,
+                      border: "1.5px solid rgba(37,99,235,0.18)",
+                      background: "rgba(255,255,255,0.84)",
+                      color: "var(--fg-primary)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div style={{ fontSize: 11, fontWeight: 800, color: "var(--accent)", marginBottom: 6 }}>
+                      Opción {index + 1}
+                    </div>
+                    <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 8, lineHeight: 1.35 }}>{ruta.titulo}</div>
+                    <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.55, marginBottom: 8 }}>{ruta.idea_central}</div>
+                    {ruta.objetivo_general && (
+                      <div style={{ fontSize: 12, lineHeight: 1.55 }}>
+                        <strong>Objetivo:</strong> {ruta.objetivo_general}
+                      </div>
+                    )}
+                    {ruta.justificacion && (
+                      <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55, marginTop: 6 }}>
+                        {ruta.justificacion}
+                      </div>
+                    )}
+                  </button>
+                ))}
               </div>
+              <button onClick={regenerarRutas} className="btn-ghost" style={{ marginTop: 14, width: "100%", justifyContent: "center", padding: "10px" }}>
+                Ver otras 3 opciones
+              </button>
             </div>
 
             <div className="card" style={{ padding: 24 }}>
-              <label className="label">¿Cuál tema elegiste? Escríbelo aquí *</label>
+              <label className="label">O escribe una ruta propia</label>
               <textarea
                 className="input-dark"
                 value={temaElegido}
                 onChange={e => setTemaElegido(e.target.value)}
                 rows={3}
-                placeholder="Copia o escribe el tema que seleccionaste de las propuestas de arriba..."
+                placeholder="Escribe el título o tema exacto que quieres usar si ninguna opción te convence..."
                 style={{ resize: "vertical", marginBottom: 16 }}
               />
               <button
@@ -631,7 +730,7 @@ export default function NuevoProyectoPage() {
                 className="btn-cyan"
                 style={{ width: "100%", justifyContent: "center", padding: "12px", opacity: !temaElegido.trim() ? 0.5 : 1 }}
               >
-                Confirmar tema e ir a la mesa de trabajo →
+                Usar esta ruta e ir a la mesa de trabajo →
               </button>
             </div>
           </div>

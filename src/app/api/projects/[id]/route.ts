@@ -88,6 +88,18 @@ export async function PATCH(req: Request, { params }: Params) {
     if (body.phase_contents && typeof body.phase_contents === "object") {
       allowed.phase_contents = body.phase_contents;
     }
+    if (body.academic_context && typeof body.academic_context === "object") {
+      allowed.academic_context = body.academic_context;
+    }
+    if (body.academic_memory && typeof body.academic_memory === "object") {
+      allowed.academic_memory = body.academic_memory;
+    }
+    if (typeof body.final_document === "string" || body.final_document === null) {
+      allowed.final_document = body.final_document;
+    }
+    if (body.final_document_validation && typeof body.final_document_validation === "object") {
+      allowed.final_document_validation = body.final_document_validation;
+    }
 
     if (Object.keys(allowed).length === 0) {
       return NextResponse.json({ error: "No hay campos válidos para actualizar" }, { status: 400 });
@@ -109,6 +121,15 @@ export async function PATCH(req: Request, { params }: Params) {
     if (typeof allowed.titulo_provisional === "string") updates.titulo_provisional = allowed.titulo_provisional;
     if (typeof allowed.completado === "boolean") updates.completado = allowed.completado;
     if (typeof allowed.estado_fase === "number") updates.estado_fase = allowed.estado_fase as EstadoFase;
+
+    if (Object.keys(updates).length === 0) {
+      const p = getProyecto(id);
+      if (p && p.usuario_id === user.id) {
+        const updated = updateProyecto(id, allowed);
+        return NextResponse.json({ proyecto: updated });
+      }
+      return NextResponse.json({ error: "No hay campos persistibles para Supabase" }, { status: 400 });
+    }
 
     const { data, error } = await db
       .from("proyectos_fases")

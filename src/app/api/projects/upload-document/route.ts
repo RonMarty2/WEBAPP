@@ -10,10 +10,42 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient } from "@/lib/supabase";
+import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
+import { getProyecto, updateProyecto } from "@/lib/memoryStore";
 import { procesarDocumento } from "@/lib/ai/rag-processor";
 
 const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function storeDocumentInMemory(proyecto_id: string, userId: string, doc: {
+  nombre: string;
+  tipo: string;
+  texto: string;
+  palabras: number;
+  truncado: boolean;
+}) {
+  const proyecto = getProyecto(proyecto_id);
+  if (!proyecto || proyecto.usuario_id !== userId) return null;
+
+  const academicContext = (proyecto.academic_context ?? {}) as Record<string, unknown>;
+  const docsActuales = Array.isArray(academicContext.documentos)
+    ? academicContext.documentos as unknown[]
+    : [];
+  const documento = {
+    nombre: doc.nombre,
+    tipo: doc.tipo,
+    texto: doc.texto,
+    palabras: doc.palabras,
+    truncado: doc.truncado,
+    subido_at: new Date().toISOString(),
+  };
+
+  return updateProyecto(proyecto_id, {
+    academic_context: {
+      ...academicContext,
+      documentos: [...docsActuales, documento],
+    },
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -38,11 +70,34 @@ export async function POST(req: Request) {
     }
 
     const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["pdf", "txt"].includes(ext ?? "")) {
+    if (!["pdf", "txt", "md", "csv", "tsv"].includes(ext ?? "")) {
       return NextResponse.json(
-        { error: "Solo se aceptan archivos PDF o TXT" },
+        { error: "Solo se aceptan archivos PDF, TXT, Markdown, CSV o TSV por ahora." },
         { status: 400 }
       );
+    }
+
+    // Extraer texto del documento una sola vez y guardarlo como material prioritario.
+    const doc = await procesarDocumento(file, file.name);
+
+    if (!isSupabaseConfigured()) {
+      const updated = storeDocumentInMemory(proyecto_id, user.id, doc);
+      if (!updated) {
+        return NextResponse.json(
+          { error: "Proyecto no encontrado o sin acceso" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json({
+        ok: true,
+        documento: {
+          nombre: doc.nombre,
+          tipo: doc.tipo,
+          palabras: doc.palabras,
+          truncado: doc.truncado,
+        },
+      });
     }
 
     const db = createAdminClient();
@@ -61,9 +116,6 @@ export async function POST(req: Request) {
         { status: 404 }
       );
     }
-
-    // Extraer texto del documento
-    const doc = await procesarDocumento(file, file.name);
 
     // Acumular en datos_fase_0.documentos (JSON)
     const datosActuales = (proyecto.datos_fase_0 as Record<string, unknown>) ?? {};
@@ -91,7 +143,10 @@ export async function POST(req: Request) {
       .eq("id", proyecto_id);
 
     if (errUpdate) {
-      return NextResponse.json({ error: "Error al guardar el documento" }, { status: 500 });
+      const updated = storeDocumentInMemory(proyecto_id, user.id, doc);
+      if (!updated) {
+        return NextResponse.json({ error: "Error al guardar el documento" }, { status: 500 });
+      }
     }
 
     return NextResponse.json({

@@ -19,6 +19,7 @@ import { llamarIA } from "@/lib/aiProvider";
 import { getProyecto, updateProyecto } from "@/lib/memoryStore";
 import { loadFromDisk } from "@/lib/persistence";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
+import { buildAcademicContextBlock, summarizePhaseForMemory } from "@/lib/academicProject.mjs";
 import type { EstadoFase, UpdateTables } from "@/types/database";
 
 const FASE_ETIQUETA: Record<number, string> = {
@@ -62,7 +63,7 @@ function buildSystemPrompt({
 
   parts.push(phasePrompt);
   parts.push(
-    `\n=== MARCADORES DE DATOS PENDIENTES ===\nSi falta un dato verificable, NO escribas un marcador genérico como [COMPLETAR DATO AQUÍ]. Usa siempre este formato descriptivo:\n[COMPLETAR: descripción específica del dato]\nEjemplos válidos: [COMPLETAR: tamaño de muestra en estudiantes], [COMPLETAR: porcentaje de crecimiento anual], [COMPLETAR: fuente institucional y año], [COMPLETAR: nombre de la normativa aplicable], [COMPLETAR: periodo de análisis].\nLa descripción debe decir qué debe completar el estudiante, no solo que falta un dato.\n=== FIN MARCADORES ===`
+    `\n=== REGLA DE DOCUMENTO ENTREGABLE ===\nNo uses marcadores, placeholders ni instrucciones visibles para el estudiante: prohibido escribir [COMPLETAR], DATO_EDITABLE, PENDIENTE, REFERENCIAS_ETAPA o frases como "complete aqui".\nSi falta un dato exacto, redacta con prudencia academica: explica la situacion sin inventar cifras, leyes, fuentes o instituciones especificas.\nLas fases son solo organizacion interna. No escribas "Fase 1", "Fase 2" ni etiquetas internas como parte del contenido final.\n=== FIN REGLA ===`
   );
 
   if (perfilEstilo?.trim()) {
@@ -119,6 +120,60 @@ function loadHilosFromDisk(): string[] {
   } catch {
     return [];
   }
+}
+
+type AcademicContext = Record<string, unknown> & {
+  contexto_inicial?: Record<string, unknown>;
+  documentos?: Record<string, unknown>[];
+  ruta_elegida?: Record<string, unknown>;
+};
+
+type AcademicMemory = Record<string, unknown> & {
+  phase_summaries?: Record<string, unknown>[];
+};
+
+function academicBlockForProject(proyecto: {
+  academic_context?: Record<string, unknown>;
+  academic_memory?: Record<string, unknown>;
+  tema_aprobado?: string | null;
+  titulo_provisional?: string | null;
+}) {
+  const academicContext = (proyecto.academic_context ?? {}) as AcademicContext;
+  const academicMemory = (proyecto.academic_memory ?? {}) as AcademicMemory;
+  const studentContext = {
+    ...(academicContext.contexto_inicial ?? {}),
+    tema: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+  };
+  return buildAcademicContextBlock({
+    contract: academicContext.ruta_elegida ?? {
+      titulo: proyecto.titulo_provisional ?? proyecto.tema_aprobado ?? "",
+      idea_central: proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+    },
+    studentContext,
+    documents: Array.isArray(academicContext.documentos) ? academicContext.documentos : [],
+    phaseMemory: Array.isArray(academicMemory.phase_summaries) ? academicMemory.phase_summaries : [],
+  });
+}
+
+function upsertPhaseSummary(
+  memory: Record<string, unknown> | undefined,
+  phaseKey: string,
+  phaseLabel: string,
+  content: string
+) {
+  const academicMemory = (memory ?? {}) as AcademicMemory;
+  const existing = Array.isArray(academicMemory.phase_summaries) ? academicMemory.phase_summaries : [];
+  const summary = {
+    phase_key: phaseKey,
+    ...summarizePhaseForMemory(phaseLabel, content),
+  };
+  return {
+    ...academicMemory,
+    phase_summaries: [
+      ...existing.filter((item) => item.phase_key !== phaseKey),
+      summary,
+    ],
+  };
 }
 
 // ── Handler principal ─────────────────────────────────────────────────────────
@@ -252,8 +307,10 @@ async function generarSinSupabase({
 
     const borradorKey = `${phase_id}_borrador`;
     const borradorPrev = phaseContents[borradorKey] ?? null;
+    const academicBlock = academicBlockForProject(proyecto);
 
     const userPromptParts = [
+      `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlock}\n--- FIN EXPEDIENTE ---`,
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
       proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
@@ -311,6 +368,11 @@ async function generarSinSupabase({
     updateProyecto(proyecto_id, {
       phase_contents: newPhaseContents,
       requiere_actualizacion: requiereActualizacion,
+      final_document: null,
+      final_document_validation: {},
+      academic_memory: tipo === "borrador" && esGuiado
+        ? proyecto.academic_memory
+        : upsertPhaseSummary(proyecto.academic_memory, phase_id, currentPhase.label, textoGenerado),
     });
 
     return NextResponse.json({
@@ -363,6 +425,7 @@ async function generarSinSupabase({
     : buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
 
   const userPromptParts: (string | null)[] = [
+    `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlockForProject(proyecto)}\n--- FIN EXPEDIENTE ---`,
     `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
     proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
     bloqueContexto,
@@ -408,6 +471,8 @@ async function generarSinSupabase({
       estado_fase: nuevaFase,
       [colKey]: textoGenerado,
       phase_contents: { ...phaseContents, [phaseKey]: textoGenerado },
+      final_document: null,
+      final_document_validation: {},
     };
 
     // Cache invalidation for subsequent phases
@@ -420,6 +485,12 @@ async function generarSinSupabase({
     }
     delete requiereActualizacion[phaseKey];
     updates.requiere_actualizacion = requiereActualizacion;
+    updates.academic_memory = upsertPhaseSummary(
+      proyecto.academic_memory,
+      phaseKey,
+      FASE_ETIQUETA[fase_numero],
+      textoGenerado
+    );
   }
 
   updateProyecto(proyecto_id, updates);
@@ -537,6 +608,12 @@ async function generarConSupabase({
   const borradorPrev = (proyecto[borradorCol] as string | null) ?? null;
 
   const userPromptParts: (string | null)[] = [
+    `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlockForProject(proyecto as unknown as {
+      academic_context?: Record<string, unknown>;
+      academic_memory?: Record<string, unknown>;
+      tema_aprobado?: string | null;
+      titulo_provisional?: string | null;
+    })}\n--- FIN EXPEDIENTE ---`,
     `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
     proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
     bloqueContexto,

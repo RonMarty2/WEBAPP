@@ -28,6 +28,10 @@ interface Proyecto {
   contenido_fase_4: string | null;
   contenido_fase_5: string | null;
   phase_contents?: Record<string, string | null>;
+  academic_context?: Record<string, unknown>;
+  academic_memory?: Record<string, unknown>;
+  final_document?: string | null;
+  final_document_validation?: { ok?: boolean; errors?: string[]; warnings?: string[]; wordCount?: number };
   servicios: { id: string; nombre: string } | null;
 }
 
@@ -84,8 +88,16 @@ function getBorrador(p: Proyecto, phaseId: string, legacyNum?: number): string |
 
 function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).length; }
 
+function escapeHtml(value: string) {
+  return value.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
 function renderMd(text: string): string {
-  const safe = text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const safe = escapeHtml(
+    text
+      .replace(/\[\[DATO_EDITABLE:[\s\S]*?\]\]([\s\S]*?)\[\[\/DATO_EDITABLE\]\]/g, "$1")
+      .replace(/\[COMPLETAR[^\]]*\]/gi, "dato academico no especificado")
+  );
   return safe
     .replace(/^#### (.+)$/gm,'<h4 class="md-h4">$1</h4>')
     .replace(/^### (.+)$/gm, '<h3 class="md-h3">$1</h3>')
@@ -95,75 +107,9 @@ function renderMd(text: string): string {
     .replace(/\*(.+?)\*/g,    '<em class="md-em">$1</em>')
     .replace(/^[-*] (.+)$/gm, '<li class="md-li">$1</li>')
     .replace(/((?:<li class="md-li">.*<\/li>\n?)+)/g,'<ul class="md-ul">$1</ul>')
-    .replace(/\[COMPLETAR(.*?)\]/gi, '<span class="marker-completar">[COMPLETAR$1]</span>')
     .replace(/\n\n+/g,'</p><p class="md-p">')
     .replace(/\n/g,'<br/>')
     .replace(/^/,'<p class="md-p">') + '</p>';
-}
-
-function isGenericMarkerDetail(detail: string) {
-  return !detail
-    || /^(dato|dato aqui|dato aquí|valor|informacion|información|pendiente|completar)$/i.test(detail.trim());
-}
-
-function inferExpectedFromContext(beforeWords: string, afterWords: string) {
-  const before = beforeWords.toLowerCase();
-  const after = afterWords.toLowerCase();
-  const immediateAfter = afterWords.match(/^\s*([A-Za-zÁÉÍÓÚáéíóúÑñ0-9%$]+)/)?.[1] ?? "";
-  const immediateBefore = beforeWords.match(/([A-Za-zÁÉÍÓÚáéíóúÑñ0-9%$]+)\s*$/)?.[1] ?? "";
-
-  if (/%|porcentaje|tasa|proporcion|proporción|incremento|crecimiento|variacion|variación/.test(`${before} ${after}`)) {
-    return "Porcentaje o tasa";
-  }
-  if (/\$|bs\.?|monto|costo|presupuesto|precio|ingreso|egreso|financiamiento|inversion|inversión/.test(`${before} ${after}`)) {
-    return "Monto o valor monetario";
-  }
-  if (/año|ano|gesti[oó]n|periodo|per[ií]odo|fecha|mes|trimestre|semestre/.test(`${before} ${after}`)) {
-    return "Periodo o fecha";
-  }
-  if (/fuente|seg[uú]n|instituci[oó]n|entidad|autor|reporte|informe|base de datos/.test(`${before} ${after}`)) {
-    return "Fuente o referencia";
-  }
-  if (/ley|decreto|norma|resoluci[oó]n|reglamento|art[ií]culo/.test(`${before} ${after}`)) {
-    return "Normativa o referencia legal";
-  }
-  if (/muestra|poblaci[oó]n|encuesta|entrevista|participantes|estudiantes|docentes|empresas|usuarios|casos/.test(`${before} ${after}`)) {
-    const noun = immediateAfter || immediateBefore;
-    return noun ? `Cantidad de ${noun.toLowerCase()}` : "Cantidad o tamaño de muestra";
-  }
-  if (/nombre|denominaci[oó]n|instituci[oó]n|universidad|empresa|municipio|departamento|sector/.test(`${before} ${after}`)) {
-    return "Nombre específico";
-  }
-  return "Dato específico";
-}
-
-function markerContextFromContent(content: string, markerStart: number, markerText: string, markerDetail: string) {
-  const before = content.slice(0, markerStart);
-  const after = content.slice(markerStart + markerText.length);
-  const headingMatches = [...before.matchAll(/^#{1,6}\s+(.+)$/gm)];
-  const heading = headingMatches.at(-1)?.[1]?.replace(/\*\*/g, "").trim() ?? "Ubicación en el texto";
-
-  const beforeWords = before
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .slice(-8)
-    .join(" ");
-  const afterWords = after
-    .replace(/\s+/g, " ")
-    .trim()
-    .split(" ")
-    .slice(0, 10)
-    .join(" ");
-  const rawSnippet = `${beforeWords} _____ ${afterWords}`
-    .replace(/\s+/g, " ")
-    .trim();
-  const normalizedDetail = markerDetail.trim().replace(/^[:\s-]+/, "");
-  const expected = isGenericMarkerDetail(normalizedDetail)
-    ? inferExpectedFromContext(beforeWords, afterWords)
-    : normalizedDetail;
-
-  return { heading, snippet: rawSnippet, expected };
 }
 
 function paginateMarkdown(text: string, unitsPerPage = 1850): string[] {
@@ -284,14 +230,11 @@ export default function WorkspacePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
   const [error, setError] = useState("");
 
   const [feedbackTexto, setFeedbackTexto] = useState("");
   const [vistaActiva, setVistaActiva] = useState<"borrador" | "final">("borrador");
-
-  // Missing data marker state
-  const [markerInputs, setMarkerInputs] = useState<Record<number, string>>({});
-  const [isReplacing, setIsReplacing] = useState(false);
 
   // Calibration
   const [showCalibracion, setShowCalibracion] = useState(false);
@@ -489,6 +432,8 @@ export default function WorkspacePage() {
           }
         }
         if (data.requiere_actualizacion) np.requiere_actualizacion = data.requiere_actualizacion;
+        np.final_document = null;
+        np.final_document_validation = {};
         return np;
       });
       if (tipo === "borrador") setVistaActiva("borrador");
@@ -520,59 +465,6 @@ export default function WorkspacePage() {
 
   // ── Replace Marker ────────────────────────────────────────────────────────────
 
-  async function handleReplaceMarker(markerIndex = 0) {
-    const rawValue = markerInputs[markerIndex] ?? "";
-    const cleanValue = rawValue.trim();
-    if (!proyecto || !displayContent || !cleanValue) return;
-    setIsReplacing(true);
-    try {
-      let currentIndex = -1;
-      const newContent = displayContent.replace(/\[COMPLETAR(.*?)\]/gi, (match) => {
-        currentIndex += 1;
-        return currentIndex === markerIndex ? cleanValue : match;
-      });
-      
-      const isDraft = (esGuiado && vistaActiva === "borrador");
-      const phaseId = currentFaseDef.id;
-      const keyStr = isDynamic
-        ? (isDraft ? `${phaseId}_borrador` : phaseId)
-        : (isDraft ? `${selectedFase}_borrador` : String(selectedFase));
-      
-      const payload: Record<string, unknown> = { phase_contents: { ...proyecto.phase_contents, [keyStr]: newContent } };
-      
-      // If it's the final version and static, also update the legacy fields
-      if (!isDynamic && !isDraft) {
-        payload[`contenido_fase_${selectedFase}`] = newContent;
-      }
-      
-      const res = await fetch(`/api/projects/${proyectoId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!res.ok) throw new Error("Error al guardar el dato");
-      
-      setProyecto(prev => {
-        if (!prev) return prev;
-        const np = { ...prev, phase_contents: { ...prev.phase_contents, [keyStr]: newContent } };
-        if (!isDynamic && !isDraft) {
-          np[`contenido_fase_${selectedFase}` as keyof Proyecto] = newContent as never;
-        }
-        return np;
-      });
-      setMarkerInputs(prev => {
-        const next = { ...prev };
-        delete next[markerIndex];
-        return next;
-      });
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setIsReplacing(false);
-    }
-  }
-
   // ── Upload ────────────────────────────────────────────────────────────────────
 
   async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -586,6 +478,44 @@ export default function WorkspacePage() {
       setChatMsgs(prev => [...prev, { role: "assistant", text: `📎 "${data.documento.nombre}" subido — ${data.documento.palabras} palabras extraídas.`, ts: Date.now() }]);
     } catch (e) { setError((e as Error).message); }
     finally { setIsUploading(false); if (fileInputRef.current) fileInputRef.current.value = ""; }
+  }
+
+  async function generarDocumentoFinal() {
+    if (!proyecto || isFinalizing) return;
+    setIsFinalizing(true);
+    setError("");
+    try {
+      const res = await fetch("/api/projects/finalize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ proyecto_id: proyectoId }),
+      });
+      const data = await res.json();
+      if (!res.ok && !data.final_document) {
+        throw new Error(data.error || data.validation?.errors?.join(" ") || "No se pudo consolidar el documento final.");
+      }
+      setProyecto(prev => prev ? {
+        ...prev,
+        final_document: data.final_document,
+        final_document_validation: data.validation,
+        completado: Boolean(data.validation?.ok),
+        phase_contents: {
+          ...(prev.phase_contents ?? {}),
+          __final_document: data.final_document,
+        },
+      } as Proyecto : prev);
+      setChatMsgs(prev => [...prev, {
+        role: "assistant",
+        text: data.validation?.ok
+          ? "Documento final consolidado. Ya puedes descargar el PDF entregable."
+          : `Documento consolidado con observaciones: ${(data.validation?.errors ?? []).join(" ")}`,
+        ts: Date.now(),
+      }]);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setIsFinalizing(false);
+    }
   }
 
   // ── LaTeX download ────────────────────────────────────────────────────────────
@@ -667,17 +597,23 @@ export default function WorkspacePage() {
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
   const documentUniversity = university ?? DEFAULT_UNIVERSITIES[0];
-  const phaseContents = Object.fromEntries(
-    displayFases.map((f, index) => [
-      `fase_${index}`,
-      getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num)
-    ])
-  );
-  const phaseLabels = Object.fromEntries(
-    displayFases.map((f, index) => [`fase_${index}`, f.label])
-  );
+  const storedFinalDocument = proyecto.final_document || proyecto.phase_contents?.__final_document || null;
+  const documentoFinalListo = Boolean(storedFinalDocument);
+  const phaseContents = storedFinalDocument
+    ? { fase_0: storedFinalDocument }
+    : Object.fromEntries(
+        displayFases.map((f, index) => [
+          `fase_${index}`,
+          getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num)
+        ])
+      );
+  const phaseLabels = storedFinalDocument
+    ? { fase_0: "Monografía final" }
+    : Object.fromEntries(
+        displayFases.map((f, index) => [`fase_${index}`, f.label])
+      );
   const documentTitle = pdfData.tituloTrabajo?.trim() || proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento";
-  const docHtml = fasesCompletadas > 0 ? generatePdfHtml({
+  const docHtml = (fasesCompletadas > 0 || storedFinalDocument) ? generatePdfHtml({
     university: documentUniversity,
     studentData: pdfData,
     phaseContents,
@@ -686,25 +622,6 @@ export default function WorkspacePage() {
     preview: true,
   }) : "";
 
-  // Missing data analysis
-  const markerRegex = /\[COMPLETAR(.*?)\]/gi;
-  const markerItems = displayContent
-    ? Array.from(displayContent.matchAll(markerRegex), (match, index) => {
-      const text = match[0];
-      const detail = match[1]?.trim().replace(/^[:\s-]+/, "") || `Dato pendiente ${index + 1}`;
-      const context = markerContextFromContent(displayContent, match.index ?? 0, text, detail);
-      return {
-        index,
-        text,
-        detail,
-        heading: context.heading,
-        snippet: context.snippet,
-        expected: context.expected,
-      };
-    })
-    : [];
-  const numMarkers = markerItems.length;
-  const hasMarkers = numMarkers > 0;
   const panelBorder = "1px solid rgba(255, 255, 255, 0.4)";
   const panelBg = "rgba(255, 255, 255, 0.55)";
   const panelBlur = "blur(28px) saturate(180%)";
@@ -948,8 +865,8 @@ export default function WorkspacePage() {
                   style={{ resize:"vertical", fontSize:12, lineHeight:1.5 }}
                 />
                 <div style={{ display:"flex", gap:7 }}>
-                  <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating || (hasMarkers && vistaActiva === "borrador")} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11, opacity: (hasMarkers && vistaActiva === "borrador") ? 0.5 : 1 }}>
-                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando final…</span></> : ((hasMarkers && vistaActiva === "borrador") ? "Completa datos para avanzar" : "Generar Versión Final")}
+                  <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11 }}>
+                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando final…</span></> : "Generar Versión Final"}
                   </button>
                   {isGenerating ? (
                     <button onClick={cancelGeneracion} className="btn-ghost" style={{ padding:"9px 11px", fontSize:11, color:"#ef4444" }}>
@@ -1098,7 +1015,7 @@ export default function WorkspacePage() {
             {displayContent && (
               <div style={{ display:"flex", gap:6 }}>
                 {selectedFase > 0 && <button onClick={() => setSelectedFase(f => f-1)} className="btn-ghost" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>← {displayFases[selectedFase-1]?.short}</button>}
-                {selectedFase < displayFases.length-1 && <button onClick={() => setSelectedFase(f => f+1)} disabled={hasMarkers} className={hasMarkers ? "btn-ghost" : "btn-cyan"} style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center", cursor: hasMarkers ? "not-allowed" : "pointer" }} title={hasMarkers ? "Faltan datos por completar" : ""}>{displayFases[selectedFase+1]?.short} →</button>}
+                {selectedFase < displayFases.length-1 && <button onClick={() => setSelectedFase(f => f+1)} className="btn-cyan" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>{displayFases[selectedFase+1]?.short} →</button>}
               </div>
             )}
           </div>
@@ -1133,63 +1050,6 @@ export default function WorkspacePage() {
                 )}
               </div>
 
-              {/* Data Replacement Panel */}
-              {hasMarkers && (
-                <div style={{ marginBottom: 24, padding: "16px 18px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 10 }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
-                    <div>
-                      <div style={{ fontSize: 12, fontWeight: 800, color: "#b45309", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-                        Datos requeridos por el documento
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 4, lineHeight: 1.5 }}>
-                        Revisa la ubicación y completa el valor real que corresponde a esa frase.
-                      </div>
-                    </div>
-                    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 800, color: "#92400e", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.24)", borderRadius: 999, padding: "4px 9px" }}>
-                      {numMarkers} pendiente{numMarkers > 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    {markerItems.map((marker) => {
-                      const value = markerInputs[marker.index] ?? "";
-                      return (
-                        <div key={`${marker.text}-${marker.index}`} style={{ display: "grid", gridTemplateColumns: "minmax(220px, 0.7fr) minmax(200px, 1fr) auto", gap: 10, alignItems: "start", padding: "10px", borderRadius: 8, background: "rgba(255,255,255,0.56)", border: "1px solid rgba(245,158,11,0.16)" }}>
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontSize: 10, fontWeight: 800, color: "#92400e", marginBottom: 3 }}>
-                              Dato {marker.index + 1}: {marker.expected}
-                            </div>
-                            <div style={{ fontSize: 10, color: "#7c2d12", marginBottom: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {marker.heading}
-                            </div>
-                            <div title={marker.snippet} style={{ fontSize: 11, color: "#5b4b2a", lineHeight: 1.45, background: "rgba(245,158,11,0.1)", border: "1px dashed rgba(245,158,11,0.42)", borderRadius: 6, padding: "6px 8px" }}>
-                              {marker.snippet}
-                            </div>
-                          </div>
-                          <input
-                            className="input-dark"
-                            value={value}
-                            onChange={e => setMarkerInputs(prev => ({ ...prev, [marker.index]: e.target.value }))}
-                            onKeyDown={e => { if (e.key === "Enter" && value.trim()) handleReplaceMarker(marker.index); }}
-                            placeholder={`Escribe ${marker.expected.toLowerCase()}`}
-                            style={{ fontSize: 12, minWidth: 0 }}
-                            disabled={isReplacing}
-                          />
-                          <button
-                            onClick={() => handleReplaceMarker(marker.index)}
-                            disabled={!value.trim() || isReplacing}
-                            className="btn-purple"
-                            style={{ padding: "8px 12px", fontSize: 11, opacity: (!value.trim() || isReplacing) ? 0.5 : 1, whiteSpace: "nowrap" }}
-                          >
-                            {isReplacing ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> Guardando</> : "Reemplazar"}
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               <style>{`
                 .md-h1{font-size:22px;font-weight:800;color:#f1f5f9;margin:24px 0 10px;line-height:1.3}
                 .md-h2{font-size:17px;font-weight:700;color:var(--fg-primary);margin:20px 0 9px;line-height:1.4}
@@ -1200,25 +1060,12 @@ export default function WorkspacePage() {
                 .md-em{color:var(--fg-muted);font-style:italic}
                 .md-ul{margin:9px 0;padding-left:20px}
                 .md-li{color:var(--fg-primary);margin:4px 0;line-height:1.65;font-size:15px;font-family:var(--font-crimson), serif}
-                .marker-completar {
-                  background: rgba(245,158,11,0.2);
-                  color: #fbbf24;
-                  padding: 2px 6px;
-                  border-radius: 4px;
-                  border: 1px dashed #fbbf24;
-                  font-weight: 700;
-                  font-size: 0.9em;
-                  display: inline-block;
-                  line-height: 1.2;
-                  animation: pulse-orange 2s infinite;
-                }
-                @keyframes pulse-orange {
-                  0% { box-shadow: 0 0 0 0 rgba(245,158,11, 0.4); }
-                  70% { box-shadow: 0 0 0 6px rgba(245,158,11, 0); }
-                  100% { box-shadow: 0 0 0 0 rgba(245,158,11, 0); }
-                }
               `}</style>
-              <div className="doc-preview" dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }} style={{ fontSize:13.5, lineHeight:1.85 }}/>
+              <div
+                className="doc-preview"
+                dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }}
+                style={{ fontSize:13.5, lineHeight:1.85 }}
+              />
             </div>
           ) : (
             <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", margin:"10vh auto", maxWidth: 400, padding:"50px 30px", borderRadius: 16, gap:12, background:"var(--bg-card)", border:"1px solid var(--border)", boxShadow:"var(--shadow-md)" }}>
@@ -1242,7 +1089,7 @@ export default function WorkspacePage() {
               <div>
                 <div style={{ fontSize:12, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa del Documento</div>
                 <div style={{ fontSize:11, color:"var(--border-hover)", marginTop:1 }}>
-                  {fasesCompletadas} capítulo{fasesCompletadas !== 1 ? "s" : ""} finalizados
+                  {documentoFinalListo ? "Documento final consolidado" : `${fasesCompletadas} capítulo${fasesCompletadas !== 1 ? "s" : ""} finalizados`}
                 </div>
               </div>
               {university && (
@@ -1271,8 +1118,11 @@ export default function WorkspacePage() {
             </div>
 
             {/* Download actions */}
-            {fasesCompletadas > 0 && (
+            {(fasesCompletadas > 0 || documentoFinalListo) && (
               <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", display:"flex", gap:8, flexShrink:0, flexWrap:"wrap" }}>
+                <button onClick={generarDocumentoFinal} disabled={isFinalizing || fasesCompletadas === 0} className="btn-purple" style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center", minWidth: "100%" }}>
+                  {isFinalizing ? "Consolidando documento..." : documentoFinalListo ? "Regenerar documento final" : "Generar documento final"}
+                </button>
                 <button onClick={() => setShowCoverSettings(true)} className="btn-cyan" style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center", minWidth: "100%" }}>
                   ⚙️ Configurar Carátula
                 </button>
@@ -1281,8 +1131,12 @@ export default function WorkspacePage() {
                 </button>
                 {university && (
                   <button
-                    disabled={isPdfDownloading}
+                    disabled={isPdfDownloading || !documentoFinalListo}
                     onClick={async () => {
+                      if (!documentoFinalListo) {
+                        setError("Primero genera el documento final consolidado.");
+                        return;
+                      }
                       setIsPdfDownloading(true);
                       setError("");
                       const html = generatePdfHtml({
@@ -1338,7 +1192,7 @@ export default function WorkspacePage() {
                     className="btn-ghost"
                     style={{ flex:1, fontSize:0, padding:"8px", justifyContent:"center" }}
                   >
-                    <span style={{ fontSize: 12 }}>{isPdfDownloading ? "Generando..." : "Descargar PDF"}</span>
+                    <span style={{ fontSize: 12 }}>{isPdfDownloading ? "Generando..." : documentoFinalListo ? "Descargar PDF" : "PDF bloqueado"}</span>
                     🖨️ Imprimir
                   </button>
                 )}

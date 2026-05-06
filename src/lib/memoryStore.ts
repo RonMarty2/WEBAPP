@@ -142,6 +142,11 @@ export interface ProyectoRecord {
   contenido_fase_5: string | null;
   // Dynamic phase contents: phase_id → content (and phase_id + "_borrador" → borrador)
   phase_contents?: Record<string, string | null>;
+  // Academic dossier used to keep a stable project context across AI calls.
+  academic_context?: Record<string, unknown>;
+  academic_memory?: Record<string, unknown>;
+  final_document?: string | null;
+  final_document_validation?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

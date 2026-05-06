@@ -604,6 +604,16 @@ export function getHtmlCover(university: University, studentData: StudentCoverDa
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
+function extractTocFromMarkdown(content: string): { label: string; level: number }[] {
+  const headings = [...content.matchAll(/^(#{1,3})\s+(.+)$/gm)]
+    .map(match => ({
+      label: match[2].replace(/\*\*/g, "").trim(),
+      level: Math.min(match[1].length, 3),
+    }))
+    .filter(item => item.label && !/^indice$/i.test(item.label));
+  return headings.slice(0, 18);
+}
+
 export function generatePdfHtml(params: {
   university: University;
   studentData: StudentCoverData;
@@ -624,19 +634,22 @@ export function generatePdfHtml(params: {
     .filter(k => /^fase_\d+$/.test(k))
     .sort((a, b) => parseInt(a.replace("fase_", ""), 10) - parseInt(b.replace("fase_", ""), 10));
 
-  const tocItems = sortedKeys
-    .filter(key => phaseContents[key]?.trim())
-    .map((key, index) => ({
-      label: phaseLabels[key] ?? `Capítulo ${index + 1}`,
-      level: 1,
-    }));
+  const isSingleFinalDocument = sortedKeys.length === 1 && /monograf/i.test(phaseLabels[sortedKeys[0]] ?? "");
+  const tocItems = isSingleFinalDocument
+    ? extractTocFromMarkdown(phaseContents[sortedKeys[0]] ?? "")
+    : sortedKeys
+        .filter(key => phaseContents[key]?.trim())
+        .map((key, index) => ({
+          label: phaseLabels[key] ?? `Capítulo ${index + 1}`,
+          level: 1,
+        }));
 
   const toc = tocItems.length
     ? `<section class="document-sheet toc-sheet">
         <h1 class="toc-title">Índice</h1>
         <ol class="toc-list">
           ${tocItems.map(item => `<li class="toc-level-${item.level}">${esc(item.label)}</li>`).join("\n")}
-          <li class="toc-level-1">Referencias Bibliográficas</li>
+          ${tocItems.some(item => /referencias|bibliograf/i.test(item.label)) ? "" : `<li class="toc-level-1">Referencias Bibliográficas</li>`}
           <li class="toc-level-1">Anexos</li>
         </ol>
       </section>`
@@ -651,7 +664,7 @@ export function generatePdfHtml(params: {
     const pages = paginateMarkdown(content, capacity);
     pages.forEach((pageContent, pageIndex) => {
       const pageIsBibliography = phaseIsBibliography || /(^|\n)#{1,3}\s*(bibliograf|referencias)/i.test(pageContent);
-      const pageTitle = pageIndex === 0 && label ? `<h1 class="doc-title">${esc(label)}</h1>` : "";
+      const pageTitle = pageIndex === 0 && label && !isSingleFinalDocument ? `<h1 class="doc-title">${esc(label)}</h1>` : "";
       bodyParts.push(
         `<section class="document-sheet content-sheet ${pageIsBibliography ? "bibliography references" : ""}">
           <span class="page-number ${pageNumPos}"></span>

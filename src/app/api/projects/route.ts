@@ -68,6 +68,9 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const { tipo_proyecto_id, universidad_id, tema_aprobado, titulo_provisional, modalidad_creacion } = body;
+    const academic_context = body.academic_context && typeof body.academic_context === "object"
+      ? body.academic_context as Record<string, unknown>
+      : {};
     const servicio_id = body.servicio_id || serviceIdForProjectType(tipo_proyecto_id);
     const resolvedTipoProyectoId = tipo_proyecto_id || projectTypeIdForService(servicio_id);
 
@@ -86,6 +89,10 @@ export async function POST(req: Request) {
         titulo_provisional: titulo_provisional ?? null,
         estado_fase: 0,
         completado: false,
+        academic_context,
+        academic_memory: {},
+        final_document: null,
+        final_document_validation: {},
         contenido_fase_0: null,
         contenido_fase_1: null,
         contenido_fase_2: null,
@@ -117,6 +124,10 @@ export async function POST(req: Request) {
         titulo_provisional: titulo_provisional ?? null,
         estado_fase: 0,
         completado: false,
+        academic_context,
+        academic_memory: {},
+        final_document: null,
+        final_document_validation: {},
         contenido_fase_0: null,
         contenido_fase_1: null,
         contenido_fase_2: null,
@@ -154,6 +165,10 @@ export async function POST(req: Request) {
         titulo_provisional: titulo_provisional ?? null,
         estado_fase: 0,
         completado: false,
+        academic_context,
+        academic_memory: {},
+        final_document: null,
+        final_document_validation: {},
         contenido_fase_0: null,
         contenido_fase_1: null,
         contenido_fase_2: null,
