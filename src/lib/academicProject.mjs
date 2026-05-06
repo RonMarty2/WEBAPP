@@ -1,3 +1,8 @@
+import {
+  extractReferenceLines,
+  normalizeReferenceCatalog,
+} from "@/lib/projectReferences.mjs";
+
 const FORBIDDEN_FINAL_PATTERNS = [
   /\bFase\s+\d+\b/i,
   /\bFASE\s+\d+\b/i,
@@ -72,14 +77,6 @@ function isAnnexHeading(line) {
   return normalized === "anexos" || normalized.startsWith("anexo ");
 }
 
-function cleanReferenceLine(line) {
-  return stripInternalDocumentMarkers(line)
-    .replace(/^[-*]\s*/, "")
-    .replace(/^#{1,6}\s*/, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 function splitVisibleBodyAndBackMatter(content) {
   const lines = cleanWhitespace(content).split("\n");
   const body = [];
@@ -102,14 +99,7 @@ function splitVisibleBodyAndBackMatter(content) {
     }
 
     if (mode === "references") {
-      const cleaned = cleanReferenceLine(line);
-      if (
-        cleaned.length > 18 &&
-        !/^nota\b/i.test(cleaned) &&
-        !/^(capitulo|fase|anexos?)\b/i.test(cleaned)
-      ) {
-        references.push(cleaned);
-      }
+      references.push(...extractReferenceLines(`## Referencias Bibliograficas\n${line}`));
       continue;
     }
 
@@ -129,7 +119,7 @@ function splitVisibleBodyAndBackMatter(content) {
   };
 }
 
-export function buildDisplayFinalDocument(phaseContents = []) {
+export function buildDisplayFinalDocument(phaseContents = [], options = {}) {
   const bodyParts = [];
   const referenceSet = new Set();
   const annexSet = new Set();
@@ -141,6 +131,14 @@ export function buildDisplayFinalDocument(phaseContents = []) {
     if (split.body) bodyParts.push(split.body);
     for (const ref of split.references) referenceSet.add(ref);
     for (const annex of split.annexes) annexSet.add(annex);
+  }
+
+  for (const ref of normalizeReferenceCatalog(options.referenceCatalog)) {
+    referenceSet.add(ref);
+  }
+
+  for (const annex of Array.isArray(options.annexes) ? options.annexes : []) {
+    if (annex) annexSet.add(String(annex).trim());
   }
 
   const references = [...referenceSet].sort((a, b) => a.localeCompare(b, "es"));
@@ -302,10 +300,11 @@ export function buildFinalConsolidationPrompt({
   documents = [],
   phaseMemory = [],
   phaseContents = [],
+  referenceCatalog = [],
   formatRules = "",
 } = {}) {
   const context = buildAcademicContextBlock({ contract, studentContext, documents, phaseMemory });
-  const internalReferences = new Set();
+  const internalReferences = new Set(normalizeReferenceCatalog(referenceCatalog));
   const content = phaseContents
     .filter((item) => item?.content?.trim())
     .map((item, index) => {

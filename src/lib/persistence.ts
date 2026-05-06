@@ -17,7 +17,7 @@ const STORE_DIR = process.env.STORE_PATH
   : DEFAULT_STORE_DIR;
 const STORE_FILE = path.join(STORE_DIR, "data.json");
 
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
+let latestDataCache: StoreData | null = null;
 
 interface WorkspacePrompts {
   hilos: string[];
@@ -112,25 +112,28 @@ function migrateLegacyStoreIfNeeded() {
 
 export function loadFromDisk(): StoreData {
   try {
+    if (latestDataCache) return latestDataCache;
     ensureDir();
     migrateLegacyStoreIfNeeded();
-    if (!fs.existsSync(STORE_FILE)) return { proyectos: {}, users: {} };
+    if (!fs.existsSync(STORE_FILE)) {
+      latestDataCache = { proyectos: {}, users: {} };
+      return latestDataCache;
+    }
     const raw = fs.readFileSync(STORE_FILE, "utf8");
-    return JSON.parse(raw) as StoreData;
+    latestDataCache = JSON.parse(raw) as StoreData;
+    return latestDataCache;
   } catch {
-    return { proyectos: {}, users: {} };
+    latestDataCache = { proyectos: {}, users: {} };
+    return latestDataCache;
   }
 }
 
 export function saveToDisk(data: StoreData) {
-  // Debounce: write at most once every 500ms
-  if (saveTimer) clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try {
-      ensureDir();
-      fs.writeFileSync(STORE_FILE, JSON.stringify(data, null, 2), "utf8");
-    } catch (e) {
-      console.error("[persistence] Error saving store:", e);
-    }
-  }, 500);
+  latestDataCache = data;
+  try {
+    ensureDir();
+    fs.writeFileSync(STORE_FILE, JSON.stringify(latestDataCache ?? data, null, 2), "utf8");
+  } catch (e) {
+    console.error("[persistence] Error saving store:", e);
+  }
 }

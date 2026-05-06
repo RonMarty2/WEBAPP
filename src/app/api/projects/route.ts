@@ -6,7 +6,12 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import { createProyecto, listProyectos } from "@/lib/memoryStore";
+import {
+  createProyecto,
+  listProyectos,
+  proyectosStore,
+  upsertProyectoSnapshot,
+} from "@/lib/memoryStore";
 import { completedPhaseIndexForProject, projectTypeIdForService, serviceIdForProjectType } from "@/lib/projectTypePhases";
 import type { InsertTables } from "@/types/database";
 
@@ -15,9 +20,10 @@ import type { InsertTables } from "@/types/database";
 export async function GET() {
   try {
     const { user } = await requireAuth();
+    const memoryProjects = listProyectos(user.id);
 
     if (!isSupabaseConfigured()) {
-      const proyectos = listProyectos(user.id).map(p => ({
+      const proyectos = memoryProjects.map(p => ({
         ...p,
         estado_fase: completedPhaseIndexForProject(p),
         servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
@@ -45,7 +51,7 @@ export async function GET() {
 
     if (error) {
       // Supabase falló — usar memoria como respaldo
-      const proyectos = listProyectos(user.id).map(p => ({
+      const proyectos = memoryProjects.map(p => ({
         ...p,
         estado_fase: completedPhaseIndexForProject(p),
         servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
@@ -53,7 +59,37 @@ export async function GET() {
       return NextResponse.json({ proyectos });
     }
 
-    return NextResponse.json({ proyectos: data ?? [] });
+    const memoryById = new Map(
+      [...proyectosStore.values()]
+        .filter((project) => project.usuario_id === user.id)
+        .map((project) => [project.id, project])
+    );
+
+    const proyectos = (data ?? [])
+      .filter((project) => !memoryById.get(project.id)?.oculto_por_usuario)
+      .map((project) => {
+        const memory = memoryById.get(project.id);
+        return memory
+          ? {
+              ...project,
+              ...memory,
+              estado_fase: completedPhaseIndexForProject(memory),
+              servicios: project.servicios,
+            }
+          : project;
+      })
+      .concat(
+        memoryProjects
+          .filter((project) => !(data ?? []).some((item) => item.id === project.id))
+          .map((project) => ({
+            ...project,
+            estado_fase: completedPhaseIndexForProject(project),
+            servicios: { id: project.servicio_id, nombre: "Monografía Académica" },
+          }))
+      )
+      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+    return NextResponse.json({ proyectos });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });
@@ -180,6 +216,31 @@ export async function POST(req: Request) {
       });
       return NextResponse.json({ proyecto }, { status: 201 });
     }
+
+    upsertProyectoSnapshot({
+      id: data.id,
+      usuario_id: user.id,
+      servicio_id,
+      tipo_proyecto_id: resolvedTipoProyectoId,
+      universidad_id: universidad_id ?? undefined,
+      modalidad_creacion: modalidad_creacion ?? "directa",
+      tema_aprobado: data.tema_aprobado ?? tema_aprobado ?? null,
+      titulo_provisional: data.titulo_provisional ?? titulo_provisional ?? null,
+      estado_fase: data.estado_fase ?? 0,
+      completado: data.completado ?? false,
+      academic_context,
+      academic_memory: {},
+      final_document: null,
+      final_document_validation: {},
+      contenido_fase_0: null,
+      contenido_fase_1: null,
+      contenido_fase_2: null,
+      contenido_fase_3: null,
+      contenido_fase_4: null,
+      contenido_fase_5: null,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+    });
 
     return NextResponse.json({ proyecto: data }, { status: 201 });
   } catch (e) {

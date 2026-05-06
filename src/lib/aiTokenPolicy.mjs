@@ -16,8 +16,21 @@ export function nextGroqRetryTokenBudget(currentTokens) {
 export function isTokenLimitError(message) {
   const normalized = message.toLowerCase();
   return normalized.includes("too large")
+    || normalized.includes("rate limit")
     || normalized.includes("rate_limit")
+    || normalized.includes("tokens per day")
     || normalized.includes("tokens per minute")
+    || normalized.includes("quota")
+    || normalized.includes("resource exhausted")
     || normalized.includes("request too large")
     || normalized.includes("please reduce your message size");
+}
+
+export function isProviderCapacityError(message) {
+  const normalized = String(message ?? "").toLowerCase();
+  return isTokenLimitError(normalized)
+    || normalized.includes("unavailable")
+    || normalized.includes("overloaded")
+    || normalized.includes("temporarily unavailable")
+    || normalized.includes("try again later");
 }

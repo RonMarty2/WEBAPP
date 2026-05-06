@@ -9,6 +9,11 @@ import {
   buildFinalConsolidationPrompt,
   validateFinalDocument,
 } from "@/lib/academicProject.mjs";
+import {
+  buildContextualReferences,
+  readReferenceCatalog,
+  withUpdatedReferenceCatalog,
+} from "@/lib/projectReferences.mjs";
 
 type AcademicContext = Record<string, unknown> & {
   contexto_inicial?: Record<string, unknown>;
@@ -18,6 +23,7 @@ type AcademicContext = Record<string, unknown> & {
 
 type AcademicMemory = Record<string, unknown> & {
   phase_summaries?: Record<string, unknown>[];
+  reference_catalog?: string[];
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -59,8 +65,14 @@ function collectPhaseContents(proyecto: Record<string, unknown>) {
   }).filter((item) => item.content?.trim());
 }
 
-function buildLocalFinalDocument(phaseContents: { label: string; content: string | null }[]) {
-  return buildDisplayFinalDocument(phaseContents);
+function buildLocalFinalDocument(
+  phaseContents: { label: string; content: string | null }[],
+  input: {
+    referenceCatalog?: string[];
+    annexes?: string[];
+  } = {}
+) {
+  return buildDisplayFinalDocument(phaseContents, input);
 }
 
 function buildFinalAITraceEntry(input: {
@@ -128,6 +140,15 @@ export async function POST(req: Request) {
     const phaseContents = collectPhaseContents(proyecto as unknown as Record<string, unknown>);
     const documents = Array.isArray(academicContext.documentos) ? academicContext.documentos : [];
     const phaseMemory = Array.isArray(academicMemory.phase_summaries) ? academicMemory.phase_summaries : [];
+    const referenceCatalog = [
+      ...readReferenceCatalog(academicMemory),
+      ...buildContextualReferences({
+        topic: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+        route: academicContext.ruta_elegida ?? {},
+        studentContext: academicContext.contexto_inicial ?? {},
+        documents,
+      }),
+    ];
     const studentContext = {
       ...asRecord(academicContext.contexto_inicial),
       tema: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
@@ -142,6 +163,7 @@ export async function POST(req: Request) {
       documents,
       phaseMemory,
       phaseContents,
+      referenceCatalog,
       formatRules: "Documento en español academico, tono formal, capitulos numerados, referencias en estilo APA 7 cuando sea posible.",
     });
 
@@ -157,14 +179,21 @@ export async function POST(req: Request) {
       traceProviderId = result.provider;
       traceModel = result.model;
       proveedor = `${result.provider} / ${result.model}`;
-      finalText = buildDisplayFinalDocument([{ label: "Documento final", content: result.text }]);
+      finalText = buildDisplayFinalDocument(
+        [{ label: "Documento final", content: result.text }],
+        {
+          referenceCatalog,
+        }
+      );
     } catch (e) {
       traceStatus = "fallback";
       traceProviderId = "local";
       traceModel = "ensamblado-sin-ia";
       traceError = (e as Error).message;
       proveedor = "local / ensamblado sin IA";
-      finalText = buildLocalFinalDocument(phaseContents);
+      finalText = buildLocalFinalDocument(phaseContents, {
+        referenceCatalog,
+      });
       if (!finalText.trim()) {
         updateProyecto(proyectoId, {
           academic_memory: appendAITrace(academicMemory, buildFinalAITraceEntry({
@@ -181,11 +210,19 @@ export async function POST(req: Request) {
     let validation = validateFinalDocument(finalText);
     if (!validation.ok) {
       try {
-        finalText = buildDisplayFinalDocument([{ label: "Documento final reparado", content: await repairFinalDocument({
-          dirtyText: finalText,
-          errors: validation.errors,
-          servicioId: proyecto.servicio_id,
-        }) }]);
+        finalText = buildDisplayFinalDocument(
+          [{
+            label: "Documento final reparado",
+            content: await repairFinalDocument({
+              dirtyText: finalText,
+              errors: validation.errors,
+              servicioId: proyecto.servicio_id,
+            }),
+          }],
+          {
+            referenceCatalog,
+          }
+        );
         validation = validateFinalDocument(finalText);
       } catch {
         // Return the validation errors below; the first final text is still stored for inspection.
@@ -197,6 +234,16 @@ export async function POST(req: Request) {
       __final_document: finalText,
     };
 
+    const nextAcademicMemory = withUpdatedReferenceCatalog(
+      academicMemory,
+      finalText,
+      buildContextualReferences({
+        topic: academicContext.contexto_inicial?.tema ?? proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
+        route: academicContext.ruta_elegida ?? {},
+        studentContext: academicContext.contexto_inicial ?? {},
+        documents,
+      })
+    );
     const traceEntry = buildFinalAITraceEntry({
       servicioId: proyecto.servicio_id,
       status: traceStatus,
@@ -211,7 +258,7 @@ export async function POST(req: Request) {
       final_document: finalText,
       final_document_validation: validation as unknown as Record<string, unknown>,
       completado: validation.ok,
-      academic_memory: appendAITrace(academicMemory, traceEntry),
+      academic_memory: appendAITrace(nextAcademicMemory, traceEntry),
     });
 
     return NextResponse.json({

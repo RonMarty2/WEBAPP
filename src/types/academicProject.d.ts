@@ -19,7 +19,11 @@ declare module "@/lib/academicProject.mjs" {
 
   export function stripInternalDocumentMarkers(text: string): string;
   export function buildDisplayFinalDocument(
-    phaseContents?: Array<string | { label?: string; content?: string | null }>
+    phaseContents?: Array<string | { label?: string; content?: string | null }>,
+    options?: {
+      referenceCatalog?: string[];
+      annexes?: string[];
+    }
   ): string;
   export function validateFinalDocument(text: string): FinalDocumentValidation;
   export function normalizeRouteOptions(raw: unknown): AcademicRouteOption[];
@@ -37,6 +41,7 @@ declare module "@/lib/academicProject.mjs" {
     documents?: Record<string, unknown>[];
     phaseMemory?: Record<string, unknown>[];
     phaseContents?: { label?: string; content?: string | null }[];
+    referenceCatalog?: string[];
     formatRules?: string;
   }): { system: string; user: string };
 }

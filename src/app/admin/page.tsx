@@ -1,306 +1,236 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import AdminShell, { StaggerRow, useCountUp } from "@/components/admin/AdminShell";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface DashStats {
   total_monografias_generadas: number;
   completadas: number;
   este_mes: number;
   prompts: Array<{ etapa: number; uso_total: number; uso_este_mes: number; tiempo_promedio_seg: number }>;
 }
-interface MonografiaCount { total: number; cap1: number; cap2: number; completadas: number; }
 
-// ── Hook: Typewriter ──────────────────────────────────────────────────────────
-function useTypewriter(text: string, speed = 38, delay = 120) {
-  const [displayed, setDisplayed] = useState("");
-  const [done, setDone]           = useState(false);
-  useEffect(() => {
-    setDisplayed("");
-    setDone(false);
-    let i = 0;
-    const t = setTimeout(() => {
-      const id = setInterval(() => {
-        i++;
-        setDisplayed(text.slice(0, i));
-        if (i >= text.length) { clearInterval(id); setDone(true); }
-      }, speed);
-      return () => clearInterval(id);
-    }, delay);
-    return () => clearTimeout(t);
-  }, [text, speed, delay]);
-  return { displayed, done };
+interface MonografiaCount {
+  total: number;
+  cap1: number;
+  cap2: number;
+  completadas: number;
 }
 
-// ── Hook: Count-up ────────────────────────────────────────────────────────────
-function useCountUp(target: number, duration = 900, delay = 300) {
-  const [value, setValue] = useState(0);
-  const raf = useRef(0);
-  useEffect(() => {
-    if (target === 0) { setValue(0); return; }
-    let start: number | null = null;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const elapsed = ts - start;
-      if (elapsed < delay) { raf.current = requestAnimationFrame(step); return; }
-      const progress = Math.min((elapsed - delay) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(ease * target));
-      if (progress < 1) raf.current = requestAnimationFrame(step);
-    };
-    raf.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf.current);
-  }, [target, duration, delay]);
-  return value;
-}
+function MetricCard({
+  code,
+  label,
+  value,
+  detail,
+  index,
+}: {
+  code: string;
+  label: string;
+  value: number;
+  detail: string;
+  index: number;
+}) {
+  const counted = useCountUp(value, 800, 140 + index * 70);
 
-// ── Animated KPI ─────────────────────────────────────────────────────────────
-function KpiCard({ label, code, value }: { label: string; code: string; value: number }) {
-  const n = useCountUp(value, 800, 200);
   return (
-    <div className="admin-card p-4 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="admin-label">{code}</span>
-        <span className="admin-muted text-[10px]">[LIVE]</span>
+    <StaggerRow index={index}>
+      <div className="adm-card adm-card-strong p-5 h-full">
+        <div className="flex items-center justify-between mb-4">
+          <span className="adm-label">{code}</span>
+          <span className="adm-muted">live</span>
+        </div>
+        <div style={{ fontSize: 44, fontWeight: 700, lineHeight: 1, color: "#edf2fb" }}>{counted}</div>
+        <div className="mt-4 pt-3" style={{ borderTop: "1px solid rgba(140, 154, 176, 0.16)" }}>
+          <div className="text-[13px] font-bold" style={{ color: "#edf2fb" }}>{label}</div>
+          <div className="adm-caption mt-1">{detail}</div>
+        </div>
       </div>
-      <div className="admin-number">{n}</div>
-      <div className="admin-caption border-t border-[#e5e7eb] pt-2">{label}</div>
-    </div>
+    </StaggerRow>
   );
 }
 
-// ── Typewriter line ───────────────────────────────────────────────────────────
-function TypeLine({ text, speed = 22, delay = 0, className = "" }: { text: string; speed?: number; delay?: number; className?: string }) {
-  const { displayed, done } = useTypewriter(text, speed, delay);
-  return (
-    <span className={className}>
-      {displayed}
-      {!done && <span className="admin-cursor">█</span>}
-    </span>
-  );
-}
-
-// ── Staggered row reveal ──────────────────────────────────────────────────────
-function StaggerRow({ children, index }: { children: React.ReactNode; index: number }) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const t = setTimeout(() => setVisible(true), 80 * index + 400);
-    return () => clearTimeout(t);
-  }, [index]);
-  return (
-    <div
-      className="transition-all duration-500"
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(8px)",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-// ── Main ──────────────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
-  const [stats, setStats]           = useState<DashStats | null>(null);
+  const [stats, setStats] = useState<DashStats | null>(null);
   const [monoCounts, setMonoCounts] = useState<MonografiaCount>({ total: 0, cap1: 0, cap2: 0, completadas: 0 });
-  const [tick, setTick]             = useState(0);
+  const [tick, setTick] = useState("");
 
   useEffect(() => {
-    const id = setInterval(() => setTick(t => t + 1), 1000);
+    const updateClock = () => {
+      setTick(
+        new Date().toLocaleTimeString("es-BO", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        }),
+      );
+    };
+    updateClock();
+    const id = setInterval(updateClock, 1000);
     return () => clearInterval(id);
   }, []);
 
   useEffect(() => {
     fetch("/api/admin/estadisticas")
-      .then(r => r.json()).then(d => setStats(d)).catch(() => null);
+      .then((r) => r.json())
+      .then((d) => setStats(d))
+      .catch(() => null);
+
     fetch("/api/admin/monografias")
-      .then(r => r.json())
+      .then((r) => r.json())
       .then((d: Array<{ etapa_actual: number; status: string }>) => {
         if (!Array.isArray(d)) return;
         setMonoCounts({
-          total:       d.length,
-          cap1:        d.filter(m => m.etapa_actual >= 1).length,
-          cap2:        d.filter(m => m.etapa_actual >= 2).length,
-          completadas: d.filter(m => m.status === "completa" || m.etapa_actual >= 3).length,
+          total: d.length,
+          cap1: d.filter((m) => m.etapa_actual >= 1).length,
+          cap2: d.filter((m) => m.etapa_actual >= 2).length,
+          completadas: d.filter((m) => m.status === "completa" || m.etapa_actual >= 3).length,
         });
-      }).catch(() => null);
+      })
+      .catch(() => null);
   }, []);
 
-  const usoTotal = stats?.prompts?.reduce((a, p) => a + p.uso_total, 0) ?? 0;
-  const now      = new Date();
-  const timeStr  = now.toLocaleTimeString("es-BO", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
-
-  const AI_LABELS: Record<number, string> = { 0: "TEMA", 1: "CAP_I", 2: "CAP_II", 3: "CAP_III-V" };
-
-  const ACTIONS = [
-    { href: "/admin/usuarios",     code: "USR", label: "Usuarios & Docs",  desc: "Monografías activas y documentos subidos." },
-    { href: "/admin/estadisticas", code: "STAT", label: "Estadísticas",    desc: "Métricas de generación por etapa." },
-    { href: "/admin/modelos",      code: "API",  label: "Modelos & APIs",  desc: "Groq, OpenAI, Anthropic — cascade fallback." },
-    { href: "/admin/prompts",      code: "PRMT", label: "Prompts",         desc: "Instrucciones de IA por etapa." },
+  const usoTotal = stats?.prompts?.reduce((acc, prompt) => acc + prompt.uso_total, 0) ?? 0;
+  const serviceHealth = [
+    { code: "AI", label: "Cadena de IA", value: "Operativa, revisar servicios por asignacion", state: "stable" },
+    { code: "MONO", label: "Monografia", value: "Validar que mono-001 tenga proveedor activo", state: "attention" },
+    { code: "STORE", label: "Persistencia", value: "Modo archivo local .store en desarrollo", state: "stable" },
+    { code: "LATEX", label: "Exportacion", value: "Motor tex disponible para compilacion", state: "stable" },
   ];
 
-  const STATUS = [
-    { code: "MEM",  label: "Almacenamiento",  value: "IN-MEMORY (session)",            state: "WARN" },
-    { code: "AI",   label: "IA Provider",     value: "Groq > Anthropic > OpenAI",      state: "OK"   },
-    { code: "TEX",  label: "LaTeX Engine",    value: "Generator .tex available",        state: "OK"   },
-    { code: "PAY",  label: "Pagos",           value: "Pending integration",             state: "IDLE" },
+  const actions = [
+    {
+      href: "/admin/modelos",
+      code: "CTRL/AI",
+      title: "Modelos y APIs",
+      desc: "Configura proveedores y elimina bloqueos de servicios como mono-001.",
+    },
+    {
+      href: "/admin/usuarios",
+      code: "CTRL/USR",
+      title: "Usuarios",
+      desc: "Controla altas, activaciones, roles y carga operativa real.",
+    },
+    {
+      href: "/admin/estadisticas",
+      code: "CTRL/STAT",
+      title: "Estadisticas",
+      desc: "Observa ritmo de generacion, etapas y comportamiento del sistema.",
+    },
+    {
+      href: "/admin/prompts",
+      code: "CTRL/PRM",
+      title: "Prompts maestros",
+      desc: "Ajusta el nucleo de redaccion sin perder el rigor del flujo.",
+    },
   ];
-
-  const stateColor: Record<string, string> = {
-    OK:   "text-[#000]",
-    WARN: "text-[#555]",
-    IDLE: "text-[#aaa]",
-  };
-  const stateDot: Record<string, string> = {
-    OK:   "bg-[#000]",
-    WARN: "bg-[#888]",
-    IDLE: "bg-[#ccc]",
-  };
 
   return (
-    <>
-      {/* ── Scoped styles (only admin) ──────────────────────────────────── */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@100;400;700&display=swap');
-
-        .admin-mono * { font-family: 'IBM Plex Mono', ui-monospace, monospace !important; }
-
-        .admin-label  { font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
-                        text-transform: uppercase; color: #000; }
-        .admin-muted  { font-size: 10px; color: #999; }
-        .admin-caption{ font-size: 11px; color: #666; line-height: 1.4; }
-        .admin-number { font-size: 40px; font-weight: 700; color: #000; line-height: 1; letter-spacing: -0.02em; }
-        .admin-card   { background: #fff; border: 1px solid #e5e7eb; }
-        .admin-divider{ border: none; border-top: 1px solid #e5e7eb; margin: 0; }
-        .admin-row    { display: flex; align-items: center; gap: 12px;
-                        padding: 10px 0; border-bottom: 1px solid #e5e7eb; }
-        .admin-row:last-child { border-bottom: none; }
-
-        @keyframes admin-blink { 0%,100%{opacity:1} 50%{opacity:0} }
-        .admin-cursor { display:inline-block; animation: admin-blink 1s step-end infinite;
-                        font-size:0.9em; vertical-align:baseline; }
-
-        @media (prefers-reduced-motion: reduce) {
-          .admin-cursor { animation: none; opacity: 1; }
-        }
-      `}</style>
-
-      <div className="admin-mono">
-
-        {/* ── Terminal header bar ──────────────────────────────────────── */}
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#e5e7eb]">
+    <AdminShell
+      title="Centro de Mando"
+      code="CMD CORE"
+      subtitle="Bunker estrategico del sistema. Todo el control operativo, de IA y de alumnos converge aqui."
+    >
+      <div className="adm-card adm-card-strong p-5 mb-8">
+        <div className="grid gap-4 lg:grid-cols-[1.25fr_0.75fr]">
           <div>
-            <div className="admin-muted mb-1">
-              // SISTEMA CENTRAL — LABORATORIO ACADÉMICO PRO
+            <div className="adm-label mb-3">panorama ejecutivo</div>
+            <div className="text-[26px] font-bold leading-tight" style={{ color: "#edf2fb" }}>
+              El panel ahora esta pensado como sala de control, no como consola improvisada.
             </div>
-            <h1 className="text-2xl font-bold text-[#000] tracking-tight leading-none">
-              <TypeLine text="Dashboard" speed={55} delay={80} />
-            </h1>
+            <div className="adm-caption mt-3 max-w-2xl">
+              Monitorea actividad real, riesgo operativo y estado de la IA desde una superficie mas sobria, mas firme y mas propia del nucleo administrativo.
+            </div>
           </div>
-          <div className="text-right hidden sm:block">
-            <div className="admin-muted">{tick >= 0 && timeStr}</div>
-            <div className="flex items-center gap-1.5 justify-end mt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#000] animate-pulse" />
-              <span className="admin-label text-[9px]">ONLINE</span>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="adm-surface p-4">
+              <div className="adm-label mb-2">reloj</div>
+              <div className="text-[22px] font-bold" style={{ color: "#edf2fb" }}>{tick || "--:--:--"}</div>
+            </div>
+            <div className="adm-surface p-4">
+              <div className="adm-label mb-2">uso IA</div>
+              <div className="text-[22px] font-bold" style={{ color: "#edf2fb" }}>{usoTotal}</div>
+            </div>
+            <div className="adm-surface p-4 col-span-2">
+              <div className="adm-label mb-2">prioridad inmediata</div>
+              <div className="text-[13px] font-bold" style={{ color: "#edf2fb" }}>
+                Confirmar proveedor y modelo activos para el servicio de monografia.
+              </div>
+              <div className="adm-caption mt-1">Ese es el origen del error que viste en la captura del generador.</div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ── ASCII decoration ─────────────────────────────────────────── */}
-        <div className="admin-muted text-[10px] mb-6 hidden md:block select-none" aria-hidden>
-          {"/*──────────────────────────────────────────────────────────────*/"}
-        </div>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 mb-8">
+        <MetricCard code="MONO" label="Monografias" value={monoCounts.total} detail="Total de proyectos creados." index={0} />
+        <MetricCard code="CAP1" label="Capitulo I" value={monoCounts.cap1} detail="Proyectos con primer avance real." index={1} />
+        <MetricCard code="CAP2" label="Capitulo II" value={monoCounts.cap2} detail="Trabajo que ya cruzo el marco teorico." index={2} />
+        <MetricCard code="DONE" label="Completadas" value={monoCounts.completadas} detail="Documentos cerrados o listos." index={3} />
+      </div>
 
-        {/* ── KPIs ─────────────────────────────────────────────────────── */}
-        <div className="admin-label mb-3">// métricas activas</div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          <KpiCard code="MONO" label="Monografías creadas" value={monoCounts.total}       />
-          <KpiCard code="CAP1" label="Con Capítulo I"      value={monoCounts.cap1}        />
-          <KpiCard code="CAP2" label="Con Capítulo II"     value={monoCounts.cap2}        />
-          <KpiCard code="DONE" label="Completadas"         value={monoCounts.completadas} />
-        </div>
-
-        {/* ── IA Monitor ───────────────────────────────────────────────── */}
-        {stats && (
-          <div className="admin-card mb-8">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#e5e7eb]">
-              <span className="admin-label">// monitor IA</span>
-              <span className="admin-muted">
-                TOTAL: <strong className="text-[#000]">{usoTotal}</strong>
-              </span>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[#e5e7eb]">
-              {stats.prompts.map((p, i) => (
-                <div key={p.etapa} className="px-4 py-4">
-                  <div className="admin-label mb-2">{AI_LABELS[p.etapa] ?? `ETG_${p.etapa}`}</div>
-                  <StaggerRow index={i}>
-                    <div className="text-2xl font-bold text-[#000] leading-none">{p.uso_total}</div>
-                    <div className="admin-muted mt-1">
-                      {p.tiempo_promedio_seg > 0 ? `avg: ${p.tiempo_promedio_seg}s` : "avg: —"}
-                    </div>
-                  </StaggerRow>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── Quick Access ─────────────────────────────────────────────── */}
-        <div className="admin-label mb-3">// acceso rápido</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-          {ACTIONS.map((a, i) => (
-            <StaggerRow key={a.href} index={i}>
-              <a
-                href={a.href}
-                className="admin-card p-4 flex gap-4 items-start no-underline group
-                           hover:border-[#000] transition-colors duration-150"
-              >
-                <span className="admin-label text-[11px] w-10 shrink-0 pt-0.5">[{a.code}]</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-bold text-[#000] mb-1">{a.label}</div>
-                  <div className="admin-caption">{a.desc}</div>
-                </div>
-                <span className="admin-muted group-hover:text-[#000] transition-colors text-[16px] leading-none">→</span>
-              </a>
-            </StaggerRow>
-          ))}
-        </div>
-
-        {/* ── System Status ─────────────────────────────────────────────── */}
-        <div className="admin-label mb-3">// estado del sistema</div>
-        <div className="admin-card">
-          <div className="px-4 py-2 border-b border-[#e5e7eb] flex items-center gap-2">
-            <span className="admin-muted text-[10px]">sys.status</span>
-            <span className="admin-muted text-[10px]">—</span>
-            <span className="admin-muted text-[10px]">4 services</span>
-          </div>
-          <div className="px-4 py-2">
-            {STATUS.map((s, i) => (
-              <StaggerRow key={s.code} index={i + 4}>
-                <div className="admin-row">
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${stateDot[s.state]}`} />
-                  <span className="admin-label w-12 shrink-0">{s.code}</span>
-                  <span className="text-[12px] font-bold text-[#000] w-28 shrink-0">{s.label}</span>
-                  <span className={`text-[12px] font-mono flex-1 ${stateColor[s.state]}`}>{s.value}</span>
-                  <span className="admin-muted text-[10px] shrink-0">[{s.state}]</span>
-                </div>
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr] mb-8">
+        <div className="adm-card p-5">
+          <div className="adm-label mb-4">acceso tactico</div>
+          <div className="grid gap-3 md:grid-cols-2">
+            {actions.map((action, index) => (
+              <StaggerRow key={action.href} index={index}>
+                <Link href={action.href} className="block adm-surface p-4 no-underline transition-transform duration-150 hover:-translate-y-[2px]">
+                  <div className="adm-label mb-2">{action.code}</div>
+                  <div className="text-[15px] font-bold" style={{ color: "#edf2fb" }}>{action.title}</div>
+                  <div className="adm-caption mt-2">{action.desc}</div>
+                </Link>
               </StaggerRow>
             ))}
           </div>
         </div>
 
-        {/* ── Footer ASCII ─────────────────────────────────────────────── */}
-        <div className="mt-8 pt-4 border-t border-[#e5e7eb]">
-          <div className="admin-muted text-[10px]">
-            {"/*──────────────────────────────────────────────────────────────*/"}
-          </div>
-          <div className="admin-muted text-[10px] mt-1">
-            © LABORATORIO ACADÉMICO PRO — build/session — all rights reserved
+        <div className="adm-card p-5">
+          <div className="adm-label mb-4">estado de sistema</div>
+          <div className="space-y-2">
+            {serviceHealth.map((item, index) => (
+              <StaggerRow key={item.code} index={index + 4}>
+                <div className="adm-surface p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="adm-label mb-2">{item.code}</div>
+                      <div className="text-[14px] font-bold" style={{ color: "#edf2fb" }}>{item.label}</div>
+                      <div className="adm-caption mt-1">{item.value}</div>
+                    </div>
+                    <span className={item.state === "stable" ? "adm-badge-ok" : "adm-badge-warn"}>
+                      {item.state === "stable" ? "estable" : "atencion"}
+                    </span>
+                  </div>
+                </div>
+              </StaggerRow>
+            ))}
           </div>
         </div>
-
       </div>
-    </>
+
+      {stats ? (
+        <div className="adm-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="adm-label">trafico por etapa</div>
+            <div className="adm-muted">prompts activos registrados</div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            {stats.prompts.map((prompt, index) => (
+              <StaggerRow key={prompt.etapa} index={index + 8}>
+                <div className="adm-surface p-4">
+                  <div className="adm-label mb-2">etapa {prompt.etapa}</div>
+                  <div className="text-[28px] font-bold" style={{ color: "#edf2fb" }}>{prompt.uso_total}</div>
+                  <div className="adm-caption mt-2">
+                    Este mes: {prompt.uso_este_mes} <br />
+                    Tiempo promedio: {prompt.tiempo_promedio_seg > 0 ? `${prompt.tiempo_promedio_seg}s` : "sin dato"}
+                  </div>
+                </div>
+              </StaggerRow>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </AdminShell>
   );
 }

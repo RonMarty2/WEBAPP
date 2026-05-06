@@ -6,11 +6,56 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import { getProyecto, updateProyecto, deleteProyecto } from "@/lib/memoryStore";
+import { getProyecto, updateProyecto, deleteProyecto, upsertProyectoSnapshot } from "@/lib/memoryStore";
 import { getServiceAIStatus } from "@/lib/aiProvider";
 import type { UpdateTables, EstadoFase } from "@/types/database";
 
 type Params = { params: Promise<{ id: string }> };
+
+function buildSnapshotFromSupabaseRow({
+  row,
+  existing,
+  overrides = {},
+}: {
+  row: Record<string, unknown>;
+  existing?: ReturnType<typeof getProyecto>;
+  overrides?: Record<string, unknown>;
+}) {
+  return {
+    id: String(row.id),
+    usuario_id: String(row.usuario_id),
+    servicio_id: String(row.servicio_id),
+    tipo_proyecto_id: typeof overrides.tipo_proyecto_id === "string"
+      ? overrides.tipo_proyecto_id
+      : existing?.tipo_proyecto_id,
+    universidad_id: typeof overrides.universidad_id === "string"
+      ? overrides.universidad_id
+      : existing?.universidad_id,
+    modalidad_creacion: typeof existing?.modalidad_creacion === "string" ? existing.modalidad_creacion : "directa",
+    perfil_estilo_usuario: existing?.perfil_estilo_usuario ?? null,
+    requiere_actualizacion: existing?.requiere_actualizacion ?? {},
+    phase_contents: (overrides.phase_contents as Record<string, string | null>) ?? existing?.phase_contents ?? {},
+    academic_context: (overrides.academic_context as Record<string, unknown>) ?? existing?.academic_context ?? {},
+    academic_memory: (overrides.academic_memory as Record<string, unknown>) ?? existing?.academic_memory ?? {},
+    final_document: overrides.final_document !== undefined
+      ? (overrides.final_document as string | null)
+      : existing?.final_document ?? null,
+    final_document_validation: (overrides.final_document_validation as Record<string, unknown>) ?? existing?.final_document_validation ?? {},
+    contenido_fase_0: (overrides.contenido_fase_0 as string | null) ?? existing?.contenido_fase_0 ?? null,
+    contenido_fase_1: (overrides.contenido_fase_1 as string | null) ?? existing?.contenido_fase_1 ?? null,
+    contenido_fase_2: (overrides.contenido_fase_2 as string | null) ?? existing?.contenido_fase_2 ?? null,
+    contenido_fase_3: (overrides.contenido_fase_3 as string | null) ?? existing?.contenido_fase_3 ?? null,
+    contenido_fase_4: (overrides.contenido_fase_4 as string | null) ?? existing?.contenido_fase_4 ?? null,
+    contenido_fase_5: (overrides.contenido_fase_5 as string | null) ?? existing?.contenido_fase_5 ?? null,
+    tema_aprobado: typeof row.tema_aprobado === "string" ? row.tema_aprobado : null,
+    titulo_provisional: typeof row.titulo_provisional === "string" ? row.titulo_provisional : null,
+    estado_fase: typeof row.estado_fase === "number" ? row.estado_fase : existing?.estado_fase ?? 0,
+    completado: typeof row.completado === "boolean" ? row.completado : existing?.completado ?? false,
+    oculto_por_usuario: existing?.oculto_por_usuario ?? false,
+    created_at: String(row.created_at ?? existing?.created_at ?? new Date().toISOString()),
+    updated_at: String(row.updated_at ?? new Date().toISOString()),
+  };
+}
 
 // ── GET ───────────────────────────────────────────────────────
 
@@ -163,6 +208,12 @@ export async function PATCH(req: Request, { params }: Params) {
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 
+    upsertProyectoSnapshot(buildSnapshotFromSupabaseRow({
+      row: data as unknown as Record<string, unknown>,
+      existing: getProyecto(id),
+      overrides: allowed,
+    }));
+
     return NextResponse.json({ proyecto: data });
   } catch (e) {
     if (e instanceof AuthError) {
@@ -179,9 +230,10 @@ export async function DELETE(req: Request, { params }: Params) {
     const { user } = await requireAuth();
     const { id } = await params;
 
+    const memoryProject = getProyecto(id);
+
     if (!isSupabaseConfigured()) {
-      const p = getProyecto(id);
-      if (!p || p.usuario_id !== user.id) {
+      if (!memoryProject || memoryProject.usuario_id !== user.id) {
         return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
       }
       const success = deleteProyecto(id);
@@ -190,24 +242,48 @@ export async function DELETE(req: Request, { params }: Params) {
 
     const db = createAdminClient();
 
-    const { error } = await db
+    const { data, error } = await db
       .from("proyectos_fases")
-      .delete()
+      .select("*")
       .eq("id", id)
       .eq("usuario_id", user.id)
-      .select();
+      .maybeSingle();
 
     if (error) {
-      // Fallback
-      const p = getProyecto(id);
-      if (p && p.usuario_id === user.id) {
+      if (memoryProject && memoryProject.usuario_id === user.id) {
         deleteProyecto(id);
-        return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, source: "memory" });
       }
-      return NextResponse.json({ error: "Error al eliminar el proyecto" }, { status: 500 });
+      return NextResponse.json({ error: "Error al cargar el proyecto para archivarlo" }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true });
+    if (!data) {
+      if (memoryProject && memoryProject.usuario_id === user.id) {
+        deleteProyecto(id);
+        return NextResponse.json({ success: true, source: "memory" });
+      }
+      return NextResponse.json({ error: "Proyecto no encontrado o ya eliminado" }, { status: 404 });
+    }
+
+    const snapshot = {
+      ...data,
+      usuario_id: data.usuario_id,
+      servicio_id: data.servicio_id,
+      tipo_proyecto_id: memoryProject?.tipo_proyecto_id,
+      universidad_id: memoryProject?.universidad_id,
+      modalidad_creacion: memoryProject?.modalidad_creacion,
+      perfil_estilo_usuario: memoryProject?.perfil_estilo_usuario ?? null,
+      requiere_actualizacion: memoryProject?.requiere_actualizacion ?? {},
+      phase_contents: memoryProject?.phase_contents ?? {},
+      academic_context: memoryProject?.academic_context ?? {},
+      academic_memory: memoryProject?.academic_memory ?? {},
+      final_document: memoryProject?.final_document ?? null,
+      final_document_validation: memoryProject?.final_document_validation ?? {},
+      oculto_por_usuario: true,
+    };
+    upsertProyectoSnapshot(snapshot);
+
+    return NextResponse.json({ success: true, source: "archived" });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });

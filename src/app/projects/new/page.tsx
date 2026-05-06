@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 interface Servicio {
@@ -52,7 +52,6 @@ export default function NuevoProyectoPage() {
   const [step, setStep] = useState<Step>("loading");
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
-  const [tiposProyecto, setTiposProyecto] = useState<TipoProyecto[]>([]);
   const [tipoProyectoId, setTipoProyectoId] = useState("tipo-monografia");
 
   // Universidad
@@ -72,6 +71,7 @@ export default function NuevoProyectoPage() {
   const [proyectoTempId, setProyectoTempId] = useState("");
   const [rutas, setRutas] = useState<RutaAcademica[]>([]);
   const [contextoRuta, setContextoRuta] = useState<Record<string, string>>({});
+  const createInFlightRef = useRef(false);
 
   useEffect(() => {
     async function init() {
@@ -117,7 +117,6 @@ export default function NuevoProyectoPage() {
         if (tipoRes.ok) {
           const tipoData = await tipoRes.json();
           const tipos = (tipoData.tipos ?? []).filter((t: TipoProyecto) => t.activo !== false);
-          setTiposProyecto(tipos);
           if (tipos.some((t: TipoProyecto) => t.id === "tipo-monografia")) setTipoProyectoId("tipo-monografia");
           else if (tipos.some((t: TipoProyecto) => t.id === "tipo-tesis")) setTipoProyectoId("tipo-tesis");
           else if (tipos[0]?.id) setTipoProyectoId(tipos[0].id);
@@ -146,13 +145,16 @@ export default function NuevoProyectoPage() {
   }
 
   async function crearProyectoConContexto(contexto: Record<string, string>) {
+    if (createInFlightRef.current) {
+      throw new Error("Ya estamos creando tu proyecto. Espera un momento.");
+    }
+    createInFlightRef.current = true;
+
     const sid = await resolverServicioId();
-    if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
-    const temaBase = contexto.tema?.trim() || "(Por definir)";
-    const res = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
+      const temaBase = contexto.tema?.trim() || "(Por definir)";
+      const payload = {
         servicio_id: sid,
         tipo_proyecto_id: tipoProyectoId,
         universidad_id: universidadId || undefined,
@@ -160,13 +162,33 @@ export default function NuevoProyectoPage() {
         tema_aprobado: temaBase,
         titulo_provisional: temaBase,
         academic_context: { contexto_inicial: contexto },
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    setProyectoTempId(data.proyecto.id);
-    setContextoRuta(contexto);
-    return data.proyecto.id as string;
+      };
+
+      if (proyectoTempId) {
+        const updateRes = await fetch(`/api/projects/${proyectoTempId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const updateData = await updateRes.json();
+        if (!updateRes.ok) throw new Error(updateData.error);
+        setContextoRuta(contexto);
+        return proyectoTempId;
+      }
+
+      const res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setProyectoTempId(data.proyecto.id);
+      setContextoRuta(contexto);
+      return data.proyecto.id as string;
+    } finally {
+      createInFlightRef.current = false;
+    }
   }
 
   async function generarRutas(proyId: string, contexto: Record<string, string>) {

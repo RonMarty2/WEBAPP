@@ -2,12 +2,19 @@ import assert from "node:assert/strict";
 import {
   buildAcademicContextBlock,
   buildDisplayFinalDocument,
+  buildFinalConsolidationPrompt,
   normalizeRouteOptions,
   stripInternalDocumentMarkers,
   summarizePhaseForMemory,
   validateFinalDocument,
 } from "../src/lib/academicProject.mjs";
 import { appendAITrace, latestAITrace } from "../src/lib/aiTrace.mjs";
+import {
+  buildReferenceSupportBlock,
+  buildContextualReferences,
+  readReferenceCatalog,
+  withUpdatedReferenceCatalog,
+} from "../src/lib/projectReferences.mjs";
 
 const dirty = `
 # Fase 1 - CAPITULO I
@@ -57,6 +64,68 @@ assert.match(finalDisplay, /Autor A\. \(2020\)/);
 assert.match(finalDisplay, /Autor B\. \(2021\)/);
 assert.match(finalDisplay, /Autor C\. \(2022\)/);
 assert.match(finalDisplay, /Autor D\. \(2023\)/);
+
+const updatedMemory = withUpdatedReferenceCatalog(
+  { phase_summaries: [] },
+  `## Referencias Bibliograficas
+Autor Z. (2024). Fuente Z.
+Autor A. (2020). Fuente A.`,
+  ["Autor Y. (2022). Fuente Y."]
+);
+assert.deepEqual(readReferenceCatalog(updatedMemory), [
+  "Autor A. (2020). Fuente A.",
+  "Autor Y. (2022). Fuente Y.",
+  "Autor Z. (2024). Fuente Z.",
+]);
+
+const displayWithCatalog = buildDisplayFinalDocument(
+  [
+    {
+      label: "CAPITULO V",
+      content: "# CAPITULO V: CONCLUSIONES\nTexto final sin referencias explicitas.",
+    },
+  ],
+  {
+    referenceCatalog: readReferenceCatalog(updatedMemory),
+  }
+);
+assert.match(displayWithCatalog, /Autor Z\. \(2024\)/);
+assert.match(displayWithCatalog, /Autor Y\. \(2022\)/);
+
+const consolidationPrompt = buildFinalConsolidationPrompt({
+  phaseContents: [
+    {
+      label: "CAPITULO I",
+      content: "# CAPITULO I: INTRODUCCION\nTexto base.",
+    },
+  ],
+  referenceCatalog: readReferenceCatalog(updatedMemory),
+});
+assert.match(consolidationPrompt.user, /Autor Z\. \(2024\)/);
+
+const supportBlock = buildReferenceSupportBlock({
+  referenceCatalog: readReferenceCatalog(updatedMemory),
+  documents: [{ nombre: "fuente-base.pdf" }],
+});
+assert.match(supportBlock, /CATALOGO ESTRUCTURADO/);
+assert.match(supportBlock, /fuente-base\.pdf/);
+
+const contextualReferences = buildContextualReferences({
+  topic: "inteligencia artificial en educacion superior",
+  route: {
+    materiales_prioritarios: [
+      "articulos de investigacion sobre inteligencia artificial y formacion de competencias",
+    ],
+  },
+  studentContext: {
+    contexto_laboral: "Universidad Mayor de San Andres, Facultad de Humanidades",
+  },
+  documents: [{ nombre: "plan-estudios-2024.pdf" }],
+});
+assert.ok(contextualReferences.length >= 3);
+assert.match(contextualReferences.join("\n"), /Fuente tematica de apoyo/);
+assert.match(contextualReferences.join("\n"), /Universidad Mayor de San Andres/);
+assert.match(contextualReferences.join("\n"), /plan-estudios-2024\.pdf/);
 
 const tracedMemory = appendAITrace(
   { ai_trace: [{ id: "old", timestamp: "2026-01-01T00:00:00.000Z" }] },

@@ -4,6 +4,7 @@ import {
   getProviderKey,
   hasProviderKey,
   setServiceAIConfig,
+  listServiceIncidents,
   AI_PROVIDERS,
 } from "@/lib/aiProvider";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
@@ -59,7 +60,7 @@ export async function GET() {
     api_key_masked: maskKey(providerKeys[cfg.provider_id] || cfg.api_key || ""),
   }));
 
-  return NextResponse.json({ providers, services });
+  return NextResponse.json({ providers, services, incidents: listServiceIncidents() });
 }
 
 export async function POST(req: Request) {

@@ -21,6 +21,14 @@ import { appendAITrace } from "@/lib/aiTrace.mjs";
 import { loadFromDisk } from "@/lib/persistence";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import { buildAcademicContextBlock, summarizePhaseForMemory } from "@/lib/academicProject.mjs";
+import {
+  buildContextualReferences,
+  buildReferenceSupportBlock,
+  collectReferencesFromPhaseContents,
+  normalizeReferenceCatalog,
+  readReferenceCatalog,
+  withUpdatedReferenceCatalog,
+} from "@/lib/projectReferences.mjs";
 import type { EstadoFase, UpdateTables } from "@/types/database";
 
 const FASE_ETIQUETA: Record<number, string> = {
@@ -131,6 +139,7 @@ type AcademicContext = Record<string, unknown> & {
 
 type AcademicMemory = Record<string, unknown> & {
   phase_summaries?: Record<string, unknown>[];
+  reference_catalog?: string[];
 };
 
 function academicBlockForProject(proyecto: {
@@ -185,73 +194,33 @@ function isReferencesPhase(phase: { label?: string; short_label?: string; prompt
   return text.includes("referencias") || text.includes("bibliograf");
 }
 
-function cleanReferenceLine(line: string) {
-  return line
-    .replace(/^[-*]\s*/, "")
-    .replace(/^#+\s*/, "")
-    .replace(/\[COMPLETAR[^\]]*\]/gi, "")
-    .replace(/REFERENCIAS_ETAPA/gi, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function extractReferenceLines(content: string) {
-  const lines = content.split(/\r?\n/);
-  const refs: string[] = [];
-  let inReferences = false;
-
-  for (const rawLine of lines) {
-    const line = rawLine.trim();
-    const normalized = line
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-
-    if (/^#{1,6}\s*/.test(line) && inReferences && !normalized.includes("referencias") && !normalized.includes("bibliograf")) {
-      inReferences = false;
-    }
-
-    if (normalized.includes("referencias_etapa") || normalized.includes("referencias bibliograficas") || normalized === "referencias") {
-      inReferences = true;
-      continue;
-    }
-
-    if (!inReferences) continue;
-
-    const cleaned = cleanReferenceLine(line);
-    if (
-      cleaned.length > 18 &&
-      !/^nota\b/i.test(cleaned) &&
-      !/^(anexos?|capitulo|fase)\b/i.test(cleaned)
-    ) {
-      refs.push(cleaned);
-    }
-  }
-
-  return refs;
-}
-
 function buildLocalReferencesPhase({
   proyecto,
   previousPhases,
   phaseContents,
 }: {
-  proyecto: { academic_context?: Record<string, unknown> };
+  proyecto: { academic_context?: Record<string, unknown>; academic_memory?: Record<string, unknown> };
   previousPhases: { id: string; label: string }[];
   phaseContents: Record<string, string | null | undefined>;
 }) {
-  const referenceSet = new Set<string>();
-  for (const phase of previousPhases) {
-    const content = phaseContents[phase.id] ?? phaseContents[`${phase.id}_borrador`];
-    if (!content) continue;
-    for (const line of extractReferenceLines(content)) {
-      referenceSet.add(line);
-    }
-  }
-
-  const references = [...referenceSet].sort((a, b) => a.localeCompare(b, "es"));
   const academicContext = (proyecto.academic_context ?? {}) as AcademicContext;
   const documents = Array.isArray(academicContext.documentos) ? academicContext.documentos : [];
+  const references = normalizeReferenceCatalog([
+    readReferenceCatalog(proyecto.academic_memory ?? {}),
+    collectReferencesFromPhaseContents(
+      previousPhases.map((phase) => ({
+        content: phaseContents[phase.id] ?? phaseContents[`${phase.id}_borrador`] ?? null,
+      }))
+    ),
+    buildContextualReferences({
+      topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
+        ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
+        ?? "",
+      route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
+      studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
+      documents,
+    }),
+  ]);
   const anexos = documents.length
     ? documents
         .map((doc, index) => {
@@ -434,12 +403,49 @@ async function generarSinSupabase({
     const borradorKey = `${phase_id}_borrador`;
     const borradorPrev = phaseContents[borradorKey] ?? null;
     const academicBlock = academicBlockForProject(proyecto);
+    const referenceCatalog = normalizeReferenceCatalog([
+      readReferenceCatalog(proyecto.academic_memory ?? {}),
+      collectReferencesFromPhaseContents(
+        previousPhases.map((phase) => ({
+          content: phaseContents[phase.id] ?? phaseContents[`${phase.id}_borrador`] ?? null,
+        }))
+      ),
+      buildContextualReferences({
+        topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
+          ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
+          ?? "",
+        route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
+        studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
+        documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
+          ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
+          : [],
+      }),
+    ]);
+    const referencesPhase = tipo !== "borrador" && isReferencesPhase(currentPhase);
 
     const userPromptParts = [
       `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlock}\n--- FIN EXPEDIENTE ---`,
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
-      proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
+      proyecto.titulo_provisional ? `TITULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
+      referencesPhase
+        ? `\n--- SOPORTE ESTRUCTURADO PARA REFERENCIAS ---\n${buildReferenceSupportBlock({
+            referenceCatalog,
+            documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
+              ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
+              : [],
+            contextualReferences: buildContextualReferences({
+              topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
+                ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
+                ?? "",
+              route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
+              studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
+              documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
+                ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
+                : [],
+            }),
+          })}\n--- FIN SOPORTE DE REFERENCIAS ---`
+        : null,
     ];
 
     if (tipo === "final" && esGuiado) {
@@ -457,62 +463,12 @@ async function generarSinSupabase({
 
     const userPrompt = userPromptParts.filter(Boolean).join("\n");
 
-    if (tipo !== "borrador" && isReferencesPhase(currentPhase)) {
-      const textoGenerado = buildLocalReferencesPhase({ proyecto, previousPhases, phaseContents });
-      const currentIndex = sorted.findIndex((phase) => phase.id === phase_id);
-      const newPhaseContents = { ...phaseContents, [phase_id]: textoGenerado };
-      const updatedMemory = upsertPhaseSummary(
-        proyecto.academic_memory,
-        phase_id,
-        currentPhase.label,
-        textoGenerado
-      );
-      const traceEntry = buildAITraceEntry({
-        servicioId: proyecto.servicio_id,
-        scope: "generate-phase",
-        action: "referencias locales",
-        phaseId: phase_id,
-        phaseLabel: currentPhase.label,
-        status: "fallback",
-        providerId: "local",
-        providerName: "Local",
-        model: "referencias-sin-ia",
-        durationMs: Date.now() - t0,
-      });
-      const tracedMemory = appendAITrace(updatedMemory, traceEntry);
-
-      updateProyecto(proyecto_id, {
-        estado_fase: Math.max(proyecto.estado_fase, currentIndex),
-        phase_contents: newPhaseContents,
-        requiere_actualizacion: {
-          ...(proyecto.requiere_actualizacion ?? {}),
-          [phase_id]: false,
-        },
-        final_document: null,
-        final_document_validation: {},
-        academic_memory: tracedMemory,
-      });
-
-      return NextResponse.json({
-        ok: true,
-        phase_id,
-        tipo,
-        fase_etiqueta: currentPhase.label,
-        proveedor: "local / referencias",
-        duracion_ms: Date.now() - t0,
-        contenido: textoGenerado,
-        requiere_actualizacion: {
-          ...(proyecto.requiere_actualizacion ?? {}),
-          [phase_id]: false,
-        },
-        ai_trace_entry: traceEntry,
-      });
-    }
-
     let textoGenerado: string;
     let proveedor: string;
     let providerId = "";
     let providerModel = "";
+    let traceStatus: "success" | "fallback" = "success";
+    let traceError: string | null = null;
     try {
       const resultado = await llamarIA(systemPrompt, userPrompt, 5000, proyecto.servicio_id);
       textoGenerado = resultado.text;
@@ -521,19 +477,28 @@ async function generarSinSupabase({
       proveedor = `${resultado.provider} / ${resultado.model}`;
     } catch (e) {
       const errorMessage = (e as Error).message;
-      updateProyecto(proyecto_id, {
-        academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
-          servicioId: proyecto.servicio_id,
-          scope: "generate-phase",
-          action: tipo === "borrador" ? "generar borrador" : "generar fase",
-          phaseId: phase_id,
-          phaseLabel: currentPhase.label,
-          status: "error",
-          durationMs: Date.now() - t0,
-          error: errorMessage,
-        })),
-      });
-      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+      if (referencesPhase) {
+        textoGenerado = buildLocalReferencesPhase({ proyecto, previousPhases, phaseContents });
+        providerId = "local";
+        providerModel = "referencias-respaldadas";
+        proveedor = "local / referencias respaldadas";
+        traceStatus = "fallback";
+        traceError = errorMessage;
+      } else {
+        updateProyecto(proyecto_id, {
+          academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
+            servicioId: proyecto.servicio_id,
+            scope: "generate-phase",
+            action: tipo === "borrador" ? "generar borrador" : "generar fase",
+            phaseId: phase_id,
+            phaseLabel: currentPhase.label,
+            status: "error",
+            durationMs: Date.now() - t0,
+            error: errorMessage,
+          })),
+        });
+        return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+      }
     }
 
     // Store content
@@ -560,9 +525,23 @@ async function generarSinSupabase({
       delete requiereActualizacion[phase_id];
     }
 
-    const nextMemory = tipo === "borrador" && esGuiado
+    const nextMemoryBase = tipo === "borrador" && esGuiado
       ? proyecto.academic_memory
       : upsertPhaseSummary(proyecto.academic_memory, phase_id, currentPhase.label, textoGenerado);
+    const nextMemory = withUpdatedReferenceCatalog(
+      nextMemoryBase ?? {},
+      textoGenerado,
+      buildContextualReferences({
+        topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
+          ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
+          ?? "",
+        route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
+        studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
+        documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
+          ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
+          : [],
+      })
+    );
 
     const traceEntry = buildAITraceEntry({
       servicioId: proyecto.servicio_id,
@@ -570,10 +549,11 @@ async function generarSinSupabase({
       action: tipo === "borrador" ? "generar borrador" : "generar fase",
       phaseId: phase_id,
       phaseLabel: currentPhase.label,
-      status: "success",
+      status: traceStatus,
       providerId,
       model: providerModel,
       durationMs: Date.now() - t0,
+      error: traceError,
     });
 
     updateProyecto(proyecto_id, {
@@ -713,11 +693,24 @@ async function generarSinSupabase({
     }
     delete requiereActualizacion[phaseKey];
     updates.requiere_actualizacion = requiereActualizacion;
-    updates.academic_memory = upsertPhaseSummary(
-      proyecto.academic_memory,
-      phaseKey,
-      FASE_ETIQUETA[fase_numero],
-      textoGenerado
+    updates.academic_memory = withUpdatedReferenceCatalog(
+      upsertPhaseSummary(
+        proyecto.academic_memory,
+        phaseKey,
+        FASE_ETIQUETA[fase_numero],
+        textoGenerado
+      ) ?? {},
+      textoGenerado,
+      buildContextualReferences({
+        topic: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial?.tema
+          ?? (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida?.titulo
+          ?? "",
+        route: (proyecto.academic_context as AcademicContext | undefined)?.ruta_elegida ?? {},
+        studentContext: (proyecto.academic_context as AcademicContext | undefined)?.contexto_inicial ?? {},
+        documents: Array.isArray((proyecto.academic_context as AcademicContext | undefined)?.documentos)
+          ? ((proyecto.academic_context as AcademicContext).documentos ?? [])
+          : [],
+      })
     );
   }
 

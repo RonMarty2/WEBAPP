@@ -110,6 +110,7 @@ export interface ErrorLogEntry {
   nivel: "critical" | "warning" | "info";
   etapa: number | string;
   monografia_id?: string;
+  service_id?: string;
   mensaje: string;
   detalle?: string;
 }
@@ -457,6 +458,12 @@ export function createProyecto(data: Omit<ProyectoRecord, "id" | "created_at" | 
   return record;
 }
 
+export function upsertProyectoSnapshot(record: ProyectoRecord): ProyectoRecord {
+  proyectosStore.set(record.id, record);
+  persistProyectos();
+  return record;
+}
+
 export function getProyecto(id: string): ProyectoRecord | undefined {
   // Intentar desde la memoria primero; si no está, recargar del disco
   if (proyectosStore.has(id)) return proyectosStore.get(id);
@@ -508,4 +515,25 @@ export function deleteProyecto(id: string): boolean {
     return true;
   }
   return false;
+}
+
+export function purgeProyecto(id: string): boolean {
+  const existed = proyectosStore.delete(id);
+  if (existed) {
+    persistProyectos();
+  }
+  return existed;
+}
+
+export function restoreProyecto(id: string): ProyectoRecord | null {
+  const existing = getProyecto(id);
+  if (!existing) return null;
+  const restored: ProyectoRecord = {
+    ...existing,
+    oculto_por_usuario: false,
+    updated_at: new Date().toISOString(),
+  };
+  proyectosStore.set(id, restored);
+  persistProyectos();
+  return restored;
 }

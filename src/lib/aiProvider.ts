@@ -2,10 +2,12 @@
 // Per-service configuration: each service can use a different provider + model.
 
 import {
+  isProviderCapacityError,
   isTokenLimitError,
   maxCompletionTokensForProvider,
   nextGroqRetryTokenBudget,
 } from "@/lib/aiTokenPolicy.mjs";
+import { logError } from "@/lib/memoryStore";
 import { loadFromDisk } from "@/lib/persistence";
 
 export interface AICallResult {
@@ -206,6 +208,72 @@ interface ServiceConfig {
 }
 
 const serviceConfigCache = new Map<string, ServiceConfig>();
+const serviceIncidentCache = new Map<string, {
+  servicio_id: string;
+  provider_id: string;
+  provider_name: string;
+  model: string;
+  kind: "token_limit" | "provider_capacity";
+  level: "critical" | "warning";
+  message: string;
+  updated_at: string;
+}>();
+const incidentThrottleCache = new Map<string, number>();
+
+function setServiceIncident(
+  servicioId: string,
+  cfg: { provider_id: string; model: string },
+  rawMessage: string
+) {
+  if (!isProviderCapacityError(rawMessage)) return;
+
+  const provider = getProviderInfo(cfg.provider_id);
+  const normalized = String(rawMessage ?? "");
+  const kind = isTokenLimitError(normalized) ? "token_limit" : "provider_capacity";
+  const incident = {
+    servicio_id: servicioId,
+    provider_id: cfg.provider_id,
+    provider_name: provider?.name ?? cfg.provider_id,
+    model: cfg.model,
+    kind,
+    level: "critical" as const,
+    message: normalized,
+    updated_at: new Date().toISOString(),
+  };
+
+  serviceIncidentCache.set(servicioId, incident);
+
+  const throttleKey = `${servicioId}:${cfg.provider_id}:${cfg.model}:${kind}`;
+  const now = Date.now();
+  const last = incidentThrottleCache.get(throttleKey) ?? 0;
+  if (now - last < 10 * 60 * 1000) return;
+  incidentThrottleCache.set(throttleKey, now);
+
+  logError({
+    nivel: "critical",
+    etapa: `ai:${servicioId}`,
+    service_id: servicioId,
+    mensaje:
+      kind === "token_limit"
+        ? `Servicio ${servicioId} sin creditos/tokens en ${cfg.provider_id}`
+        : `Servicio ${servicioId} con proveedor no disponible (${cfg.provider_id})`,
+    detalle: normalized,
+  });
+}
+
+function clearServiceIncident(servicioId: string) {
+  serviceIncidentCache.delete(servicioId);
+}
+
+export function getServiceIncident(servicioId: string) {
+  return serviceIncidentCache.get(servicioId) ?? null;
+}
+
+export function listServiceIncidents() {
+  return [...serviceIncidentCache.values()].sort((a, b) =>
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+  );
+}
 
 export function setServiceAIConfig(servicioId: string, cfg: ServiceConfig) {
   serviceConfigCache.set(servicioId, cfg);
@@ -413,8 +481,10 @@ export async function llamarIA(
     if (cfg && cfg.api_key) {
       try {
         const text = await llamarIAConConfig(cfg.provider_id, cfg.model, cfg.api_key, system, user, maxTokens);
+        clearServiceIncident(servicioId);
         return { text, provider: cfg.provider_id, model: cfg.model };
       } catch (e) {
+        setServiceIncident(servicioId, cfg, (e as Error).message);
         throw new Error(`La IA configurada para este servicio fallo (${cfg.provider_id} / ${cfg.model}): ${(e as Error).message}`);
       }
     }

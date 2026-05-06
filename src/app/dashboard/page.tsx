@@ -69,12 +69,14 @@ export default function DashboardPage() {
     if (!proyectoToDelete) return;
     try {
       const res = await fetch(`/api/projects/${proyectoToDelete}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setProyectos(prev => prev.filter(p => p.id !== proyectoToDelete));
+        setProyectoToDelete(null);
       } else {
-        alert("Error al eliminar el proyecto.");
+        alert((data as { error?: string }).error || "Error al eliminar el proyecto.");
       }
-    } catch (err) {
+    } catch {
       alert("Error de conexión al eliminar.");
     }
   }
