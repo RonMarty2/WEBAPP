@@ -39,8 +39,8 @@ export default function ParticleBackground() {
       y: Math.random() * 100,
       duration: 20 + Math.random() * 20,
       delay: Math.random() * 5,
-      size: isMobileRef.current ? 40 + Math.random() * 60 : 60 + Math.random() * 120,
-      opacity: 0.3 + Math.random() * 0.3,
+      size: isMobileRef.current ? 80 + Math.random() * 120 : 150 + Math.random() * 250,
+      opacity: 0.5 + Math.random() * 0.4,
       color: colors[Math.floor(Math.random() * colors.length)],
     }));
 
@@ -64,7 +64,7 @@ export default function ParticleBackground() {
             top: `${particle.y}%`,
             background: particle.color,
             opacity: particle.opacity,
-            filter: "blur(40px)",
+            filter: "blur(25px)",
           }}
           animate={{
             x: [0, 50 - Math.random() * 100, 0],
