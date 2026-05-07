@@ -199,3 +199,108 @@ FINAL   → Usuario descarga .tex → Overleaf → PDF presentable
 | Monografía | http://localhost:3000/monografia |
 | Admin | http://localhost:3000/admin |
 | Demo login | /login → "Entrar como estudiante demo" |
+
+---
+
+## ⚠️ CAMBIOS QUE ROMPEN EL SISTEMA (AVISAR PRIMERO)
+
+Cualquier cambio que toque estas áreas **DEBE ser autorizado explícitamente** antes de implementar:
+
+### Arquitectura (NO CAMBIAR SIN AVISAR)
+- ❌ Orden de las 4 etapas (Tema → Cap.I → Cap.II → Caps.III-V+Biblio)
+- ❌ Eliminar rutas API existentes sin migración
+- ❌ Renombrar tablas de BD sin migration script
+- ❌ Cambiar estructura de `capitulo.contenido_json`
+- ❌ Mover prompts fuera de `src/lib/prompts/index.ts`
+- ❌ Quitar validaciones anti-alucinación (`detectarAlucinaciones()`, `validarCoherencia()`)
+- ❌ Cambiar firma de `llamarIA()` o `llamarIAConConfig()`
+- ❌ Eliminar soporte de cualquiera de los 11 proveedores IA
+
+### Cascada de IA (ORDEN CRÍTICO)
+```
+NUNCA cambiar este orden:
+1. Groq (llama-3.3-70b-versatile) — principal
+2. Anthropic (claude-haiku-4-5-20251001) — fallback 1
+3. OpenAI (gpt-4o-mini) — fallback final
+```
+Si un proveedor falla, el sistema DEBE reintentar con el siguiente. Si alteras esta cascada, el 30% de usuarios sin Groq perderá acceso.
+
+### Validaciones Anti-Alucinación (BLINDADAS)
+- ❌ Cambiar lógica de `detectarAlucinaciones()` sin testing exhaustivo
+- ❌ Permitir citas sin autor, año o fuente
+- ❌ Generar Caps.II-V sin validar coherencia con Cap.I
+- ❌ Compilar LaTeX sin escapar caracteres especiales
+
+### Persistencia (3 CAPAS)
+```
+Si agregas una 4ta capa (Redis, cache, etc.):
+  → DEBE ser transparente (no romper src/lib/db/*)
+  → DEBE tener fallback a in-memory
+  → DEBE poder desactivarse sin error
+```
+
+---
+
+## PROTOCOLO DE CAMBIOS (OBLIGATORIO)
+
+**Antes de CUALQUIER modificación importante:**
+
+1. **AUDITAR**: ¿Qué archivos toca? (busca en `/api/*`, `/lib/*`, tipos en `types/*`)
+2. **MAPEAR DEPENDENCIAS**: ¿Qué otros features dependen de esto?
+3. **VALIDAR**: ¿Rompe algo de las "REGLAS ABSOLUTAS" arriba?
+4. **AVISAR**: Si hay impacto → explicar cambio ANTES de hacer
+5. **EJECUTAR**: Solo si usuario confirma o es cambio safe (typo fixes, etc.)
+6. **VERIFICAR POST-CAMBIO**: confirmar que funciona + no rompió nada
+
+**Ejemplo de aviso correcto:**
+```
+❌ IMPACTO: Cambiar temperatura a 0.7 en todas las llamadas IA
+  → Afecta: src/lib/aiProvider.ts línea 394
+  → Impacto: Caps.I-III tendrán más creatividad → menos coherencia
+  → Recomendación: Aplicar solo en /api/etapas/[n]/chat (iteraciones)
+  ¿Procedo de esa forma?
+```
+
+---
+
+## MEMORY AUTOMÁTICA (CARGADA SIEMPRE)
+
+Este proyecto tiene un **Blueprint de Arquitectura persistente** en:
+```
+C:\Users\lmigu\.claude\projects\c--Users-lmigu-Desktop-WEBAPP-WEBAPP-WEBAPP\memory\ARCHITECTURE_BLUEPRINT.md
+```
+
+**Se carga automáticamente en TODA sesión.** Contiene:
+- Verdades inmutables del sistema
+- Flujo de 4 etapas detallado
+- Catálogo de 11 proveedores IA
+- Todas las rutas API existentes
+- Protocolo de validación para cambios
+
+Si olvido algo de esa memoria → es un bug mío. Recuérdame consultarla.
+
+---
+
+## 🔐 ARCHIVO DE CONFIGURACIÓN (`.claude-config.json`)
+
+**IMPORTANTE:** Existe un archivo de configuración en raíz del proyecto:
+```
+.claude-config.json
+```
+
+Este archivo contiene:
+- Reglas de cambios que rompen el sistema (breaking changes detector)
+- Archivos que NUNCA deben tocarse sin avisar
+- Protocolo obligatorio ANTES de cualquier cambio
+
+**Instrucción para Claude:** Al inicio de CADA sesión, si el usuario solicita cambios:
+1. Leer `.claude-config.json` 
+2. Verificar si el cambio está en la lista de "breaking_changes_detector"
+3. Si está marcado como CRITICAL o HIGH → AVISAR OBLIGATORIAMENTE
+4. Esperar confirmación explícita del usuario
+5. Solo entonces ejecutar
+
+**Esto es automático porque:**
+- El archivo está en Git (se sincroniza laptop ↔ PC)
+- Está en la raíz (imposible de ignorar)
+- Contiene reglas que yo debo seguir
