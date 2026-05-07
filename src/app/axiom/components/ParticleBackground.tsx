@@ -3,24 +3,35 @@
 import { motion } from "framer-motion";
 
 export default function ParticleBackground() {
-  // Array de 12 partículas con posiciones y colores random
-  const particles = Array.from({ length: 12 }, (_, i) => {
-    const colors = [
-      "rgba(139, 92, 246, 0.75)",
-      "rgba(168, 85, 247, 0.7)",
-      "rgba(147, 112, 219, 0.7)",
-      "rgba(186, 85, 211, 0.65)",
-      "rgba(123, 104, 238, 0.7)",
-    ];
+  const colors = [
+    "rgba(139, 92, 246, 0.8)",
+    "rgba(168, 85, 247, 0.75)",
+    "rgba(147, 112, 219, 0.75)",
+    "rgba(186, 85, 211, 0.7)",
+    "rgba(123, 104, 238, 0.75)",
+  ];
+
+  // Crear partículas distribuidas uniformemente en una grid
+  const particles = Array.from({ length: 16 }, (_, i) => {
+    const cols = 4;
+    const rows = 4;
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+
+    // Distribuir en grid 4x4 con variación random
+    const baseX = (col / cols) * 100 + 12.5;
+    const baseY = (row / rows) * 100 + 12.5;
+    const x = baseX + (Math.random() - 0.5) * 20;
+    const y = baseY + (Math.random() - 0.5) * 20;
 
     return {
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: 180 + Math.random() * 220,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      duration: 20 + Math.random() * 12,
-      delay: Math.random() * 2,
+      x: Math.max(5, Math.min(95, x)),
+      y: Math.max(5, Math.min(95, y)),
+      size: 150 + Math.random() * 200,
+      color: colors[i % colors.length],
+      duration: 18 + Math.random() * 14,
+      delay: (i % 4) * 0.5,
     };
   });
 
