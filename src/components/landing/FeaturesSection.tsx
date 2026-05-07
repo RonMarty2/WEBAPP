@@ -88,11 +88,19 @@ export default function FeaturesSection() {
   const planes = PLANES[audiencia];
   const productos = audiencia === "estudiante" ? ESTUDIANTES_PRODUCTOS : DOCENTES_PRODUCTOS;
 
-  function handlePlan(planId: string) {
+  async function handlePlan(planId: string) {
     if (typeof window !== "undefined") {
       localStorage.setItem("plan_elegido", planId);
       localStorage.setItem("audiencia_elegida", audiencia);
     }
+    try {
+      const res = await fetch("/api/auth/me");
+      const d = await res.json();
+      if (d.user) {
+        router.push(`/pago?plan=${planId}`);
+        return;
+      }
+    } catch { /* no session */ }
     router.push("/login");
   }
 

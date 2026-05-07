@@ -6,24 +6,8 @@
  */
 import { NextResponse } from "next/server";
 import { requireAdmin, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import {
-  getProyecto,
-  proyectosStore,
-  purgeProyecto,
-  restoreProyecto,
-} from "@/lib/memoryStore";
-import { loadFromDisk } from "@/lib/persistence";
-
-function mergeProjectWithMemory<T extends { id: string }>(project: T) {
-  const memory = getProyecto(project.id);
-  return memory
-    ? {
-        ...project,
-        ...memory,
-      }
-    : project;
-}
+import { dbGetProyecto, dbListAllProyectos, dbDeleteProyecto } from "@/lib/db";
+import { restoreProyecto } from "@/lib/memoryStore";
 
 export async function GET(req: Request) {
   try {
@@ -33,85 +17,18 @@ export async function GET(req: Request) {
     const id = searchParams.get("id");
 
     if (id) {
-      let proyecto = getProyecto(id);
-
-      if (!proyecto && isSupabaseConfigured()) {
-        const db = createAdminClient();
-        const { data } = await db
-          .from("proyectos_fases")
-          .select("*")
-          .eq("id", id)
-          .maybeSingle();
-
-        if (data) {
-          proyecto = mergeProjectWithMemory(data);
-        }
-      }
-
-      if (!proyecto) {
-        return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
-      }
-
+      const proyecto = await dbGetProyecto(id);
+      if (!proyecto) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
       return NextResponse.json({ proyecto });
     }
 
-    try {
-      const disk = loadFromDisk();
-      if (disk.proyectos) {
-        for (const [key, value] of Object.entries(disk.proyectos)) {
-          if (!proyectosStore.has(key)) {
-            proyectosStore.set(key, value as Parameters<typeof proyectosStore.set>[1]);
-          }
-        }
-      }
-    } catch {
-      // ignore disk sync failures here; the in-memory state is still usable
-    }
-
-    const memProyectos = [...proyectosStore.values()].sort(
-      (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    );
-
-    if (!isSupabaseConfigured()) {
-      return NextResponse.json({
-        proyectos: memProyectos.map((project) => ({
-          ...project,
-          servicios: { id: project.servicio_id, nombre: "Monografia Academica" },
-        })),
-      });
-    }
-
-    const db = createAdminClient();
-    const { data } = await db
-      .from("proyectos_fases")
-      .select(
-        "id, usuario_id, tema_aprobado, titulo_provisional, estado_fase, completado, created_at, updated_at, servicios ( id, nombre )"
-      )
-      .order("created_at", { ascending: false });
-
-    const memoryById = new Map(memProyectos.map((project) => [project.id, project]));
-    const merged = (data ?? [])
-      .map((project) => {
-        const memory = memoryById.get(project.id);
-        return memory
-          ? {
-              ...project,
-              ...memory,
-              servicios: project.servicios,
-            }
-          : project;
-      })
-      .concat(
-        memProyectos
-          .filter((project) => !(data ?? []).some((item) => item.id === project.id))
-          .map((project) => ({
-            ...project,
-            servicios: { id: project.servicio_id, nombre: "Monografia Academica" },
-          }))
-      )
-      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-
-    return NextResponse.json({ proyectos: merged });
+    const proyectos = await dbListAllProyectos();
+    return NextResponse.json({
+      proyectos: proyectos.map(p => ({
+        ...p,
+        servicios: { id: p.servicio_id, nombre: "Monografía Académica" },
+      })),
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
@@ -132,32 +49,9 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Falta el id del proyecto" }, { status: 400 });
     }
 
-    let removedFromSupabase = false;
-
-    if (isSupabaseConfigured()) {
-      const db = createAdminClient();
-      const { error } = await db.from("proyectos_fases").delete().eq("id", id);
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      removedFromSupabase = true;
-    }
-
-    const removedFromMemory = purgeProyecto(id);
-
-    if (!removedFromSupabase && !removedFromMemory) {
-      return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      removed: {
-        supabase: removedFromSupabase,
-        memory: removedFromMemory,
-      },
-    });
+    const removed = await dbDeleteProyecto(id);
+    if (!removed) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
+    return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof AuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
@@ -185,34 +79,9 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Accion no soportada" }, { status: 400 });
     }
 
-    const restored = restoreProyecto(id);
-
-    if (restored) {
-      return NextResponse.json({ success: true, proyecto: restored, source: "memory" });
-    }
-
-    if (isSupabaseConfigured()) {
-      const db = createAdminClient();
-      const { data, error } = await db
-        .from("proyectos_fases")
-        .select("*")
-        .eq("id", id)
-        .maybeSingle();
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      if (data) {
-        return NextResponse.json({
-          success: true,
-          proyecto: data,
-          source: "supabase",
-        });
-      }
-    }
-
-    return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
+    const restored = restoreProyecto(id) ?? await dbGetProyecto(id);
+    if (!restored) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
+    return NextResponse.json({ success: true, proyecto: restored });
   } catch (error) {
     if (error instanceof AuthError) {
       return NextResponse.json({ error: error.message }, { status: error.status });

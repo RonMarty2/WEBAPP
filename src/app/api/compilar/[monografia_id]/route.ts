@@ -83,6 +83,7 @@ export async function POST(req: Request, { params }: { params: Params }) {
       caratulaPdf: caratula_pdf ?? undefined,
       capituloContenidos,
       bibliografia: citasBiblio,
+      universidad_id: (monografia as unknown as { universidad_id?: string }).universidad_id,
     });
 
     // Build validation checklist

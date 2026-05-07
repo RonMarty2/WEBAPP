@@ -109,6 +109,7 @@ function IconX() {
 const GLOBAL_NAV = [
   { href: "/admin", label: "Dashboard General", Icon: IconDashboard },
   { href: "/admin/usuarios", label: "Usuarios", Icon: IconUsers },
+  { href: "/admin/pagos", label: "Pagos", Icon: IconBarChart },
   { href: "/admin/estadisticas", label: "Estadisticas", Icon: IconBarChart },
   { href: "/admin/logs", label: "Logs", Icon: IconScroll },
   { href: "/admin/modelos", label: "Modelos y APIs", Icon: IconCpu },
@@ -163,8 +164,9 @@ const LAYOUT_CSS = `
     background:
       linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)),
       var(--adm-sidebar);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    will-change: transform;
     border-color: var(--adm-line);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
   }
@@ -173,8 +175,18 @@ const LAYOUT_CSS = `
     content: "";
     position: absolute;
     inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, #00c2ff, rgba(0, 194, 255, 0.3), transparent);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .admin-sidebar::after {
+    content: "";
+    position: absolute;
+    inset: 3px 0 auto 0;
     height: 160px;
-    background: radial-gradient(circle at 30% 0%, rgba(255,255,255,0.08), transparent 50%);
+    background: radial-gradient(circle at 30% 0%, rgba(0, 194, 255, 0.06), transparent 50%);
     pointer-events: none;
   }
 
@@ -199,13 +211,16 @@ const LAYOUT_CSS = `
   }
 
   .admin-nav-link.is-active {
-    background: linear-gradient(180deg, rgba(194, 205, 219, 0.12), rgba(194, 205, 219, 0.04));
-    border-color: var(--adm-line-strong);
-    color: var(--adm-text);
+    background: linear-gradient(90deg, rgba(0, 194, 255, 0.10), rgba(0, 194, 255, 0.02));
+    border-color: rgba(0, 194, 255, 0.28);
+    border-left: 2px solid #00c2ff;
+    color: #ffffff;
+    box-shadow: inset 0 0 12px rgba(0, 194, 255, 0.06);
   }
 
   .admin-nav-link.is-active .admin-nav-indicator {
-    color: var(--adm-accent);
+    color: #00c2ff;
+    text-shadow: 0 0 8px rgba(0, 194, 255, 0.7);
   }
 
   .admin-chip {
@@ -214,13 +229,18 @@ const LAYOUT_CSS = `
     color: var(--adm-soft);
   }
 
+  .admin-main {
+    background-image: linear-gradient(rgba(0, 194, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 48px;
+  }
+
   .admin-main::before {
     content: "";
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(180deg, rgba(6, 9, 14, 0.56), rgba(6, 9, 14, 0.32) 40%, rgba(6, 9, 14, 0.56)),
-      radial-gradient(circle at 82% 14%, rgba(185, 197, 214, 0.09), transparent 26%);
+      linear-gradient(180deg, rgba(4, 8, 14, 0.72), rgba(4, 8, 14, 0.44) 40%, rgba(4, 8, 14, 0.68)),
+      radial-gradient(circle at 82% 14%, rgba(0, 194, 255, 0.06), transparent 32%);
     pointer-events: none;
   }
 `;
@@ -228,20 +248,8 @@ const LAYOUT_CSS = `
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [authed, setAuthed] = useState<boolean | null>(null);
   const [activeModule, setActiveModule] = useState("GLOBAL");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (!pathname || pathname.includes("/admin/login")) return;
-    const flag = localStorage.getItem("adminAuthed") === "1";
-    if (flag) {
-      setAuthed(true);
-      return;
-    }
-    setAuthed(false);
-    router.replace("/admin/login");
-  }, [pathname, router]);
 
   useEffect(() => {
     const savedModule = localStorage.getItem("adminActiveModule");
@@ -260,20 +268,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   const handleLogout = async () => {
-    localStorage.removeItem("adminAuthed");
     await fetch("/api/admin/auth", { method: "DELETE" }).catch(() => {});
     router.replace("/admin/login");
   };
 
   if (!pathname || pathname.includes("/admin/login")) return <>{children}</>;
-
-  if (authed === null) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#070b11", color: "#edf2fb" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.12em", fontSize: 12 }}>CARGANDO_PANEL</div>
-      </div>
-    );
-  }
 
   const currentModuleNav = MODULE_NAV[activeModule] || [];
 

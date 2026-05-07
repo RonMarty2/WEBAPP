@@ -6,9 +6,8 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { llamarIA } from "@/lib/aiProvider";
-import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { loadFromDisk } from "@/lib/persistence";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 
@@ -61,24 +60,11 @@ export async function POST(req: Request) {
     // Load style analyzer prompt from admin config
     const disk = loadFromDisk();
     const systemPrompt = disk.estiloAnalizadorPrompt?.trim() || DEFAULT_ESTILO_PROMPT;
-    const proyectoMemoria = getProyecto(body.proyecto_id);
-    if (!isSupabaseConfigured() && !proyectoMemoria) {
+    const proyectoMemoria = await dbGetProyecto(body.proyecto_id);
+    if (!proyectoMemoria || (proyectoMemoria.usuario_id !== user.id && user.role !== "admin")) {
       return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
     }
-    let servicioIdForAI = proyectoMemoria?.servicio_id;
-    if (isSupabaseConfigured() && !servicioIdForAI) {
-      const db = createAdminClient();
-      const { data: proyectoDb } = await db
-        .from("proyectos_fases")
-        .select("servicio_id")
-        .eq("id", body.proyecto_id)
-        .eq("usuario_id", user.id)
-        .maybeSingle();
-      servicioIdForAI = proyectoDb?.servicio_id;
-      if (!servicioIdForAI) {
-        return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
-      }
-    }
+    const servicioIdForAI = proyectoMemoria.servicio_id;
 
     let perfilEstilo: string;
     const aiStart = Date.now();
@@ -90,56 +76,38 @@ export async function POST(req: Request) {
       providerModel = resultado.model;
       perfilEstilo = resultado.text.trim();
     } catch (e) {
-      if (proyectoMemoria) {
-        updateProyecto(body.proyecto_id, {
-          academic_memory: appendAITrace(proyectoMemoria.academic_memory, {
-            scope: "analyze-style",
-            action: "analizar estilo",
-            phase_id: "calibracion",
-            phase_label: "Calibracion de estilo",
-            status: "error",
-            provider_id: "",
-            provider_name: "",
-            model: "",
-            duration_ms: Date.now() - aiStart,
-            error: (e as Error).message,
-          }),
-        });
-      }
-      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
-    }
-
-    // Save to project
-    if (!isSupabaseConfigured()) {
-      const p = getProyecto(body.proyecto_id);
-      if (!p) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
-      updateProyecto(body.proyecto_id, {
-        perfil_estilo_usuario: perfilEstilo,
-        academic_memory: appendAITrace(p.academic_memory, {
+      void dbUpdateProyecto(body.proyecto_id, {
+        academic_memory: appendAITrace(proyectoMemoria.academic_memory, {
           scope: "analyze-style",
           action: "analizar estilo",
           phase_id: "calibracion",
           phase_label: "Calibracion de estilo",
-          status: "success",
-          provider_id: providerId,
-          provider_name: providerId,
-          model: providerModel,
+          status: "error",
+          provider_id: "",
+          provider_name: "",
+          model: "",
           duration_ms: Date.now() - aiStart,
+          error: (e as Error).message,
         }),
       });
-    } else {
-      const db = createAdminClient();
-      const { error } = await db
-        .from("proyectos_fases")
-        .update({ perfil_estilo_usuario: perfilEstilo } as never)
-        .eq("id", body.proyecto_id)
-        .eq("usuario_id", user.id);
-
-      if (error) {
-        // Supabase failed — save to memory store as fallback
-        updateProyecto(body.proyecto_id, { perfil_estilo_usuario: perfilEstilo });
-      }
+      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
     }
+
+    // Save to project
+    await dbUpdateProyecto(body.proyecto_id, {
+      perfil_estilo_usuario: perfilEstilo,
+      academic_memory: appendAITrace(proyectoMemoria.academic_memory, {
+        scope: "analyze-style",
+        action: "analizar estilo",
+        phase_id: "calibracion",
+        phase_label: "Calibracion de estilo",
+        status: "success",
+        provider_id: providerId,
+        provider_name: providerId,
+        model: providerModel,
+        duration_ms: Date.now() - aiStart,
+      }),
+    });
 
     return NextResponse.json({ ok: true, perfil_estilo_usuario: perfilEstilo });
   } catch (e) {

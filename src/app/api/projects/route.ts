@@ -5,96 +5,25 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import {
-  createProyecto,
-  isProyectoOculto,
-  listProyectos,
-  proyectosStore,
-  upsertProyectoSnapshot,
-} from "@/lib/memoryStore";
-import { completedPhaseIndexForProject, projectTypeIdForService, serviceIdForProjectType } from "@/lib/projectTypePhases";
-import type { InsertTables } from "@/types/database";
+import { dbCreateProyecto, dbListProyectos } from "@/lib/db";
+import { completedPhaseIndexForProject, serviceIdForProjectType, projectTypeIdForService } from "@/lib/projectTypePhases";
 
 // ── GET ───────────────────────────────────────────────────────
 
 export async function GET() {
   try {
     const { user } = await requireAuth();
-    const memoryProjects = listProyectos(user.id);
+    const proyectos = await dbListProyectos(user.id);
 
-    if (!isSupabaseConfigured()) {
-      const proyectos = memoryProjects.map(p => ({
+    return NextResponse.json({
+      proyectos: proyectos.map(p => ({
         ...p,
         estado_fase: completedPhaseIndexForProject(p),
         servicios: { id: p.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
-      }));
-      return NextResponse.json({ proyectos });
-    }
-
-    const db = createAdminClient();
-
-    const { data, error } = await db
-      .from("proyectos_fases")
-      .select(`
-        id,
-        servicio_id,
-        tema_aprobado,
-        titulo_provisional,
-        estado_fase,
-        completado,
-        created_at,
-        updated_at,
-        servicios ( id, nombre, audiencia_id )
-      `)
-      .eq("usuario_id", user.id)
-      .order("updated_at", { ascending: false });
-
-    if (error) {
-      // Supabase falló — usar memoria como respaldo
-      const proyectos = memoryProjects.map(p => ({
-        ...p,
-        estado_fase: completedPhaseIndexForProject(p),
-        servicios: { id: p.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
-      }));
-      return NextResponse.json({ proyectos });
-    }
-
-    const memoryById = new Map(
-      [...proyectosStore.values()]
-        .filter((project) => project.usuario_id === user.id)
-        .map((project) => [project.id, project])
-    );
-
-    const proyectos = (data ?? [])
-      .filter((project) => !isProyectoOculto(project.id, user.id))
-      .map((project) => {
-        const memory = memoryById.get(project.id);
-        return memory
-          ? {
-              ...project,
-              ...memory,
-              estado_fase: completedPhaseIndexForProject(memory),
-              servicios: project.servicios,
-            }
-          : project;
-      })
-      .concat(
-        memoryProjects
-          .filter((project) => !(data ?? []).some((item) => item.id === project.id))
-          .map((project) => ({
-            ...project,
-            estado_fase: completedPhaseIndexForProject(project),
-            servicios: { id: project.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
-          }))
-      )
-      .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
-
-    return NextResponse.json({ proyectos });
+      })),
+    });
   } catch (e) {
-    if (e instanceof AuthError) {
-      return NextResponse.json({ error: e.message }, { status: e.status });
-    }
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }
@@ -104,8 +33,8 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const { user } = await requireAuth();
-
     const body = await req.json();
+
     const { tipo_proyecto_id, universidad_id, tema_aprobado, titulo_provisional, modalidad_creacion } = body;
     const academic_context = body.academic_context && typeof body.academic_context === "object"
       ? body.academic_context as Record<string, unknown>
@@ -117,118 +46,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "servicio_id es requerido" }, { status: 400 });
     }
 
-    if (!isSupabaseConfigured()) {
-      const proyecto = createProyecto({
-        usuario_id: user.id,
-        servicio_id,
-        tipo_proyecto_id: resolvedTipoProyectoId,
-        universidad_id: universidad_id ?? undefined,
-        modalidad_creacion: modalidad_creacion ?? "directa",
-        tema_aprobado: tema_aprobado ?? null,
-        titulo_provisional: titulo_provisional ?? null,
-        estado_fase: 0,
-        completado: false,
-        academic_context,
-        academic_memory: {},
-        final_document: null,
-        final_document_validation: {},
-        contenido_fase_0: null,
-        contenido_fase_1: null,
-        contenido_fase_2: null,
-        contenido_fase_3: null,
-        contenido_fase_4: null,
-        contenido_fase_5: null,
-      });
-      return NextResponse.json({ proyecto }, { status: 201 });
-    }
-
-    const db = createAdminClient();
-
-    const { data: servicio, error: errS } = await db
-      .from("servicios")
-      .select("id, nombre, activo")
-      .eq("id", servicio_id)
-      .eq("activo", true)
-      .single();
-
-    if (errS || !servicio) {
-      // Supabase no tiene el servicio — crear proyecto en memoria igual
-      const proyecto = createProyecto({
-        usuario_id: user.id,
-        servicio_id,
-        tipo_proyecto_id: resolvedTipoProyectoId,
-        universidad_id: universidad_id ?? undefined,
-        modalidad_creacion: modalidad_creacion ?? "directa",
-        tema_aprobado: tema_aprobado ?? null,
-        titulo_provisional: titulo_provisional ?? null,
-        estado_fase: 0,
-        completado: false,
-        academic_context,
-        academic_memory: {},
-        final_document: null,
-        final_document_validation: {},
-        contenido_fase_0: null,
-        contenido_fase_1: null,
-        contenido_fase_2: null,
-        contenido_fase_3: null,
-        contenido_fase_4: null,
-        contenido_fase_5: null,
-      });
-      return NextResponse.json({ proyecto }, { status: 201 });
-    }
-
-    const nuevoProyecto: InsertTables<"proyectos_fases"> = {
-      usuario_id:         user.id,
-      servicio_id,
-      tema_aprobado:      tema_aprobado ?? null,
-      titulo_provisional: titulo_provisional ?? null,
-      estado_fase:        0,
-      completado:         false,
-    };
-
-    const { data, error } = await db
-      .from("proyectos_fases")
-      .insert(nuevoProyecto)
-      .select()
-      .single();
-
-    if (error || !data) {
-      // Supabase falló — guardar en memoria
-      const proyecto = createProyecto({
-        usuario_id: user.id,
-        servicio_id,
-        tipo_proyecto_id: resolvedTipoProyectoId,
-        universidad_id: universidad_id ?? undefined,
-        modalidad_creacion: modalidad_creacion ?? "directa",
-        tema_aprobado: tema_aprobado ?? null,
-        titulo_provisional: titulo_provisional ?? null,
-        estado_fase: 0,
-        completado: false,
-        academic_context,
-        academic_memory: {},
-        final_document: null,
-        final_document_validation: {},
-        contenido_fase_0: null,
-        contenido_fase_1: null,
-        contenido_fase_2: null,
-        contenido_fase_3: null,
-        contenido_fase_4: null,
-        contenido_fase_5: null,
-      });
-      return NextResponse.json({ proyecto }, { status: 201 });
-    }
-
-    upsertProyectoSnapshot({
-      id: data.id,
+    const proyecto = await dbCreateProyecto({
       usuario_id: user.id,
       servicio_id,
       tipo_proyecto_id: resolvedTipoProyectoId,
       universidad_id: universidad_id ?? undefined,
       modalidad_creacion: modalidad_creacion ?? "directa",
-      tema_aprobado: data.tema_aprobado ?? tema_aprobado ?? null,
-      titulo_provisional: data.titulo_provisional ?? titulo_provisional ?? null,
-      estado_fase: data.estado_fase ?? 0,
-      completado: data.completado ?? false,
+      tema_aprobado: tema_aprobado ?? null,
+      titulo_provisional: titulo_provisional ?? null,
+      estado_fase: 0,
+      completado: false,
+      oculto_por_usuario: false,
       academic_context,
       academic_memory: {},
       final_document: null,
@@ -239,15 +67,11 @@ export async function POST(req: Request) {
       contenido_fase_3: null,
       contenido_fase_4: null,
       contenido_fase_5: null,
-      created_at: data.created_at,
-      updated_at: data.updated_at,
     });
 
-    return NextResponse.json({ proyecto: data }, { status: 201 });
+    return NextResponse.json({ proyecto }, { status: 201 });
   } catch (e) {
-    if (e instanceof AuthError) {
-      return NextResponse.json({ error: e.message }, { status: e.status });
-    }
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }
 }

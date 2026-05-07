@@ -4,8 +4,7 @@
  */
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-import { getProyecto } from "@/lib/memoryStore";
+import { dbGetProyecto } from "@/lib/db";
 import { generarLatex, nombreArchivoLatex } from "@/lib/export/latex-builder";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
 
@@ -18,28 +17,11 @@ export async function GET(_req: Request, { params }: Params) {
     const { user } = await requireAuth();
     const { id } = await params;
 
-    let proyecto: Record<string, unknown> | null = null;
-
-    if (!isSupabaseConfigured()) {
-      const p = getProyecto(id);
-      if (!p) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
-      proyecto = p as unknown as Record<string, unknown>;
-    } else {
-      const db = createAdminClient();
-      const { data, error } = await db
-        .from("proyectos_fases")
-        .select("*, servicios ( nombre )")
-        .eq("id", id)
-        .eq("usuario_id", user.id)
-        .single();
-      if (error || !data) {
-        const p = getProyecto(id);
-        if (!p) return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
-        proyecto = p as unknown as Record<string, unknown>;
-      } else {
-        proyecto = data as Record<string, unknown>;
-      }
+    const raw = await dbGetProyecto(id);
+    if (!raw || (raw.usuario_id !== user.id && user.role !== "admin")) {
+      return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
     }
+    const proyecto = raw as unknown as Record<string, unknown>;
 
     const titulo = (proyecto.tema_aprobado as string | null) || (proyecto.titulo_provisional as string | null) || "Proyecto Académico";
 

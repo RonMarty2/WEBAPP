@@ -49,6 +49,7 @@ export async function GET(_req: Request, { params }: { params: Params }) {
     diplomado: monografia.diplomado ?? "",
     capituloContenidos,
     bibliografia: citasBiblio,
+    universidad_id: (monografia as unknown as { universidad_id?: string }).universidad_id,
   });
 
   const slug = titulo

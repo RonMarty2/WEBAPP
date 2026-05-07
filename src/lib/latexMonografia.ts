@@ -1,6 +1,8 @@
 // LaTeX document builder for monografías.
 // Format: 12pt, letterpaper, Times New Roman, 2.54 cm margins, 1.5 spacing.
 
+import { getUniversityTemplate, type CaratulaInput } from "./universityTemplates";
+
 export interface CitaBiblio {
   autor: string;
   ano?: number;
@@ -16,6 +18,10 @@ export interface MonografiaLatexInput {
   caratulaPdf?: string; // filename, e.g. "caratula.pdf"
   capituloContenidos: { numero: number; titulo: string; contenido: string }[];
   bibliografia: CitaBiblio[];
+  /** ID de universidad (umsa | umss | ucb | upb | upea | usfx). Default: umss */
+  universidad_id?: string;
+  /** Datos opcionales de la carátula de respaldo (cuando no hay caratulaPdf) */
+  caratulaData?: CaratulaInput;
 }
 
 /**
@@ -206,7 +212,10 @@ function generarBibliografiaLatex(citas: CitaBiblio[]): string {
  * Builds the full LaTeX source for a monografía.
  */
 export function generarLatexMonografia(input: MonografiaLatexInput): string {
-  const { titulo, diplomado, caratulaPdf, capituloContenidos, bibliografia } = input;
+  const { titulo, diplomado, caratulaPdf, capituloContenidos, bibliografia, universidad_id, caratulaData } = input;
+  const uniTpl = getUniversityTemplate(universidad_id);
+  const { izq, der, sup, inf } = uniTpl.margenes;
+  const spacingCmd = uniTpl.espaciado === 2.0 ? "\\doublespacing" : "\\onehalfspacing";
 
   const capTitulos: Record<number, string> = {
     1: "CAPÍTULO I: PLANTEAMIENTO DEL PROBLEMA",
@@ -234,25 +243,22 @@ export function generarLatexMonografia(input: MonografiaLatexInput): string {
 
   const caratulaBlock = caratulaPdf
     ? `\\includepdf[pages=1]{${caratulaPdf}}\n\\newpage`
-    : [
-        "\\begin{titlepage}",
-        "  \\centering",
-        "  \\vspace*{3cm}",
-        `  {\\LARGE \\textbf{${escaparLatexPlain(titulo)}}}\\\\[1.2cm]`,
-        `  {\\large ${escaparLatexPlain(diplomado ?? "")}}\\\\[3cm]`,
-        "  {\\large \\today}",
-        "\\end{titlepage}",
-      ].join("\n");
+    : uniTpl.buildCaratula(caratulaData ?? { titulo, diplomado });
+
+  const fontPackage = uniTpl.fuente === "arial"
+    ? "\\usepackage{helvet}\n\\renewcommand{\\familydefault}{\\sfdefault}"
+    : "\\usepackage{times}";
 
   return `\\documentclass[12pt, letterpaper]{article}
 
 % ─── Paquetes ───────────────────────────────────────────────
 \\usepackage[utf8]{inputenc}
 \\usepackage[spanish,es-noshorthands]{babel}
-\\usepackage{times}
-\\usepackage[left=2.54cm, right=2.54cm, top=2.54cm, bottom=2.54cm]{geometry}
+${fontPackage}
+\\usepackage[left=${izq}cm, right=${der}cm, top=${sup}cm, bottom=${inf}cm]{geometry}
 \\usepackage{setspace}
-\\onehalfspacing
+${spacingCmd}
+${uniTpl.preambleExtras ?? ""}
 \\usepackage{float}
 \\usepackage{array}
 \\usepackage{tabularx}

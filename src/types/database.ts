@@ -303,6 +303,165 @@ export interface Database {
         ];
       };
 
+      proyectos: {
+        Row: {
+          id: string;
+          usuario_id: string;
+          servicio_id: string;
+          tipo_proyecto_id: string | null;
+          universidad_id: string | null;
+          tema_aprobado: string | null;
+          titulo_provisional: string | null;
+          estado_fase: number;
+          completado: boolean;
+          oculto_por_usuario: boolean;
+          modalidad_creacion: string | null;
+          perfil_estilo_usuario: string | null;
+          requiere_actualizacion: Json | null;
+          contenido_fase_0: string | null;
+          contenido_fase_1: string | null;
+          contenido_fase_2: string | null;
+          contenido_fase_3: string | null;
+          contenido_fase_4: string | null;
+          contenido_fase_5: string | null;
+          phase_contents: Json | null;
+          academic_context: Json | null;
+          academic_memory: Json | null;
+          final_document: string | null;
+          final_document_validation: Json | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          usuario_id: string;
+          servicio_id: string;
+          tipo_proyecto_id?: string | null;
+          universidad_id?: string | null;
+          tema_aprobado?: string | null;
+          titulo_provisional?: string | null;
+          estado_fase?: number;
+          completado?: boolean;
+          oculto_por_usuario?: boolean;
+          modalidad_creacion?: string | null;
+          perfil_estilo_usuario?: string | null;
+          requiere_actualizacion?: Json | null;
+          contenido_fase_0?: string | null;
+          contenido_fase_1?: string | null;
+          contenido_fase_2?: string | null;
+          contenido_fase_3?: string | null;
+          contenido_fase_4?: string | null;
+          contenido_fase_5?: string | null;
+          phase_contents?: Json | null;
+          academic_context?: Json | null;
+          academic_memory?: Json | null;
+          final_document?: string | null;
+          final_document_validation?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          usuario_id?: string;
+          servicio_id?: string;
+          tipo_proyecto_id?: string | null;
+          universidad_id?: string | null;
+          tema_aprobado?: string | null;
+          titulo_provisional?: string | null;
+          estado_fase?: number;
+          completado?: boolean;
+          oculto_por_usuario?: boolean;
+          modalidad_creacion?: string | null;
+          perfil_estilo_usuario?: string | null;
+          requiere_actualizacion?: Json | null;
+          contenido_fase_0?: string | null;
+          contenido_fase_1?: string | null;
+          contenido_fase_2?: string | null;
+          contenido_fase_3?: string | null;
+          contenido_fase_4?: string | null;
+          contenido_fase_5?: string | null;
+          phase_contents?: Json | null;
+          academic_context?: Json | null;
+          academic_memory?: Json | null;
+          final_document?: string | null;
+          final_document_validation?: Json | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+
+      usuarios: {
+        Row: {
+          id: string;
+          email: string;
+          name: string;
+          picture: string | null;
+          role: string;
+          plan: string | null;
+          active: boolean;
+          registered_at: string;
+          activated_at: string | null;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          name: string;
+          picture?: string | null;
+          role?: string;
+          plan?: string | null;
+          active?: boolean;
+          registered_at?: string;
+          activated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          name?: string;
+          picture?: string | null;
+          role?: string;
+          plan?: string | null;
+          active?: boolean;
+          registered_at?: string;
+          activated_at?: string | null;
+        };
+        Relationships: [];
+      };
+
+      error_logs: {
+        Row: {
+          id: string;
+          timestamp: string;
+          nivel: string;
+          etapa: string | null;
+          proyecto_id: string | null;
+          service_id: string | null;
+          mensaje: string;
+          detalle: string | null;
+        };
+        Insert: {
+          id?: string;
+          timestamp?: string;
+          nivel: string;
+          etapa?: string | null;
+          proyecto_id?: string | null;
+          service_id?: string | null;
+          mensaje: string;
+          detalle?: string | null;
+        };
+        Update: {
+          id?: string;
+          timestamp?: string;
+          nivel?: string;
+          etapa?: string | null;
+          proyecto_id?: string | null;
+          service_id?: string | null;
+          mensaje?: string;
+          detalle?: string | null;
+        };
+        Relationships: [];
+      };
+
       auditoria_chats: {
         Row: {
           id: string;

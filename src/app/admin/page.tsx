@@ -40,7 +40,7 @@ function MetricCard({
           <span className="adm-label">{code}</span>
           <span className="adm-muted">live</span>
         </div>
-        <div style={{ fontSize: 44, fontWeight: 700, lineHeight: 1, color: "#edf2fb" }}>{counted}</div>
+        <div className="adm-kpi-num" style={{ fontSize: 44, fontWeight: 700, lineHeight: 1 }}>{counted}</div>
         <div className="mt-4 pt-3" style={{ borderTop: "1px solid rgba(140, 154, 176, 0.16)" }}>
           <div className="text-[13px] font-bold" style={{ color: "#edf2fb" }}>{label}</div>
           <div className="adm-caption mt-1">{detail}</div>

@@ -162,6 +162,31 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
     }
   }, [pathname, isPreview]);
 
+  // Sync previewConfig prop → uiConfigRef so the canvas loop picks up live changes
+  useEffect(() => {
+    if (!isPreview || !previewConfig) return;
+    const oldShape = uiConfigRef.current.shape;
+    const oldDensity = uiConfigRef.current.density;
+    uiConfigRef.current = {
+      shape: previewConfig.shape ?? "sphere",
+      palette: previewConfig.palette ?? "antigravity",
+      wave: previewConfig.wave ?? "none",
+      speed: typeof previewConfig.speed === "number" ? previewConfig.speed : 1.0,
+      particleSize: typeof previewConfig.particleSize === "number" ? previewConfig.particleSize : 1.0,
+      particleLength: typeof previewConfig.particleLength === "number" ? previewConfig.particleLength : 1.0,
+      swarmSize: typeof previewConfig.swarmSize === "number" ? previewConfig.swarmSize : 1.0,
+      density: typeof previewConfig.density === "number" ? previewConfig.density : 1000,
+    };
+    if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
+      const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+      parts.current = newTargets.map((t, i) =>
+        parts.current[i]
+          ? { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz }
+          : { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz }
+      );
+    }
+  }, [isPreview, previewConfig]);
+
   // ── Nucleus Morphing Cycle ────────────────────────────────────────────────
   useEffect(() => {
     let interval: number;

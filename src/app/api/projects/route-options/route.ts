@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { llamarIA } from "@/lib/aiProvider";
-import { getProyecto, updateProyecto, upsertProyectoSnapshot } from "@/lib/memoryStore";
+import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 import { buildAcademicContextBlock, normalizeRouteOptions, parseJsonFromAi } from "@/lib/academicProject.mjs";
 
@@ -27,43 +26,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "proyecto_id es requerido" }, { status: 400 });
     }
 
-    let proyecto = getProyecto(proyectoId);
-    if (!proyecto && isSupabaseConfigured()) {
-      const db = createAdminClient();
-      const { data } = await db
-        .from("proyectos_fases")
-        .select("*")
-        .eq("id", proyectoId)
-        .eq("usuario_id", user.id)
-        .maybeSingle();
-
-      if (data) {
-        proyecto = upsertProyectoSnapshot({
-          id: data.id,
-          usuario_id: data.usuario_id,
-          servicio_id: data.servicio_id,
-          tema_aprobado: data.tema_aprobado,
-          titulo_provisional: data.titulo_provisional,
-          estado_fase: data.estado_fase ?? 0,
-          completado: data.completado ?? false,
-          modalidad_creacion: "directa",
-          academic_context: {},
-          academic_memory: {},
-          final_document: null,
-          final_document_validation: {},
-          contenido_fase_0: null,
-          contenido_fase_1: null,
-          contenido_fase_2: null,
-          contenido_fase_3: null,
-          contenido_fase_4: null,
-          contenido_fase_5: null,
-          created_at: data.created_at,
-          updated_at: data.updated_at,
-        });
-      }
-    }
-
-    if (!proyecto || proyecto.usuario_id !== user.id) {
+    const proyecto = await dbGetProyecto(proyectoId);
+    if (!proyecto || (proyecto.usuario_id !== user.id && user.role !== "admin")) {
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 
@@ -109,7 +73,7 @@ Formato obligatorio:
       proveedor = `${result.provider} / ${result.model}`;
       parsed = parseJsonFromAi(result.text);
     } catch (e) {
-      updateProyecto(proyectoId, {
+      void dbUpdateProyecto(proyectoId, {
         academic_memory: appendAITrace(proyecto.academic_memory, {
           scope: "route-options",
           action: "generar rutas academicas",
@@ -136,7 +100,7 @@ Formato obligatorio:
       contexto_inicial: contextoInicial,
       rutas_sugeridas: rutas,
     };
-    const updated = updateProyecto(proyectoId, {
+    const updated = await dbUpdateProyecto(proyectoId, {
       academic_context: updatedContext,
       academic_memory: appendAITrace(proyecto.academic_memory, {
         scope: "route-options",

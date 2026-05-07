@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
-import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 import {
@@ -137,8 +137,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "proyecto_id es requerido" }, { status: 400 });
     }
 
-    const proyecto = getProyecto(proyectoId);
-    if (!proyecto || proyecto.usuario_id !== user.id) {
+    const proyecto = await dbGetProyecto(proyectoId);
+    if (!proyecto || (proyecto.usuario_id !== user.id && user.role !== "admin")) {
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 
@@ -207,7 +207,7 @@ export async function POST(req: Request) {
         referenceCatalog,
       });
       if (!finalText.trim()) {
-        updateProyecto(proyectoId, {
+        void dbUpdateProyecto(proyectoId, {
           academic_memory: appendAITrace(academicMemory, buildFinalAITraceEntry({
             servicioId: proyecto.servicio_id,
             status: "error",
@@ -265,7 +265,7 @@ export async function POST(req: Request) {
       error: traceError,
     });
 
-    const updated = updateProyecto(proyectoId, {
+    const updated = await dbUpdateProyecto(proyectoId, {
       phase_contents: updatedPhaseContents,
       final_document: finalText,
       final_document_validation: validation as unknown as Record<string, unknown>,

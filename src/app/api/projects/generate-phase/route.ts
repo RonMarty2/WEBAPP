@@ -14,10 +14,14 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
-import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
+import {
+  extractCommitments,
+  updateHiloConductor,
+  buildHiloConstraintBlock,
+} from "@/lib/hiloConductor";
 import { loadFromDisk } from "@/lib/persistence";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import { buildAcademicContextBlock, summarizePhaseForMemory } from "@/lib/academicProject.mjs";
@@ -30,7 +34,17 @@ import {
   withUpdatedReferenceCatalog,
 } from "@/lib/projectReferences.mjs";
 import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
-import type { EstadoFase, UpdateTables } from "@/types/database";
+import { buscarFuentesAcademicas, buildFuentesVerificadasBlock } from "@/lib/deepSearch";
+
+// Fases legacy que se benefician de búsqueda académica (Marco Teórico y Bibliografía)
+const FASES_CON_DEEP_SEARCH = new Set([2, 3, 5]);
+
+// Palabras clave en el label/prompt de una fase dinámica que activan deep search
+const DEEP_SEARCH_KEYWORDS = /marco\s+te[oó]rico|bibliograf|referencias|fuentes|estado\s+del\s+arte|antecedente/i;
+
+function faseNecesitaDeepSearch(phase: { label: string; prompt?: string }): boolean {
+  return DEEP_SEARCH_KEYWORDS.test(phase.label) || DEEP_SEARCH_KEYWORDS.test(phase.prompt ?? "");
+}
 
 const FASE_ETIQUETA: Record<number, string> = {
   0: "Fase 0 — Planteamiento del Tema",
@@ -64,14 +78,21 @@ function buildSystemPrompt({
   phasePrompt,
   perfilEstilo,
   hilos,
+  hiloConstraints,
 }: {
   phasePrompt: string;
   perfilEstilo?: string | null;
   hilos: string[];
+  hiloConstraints?: string;
 }): string {
   const parts: string[] = [];
 
   parts.push(phasePrompt);
+
+  // Compromisos sagrados de capítulos anteriores — máxima prioridad factual
+  if (hiloConstraints?.trim()) {
+    parts.push(`\n${hiloConstraints}`);
+  }
 
   if (perfilEstilo?.trim()) {
     parts.push(
@@ -325,18 +346,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Body JSON inválido" }, { status: 400 });
     }
 
-    if (!isSupabaseConfigured()) {
-      return await generarSinSupabase({
-        sessionUserId: sessionUser.id,
-        proyecto_id, fase_numero, phase_id,
-        mensaje_usuario, tipo, feedback_usuario,
-        t0,
-      });
-    }
-
-    return await generarConSupabase({
+    // Siempre usar el path principal (tabla 'proyectos' vía db layer)
+    return await generarSinSupabase({
       sessionUserId: sessionUser.id,
-      proyecto_id, fase_numero,
+      proyecto_id, fase_numero, phase_id,
       mensaje_usuario, tipo, feedback_usuario,
       t0,
     });
@@ -366,12 +379,13 @@ async function generarSinSupabase({
   feedback_usuario?: string;
   t0: number;
 }) {
-  const proyecto = getProyecto(proyecto_id);
+  const proyecto = await dbGetProyecto(proyecto_id);
   if (!proyecto || proyecto.usuario_id !== sessionUserId) {
     return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
   }
 
   const hilos = loadHilosFromDisk();
+  const hiloConstraints = buildHiloConstraintBlock(proyecto.academic_memory);
   const perfilEstilo = proyecto.perfil_estilo_usuario;
   const esGuiado = proyecto.modalidad_creacion === "guiada";
 
@@ -418,7 +432,7 @@ async function generarSinSupabase({
       ? currentPhase.prompt_borrador?.trim()
       : currentPhase.prompt_final?.trim();
     const phasePromptBase = typePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
-    const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
+    const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
     const borradorKey = `${phase_id}_borrador`;
     const borradorPrev = phaseContents[borradorKey] ?? null;
@@ -436,11 +450,21 @@ async function generarSinSupabase({
     ]);
     const referencesPhase = tipo !== "borrador" && isReferencesPhase(currentPhase);
 
+    // Deep search: buscar fuentes reales para fases bibliográficas
+    const necesitaSearch = faseNecesitaDeepSearch(currentPhase);
+    const searchQuery = proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "";
+    const deepSearchBlock = (necesitaSearch && searchQuery)
+      ? await buscarFuentesAcademicas(searchQuery, { soloSemanticScholar: false })
+          .then(r => buildFuentesVerificadasBlock(r))
+          .catch(() => "")
+      : "";
+
     const userPromptParts = [
       `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlock}\n--- FIN EXPEDIENTE ---`,
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
       proyecto.titulo_provisional ? `TITULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
+      deepSearchBlock || null,
       referencesPhase
         ? `\n--- SOPORTE ESTRUCTURADO PARA REFERENCIAS ---\n${buildReferenceSupportBlock({
             referenceCatalog,
@@ -487,7 +511,7 @@ async function generarSinSupabase({
         traceStatus = "fallback";
         traceError = errorMessage;
       } else {
-        updateProyecto(proyecto_id, {
+        await dbUpdateProyecto(proyecto_id, {
           academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
             servicioId: proyecto.servicio_id,
             scope: "generate-phase",
@@ -549,13 +573,16 @@ async function generarSinSupabase({
       error: traceError,
     });
 
-    updateProyecto(proyecto_id, {
+    const newCommitmentsPhase = extractCommitments(textoGenerado, currentPhase.label);
+    const nextMemoryWithHilo = updateHiloConductor(nextMemory, newCommitmentsPhase);
+
+    await dbUpdateProyecto(proyecto_id, {
       estado_fase: Math.max(proyecto.estado_fase, sorted.findIndex((phase) => phase.id === phase_id)),
       phase_contents: newPhaseContents,
       requiere_actualizacion: requiereActualizacion,
       final_document: null,
       final_document_validation: {},
-      academic_memory: appendAITrace(nextMemory, traceEntry),
+      academic_memory: appendAITrace(nextMemoryWithHilo, traceEntry),
     });
 
     return NextResponse.json({
@@ -606,13 +633,20 @@ async function generarSinSupabase({
 
   const systemPrompt = esOnboarding
     ? phasePromptBase  // onboarding doesn't use style profile
-    : buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
+    : buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
+
+  // Deep search para fases legacy que lo necesitan (Marco Teórico, Desarrollo, Bibliografía)
+  const legacySearchQuery = proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "";
+  const legacyDeepSearchBlock = (FASES_CON_DEEP_SEARCH.has(fase_numero) && legacySearchQuery && !esOnboarding)
+    ? await buscarFuentesAcademicas(legacySearchQuery).then(r => buildFuentesVerificadasBlock(r)).catch(() => "")
+    : "";
 
   const userPromptParts: (string | null)[] = [
     `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlockForProject(proyecto)}\n--- FIN EXPEDIENTE ---`,
     `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
     proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
     bloqueContexto,
+    legacyDeepSearchBlock || null,
   ];
 
   if (tipo === "final" && esGuiado && !esOnboarding) {
@@ -643,7 +677,7 @@ async function generarSinSupabase({
     proveedor = `${resultado.provider} / ${resultado.model}`;
   } catch (e) {
     const errorMessage = (e as Error).message;
-    updateProyecto(proyecto_id, {
+    await dbUpdateProyecto(proyecto_id, {
       academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
         servicioId: proyecto.servicio_id,
         scope: "generate-phase",
@@ -712,7 +746,12 @@ async function generarSinSupabase({
   });
   updates.academic_memory = appendAITrace(updates.academic_memory ?? proyecto.academic_memory, traceEntry);
 
-  updateProyecto(proyecto_id, updates);
+  if (!(tipo === "borrador" && esGuiado)) {
+    const newCommitmentsLegacy = extractCommitments(textoGenerado, FASE_ETIQUETA[fase_numero]);
+    updates.academic_memory = updateHiloConductor(updates.academic_memory ?? proyecto.academic_memory, newCommitmentsLegacy);
+  }
+
+  await dbUpdateProyecto(proyecto_id, updates);
 
   return NextResponse.json({
     ok: true,
@@ -727,184 +766,3 @@ async function generarSinSupabase({
   });
 }
 
-// ── Con Supabase ──────────────────────────────────────────────────────────────
-
-async function generarConSupabase({
-  sessionUserId, proyecto_id, fase_numero,
-  mensaje_usuario, tipo, feedback_usuario,
-  t0,
-}: {
-  sessionUserId: string;
-  proyecto_id: string;
-  fase_numero: number;
-  mensaje_usuario?: string;
-  tipo: "borrador" | "final";
-  feedback_usuario?: string;
-  t0: number;
-}) {
-  const db = createAdminClient();
-
-  const { data: proyecto, error: errProyecto } = await db
-    .from("proyectos_fases")
-    .select("*, servicios(id, nombre, audiencia_id)")
-    .eq("id", proyecto_id)
-    .eq("usuario_id", sessionUserId)
-    .single();
-
-  if (errProyecto || !proyecto) {
-    // Fallback to memory store
-    return await generarSinSupabase({
-      sessionUserId, proyecto_id, fase_numero,
-      mensaje_usuario, tipo, feedback_usuario, t0,
-    });
-  }
-
-  const servicio_id = proyecto.servicio_id;
-  const esGuiado = (proyecto as unknown as { modalidad_creacion?: string }).modalidad_creacion === "guiada";
-  const perfilEstilo = (proyecto as unknown as { perfil_estilo_usuario?: string }).perfil_estilo_usuario;
-
-  const { data: hilosData } = await db
-    .from("hilos_conductores")
-    .select("regla_inmutable, orden")
-    .eq("servicio_id", servicio_id)
-    .order("orden");
-
-  const hilos = hilosData?.map(h => h.regla_inmutable) ?? [];
-
-  // Load dynamic phase definitions for labels
-  const phaseDefs = phaseDefinitionsForProject({
-    servicioId: servicio_id ?? "mono-001",
-    tipoProyectoId: (proyecto as unknown as { tipo_proyecto_id?: string }).tipo_proyecto_id,
-  });
-  const legacyPhaseLabel = phaseDefs?.find(p => p.orden === fase_numero)?.label ?? `Fase ${fase_numero}`;
-
-  const { data: promptBorradorData } = await db
-    .from("prompts_maestros")
-    .select("contenido_prompt, nombre_fase, version")
-    .eq("servicio_id", servicio_id)
-    .eq("fase_numero", fase_numero as EstadoFase)
-    .eq("activo", true)
-    .eq("tipo" as never, tipo === "borrador" ? "borrador" : "final")
-    .maybeSingle();
-
-  const phaseByOrder = phaseDefs.find(p => p.orden === fase_numero * 10 || p.orden === fase_numero);
-  const typePrompt = tipo === "borrador"
-    ? phaseByOrder?.prompt_borrador?.trim()
-    : phaseByOrder?.prompt_final?.trim();
-  const phasePromptBase = promptBorradorData?.contenido_prompt
-    ?? typePrompt
-    ?? loadPhasePromptFromDisk(fase_numero, tipo);
-
-  const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos });
-
-  const MAX_CHARS = 1800;
-  const fasesAnteriores: string[] = [];
-  for (let f = 0; f < fase_numero; f++) {
-    const col = FASE_A_COLUMNA[f];
-    let contenido: string | null = null;
-    if (col) {
-      contenido = (proyecto as Record<string, unknown>)[col] as string | null;
-    }
-    // Also check phase_contents for dynamic phases
-    const pc = (proyecto as unknown as { phase_contents?: Record<string, string> }).phase_contents;
-    if (!contenido && pc?.[String(f)]) {
-      contenido = pc[String(f)];
-    }
-    if (contenido) {
-      const truncated = contenido.length > MAX_CHARS
-        ? contenido.slice(0, MAX_CHARS) + "\n[... truncado ...]"
-        : contenido;
-      const label = phaseDefs?.find(p => p.orden === f)?.label ?? FASE_ETIQUETA[f] ?? `Fase ${f}`;
-      fasesAnteriores.push(`=== ${label} (ya aprobada) ===\n${truncated}\n=== FIN ===`);
-    }
-  }
-
-  const bloqueContexto = fasesAnteriores.length > 0
-    ? `\n\n--- CONTEXTO ACUMULADO ---\n\n${fasesAnteriores.join("\n\n")}`
-    : "";
-
-  const phaseKey = String(fase_numero);
-  const borradorCol = `contenido_fase_${fase_numero}_borrador` as keyof typeof proyecto;
-  const borradorPrev = (proyecto[borradorCol] as string | null) ?? null;
-
-  const userPromptParts: (string | null)[] = [
-    `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlockForProject(proyecto as unknown as {
-      academic_context?: Record<string, unknown>;
-      academic_memory?: Record<string, unknown>;
-      tema_aprobado?: string | null;
-      titulo_provisional?: string | null;
-    })}\n--- FIN EXPEDIENTE ---`,
-    `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
-    proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
-    bloqueContexto,
-  ];
-
-  if (tipo === "final" && esGuiado) {
-    if (borradorPrev) {
-      userPromptParts.push(`\n--- BORRADOR PREVIO ---\n${borradorPrev}\n--- FIN BORRADOR ---`);
-    }
-    if (feedback_usuario?.trim()) {
-      userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
-    }
-    userPromptParts.push(`\nGenera la VERSIÓN FINAL de ${legacyPhaseLabel} incorporando el feedback.`);
-  } else {
-    if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
-    userPromptParts.push(`\nGenera el contenido de ${legacyPhaseLabel}.`);
-  }
-
-  const userPrompt = userPromptParts.filter(Boolean).join("\n");
-
-  let textoGenerado: string;
-  let proveedor: string;
-  try {
-    const resultado = await llamarIA(systemPrompt, userPrompt, 7000, servicio_id);
-    textoGenerado = resultado.text;
-    proveedor = `${resultado.provider} / ${resultado.model}`;
-  } catch (e) {
-    return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
-  }
-
-  const duracion_ms = Date.now() - t0;
-
-  if (tipo === "borrador" && esGuiado) {
-    await db.from("proyectos_fases").update({
-      phase_contents: {
-        ...(((proyecto as unknown as { phase_contents?: Record<string, unknown> }).phase_contents) ?? {}),
-        [`${phaseKey}_borrador`]: textoGenerado,
-      },
-    } as never).eq("id", proyecto_id);
-  } else {
-    const nuevaFase = Math.max(proyecto.estado_fase, fase_numero) as EstadoFase;
-    const updatePayload: UpdateTables<"proyectos_fases"> = { estado_fase: nuevaFase };
-    const colKey = FASE_A_COLUMNA[fase_numero];
-    if (colKey) {
-      (updatePayload as Record<string, unknown>)[colKey] = textoGenerado;
-    }
-    // Always store in phase_contents for dynamic support
-    (updatePayload as Record<string, unknown>).phase_contents = {
-      ...(((proyecto as unknown as { phase_contents?: Record<string, unknown> }).phase_contents) ?? {}),
-      [phaseKey]: textoGenerado,
-    };
-    await db.from("proyectos_fases").update(updatePayload).eq("id", proyecto_id);
-  }
-
-  try {
-    await db.from("auditoria_chats").insert({
-      usuario_id: sessionUserId,
-      proyecto_id,
-      servicio_id,
-      fase_numero,
-      mensaje_usuario: userPrompt.slice(0, 2000),
-      respuesta_ia: textoGenerado.slice(0, 5000),
-      modelo_usado: proveedor,
-      duracion_ms,
-    });
-  } catch { /* auditoría no crítica */ }
-
-  return NextResponse.json({
-    ok: true, fase: fase_numero, tipo,
-    fase_etiqueta: legacyPhaseLabel,
-    prompt_version: promptBorradorData?.version ?? "fallback",
-    proveedor, duracion_ms, contenido: textoGenerado,
-  });
-}

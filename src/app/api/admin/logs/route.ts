@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { getErrorLogs, errorLogsStore, type ErrorLogEntry } from "@/lib/memoryStore";
+import { dbGetErrorLogs } from "@/lib/db";
+import { errorLogsStore, type ErrorLogEntry } from "@/lib/memoryStore";
 
 // GET /api/admin/logs?nivel=critical|warning|info&limit=50
 export async function GET(req: Request) {
@@ -7,7 +8,7 @@ export async function GET(req: Request) {
   const nivel = searchParams.get("nivel") as ErrorLogEntry["nivel"] | null;
   const limit = parseInt(searchParams.get("limit") ?? "50", 10);
 
-  const logs = getErrorLogs(nivel ?? undefined, limit);
+  const logs = await dbGetErrorLogs(nivel ?? undefined, limit);
   return NextResponse.json({
     total: errorLogsStore.length,
     retornados: logs.length,

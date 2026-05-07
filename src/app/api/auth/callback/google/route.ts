@@ -7,7 +7,7 @@ import {
   SESSION_MAX_AGE,
   isAdmin,
 } from "@/lib/auth";
-import { upsertUser, getUser } from "@/lib/memoryStore";
+import { dbUpsertUser, dbGetUser } from "@/lib/db";
 
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
@@ -30,9 +30,9 @@ export async function GET(req: Request) {
   const admin = isAdmin(profile.email);
 
   // Mantener rol/plan si el usuario ya existe y fue activado
-  const existing = getUser(profile.id);
+  const existing = await dbGetUser(profile.id);
 
-  const userRecord = upsertUser({
+  const userRecord = await dbUpsertUser({
     id: profile.id,
     email: profile.email,
     name: profile.name,

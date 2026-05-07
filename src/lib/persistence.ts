@@ -68,6 +68,49 @@ export interface FaseTipoProyecto {
   padre_id?: string;
 }
 
+export interface SolicitudPagoRecord {
+  id: string;
+  usuario_id: string;
+  usuario_email?: string;
+  usuario_nombre?: string;
+  plan: "estandar" | "pro";
+  monto_bs: number;
+  metodo: "tigo_money" | "qr_bancario" | "transferencia";
+  estado: "pendiente" | "aprobado" | "rechazado";
+  comprobante_b64?: string;
+  comprobante_tipo?: string;
+  notas_usuario?: string;
+  notas_admin?: string;
+  aprobado_por?: string;
+  aprobado_at?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentConfig {
+  tigo_money_numero?: string;
+  tigo_money_nombre?: string;
+  banco_nombre?: string;
+  banco_cuenta?: string;
+  banco_titular?: string;
+  banco_ci?: string;
+  qr_imagen_b64?: string; // imagen del QR bancario en base64
+  instrucciones_extra?: string;
+}
+
+export interface ObservacionTribunal {
+  id: string;
+  proyecto_id: string;
+  texto: string;
+  capitulo_afectado?: string; // e.g. "fase_1", "fase_2"
+  estado: "pendiente" | "atendida" | "descartada";
+  respuesta_ia?: string;
+  notas_usuario?: string;
+  created_at: string;
+  updated_at: string;
+  atendida_at?: string;
+}
+
 export interface StoreData {
   proyectos: Record<string, unknown>;
   users: Record<string, unknown>;
@@ -78,6 +121,9 @@ export interface StoreData {
   estiloAnalizadorPrompt?: string;
   tiposProyecto?: TipoProyecto[];
   fasesTipoProyecto?: FaseTipoProyecto[];
+  solicitudesPago?: Record<string, SolicitudPagoRecord>;
+  paymentConfig?: PaymentConfig;
+  observacionesTribunal?: Record<string, ObservacionTribunal>;
 }
 
 function ensureDir() {

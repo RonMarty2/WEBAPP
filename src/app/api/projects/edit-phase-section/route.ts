@@ -5,9 +5,8 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
 import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
-import { getProyecto, updateProyecto } from "@/lib/memoryStore";
+import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 import { loadFromDisk } from "@/lib/persistence";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
@@ -217,77 +216,19 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "proyecto_id y mensaje_usuario son obligatorios" }, { status: 400 });
     }
 
-    const memoryProject = getProyecto(proyectoId);
-    if (memoryProject) {
-      if (memoryProject.usuario_id !== user.id) {
-        return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
-      }
-
-      const phase = resolvePhase(memoryProject, body.phase_id, body.fase_numero);
-      const contenidoActual = currentContentFor(memoryProject, phase.key, phase.legacyColumn);
-      if (!contenidoActual?.trim()) {
-        return NextResponse.json({ error: "No hay contenido existente para ajustar en esta fase." }, { status: 400 });
-      }
-
-      const { contenido, proveedor, traceEntry } = await editWithAI({
-        proyecto: memoryProject,
-        key: phase.key,
-        label: phase.label,
-        contenidoActual,
-        observacion,
-        t0,
-      });
-
-      const phaseContents = { ...(memoryProject.phase_contents ?? {}), [phase.key]: contenido };
-      const nextMemory = appendAITrace(
-        upsertPhaseSummary(memoryProject.academic_memory, phase.key, phase.label, contenido),
-        traceEntry
-      );
-      const updates: Partial<typeof memoryProject> & Record<string, unknown> = {
-        phase_contents: phaseContents,
-        academic_memory: nextMemory,
-        final_document: null,
-        final_document_validation: {},
-      };
-      if (phase.legacyColumn) updates[phase.legacyColumn] = contenido;
-      updateProyecto(proyectoId, updates);
-
-      return NextResponse.json({
-        ok: true,
-        phase_id: phase.key,
-        fase_etiqueta: phase.label,
-        proveedor,
-        duracion_ms: Date.now() - t0,
-        contenido,
-        ai_trace_entry: traceEntry,
-      });
-    }
-
-    if (!isSupabaseConfigured()) {
+    const proyecto = await dbGetProyecto(proyectoId);
+    if (!proyecto || (proyecto.usuario_id !== user.id && user.role !== "admin")) {
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 
-    const db = createAdminClient();
-    const { data: proyecto, error } = await db
-      .from("proyectos_fases")
-      .select("*")
-      .eq("id", proyectoId)
-      .eq("usuario_id", user.id)
-      .maybeSingle();
-
-    if (error || !proyecto) {
-      return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
-    }
-
-    const supabaseProject = proyecto as ProyectoLike;
-    const phase = resolvePhase(supabaseProject, body.phase_id, body.fase_numero);
-    const contenidoActual = currentContentFor(supabaseProject, phase.key, phase.legacyColumn);
+    const phase = resolvePhase(proyecto, body.phase_id, body.fase_numero);
+    const contenidoActual = currentContentFor(proyecto, phase.key, phase.legacyColumn);
     if (!contenidoActual?.trim()) {
       return NextResponse.json({ error: "No hay contenido existente para ajustar en esta fase." }, { status: 400 });
     }
 
     const { contenido, proveedor, traceEntry } = await editWithAI({
-      proyecto: supabaseProject,
+      proyecto,
       key: phase.key,
       label: phase.label,
       contenidoActual,
@@ -295,19 +236,18 @@ export async function POST(req: Request) {
       t0,
     });
 
-    const phaseContents = { ...(supabaseProject.phase_contents ?? {}), [phase.key]: contenido };
-    const updatePayload: Record<string, unknown> = {
+    const phaseContents = { ...(proyecto.phase_contents ?? {}), [phase.key]: contenido };
+    const updates: Record<string, unknown> = {
       phase_contents: phaseContents,
       academic_memory: appendAITrace(
-        upsertPhaseSummary(supabaseProject.academic_memory, phase.key, phase.label, contenido),
+        upsertPhaseSummary(proyecto.academic_memory, phase.key, phase.label, contenido),
         traceEntry
       ),
       final_document: null,
       final_document_validation: {},
     };
-    if (phase.legacyColumn) updatePayload[phase.legacyColumn] = contenido;
-
-    await db.from("proyectos_fases").update(updatePayload as never).eq("id", proyectoId);
+    if (phase.legacyColumn) updates[phase.legacyColumn] = contenido;
+    await dbUpdateProyecto(proyectoId, updates);
 
     return NextResponse.json({
       ok: true,

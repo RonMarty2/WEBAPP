@@ -112,6 +112,8 @@ const ADMIN_CSS = `
     --adm-danger: #f87171;
     --adm-warn: #fbbf24;
     --adm-ok: #7dd3a7;
+    --adm-glow: #00c2ff;
+    --adm-glow-rgb: 0, 194, 255;
     font-family: 'IBM Plex Mono', ui-monospace, monospace !important;
     color: var(--adm-text);
   }
@@ -130,9 +132,37 @@ const ADMIN_CSS = `
     inset: -24px -24px auto -24px;
     height: 160px;
     background:
-      linear-gradient(180deg, rgba(162, 179, 203, 0.12), rgba(162, 179, 203, 0)),
-      radial-gradient(circle at 10% 0%, rgba(255, 255, 255, 0.08), transparent 40%);
+      linear-gradient(180deg, rgba(0, 194, 255, 0.06), transparent),
+      radial-gradient(circle at 10% 0%, rgba(0, 194, 255, 0.08), transparent 40%);
     pointer-events: none;
+  }
+
+  .adm-kpi-num {
+    text-shadow:
+      0 0 20px rgba(var(--adm-glow-rgb), 0.45),
+      0 0 50px rgba(var(--adm-glow-rgb), 0.18);
+    color: #ffffff !important;
+  }
+
+  @keyframes adm-live-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(125, 211, 167, 0.5); }
+    50%       { box-shadow: 0 0 0 5px rgba(125, 211, 167, 0); }
+  }
+
+  .adm-live-dot {
+    animation: adm-live-pulse 2.2s ease-in-out infinite;
+  }
+
+  @keyframes adm-glow-flicker {
+    0%, 100% { opacity: 0.85; }
+    45%      { opacity: 1; }
+    55%      { opacity: 0.9; }
+  }
+
+  .adm-glow-text {
+    color: var(--adm-glow);
+    text-shadow: 0 0 12px rgba(var(--adm-glow-rgb), 0.6);
+    animation: adm-glow-flicker 4s ease-in-out infinite;
   }
 
   .adm-label {
@@ -157,14 +187,12 @@ const ADMIN_CSS = `
   .adm-card,
   .adm-surface {
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)),
       var(--adm-panel);
     border: 1px solid var(--adm-line);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.05),
-      0 18px 40px rgba(0, 0, 0, 0.28);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+      0 8px 24px rgba(0, 0, 0, 0.32);
   }
 
   .adm-card-strong {
@@ -207,9 +235,16 @@ const ADMIN_CSS = `
 
   .adm-btn-active,
   .adm-btn-primary {
-    background: linear-gradient(180deg, rgba(220, 228, 240, 0.16), rgba(220, 228, 240, 0.08));
-    border-color: rgba(214, 222, 233, 0.34);
-    color: var(--adm-text);
+    background: linear-gradient(180deg, rgba(0, 194, 255, 0.14), rgba(0, 194, 255, 0.06));
+    border-color: rgba(0, 194, 255, 0.38);
+    color: var(--adm-glow);
+    box-shadow: 0 0 14px rgba(var(--adm-glow-rgb), 0.12), inset 0 1px 0 rgba(var(--adm-glow-rgb), 0.12);
+  }
+
+  .adm-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(180deg, rgba(0, 194, 255, 0.2), rgba(0, 194, 255, 0.1));
+    border-color: rgba(0, 194, 255, 0.55);
+    box-shadow: 0 0 20px rgba(var(--adm-glow-rgb), 0.22);
   }
 
   .adm-btn-primary:disabled {
@@ -383,7 +418,7 @@ function AdminHeader({
       <div className="adm-card adm-card-strong px-4 py-3 min-w-[220px]">
         <div className="adm-label mb-2">estado de mando</div>
         <div className="flex items-center gap-2 text-[12px]" style={{ color: "#edf2fb" }}>
-          <span className="inline-block h-2 w-2 rounded-full" style={{ background: "#7dd3a7" }} />
+          <span className="adm-live-dot inline-block h-2 w-2 rounded-full" style={{ background: "#7dd3a7" }} />
           Control operativo en linea
         </div>
       </div>

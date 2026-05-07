@@ -7,6 +7,7 @@ import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml, getHtmlCover, buildCss } from "@/lib/pdfTemplate";
 import GlassModal from "@/components/ui/GlassModal";
+import ObservacionesTribunal from "@/components/ObservacionesTribunal";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -243,7 +244,7 @@ export default function WorkspacePage() {
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedFase, setSelectedFase] = useState(0);
-  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes">("generacion");
+  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal">("generacion");
 
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
   const [isDynamic, setIsDynamic] = useState(false);
@@ -656,6 +657,14 @@ export default function WorkspacePage() {
     ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
     : finalContent;
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
+
+  // Real-time document stats: sum words from all completed phases
+  const totalWords = displayFases.reduce((acc, f) => {
+    const c = getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
+    return acc + (c ? countWords(c) : 0);
+  }, 0);
+  const estimatedPages = totalWords > 0 ? Math.round(totalWords / 350) : 0;
+
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
   const documentUniversity = university ?? DEFAULT_UNIVERSITIES[0];
   const storedFinalDocument = proyecto.final_document || proyecto.phase_contents?.__final_document || null;
@@ -773,6 +782,14 @@ export default function WorkspacePage() {
             <span>{proyecto.servicios?.nombre ?? "Monografía"}</span>
             <span className="hidden sm:inline">·</span>
             <span className="hidden sm:inline">{fasesCompletadas}/{displayFases.length} fases</span>
+            {totalWords > 0 && (
+              <>
+                <span className="hidden sm:inline">·</span>
+                <span className="hidden sm:inline" title={`${totalWords.toLocaleString("es")} palabras en total`} style={{ color: estimatedPages >= 40 ? "#4ade80" : estimatedPages >= 20 ? "#facc15" : "var(--fg-secondary)" }}>
+                  ~{estimatedPages}p · {totalWords >= 1000 ? `${(totalWords / 1000).toFixed(1)}k` : totalWords}w
+                </span>
+              </>
+            )}
             {esGuiado && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(167,139,250,0.12)", border:"1px solid rgba(167,139,250,0.25)", color:"#a78bfa", fontSize:10, fontWeight:600 }}>GUIADO</span>}
             {esGuiado && proyecto.perfil_estilo_usuario && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(34,197,94,0.08)", border:"1px solid rgba(34,197,94,0.2)", color:"#4ade80", fontSize:10 }}>✓ Estilo calibrado</span>}
             {isRefreshing && (
@@ -832,6 +849,11 @@ export default function WorkspacePage() {
             <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
               {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
             </button>
+          )}
+          {fasesCompletadas >= 2 && (
+            <Link href={`/projects/${proyectoId}/defensa`} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4, textDecoration:"none" }} title="Simula tu defensa oral con IA">
+              ⚖️ <span className="hidden sm:inline">Defensa</span>
+            </Link>
           )}
           {user?.role === "admin" && (
             <Link href="/admin" className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4, textDecoration:"none" }}>
@@ -930,11 +952,17 @@ export default function WorkspacePage() {
               >
                 ⚡ Revision
               </button>
-              <button 
+              <button
                 onClick={() => setCol1Tab("fuentes")}
                 style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "fuentes" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "fuentes" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
               >
                 📚 Material base
+              </button>
+              <button
+                onClick={() => setCol1Tab("tribunal")}
+                style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "tribunal" ? "#f59e0b" : "var(--fg-secondary)", borderBottom: col1Tab === "tribunal" ? "2px solid #f59e0b" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+              >
+                ⚖️ Tribunal
               </button>
             </div>
 
@@ -1064,6 +1092,14 @@ export default function WorkspacePage() {
           </div>
           
           {/* Aquí podrías renderizar la lista de archivos subidos si tienes esa funcionalidad */}
+        </div>
+      )}
+      {col1Tab === "tribunal" && (
+        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <ObservacionesTribunal
+            proyectoId={proyectoId}
+            phaseDefs={displayFases.map(f => ({ id: f.id, label: f.label, short: f.short }))}
+          />
         </div>
       )}
     </div> {/* END UPPER SCROLLABLE AREA */}
