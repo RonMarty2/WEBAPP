@@ -1753,3 +1753,115 @@ https://nextjs.org/docs/messages/module-not-found
  GET /api/auth/me 200 in 82ms (next.js: 36ms, application-code: 46ms)
  GET /api/axiom/ranking 200 in 9ms (next.js: 3ms, application-code: 6ms)
  GET /api/auth/me 200 in 11ms (next.js: 3ms, application-code: 8ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom" notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+ GET /axiom 200 in 79ms (next.js: 5ms, proxy.ts: 7ms, application-code: 67ms)
+ GET /api/axiom/ranking 200 in 14ms (next.js: 10ms, application-code: 4ms)
+ GET /api/auth/me 200 in 18ms (next.js: 4ms, application-code: 15ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom" notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+✓ Compiled in 200ms
+✓ Compiled in 194ms
+✓ Compiled in 203ms
+✓ Compiled in 226ms
+✓ Compiled in 203ms
+✓ Compiled in 185ms
+✓ Compiled in 157ms
+ GET /admin/usuarios 200 in 349ms (next.js: 165ms, proxy.ts: 78ms, application-code: 106ms)
+ GET /axiom 200 in 360ms (next.js: 112ms, proxy.ts: 78ms, application-code: 170ms)
+ GET /admin/usuarios 200 in 134ms (next.js: 37ms, proxy.ts: 11ms, application-code: 86ms)
+ GET /axiom 200 in 140ms (next.js: 8ms, proxy.ts: 12ms, application-code: 119ms)
+ GET /axiom 200 in 68ms (next.js: 9ms, proxy.ts: 11ms, application-code: 49ms)
+ GET /axiom 200 in 64ms (next.js: 25ms, proxy.ts: 11ms, application-code: 27ms)

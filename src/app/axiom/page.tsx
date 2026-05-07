@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
-import HeroSection from "./components/HeroSection";
-import RankingSection from "./components/RankingSection";
-import QuickActionsGrid from "./components/QuickActionsGrid";
-import StatsSection from "./components/StatsSection";
-import CTASection from "./components/CTASection";
+import HeroSectionNew from "./components/HeroSectionNew";
+import RankingSectionNew from "./components/RankingSectionNew";
+import QuickActionsNew from "./components/QuickActionsNew";
+import StatsNew from "./components/StatsNew";
+import CTANew from "./components/CTANew";
 
 export default function AxiomLandingPage() {
   const [ranking, setRanking] = useState<any[]>([]);
@@ -44,20 +44,20 @@ export default function AxiomLandingPage() {
 
       {/* Main content */}
       <main>
-        {/* Hero Section */}
-        <HeroSection />
+        {/* Hero Section - Premium */}
+        <HeroSectionNew />
 
-        {/* Ranking Section */}
-        <RankingSection ranking={ranking} currentUserId={user?.id} />
+        {/* Ranking Section - Visual cards with real data */}
+        <RankingSectionNew ranking={ranking} currentUserId={user?.id} />
 
-        {/* Quick Actions Grid */}
-        <QuickActionsGrid />
+        {/* Quick Actions - 2x2 grid with better styling */}
+        <QuickActionsNew />
 
-        {/* Stats Section */}
-        {user && <StatsSection />}
+        {/* Stats Section - Large numbers */}
+        <StatsNew />
 
         {/* Final CTA */}
-        <CTASection />
+        <CTANew />
       </main>
     </div>
   );
