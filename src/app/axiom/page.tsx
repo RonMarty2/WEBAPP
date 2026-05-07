@@ -39,7 +39,7 @@ export default function AxiomLandingPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-white">
+    <div className="relative min-h-screen" style={{ background: "transparent" }}>
       <ParticleBackground />
       {/* Header */}
       <div className="relative z-10">
