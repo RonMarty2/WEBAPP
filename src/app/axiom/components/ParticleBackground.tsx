@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 
 interface Particle {
   id: number;
-  x: number;
-  y: number;
+  startX: number;
+  startY: number;
   duration: number;
   delay: number;
   size: number;
@@ -23,68 +23,57 @@ export default function ParticleBackground() {
   useEffect(() => {
     setIsMounted(true);
 
-    // Detectar mobile
     const isMobile = window.innerWidth < 768;
-
-    // Generar partículas solo en cliente
     const particleCount = isMobile ? 5 : 12;
     const colors = [
-      "rgba(139, 92, 246, 0.7)",
-      "rgba(168, 85, 247, 0.6)",
-      "rgba(147, 112, 219, 0.6)",
-      "rgba(186, 85, 211, 0.5)",
-      "rgba(123, 104, 238, 0.6)",
+      "rgba(139, 92, 246, 0.8)",
+      "rgba(168, 85, 247, 0.7)",
+      "rgba(147, 112, 219, 0.7)",
+      "rgba(186, 85, 211, 0.6)",
+      "rgba(123, 104, 238, 0.7)",
     ];
 
     const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      duration: 20 + Math.random() * 20,
-      delay: Math.random() * 5,
-      size: isMobile ? 100 + Math.random() * 150 : 200 + Math.random() * 300,
-      opacity: 0.6 + Math.random() * 0.35,
+      startX: Math.random() * window.innerWidth,
+      startY: Math.random() * window.innerHeight,
+      duration: 20 + Math.random() * 15,
+      delay: Math.random() * 3,
+      size: isMobile ? 120 + Math.random() * 100 : 250 + Math.random() * 200,
+      opacity: 0.65 + Math.random() * 0.3,
       color: colors[Math.floor(Math.random() * colors.length)],
-      moveX: 80 - Math.random() * 160,
-      moveY: 150 - Math.random() * 300,
+      moveX: (Math.random() - 0.5) * 200,
+      moveY: (Math.random() - 0.5) * 300,
     }));
 
     setParticles(newParticles);
-    console.log("✨ Particles generated:", newParticles.length);
+    console.log("✨ Particles rendered:", newParticles.length);
   }, []);
 
   if (!isMounted) return null;
 
   return (
     <div
-      className="fixed inset-0 overflow-hidden pointer-events-none will-change-transform"
-      style={{
-        zIndex: 0,
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        position: "fixed",
-      }}
+      className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none"
+      style={{ zIndex: 0 }}
     >
       {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute rounded-full will-change-transform"
+          className="absolute rounded-full"
           style={{
             width: particle.size,
             height: particle.size,
-            left: `${particle.x}%`,
-            top: `${particle.y}%`,
+            x: particle.startX - particle.size / 2,
+            y: particle.startY - particle.size / 2,
             background: particle.color,
             opacity: particle.opacity,
             filter: "blur(20px)",
-            transform: "translate(-50%, -50%)",
           }}
           animate={{
-            x: [0, particle.moveX, 0],
-            y: [0, particle.moveY, 0],
-            scale: [1, 1.15, 1],
+            x: [particle.startX - particle.size / 2, particle.startX - particle.size / 2 + particle.moveX, particle.startX - particle.size / 2],
+            y: [particle.startY - particle.size / 2, particle.startY - particle.size / 2 + particle.moveY, particle.startY - particle.size / 2],
+            scale: [1, 1.2, 1],
           }}
           transition={{
             duration: particle.duration,
