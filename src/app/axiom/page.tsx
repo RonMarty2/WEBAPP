@@ -1,173 +1,143 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { motion } from "framer-motion";
+import Header from "./components/Header";
+import Section from "./components/Section";
+import ActionCard from "./components/ActionCard";
 import RankingPodios from "./components/RankingPodios";
+
+const actionItems = [
+  {
+    href: "/axiom/examenes",
+    icon: "📚",
+    title: "Base de Exámenes",
+    description: "Accede a exámenes resueltos de años anteriores",
+    accentColor: "rgb(59, 130, 246)",
+  },
+  {
+    href: "/axiom/simulador",
+    icon: "▶️",
+    title: "Simulador",
+    description: "Practica un examen completo en tiempo real",
+    accentColor: "rgb(139, 92, 246)",
+  },
+  {
+    href: "/axiom/progreso",
+    icon: "📊",
+    title: "Mi Progreso",
+    description: "Revisa tu historial y mejoras en el tiempo",
+    accentColor: "rgb(16, 185, 129)",
+  },
+  {
+    href: "/axiom/progreso#plan",
+    icon: "🎯",
+    title: "Plan Personalizado",
+    description: "Descubre tu ruta de preparación basada en IA",
+    accentColor: "rgb(251, 146, 60)",
+  },
+];
 
 export default function AxiomLandingPage() {
   const [ranking, setRanking] = useState<any[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load user
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((d) => setUser(d.user))
-      .catch(() => setUser(null));
+    const loadData = async () => {
+      try {
+        const [userRes, rankingRes] = await Promise.all([
+          fetch("/api/auth/me"),
+          fetch("/api/axiom/ranking"),
+        ]);
 
-    // Load ranking
-    fetch("/api/axiom/ranking")
-      .then((r) => r.json())
-      .then((d) => setRanking(d.ranking || []))
-      .catch(() => setRanking([]));
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          setUser(userData.user);
+        }
+
+        if (rankingRes.ok) {
+          const rankingData = await rankingRes.json();
+          setRanking(rankingData.ranking || []);
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (
-    <div style={{ minHeight: "100vh", background: "white" }}>
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div
-        style={{
-          padding: "24px",
-          borderBottom: "1px solid #e5e7eb",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div>
-          <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 700 }}>
-            AXIOM
-          </h1>
-          <p
-            style={{
-              margin: "4px 0 0 0",
-              fontSize: "12px",
-              color: "#6b7280",
-            }}
-          >
-            Prepárate como si ya estuvieras
-          </p>
-        </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          {user && (
-            <span style={{ fontSize: "14px", color: "#6b7280" }}>
-              {user.name}
-            </span>
-          )}
-          <a href="/login" style={{ color: "rgb(139,92,246)", fontSize: "14px" }}>
-            Salir
-          </a>
-        </div>
-      </div>
+      <Header user={user} />
 
       {/* Main content */}
-      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
-        {/* Ranking Hero */}
-        <div
-          style={{
-            background: "rgba(139,92,246,0.06)",
-            border: "1px solid rgba(139,92,246,0.15)",
-            borderRadius: "12px",
-            padding: "32px",
-            marginBottom: "48px",
-          }}
+      <main className="mx-auto max-w-5xl px-6 py-12">
+        {/* Ranking Section */}
+        <Section
+          title="🏆 Top Simuladores"
+          subtitle="Los mejores estudiantes del mes"
+          delay={0.2}
         >
-          <h2
-            style={{
-              margin: "0 0 24px 0",
-              fontSize: "20px",
-              fontWeight: 700,
-              color: "rgb(139,92,246)",
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="rounded-xl border border-violet-100 bg-gradient-to-br from-violet-50 to-white p-8"
           >
-            🏆 Top Simuladores
-          </h2>
+            <RankingPodios
+              ranking={ranking}
+              currentUserId={user?.id}
+              soundEnabled={true}
+            />
+          </motion.div>
+        </Section>
 
-          <RankingPodios ranking={ranking} currentUserId={user?.id} soundEnabled={true} />
-        </div>
-
-        {/* Main options */}
-        <div style={{ marginBottom: "48px" }}>
-          <h2
-            style={{
-              margin: "0 0 20px 0",
-              fontSize: "18px",
-              fontWeight: 700,
-              color: "#1f2937",
-            }}
-          >
-            ¿Qué quieres hacer?
-          </h2>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            {[
-              {
-                href: "/axiom/examenes",
-                title: "📚 Base de Exámenes",
-                desc: "Ver exámenes resueltos",
-              },
-              {
-                href: "/axiom/simulador",
-                title: "▶️ Simulador",
-                desc: "Practicar examen completo",
-              },
-              {
-                href: "/axiom/progreso",
-                title: "📊 Mi Progreso",
-                desc: "Ver historial y mejoras",
-              },
-              {
-                href: "/axiom/progreso#plan",
-                title: "🎯 Plan Personalizado",
-                desc: "Tu ruta de preparación",
-              },
-            ].map((item) => (
-              <Link
+        {/* Actions Section */}
+        <Section
+          title="¿Qué quieres hacer?"
+          subtitle="Elige cómo quieres prepararte hoy"
+          delay={0.4}
+        >
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {actionItems.map((item, index) => (
+              <ActionCard
                 key={item.href}
-                href={item.href}
-                style={{
-                  background: "white",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "8px",
-                  padding: "20px",
-                  textDecoration: "none",
-                  color: "#1f2937",
-                  transition: "all 200ms ease-out",
-                  cursor: "pointer",
-                  display: "block",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = "rgb(139,92,246)";
-                  e.currentTarget.style.transform = "scale(1.02)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = "#e5e7eb";
-                  e.currentTarget.style.transform = "scale(1)";
-                }}
-              >
-                <div style={{ fontSize: "20px", fontWeight: 700 }}>
-                  {item.title}
-                </div>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    color: "#6b7280",
-                    marginTop: "8px",
-                  }}
-                >
-                  {item.desc}
-                </div>
-              </Link>
+                {...item}
+                delay={0.4 + index * 0.1}
+              />
             ))}
           </div>
-        </div>
-      </div>
+        </Section>
+
+        {/* CTA Section */}
+        <motion.section
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+          className="mt-16 rounded-xl border border-neutral-200 bg-gradient-to-r from-violet-50 to-blue-50 px-8 py-12 text-center"
+        >
+          <h3 className="text-2xl font-bold text-neutral-900 mb-3">
+            ¿Listo para tu examen?
+          </h3>
+          <p className="text-neutral-600 mb-6 max-w-2xl mx-auto">
+            Inicia un simulador ahora y recibe feedback automático basado en IA.
+            Cada práctica te acerca más a tu meta.
+          </p>
+          <motion.a
+            href="/axiom/simulador"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-block rounded-lg bg-violet-600 px-8 py-3 font-semibold text-white transition-shadow hover:shadow-lg hover:bg-violet-700"
+          >
+            Comenzar Simulador
+          </motion.a>
+        </motion.section>
+      </main>
     </div>
   );
 }
