@@ -54,6 +54,46 @@
         "pattern": "escaparLatex.*remove|LaTeX.*escape.*remove",
         "severity": "CRITICAL",
         "message": "❌ NUNCA QUITAR ESCAPEO LATEX. Riesgo inyección. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*ranking.*delete|RankingPodios.*remove|podio.*delete",
+        "severity": "CRITICAL",
+        "message": "❌ RANKING CON PODIOS ES CORE. No eliminar sin UI replacement. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*scoring|evaluador.*change|nota.*formula|puntaje.*modificar",
+        "severity": "CRITICAL",
+        "message": "❌ SISTEMA DE PUNTUACIÓN CRÍTICO. Cambios afectan integridad académica. Avisar primero."
+      },
+      {
+        "pattern": "api/axiom/simulador.*delete|route.*simulador.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ RUTAS DE SIMULADOR SON CORE. No eliminar sin migración. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*question.*cache|deduplicar.*remove|question.*hash",
+        "severity": "HIGH",
+        "message": "⚠️ CACHÉ DE PREGUNTAS. Cambios afectan performance y validez. Avisar primero."
+      },
+      {
+        "pattern": "RankingPodios.*animation|shield.*remove|podio.*motion",
+        "severity": "HIGH",
+        "message": "⚠️ INTERACTIVIDAD DEL RANKING. Cambios afectan UX. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*sound|audio.*disable|whoosh.*remove",
+        "severity": "MEDIUM",
+        "message": "⚠️ SONIDO DE FEEDBACK. Cambios afectan experiencia. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*plan.*personalizado|plane.*remove|learning.*path",
+        "severity": "CRITICAL",
+        "message": "❌ PLANES PERSONALIZADOS SON DIFERENCIADOR. No eliminar. Avisar primero."
+      },
+      {
+        "pattern": "api/axiom.*delete|axiom.*route.*remove|/axiom/.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ RUTAS AXIOM NO SE ELIMINAN SIN PLAN. Usar deprecation + redirect. Avisar primero."
       }
     ]
   },
@@ -63,7 +103,14 @@
     "src/lib/validaciones.ts",
     "src/lib/export/latex-builder.ts",
     "src/lib/latexMonografia.ts",
-    "CLAUDE.md"
+    "src/lib/axiom/types.ts",
+    "src/lib/axiom/db.ts",
+    "src/lib/axiom/evaluador.ts",
+    "src/app/axiom/components/RankingPodios.tsx",
+    "src/app/api/axiom/simulador/route.ts",
+    "CLAUDE.md",
+    "docs/axiom/PRODUCT.md",
+    "docs/axiom/DESIGN.md"
   ],
   "memory_references": {
     "blueprint": ".claude/projects/c--Users-lmigu-Desktop-WEBAPP-WEBAPP-WEBAPP/memory/ARCHITECTURE_BLUEPRINT.md",
