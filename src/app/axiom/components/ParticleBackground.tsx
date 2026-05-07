@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 interface Particle {
@@ -12,51 +12,57 @@ interface Particle {
   size: number;
   opacity: number;
   color: string;
+  moveX: number;
+  moveY: number;
 }
 
 export default function ParticleBackground() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const particlesRef = useRef<Particle[]>([]);
-  const isMobileRef = useRef(false);
+  const [particles, setParticles] = useState<Particle[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    // Detectar mobile
-    isMobileRef.current = window.innerWidth < 768;
+    setIsMounted(true);
 
-    // Generar partículas
-    const particleCount = isMobileRef.current ? 5 : 12;
+    // Detectar mobile
+    const isMobile = window.innerWidth < 768;
+
+    // Generar partículas solo en cliente
+    const particleCount = isMobile ? 5 : 12;
     const colors = [
-      "rgba(139, 92, 246, 0.6)",   // Violeta principal
-      "rgba(168, 85, 247, 0.5)",   // Violeta más oscuro
-      "rgba(147, 112, 219, 0.5)",  // Violeta medio
-      "rgba(186, 85, 211, 0.4)",   // Orchid
-      "rgba(123, 104, 238, 0.5)",  // Medium Slate Blue
+      "rgba(139, 92, 246, 0.6)",
+      "rgba(168, 85, 247, 0.5)",
+      "rgba(147, 112, 219, 0.5)",
+      "rgba(186, 85, 211, 0.4)",
+      "rgba(123, 104, 238, 0.5)",
     ];
 
-    const particles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
+    const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
       duration: 20 + Math.random() * 20,
       delay: Math.random() * 5,
-      size: isMobileRef.current ? 80 + Math.random() * 120 : 150 + Math.random() * 250,
+      size: isMobile ? 80 + Math.random() * 120 : 150 + Math.random() * 250,
       opacity: 0.5 + Math.random() * 0.4,
       color: colors[Math.floor(Math.random() * colors.length)],
+      moveX: 50 - Math.random() * 100,
+      moveY: 100 - Math.random() * 200,
     }));
 
-    particlesRef.current = particles;
+    setParticles(newParticles);
   }, []);
+
+  if (!isMounted) return null;
 
   return (
     <div
-      ref={containerRef}
       className="fixed inset-0 overflow-hidden pointer-events-none"
       style={{ zIndex: 0 }}
     >
-      {particlesRef.current.map((particle) => (
+      {particles.map((particle) => (
         <motion.div
           key={particle.id}
-          className="absolute rounded-full blur-3xl"
+          className="absolute rounded-full"
           style={{
             width: particle.size,
             height: particle.size,
@@ -67,8 +73,8 @@ export default function ParticleBackground() {
             filter: "blur(25px)",
           }}
           animate={{
-            x: [0, 50 - Math.random() * 100, 0],
-            y: [0, 100 - Math.random() * 200, 0],
+            x: [0, particle.moveX, 0],
+            y: [0, particle.moveY, 0],
             scale: [1, 1.2, 1],
           }}
           transition={{
