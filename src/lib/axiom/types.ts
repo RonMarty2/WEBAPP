@@ -42,7 +42,9 @@ export interface RespuestaUsuario {
 }
 
 export interface PlanPersonalizado {
+  id: string;
   usuario_id: string;
+  simulador_id: string;
   area_debil: string;
   dias: {
     dia: number;
@@ -51,4 +53,6 @@ export interface PlanPersonalizado {
     ejercicios: number;
     descripcion: string;
   }[];
+  generado: string;
+  pdf_url?: string;
 }

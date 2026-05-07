@@ -1,8 +1,9 @@
-import type { ExamenConfig, Simulador } from "./types";
+import type { ExamenConfig, Simulador, PlanPersonalizado } from "./types";
 
 // In-memory store for development
 const configStore: Record<string, ExamenConfig> = {};
 const simuladorStore: Record<string, Simulador> = {};
+const planStore: Record<string, PlanPersonalizado> = {};
 
 export const axiomDB = {
   async getConfig(id: string): Promise<ExamenConfig | null> {
@@ -28,6 +29,14 @@ export const axiomDB = {
     return simuladorStore[id] || null;
   },
 
+  async getSimuladorById(id: string): Promise<Simulador | null> {
+    return simuladorStore[id] || null;
+  },
+
+  async getSimuladoresByUsuario(usuarioId: string): Promise<Simulador[]> {
+    return Object.values(simuladorStore).filter((s) => s.usuario_id === usuarioId);
+  },
+
   async createSimulador(simulador: Simulador): Promise<Simulador> {
     simuladorStore[simulador.id] = simulador;
     return simulador;
@@ -51,5 +60,14 @@ export const axiomDB = {
     if (simulador) {
       simulador.respuestas_usuario = respuestas;
     }
+  },
+
+  async createPlan(plan: PlanPersonalizado): Promise<PlanPersonalizado> {
+    planStore[plan.id] = plan;
+    return plan;
+  },
+
+  async getPlan(id: string): Promise<PlanPersonalizado | null> {
+    return planStore[id] || null;
   },
 };
