@@ -1,0 +1,1755 @@
+
+> laboratorio@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.100.15:3000
+- Environments: .env.local
+✓ Ready in 575ms
+
+[browser] Uncaught Error: Internal Next.js error: Router action dispatched before initialization.
+ GET /admin/usuarios 200 in 941ms (next.js: 308ms, proxy.ts: 244ms, application-code: 389ms)
+ GET /api/admin/usuarios 200 in 183ms (next.js: 160ms, application-code: 23ms)
+ GET /axiom 200 in 1545ms (next.js: 1177ms, proxy.ts: 260ms, application-code: 108ms)
+ GET /api/axiom/ranking 200 in 88ms (next.js: 81ms, application-code: 8ms)
+ GET /api/auth/me 200 in 105ms (next.js: 43ms, application-code: 62ms)
+ GET /axiom 200 in 51ms (next.js: 3ms, proxy.ts: 5ms, application-code: 43ms)
+ GET /axiom 200 in 71ms (next.js: 7ms, proxy.ts: 10ms, application-code: 55ms)
+ GET /api/axiom/ranking 200 in 13ms (next.js: 8ms, application-code: 6ms)
+ GET /api/auth/me 200 in 17ms (next.js: 3ms, application-code: 13ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom" notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+✓ Compiled in 171ms
+✓ Compiled in 172ms
+✓ Compiled in 168ms
+✓ Compiled in 370ms
+ GET /api/axiom/ranking 200 in 279ms (next.js: 270ms, application-code: 9ms)
+ GET /api/auth/me 200 in 474ms (next.js: 228ms, application-code: 246ms)
+ GET /api/axiom/ranking 200 in 14ms (next.js: 7ms, application-code: 7ms)
+ GET /api/auth/me 200 in 22ms (next.js: 11ms, application-code: 11ms)
+ GET /admin/usuarios 200 in 712ms (next.js: 117ms, proxy.ts: 85ms, application-code: 511ms)
+ GET /axiom 200 in 726ms (next.js: 422ms, proxy.ts: 88ms, application-code: 216ms)
+ GET /admin/usuarios 200 in 216ms (next.js: 13ms, proxy.ts: 41ms, application-code: 162ms)
+ GET /axiom 200 in 253ms (next.js: 52ms, proxy.ts: 40ms, application-code: 161ms)
+ GET /axiom 200 in 122ms (next.js: 30ms, proxy.ts: 21ms, application-code: 71ms)
+ GET /axiom 200 in 102ms (next.js: 7ms, proxy.ts: 55ms, application-code: 39ms)
+ GET /axiom/simulador 200 in 208ms (next.js: 41ms, proxy.ts: 8ms, application-code: 159ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom/sim..." notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom/sim..." tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+ GET /axiom 200 in 114ms (next.js: 3ms, proxy.ts: 5ms, application-code: 106ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom" notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+ GET /api/axiom/ranking 200 in 9ms (next.js: 3ms, application-code: 6ms)
+ GET /api/auth/me 200 in 18ms (next.js: 3ms, application-code: 15ms)
+ GET /axiom 200 in 64ms (next.js: 3ms, proxy.ts: 6ms, application-code: 55ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom" notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+ GET /api/auth/me 200 in 16ms (next.js: 5ms, application-code: 11ms)
+ GET /api/axiom/ranking 200 in 9ms (next.js: 5ms, application-code: 4ms)
+✓ Compiled in 189ms
+✓ Compiled in 238ms
+✓ Compiled in 204ms
+ GET /axiom 200 in 73ms (next.js: 4ms, proxy.ts: 6ms, application-code: 63ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <RenderFromTemplateContext>
+      <ScrollAndMaybeFocusHandler cacheNode={{rsc:{...}, ...}}>
+        <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+          <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+            <LoadingBoundary name="/" loading={null}>
+              <HTTPAccessFallbackBoundary notFound={{...}} forbidden={undefined} unauthorized={undefined}>
+                <HTTPAccessFallbackErrorBoundary pathname="/axiom" notFound={{...}} forbidden={undefined} ...>
+                  <RedirectBoundary>
+                    <RedirectErrorBoundary router={{...}}>
+                      <InnerLayoutRouter url="/axiom" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                        <SegmentViewNode type="layout" pagePath="axiom/layo...">
+                          <SegmentTrieNode>
+                          <AxiomLayout>
+                            <html
+                              lang="es"
+-                             className="h-full"
+                            >
+                              <head>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <meta>
+                                <style
+                                  dangerouslySetInnerHTML={{
++                                   __html: "\n    :root {\n      --primary: rgb(139, 92, 246);\n      --primary-light..."
+-                                   __html: "@font-face{font-family:'__nextjs-Geist';font-style:normal;font-weight:400..."
+                                  }}
+                                >
+                              <body
+-                               className="atkinson_hyperlegible_22f9cf31-module__uJwZvG__variable crimson_pro_9e9dcc0..."
+                              >
+                      ...
+          ...
+ 
+ GET /api/axiom/ranking 200 in 7ms (next.js: 3ms, application-code: 4ms)
+ GET /api/auth/me 200 in 15ms (next.js: 3ms, application-code: 12ms)
+✓ Compiled in 192ms
+✓ Compiled in 211ms
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+✓ Compiled in 198ms
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+ GET /axiom 500 in 1779ms (next.js: 1560ms, proxy.ts: 80ms, application-code: 139ms)
+ GET /admin/usuarios 500 in 1781ms (next.js: 1567ms, proxy.ts: 81ms, application-code: 133ms)
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+ GET /admin/usuarios 500 in 56ms (next.js: 21ms, proxy.ts: 14ms, application-code: 21ms)
+ GET /axiom 500 in 58ms (next.js: 30ms, proxy.ts: 15ms, application-code: 13ms)
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+ GET /admin/usuarios 500 in 68ms (next.js: 17ms, proxy.ts: 29ms, application-code: 22ms)
+ GET /axiom 500 in 69ms (next.js: 28ms, proxy.ts: 29ms, application-code: 12ms)
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+⨯ ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m3 |[0m [36mimport[0m [33mLink[0m [36mfrom[0m [32m"next/link"[0m;
+  [90m4 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m5 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m6 |[0m [36mimport[0m [33mReact[0m [36mfrom[0m [32m"react"[0m;
+  [90m7 |[0m
+  [90m8 |[0m [36minterface[0m [33mActionItemProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+
+./src/app/axiom/components/StatsSection.tsx:4:1
+Module not found: Can't resolve 'react-intersection-observer'
+  [90m2 |[0m
+  [90m3 |[0m [36mimport[0m { motion } [36mfrom[0m [32m"framer-motion"[0m;
+[31m[1m>[0m [90m4 |[0m [36mimport[0m { useInView } [36mfrom[0m [32m"react-intersection-observer"[0m;
+  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+  [90m5 |[0m [36mimport[0m { useState, useEffect } [36mfrom[0m [32m"react"[0m;
+  [90m6 |[0m
+  [90m7 |[0m [36minterface[0m [33mStatCardProps[0m {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/StatsSection.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+ GET /axiom 500 in 89ms (next.js: 27ms, proxy.ts: 36ms, application-code: 26ms)
+ GET /axiom 500 in 80ms (next.js: 32ms, proxy.ts: 33ms, application-code: 15ms)
+[browser] Uncaught Error: ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  3 | import Link from "next/link";
+  4 | import { motion } from "framer-motion";
+> 5 | import { useInView } from "react-intersection-observer";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import React from "react";
+  7 |
+  8 | interface ActionItemProps {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/axiom/components/QuickActionsGrid.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/axiom/components/QuickActionsGrid.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+[browser] Uncaught Error: ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  3 | import Link from "next/link";
+  4 | import { motion } from "framer-motion";
+> 5 | import { useInView } from "react-intersection-observer";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import React from "react";
+  7 |
+  8 | interface ActionItemProps {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/axiom/components/QuickActionsGrid.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/axiom/components/QuickActionsGrid.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+[browser] Uncaught Error: ./src/app/axiom/components/QuickActionsGrid.tsx:5:1
+Module not found: Can't resolve 'react-intersection-observer'
+  3 | import Link from "next/link";
+  4 | import { motion } from "framer-motion";
+> 5 | import { useInView } from "react-intersection-observer";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import React from "react";
+  7 |
+  8 | interface ActionItemProps {
+
+
+
+Import traces:
+  Client Component Browser:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Client Component Browser]
+    ./src/app/axiom/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/axiom/components/QuickActionsGrid.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Client Component SSR]
+    ./src/app/axiom/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/axiom/components/QuickActionsGrid.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (Error: (./src/app/axiom/components/QuickActionsGrid.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+✓ Compiled in 811ms
+ GET /admin/usuarios 200 in 494ms (next.js: 154ms, proxy.ts: 9ms, application-code: 331ms)
+ GET /axiom 200 in 500ms (next.js: 106ms, proxy.ts: 9ms, application-code: 385ms)
+ GET /axiom 200 in 96ms (next.js: 4ms, proxy.ts: 7ms, application-code: 84ms)
+ GET /api/admin/usuarios 200 in 109ms (next.js: 100ms, application-code: 9ms)
+ GET /api/axiom/ranking 200 in 74ms (next.js: 69ms, application-code: 5ms)
+ GET /api/auth/me 200 in 82ms (next.js: 36ms, application-code: 46ms)
+ GET /api/axiom/ranking 200 in 9ms (next.js: 3ms, application-code: 6ms)
+ GET /api/auth/me 200 in 11ms (next.js: 3ms, application-code: 8ms)
