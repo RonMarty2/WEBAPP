@@ -37,7 +37,7 @@ function ActionCardNew({
         <motion.div
           whileHover={{ y: -8, transition: { duration: 0.3 } }}
           whileTap={{ scale: 0.98 }}
-          className={`group relative h-full overflow-hidden rounded-2xl border ${borderColor} ${colorClass} p-8 cursor-pointer transition-all duration-300 hover:shadow-2xl`}
+          className={`group relative h-full min-h-56 cursor-pointer overflow-hidden rounded-2xl border ${borderColor} ${colorClass} p-6 shadow-[0_18px_44px_rgba(24,24,70,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-7`}
         >
           {/* Top accent line */}
           <motion.div
@@ -60,7 +60,7 @@ function ActionCardNew({
             </motion.div>
 
             {/* Title */}
-            <h3 className="mb-3 text-2xl font-bold text-neutral-900 group-hover:text-violet-600 transition-colors duration-300">
+            <h3 className="mb-3 text-2xl font-black text-neutral-900 transition-colors duration-300 group-hover:text-violet-600">
               {title}
             </h3>
 
@@ -97,47 +97,47 @@ const actions = [
     icon: "📚",
     title: "Base de Exámenes",
     description: "Accede a exámenes resueltos de años anteriores y aprende de las mejores estrategias",
-    colorClass: "bg-blue-50",
-    borderColor: "border-blue-200",
+    colorClass: "bg-white/82 backdrop-blur-xl",
+    borderColor: "border-blue-200/80",
   },
   {
     href: "/axiom/simulador",
     icon: "▶️",
     title: "Simulador UMSS",
     description: "Practica exámenes completos en tiempo real con feedback automático de IA",
-    colorClass: "bg-violet-50",
-    borderColor: "border-violet-200",
+    colorClass: "bg-white/82 backdrop-blur-xl",
+    borderColor: "border-violet-200/80",
   },
   {
     href: "/axiom/progreso",
     icon: "📊",
     title: "Mi Progreso",
     description: "Visualiza tu evolución en el tiempo con gráficos y estadísticas detalladas",
-    colorClass: "bg-teal-50",
-    borderColor: "border-teal-200",
+    colorClass: "bg-white/82 backdrop-blur-xl",
+    borderColor: "border-teal-200/80",
   },
   {
     href: "/axiom/progreso#plan",
     icon: "🎯",
     title: "Plan Personalizado",
     description: "Descubre tu ruta optimizada de preparación basada en IA y tu desempeño",
-    colorClass: "bg-amber-50",
-    borderColor: "border-amber-200",
+    colorClass: "bg-white/82 backdrop-blur-xl",
+    borderColor: "border-amber-200/80",
   },
 ];
 
 export default function QuickActionsNew() {
   return (
-    <section className="relative bg-white px-6 py-24 lg:px-8">
+    <section className="relative w-full overflow-hidden py-12 sm:py-16">
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="mx-auto mb-16 max-w-5xl text-center"
+        className="axiom-section-title mb-10"
       >
-        <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 mb-4">
+        <h2 className="mb-4 text-4xl font-black text-[#171545] sm:text-5xl">
           ¿Qué quieres hacer hoy?
         </h2>
         <p className="text-lg text-neutral-600">
@@ -146,8 +146,8 @@ export default function QuickActionsNew() {
       </motion.div>
 
       {/* Grid 2x2 */}
-      <div className="mx-auto max-w-5xl">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div className="axiom-container">
+        <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-2">
           {actions.map((action, idx) => (
             <ActionCardNew
               key={action.href}

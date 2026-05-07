@@ -11,20 +11,20 @@ interface RankingUser {
 
 const rankColors = {
   1: {
-    bg: "bg-gradient-to-br from-amber-50 to-orange-50",
-    border: "border-amber-200",
+    bg: "bg-white/82 backdrop-blur-xl",
+    border: "border-amber-200/80",
     accent: "text-amber-600",
     badge: "bg-amber-100 text-amber-900",
   },
   2: {
-    bg: "bg-gradient-to-br from-slate-50 to-gray-50",
-    border: "border-slate-200",
+    bg: "bg-white/82 backdrop-blur-xl",
+    border: "border-slate-200/80",
     accent: "text-slate-600",
     badge: "bg-slate-100 text-slate-900",
   },
   3: {
-    bg: "bg-gradient-to-br from-orange-50 to-amber-50",
-    border: "border-orange-200",
+    bg: "bg-white/82 backdrop-blur-xl",
+    border: "border-orange-200/80",
     accent: "text-orange-600",
     badge: "bg-orange-100 text-orange-900",
   },
@@ -56,7 +56,7 @@ export default function RankingCardNew({
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
       viewport={{ once: true }}
-      className={`group relative overflow-hidden rounded-2xl border ${colors.border} ${colors.bg} p-8 transition-all duration-300 hover:shadow-xl hover:border-violet-200 cursor-default`}
+      className={`group relative flex min-h-64 w-full flex-col overflow-hidden rounded-2xl border ${colors.border} ${colors.bg} p-6 shadow-[0_18px_44px_rgba(24,24,70,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-default sm:p-7`}
     >
       {/* Top accent line */}
       <motion.div
@@ -67,7 +67,7 @@ export default function RankingCardNew({
         style={{ transformOrigin: "left" }}
       />
 
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="mb-6 flex items-start justify-between gap-4">
         {/* Medal + Position */}
         <div className="flex flex-col items-center">
           <span className="text-4xl mb-2">{medals[position - 1]}</span>
@@ -93,7 +93,7 @@ export default function RankingCardNew({
 
       {/* Big score */}
       <div className="mb-4">
-        <p className="text-5xl sm:text-6xl font-bold text-violet-600">{user.nota}</p>
+        <p className="text-5xl font-black text-violet-600 sm:text-6xl">{user.nota}</p>
         <p className="text-sm text-neutral-600 font-medium">/100</p>
       </div>
 

@@ -25,30 +25,30 @@ export default function RankingSectionNew({
       whileInView={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       viewport={{ once: true, margin: "-100px" }}
-      className="relative bg-neutral-50 px-6 py-24 lg:px-8"
+      className="relative w-full overflow-hidden py-12 sm:py-16"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="axiom-container">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="mb-16 text-center"
+          className="axiom-section-title mb-10"
         >
           <div className="mb-4">
             <span className="text-5xl">🏆</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 mb-3">
+          <h2 className="mb-3 text-4xl font-black text-[#171545] sm:text-5xl">
             Top Simuladores
           </h2>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-lg text-neutral-600">
             Los mejores estudiantes del mes. ¿Puedes alcanzarlos?
           </p>
         </motion.div>
 
         {/* Top 3 Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
+        <div className="mx-auto mb-8 grid w-full grid-cols-1 gap-6 md:grid-cols-3">
           {top3.map((user, idx) => (
             <RankingCardNew
               key={user.id}
@@ -67,8 +67,8 @@ export default function RankingSectionNew({
             transition={{ duration: 0.6, delay: 0.4 }}
             viewport={{ once: true }}
           >
-            <div className="mb-6">
-              <p className="text-xs font-semibold text-neutral-600 uppercase tracking-wider">
+            <div className="mb-4 text-center">
+              <p className="text-xs font-semibold uppercase tracking-wider text-neutral-600">
                 — Participantes Aprobados —
               </p>
             </div>
@@ -81,7 +81,7 @@ export default function RankingSectionNew({
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.4, delay: 0.4 + idx * 0.05 }}
                   viewport={{ once: true }}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-neutral-200 bg-white hover:border-violet-200 hover:shadow-md transition-all duration-300"
+                  className="flex items-center gap-4 rounded-2xl border border-neutral-200/80 bg-white/82 p-4 shadow-[0_14px_36px_rgba(24,24,70,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                 >
                   <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-violet-400 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
                     #{idx + 4}

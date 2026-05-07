@@ -38,28 +38,26 @@ export default function AxiomLandingPage() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-white">
-      {/* Header */}
-      <div className="relative z-10">
+    <div className="axiom-page relative z-10 min-h-screen bg-transparent">
+      <div className="mx-auto flex min-h-screen w-full max-w-none flex-col items-stretch">
         <Header user={user} />
 
-      {/* Main content */}
-      <main>
-        {/* Hero Section - Premium */}
-        <HeroSectionNew />
+        <main className="relative mx-auto flex w-full max-w-none flex-col items-stretch">
+          {/* Hero Section - Premium */}
+          <HeroSectionNew />
 
-        {/* Ranking Section - Visual cards with real data */}
-        <RankingSectionNew ranking={ranking} currentUserId={user?.id} />
+          {/* Ranking Section - Visual cards with real data */}
+          <RankingSectionNew ranking={ranking} currentUserId={user?.id} />
 
-        {/* Quick Actions - 2x2 grid with better styling */}
-        <QuickActionsNew />
+          {/* Quick Actions - 2x2 grid with better styling */}
+          <QuickActionsNew />
 
-        {/* Stats Section - Large numbers */}
-        <StatsNew />
+          {/* Stats Section - Large numbers */}
+          <StatsNew />
 
-        {/* Final CTA */}
-        <CTANew />
-      </main>
+          {/* Final CTA */}
+          <CTANew />
+        </main>
       </div>
     </div>
   );

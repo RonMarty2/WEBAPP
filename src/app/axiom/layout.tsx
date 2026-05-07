@@ -1,8 +1,14 @@
+import type { Metadata } from "next";
 import { ReactNode } from "react";
 
+export const metadata: Metadata = {
+  title: "AXIOM - Simulador de examenes UMSS",
+  description: "Simulador de examenes universitarios con IA para preparacion academica.",
+};
+
 export default function AxiomLayout({ children }: { children: ReactNode }) {
-  const globalStyles = `
-    :root {
+  const axiomStyles = `
+    .axiom-shell {
       --primary: rgb(139, 92, 246);
       --primary-light: rgb(168, 126, 255);
       --primary-dark: rgb(109, 40, 217);
@@ -22,93 +28,86 @@ export default function AxiomLayout({ children }: { children: ReactNode }) {
       --neutral-700: #374151;
       --neutral-800: #1f2937;
       --neutral-900: #111827;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
+      min-height: 100vh;
+      width: 100%;
+      max-width: none;
+      display: block;
+      position: relative;
+      z-index: 1;
+      overflow-x: clip;
+      color: var(--neutral-900);
+      color-scheme: light;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
         'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
         sans-serif;
-      background-color: var(--neutral-50);
-      color: var(--neutral-900);
       line-height: 1.6;
-      font-size: 16px;
+      background: transparent;
     }
 
-    h1, h2, h3, h4, h5, h6 {
-      font-weight: 600;
-      line-height: 1.3;
-      margin-bottom: 0.5rem;
+    .axiom-shell *,
+    .axiom-shell *::before,
+    .axiom-shell *::after {
+      box-sizing: border-box;
     }
 
-    h1 {
-      font-size: 2.5rem;
+    .axiom-page {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      overflow-x: clip;
     }
 
-    h2 {
-      font-size: 2rem;
+    .axiom-container {
+      width: 100%;
+      max-width: 1280px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 24px;
+      padding-right: 24px;
     }
 
-    h3 {
-      font-size: 1.5rem;
+    .axiom-hero-center {
+      width: 100%;
+      max-width: 980px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 24px;
+      padding-right: 24px;
     }
 
-    h4 {
-      font-size: 1.25rem;
+    @media (max-width: 640px) {
+      .axiom-container,
+      .axiom-hero-center {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
     }
 
-    h5 {
-      font-size: 1.125rem;
+    .axiom-section-title {
+      max-width: 760px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
     }
 
-    h6 {
-      font-size: 1rem;
+    .axiom-pill {
+      min-height: 48px;
+      min-width: 176px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 28px;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
     }
 
-    p {
-      margin-bottom: 1rem;
-    }
-
-    a {
-      color: var(--primary);
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    a:hover {
-      color: var(--primary-dark);
-      text-decoration: underline;
-    }
-
-    button {
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      background: none;
-      transition: all 0.2s ease;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    input,
-    textarea,
-    select {
+    .axiom-shell input,
+    .axiom-shell textarea,
+    .axiom-shell select {
       font-family: inherit;
       border: 1px solid var(--neutral-300);
       border-radius: 0.375rem;
@@ -117,168 +116,23 @@ export default function AxiomLayout({ children }: { children: ReactNode }) {
       transition: border-color 0.2s ease;
     }
 
-    input:focus,
-    textarea:focus,
-    select:focus {
+    .axiom-shell input:focus,
+    .axiom-shell textarea:focus,
+    .axiom-shell select:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-
-    code {
-      background-color: var(--neutral-100);
-      padding: 0.2rem 0.4rem;
-      border-radius: 0.25rem;
-      font-family: 'Courier New', monospace;
-      font-size: 0.875rem;
-    }
-
-    pre {
-      background-color: var(--neutral-900);
-      color: #e5e7eb;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      overflow-x: auto;
-      margin-bottom: 1rem;
-    }
-
-    pre code {
-      background-color: transparent;
-      color: inherit;
-      padding: 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 1rem;
-    }
-
-    th,
-    td {
-      padding: 0.75rem;
-      text-align: left;
-      border-bottom: 1px solid var(--neutral-200);
-    }
-
-    th {
-      background-color: var(--neutral-100);
-      font-weight: 600;
-    }
-
-    tr:hover {
-      background-color: var(--neutral-50);
-    }
-
-    ul,
-    ol {
-      margin-bottom: 1rem;
-      margin-left: 1.5rem;
-    }
-
-    li {
-      margin-bottom: 0.5rem;
-    }
-
-    blockquote {
-      border-left: 4px solid var(--primary);
-      padding-left: 1rem;
-      margin-left: 0;
-      margin-bottom: 1rem;
-      font-style: italic;
-      color: var(--neutral-600);
-    }
-
-    hr {
-      border: none;
-      border-top: 1px solid var(--neutral-200);
-      margin: 2rem 0;
-    }
-
-    .container {
-      width: 100%;
-      margin-left: auto;
-      margin-right: auto;
-      padding-left: 1rem;
-      padding-right: 1rem;
-    }
-
-    @media (min-width: 640px) {
-      .container {
-        max-width: 640px;
-      }
-    }
-
-    @media (min-width: 768px) {
-      .container {
-        max-width: 768px;
-      }
-    }
-
-    @media (min-width: 1024px) {
-      .container {
-        max-width: 1024px;
-      }
-    }
-
-    @media (min-width: 1280px) {
-      .container {
-        max-width: 1280px;
-      }
-    }
-
-    @media (min-width: 1536px) {
-      .container {
-        max-width: 1536px;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      h1 {
-        font-size: 1.875rem;
-      }
-
-      h2 {
-        font-size: 1.5rem;
-      }
-
-      h3 {
-        font-size: 1.25rem;
-      }
-
-      body {
-        font-size: 14px;
-      }
+    .axiom-shell button {
+      font-family: inherit;
     }
   `;
 
   return (
-    <html lang="es">
-      <head>
-        <meta charSet="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta
-          name="description"
-          content="Axiom - Simulador de exámenes UMSS. Generador de exámenes universitarios con IA."
-        />
-        <meta name="author" content="Laboratorio Académico PRO" />
-        <meta name="keywords" content="exámenes, simulador, UMSS, educación, Bolivia" />
-        <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
-      </head>
-      <body>{children}</body>
-    </html>
+    <section className="axiom-shell">
+      <style dangerouslySetInnerHTML={{ __html: axiomStyles }} />
+      {children}
+    </section>
   );
 }

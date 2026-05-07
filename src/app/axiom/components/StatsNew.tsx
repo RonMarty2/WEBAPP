@@ -48,7 +48,7 @@ function StatItem({ icon, label, value, unit, delay = 0 }: StatItemProps) {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
       viewport={{ once: true }}
-      className="flex flex-col items-center text-center p-8 rounded-2xl border border-neutral-200 bg-white hover:border-violet-200 hover:shadow-lg transition-all duration-300"
+      className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-neutral-200/80 bg-white/82 p-6 text-center shadow-[0_18px_44px_rgba(24,24,70,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-7"
     >
       <motion.span
         className="text-5xl mb-4"
@@ -92,16 +92,16 @@ export default function StatsNew({ stats }: StatsNewProps) {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-neutral-50 to-white px-6 py-24 lg:px-8">
+    <section className="relative w-full overflow-hidden py-12 sm:py-16">
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="mx-auto mb-16 max-w-5xl text-center"
+        className="axiom-section-title mb-10"
       >
-        <h2 className="text-4xl sm:text-5xl font-bold text-neutral-900 mb-3">
+        <h2 className="mb-3 text-4xl font-black text-[#171545] sm:text-5xl">
           Tu Progreso en Números
         </h2>
         <p className="text-lg text-neutral-600">
@@ -110,8 +110,8 @@ export default function StatsNew({ stats }: StatsNewProps) {
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="mx-auto max-w-5xl">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div className="axiom-container">
+        <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-3">
           <StatItem
             icon="📊"
             label="Simuladores Completados"
