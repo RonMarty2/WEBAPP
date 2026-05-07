@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import RankingPodios from "./components/RankingPodios";
 
 export default function AxiomLandingPage() {
   const [ranking, setRanking] = useState<any[]>([]);
@@ -82,78 +83,7 @@ export default function AxiomLandingPage() {
             🏆 Top Simuladores
           </h2>
 
-          {ranking.length > 0 ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {ranking.slice(0, 5).map((user, i) => (
-                <div
-                  key={user.id}
-                  style={{
-                    background: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    padding: "16px",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "12px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "36px",
-                        height: "36px",
-                        background: "rgb(139,92,246)",
-                        borderRadius: "50%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {i + 1}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                        {user.nombre}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                        }}
-                      >
-                        {user.email}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "28px",
-                      fontWeight: 700,
-                      color: "rgb(139,92,246)",
-                    }}
-                  >
-                    {user.nota}/100
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p style={{ color: "#6b7280", fontSize: "14px" }}>
-              Sé el primero en publicar tu nota. Practica ahora.
-            </p>
-          )}
+          <RankingPodios ranking={ranking} currentUserId={user?.id} soundEnabled={true} />
         </div>
 
         {/* Main options */}
