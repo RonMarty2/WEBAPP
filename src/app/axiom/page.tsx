@@ -1,109 +1,241 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import type { SessionUser } from "@/lib/auth";
-import GlassModal from "@/components/ui/GlassModal";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-export default function AxiomDashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [simulaciones, setSimulaciones] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [proyectoToDelete, setProyectoToDelete] = useState<string | null>(null);
+export default function AxiomLandingPage() {
+  const [ranking, setRanking] = useState<any[]>([]);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
+    // Load user
     fetch("/api/auth/me")
-      .then(r => r.json())
-      .then(d => {
-        if (!d.user) { router.replace("/login"); return; }
-        setUser(d.user);
-        setLoading(false);
-      })
-      .catch(() => router.replace("/login"));
-  }, [router]);
+      .then((r) => r.json())
+      .then((d) => setUser(d.user))
+      .catch(() => setUser(null));
 
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
-  }
-
-  if (loading) {
-    return (
-      <div className="bg-transparent" style={{ minHeight: "100vh", position: "relative", zIndex: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div className="spinner" />
-      </div>
-    );
-  }
-
-  if (!user) return null;
+    // Load ranking
+    fetch("/api/axiom/ranking")
+      .then((r) => r.json())
+      .then((d) => setRanking(d.ranking || []))
+      .catch(() => setRanking([]));
+  }, []);
 
   return (
-    <div className="bg-transparent" style={{ minHeight: "100vh", position: "relative", zIndex: 10, padding: 24 }}>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+    <div style={{ minHeight: "100vh", background: "white" }}>
+      {/* Header */}
+      <div
+        style={{
+          padding: "24px",
+          borderBottom: "1px solid #e5e7eb",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <div>
+          <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 700 }}>
+            AXIOM
+          </h1>
+          <p
+            style={{
+              margin: "4px 0 0 0",
+              fontSize: "12px",
+              color: "#6b7280",
+            }}
+          >
+            Prepárate como si ya estuvieras
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: "12px" }}>
+          {user && (
+            <span style={{ fontSize: "14px", color: "#6b7280" }}>
+              {user.name}
+            </span>
+          )}
+          <a href="/login" style={{ color: "rgb(139,92,246)", fontSize: "14px" }}>
+            Salir
+          </a>
+        </div>
+      </div>
 
-        {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {user.picture ? (
-              <img src={user.picture} alt="" style={{ width: 42, height: 42, borderRadius: "50%", border: "2px solid rgb(139,92,246)" }} />
-            ) : (
-              <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgb(139,92,246)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 700, color: "#fff" }}>
-                {user.name[0]}
-              </div>
-            )}
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)" }}>{user.name}</div>
-              <div style={{ fontSize: 12, color: "var(--fg-muted)", display: "flex", alignItems: "center", gap: 6 }}>
-                <span>{user.email}</span>
-              </div>
+      {/* Main content */}
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 24px" }}>
+        {/* Ranking Hero */}
+        <div
+          style={{
+            background: "rgba(139,92,246,0.06)",
+            border: "1px solid rgba(139,92,246,0.15)",
+            borderRadius: "12px",
+            padding: "32px",
+            marginBottom: "48px",
+          }}
+        >
+          <h2
+            style={{
+              margin: "0 0 24px 0",
+              fontSize: "20px",
+              fontWeight: 700,
+              color: "rgb(139,92,246)",
+            }}
+          >
+            🏆 Top Simuladores
+          </h2>
+
+          {ranking.length > 0 ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+                gap: "16px",
+              }}
+            >
+              {ranking.slice(0, 5).map((user, i) => (
+                <div
+                  key={user.id}
+                  style={{
+                    background: "white",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    padding: "16px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "36px",
+                        height: "36px",
+                        background: "rgb(139,92,246)",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {i + 1}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: "14px" }}>
+                        {user.nombre}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "#6b7280",
+                        }}
+                      >
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "28px",
+                      fontWeight: 700,
+                      color: "rgb(139,92,246)",
+                    }}
+                  >
+                    {user.nota}/100
+                  </div>
+                </div>
+              ))}
             </div>
+          ) : (
+            <p style={{ color: "#6b7280", fontSize: "14px" }}>
+              Sé el primero en publicar tu nota. Practica ahora.
+            </p>
+          )}
+        </div>
+
+        {/* Main options */}
+        <div style={{ marginBottom: "48px" }}>
+          <h2
+            style={{
+              margin: "0 0 20px 0",
+              fontSize: "18px",
+              fontWeight: 700,
+              color: "#1f2937",
+            }}
+          >
+            ¿Qué quieres hacer?
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+              gap: "16px",
+            }}
+          >
+            {[
+              {
+                href: "/axiom/examenes",
+                title: "📚 Base de Exámenes",
+                desc: "Ver exámenes resueltos",
+              },
+              {
+                href: "/axiom/simulador",
+                title: "▶️ Simulador",
+                desc: "Practicar examen completo",
+              },
+              {
+                href: "/axiom/progreso",
+                title: "📊 Mi Progreso",
+                desc: "Ver historial y mejoras",
+              },
+              {
+                href: "/axiom/progreso#plan",
+                title: "🎯 Plan Personalizado",
+                desc: "Tu ruta de preparación",
+              },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  background: "white",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "8px",
+                  padding: "20px",
+                  textDecoration: "none",
+                  color: "#1f2937",
+                  transition: "all 200ms ease-out",
+                  cursor: "pointer",
+                  display: "block",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "rgb(139,92,246)";
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e5e7eb";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                <div style={{ fontSize: "20px", fontWeight: 700 }}>
+                  {item.title}
+                </div>
+                <div
+                  style={{
+                    fontSize: "12px",
+                    color: "#6b7280",
+                    marginTop: "8px",
+                  }}
+                >
+                  {item.desc}
+                </div>
+              </Link>
+            ))}
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <a href="/nucleo" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
-              Volver a NŪCLEO
-            </a>
-            <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)", background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-
-        {/* Welcome - AXIOM COLORS */}
-        <div className="card" style={{ marginBottom: 28, borderColor: "rgba(139,92,246,0.22)", background: "rgba(139,92,246,0.06)", position: "relative", overflow: "hidden" }}>
-          {/* Micro-sphere glow violeta */}
-          <div style={{ position: "absolute", top: "-60px", right: "-60px", width: 180, height: 180, borderRadius: "50%", background: "radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, transparent 70%)", filter: "blur(30px)", pointerEvents: "none" }} />
-          <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6, position: "relative" }}>Simulador AXIOM</h1>
-          <p style={{ color: "var(--fg-muted)", fontSize: 14, position: "relative" }}>Entorno de alta precisión para evaluación y simulación.</p>
-        </div>
-
-        {/* Mis Simulaciones */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-muted)" }}>Mis simulaciones</h2>
-          <button style={{ background: "rgba(139,92,246,0.15)", border: "1px solid rgba(139,92,246,0.4)", color: "rgb(167,139,250)", fontSize: 13, padding: "8px 18px", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>
-            + Nueva simulación
-          </button>
-        </div>
-
-        <div className="card" style={{ textAlign: "center", padding: "48px 24px", marginBottom: 32, borderStyle: "dashed", borderColor: "var(--border-hover)" }}>
-          <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>⏱️</div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-secondary)", marginBottom: 8 }}>Aún no tienes simulaciones activas</div>
-          <div style={{ fontSize: 14, color: "var(--fg-muted)", marginBottom: 24 }}>Crea tu primer banco de preguntas hiperdimensional</div>
-        </div>
-
-        {/* Próximamente */}
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Módulos AXIOM</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
-          {[{ icon: "🎯", name: "Simulador CENEVAL" }, { icon: "📈", name: "Análisis Psicométrico" }, { icon: "🧠", name: "Preguntas Adaptativas" }].map(pr => (
-            <div key={pr.name} className="card" style={{ opacity: 0.4, display: "flex", gap: 12, alignItems: "center" }}>
-              <div style={{ fontSize: 28 }}>{pr.icon}</div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)" }}>{pr.name}</div>
-                <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>Próximamente</div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>
