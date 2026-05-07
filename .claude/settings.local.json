@@ -27,7 +27,9 @@
       "PowerShell($pkg = Get-Content \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\package.json\" | ConvertFrom-Json; $pkg.dependencies.jose; Test-Path \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\node_modules\\\\jose\")",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Skill(impeccable)",
+      "Skill(impeccable:*)"
     ]
   }
 }

@@ -126,6 +126,34 @@ useEffect(() => {
 
 ---
 
+### Causa 4: Preview de Vercel con `ADMIN_PASSWORD` ausente o diferente
+**Root cause:** El deploy de Vercel puede tener variables de entorno distintas a `.env.local`. Cuando `ADMIN_PASSWORD` no coincide o no existe en el entorno Preview/Production, el POST a `/api/admin/auth` rechaza el login. Si la UI no confirma la cookie antes de navegar, el usuario puede quedarse viendo `Verificando...` sin una causa clara.
+
+**Fix aplicado (2026-05-07):**
+```tsx
+// La API avisa configuracion faltante en vez de rechazar en silencio.
+if (!process.env.ADMIN_PASSWORD) {
+  return NextResponse.json(
+    { error: "ADMIN_PASSWORD no esta configurada en el servidor." },
+    { status: 503 }
+  );
+}
+
+// El cliente valida la cookie antes de enviar a /admin.
+const checkRes = await fetch("/api/admin/auth/check", { cache: "no-store" });
+if (!checkRes.ok) {
+  setError("No se pudo confirmar la sesion admin.");
+  setLoading(false);
+  return;
+}
+```
+
+**Archivos:** `src/app/api/admin/auth/route.ts`, `src/app/admin/login/page.tsx`
+
+**Regla de oro:** Para probar desde celular en Vercel, configurar `ADMIN_PASSWORD` en el mismo Environment del deploy usado: Preview para links de rama, Production para el dominio final.
+
+---
+
 ## BUG-002
 
 ### Síntoma

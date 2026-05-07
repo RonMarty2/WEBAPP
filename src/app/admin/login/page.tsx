@@ -4,6 +4,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+async function readErrorMessage(res: Response, fallback: string) {
+  try {
+    const data = await res.json();
+    return typeof data.error === "string" ? data.error : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export default function AdminLoginPage() {
   const router = useRouter();
   const [password, setPassword] = useState("");
@@ -14,8 +23,8 @@ export default function AdminLoginPage() {
     router.prefetch("/admin");
     router.prefetch("/dashboard");
     let cancelled = false;
-    fetch("/api/admin/auth/check")
-      .then((res) => { if (!cancelled && res.ok) router.replace("/admin"); })
+    fetch("/api/admin/auth/check", { cache: "no-store" })
+      .then((res) => { if (!cancelled && res.ok) window.location.assign("/admin"); })
       .catch(() => {});
     return () => { cancelled = true; };
   }, [router]);
@@ -25,8 +34,10 @@ export default function AdminLoginPage() {
     if (!password || loading) return;
     setLoading(true);
     setError("");
+
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 15_000);
+
     try {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
@@ -34,14 +45,25 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ password }),
         signal: controller.signal,
       });
-      const data = await res.json();
+
       if (!res.ok) {
-        setError(data.error || "Contraseña incorrecta");
+        setError(await readErrorMessage(res, "Contraseña incorrecta"));
         setLoading(false);
         return;
       }
-      
-      router.replace("/admin");
+
+      const checkRes = await fetch("/api/admin/auth/check", {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+
+      if (!checkRes.ok) {
+        setError(await readErrorMessage(checkRes, "No se pudo confirmar la sesión admin."));
+        setLoading(false);
+        return;
+      }
+
+      window.location.assign("/admin");
     } catch (err) {
       setError(err instanceof DOMException && err.name === "AbortError" ? "La verificación tardó demasiado. Intenta de nuevo." : "Error de conexión");
       setLoading(false);

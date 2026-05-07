@@ -72,10 +72,10 @@ export const AI_PROVIDERS: AIProviderInfo[] = [
     color: "#8b5cf6",
     website: "http://localhost:1234",
     apiDocsUrl: "http://localhost:1234",
-    defaultModel: "gemma-4-e4b-uncensored-hauhaucs-aggressive",
+    defaultModel: "google/gemma-4-e4b",
     models: [
       {
-        id: "gemma-4-e4b-uncensored-hauhaucs-aggressive",
+        id: "google/gemma-4-e4b",
         label: "Gemma 4 E4B local (LM Studio)",
         contextK: 128,
       },
