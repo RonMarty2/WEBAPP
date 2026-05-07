@@ -33,18 +33,26 @@ export default function ParticleBackground() {
       "rgba(123, 104, 238, 0.7)",
     ];
 
-    const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => ({
-      id: i,
-      startX: Math.random() * window.innerWidth,
-      startY: Math.random() * window.innerHeight,
-      duration: 20 + Math.random() * 15,
-      delay: Math.random() * 3,
-      size: isMobile ? 120 + Math.random() * 100 : 250 + Math.random() * 200,
-      opacity: 0.65 + Math.random() * 0.3,
-      color: colors[Math.floor(Math.random() * colors.length)],
-      moveX: (Math.random() - 0.5) * 200,
-      moveY: (Math.random() - 0.5) * 300,
-    }));
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const newParticles: Particle[] = Array.from({ length: particleCount }, (_, i) => {
+      const size = isMobile ? 120 + Math.random() * 100 : 250 + Math.random() * 200;
+      const padding = size / 2;
+
+      return {
+        id: i,
+        startX: padding + Math.random() * (vw - 2 * padding),
+        startY: padding + Math.random() * (vh - 2 * padding),
+        duration: 20 + Math.random() * 15,
+        delay: Math.random() * 3,
+        size: size,
+        opacity: 0.65 + Math.random() * 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        moveX: (Math.random() - 0.5) * 80,
+        moveY: (Math.random() - 0.5) * 120,
+      };
+    });
 
     setParticles(newParticles);
     console.log("✨ Particles rendered:", newParticles.length);
