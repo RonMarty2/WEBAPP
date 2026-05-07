@@ -13,9 +13,12 @@ export interface Simulador {
   usuario_id: string;
   preguntas_generadas: Pregunta[];
   respuestas_usuario: Record<string, string>;
-  estado: "iniciado" | "completado" | "calificado";
+  estado: "activo" | "completado" | "calificado";
   fecha_inicio: string;
   fecha_fin?: string;
+  nota_final?: number;
+  desglose?: Record<string, number>;
+  pregunta_texto?: string;
 }
 
 export interface ExamenConfig {
