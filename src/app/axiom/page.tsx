@@ -7,6 +7,7 @@ import RankingSectionNew from "./components/RankingSectionNew";
 import QuickActionsNew from "./components/QuickActionsNew";
 import StatsNew from "./components/StatsNew";
 import CTANew from "./components/CTANew";
+import ParticleBackground from "./components/ParticleBackground";
 
 export default function AxiomLandingPage() {
   const [ranking, setRanking] = useState<any[]>([]);
@@ -38,9 +39,11 @@ export default function AxiomLandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="relative min-h-screen bg-white">
+      <ParticleBackground />
       {/* Header */}
-      <Header user={user} />
+      <div className="relative z-10">
+        <Header user={user} />
 
       {/* Main content */}
       <main>
@@ -59,6 +62,7 @@ export default function AxiomLandingPage() {
         {/* Final CTA */}
         <CTANew />
       </main>
+      </div>
     </div>
   );
 }

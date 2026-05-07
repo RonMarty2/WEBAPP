@@ -1,7 +1,4 @@
-"use client";
-
 import { ReactNode } from "react";
-import ParticleBackground from "./components/ParticleBackground";
 
 export default function AxiomLayout({ children }: { children: ReactNode }) {
   const globalStyles = `
@@ -281,10 +278,7 @@ export default function AxiomLayout({ children }: { children: ReactNode }) {
         <meta name="keywords" content="exámenes, simulador, UMSS, educación, Bolivia" />
         <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
       </head>
-      <body>
-        <ParticleBackground />
-        <div className="relative z-10">{children}</div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
