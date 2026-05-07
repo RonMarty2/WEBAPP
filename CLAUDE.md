@@ -281,26 +281,37 @@ Si olvido algo de esa memoria → es un bug mío. Recuérdame consultarla.
 
 ---
 
-## 🔐 ARCHIVO DE CONFIGURACIÓN (`.claude-config.json`)
+## 🔐 BLINDAJE Y STARTUP SEQUENCE
 
-**IMPORTANTE:** Existe un archivo de configuración en raíz del proyecto:
+### Archivo de Configuración (`.claude-config.json`)
 ```
-.claude-config.json
+.claude-config.json — Contiene 10 CRITICAL + 2 HIGH reglas
 ```
 
-Este archivo contiene:
-- Reglas de cambios que rompen el sistema (breaking changes detector)
-- Archivos que NUNCA deben tocarse sin avisar
-- Protocolo obligatorio ANTES de cualquier cambio
+### STARTUP SEQUENCE (`.claude-startup.md`)
+```
+.claude-startup.md — OBLIGATORIO CONSULTAR EN CADA SESIÓN
+```
 
-**Instrucción para Claude:** Al inicio de CADA sesión, si el usuario solicita cambios:
-1. Leer `.claude-config.json` 
-2. Verificar si el cambio está en la lista de "breaking_changes_detector"
-3. Si está marcado como CRITICAL o HIGH → AVISAR OBLIGATORIAMENTE
-4. Esperar confirmación explícita del usuario
-5. Solo entonces ejecutar
+**Instrucción CRÍTICA para Claude:**
 
-**Esto es automático porque:**
-- El archivo está en Git (se sincroniza laptop ↔ PC)
-- Está en la raíz (imposible de ignorar)
-- Contiene reglas que yo debo seguir
+AL INICIO DE CADA SESIÓN NUEVA:
+1. ✅ Consultar `.claude-startup.md` (este archivo)
+2. ✅ Leer `.claude-config.json` (parsing de 12 reglas)
+3. ✅ Leer sección "⚠️ CAMBIOS QUE ROMPEN" de este CLAUDE.md
+4. ✅ Leer `ARCHITECTURE_BLUEPRINT.md` desde memory
+5. ✅ Verificar git status y commits
+6. ✅ **GENERAR Y MOSTRAR BANNER DE CONFIRMACIÓN**
+
+El banner debe incluir:
+- Timestamp de sesión
+- Número exacto de reglas activas (10 CRITICAL, 2 HIGH)
+- Git branch y último commit
+- Status de sincronización
+- Confirmación: "✅ Blindaje verificado y activo"
+
+**Esto funciona porque:**
+- Los 3 archivos están en Git (sincronización automática laptop ↔ PC)
+- Claude DEBE consultar `.claude-startup.md` como rutina
+- El banner es EVIDENCIA de que se leyó todo
+- Usuario puede pedir "Muestra startup" en cualquier momento
