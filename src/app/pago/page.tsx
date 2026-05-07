@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -41,7 +41,7 @@ const METODOS_LABEL: Record<Metodo, string> = {
   transferencia: "Transferencia Bancaria",
 };
 
-export default function PagoPage() {
+function PagoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const planParam = (searchParams.get("plan") ?? "estandar") as Plan;
@@ -318,5 +318,17 @@ export default function PagoPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PagoPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ width: 36, height: 36, border: "3px solid #e5e7eb", borderTopColor: "#3b82f6", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+      </div>
+    }>
+      <PagoContent />
+    </Suspense>
   );
 }
