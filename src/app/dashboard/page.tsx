@@ -207,8 +207,26 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Próximamente */}
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Próximamente</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Servicios disponibles</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 12, marginBottom: 32 }}>
+          <Link href="/projects/new?tipo=tipo-monografia" className="card card-hover" style={{ textDecoration: "none", display: "flex", gap: 12, alignItems: "center" }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(37,99,235,0.08)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent)", fontWeight: 800 }}>M</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Monografia academica</div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Documento academico estructurado por fases.</div>
+            </div>
+          </Link>
+
+          <Link href="/projects/new?tipo=tipo-demostracion-competencias" className="card card-hover" style={{ textDecoration: "none", display: "flex", gap: 12, alignItems: "center", borderColor: "rgba(34,197,94,0.28)", background: "rgba(34,197,94,0.05)" }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(34,197,94,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#16a34a", fontWeight: 800 }}>DC</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Demostracion de competencias</div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Materia, reto, competencias y evidencias para defensa.</div>
+            </div>
+          </Link>
+        </div>
+
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Proximamente</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
           {[{ icon: "🎓", name: "Tesis" }, { icon: "📝", name: "Ensayo académico" }, { icon: "📊", name: "Trabajo final" }].map(pr => (
             <div key={pr.name} className="card" style={{ opacity: 0.4, display: "flex", gap: 12, alignItems: "center" }}>

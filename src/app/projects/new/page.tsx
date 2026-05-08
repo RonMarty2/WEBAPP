@@ -40,6 +40,7 @@ type Step =
   | "loading"
   | "seleccionar-universidad"
   | "elegir-tipo"
+  | "competencias"
   | "con-tema"
   | "sin-tema"
   | "generando"
@@ -53,6 +54,7 @@ export default function NuevoProyectoPage() {
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
   const [tipoProyectoId, setTipoProyectoId] = useState("tipo-monografia");
+  const [tiposProyecto, setTiposProyecto] = useState<TipoProyecto[]>([]);
 
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
@@ -65,6 +67,11 @@ export default function NuevoProyectoPage() {
   const [programa, setPrograma] = useState("");
   const [materias, setMaterias] = useState("");
   const [entorno, setEntorno] = useState("");
+  const [materiaCompetencia, setMateriaCompetencia] = useState("");
+  const [retoCompetencia, setRetoCompetencia] = useState("");
+  const [competencias, setCompetencias] = useState("");
+  const [problematicaCompetencia, setProblematicaCompetencia] = useState("");
+  const [detalleCompetencia, setDetalleCompetencia] = useState("");
 
   // Resultado IA
   const [temaElegido, setTemaElegido] = useState("");
@@ -98,6 +105,11 @@ export default function NuevoProyectoPage() {
           setMaterias("Tecnologías Educativas\nPedagogía Moderna\nEvaluación por Competencias");
           setEntorno("Universidad Mayor de San Andrés, Facultad de Humanidades");
           setTemaElegido("Estrategias de retención estudiantil basadas en machine learning en universidades privadas");
+          setMateriaCompetencia("Evaluacion por competencias");
+          setRetoCompetencia("Resolver una problematica de bajo rendimiento usando una estrategia de evaluacion formativa");
+          setCompetencias("Analiza problemas educativos\nPropone soluciones viables\nDefiende decisiones con evidencia");
+          setProblematicaCompetencia("Los estudiantes entregan tareas sin retroalimentacion suficiente y no logran demostrar desempeno progresivo.");
+          setDetalleCompetencia("Se cuenta con notas de clase, rubrica de evaluacion y una tabla de resultados preliminares que el estudiante podra cargar como evidencia.");
         }
 
         if (svcRes.ok) {
@@ -117,7 +129,12 @@ export default function NuevoProyectoPage() {
         if (tipoRes.ok) {
           const tipoData = await tipoRes.json();
           const tipos = (tipoData.tipos ?? []).filter((t: TipoProyecto) => t.activo !== false);
-          if (tipos.some((t: TipoProyecto) => t.id === "tipo-monografia")) setTipoProyectoId("tipo-monografia");
+          setTiposProyecto(tipos);
+          const requestedType = typeof window !== "undefined"
+            ? new URLSearchParams(window.location.search).get("tipo")
+            : null;
+          if (requestedType && tipos.some((t: TipoProyecto) => t.id === requestedType)) setTipoProyectoId(requestedType);
+          else if (tipos.some((t: TipoProyecto) => t.id === "tipo-monografia")) setTipoProyectoId("tipo-monografia");
           else if (tipos.some((t: TipoProyecto) => t.id === "tipo-tesis")) setTipoProyectoId("tipo-tesis");
           else if (tipos[0]?.id) setTipoProyectoId(tipos[0].id);
         }
@@ -238,6 +255,32 @@ export default function NuevoProyectoPage() {
     } catch (e) {
       setError((e as Error).message);
       setStep("sin-tema");
+    }
+  }
+
+  async function startDemostracionCompetencias() {
+    if (!materiaCompetencia.trim()) { setError("Escribe la materia antes de continuar."); return; }
+    if (!retoCompetencia.trim()) { setError("Escribe el reto antes de continuar."); return; }
+    if (!competencias.trim()) { setError("Escribe al menos una competencia."); return; }
+    setError("");
+    setStep("creando");
+    const temaBase = `${materiaCompetencia.trim()} - ${retoCompetencia.trim()}`;
+    const contexto = {
+      tema: temaBase,
+      tipo_documento: "Demostracion de competencias",
+      materia: materiaCompetencia.trim(),
+      reto: retoCompetencia.trim(),
+      competencias: competencias.trim(),
+      problematica: problematicaCompetencia.trim(),
+      informacion_detallada: detalleCompetencia.trim(),
+      evidencias_pendientes: "El estudiante puede cargar Excel, figuras, tablas, documentos y anexos desde la mesa de trabajo.",
+    };
+    try {
+      const proyId = await crearProyectoConContexto(contexto);
+      router.push(`/projects/${proyId}/workspace`);
+    } catch (e) {
+      setError((e as Error).message);
+      setStep("competencias");
     }
   }
 
@@ -380,7 +423,43 @@ export default function NuevoProyectoPage() {
               </p>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {tiposProyecto.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10, marginBottom: 20 }}>
+                {tiposProyecto.map((tipo) => (
+                  <button
+                    key={tipo.id}
+                    onClick={() => setTipoProyectoId(tipo.id)}
+                    style={{
+                      padding: "12px",
+                      borderRadius: 10,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      background: tipoProyectoId === tipo.id ? "rgba(37,99,235,0.12)" : "rgba(255,255,255,0.84)",
+                      border: tipoProyectoId === tipo.id ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                      color: "var(--fg-primary)",
+                    }}
+                  >
+                    <div style={{ fontSize: 11, fontWeight: 800, color: tipoProyectoId === tipo.id ? "var(--accent)" : "var(--fg-muted)", marginBottom: 4 }}>
+                      {tipoProyectoId === tipo.id ? "Seleccionado" : "Tipo"}
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 800, lineHeight: 1.35 }}>{tipo.nombre}</div>
+                    {tipo.descripcion ? <div style={{ fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.4, marginTop: 4 }}>{tipo.descripcion}</div> : null}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {tipoProyectoId === "tipo-demostracion-competencias" ? (
+              <button
+                onClick={() => setStep("competencias")}
+                className="btn-cyan"
+                style={{ width: "100%", justifyContent: "center", padding: "12px" }}
+              >
+                Continuar con Materia, Reto y Competencia
+              </button>
+            ) : null}
+
+            {tipoProyectoId !== "tipo-demostracion-competencias" && <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               <button
                 onClick={() => setStep("con-tema")}
                 style={{
@@ -410,11 +489,62 @@ export default function NuevoProyectoPage() {
                 <div style={{ fontWeight: 700, marginBottom: 4, fontSize: 14 }}>No, necesito ayuda</div>
                 <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.5 }}>La IA me propone 3 temas viables</div>
               </button>
-            </div>
+            </div>}
           </div>
         )}
 
         {/* ── CON TEMA PROPIO ──────────────────────────────────────────────────── */}
+        {step === "competencias" && (
+          <div className="card fade-in" style={{ padding: 32 }}>
+            <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>Atras</button>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                Demostracion de competencias
+              </div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 6 }}>Materia, Reto y Competencia</h2>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
+                Completa el contexto real. Luego podras cargar Excel, figuras, tablas, documentos y anexos desde la mesa de trabajo.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label className="label">Materia *</label>
+                <input className="input-dark" value={materiaCompetencia} onChange={e => setMateriaCompetencia(e.target.value)} placeholder="Ej: Evaluacion por competencias" />
+              </div>
+
+              <div>
+                <label className="label">Reto *</label>
+                <textarea className="input-dark" value={retoCompetencia} onChange={e => setRetoCompetencia(e.target.value)} rows={3} placeholder="Describe el reto que pide la universidad o la materia" style={{ resize: "vertical" }} />
+              </div>
+
+              <div>
+                <label className="label">Competencia(s) *</label>
+                <textarea className="input-dark" value={competencias} onChange={e => setCompetencias(e.target.value)} rows={3} placeholder={"Ej:\nAnaliza la problematica\nPropone una solucion viable\nDefiende la solucion con evidencia"} style={{ resize: "vertical" }} />
+              </div>
+
+              <div>
+                <label className="label">Problematica a resolver</label>
+                <textarea className="input-dark" value={problematicaCompetencia} onChange={e => setProblematicaCompetencia(e.target.value)} rows={3} placeholder="Explica la situacion concreta que se intentara resolver" style={{ resize: "vertical" }} />
+              </div>
+
+              <div>
+                <label className="label">Informacion detallada, tablas o evidencias disponibles</label>
+                <textarea className="input-dark" value={detalleCompetencia} onChange={e => setDetalleCompetencia(e.target.value)} rows={4} placeholder="Pega datos, resumen de tablas, descripcion de figuras, fuentes propias o notas. Los archivos se cargan en la mesa de trabajo." style={{ resize: "vertical" }} />
+              </div>
+
+              <button
+                onClick={startDemostracionCompetencias}
+                disabled={!materiaCompetencia.trim() || !retoCompetencia.trim() || !competencias.trim()}
+                className="btn-cyan"
+                style={{ width: "100%", justifyContent: "center", padding: "12px", opacity: !materiaCompetencia.trim() || !retoCompetencia.trim() || !competencias.trim() ? 0.5 : 1 }}
+              >
+                Crear documento de demostracion
+              </button>
+            </div>
+          </div>
+        )}
+
         {step === "con-tema" && (
           <div className="card fade-in" style={{ padding: 32 }}>
             <button onClick={() => setStep("elegir-tipo")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
