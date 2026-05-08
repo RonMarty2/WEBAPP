@@ -8,12 +8,19 @@ const ADMIN_JWT_SECRET = new TextEncoder().encode(
 export async function POST(req: Request) {
   try {
     const { password } = await req.json();
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
-    if (!password || password !== process.env.ADMIN_PASSWORD) {
+    if (!adminPassword) {
+      return NextResponse.json(
+        { error: "ADMIN_PASSWORD no está configurada en el servidor." },
+        { status: 503 }
+      );
+    }
+
+    if (!password || password !== adminPassword) {
       return NextResponse.json({ error: "Contraseña incorrecta." }, { status: 401 });
     }
 
-    // Create JWT token
     const token = await new SignJWT({ role: "admin" })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
@@ -26,7 +33,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 8, // 8 hours
+      maxAge: 60 * 60 * 8,
       path: "/",
     });
 

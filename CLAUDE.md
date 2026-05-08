@@ -199,3 +199,119 @@ FINAL   → Usuario descarga .tex → Overleaf → PDF presentable
 | Monografía | http://localhost:3000/monografia |
 | Admin | http://localhost:3000/admin |
 | Demo login | /login → "Entrar como estudiante demo" |
+
+---
+
+## ⚠️ CAMBIOS QUE ROMPEN EL SISTEMA (AVISAR PRIMERO)
+
+Cualquier cambio que toque estas áreas **DEBE ser autorizado explícitamente** antes de implementar:
+
+### Arquitectura (NO CAMBIAR SIN AVISAR)
+- ❌ Orden de las 4 etapas (Tema → Cap.I → Cap.II → Caps.III-V+Biblio)
+- ❌ Eliminar rutas API existentes sin migración
+- ❌ Renombrar tablas de BD sin migration script
+- ❌ Cambiar estructura de `capitulo.contenido_json`
+- ❌ Mover prompts fuera de `src/lib/prompts/index.ts`
+- ❌ Quitar validaciones anti-alucinación (`detectarAlucinaciones()`, `validarCoherencia()`)
+- ❌ Cambiar firma de `llamarIA()` o `llamarIAConConfig()`
+- ❌ Eliminar soporte de cualquiera de los 11 proveedores IA
+
+### Cascada de IA (ORDEN CRÍTICO)
+```
+NUNCA cambiar este orden:
+1. Groq (llama-3.3-70b-versatile) — principal
+2. Anthropic (claude-haiku-4-5-20251001) — fallback 1
+3. OpenAI (gpt-4o-mini) — fallback final
+```
+Si un proveedor falla, el sistema DEBE reintentar con el siguiente. Si alteras esta cascada, el 30% de usuarios sin Groq perderá acceso.
+
+### Validaciones Anti-Alucinación (BLINDADAS)
+- ❌ Cambiar lógica de `detectarAlucinaciones()` sin testing exhaustivo
+- ❌ Permitir citas sin autor, año o fuente
+- ❌ Generar Caps.II-V sin validar coherencia con Cap.I
+- ❌ Compilar LaTeX sin escapar caracteres especiales
+
+### Persistencia (3 CAPAS)
+```
+Si agregas una 4ta capa (Redis, cache, etc.):
+  → DEBE ser transparente (no romper src/lib/db/*)
+  → DEBE tener fallback a in-memory
+  → DEBE poder desactivarse sin error
+```
+
+---
+
+## PROTOCOLO DE CAMBIOS (OBLIGATORIO)
+
+**Antes de CUALQUIER modificación importante:**
+
+1. **AUDITAR**: ¿Qué archivos toca? (busca en `/api/*`, `/lib/*`, tipos en `types/*`)
+2. **MAPEAR DEPENDENCIAS**: ¿Qué otros features dependen de esto?
+3. **VALIDAR**: ¿Rompe algo de las "REGLAS ABSOLUTAS" arriba?
+4. **AVISAR**: Si hay impacto → explicar cambio ANTES de hacer
+5. **EJECUTAR**: Solo si usuario confirma o es cambio safe (typo fixes, etc.)
+6. **VERIFICAR POST-CAMBIO**: confirmar que funciona + no rompió nada
+
+**Ejemplo de aviso correcto:**
+```
+❌ IMPACTO: Cambiar temperatura a 0.7 en todas las llamadas IA
+  → Afecta: src/lib/aiProvider.ts línea 394
+  → Impacto: Caps.I-III tendrán más creatividad → menos coherencia
+  → Recomendación: Aplicar solo en /api/etapas/[n]/chat (iteraciones)
+  ¿Procedo de esa forma?
+```
+
+---
+
+## MEMORY AUTOMÁTICA (CARGADA SIEMPRE)
+
+Este proyecto tiene un **Blueprint de Arquitectura persistente** en:
+```
+C:\Users\lmigu\.claude\projects\c--Users-lmigu-Desktop-WEBAPP-WEBAPP-WEBAPP\memory\ARCHITECTURE_BLUEPRINT.md
+```
+
+**Se carga automáticamente en TODA sesión.** Contiene:
+- Verdades inmutables del sistema
+- Flujo de 4 etapas detallado
+- Catálogo de 11 proveedores IA
+- Todas las rutas API existentes
+- Protocolo de validación para cambios
+
+Si olvido algo de esa memoria → es un bug mío. Recuérdame consultarla.
+
+---
+
+## 🔐 BLINDAJE Y STARTUP SEQUENCE
+
+### Archivo de Configuración (`.claude-config.json`)
+```
+.claude-config.json — Contiene 10 CRITICAL + 2 HIGH reglas
+```
+
+### STARTUP SEQUENCE (`.claude-startup.md`)
+```
+.claude-startup.md — OBLIGATORIO CONSULTAR EN CADA SESIÓN
+```
+
+**Instrucción CRÍTICA para Claude:**
+
+AL INICIO DE CADA SESIÓN NUEVA:
+1. ✅ Consultar `.claude-startup.md` (este archivo)
+2. ✅ Leer `.claude-config.json` (parsing de 12 reglas)
+3. ✅ Leer sección "⚠️ CAMBIOS QUE ROMPEN" de este CLAUDE.md
+4. ✅ Leer `ARCHITECTURE_BLUEPRINT.md` desde memory
+5. ✅ Verificar git status y commits
+6. ✅ **GENERAR Y MOSTRAR BANNER DE CONFIRMACIÓN**
+
+El banner debe incluir:
+- Timestamp de sesión
+- Número exacto de reglas activas (10 CRITICAL, 2 HIGH)
+- Git branch y último commit
+- Status de sincronización
+- Confirmación: "✅ Blindaje verificado y activo"
+
+**Esto funciona porque:**
+- Los 3 archivos están en Git (sincronización automática laptop ↔ PC)
+- Claude DEBE consultar `.claude-startup.md` como rutina
+- El banner es EVIDENCIA de que se leyó todo
+- Usuario puede pedir "Muestra startup" en cualquier momento

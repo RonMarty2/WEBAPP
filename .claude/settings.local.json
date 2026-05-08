@@ -27,7 +27,24 @@
       "PowerShell($pkg = Get-Content \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\package.json\" | ConvertFrom-Json; $pkg.dependencies.jose; Test-Path \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\node_modules\\\\jose\")",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
       "Bash(echo \"Exit code: $?\")",
-      "Bash(echo \"Exit: $?\")"
+      "Bash(echo \"Exit: $?\")",
+      "Skill(impeccable)",
+      "Skill(impeccable:*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\src\\\\lib\\\\axiom\" -ErrorAction SilentlyContinue)",
+      "Bash(Select-Object Name)",
+      "Bash(dir \"C:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\src\\\\app\\\\axiom\" -Recurse)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\src\\\\app\\\\axiom\" -Recurse)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\" -Directory)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)",
+      "Bash(git branch *)",
+      "Bash(git worktree *)",
+      "Bash(node .claude/skills/impeccable/scripts/load-context.mjs)",
+      "Bash(curl -s http://localhost:3000/axiom)",
+      "Bash(git push *)"
     ]
   }
 }

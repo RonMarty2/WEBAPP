@@ -1,0 +1,141 @@
+{
+  "project": "Laboratorio Académico PRO",
+  "architecture_version": "6-areas-mapped-2026-05-07",
+  "auto_validate": true,
+  "breaking_changes_detector": {
+    "enabled": true,
+    "rules": [
+      {
+        "pattern": "etapa.*order|fase.*order|order.*etapa",
+        "severity": "CRITICAL",
+        "message": "❌ NO CAMBIAR ORDEN DE ETAPAS (0→1→2→3). Avisar primero."
+      },
+      {
+        "pattern": "src/lib/prompts.*delete|SISTEMA_ETAPA.*move|prompts.*mover",
+        "severity": "CRITICAL",
+        "message": "❌ PROMPTS NUNCA SALEN DE src/lib/prompts/index.ts. Avisar primero."
+      },
+      {
+        "pattern": "api/etapas.*delete|route.*remove.*generar|route.*remove.*revisar",
+        "severity": "CRITICAL",
+        "message": "❌ NO ELIMINAR RUTAS EXISTENTES sin migración. Avisar primero."
+      },
+      {
+        "pattern": "llamarIA.*signature|aiProvider.*function.*change",
+        "severity": "HIGH",
+        "message": "⚠️ CAMBIO EN CASCADA IA. Avisar primero."
+      },
+      {
+        "pattern": "detectarAlucinaciones.*remove|validarCoherencia.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ NUNCA QUITAR VALIDACIONES ANTI-ALUCINACIÓN. Avisar primero."
+      },
+      {
+        "pattern": "11.*provider|provider.*support.*remove|Groq|Anthropic|OpenAI",
+        "severity": "HIGH",
+        "message": "⚠️ CAMBIO EN PROVEEDORES IA. Sistema soporta 11. Avisar primero."
+      },
+      {
+        "pattern": "src/lib/db.*delete|database.*remove|db/index.*change",
+        "severity": "CRITICAL",
+        "message": "❌ NO ELIMINAR CAPA DE BD (abstracción Supabase/In-Memory). Avisar primero."
+      },
+      {
+        "pattern": "src/lib/auth.*delete|JWT.*remove|session.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ NO ELIMINAR AUTENTICACIÓN JWT. Sistema depende de esto. Avisar primero."
+      },
+      {
+        "pattern": "api/auth.*delete|route.*auth.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ NO ELIMINAR RUTAS DE AUTH sin plan de migración. Avisar primero."
+      },
+      {
+        "pattern": "escaparLatex.*remove|LaTeX.*escape.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ NUNCA QUITAR ESCAPEO LATEX. Riesgo inyección. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*ranking.*delete|RankingPodios.*remove|podio.*delete",
+        "severity": "CRITICAL",
+        "message": "❌ RANKING CON PODIOS ES CORE. No eliminar sin UI replacement. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*scoring|evaluador.*change|nota.*formula|puntaje.*modificar",
+        "severity": "CRITICAL",
+        "message": "❌ SISTEMA DE PUNTUACIÓN CRÍTICO. Cambios afectan integridad académica. Avisar primero."
+      },
+      {
+        "pattern": "api/axiom/simulador.*delete|route.*simulador.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ RUTAS DE SIMULADOR SON CORE. No eliminar sin migración. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*question.*cache|deduplicar.*remove|question.*hash",
+        "severity": "HIGH",
+        "message": "⚠️ CACHÉ DE PREGUNTAS. Cambios afectan performance y validez. Avisar primero."
+      },
+      {
+        "pattern": "RankingPodios.*animation|shield.*remove|podio.*motion",
+        "severity": "HIGH",
+        "message": "⚠️ INTERACTIVIDAD DEL RANKING. Cambios afectan UX. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*sound|audio.*disable|whoosh.*remove",
+        "severity": "MEDIUM",
+        "message": "⚠️ SONIDO DE FEEDBACK. Cambios afectan experiencia. Avisar primero."
+      },
+      {
+        "pattern": "axiom.*plan.*personalizado|plane.*remove|learning.*path",
+        "severity": "CRITICAL",
+        "message": "❌ PLANES PERSONALIZADOS SON DIFERENCIADOR. No eliminar. Avisar primero."
+      },
+      {
+        "pattern": "api/axiom.*delete|axiom.*route.*remove|/axiom/.*remove",
+        "severity": "CRITICAL",
+        "message": "❌ RUTAS AXIOM NO SE ELIMINAN SIN PLAN. Usar deprecation + redirect. Avisar primero."
+      }
+    ]
+  },
+  "mandatory_files": [
+    "src/lib/prompts/index.ts",
+    "src/lib/aiProvider.ts",
+    "src/lib/validaciones.ts",
+    "src/lib/export/latex-builder.ts",
+    "src/lib/latexMonografia.ts",
+    "src/lib/axiom/types.ts",
+    "src/lib/axiom/db.ts",
+    "src/lib/axiom/evaluador.ts",
+    "src/app/axiom/components/RankingPodios.tsx",
+    "src/app/api/axiom/simulador/route.ts",
+    "CLAUDE.md",
+    "docs/axiom/PRODUCT.md",
+    "docs/axiom/DESIGN.md"
+  ],
+  "memory_references": {
+    "blueprint": ".claude/projects/c--Users-lmigu-Desktop-WEBAPP-WEBAPP-WEBAPP/memory/ARCHITECTURE_BLUEPRINT.md",
+    "description": "Cargado automáticamente. Consultar antes de cambios importantes."
+  },
+  "protocol": {
+    "before_any_change": [
+      "1. Leer CLAUDE.md sección '⚠️ CAMBIOS QUE ROMPEN'",
+      "2. Leer ARCHITECTURE_BLUEPRINT.md desde memory",
+      "3. Verificar si el cambio está en 'breaking_changes_detector.rules'",
+      "4. Si CRITICAL o HIGH → AVISAR AL USUARIO PRIMERO",
+      "5. Esperar confirmación explícita",
+      "6. Ejecutar solo si es safe o usuario autorizó"
+    ]
+  },
+  "sync_note": "Este archivo se sincroniza entre laptop y PC vía Git. Usado como referencia inmediata.",
+  "user_notes": {
+    "description": "PUEDES MODIFICAR ESTE ARCHIVO. Agregar, cambiar o mejorar reglas cuando lo necesites.",
+    "how_to_add_rules": "Agrega objetos en 'breaking_changes_detector.rules' con: pattern (regex), severity (CRITICAL/HIGH/MEDIUM), message (descripción)",
+    "examples_to_add": [
+      "Proteger modelo de IA específico si cambias de default",
+      "Agregar regla para nunca eliminar integraciones de pago",
+      "Agregar regla para cambios en estructura de tipos TypeScript críticos",
+      "Agregar regla para cambios en LaTeX format template"
+    ],
+    "last_updated": "2026-05-07 por Claude (usuario puede actualizar cuando quiera)"
+  }
+}
