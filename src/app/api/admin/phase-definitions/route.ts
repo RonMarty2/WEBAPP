@@ -199,8 +199,13 @@ export async function GET(req: Request) {
   const disk = loadFromDisk();
   if (!disk.phaseDefinitions) disk.phaseDefinitions = {};
 
-  const phases = disk.phaseDefinitions[servicioId] ?? [];
+  let phases = disk.phaseDefinitions[servicioId] ?? [];
   const isDefault = phases.length === 0;
+
+  // Si no hay fases guardadas, retorna las DEFAULT_PHASES
+  if (isDefault && servicioId === "mono-001") {
+    phases = DEFAULT_PHASES;
+  }
 
   return NextResponse.json({
     phases: phases.sort((a, b) => a.orden - b.orden),

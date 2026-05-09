@@ -150,6 +150,17 @@ function loadHilosFromDisk(): string[] {
   }
 }
 
+async function loadPhasePromptFromAdmin(servicioId: string, phaseId: string): Promise<string | null> {
+  try {
+    const disk = loadFromDisk();
+    const phases = disk.phaseDefinitions?.[servicioId] ?? [];
+    const phase = phases.find((p: any) => p.id === phaseId);
+    return phase?.prompt ?? null;
+  } catch {
+    return null;
+  }
+}
+
 type AcademicContext = Record<string, unknown> & {
   contexto_inicial?: Record<string, unknown>;
   documentos?: Record<string, unknown>[];
@@ -431,7 +442,10 @@ async function generarSinSupabase({
     const typePrompt = tipo === "borrador"
       ? currentPhase.prompt_borrador?.trim()
       : currentPhase.prompt_final?.trim();
-    const phasePromptBase = typePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
+
+    // Intenta cargar el prompt de admin/phase-definitions primero
+    const adminPrompt = await loadPhasePromptFromAdmin(servicio_id, phase_id);
+    const phasePromptBase = typePrompt || adminPrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
     const borradorKey = `${phase_id}_borrador`;
