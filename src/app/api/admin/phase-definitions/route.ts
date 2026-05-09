@@ -1,144 +1,188 @@
-/**
- * GET  /api/admin/phase-definitions?servicio_id=X  — list phases for a service
- * POST /api/admin/phase-definitions                — create or update a phase
- * DELETE /api/admin/phase-definitions              — delete a phase
- */
-
 import { NextResponse } from "next/server";
-import { loadFromDisk, saveToDisk, PhaseDefinition } from "@/lib/persistence";
-import { DEFAULT_PHASES } from "@/app/api/admin/workspace-prompts/route";
-import { phaseDefinitionsFromProjectType, projectTypeIdForService } from "@/lib/projectTypePhases";
-
-// Default phase definitions for any service that hasn't been customized
-export function getDefaultPhaseDefinitions(servicio_id: string): PhaseDefinition[] {
-  const labels: Record<string, { label: string; short_label: string }> = {
-    "0": { label: "Planteamiento del Tema",           short_label: "Planteamiento" },
-    "1": { label: "Capítulo I — Marco Referencial",   short_label: "Cap. I" },
-    "2": { label: "Capítulo II — Marco Teórico",      short_label: "Cap. II" },
-    "3": { label: "Capítulos III-V — Desarrollo",     short_label: "Caps. III-V" },
-    "4": { label: "Revisión y Compilación",           short_label: "Revisión" },
-    "5": { label: "Conclusiones y Bibliografía",      short_label: "Final" },
-  };
-  return Object.entries(labels).map(([key, meta]) => ({
-    id: key,
-    servicio_id,
-    orden: Number(key) * 10,
-    label: meta.label,
-    short_label: meta.short_label,
-    prompt: DEFAULT_PHASES[key as keyof typeof DEFAULT_PHASES] ?? "",
-  }));
-}
+import { loadFromDisk, saveToDisk } from "@/lib/persistence";
+import type { PhaseDefinition, StoreData } from "@/lib/persistence";
 
 function uid(): string {
-  return `ph-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const servicio_id = searchParams.get("servicio_id") ?? "mono-001";
-  const tipo_proyecto_id = searchParams.get("tipo_proyecto_id") ?? projectTypeIdForService(servicio_id);
+const DEFAULT_PHASES: PhaseDefinition[] = [
+  {
+    id: "ph-cap0",
+    servicio_id: "mono-001",
+    orden: 0,
+    label: "Cap. 0 — Propuesta y Refinamiento de Tema",
+    short_label: "Tema",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 0]`,
+  },
+  {
+    id: "ph-cap1",
+    servicio_id: "mono-001",
+    orden: 10,
+    label: "Cap. I — Introducción y Antecedentes",
+    short_label: "Cap. I",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 1]`,
+  },
+  {
+    id: "ph-cap2",
+    servicio_id: "mono-001",
+    orden: 20,
+    label: "Cap. II — Marco Teórico y Referencial",
+    short_label: "Cap. II",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 2]`,
+  },
+  {
+    id: "ph-cap3",
+    servicio_id: "mono-001",
+    orden: 30,
+    label: "Cap. III — Diseño Metodológico",
+    short_label: "Cap. III",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 3]`,
+  },
+  {
+    id: "ph-cap4",
+    servicio_id: "mono-001",
+    orden: 40,
+    label: "Cap. IV — Análisis de Resultados",
+    short_label: "Cap. IV",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 4]`,
+  },
+  {
+    id: "ph-cap5",
+    servicio_id: "mono-001",
+    orden: 50,
+    label: "Cap. V — Conclusiones y Recomendaciones",
+    short_label: "Cap. V",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 5]`,
+  },
+  {
+    id: "ph-resumen",
+    servicio_id: "mono-001",
+    orden: 60,
+    label: "Resumen Ejecutivo",
+    short_label: "Resumen",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE RESUMEN]`,
+  },
+  {
+    id: "ph-referencias",
+    servicio_id: "mono-001",
+    orden: 70,
+    label: "Consolidación de Referencias Bibliográficas",
+    short_label: "Referencias",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE REFERENCIAS]`,
+  },
+  {
+    id: "ph-latex",
+    servicio_id: "mono-001",
+    orden: 80,
+    label: "Compilación Final en LaTeX",
+    short_label: "LaTeX",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE COMPILACIÓN LaTeX]`,
+  },
+  {
+    id: "ph-calidad",
+    servicio_id: "mono-001",
+    orden: 90,
+    label: "Control Final de Calidad",
+    short_label: "Calidad",
+    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CONTROL DE CALIDAD]`,
+  },
+];
 
-  const projectTypePhases = phaseDefinitionsFromProjectType(tipo_proyecto_id, servicio_id);
-  if (projectTypePhases.length > 0) {
-    return NextResponse.json({ phases: projectTypePhases, is_default: false, source: "project-types" });
-  }
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const servicioId = url.searchParams.get("servicio_id") || "mono-001";
 
   const disk = loadFromDisk();
-  const stored = disk.phaseDefinitions?.[servicio_id];
+  if (!disk.phaseDefinitions) disk.phaseDefinitions = {};
 
-  const phases = stored?.length
-    ? [...stored].sort((a, b) => a.orden - b.orden)
-    : getDefaultPhaseDefinitions(servicio_id);
+  const phases = disk.phaseDefinitions[servicioId] ?? [];
+  const isDefault = phases.length === 0;
 
-  return NextResponse.json({ phases, is_default: !stored?.length });
+  return NextResponse.json({
+    phases: phases.sort((a, b) => a.orden - b.orden),
+    is_default: isDefault,
+  });
 }
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json() as Partial<PhaseDefinition> & { servicio_id: string };
-    if (!body.servicio_id) return NextResponse.json({ error: "servicio_id requerido" }, { status: 400 });
+    const body = (await req.json()) as Partial<PhaseDefinition> & { servicio_id: string };
+    const { servicio_id, ...phase } = body;
 
     const disk = loadFromDisk();
     if (!disk.phaseDefinitions) disk.phaseDefinitions = {};
+    if (!disk.phaseDefinitions[servicio_id]) disk.phaseDefinitions[servicio_id] = [];
 
-    const existing = disk.phaseDefinitions[body.servicio_id] ?? [];
+    const phases = disk.phaseDefinitions[servicio_id];
 
-    if (body.id) {
-      // Update existing phase
-      const idx = existing.findIndex((p) => p.id === body.id);
-      if (idx === -1) return NextResponse.json({ error: "Fase no encontrada" }, { status: 404 });
-      existing[idx] = { ...existing[idx], ...body } as PhaseDefinition;
+    if (phase.id) {
+      const idx = phases.findIndex((p) => p.id === phase.id);
+      if (idx >= 0) {
+        phases[idx] = { ...phases[idx], ...phase } as PhaseDefinition;
+      } else {
+        phases.push({ id: phase.id || uid(), servicio_id, orden: (phases.length * 10) || 0, ...phase } as PhaseDefinition);
+      }
     } else {
-      // Create new phase — determine next orden
-      const maxOrden = existing.reduce((m, p) => Math.max(m, p.orden), -10);
-      const newPhase: PhaseDefinition = {
-        id: uid(),
-        servicio_id: body.servicio_id,
-        orden: maxOrden + 10,
-        label: body.label ?? "Nueva Fase",
-        short_label: body.short_label ?? "Fase",
-        prompt: body.prompt ?? "",
-      };
-      existing.push(newPhase);
-      disk.phaseDefinitions[body.servicio_id] = existing;
-      saveToDisk(disk);
-      return NextResponse.json({ ok: true, phase: newPhase });
+      const maxOrden = phases.length > 0 ? Math.max(...phases.map((p) => p.orden)) : 0;
+      phases.push({ id: uid(), servicio_id, orden: maxOrden + 10, ...phase } as PhaseDefinition);
     }
 
-    disk.phaseDefinitions[body.servicio_id] = existing;
+    disk.phaseDefinitions[servicio_id] = phases.sort((a, b) => a.orden - b.orden);
     saveToDisk(disk);
-    return NextResponse.json({ ok: true });
+
+    return NextResponse.json({ ok: true, phase: phases.find((p) => p.id === phase.id) });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
 
 export async function DELETE(req: Request) {
   try {
-    const { id, servicio_id } = await req.json() as { id: string; servicio_id: string };
-    if (!id || !servicio_id) return NextResponse.json({ error: "id y servicio_id requeridos" }, { status: 400 });
+    const body = (await req.json()) as { id: string; servicio_id: string };
+    const { id, servicio_id } = body;
 
     const disk = loadFromDisk();
-    if (!disk.phaseDefinitions?.[servicio_id]) return NextResponse.json({ ok: true });
+    if (!disk.phaseDefinitions) disk.phaseDefinitions = {};
+    if (!disk.phaseDefinitions[servicio_id]) disk.phaseDefinitions[servicio_id] = [];
 
-    disk.phaseDefinitions[servicio_id] = disk.phaseDefinitions[servicio_id].filter((p) => p.id !== id);
-    if (disk.phaseDefinitions[servicio_id].length === 0) {
-      delete disk.phaseDefinitions[servicio_id];
-    }
+    const phases = disk.phaseDefinitions[servicio_id];
+    disk.phaseDefinitions[servicio_id] = phases.filter((p) => p.id !== id);
     saveToDisk(disk);
+
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
 
-// PATCH — reorder: swap orden values of two phases
 export async function PATCH(req: Request) {
   try {
-    const { servicio_id, id, direction } = await req.json() as {
-      servicio_id: string;
-      id: string;
-      direction: "up" | "down";
-    };
+    const body = (await req.json()) as { id: string; servicio_id: string; direction: "up" | "down" };
+    const { id, servicio_id, direction } = body;
 
     const disk = loadFromDisk();
-    const phases = disk.phaseDefinitions?.[servicio_id];
-    if (!phases) return NextResponse.json({ error: "No hay fases para este servicio" }, { status: 404 });
+    if (!disk.phaseDefinitions) disk.phaseDefinitions = {};
+    if (!disk.phaseDefinitions[servicio_id]) disk.phaseDefinitions[servicio_id] = [];
 
-    const sorted = [...phases].sort((a, b) => a.orden - b.orden);
-    const idx = sorted.findIndex((p) => p.id === id);
-    const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= sorted.length) return NextResponse.json({ ok: true });
+    const phases = disk.phaseDefinitions[servicio_id];
+    const idx = phases.findIndex((p) => p.id === id);
 
-    // Swap orden values
-    const tmpOrden = sorted[idx].orden;
-    sorted[idx].orden = sorted[swapIdx].orden;
-    sorted[swapIdx].orden = tmpOrden;
+    if (idx === -1) return NextResponse.json({ error: "Phase not found" }, { status: 404 });
 
-    disk.phaseDefinitions![servicio_id] = sorted;
+    if (direction === "up" && idx > 0) {
+      const gap = (phases[idx - 1].orden + phases[idx].orden) / 2;
+      phases[idx].orden = gap;
+    } else if (direction === "down" && idx < phases.length - 1) {
+      const gap = (phases[idx].orden + phases[idx + 1].orden) / 2;
+      phases[idx].orden = gap;
+    }
+
+    disk.phaseDefinitions[servicio_id] = phases.sort((a, b) => a.orden - b.orden);
     saveToDisk(disk);
+
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }

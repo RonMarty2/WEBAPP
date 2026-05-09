@@ -43,7 +43,10 @@
       "Bash(git branch *)",
       "Bash(git worktree *)",
       "Bash(node .claude/skills/impeccable/scripts/load-context.mjs)",
-      "Bash(curl -s http://localhost:3000/axiom)"
+      "Bash(curl -s http://localhost:3000/axiom)",
+      "Bash(mkdir -p \"c:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\src\\\\app\\\\api\\\\admin\\\\phase-definitions\")",
+      "Bash(find /c/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP -name \"cap0-propuesta-temas.ts\" -o -name \"cap2.ts\" 2>/dev/null | head -5)",
+      "Bash(mkdir -p \"/c/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/.claude/worktrees/angry-gates-db3cdb/src/lib/prompts/scribe\" && cp /c/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/src/lib/prompts/scribe/* \"/c/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/.claude/worktrees/angry-gates-db3cdb/src/lib/prompts/scribe/\" && echo \"Files copied\")"
     ]
   }
 }
