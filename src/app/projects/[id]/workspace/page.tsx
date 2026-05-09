@@ -102,6 +102,13 @@ function getFinalContent(p: Proyecto, phaseId: string, legacyNum?: number): stri
   return null;
 }
 
+function getBorrador(p: Proyecto, phaseId: string, legacyNum?: number): string | null {
+  const k = `${phaseId}_borrador`;
+  if (p.phase_contents && k in p.phase_contents) return p.phase_contents[k];
+  if (legacyNum !== undefined) return getLegacyContent(p, legacyNum);
+  return null;
+}
+
 
 function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).length; }
 
@@ -265,6 +272,15 @@ export default function WorkspacePage() {
   const [finalizationSteps, setFinalizationSteps] = useState<Array<{ name: string; status: "pending" | "running" | "completed" | "error"; duration_ms: number }>>([]);
   const [error, setError] = useState("");
 
+  const [feedbackTexto, setFeedbackTexto] = useState("");
+  const [vistaActiva, setVistaActiva] = useState<"borrador" | "final">("borrador");
+
+  // Calibration
+  const [showCalibracion, setShowCalibracion] = useState(false);
+  const [calibPreguntas, setCalibPreguntas] = useState<CalibracionPregunta[]>([]);
+  const [calibRespuestas, setCalibRespuestas] = useState<Record<string, string>>({});
+  const [isAnalyzingStyle, setIsAnalyzingStyle] = useState(false);
+
 
   // PDF right panel
   const [showPdfPanel, setShowPdfPanel] = useState(true);
@@ -315,6 +331,11 @@ export default function WorkspacePage() {
         const proj: Proyecto = (await projRes.json()).proyecto;
         setProyecto(proj);
 
+        if (proj.modalidad_creacion === "guiada" && !proj.perfil_estilo_usuario) {
+          setShowCalibracion(true);
+          const qRes = await fetch(`/api/admin/calibration-questions?servicio_id=${proj.servicio_id ?? "mono-001"}`);
+          if (qRes.ok) setCalibPreguntas((await qRes.json()).preguntas ?? []);
+        }
 
         try {
           const phaseParams = new URLSearchParams({ servicio_id: proj.servicio_id ?? "mono-001" });
@@ -390,7 +411,8 @@ export default function WorkspacePage() {
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => {
     queueMicrotask(() => {
-      // Reset state when changing phases
+      setFeedbackTexto("");
+      setVistaActiva("borrador");
     });
   }, [selectedFase]);
 
@@ -422,12 +444,16 @@ export default function WorkspacePage() {
 
   const generarFase = useCallback(async (opts: {
     mensajeOverride?: string;
+    tipo?: "borrador" | "final";
+    feedback?: string;
   } = {}) => {
     if (!proyecto || isGenerating) return;
     setIsGenerating(true); setError("");
-    const { mensajeOverride } = opts;
+    const { mensajeOverride, tipo: tipoOpt, feedback } = opts;
+    const esGuiado = proyecto.modalidad_creacion === "guiada";
+    const tipo: "borrador" | "final" = tipoOpt ?? (esGuiado ? "borrador" : "final");
     const userMsg = mensajeOverride ?? chatInput.trim();
-    if (userMsg) {
+    if (userMsg && !feedback) {
       setChatMsgs(prev => [...prev, { role: "user", text: userMsg, ts: Date.now() }]);
       if (!mensajeOverride) setChatInput("");
     }
@@ -435,10 +461,10 @@ export default function WorkspacePage() {
     const existingFinal = isDynamic
       ? getFinalContent(proyecto, faseDef.id)
       : getFinalContent(proyecto, String(selectedFase), selectedFase);
-    const shouldEditExisting = Boolean(userMsg && existingFinal?.trim());
+    const shouldEditExisting = Boolean(userMsg && !feedback && tipo === "final" && existingFinal?.trim());
     const body = isDynamic
-      ? { proyecto_id: proyectoId, phase_id: faseDef.id, mensaje_usuario: userMsg || undefined }
-      : { proyecto_id: proyectoId, fase_numero: selectedFase, mensaje_usuario: userMsg || undefined };
+      ? { proyecto_id: proyectoId, phase_id: faseDef.id, mensaje_usuario: userMsg || undefined, tipo, feedback_usuario: feedback || undefined }
+      : { proyecto_id: proyectoId, fase_numero: selectedFase, mensaje_usuario: userMsg || undefined, tipo, feedback_usuario: feedback || undefined };
     // Setup AbortController for cancellation
     const controller = new AbortController();
     abortRef.current = controller;
@@ -456,13 +482,21 @@ export default function WorkspacePage() {
         if (!prev) return prev;
         const np = { ...prev };
         if (isDynamic) {
-          np.phase_contents = { ...(prev.phase_contents ?? {}), [faseDef.id]: data.contenido };
+          if (tipo === "borrador") {
+            np.phase_contents = { ...(prev.phase_contents ?? {}), [`${faseDef.id}_borrador`]: data.contenido };
+          } else {
+            np.phase_contents = { ...(prev.phase_contents ?? {}), [faseDef.id]: data.contenido };
+          }
         } else {
           const pk = String(selectedFase);
-          const legacyKey = `contenido_fase_${selectedFase}` as keyof Proyecto;
-          np[legacyKey] = data.contenido as never;
-          np.estado_fase = Math.max(prev.estado_fase, selectedFase);
-          np.phase_contents = { ...(prev.phase_contents ?? {}), [pk]: data.contenido };
+          if (tipo === "borrador") {
+            np.phase_contents = { ...(prev.phase_contents ?? {}), [`${pk}_borrador`]: data.contenido };
+          } else {
+            const legacyKey = `contenido_fase_${selectedFase}` as keyof Proyecto;
+            np[legacyKey] = data.contenido as never;
+            np.estado_fase = Math.max(prev.estado_fase, selectedFase);
+            np.phase_contents = { ...(prev.phase_contents ?? {}), [pk]: data.contenido };
+          }
         }
         if (data.requiere_actualizacion) np.requiere_actualizacion = data.requiere_actualizacion;
         if (data.ai_trace_entry) {
@@ -475,12 +509,16 @@ export default function WorkspacePage() {
         np.final_document_validation = {};
         return np;
       });
-      if (userMsg) {
+      if (tipo === "borrador") setVistaActiva("borrador");
+      else { setVistaActiva("final"); setFeedbackTexto(""); }
+      if (userMsg && !feedback) {
         setChatMsgs(prev => [...prev, {
           role: "assistant",
           text: shouldEditExisting
             ? "✅ Ajuste puntual aplicado sin regenerar toda la fase."
-            : "✅ Contenido generado correctamente.",
+            : tipo === "final"
+            ? "✅ Versión final generada."
+            : "📝 Borrador generado. Revísalo y deja tu feedback.",
           ts: Date.now(),
         }]);
       }
@@ -644,12 +682,17 @@ export default function WorkspacePage() {
   }
   if (!proyecto) return null;
 
+  const esGuiado = proyecto.modalidad_creacion === "guiada";
   const currentFaseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
   const phaseId = currentFaseDef.id;
   const legacyNum = (currentFaseDef as typeof FASES_STATIC[0]).num;
   const finalContent = getFinalContent(proyecto, phaseId, legacyNum);
+  const borradorContent = getBorrador(proyecto, phaseId, legacyNum);
+  const hasBorrador = Boolean(borradorContent);
   const hasFinal = Boolean(finalContent);
-  const displayContent = finalContent;
+  const displayContent = esGuiado
+    ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
+    : finalContent;
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
 
   // Real-time document stats: sum words from all completed phases

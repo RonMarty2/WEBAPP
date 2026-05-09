@@ -2,7 +2,7 @@
 
 ## Ultima sesion
 
-- [2026-05-08-sesion-01.md](C:/Users/lmigu/Desktop/WEBAPP/docs/dev-sessions/2026-05-08-sesion-01.md)
+- [2026-05-09-sesion-01.md](C:/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/docs/dev-sessions/2026-05-09-sesion-01.md)
 
 ## Estado actual
 
@@ -21,6 +21,7 @@
 - El admin ahora tiene prompt editable `Edicion por Chat`; el chat del workspace aplica observaciones puntuales con `/api/projects/edit-phase-section` cuando la fase ya tiene contenido, evitando regenerar todo el capitulo.
 - El PDF ahora separa capitulos del documento final consolidado en hojas distintas, evita titulos huerfanos, deduplica referencias al renderizar y crea indices de tablas/figuras/graficos cuando detecta captions.
 - SCRIBE ahora incluye el tipo predefinido `Demostracion de competencias`, con fases propias, formulario inicial para materia/reto/competencias/problematica/evidencias, tarjeta visible en `/dashboard` y deep link `/projects/new?tipo=tipo-demostracion-competencias`. No se creo un hijo nuevo de NUCLEO.
+- `npm run build` vuelve a pasar completo en local despues de restaurar la coherencia del flujo guiado en `workspace/page.tsx` y `/api/projects/generate-phase`: la UI acepta `tipo`/`feedback`, los borradores se guardan como `phase_id_borrador` y la version final incorpora feedback.
 
 ## Enfoques o reglas vigentes
 
@@ -44,14 +45,15 @@
 - Fase que genera solo referencias/anexos quedo documentada como `BUG-007`; causa: deteccion de fase de referencias miraba el prompt completo en vez del nombre de la fase.
 - Esta configuracion LM Studio es solo para desarrollo local. Para produccion, el usuario decide desde `Admin > Modelos & APIs` que proveedor/modelo usa cada servicio con su API real.
 - `BUG-008` documenta el nuevo flujo de edicion puntual por chat y los problemas de PDF: titulos huerfanos, referencias repetidas e indices incompletos.
-- `npm run build` llega a TypeScript correctamente, pero el cierre completo falla en `/pago` por `useSearchParams()` sin boundary `Suspense`.
+- `npx tsc --noEmit` sigue reportando deuda fuera del build en `tests/axiom/evaluador.test.ts`: faltan tipos/globals de runner para `describe`, `it` y `expect`.
 
 ## Siguiente paso recomendado
 
-- Probar desde la UI la creacion de un documento de demostracion de competencias, cargar evidencias y generar fases; luego corregir el fallo existente de `/pago` para recuperar build completo.
+- Reintentar el deploy en Vercel y, despues, probar desde la UI la creacion de un documento de demostracion de competencias, cargar evidencias y generar borrador/final en modo guiado.
 
 ## Historial reciente
 
+- [2026-05-09-sesion-01.md](C:/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/docs/dev-sessions/2026-05-09-sesion-01.md)
 - [2026-05-08-sesion-01.md](C:/Users/lmigu/Desktop/WEBAPP/docs/dev-sessions/2026-05-08-sesion-01.md)
 - [2026-05-06-sesion-02.md](C:/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/docs/dev-sessions/2026-05-06-sesion-02.md)
 - [2026-05-06-sesion-01.md](C:/Users/lmigu/Desktop/WEBAPP/WEBAPP/WEBAPP/docs/dev-sessions/2026-05-06-sesion-01.md)
