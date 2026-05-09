@@ -371,6 +371,22 @@ export default function WorkspacePage() {
     }
   }, [cacheKey, user, proyecto, university, pdfData, selectedFase, isDynamic, phaseDefs, loading]);
 
+  // Auto-ejecutar Cap 0 si es la primera vez (sin contenido de fase 0)
+  useEffect(() => {
+    if (proyecto && !proyecto.contenido_fase_0 && !isGenerating && phaseDefs.length > 0) {
+      const cap0 = phaseDefs.find(p => p.id === "0" || p.label?.includes("Tema"));
+      if (cap0) {
+        queueMicrotask(() => {
+          setIsGenerating(true);
+          generarFase({ tipo: "borrador" }).catch(e => {
+            console.error("Error auto-generando Cap 0:", e);
+            setIsGenerating(false);
+          });
+        });
+      }
+    }
+  }, [proyecto?.id, proyecto?.contenido_fase_0, phaseDefs]);
+
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => {
     queueMicrotask(() => {
@@ -895,8 +911,65 @@ export default function WorkspacePage() {
 
                 {/* ── Generate buttons block ── */}
           <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:10 }}>
-            {/* Generate phase - direct mode only */}
-            {!hasFinal && (
+            {/* GUIADO: no borrador yet */}
+              {esGuiado && !hasBorrador && !hasFinal && (
+                <div style={{ display:"flex", gap:8 }}>
+                  <button onClick={() => generarFase({ tipo:"borrador" })} disabled={isGenerating} className="btn-purple" style={{ flex:1, justifyContent:"center", padding:"10px", fontSize:12 }}>
+                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando borrador…</span></> : `Generar Borrador — ${currentFaseDef.short}`}
+                  </button>
+                  {isGenerating && (
+                    <button onClick={cancelGeneracion} className="btn-ghost" style={{ padding:"10px 16px", fontSize:11, color:"#ef4444" }}>
+                      Cancelar
+                    </button>
+                  )}
+                </div>
+              )}
+
+            {/* GUIADO: has borrador, needs final */}
+            {esGuiado && hasBorrador && !hasFinal && (
+              <>
+                <div style={{ fontSize:11, color:"#8b5cf6", fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase" }}>Borrador listo — añade feedback</div>
+                <textarea
+                  className="input-dark"
+                  rows={2}
+                  value={feedbackTexto}
+                  onChange={e => setFeedbackTexto(e.target.value)}
+                  placeholder="Ej: Ampliar antecedentes, ajustar tono más formal..."
+                  style={{ resize:"vertical", fontSize:12, lineHeight:1.5 }}
+                />
+                <div style={{ display:"flex", gap:7 }}>
+                  <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11 }}>
+                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando final…</span></> : "Generar Versión Final"}
+                  </button>
+                  {isGenerating ? (
+                    <button onClick={cancelGeneracion} className="btn-ghost" style={{ padding:"9px 11px", fontSize:11, color:"#ef4444" }}>
+                      Cancelar
+                    </button>
+                  ) : (
+                    <button onClick={() => generarFase({ tipo:"borrador" })} className="btn-ghost" style={{ padding:"9px 11px", fontSize:11 }} title="Regenerar borrador">🔄</button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* GUIADO: has final — vista toggle */}
+            {esGuiado && hasFinal && (
+              <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
+                <div style={{ display:"flex", gap:6 }}>
+                  <button onClick={() => setVistaActiva("borrador")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="borrador"?"rgba(167,139,250,0.15)":"transparent", border: vistaActiva==="borrador"?"1px solid rgba(167,139,250,0.4)":"1px solid var(--border)", color: vistaActiva==="borrador"?"#a78bfa":"var(--fg-secondary)" }}>📝 Borrador</button>
+                  <button onClick={() => setVistaActiva("final")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="final"?"rgba(37,99,235,0.15)":"transparent", border: vistaActiva==="final"?"1px solid rgba(37,99,235,0.4)":"1px solid var(--border)", color: vistaActiva==="final"?"var(--accent)":"var(--fg-secondary)" }}>✨ Final</button>
+                </div>
+                {/* CAP 0 SPECIAL: Regenerar temas */}
+                {selectedFase === 0 && (
+                  <button onClick={() => generarFase({ tipo:"borrador" })} disabled={isGenerating} style={{ width:"100%", justifyContent:"center", padding:"9px 10px", fontSize:11, borderRadius:6, border:"1px solid rgba(34,197,94,0.3)", background:"rgba(34,197,94,0.08)", color:"#22c55e", fontWeight:600, cursor:isGenerating?"not-allowed":"pointer", opacity:isGenerating?0.6:1 }}>
+                    🔄 Regenerar temas propuestos
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* DIRECTO: no final yet */}
+            {!esGuiado && !hasFinal && (
               <div style={{ display:"flex", gap:8 }}>
                 <button onClick={() => generarFase()} disabled={isGenerating} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"10px", fontSize:12 }}>
                   {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando…</span></> : `Generar ${currentFaseDef.short}`}

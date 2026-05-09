@@ -151,6 +151,17 @@ function loadHilosFromDisk(): string[] {
   }
 }
 
+async function loadPhasePromptFromAdmin(servicioId: string, phaseId: string): Promise<string | null> {
+  try {
+    const disk = loadFromDisk();
+    const phases = disk.phaseDefinitions?.[servicioId] ?? [];
+    const phase = phases.find((p: any) => p.id === phaseId);
+    return phase?.prompt ?? null;
+  } catch {
+    return null;
+  }
+}
+
 type AcademicContext = Record<string, unknown> & {
   contexto_inicial?: Record<string, unknown>;
   documentos?: Record<string, unknown>[];
@@ -425,47 +436,13 @@ async function generarSinSupabase({
       ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
       : "";
 
-    // Detect if this is Cap I and use SCRIBE megaprompt
-    const esCapI = currentPhase.label?.toLowerCase().includes("cap") &&
-                   (currentPhase.label?.toLowerCase().includes("i ") ||
-                    currentPhase.label?.toLowerCase().includes("i:") ||
-                    currentPhase.label?.toLowerCase().includes("i.") ||
-                    currentPhase.orden === 10);
+    const typePrompt = tipo === "borrador"
+      ? currentPhase.prompt_borrador?.trim()
+      : currentPhase.prompt_final?.trim();
 
-    let phasePromptBase: string;
-    let contextoPrependido: string = "";
-
-    if (esCapI) {
-      // Use SCRIBE Cap I megaprompt with context prepended
-      const academicCtx = getAcademicContext(proyecto.academic_context);
-      const contextoInicial = academicCtx.contexto_inicial ?? {};
-
-      const programa = (contextoInicial as any).programa || (contextoInicial as any).universidad || "Programa no especificado";
-      const materiasRaw = (contextoInicial as any).materias || "";
-      const materias = typeof materiasRaw === "string"
-        ? materiasRaw.split("\n").filter((m: string) => m.trim())
-        : Array.isArray(materiasRaw) ? materiasRaw : [];
-      const temaConfirmado = proyecto.tema_aprobado || proyecto.titulo_provisional || "Tema no especificado";
-      const dondeTrabaja = (contextoInicial as any).entorno || undefined;
-      const materialPropio = undefined;
-      const interesesRelevantes = undefined;
-
-      contextoPrependido = buildContextoCap1({
-        programa,
-        materias,
-        temaConfirmado,
-        dondeTrabaja,
-        materialPropio,
-        interesesRelevantes,
-      });
-      phasePromptBase = contextoPrependido + SISTEMA_SCRIBE_CAP1;
-    } else {
-      const typePrompt = tipo === "borrador"
-        ? currentPhase.prompt_borrador?.trim()
-        : currentPhase.prompt_final?.trim();
-      phasePromptBase = typePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
-    }
-
+    // Intenta cargar el prompt de admin/phase-definitions primero
+    const adminPrompt = await loadPhasePromptFromAdmin(servicio_id, phase_id);
+    const phasePromptBase = typePrompt || adminPrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
     const academicBlock = academicBlockForProject(proyecto);

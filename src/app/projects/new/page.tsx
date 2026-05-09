@@ -28,8 +28,14 @@ interface TipoProyecto {
 type Step =
   | "loading"
   | "seleccionar-universidad"
-  | "elegir-tipo"
+  | "datos-completos"
   | "creando";
+
+interface ArchivoSubido {
+  file: File;
+  estado: "pendiente" | "subiendo" | "ok" | "error";
+  error?: string;
+}
 
 export default function NuevoProyectoPage() {
   const router = useRouter();
@@ -42,13 +48,15 @@ export default function NuevoProyectoPage() {
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
   const [universidadId, setUniversidadId] = useState("");
 
-  // Formulario única ruta de creación
-  const [tema, setTema] = useState("");
-  const [programa, setPrograma] = useState("");
-  const [materias, setMaterias] = useState("");
-  const [entorno, setEntorno] = useState("");
+  // Datos del proyecto (un solo formulario)
+  const [tema, setTema] = useState("");                       // opcional
+  const [programa, setPrograma] = useState("");               // OBLIGATORIO
+  const [materias, setMaterias] = useState("");               // OBLIGATORIO
+  const [interesesYContexto, setInteresesYContexto] = useState(""); // opcional, combinado
+  const [archivos, setArchivos] = useState<ArchivoSubido[]>([]);
 
   const createInFlightRef = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function init() {
@@ -62,31 +70,6 @@ export default function NuevoProyectoPage() {
         if (!meData.user) {
           router.replace("/login");
           return;
-        }
-
-        // Autocompletar datos para facilitar pruebas
-        const u = meData.user;
-        const isTestUser =
-          u.role === "admin" ||
-          (u.email &&
-            (u.email.includes("demo") ||
-              u.email.includes("test") ||
-              u.email.includes("lmiguellz"))) ||
-          process.env.NODE_ENV === "development" ||
-          (typeof window !== "undefined" &&
-            window.location.hostname === "localhost");
-
-        if (isTestUser) {
-          setTema(
-            "Análisis del impacto de la inteligencia artificial en la educación superior boliviana 2024"
-          );
-          setPrograma("Diplomado en Educación Superior Tecnológica");
-          setMaterias(
-            "Tecnologías Educativas\nPedagogía Moderna\nEvaluación por Competencias"
-          );
-          setEntorno(
-            "Universidad Mayor de San Andrés, Facultad de Humanidades"
-          );
         }
 
         if (svcRes.ok) {
@@ -143,26 +126,64 @@ export default function NuevoProyectoPage() {
     return sid;
   }
 
-  async function crearProyectoConContexto(
-    contexto: Record<string, string>
-  ) {
-    if (createInFlightRef.current) {
-      throw new Error("Ya estamos creando tu proyecto. Espera un momento.");
-    }
-    createInFlightRef.current = true;
+  function handleFilesSelected(files: FileList | null) {
+    if (!files) return;
+    const nuevos: ArchivoSubido[] = Array.from(files).map(f => ({ file: f, estado: "pendiente" }));
+    setArchivos(prev => [...prev, ...nuevos]);
+  }
 
-    const sid = await resolverServicioId();
+  function quitarArchivo(idx: number) {
+    setArchivos(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  async function subirArchivosAlProyecto(proyectoId: string) {
+    if (archivos.length === 0) return;
+    for (let i = 0; i < archivos.length; i++) {
+      const a = archivos[i];
+      if (a.estado === "ok") continue;
+      setArchivos(prev => prev.map((x, idx) => idx === i ? { ...x, estado: "subiendo" } : x));
+      try {
+        const fd = new FormData();
+        fd.append("file", a.file);
+        fd.append("proyecto_id", proyectoId);
+        const res = await fetch("/api/projects/upload-document", { method: "POST", body: fd });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          throw new Error(d.error ?? `Error subiendo ${a.file.name}`);
+        }
+        setArchivos(prev => prev.map((x, idx) => idx === i ? { ...x, estado: "ok" } : x));
+      } catch (e) {
+        setArchivos(prev => prev.map((x, idx) => idx === i ? { ...x, estado: "error", error: (e as Error).message } : x));
+      }
+    }
+  }
+
+  async function crearProyectoYDirigirAlWorkspace() {
+    if (!programa.trim()) { setError("El diplomado/curso/taller es obligatorio."); return; }
+    if (!materias.trim()) { setError("Los módulos/temas/materias son obligatorios."); return; }
+
+    if (createInFlightRef.current) return;
+    createInFlightRef.current = true;
+    setError("");
+    setStep("creando");
+
     try {
-      if (!sid)
-        throw new Error(
-          "No hay servicios configurados. Avisa al administrador."
-        );
-      const temaBase = contexto.tema?.trim() || "(Por definir)";
+      const sid = await resolverServicioId();
+      if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
+
+      const temaBase = tema.trim() || "(Por definir — Cap 0 propondrá temas)";
+      const contexto = {
+        tema: tema.trim(),
+        programa: programa.trim(),
+        modulos: materias.trim(),
+        intereses_y_contexto: interesesYContexto.trim(),
+      };
+
       const payload = {
         servicio_id: sid,
         tipo_proyecto_id: tipoProyectoId,
         universidad_id: universidadId || undefined,
-        modalidad_creacion: "directa",
+        modalidad_creacion: "guiada",
         tema_aprobado: temaBase,
         titulo_provisional: temaBase,
         academic_context: { contexto_inicial: contexto },
@@ -175,42 +196,25 @@ export default function NuevoProyectoPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      return data.proyecto.id as string;
+      const proyId = data.proyecto.id as string;
+
+      // Subir archivos si los hay
+      if (archivos.length > 0) {
+        await subirArchivosAlProyecto(proyId);
+      }
+
+      router.push(`/projects/${proyId}/workspace`);
+    } catch (e) {
+      setError((e as Error).message);
+      setStep("datos-completos");
     } finally {
       createInFlightRef.current = false;
     }
   }
 
-  async function handleCrearProyecto() {
-    if (!programa.trim()) {
-      setError("El programa/diplomado es requerido.");
-      return;
-    }
-    if (!materias.trim()) {
-      setError("Los módulos/materias son requeridos.");
-      return;
-    }
-    setError("");
-    setStep("creando");
+  // ── Loading / Creando ────────────────────────────────────────────────────
 
-    try {
-      const contexto = {
-        tema: tema.trim(),
-        programa: programa.trim(),
-        materias: materias.trim(),
-        entorno: entorno.trim(),
-      };
-      const proyectoId = await crearProyectoConContexto(contexto);
-      router.push(`/projects/${proyectoId}/workspace`);
-    } catch (err) {
-      setError((err as Error).message || "Error al crear el proyecto.");
-      setStep("elegir-tipo");
-    }
-  }
-
-  // ── Loading / Creando ────────────────────────────────────────────────────────────
-
-  if (step === "loading" || step === "creando") {
+  if (step === "loading") {
     return (
       <div
         className="gradient-bg"
@@ -224,38 +228,31 @@ export default function NuevoProyectoPage() {
         }}
       >
         <div className="spinner" style={{ width: 32, height: 32, borderWidth: 3 }} />
-        <div style={{ color: "var(--fg-muted)", fontSize: 14 }}>
-          Preparando...
+        <div style={{ color: "var(--fg-muted)", fontSize: 14 }}>Preparando...</div>
+      </div>
+    );
+  }
+
+  if (step === "creando") {
+    return (
+      <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
+        <div style={{ fontSize: 48 }}>🚀</div>
+        <div style={{ fontSize: 18, fontWeight: 700, color: "var(--fg-primary)" }}>Creando tu proyecto…</div>
+        <div style={{ color: "var(--fg-muted)", fontSize: 14, textAlign: "center", maxWidth: 360 }}>
+          {archivos.length > 0
+            ? `Subiendo ${archivos.length} archivo(s) y preparando tu mesa de trabajo. El Cap 0 generará propuestas automáticamente.`
+            : "Preparando tu mesa de trabajo. El Cap 0 generará propuestas automáticamente."}
         </div>
+        <div className="spinner" style={{ width: 28, height: 28, borderWidth: 3 }} />
       </div>
     );
   }
 
   return (
-    <div
-      className="gradient-bg"
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 16px",
-      }}
-    >
-      <div style={{ width: "100%", maxWidth: 600 }}>
-        <a
-          href="/dashboard"
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 6,
-            color: "var(--fg-muted)",
-            textDecoration: "none",
-            fontSize: 13,
-            marginBottom: 24,
-          }}
-        >
+    <div className="gradient-bg" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "40px 16px" }}>
+      <div style={{ width: "100%", maxWidth: 640 }}>
+
+        <a href="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--fg-muted)", textDecoration: "none", fontSize: 13, marginBottom: 24 }}>
           ← Volver al dashboard
         </a>
 
@@ -382,16 +379,7 @@ export default function NuevoProyectoPage() {
             </div>
 
             <button
-              onClick={() => {
-                if (!universidadId) {
-                  setError(
-                    "Selecciona tu universidad para continuar."
-                  );
-                  return;
-                }
-                setError("");
-                setStep("elegir-tipo");
-              }}
+              onClick={() => { if (!universidadId) { setError("Selecciona tu universidad para continuar."); return; } setError(""); setStep("datos-completos"); }}
               className="btn-cyan"
               style={{
                 width: "100%",
@@ -404,147 +392,161 @@ export default function NuevoProyectoPage() {
           </div>
         )}
 
-        {/* ── PASO 2: FORMULARIO ÚNICO DE CREACIÓN ────────────────────────────────────── */}
-        {step === "elegir-tipo" && (
+        {/* ── PASO 2: DATOS COMPLETOS (UN SOLO FORMULARIO) ────────────────────── */}
+        {step === "datos-completos" && (
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button
-              onClick={() => setStep("seleccionar-universidad")}
-              style={{
-                background: "none",
-                border: "none",
-                color: "var(--fg-muted)",
-                cursor: "pointer",
-                marginBottom: 20,
-                padding: 0,
-                fontSize: 13,
-              }}
-            >
-              ← Atrás
-            </button>
-            <div style={{ marginBottom: 28 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "var(--accent)",
-                  fontWeight: 600,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  marginBottom: 6,
-                }}
-              >
-                Paso 2 de 2 — Datos iniciales
+            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
+                Paso 2 de 2 — Datos del proyecto
               </div>
-              <h1
-                style={{
-                  fontSize: 22,
-                  fontWeight: 800,
-                  marginBottom: 8,
-                }}
-              >
-                Cuéntanos sobre tu investigación
-              </h1>
-              <p
-                style={{
-                  color: "var(--fg-muted)",
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                }}
-              >
-                Completa los datos que tengas disponibles. Usaremos esta
-                información para generar cada capítulo con coherencia y
-                relevancia académica.
+              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Cuéntanos sobre tu trabajo</h1>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
+                Llena lo que tengas. Si no tienes tema, la IA propondrá 3-5 opciones viables. Si subes documentos, los usaremos como referencia.
               </p>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+
+              {/* TEMA (opcional) */}
               <div>
                 <label className="label">
                   Tema / Título de investigación{" "}
-                  <span
-                    style={{
-                      color: "var(--fg-secondary)",
-                      fontWeight: 400,
-                      textTransform: "none",
-                    }}
-                  >
-                    (opcional)
-                  </span>
+                  <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span>
                 </label>
                 <textarea
                   className="input-dark"
                   value={tema}
-                  onChange={(e) => setTema(e.target.value)}
-                  rows={3}
-                  placeholder="Ej: Análisis del impacto del microcrédito en el sector rural boliviano 2019-2024"
+                  onChange={e => setTema(e.target.value)}
+                  rows={2}
+                  placeholder="Si ya tienes tema, escríbelo aquí. Si no, déjalo vacío y la IA propondrá."
                   style={{ resize: "vertical" }}
                 />
               </div>
 
+              {/* DIPLOMADO (obligatorio) */}
               <div>
                 <label className="label">
-                  Diplomado / Curso / Programa *
+                  Diplomado / curso / taller / programa{" "}
+                  <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
                 <input
                   className="input-dark"
                   value={programa}
-                  onChange={(e) => setPrograma(e.target.value)}
-                  placeholder="Ej: Diplomado en Educación Superior"
+                  onChange={e => setPrograma(e.target.value)}
+                  placeholder="Ej: Diplomado en Educación Superior Tecnológica"
                 />
               </div>
 
+              {/* MÓDULOS (obligatorio) */}
               <div>
                 <label className="label">
-                  Módulos o materias que llevaste *
+                  Módulos / temas / materias que llevaste{" "}
+                  <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
                 <textarea
                   className="input-dark"
                   value={materias}
-                  onChange={(e) => setMaterias(e.target.value)}
-                  rows={3}
-                  placeholder={
-                    "Ej:\nMetodología de la investigación\nTecnologías educativas\nEvaluación por competencias"
-                  }
+                  onChange={e => setMaterias(e.target.value)}
+                  rows={4}
+                  placeholder={"Lista los módulos/temas, uno por línea. Ej:\nMetodología de la investigación\nTecnologías educativas\nEvaluación por competencias"}
                   style={{ resize: "vertical" }}
                 />
               </div>
 
+              {/* INTERESES + LUGAR DE TRABAJO (combinado, opcional) */}
               <div>
                 <label className="label">
-                  Lugar de trabajo o contexto de interés{" "}
-                  <span
-                    style={{
-                      color: "var(--fg-secondary)",
-                      fontWeight: 400,
-                      textTransform: "none",
-                    }}
-                  >
-                    (opcional)
-                  </span>
+                  Intereses personales y lugar de trabajo / contexto{" "}
+                  <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span>
                 </label>
-                <input
+                <textarea
                   className="input-dark"
-                  value={entorno}
-                  onChange={(e) => setEntorno(e.target.value)}
-                  placeholder="Ej: universidad, colegio, empresa, sector o ciudad"
+                  value={interesesYContexto}
+                  onChange={e => setInteresesYContexto(e.target.value)}
+                  rows={3}
+                  placeholder={"Cuéntanos en qué trabajas, sectores o áreas que te interesan, ciudad donde trabajas, etc.\nEj: Trabajo en la Universidad Mayor de San Andrés, Facultad de Humanidades. Me interesa la innovación pedagógica y el uso de tecnología en el aula."}
+                  style={{ resize: "vertical" }}
                 />
               </div>
 
+              {/* DOCUMENTOS (opcional) */}
+              <div>
+                <label className="label">
+                  Documentos de referencia{" "}
+                  <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional · PDF o TXT, máx. 10MB c/u)</span>
+                </label>
+                <p style={{ fontSize: 12, color: "var(--fg-muted)", marginBottom: 8, lineHeight: 1.5 }}>
+                  Sube material que la IA pueda usar como referencia: lecturas del diplomado, papers que te interesen, normativa, etc.
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.txt"
+                  multiple
+                  onChange={e => { handleFilesSelected(e.target.files); if (e.target) e.target.value = ""; }}
+                  style={{ display: "none" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    width: "100%", padding: "12px", borderRadius: 10, cursor: "pointer",
+                    border: "1.5px dashed var(--border)", background: "rgba(37,99,235,0.04)",
+                    color: "var(--accent)", fontSize: 13, fontWeight: 600,
+                  }}
+                >
+                  📎 Seleccionar archivos
+                </button>
+
+                {archivos.length > 0 && (
+                  <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+                    {archivos.map((a, i) => (
+                      <div key={i} style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        padding: "8px 10px", background: "rgba(255,255,255,0.6)",
+                        border: "1px solid var(--border)", borderRadius: 8, fontSize: 12,
+                      }}>
+                        <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          📄 {a.file.name} <span style={{ color: "var(--fg-muted)" }}>({(a.file.size / 1024).toFixed(0)} KB)</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => quitarArchivo(i)}
+                          style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 16, padding: "0 6px" }}
+                          title="Quitar archivo"
+                        >×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* INFO ESCENARIO DETECTADO */}
+              <div style={{
+                padding: "10px 12px", background: "rgba(37,99,235,0.05)", border: "1px solid rgba(37,99,235,0.15)",
+                borderRadius: 8, fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.5,
+              }}>
+                <strong style={{ color: "var(--accent)" }}>💡 ¿Qué pasa después?</strong>
+                <br />
+                {tema.trim() && archivos.length > 0 && "El Cap 0 analizará tus documentos y propondrá 2-3 refinamientos a tu tema."}
+                {tema.trim() && archivos.length === 0 && "El Cap 0 validará tu tema y propondrá ajustes menores según tu programa."}
+                {!tema.trim() && archivos.length > 0 && "El Cap 0 propondrá 3-5 temas basados en tus documentos y programa."}
+                {!tema.trim() && archivos.length === 0 && "El Cap 0 propondrá 3-5 temas viables basados en tu programa y módulos."}
+              </div>
+
               <button
-                onClick={handleCrearProyecto}
+                onClick={crearProyectoYDirigirAlWorkspace}
                 disabled={!programa.trim() || !materias.trim()}
                 className="btn-cyan"
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  padding: "12px",
-                  opacity: !programa.trim() || !materias.trim() ? 0.5 : 1,
-                }}
+                style={{ width: "100%", justifyContent: "center", padding: "14px", opacity: (!programa.trim() || !materias.trim()) ? 0.5 : 1, fontSize: 14, fontWeight: 700 }}
               >
-                Crear proyecto y entrar →
+                Crear proyecto y empezar →
               </button>
             </div>
           </div>
         )}
+
       </div>
     </div>
   );

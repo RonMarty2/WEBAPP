@@ -116,17 +116,30 @@ export default function FasesPage() {
   }
 
   async function initializeFromDefaults() {
-    if (!confirm("Esto copiará las 6 fases por defecto para este servicio. Podrás editarlas libremente.")) return;
+    if (!confirm("Esto copiará las 10 fases por defecto para este servicio. Podrás editarlas libremente.")) return;
     setSaving("init");
     setError("");
     try {
-      const disk = await fetch(`/api/admin/phase-definitions?servicio_id=${servicioId}`).then(r => r.json()) as PhaseListResponse;
-      for (const phase of disk.phases) {
-        await fetch("/api/admin/phase-definitions", {
+      const defaultPhases = [
+        { label: "Cap. 0 — Propuesta y Refinamiento de Tema", short_label: "Tema", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 0]" },
+        { label: "Cap. I — Introducción y Antecedentes", short_label: "Cap. I", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 1]" },
+        { label: "Cap. II — Marco Teórico y Referencial", short_label: "Cap. II", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 2]" },
+        { label: "Cap. III — Diseño Metodológico", short_label: "Cap. III", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 3]" },
+        { label: "Cap. IV — Análisis de Resultados", short_label: "Cap. IV", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 4]" },
+        { label: "Cap. V — Conclusiones y Recomendaciones", short_label: "Cap. V", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 5]" },
+        { label: "Resumen Ejecutivo", short_label: "Resumen", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE RESUMEN]" },
+        { label: "Consolidación de Referencias Bibliográficas", short_label: "Referencias", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE REFERENCIAS]" },
+        { label: "Compilación Final en LaTeX", short_label: "LaTeX", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE COMPILACIÓN LaTeX]" },
+        { label: "Control Final de Calidad", short_label: "Calidad", prompt: "[VACÍO — PEGA AQUÍ EL CONTENIDO DE CONTROL DE CALIDAD]" },
+      ];
+
+      for (const phase of defaultPhases) {
+        const res = await fetch("/api/admin/phase-definitions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...phase, id: undefined, servicio_id: servicioId }),
+          body: JSON.stringify({ ...phase, servicio_id: servicioId }),
         });
+        if (!res.ok) throw new Error((await res.json()).error);
       }
       await loadPhases(servicioId);
     } catch (e) { setError((e as Error).message); }
