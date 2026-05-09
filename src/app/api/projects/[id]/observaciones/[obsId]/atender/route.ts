@@ -35,6 +35,34 @@ export async function POST(req: Request, { params }: { params: Params }) {
       return NextResponse.json({ error: "Observación no encontrada" }, { status: 404 });
     }
 
+    // VALIDACIÓN: "Título Inviolable" — para observaciones TIPO 3
+    if (obs.tipo === 3) {
+      const tema = (proyecto as unknown as Record<string, unknown>).tema_aprobado as string | null
+        ?? (proyecto as unknown as Record<string, unknown>).titulo_provisional as string | null
+        ?? "Tema no definido";
+
+      const validacionPrompt = `Título central del documento: "${tema}"
+Observación a aplicar: "${obs.texto}"
+
+¿Esta observación contradice o cambia la dirección central del documento?
+Responde SOLO: "compatible" o "contradice: [razón breve]"`;
+
+      const validacionResult = await llamarIA(
+        "Eres un validador académico. Verifica si una observación contradice el título central.",
+        validacionPrompt,
+        300,
+        proyecto.servicio_id ?? "mono-001"
+      );
+
+      if (validacionResult.text.toLowerCase().includes("contradice")) {
+        return NextResponse.json({
+          ok: false,
+          error: "Esta observación contradice el título central del documento. No puede aplicarse.",
+          detalle: validacionResult.text,
+        }, { status: 409 });
+      }
+    }
+
     // Build chapter context — look in phase_contents first, then legacy fields
     const phaseContents = (proyecto as unknown as Record<string, unknown>).phase_contents as Record<string, string> | undefined;
     let chapterContext = "";

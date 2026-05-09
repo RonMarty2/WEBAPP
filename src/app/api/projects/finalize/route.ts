@@ -142,6 +142,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 
+    const t0 = Date.now();
+    const steps: Array<{ name: string; status: "pending" | "running" | "completed" | "error"; duration_ms: number }> = [
+      { name: "Consolidación de Referencias", status: "running", duration_ms: 0 },
+      { name: "Control Final de Calidad", status: "pending", duration_ms: 0 },
+      { name: "Compilación LaTeX", status: "pending", duration_ms: 0 },
+    ];
+
+    // PASO 1: Consolidación de Referencias
+    const step1Start = Date.now();
     const academicContext = (proyecto.academic_context ?? {}) as AcademicContext;
     const academicMemory = (proyecto.academic_memory ?? {}) as AcademicMemory;
     const phaseContents = collectPhaseContents(proyecto as unknown as Record<string, unknown>);
@@ -165,7 +174,12 @@ export async function POST(req: Request) {
       ...asRecord(academicContext.contexto_inicial),
       tema: projectTopic,
     };
+    steps[0].duration_ms = Date.now() - step1Start;
+    steps[0].status = "completed";
+    steps[1].status = "running";
 
+    // PASO 2: Control Final de Calidad
+    const step2Start = Date.now();
     const prompt = buildFinalConsolidationPrompt({
       contract: academicContext.ruta_elegida ?? {
         titulo: proyecto.titulo_provisional ?? proyecto.tema_aprobado,
@@ -207,6 +221,8 @@ export async function POST(req: Request) {
         referenceCatalog,
       });
       if (!finalText.trim()) {
+        steps[1].status = "error";
+        steps[1].duration_ms = Date.now() - step2Start;
         void dbUpdateProyecto(proyectoId, {
           academic_memory: appendAITrace(academicMemory, buildFinalAITraceEntry({
             servicioId: proyecto.servicio_id,
@@ -215,7 +231,10 @@ export async function POST(req: Request) {
             error: (e as Error).message,
           })),
         });
-        return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+        return NextResponse.json({
+          error: `Error de IA: ${(e as Error).message}`,
+          steps,
+        }, { status: 502 });
       }
     }
 
@@ -237,9 +256,15 @@ export async function POST(req: Request) {
         );
         validation = validateFinalDocument(finalText);
       } catch {
-        // Return the validation errors below; the first final text is still stored for inspection.
+        // Continue with unrepaired text
       }
     }
+    steps[1].duration_ms = Date.now() - step2Start;
+    steps[1].status = "completed";
+    steps[2].status = "running";
+
+    // PASO 3: Compilación LaTeX (ensamblaje)
+    const step3Start = Date.now();
 
     const updatedPhaseContents = {
       ...(proyecto.phase_contents ?? {}),
@@ -273,6 +298,9 @@ export async function POST(req: Request) {
       academic_memory: appendAITrace(nextAcademicMemory, traceEntry),
     });
 
+    steps[2].duration_ms = Date.now() - step3Start;
+    steps[2].status = "completed";
+
     return NextResponse.json({
       ok: validation.ok,
       proveedor,
@@ -280,11 +308,13 @@ export async function POST(req: Request) {
       validation,
       ai_trace_entry: traceEntry,
       proyecto: updated,
+      steps,
+      total_duration_ms: Date.now() - t0,
     }, { status: validation.ok ? 200 : 422 });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });
     }
-    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+    return NextResponse.json({ error: "Error interno", steps: [] }, { status: 500 });
   }
 }

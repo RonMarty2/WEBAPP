@@ -35,6 +35,7 @@ import {
 } from "@/lib/projectReferences.mjs";
 import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
 import { buscarFuentesAcademicas, buildFuentesVerificadasBlock } from "@/lib/deepSearch";
+import { SISTEMA_SCRIBE_CAP1, buildContextoCap1 } from "@/lib/prompts/scribe/cap1";
 
 // Fases legacy que se benefician de búsqueda académica (Marco Teórico y Bibliografía)
 const FASES_CON_DEEP_SEARCH = new Set([2, 3, 5]);
@@ -325,7 +326,6 @@ export async function POST(req: Request) {
     let phase_id: string | undefined;
     let mensaje_usuario: string | undefined;
     let tipo: "borrador" | "final";
-    let feedback_usuario: string | undefined;
 
     try {
       const body = await req.json();
@@ -333,8 +333,7 @@ export async function POST(req: Request) {
       phase_id = body.phase_id ?? undefined;
       fase_numero = Number(body.fase_numero ?? 0);
       mensaje_usuario = body.mensaje_usuario ?? undefined;
-      tipo = body.tipo === "borrador" ? "borrador" : "final";
-      feedback_usuario = body.feedback_usuario ?? undefined;
+      tipo = "final";
 
       if (!proyecto_id || (!phase_id && (isNaN(fase_numero) || fase_numero < 0))) {
         return NextResponse.json(
@@ -350,7 +349,7 @@ export async function POST(req: Request) {
     return await generarSinSupabase({
       sessionUserId: sessionUser.id,
       proyecto_id, fase_numero, phase_id,
-      mensaje_usuario, tipo, feedback_usuario,
+      mensaje_usuario, tipo,
       t0,
     });
 
@@ -367,7 +366,7 @@ export async function POST(req: Request) {
 
 async function generarSinSupabase({
   sessionUserId, proyecto_id, fase_numero, phase_id,
-  mensaje_usuario, tipo, feedback_usuario,
+  mensaje_usuario, tipo,
   t0,
 }: {
   sessionUserId: string;
@@ -376,7 +375,6 @@ async function generarSinSupabase({
   phase_id?: string;
   mensaje_usuario?: string;
   tipo: "borrador" | "final";
-  feedback_usuario?: string;
   t0: number;
 }) {
   const proyecto = await dbGetProyecto(proyecto_id);
@@ -387,7 +385,6 @@ async function generarSinSupabase({
   const hilos = loadHilosFromDisk();
   const hiloConstraints = buildHiloConstraintBlock(proyecto.academic_memory);
   const perfilEstilo = proyecto.perfil_estilo_usuario;
-  const esGuiado = proyecto.modalidad_creacion === "guiada";
 
   const MAX_CHARS_POR_FASE = 1800;
 
@@ -428,14 +425,49 @@ async function generarSinSupabase({
       ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
       : "";
 
-    const typePrompt = tipo === "borrador"
-      ? currentPhase.prompt_borrador?.trim()
-      : currentPhase.prompt_final?.trim();
-    const phasePromptBase = typePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
+    // Detect if this is Cap I and use SCRIBE megaprompt
+    const esCapI = currentPhase.label?.toLowerCase().includes("cap") &&
+                   (currentPhase.label?.toLowerCase().includes("i ") ||
+                    currentPhase.label?.toLowerCase().includes("i:") ||
+                    currentPhase.label?.toLowerCase().includes("i.") ||
+                    currentPhase.orden === 10);
+
+    let phasePromptBase: string;
+    let contextoPrependido: string = "";
+
+    if (esCapI) {
+      // Use SCRIBE Cap I megaprompt with context prepended
+      const academicCtx = getAcademicContext(proyecto.academic_context);
+      const contextoInicial = academicCtx.contexto_inicial ?? {};
+
+      const programa = (contextoInicial as any).programa || (contextoInicial as any).universidad || "Programa no especificado";
+      const materiasRaw = (contextoInicial as any).materias || "";
+      const materias = typeof materiasRaw === "string"
+        ? materiasRaw.split("\n").filter((m: string) => m.trim())
+        : Array.isArray(materiasRaw) ? materiasRaw : [];
+      const temaConfirmado = proyecto.tema_aprobado || proyecto.titulo_provisional || "Tema no especificado";
+      const dondeTrabaja = (contextoInicial as any).entorno || undefined;
+      const materialPropio = undefined;
+      const interesesRelevantes = undefined;
+
+      contextoPrependido = buildContextoCap1({
+        programa,
+        materias,
+        temaConfirmado,
+        dondeTrabaja,
+        materialPropio,
+        interesesRelevantes,
+      });
+      phasePromptBase = contextoPrependido + SISTEMA_SCRIBE_CAP1;
+    } else {
+      const typePrompt = tipo === "borrador"
+        ? currentPhase.prompt_borrador?.trim()
+        : currentPhase.prompt_final?.trim();
+      phasePromptBase = typePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
+    }
+
     const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
-    const borradorKey = `${phase_id}_borrador`;
-    const borradorPrev = phaseContents[borradorKey] ?? null;
     const academicBlock = academicBlockForProject(proyecto);
     const academicContext = getAcademicContext(proyecto.academic_context);
     const academicDocuments = getContextDocuments(academicContext);
@@ -474,18 +506,8 @@ async function generarSinSupabase({
         : null,
     ];
 
-    if (tipo === "final" && esGuiado) {
-      if (borradorPrev) {
-        userPromptParts.push(`\n--- BORRADOR PREVIO ---\n${borradorPrev}\n--- FIN BORRADOR ---`);
-      }
-      if (feedback_usuario?.trim()) {
-        userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
-      }
-      userPromptParts.push(`\nGenera la VERSIÓN FINAL de ${currentPhase.label} incorporando el feedback.`);
-    } else {
-      if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
-      userPromptParts.push(`\nGenera el contenido de ${currentPhase.label}.`);
-    }
+    if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
+    userPromptParts.push(`\nGenera el contenido de ${currentPhase.label}.`);
 
     const userPrompt = userPromptParts.filter(Boolean).join("\n");
 
@@ -515,7 +537,7 @@ async function generarSinSupabase({
           academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
             servicioId: proyecto.servicio_id,
             scope: "generate-phase",
-            action: tipo === "borrador" ? "generar borrador" : "generar fase",
+            action: "generar fase",
             phaseId: phase_id,
             phaseLabel: currentPhase.label,
             status: "error",
@@ -527,33 +549,26 @@ async function generarSinSupabase({
       }
     }
 
-    // Store content
+    // Store content as final (direct mode — no borrador)
     let newPhaseContents: Record<string, string | null>;
     let requiereActualizacion = proyecto.requiere_actualizacion ?? {};
 
-    if (tipo === "borrador" && esGuiado) {
-      // Store as borrador, don't invalidate others yet
-      newPhaseContents = { ...phaseContents, [borradorKey]: textoGenerado };
-    } else {
-      // Final content — store in the main key and invalidate subsequent phases
-      newPhaseContents = { ...phaseContents, [phase_id]: textoGenerado };
+    // Store final content and invalidate subsequent phases
+    newPhaseContents = { ...phaseContents, [phase_id]: textoGenerado };
 
-      // Invalidate all phases that come after this one
-      const currentOrden = currentPhase.orden;
-      const subsequentPhases = sorted.filter(p => p.orden > currentOrden);
-      for (const sp of subsequentPhases) {
-        if (phaseContents[sp.id] || phaseContents[`${sp.id}_borrador`]) {
-          requiereActualizacion = { ...requiereActualizacion, [sp.id]: true };
-        }
+    // Invalidate all phases that come after this one
+    const currentOrden = currentPhase.orden;
+    const subsequentPhases = sorted.filter(p => p.orden > currentOrden);
+    for (const sp of subsequentPhases) {
+      if (phaseContents[sp.id] || phaseContents[`${sp.id}_borrador`]) {
+        requiereActualizacion = { ...requiereActualizacion, [sp.id]: true };
       }
-
-      // Clear invalidation flag for this phase
-      delete requiereActualizacion[phase_id];
     }
 
-    const nextMemoryBase = tipo === "borrador" && esGuiado
-      ? proyecto.academic_memory
-      : upsertPhaseSummary(proyecto.academic_memory, phase_id, currentPhase.label, textoGenerado);
+    // Clear invalidation flag for this phase
+    delete requiereActualizacion[phase_id];
+
+    const nextMemoryBase = upsertPhaseSummary(proyecto.academic_memory, phase_id, currentPhase.label, textoGenerado);
     const nextMemory = withUpdatedReferenceCatalog(
       nextMemoryBase ?? {},
       textoGenerado,
@@ -563,7 +578,7 @@ async function generarSinSupabase({
     const traceEntry = buildAITraceEntry({
       servicioId: proyecto.servicio_id,
       scope: "generate-phase",
-      action: tipo === "borrador" ? "generar borrador" : "generar fase",
+      action: "generar fase",
       phaseId: phase_id,
       phaseLabel: currentPhase.label,
       status: traceStatus,
@@ -620,9 +635,7 @@ async function generarSinSupabase({
     : "";
 
   const phaseKey = String(fase_numero);
-  const borradorKey = `${phaseKey}_borrador`;
   const phaseContents = proyecto.phase_contents ?? {};
-  const borradorPrev = phaseContents[borradorKey] ?? (proyecto[FASE_A_COLUMNA[fase_numero] as keyof typeof proyecto] as string | null);
 
   let phasePromptBase: string;
   if (esOnboarding) {
@@ -649,18 +662,8 @@ async function generarSinSupabase({
     legacyDeepSearchBlock || null,
   ];
 
-  if (tipo === "final" && esGuiado && !esOnboarding) {
-    if (borradorPrev) {
-      userPromptParts.push(`\n--- BORRADOR PREVIO ---\n${borradorPrev}\n--- FIN BORRADOR ---`);
-    }
-    if (feedback_usuario?.trim()) {
-      userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
-    }
-    userPromptParts.push(`\nGenera la VERSIÓN FINAL de la ${FASE_ETIQUETA[fase_numero]} incorporando el feedback.`);
-  } else {
-    if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
-    userPromptParts.push(`\nGenera el contenido de la ${FASE_ETIQUETA[fase_numero]}.`);
-  }
+  if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
+  userPromptParts.push(`\nGenera el contenido de la ${FASE_ETIQUETA[fase_numero]}.`);
 
   const userPrompt = userPromptParts.filter(Boolean).join("\n");
   const maxTokens = fase_numero <= 1 ? 6000 : fase_numero <= 3 ? 4500 : 3000;
@@ -681,7 +684,7 @@ async function generarSinSupabase({
       academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
         servicioId: proyecto.servicio_id,
         scope: "generate-phase",
-        action: tipo === "borrador" ? "generar borrador" : "generar fase",
+        action: "generar fase",
         phaseId: phaseKey,
         phaseLabel: FASE_ETIQUETA[fase_numero],
         status: "error",
@@ -695,43 +698,38 @@ async function generarSinSupabase({
   let requiereActualizacion = proyecto.requiere_actualizacion ?? {};
   let updates: Partial<typeof proyecto> = {};
 
-  if (tipo === "borrador" && esGuiado) {
-    // Store borrador in phase_contents, not in legacy columns
-    updates.phase_contents = { ...phaseContents, [borradorKey]: textoGenerado };
-  } else {
-    // Final or directo: store in legacy columns + phase_contents
-    const nuevaFase = Math.max(proyecto.estado_fase, fase_numero);
-    const colKey = FASE_A_COLUMNA[fase_numero];
-    updates = {
-      estado_fase: nuevaFase,
-      [colKey]: textoGenerado,
-      phase_contents: { ...phaseContents, [phaseKey]: textoGenerado },
-      final_document: null,
-      final_document_validation: {},
-    };
+  // Store final content in legacy columns + phase_contents (direct mode only)
+  const nuevaFase = Math.max(proyecto.estado_fase, fase_numero);
+  const colKey = FASE_A_COLUMNA[fase_numero];
+  updates = {
+    estado_fase: nuevaFase,
+    [colKey]: textoGenerado,
+    phase_contents: { ...phaseContents, [phaseKey]: textoGenerado },
+    final_document: null,
+    final_document_validation: {},
+  };
 
-    // Cache invalidation for subsequent phases
-    for (let f = fase_numero + 1; f <= 5; f++) {
-      const fKey = FASE_A_COLUMNA[f] as keyof typeof proyecto;
-      const hasContent = !!(proyecto[fKey] as string | null) || !!phaseContents[String(f)];
-      if (hasContent) {
-        requiereActualizacion = { ...requiereActualizacion, [String(f)]: true };
-      }
+  // Cache invalidation for subsequent phases
+  for (let f = fase_numero + 1; f <= 5; f++) {
+    const fKey = FASE_A_COLUMNA[f] as keyof typeof proyecto;
+    const hasContent = !!(proyecto[fKey] as string | null) || !!phaseContents[String(f)];
+    if (hasContent) {
+      requiereActualizacion = { ...requiereActualizacion, [String(f)]: true };
     }
-    delete requiereActualizacion[phaseKey];
-    updates.requiere_actualizacion = requiereActualizacion;
-    const legacyAcademicContext = getAcademicContext(proyecto.academic_context);
-    updates.academic_memory = withUpdatedReferenceCatalog(
-      upsertPhaseSummary(
-        proyecto.academic_memory,
-        phaseKey,
-        FASE_ETIQUETA[fase_numero],
-        textoGenerado
-      ) ?? {},
-      textoGenerado,
-      buildContextualReferences(buildContextualReferenceInput(legacyAcademicContext))
-    );
   }
+  delete requiereActualizacion[phaseKey];
+  updates.requiere_actualizacion = requiereActualizacion;
+  const legacyAcademicContext = getAcademicContext(proyecto.academic_context);
+  updates.academic_memory = withUpdatedReferenceCatalog(
+    upsertPhaseSummary(
+      proyecto.academic_memory,
+      phaseKey,
+      FASE_ETIQUETA[fase_numero],
+      textoGenerado
+    ) ?? {},
+    textoGenerado,
+    buildContextualReferences(buildContextualReferenceInput(legacyAcademicContext))
+  );
 
   const traceEntry = buildAITraceEntry({
     servicioId: proyecto.servicio_id,
@@ -746,10 +744,8 @@ async function generarSinSupabase({
   });
   updates.academic_memory = appendAITrace(updates.academic_memory ?? proyecto.academic_memory, traceEntry);
 
-  if (!(tipo === "borrador" && esGuiado)) {
-    const newCommitmentsLegacy = extractCommitments(textoGenerado, FASE_ETIQUETA[fase_numero]);
-    updates.academic_memory = updateHiloConductor(updates.academic_memory ?? proyecto.academic_memory, newCommitmentsLegacy);
-  }
+  const newCommitmentsLegacy = extractCommitments(textoGenerado, FASE_ETIQUETA[fase_numero]);
+  updates.academic_memory = updateHiloConductor(updates.academic_memory ?? proyecto.academic_memory, newCommitmentsLegacy);
 
   await dbUpdateProyecto(proyecto_id, updates);
 

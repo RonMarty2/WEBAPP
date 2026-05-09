@@ -104,6 +104,7 @@ export interface ObservacionTribunal {
   texto: string;
   capitulo_afectado?: string; // e.g. "fase_1", "fase_2"
   estado: "pendiente" | "atendida" | "descartada";
+  tipo?: 1 | 2 | 3; // 1=trivial, 2=forma, 3=fondo
   respuesta_ia?: string;
   notas_usuario?: string;
   created_at: string;

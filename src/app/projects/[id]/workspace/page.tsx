@@ -102,12 +102,6 @@ function getFinalContent(p: Proyecto, phaseId: string, legacyNum?: number): stri
   return null;
 }
 
-function getBorrador(p: Proyecto, phaseId: string, legacyNum?: number): string | null {
-  const k = `${phaseId}_borrador`;
-  if (p.phase_contents && k in p.phase_contents) return p.phase_contents[k];
-  if (legacyNum !== undefined) return getLegacyContent(p, legacyNum);
-  return null;
-}
 
 function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).length; }
 
@@ -268,16 +262,9 @@ export default function WorkspacePage() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
+  const [finalizationSteps, setFinalizationSteps] = useState<Array<{ name: string; status: "pending" | "running" | "completed" | "error"; duration_ms: number }>>([]);
   const [error, setError] = useState("");
 
-  const [feedbackTexto, setFeedbackTexto] = useState("");
-  const [vistaActiva, setVistaActiva] = useState<"borrador" | "final">("borrador");
-
-  // Calibration
-  const [showCalibracion, setShowCalibracion] = useState(false);
-  const [calibPreguntas, setCalibPreguntas] = useState<CalibracionPregunta[]>([]);
-  const [calibRespuestas, setCalibRespuestas] = useState<Record<string, string>>({});
-  const [isAnalyzingStyle, setIsAnalyzingStyle] = useState(false);
 
   // PDF right panel
   const [showPdfPanel, setShowPdfPanel] = useState(true);
@@ -328,11 +315,6 @@ export default function WorkspacePage() {
         const proj: Proyecto = (await projRes.json()).proyecto;
         setProyecto(proj);
 
-        if (proj.modalidad_creacion === "guiada" && !proj.perfil_estilo_usuario) {
-          setShowCalibracion(true);
-          const qRes = await fetch(`/api/admin/calibration-questions?servicio_id=${proj.servicio_id ?? "mono-001"}`);
-          if (qRes.ok) setCalibPreguntas((await qRes.json()).preguntas ?? []);
-        }
 
         try {
           const phaseParams = new URLSearchParams({ servicio_id: proj.servicio_id ?? "mono-001" });
@@ -392,8 +374,7 @@ export default function WorkspacePage() {
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => {
     queueMicrotask(() => {
-      setFeedbackTexto("");
-      setVistaActiva("borrador");
+      // Reset state when changing phases
     });
   }, [selectedFase]);
 
@@ -425,16 +406,12 @@ export default function WorkspacePage() {
 
   const generarFase = useCallback(async (opts: {
     mensajeOverride?: string;
-    tipo?: "borrador" | "final";
-    feedback?: string;
   } = {}) => {
     if (!proyecto || isGenerating) return;
     setIsGenerating(true); setError("");
-    const { mensajeOverride, tipo: tipoOpt, feedback } = opts;
-    const esGuiado = proyecto.modalidad_creacion === "guiada";
-    const tipo: "borrador" | "final" = tipoOpt ?? (esGuiado ? "borrador" : "final");
+    const { mensajeOverride } = opts;
     const userMsg = mensajeOverride ?? chatInput.trim();
-    if (userMsg && !feedback) {
+    if (userMsg) {
       setChatMsgs(prev => [...prev, { role: "user", text: userMsg, ts: Date.now() }]);
       if (!mensajeOverride) setChatInput("");
     }
@@ -442,10 +419,10 @@ export default function WorkspacePage() {
     const existingFinal = isDynamic
       ? getFinalContent(proyecto, faseDef.id)
       : getFinalContent(proyecto, String(selectedFase), selectedFase);
-    const shouldEditExisting = Boolean(userMsg && !feedback && tipo === "final" && existingFinal?.trim());
+    const shouldEditExisting = Boolean(userMsg && existingFinal?.trim());
     const body = isDynamic
-      ? { proyecto_id: proyectoId, phase_id: faseDef.id, mensaje_usuario: userMsg || undefined, tipo, feedback_usuario: feedback || undefined }
-      : { proyecto_id: proyectoId, fase_numero: selectedFase, mensaje_usuario: userMsg || undefined, tipo, feedback_usuario: feedback || undefined };
+      ? { proyecto_id: proyectoId, phase_id: faseDef.id, mensaje_usuario: userMsg || undefined }
+      : { proyecto_id: proyectoId, fase_numero: selectedFase, mensaje_usuario: userMsg || undefined };
     // Setup AbortController for cancellation
     const controller = new AbortController();
     abortRef.current = controller;
@@ -463,21 +440,13 @@ export default function WorkspacePage() {
         if (!prev) return prev;
         const np = { ...prev };
         if (isDynamic) {
-          if (tipo === "borrador") {
-            np.phase_contents = { ...(prev.phase_contents ?? {}), [`${faseDef.id}_borrador`]: data.contenido };
-          } else {
-            np.phase_contents = { ...(prev.phase_contents ?? {}), [faseDef.id]: data.contenido };
-          }
+          np.phase_contents = { ...(prev.phase_contents ?? {}), [faseDef.id]: data.contenido };
         } else {
           const pk = String(selectedFase);
-          if (tipo === "borrador") {
-            np.phase_contents = { ...(prev.phase_contents ?? {}), [`${pk}_borrador`]: data.contenido };
-          } else {
-            const legacyKey = `contenido_fase_${selectedFase}` as keyof Proyecto;
-            np[legacyKey] = data.contenido as never;
-            np.estado_fase = Math.max(prev.estado_fase, selectedFase);
-            np.phase_contents = { ...(prev.phase_contents ?? {}), [pk]: data.contenido };
-          }
+          const legacyKey = `contenido_fase_${selectedFase}` as keyof Proyecto;
+          np[legacyKey] = data.contenido as never;
+          np.estado_fase = Math.max(prev.estado_fase, selectedFase);
+          np.phase_contents = { ...(prev.phase_contents ?? {}), [pk]: data.contenido };
         }
         if (data.requiere_actualizacion) np.requiere_actualizacion = data.requiere_actualizacion;
         if (data.ai_trace_entry) {
@@ -490,16 +459,12 @@ export default function WorkspacePage() {
         np.final_document_validation = {};
         return np;
       });
-      if (tipo === "borrador") setVistaActiva("borrador");
-      else { setVistaActiva("final"); setFeedbackTexto(""); }
-      if (userMsg && !feedback) {
+      if (userMsg) {
         setChatMsgs(prev => [...prev, {
           role: "assistant",
           text: shouldEditExisting
             ? "✅ Ajuste puntual aplicado sin regenerar toda la fase."
-            : tipo === "final"
-            ? "✅ Versión final generada."
-            : "📝 Borrador generado. Revísalo y deja tu feedback.",
+            : "✅ Contenido generado correctamente.",
           ts: Date.now(),
         }]);
       }
@@ -540,6 +505,12 @@ export default function WorkspacePage() {
     if (!proyecto || isFinalizing) return;
     setIsFinalizing(true);
     setError("");
+    setFinalizationSteps([
+      { name: "Consolidación de Referencias", status: "running", duration_ms: 0 },
+      { name: "Control Final de Calidad", status: "pending", duration_ms: 0 },
+      { name: "Compilación LaTeX", status: "pending", duration_ms: 0 },
+    ]);
+
     try {
       const res = await fetch("/api/projects/finalize", {
         method: "POST",
@@ -547,6 +518,12 @@ export default function WorkspacePage() {
         body: JSON.stringify({ proyecto_id: proyectoId }),
       });
       const data = await res.json();
+
+      // Actualizar los pasos si fueron retornados
+      if (data.steps) {
+        setFinalizationSteps(data.steps);
+      }
+
       if (!res.ok && !data.final_document) {
         throw new Error(data.error || data.validation?.errors?.join(" ") || "No se pudo consolidar el documento final.");
       }
@@ -569,12 +546,18 @@ export default function WorkspacePage() {
       setChatMsgs(prev => [...prev, {
         role: "assistant",
         text: data.validation?.ok
-          ? "Documento final consolidado. Ya puedes descargar el PDF entregable."
+          ? "Documento final completado. Ya puedes descargar el PDF entregable."
           : `Documento consolidado con observaciones: ${(data.validation?.errors ?? []).join(" ")}`,
         ts: Date.now(),
       }]);
     } catch (e) {
       setError((e as Error).message);
+      setFinalizationSteps(prev => {
+        const steps = [...prev];
+        const runningStep = steps.findIndex(s => s.status === "running");
+        if (runningStep >= 0) steps[runningStep].status = "error";
+        return steps;
+      });
     } finally {
       setIsFinalizing(false);
     }
@@ -645,17 +628,12 @@ export default function WorkspacePage() {
   }
   if (!proyecto) return null;
 
-  const esGuiado = proyecto.modalidad_creacion === "guiada";
   const currentFaseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
   const phaseId = currentFaseDef.id;
   const legacyNum = (currentFaseDef as typeof FASES_STATIC[0]).num;
   const finalContent = getFinalContent(proyecto, phaseId, legacyNum);
-  const borradorContent = getBorrador(proyecto, phaseId, legacyNum);
-  const hasBorrador = Boolean(borradorContent);
   const hasFinal = Boolean(finalContent);
-  const displayContent = esGuiado
-    ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
-    : finalContent;
+  const displayContent = finalContent;
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
 
   // Real-time document stats: sum words from all completed phases
@@ -703,69 +681,6 @@ export default function WorkspacePage() {
     ? `${activeAI.provider_name || activeAI.provider_id} / ${activeAI.model}`
     : "IA sin configurar";
 
-  // ── Calibration fullscreen ────────────────────────────────────────────────────
-
-  if (showCalibracion) {
-    const allOk = calibPreguntas.every(q => countWords(calibRespuestas[q.id] ?? "") >= q.minimo_palabras);
-    return (
-      <div style={{ height:"100vh", background:"transparent", color:"var(--fg-primary)", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"24px 16px", overflow:"auto" }}>
-        <div style={{ width:"100%", maxWidth:680 }}>
-          <div style={{ marginBottom:28, textAlign:"center" }}>
-            <div style={{ fontSize:36, marginBottom:12, color:"#a78bfa" }}></div>
-            <h1 style={{ fontSize:22, fontWeight:800, marginBottom:8 }}>Calibración de Estilo</h1>
-            <p style={{ color:"var(--fg-muted)", fontSize:14, lineHeight:1.6, maxWidth:480, margin:"0 auto" }}>
-              Responde estas preguntas para que la IA aprenda tu estilo de escritura. Cuanto más detallado, más personalizado será el resultado.
-            </p>
-          </div>
-          {proyecto.tema_aprobado && (
-            <div style={{ padding:"10px 14px", background:"rgba(167,139,250,0.08)", border:"1px solid rgba(167,139,250,0.2)", borderRadius:8, marginBottom:24, fontSize:13, color:"#a78bfa" }}>
-              <strong>Tema:</strong> {proyecto.tema_aprobado}
-            </div>
-          )}
-          <div style={{ display:"flex", flexDirection:"column", gap:20, marginBottom:28 }}>
-            {calibPreguntas.map((q, i) => {
-              const words = countWords(calibRespuestas[q.id] ?? "");
-              const ok = words >= q.minimo_palabras;
-              return (
-                <div key={q.id} style={{ background:"rgba(255, 255, 255, 0.3)", border:"1px solid var(--border)", borderRadius:10, padding:"18px 20px" }}>
-                  <div style={{ display:"flex", alignItems:"flex-start", gap:10, marginBottom:8 }}>
-                    <span style={{ flexShrink:0, width:22, height:22, borderRadius:"50%", background:"rgba(167,139,250,0.15)", border:"1px solid rgba(167,139,250,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:700, color:"#a78bfa" }}>{i+1}</span>
-                    <div>
-                      <div style={{ fontSize:14, fontWeight:600, marginBottom:q.descripcion?4:0 }}>{q.pregunta}</div>
-                      {q.descripcion && <div style={{ fontSize:12, color:"var(--fg-muted)" }}>{q.descripcion}</div>}
-                    </div>
-                  </div>
-                  <textarea
-                    className="input-dark"
-                    rows={4}
-                    value={calibRespuestas[q.id] ?? ""}
-                    onChange={e => setCalibRespuestas(prev => ({ ...prev, [q.id]: e.target.value }))}
-                    placeholder={q.placeholder || "Escribe tu respuesta aquí..."}
-                    style={{ width:"100%", resize:"vertical", fontSize:13 }}
-                  />
-                  <div style={{ display:"flex", justifyContent:"space-between", marginTop:6, fontSize:11, color:ok?"#22c55e":"var(--fg-muted)" }}>
-                    <span>{words} / {q.minimo_palabras} palabras mínimas</span>
-                    {ok && <span>✓ Suficiente</span>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div style={{ display:"flex", gap:12 }}>
-            <button onClick={() => setShowCalibracion(false)} className="btn-ghost" style={{ flex:1, justifyContent:"center", padding:"12px" }}>
-              Omitir por ahora
-            </button>
-            <button onClick={submitCalibracion} disabled={!allOk || isAnalyzingStyle} className="btn-purple" style={{ flex:2, justifyContent:"center", padding:"12px", opacity:allOk?1:0.5 }}>
-              {isAnalyzingStyle
-                ? <><div className="spinner" style={{ width:14, height:14, borderWidth:2 }}/><span>Analizando…</span></>
-                : "🎓 Analizar mi estilo de escritura →"}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // ── 3-COLUMN WORKSPACE ────────────────────────────────────────────────────────
 
   return (
@@ -790,8 +705,6 @@ export default function WorkspacePage() {
                 </span>
               </>
             )}
-            {esGuiado && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(167,139,250,0.12)", border:"1px solid rgba(167,139,250,0.25)", color:"#a78bfa", fontSize:10, fontWeight:600 }}>GUIADO</span>}
-            {esGuiado && proyecto.perfil_estilo_usuario && <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(34,197,94,0.08)", border:"1px solid rgba(34,197,94,0.2)", color:"#4ade80", fontSize:10 }}>✓ Estilo calibrado</span>}
             {isRefreshing && (
               <span style={{ padding:"1px 6px", borderRadius:4, background:"rgba(59,130,246,0.1)", border:"1px solid rgba(59,130,246,0.25)", color:"#60a5fa", fontSize:10 }}>
                 Actualizando...
@@ -821,7 +734,6 @@ export default function WorkspacePage() {
           {displayFases.map((f, idx) => {
             const fId = f.id;
             const done = Boolean(getFinalContent(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
-            const hasBorr = Boolean(getBorrador(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
             const needsUpd = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? fId : String(idx)]);
             const sel = idx === selectedFase;
             return (
@@ -829,12 +741,12 @@ export default function WorkspacePage() {
                 className="shrink-0"
                 style={{
                   width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
-                  border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
+                  border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : "2px solid var(--border)",
                   background: sel ? "rgba(37,99,235,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
-                  color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "var(--fg-secondary)",
+                  color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : "var(--fg-secondary)",
                   display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s",
                 }}>
-                {needsUpd ? "!" : done ? "✓" : hasBorr ? "~" : idx}
+                {needsUpd ? "!" : done ? "✓" : idx}
               </button>
             );
           })}
@@ -983,57 +895,8 @@ export default function WorkspacePage() {
 
                 {/* ── Generate buttons block ── */}
           <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:10 }}>
-            {/* GUIADO: no borrador yet */}
-              {esGuiado && !hasBorrador && !hasFinal && (
-                <div style={{ display:"flex", gap:8 }}>
-                  <button onClick={() => generarFase({ tipo:"borrador" })} disabled={isGenerating} className="btn-purple" style={{ flex:1, justifyContent:"center", padding:"10px", fontSize:12 }}>
-                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando borrador…</span></> : `Generar Borrador — ${currentFaseDef.short}`}
-                  </button>
-                  {isGenerating && (
-                    <button onClick={cancelGeneracion} className="btn-ghost" style={{ padding:"10px 16px", fontSize:11, color:"#ef4444" }}>
-                      Cancelar
-                    </button>
-                  )}
-                </div>
-              )}
-
-            {/* GUIADO: has borrador, needs final */}
-            {esGuiado && hasBorrador && !hasFinal && (
-              <>
-                <div style={{ fontSize:11, color:"#8b5cf6", fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase" }}>Borrador listo — añade feedback</div>
-                <textarea
-                  className="input-dark"
-                  rows={2}
-                  value={feedbackTexto}
-                  onChange={e => setFeedbackTexto(e.target.value)}
-                  placeholder="Ej: Ampliar antecedentes, ajustar tono más formal..."
-                  style={{ resize:"vertical", fontSize:12, lineHeight:1.5 }}
-                />
-                <div style={{ display:"flex", gap:7 }}>
-                  <button onClick={() => generarFase({ tipo:"final", feedback: feedbackTexto || undefined })} disabled={isGenerating} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"9px", fontSize:11 }}>
-                    {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando final…</span></> : "Generar Versión Final"}
-                  </button>
-                  {isGenerating ? (
-                    <button onClick={cancelGeneracion} className="btn-ghost" style={{ padding:"9px 11px", fontSize:11, color:"#ef4444" }}>
-                      Cancelar
-                    </button>
-                  ) : (
-                    <button onClick={() => generarFase({ tipo:"borrador" })} className="btn-ghost" style={{ padding:"9px 11px", fontSize:11 }} title="Regenerar borrador">🔄</button>
-                  )}
-                </div>
-              </>
-            )}
-
-            {/* GUIADO: has final — vista toggle */}
-            {esGuiado && hasFinal && (
-              <div style={{ display:"flex", gap:6 }}>
-                <button onClick={() => setVistaActiva("borrador")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="borrador"?"rgba(167,139,250,0.15)":"transparent", border: vistaActiva==="borrador"?"1px solid rgba(167,139,250,0.4)":"1px solid var(--border)", color: vistaActiva==="borrador"?"#a78bfa":"var(--fg-secondary)" }}>📝 Borrador</button>
-                <button onClick={() => setVistaActiva("final")} style={{ flex:1, padding:"7px", fontSize:10, fontWeight:600, borderRadius:6, cursor:"pointer", background: vistaActiva==="final"?"rgba(37,99,235,0.15)":"transparent", border: vistaActiva==="final"?"1px solid rgba(37,99,235,0.4)":"1px solid var(--border)", color: vistaActiva==="final"?"var(--accent)":"var(--fg-secondary)" }}>✨ Final</button>
-              </div>
-            )}
-
-            {/* DIRECTO: no final yet */}
-            {!esGuiado && !hasFinal && (
+            {/* Generate phase - direct mode only */}
+            {!hasFinal && (
               <div style={{ display:"flex", gap:8 }}>
                 <button onClick={() => generarFase()} disabled={isGenerating} className="btn-cyan" style={{ flex:1, justifyContent:"center", padding:"10px", fontSize:12 }}>
                   {isGenerating ? <><div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/><span>Generando…</span></> : `Generar ${currentFaseDef.short}`}
@@ -1192,11 +1055,7 @@ export default function WorkspacePage() {
                     <div style={{ fontSize:11, color:"var(--accent)", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.12em", marginBottom:4 }}>{currentFaseDef.short}</div>
                     <h1 style={{ fontSize:22, fontWeight:800, color:"var(--fg-primary)", margin:0, lineHeight:1.3 }}>{currentFaseDef.label}</h1>
                   </div>
-                  {esGuiado && (vistaActiva==="final" && hasFinal
-                    ? <span className="badge badge-cyan">Versión Final</span>
-                    : <span style={{ padding:"3px 10px", borderRadius:20, fontSize:10, fontWeight:700, background:"rgba(167,139,250,0.12)", border:"1px solid rgba(167,139,250,0.3)", color:"#a78bfa" }}>Borrador</span>
-                  )}
-                  {!esGuiado && hasFinal && <span className="badge badge-green">✓ Generado</span>}
+                  {hasFinal && <span className="badge badge-green">✓ Generado</span>}
                 </div>
                 {needsUpdate && (
                   <div style={{ marginTop:8, padding:"7px 10px", background:"rgba(245,158,11,0.07)", border:"1px solid rgba(245,158,11,0.2)", borderRadius:5, fontSize:11, color:"#fbbf24" }}>
@@ -1227,7 +1086,7 @@ export default function WorkspacePage() {
               <div style={{ fontSize:48, opacity:0.3 }}>📄</div>
               <div style={{ fontSize:15, fontWeight:700, color:"var(--border)" }}>{currentFaseDef.label}</div>
               <div style={{ fontSize:12, color:"var(--fg-primary)", textAlign:"center", maxWidth:240, lineHeight:1.6 }}>
-                {esGuiado ? "Genera el borrador para iniciar el proceso guiado." : "Usa el panel izquierdo para generar el contenido."}
+                Usa el panel izquierdo para generar el contenido.
               </div>
             </div>
           )}
@@ -1271,6 +1130,35 @@ export default function WorkspacePage() {
                 </div>
               )}
             </div>
+
+            {/* Finalization steps progress */}
+            {isFinalizing && finalizationSteps.length > 0 && (
+              <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", background:"rgba(37,99,235,0.05)", display:"flex", flexDirection:"column", gap:10, flexShrink:0 }}>
+                <div style={{ fontSize:11, fontWeight:700, color:"var(--accent)", textTransform:"uppercase", letterSpacing:"0.08em" }}>
+                  3 Pasos automáticos en progreso
+                </div>
+                {finalizationSteps.map((step, idx) => (
+                  <div key={idx} style={{ display:"flex", alignItems:"center", gap:8 }}>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:11, fontWeight:600, color:"var(--fg-primary)", marginBottom:3 }}>
+                        {idx + 1}. {step.name}
+                      </div>
+                      <div style={{ fontSize:10, color:"var(--fg-secondary)" }}>
+                        {step.status === "completed" ? `✓ ${step.duration_ms}ms` : step.status === "running" ? "En progreso…" : step.status === "error" ? "❌ Error" : "Pendiente"}
+                      </div>
+                    </div>
+                    <div style={{
+                      width:24, height:24, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:10,
+                      background: step.status === "completed" ? "rgba(34,197,94,0.15)" : step.status === "running" ? "rgba(37,99,235,0.15)" : step.status === "error" ? "rgba(239,68,68,0.15)" : "rgba(148,163,184,0.1)",
+                      color: step.status === "completed" ? "#4ade80" : step.status === "running" ? "var(--accent)" : step.status === "error" ? "#ef4444" : "var(--fg-secondary)",
+                      fontWeight:700
+                    }}>
+                      {step.status === "completed" ? "✓" : step.status === "running" ? "⚡" : step.status === "error" ? "!" : idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Download actions */}
             {(fasesCompletadas > 0 || documentoFinalListo) && (

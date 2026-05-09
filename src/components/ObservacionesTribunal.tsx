@@ -7,6 +7,7 @@ interface Observacion {
   texto: string;
   capitulo_afectado?: string;
   estado: "pendiente" | "atendida" | "descartada";
+  tipo?: 1 | 2 | 3;
   respuesta_ia?: string;
   notas_usuario?: string;
   created_at: string;
@@ -22,6 +23,12 @@ const ESTADO_META: Record<Observacion["estado"], { label: string; color: string;
   pendiente:   { label: "PENDIENTE",   color: "#fbbf24", bg: "rgba(251,191,36,0.1)" },
   atendida:    { label: "ATENDIDA",    color: "#4ade80", bg: "rgba(74,222,128,0.1)" },
   descartada:  { label: "DESCARTADA", color: "#94a3b8", bg: "rgba(148,163,184,0.1)" },
+};
+
+const TIPO_META: Record<1 | 2 | 3, { label: string; color: string; bg: string; desc: string }> = {
+  1: { label: "TRIVIAL", color: "#10b981", bg: "rgba(16,185,129,0.1)", desc: "Aclaración puntual" },
+  2: { label: "FORMA", color: "#3b82f6", bg: "rgba(59,130,246,0.1)", desc: "Redacción/formato" },
+  3: { label: "FONDO", color: "#ef4444", bg: "rgba(239,68,68,0.1)", desc: "Estructura/contenido" },
 };
 
 export default function ObservacionesTribunal({ proyectoId, phaseDefs = [] }: Props) {
@@ -256,18 +263,27 @@ export default function ObservacionesTribunal({ proyectoId, phaseDefs = [] }: Pr
                       <div style={{ fontSize: 12, color: "var(--fg-primary)", lineHeight: 1.4, flex: 1 }}>
                         {o.texto.length > 100 && !isOpen ? `${o.texto.slice(0, 100)}…` : o.texto}
                       </div>
-                      <span style={{
-                        flexShrink: 0, fontSize: 9, fontWeight: 800, padding: "2px 6px", borderRadius: 4,
-                        background: meta.bg, color: meta.color,
-                      }}>
-                        {meta.label}
-                      </span>
-                    </div>
-                    {phaseLabel(o.capitulo_afectado) && (
-                      <div style={{ fontSize: 10, color: "var(--fg-muted)" }}>
-                        Cap.: {phaseLabel(o.capitulo_afectado)}
+                      <div style={{ display: "flex", gap: 4, flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end" }}>
+                        {o.tipo && (
+                          <span title={TIPO_META[o.tipo].desc} style={{
+                            fontSize: 8, fontWeight: 900, padding: "2px 6px", borderRadius: 4,
+                            background: TIPO_META[o.tipo].bg, color: TIPO_META[o.tipo].color,
+                          }}>
+                            {TIPO_META[o.tipo].label}
+                          </span>
+                        )}
+                        <span style={{
+                          fontSize: 9, fontWeight: 800, padding: "2px 6px", borderRadius: 4,
+                          background: meta.bg, color: meta.color,
+                        }}>
+                          {meta.label}
+                        </span>
                       </div>
-                    )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, fontSize: 10, color: "var(--fg-muted)" }}>
+                      {phaseLabel(o.capitulo_afectado) && <span>Cap.: {phaseLabel(o.capitulo_afectado)}</span>}
+                      {o.tipo && <span style={{ color: TIPO_META[o.tipo].color }}>• {TIPO_META[o.tipo].desc}</span>}
+                    </div>
                     {o.respuesta_ia && (
                       <div style={{ fontSize: 10, color: "#4ade80" }}>✓ IA generó una sugerencia</div>
                     )}
