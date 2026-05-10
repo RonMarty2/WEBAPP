@@ -112,14 +112,6 @@ export default function Cap0PropuestasView({
   const propuestas = data?.propuestas ?? [];
   const recomendada = detectarOpcionRecomendada(data?.recomendacion);
 
-  // Texto previo al JSON (análisis del tema actual cuando hay tema previo)
-  const analisisTexto = useMemo(() => {
-    if (!rawContent) return "";
-    const idx = rawContent.indexOf("```json");
-    if (idx < 0) return rawContent;
-    return rawContent.slice(0, idx).trim();
-  }, [rawContent]);
-
   // Fallback: si no se pudo parsear el JSON, mostramos el markdown crudo
   if (!data || propuestas.length === 0) {
     return (
@@ -428,20 +420,6 @@ export default function Cap0PropuestasView({
         </div>
       </div>
 
-      {/* ── Análisis textual (opcional, colapsable) ──────────────────── */}
-      {analisisTexto && analisisTexto.length > 100 && (
-        <details style={{ marginTop: 24 }}>
-          <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--fg-muted)", padding: "8px 0" }}>
-            Ver análisis completo de la IA ⌄
-          </summary>
-          <pre style={{
-            whiteSpace: "pre-wrap", fontSize: 12.5, lineHeight: 1.7,
-            color: "var(--fg-secondary)", fontFamily: "var(--font-crimson), serif",
-            padding: "12px 16px", marginTop: 8,
-            background: "rgba(148,163,184,0.04)", borderRadius: 8,
-          }}>{analisisTexto}</pre>
-        </details>
-      )}
     </div>
   );
 }
