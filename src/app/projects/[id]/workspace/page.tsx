@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
-import { MESES, type StudentCoverData, generatePdfHtml, getHtmlCover, buildCss } from "@/lib/pdfTemplate";
+import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
 import GlassModal from "@/components/ui/GlassModal";
 import ObservacionesTribunal from "@/components/ObservacionesTribunal";
 
@@ -193,46 +193,6 @@ function paginateMarkdown(text: string, unitsPerPage = 1850): string[] {
   return pages.length ? pages : [text];
 }
 
-// Assembles all final phases into a document HTML for the PDF preview panel
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function buildDocPreview(proyecto: Proyecto, displayFases: typeof FASES_STATIC, university: University | null, pdfData: StudentCoverData): string {
-  const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Sin título";
-  const chunks: string[] = [];
-  for (const f of displayFases) {
-    const content = getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
-    if (!content) continue;
-    const pages = paginateMarkdown(content);
-    pages.forEach((pageContent, pageIndex) => {
-      chunks.push(
-        `<div class="doc-page">` +
-        `<div class="doc-page-content">` +
-        `<h2 class="doc-ch-title">${f.label}${pages.length > 1 ? ` · ${pageIndex + 1}` : ""}</h2>` +
-        `<div class="doc-ch-body">${renderMd(pageContent)}</div>` +
-        `</div></div>`
-      );
-    });
-  }
-  if (chunks.length === 0) return "";
-  
-  let coverHtml = "";
-  let cssStr = "";
-  if (university) {
-    coverHtml = `<div class="doc-page doc-cover-page"><div class="doc-cover-scale">${getHtmlCover(university, pdfData, titulo)}</div></div>`;
-    cssStr = `<style>${buildCss(university).replace(/@page/g, '@media print { @page')}</style>`; // Scope @page to print only so it doesn't break the UI
-  } else {
-    coverHtml = `<div class="doc-page"><div class="doc-page-content" style="display:flex; flex-direction:column; justify-content:center; min-height: 400px; text-align:center;">
-      <h1 class="doc-main-title">${titulo.replace(/</g,"&lt;")}</h1>
-    </div></div>`;
-  }
-
-  return `
-    ${cssStr}
-    <div class="doc-root">
-      ${coverHtml}
-      ${chunks.join('')}
-    </div>`;
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function WorkspacePage() {
@@ -334,13 +294,14 @@ export default function WorkspacePage() {
           if (qRes.ok) setCalibPreguntas((await qRes.json()).preguntas ?? []);
         }
 
+        // 🔒 Endpoint seguro: solo retorna metadata (id/label/short_label/orden).
+        // Los prompts NUNCA salen al cliente — el server los lee internamente.
         try {
           const phaseParams = new URLSearchParams({ servicio_id: proj.servicio_id ?? "mono-001" });
-          if (proj.tipo_proyecto_id) phaseParams.set("tipo_proyecto_id", proj.tipo_proyecto_id);
-          const phRes = await fetch(`/api/admin/phase-definitions?${phaseParams.toString()}`);
+          const phRes = await fetch(`/api/projects/${proj.id}/phases?${phaseParams.toString()}`);
           if (phRes.ok) {
             const phData = await phRes.json();
-            if (!phData.is_default && phData.phases?.length > 0) {
+            if (phData.phases?.length > 0) {
               const defs: PhaseDef[] = phData.phases.map((p: { id: string; label: string; short_label: string; orden: number }) => ({
                 id: p.id, label: p.label, short: p.short_label, orden: p.orden,
               }));
@@ -388,22 +349,6 @@ export default function WorkspacePage() {
       /* storage quota or private mode */
     }
   }, [cacheKey, user, proyecto, university, pdfData, selectedFase, isDynamic, phaseDefs, loading]);
-
-  // Auto-ejecutar Cap 0 si es la primera vez (sin contenido de fase 0)
-  useEffect(() => {
-    if (proyecto && !proyecto.contenido_fase_0 && !isGenerating && phaseDefs.length > 0) {
-      const cap0 = phaseDefs.find(p => p.id === "0" || p.label?.includes("Tema"));
-      if (cap0) {
-        queueMicrotask(() => {
-          setIsGenerating(true);
-          generarFase({ tipo: "borrador" }).catch(e => {
-            console.error("Error auto-generando Cap 0:", e);
-            setIsGenerating(false);
-          });
-        });
-      }
-    }
-  }, [proyecto?.id, proyecto?.contenido_fase_0, phaseDefs]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => {
@@ -535,7 +480,20 @@ export default function WorkspacePage() {
     abortRef.current?.abort();
   }, []);
 
-  // ── Replace Marker ────────────────────────────────────────────────────────────
+  // Auto-ejecutar Cap 0 la primera vez (cuando el proyecto se acaba de crear y no tiene contenido todavía).
+  // Debe ir DESPUÉS de la declaración de generarFase para evitar TDZ (temporal dead zone).
+  useEffect(() => {
+    if (!proyecto || isGenerating || phaseDefs.length === 0) return;
+    if (proyecto.contenido_fase_0) return;
+    const cap0 = phaseDefs.find(p => p.id === "ph-cap0" || p.id === "0" || p.label?.includes("Tema"));
+    if (!cap0) return;
+    queueMicrotask(() => {
+      generarFase({ tipo: "borrador" }).catch(e => {
+        console.error("Error auto-generando Cap 0:", e);
+      });
+    });
+  }, [proyecto?.id, proyecto?.contenido_fase_0, phaseDefs.length, isGenerating, generarFase, proyecto]);
+
 
   // ── Upload ────────────────────────────────────────────────────────────────────
 

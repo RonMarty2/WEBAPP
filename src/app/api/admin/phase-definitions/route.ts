@@ -1,122 +1,52 @@
+/**
+ * /api/admin/phase-definitions
+ *
+ * 🔒 SOLO ADMIN. Este endpoint expone los megaprompts maestros completos.
+ * NO debe ser llamado desde flujos de estudiantes — para eso existe
+ * /api/projects/[id]/phases (devuelve solo metadata, sin prompts).
+ */
+
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
-import type { PhaseDefinition, StoreData } from "@/lib/persistence";
+import type { PhaseDefinition } from "@/lib/persistence";
+import { SISTEMA_SCRIBE_CAP0 } from "@/lib/prompts/scribe/cap0-propuesta-temas";
+import { SISTEMA_SCRIBE_CAP1 } from "@/lib/prompts/scribe/cap1";
+import { SISTEMA_SCRIBE_CAP2 } from "@/lib/prompts/scribe/cap2";
+import { SISTEMA_SCRIBE_CAP3 } from "@/lib/prompts/scribe/cap3";
+import { SISTEMA_SCRIBE_CAP4 } from "@/lib/prompts/scribe/cap4";
+import { SISTEMA_SCRIBE_CAP5 } from "@/lib/prompts/scribe/cap5";
+import { SISTEMA_SCRIBE_RESUMEN } from "@/lib/prompts/scribe/resumen-ejecutivo";
+import { SISTEMA_SCRIBE_REFERENCIAS } from "@/lib/prompts/scribe/consolidar-referencias";
+import { SISTEMA_SCRIBE_LATEX } from "@/lib/prompts/scribe/compilar-latex";
+import { SISTEMA_SCRIBE_CALIDAD } from "@/lib/prompts/scribe/control-calidad";
 
 function uid(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-const DEFAULT_PHASES: PhaseDefinition[] = [
+/** Centraliza el manejo de errores de autenticación. */
+function handleAuthError(e: unknown): NextResponse | null {
+  if (e instanceof AuthError) {
+    return NextResponse.json({ error: e.message }, { status: e.status });
+  }
+  return null;
+}
+
+/**
+ * Megaprompts maestros del sistema SCRIBE — 10 fases.
+ * Importados de src/lib/prompts/scribe/* (server-only).
+ * Si el admin edita en /admin/fases, las modificaciones se persisten en disco
+ * y sobrescriben estos defaults para ese servicio.
+ */
+export const DEFAULT_PHASES: PhaseDefinition[] = [
   {
     id: "ph-cap0",
     servicio_id: "mono-001",
     orden: 0,
     label: "Cap. 0 — Propuesta y Refinamiento de Tema",
     short_label: "Tema",
-    prompt: `Eres un asesor académico experto en investigación para diplomados y postgrados en Bolivia y Latinoamérica. Especializas en selección, validación y refinamiento de temas de monografía 100% viables.
-
-════════════════════════════════════════
-PRINCIPIOS CRÍTICOS — OBLIGATORIOS
-════════════════════════════════════════
-1. SOLO temas con DATOS SECUNDARIOS públicos y accesibles (INE, IBCE, ministerios, BCB, UDAPE, universidades, reportes sectoriales).
-2. NUNCA sugerir temas que requieran entrevistas, encuestas ni datos primarios propios, SALVO que el estudiante ya trabaje en la institución y lo confirme.
-3. NUNCA inventar autores, títulos, URLs ni estadísticas. Si no tienes datos concretos, sé conservador.
-4. Toda fuente mencionada debe ser real y pública. Especifica año y entidad.
-5. Prefiere metodología cuantitativa con datos secundarios sobre mixta o cualitativa.
-
-════════════════════════════════════════
-LÓGICA CONDICIONAL — 4 ESCENARIOS
-════════════════════════════════════════
-
-ESCENARIO A — TIENE TEMA + SÍ MATERIAL EXTRA
-→ OBJETIVO: Analizar el material + proponer REFINAMIENTOS/MEJORAS al tema
-→ Estructura: Análisis del material | Evaluación del tema actual | 2-3 mejoras propuestas | Validación viabilidad
-
-ESCENARIO B — TIENE TEMA + NO MATERIAL EXTRA
-→ OBJETIVO: Validar tema + proponer AJUSTES MENORES basado en diplomado/módulos
-→ Estructura: Fortalezas del tema | Posibles ajustes menores | Validación viabilidad
-
-ESCENARIO C — NO TIENE TEMA + SÍ MATERIAL EXTRA
-→ OBJETIVO: Proponer 3-5 temas BASADOS EN el material subido + diplomado/módulos
-→ Estructura: Síntesis del material | 3-5 propuestas derivadas | Tabla comparativa | Recomendación
-
-ESCENARIO D — NO TIENE TEMA + NO MATERIAL EXTRA
-→ OBJETIVO: Proponer 3-5 temas GENÉRICOS basados en diplomado/módulos/contexto geográfico
-→ Estructura: 3-5 propuestas genéricas | Tabla comparativa | Recomendación
-
-════════════════════════════════════════
-ESTRUCTURA DE RESPUESTA — ESCENARIO A Y B
-════════════════════════════════════════
-
-[ANÁLISIS DEL TEMA ACTUAL]
-Título propuesto: [tema del estudiante]
-Viabilidad inicial: [ALTA / MEDIA / BAJA]
-Razón: [breve análisis]
-
-[REFINAMIENTOS PROPUESTOS]
-Opción 1 — Ajuste: [mejora específica]
-  - Nuevas fuentes accesibles: [entidades reales + período]
-  - Impacto en viabilidad: [mejorada/igual]
-
-Opción 2 — Ajuste: [mejora específica]
-  - Nuevas fuentes accesibles: [entidades reales + período]
-  - Impacto en viabilidad: [mejorada/igual]
-
-Opción 3 — Ajuste: [mejora específica]
-  - Nuevas fuentes accesibles: [entidades reales + período]
-  - Impacto en viabilidad: [mejorada/igual]
-
-[VALIDACIÓN FINAL]
-✅ Tema seleccionado o refinado: [tema final]
-✅ Viabilidad: ALTA / MEDIA
-✅ Próximo paso: Proceder a Capítulo I
-
-════════════════════════════════════════
-ESTRUCTURA DE RESPUESTA — ESCENARIO C Y D
-════════════════════════════════════════
-
-Genera exactamente 3-5 propuestas de tema. Para cada una:
-
-## OPCIÓN [N]: [TÍTULO — máx 15 palabras]
-- **Contexto:** relevancia en Bolivia/región
-- **Problema central:** causa-raíz + efectos observables
-- **Pregunta de investigación:** ¿[objeto] [tiempo] [espacio]?
-- **Objetivo general:** [verbo observable] [qué] para [propósito]
-- **Metodología:** análisis de datos secundarios + tipo (descriptivo/explicativo/comparativo)
-- **Fuentes de datos:** [entidad real + período específico AAAA-AAAA]
-- **¿Requiere entrevistas?:** NO / SÍ (solo si trabaja en institución)
-- **Viabilidad:** ✅ ALTA / ⚠️ MEDIA / ❌ BAJA + razón
-
-Luego genera una TABLA COMPARATIVA (criterio | Op.1 | Op.2 | Op.3 | Op.4 | Op.5).
-
-════════════════════════════════════════
-OUTPUT JSON OBLIGATORIO AL FINAL
-════════════════════════════════════════
-\`\`\`json
-{
-  "etapa": 0,
-  "escenario": "A|B|C|D",
-  "status": "propuestas_generadas|tema_refinado|tema_validado",
-  "tema_final": "...",
-  "viabilidad_final": "ALTA|MEDIA|BAJA",
-  "propuestas": [
-    {
-      "numero": 1,
-      "titulo": "...",
-      "contexto": "...",
-      "problema_central": "...",
-      "pregunta_investigacion": "...",
-      "objetivo_general": "...",
-      "fuentes_datos": ["INE 2020-2024", "IBCE 2019-2023"],
-      "periodo_temporal": "AAAA-AAAA",
-      "requiere_entrevistas": false,
-      "viabilidad": "ALTA"
-    }
-  ],
-  "recomendacion": "Opción N porque ...",
-  "proximo_paso": "Proceder a Capítulo I"
-}
-\`\`\``,
+    prompt: SISTEMA_SCRIBE_CAP0,
   },
   {
     id: "ph-cap1",
@@ -124,7 +54,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 10,
     label: "Cap. I — Introducción y Antecedentes",
     short_label: "Cap. I",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 1]`,
+    prompt: SISTEMA_SCRIBE_CAP1,
   },
   {
     id: "ph-cap2",
@@ -132,7 +62,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 20,
     label: "Cap. II — Marco Teórico y Referencial",
     short_label: "Cap. II",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 2]`,
+    prompt: SISTEMA_SCRIBE_CAP2,
   },
   {
     id: "ph-cap3",
@@ -140,7 +70,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 30,
     label: "Cap. III — Diseño Metodológico",
     short_label: "Cap. III",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 3]`,
+    prompt: SISTEMA_SCRIBE_CAP3,
   },
   {
     id: "ph-cap4",
@@ -148,7 +78,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 40,
     label: "Cap. IV — Análisis de Resultados",
     short_label: "Cap. IV",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 4]`,
+    prompt: SISTEMA_SCRIBE_CAP4,
   },
   {
     id: "ph-cap5",
@@ -156,7 +86,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 50,
     label: "Cap. V — Conclusiones y Recomendaciones",
     short_label: "Cap. V",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CAP 5]`,
+    prompt: SISTEMA_SCRIBE_CAP5,
   },
   {
     id: "ph-resumen",
@@ -164,7 +94,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 60,
     label: "Resumen Ejecutivo",
     short_label: "Resumen",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE RESUMEN]`,
+    prompt: SISTEMA_SCRIBE_RESUMEN,
   },
   {
     id: "ph-referencias",
@@ -172,7 +102,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 70,
     label: "Consolidación de Referencias Bibliográficas",
     short_label: "Referencias",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE REFERENCIAS]`,
+    prompt: SISTEMA_SCRIBE_REFERENCIAS,
   },
   {
     id: "ph-latex",
@@ -180,7 +110,7 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 80,
     label: "Compilación Final en LaTeX",
     short_label: "LaTeX",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE COMPILACIÓN LaTeX]`,
+    prompt: SISTEMA_SCRIBE_LATEX,
   },
   {
     id: "ph-calidad",
@@ -188,33 +118,52 @@ OUTPUT JSON OBLIGATORIO AL FINAL
     orden: 90,
     label: "Control Final de Calidad",
     short_label: "Calidad",
-    prompt: `[VACÍO — PEGA AQUÍ EL CONTENIDO DE CONTROL DE CALIDAD]`,
+    prompt: SISTEMA_SCRIBE_CALIDAD,
   },
 ];
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const servicioId = url.searchParams.get("servicio_id") || "mono-001";
-
+/**
+ * Resuelve las fases para un servicio. Helper interno usado por
+ * este endpoint y por /api/projects/[id]/phases (que devuelve metadata).
+ */
+export function resolvePhases(servicioId: string): { phases: PhaseDefinition[]; isDefault: boolean } {
   const disk = loadFromDisk();
   if (!disk.phaseDefinitions) disk.phaseDefinitions = {};
 
-  let phases = disk.phaseDefinitions[servicioId] ?? [];
-  const isDefault = phases.length === 0;
-
-  // Si no hay fases guardadas, retorna las DEFAULT_PHASES
-  if (isDefault && servicioId === "mono-001") {
-    phases = DEFAULT_PHASES;
+  const stored = disk.phaseDefinitions[servicioId] ?? [];
+  if (stored.length > 0) {
+    return { phases: [...stored].sort((a, b) => a.orden - b.orden), isDefault: false };
   }
 
-  return NextResponse.json({
-    phases: phases.sort((a, b) => a.orden - b.orden),
-    is_default: isDefault,
-  });
+  if (servicioId === "mono-001") {
+    return { phases: [...DEFAULT_PHASES].sort((a, b) => a.orden - b.orden), isDefault: true };
+  }
+
+  return { phases: [], isDefault: true };
 }
+
+// ── GET — solo admin ────────────────────────────────────────────────────────
+
+export async function GET(req: Request) {
+  try {
+    await requireAdmin();
+
+    const url = new URL(req.url);
+    const servicioId = url.searchParams.get("servicio_id") || "mono-001";
+    const { phases, isDefault } = resolvePhases(servicioId);
+
+    return NextResponse.json({ phases, is_default: isDefault });
+  } catch (e) {
+    return handleAuthError(e) ?? NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  }
+}
+
+// ── POST — solo admin ───────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
+    await requireAdmin();
+
     const body = (await req.json()) as Partial<PhaseDefinition> & { servicio_id: string };
     const { servicio_id, ...phase } = body;
 
@@ -229,7 +178,7 @@ export async function POST(req: Request) {
       if (idx >= 0) {
         phases[idx] = { ...phases[idx], ...phase } as PhaseDefinition;
       } else {
-        phases.push({ id: phase.id || uid(), servicio_id, orden: (phases.length * 10) || 0, ...phase } as PhaseDefinition);
+        phases.push({ id: phase.id || uid(), servicio_id, orden: phases.length * 10 || 0, ...phase } as PhaseDefinition);
       }
     } else {
       const maxOrden = phases.length > 0 ? Math.max(...phases.map((p) => p.orden)) : 0;
@@ -241,12 +190,16 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, phase: phases.find((p) => p.id === phase.id) });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return handleAuthError(e) ?? NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
 
+// ── DELETE — solo admin ─────────────────────────────────────────────────────
+
 export async function DELETE(req: Request) {
   try {
+    await requireAdmin();
+
     const body = (await req.json()) as { id: string; servicio_id: string };
     const { id, servicio_id } = body;
 
@@ -260,12 +213,16 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return handleAuthError(e) ?? NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
 
+// ── PATCH — solo admin ──────────────────────────────────────────────────────
+
 export async function PATCH(req: Request) {
   try {
+    await requireAdmin();
+
     const body = (await req.json()) as { id: string; servicio_id: string; direction: "up" | "down" };
     const { id, servicio_id, direction } = body;
 
@@ -291,6 +248,6 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+    return handleAuthError(e) ?? NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
 }
