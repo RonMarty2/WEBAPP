@@ -41,6 +41,28 @@ interface DashboardData {
   posiblesDuplicados: Array<{ programa: string; ejemplos: string[] }>;
 }
 
+interface FeedbackInsights {
+  totalFeedbacks: number;
+  porFase: Array<{ phase_id: string; phase_label: string; count: number }>;
+  porPrograma: Array<{ nombre: string; count: number }>;
+  topPalabrasClave: Array<{ palabra: string; count: number }>;
+  topFrasesAccion: Array<{ frase: string; count: number }>;
+  sugerenciasPorFase: Array<{
+    phase_id: string;
+    phase_label: string;
+    sugerencia: string;
+    evidencia: string[];
+  }>;
+  feedbacksRecientes: Array<{
+    phase_label: string;
+    programa: string;
+    feedback_text: string;
+    tipo: string;
+    created_at: string;
+  }>;
+  emptyState: boolean;
+}
+
 function MetricCard({
   code,
   label,
@@ -77,6 +99,7 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashStats | null>(null);
   const [monoCounts, setMonoCounts] = useState<MonografiaCount>({ total: 0, cap1: 0, cap2: 0, completadas: 0 });
   const [dashboard, setDashboard] = useState<DashboardData | null>(null);
+  const [insights, setInsights] = useState<FeedbackInsights | null>(null);
   const [tick, setTick] = useState("");
 
   useEffect(() => {
@@ -118,6 +141,12 @@ export default function AdminDashboard() {
     fetch("/api/admin/dashboard")
       .then(r => r.json())
       .then((d: DashboardData) => setDashboard(d))
+      .catch(() => null);
+
+    // Insights de feedback (qué piden los estudiantes para mejorar prompts)
+    fetch("/api/admin/feedback-insights")
+      .then(r => r.json())
+      .then((d: FeedbackInsights) => setInsights(d))
       .catch(() => null);
   }, []);
 
@@ -362,6 +391,161 @@ export default function AdminDashboard() {
             La anti-duplicación automática evita esto en proyectos nuevos. Los duplicados de arriba son históricos.
           </div>
         </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════
+          INSIGHTS DE FEEDBACK - Para mejorar megaprompts maestros
+         ═══════════════════════════════════════════════════════════════ */}
+      {insights && (
+        <>
+          <div className="adm-card adm-card-strong p-5 mb-6" style={{ marginTop: 24 }}>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <div className="adm-label">🎯 insights del feedback de estudiantes</div>
+                <div className="text-[14px] mt-1" style={{ color: "#edf2fb", fontWeight: 600 }}>
+                  Detección automática de patrones para mejorar tus megaprompts
+                </div>
+              </div>
+              <div className="text-[28px] font-bold" style={{ color: "#a78bfa" }}>
+                {insights.totalFeedbacks}
+              </div>
+            </div>
+            <div className="adm-caption">
+              {insights.totalFeedbacks === 0
+                ? "Aún no hay feedback registrado. Cuando los estudiantes apliquen cambios o usen el chat de correcciones, sus mensajes aparecerán acá analizados."
+                : `${insights.totalFeedbacks} mensaje(s) capturados de los estudiantes al pedir cambios. Mirá las recomendaciones automáticas debajo.`}
+            </div>
+          </div>
+
+          {!insights.emptyState && (
+            <>
+              {/* Sugerencias por fase (lo más importante para acción) */}
+              {insights.sugerenciasPorFase.length > 0 && (
+                <div className="adm-card p-5 mb-8" style={{ borderColor: "rgba(34,197,94,0.3)" }}>
+                  <div className="adm-label mb-4" style={{ color: "#22c55e" }}>
+                    💡 recomendaciones automáticas para tus megaprompts
+                  </div>
+                  <div className="space-y-3">
+                    {insights.sugerenciasPorFase.map((s, i) => (
+                      <div key={i} className="adm-surface p-4" style={{ background: "rgba(34,197,94,0.04)" }}>
+                        <div className="flex items-start gap-3">
+                          <div style={{
+                            width: 32, height: 32, borderRadius: 8,
+                            background: "rgba(34,197,94,0.15)",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0, fontSize: 16,
+                          }}>📝</div>
+                          <div className="flex-1">
+                            <div className="text-[12px] font-bold mb-1.5" style={{ color: "#22c55e", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                              {s.phase_label}
+                            </div>
+                            <div className="text-[13px] leading-relaxed mb-2" style={{ color: "#edf2fb" }}>
+                              {s.sugerencia}
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {s.evidencia.map((ev, j) => (
+                                <span key={j} className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.25)", color: "#86efac" }}>
+                                  {ev}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Distribución por fase + frases acción */}
+              <div className="grid gap-6 xl:grid-cols-2 mb-8">
+                <div className="adm-card p-5">
+                  <div className="adm-label mb-4">📊 fases que reciben más feedback</div>
+                  {insights.porFase.length === 0 ? (
+                    <div className="adm-caption">Sin datos aún</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {insights.porFase.slice(0, 6).map((f, i) => {
+                        const max = insights.porFase[0]?.count ?? 1;
+                        const pct = (f.count / max) * 100;
+                        return (
+                          <div key={i} className="adm-surface px-3 py-2.5">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-[13px] font-bold truncate" style={{ color: "#edf2fb" }}>{f.phase_label}</span>
+                              <span className="text-[12px] font-bold ml-2 shrink-0" style={{ color: "#a78bfa" }}>{f.count}</span>
+                            </div>
+                            <div style={{ height: 4, borderRadius: 999, background: "rgba(140,154,176,0.15)", overflow: "hidden" }}>
+                              <div style={{
+                                height: "100%", width: `${pct}%`,
+                                background: "linear-gradient(90deg, #a78bfa, #818cf8)",
+                                borderRadius: 999,
+                                transition: "width 600ms cubic-bezier(0.22,1,0.36,1)",
+                              }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="adm-card p-5">
+                  <div className="adm-label mb-4">🔁 frases que más se repiten</div>
+                  {insights.topFrasesAccion.length === 0 ? (
+                    <div className="adm-caption">Aún no hay patrones repetidos. Necesitamos al menos 2 ocurrencias.</div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {insights.topFrasesAccion.map((f, i) => (
+                        <span key={i} style={{
+                          padding: "6px 12px",
+                          borderRadius: 999,
+                          background: "rgba(167,139,250,0.10)",
+                          border: "1px solid rgba(167,139,250,0.25)",
+                          color: "#edf2fb",
+                          fontSize: 12.5,
+                          fontWeight: 600,
+                        }}>
+                          “{f.frase}” <span style={{ color: "#a78bfa", marginLeft: 4 }}>×{f.count}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Feedbacks recientes — muestra textual */}
+              {insights.feedbacksRecientes.length > 0 && (
+                <div className="adm-card p-5 mb-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="adm-label">💬 últimos feedbacks de estudiantes</div>
+                    <div className="adm-muted">los más recientes primero</div>
+                  </div>
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                    {insights.feedbacksRecientes.slice(0, 12).map((fb, i) => (
+                      <div key={i} className="adm-surface p-3">
+                        <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(99,102,241,0.15)", color: "#a78bfa", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                            {fb.phase_label}
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: "rgba(140,154,176,0.10)", color: "#94a3b8" }}>
+                            {fb.tipo === "aplicar_cambios" ? "Aplicar cambios" : fb.tipo === "chat_correccion" ? "Chat correcciones" : fb.tipo}
+                          </span>
+                          {fb.programa && <span className="text-[10px]" style={{ color: "#94a3b8" }}>{fb.programa}</span>}
+                          <span className="text-[10px] ml-auto" style={{ color: "#94a3b8" }}>
+                            {new Date(fb.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                        </div>
+                        <div className="text-[13px] leading-relaxed" style={{ color: "#edf2fb" }}>
+                          {fb.feedback_text}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </>
       )}
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr] mb-8">
