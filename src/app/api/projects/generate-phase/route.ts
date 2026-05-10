@@ -625,6 +625,23 @@ async function generarSinSupabase({
 
     const userPrompt = userPromptParts.filter(Boolean).join("\n");
 
+    // 📏 maxTokens según fase: los caps largos (I-V) piden 10-25 páginas,
+    // necesitan más espacio para responder completo. Antes era fijo 5000
+    // (~7 páginas) y la IA se quedaba corta a mitad del Cap.
+    const TOKENS_POR_FASE: Record<string, number> = {
+      "ph-cap0":        6000,   // propuestas + JSON (~3000-5000 palabras)
+      "ph-cap1":       14000,   // 10-14 páginas
+      "ph-cap2":       14000,   // 12-16 páginas
+      "ph-cap3":        9000,   // 6-10 páginas
+      "ph-cap4":       18000,   // 15-25 páginas (el más largo)
+      "ph-cap5":        5000,   // 2-4 páginas
+      "ph-resumen":     2000,   // 250-400 palabras
+      "ph-referencias": 6000,   // lista APA
+      "ph-latex":      24000,   // documento .tex completo
+      "ph-calidad":     8000,   // informe estructurado
+    };
+    const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 8000;
+
     let textoGenerado: string;
     let proveedor: string;
     let providerId = "";
@@ -632,7 +649,7 @@ async function generarSinSupabase({
     let traceStatus: "success" | "fallback" = "success";
     let traceError: string | null = null;
     try {
-      const resultado = await llamarIA(systemPrompt, userPrompt, 5000, proyecto.servicio_id);
+      const resultado = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
       textoGenerado = resultado.text;
       providerId = resultado.provider;
       providerModel = resultado.model;
@@ -799,7 +816,15 @@ async function generarSinSupabase({
   }
 
   const userPrompt = userPromptParts.filter(Boolean).join("\n");
-  const maxTokens = fase_numero <= 1 ? 6000 : fase_numero <= 3 ? 4500 : 3000;
+  // Modo legacy (6 fases). Tokens aumentados para que los caps largos
+  // (Cap I = fase 1, Cap II = fase 2) no se corten a mitad.
+  const maxTokens =
+    fase_numero === 0 ? 6000 :
+    fase_numero === 1 ? 14000 :  // Cap I — 10-14 páginas
+    fase_numero === 2 ? 14000 :  // Cap II — 12-16 páginas
+    fase_numero === 3 ? 18000 :  // Caps III-V juntos en legacy
+    fase_numero === 4 ?  8000 :  // Revisión
+                         6000;   // Final / consolidación
 
   let textoGenerado: string;
   let proveedor: string;
