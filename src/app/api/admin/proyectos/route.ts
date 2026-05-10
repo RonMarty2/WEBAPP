@@ -39,22 +39,14 @@ export async function GET(req: Request) {
       const ctxIni = (ctx.contexto_inicial ?? {}) as Record<string, unknown>;
       const phaseContents = (p.phase_contents ?? {}) as Record<string, string | null | undefined>;
 
-      // Contar fases completas (que tengan contenido en phase_contents)
-      const fasesCompletas = Object.entries(phaseContents)
+      // Contar fases completas (que tengan contenido en phase_contents).
+      const totalFasesCompletas = Object.entries(phaseContents)
         .filter(([key, value]) =>
           !key.includes("_borrador") &&
           !key.startsWith("__") &&
           typeof value === "string" &&
           value.trim().length > 100,
         ).length;
-
-      // También considerar campos legacy
-      const legacyCompletas = [0, 1, 2, 3, 4, 5].filter(n => {
-        const c = (p as unknown as Record<string, unknown>)[`contenido_fase_${n}`];
-        return typeof c === "string" && c.trim().length > 100;
-      }).length;
-
-      const totalFasesCompletas = Math.max(fasesCompletas, legacyCompletas);
 
       // Estado: completo / en curso / abandonado (sin actividad >30 días)
       const ultimaAct = (p as { updated_at?: string }).updated_at

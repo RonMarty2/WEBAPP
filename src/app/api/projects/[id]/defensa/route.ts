@@ -35,30 +35,25 @@ REGLAS ESTRICTAS:
 - Usa lenguaje académico formal pero claro.`;
 
 function buildContexto(proyecto: Record<string, unknown>): string {
-  const phaseContents = proyecto.phase_contents as Record<string, string | null> | undefined;
+  const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
+  const nonEmpty = (s: string | null | undefined): string | null =>
+    typeof s === "string" && s.trim() ? s : null;
+  // Capítulos III, IV y V se combinan en una sola sección "Desarrollo".
+  const caps345 = [phaseContents["ph-cap3"], phaseContents["ph-cap4"], phaseContents["ph-cap5"]]
+    .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+    .join("\n\n") || null;
 
-  // Legacy fields fallback
-  const legacyMap: Record<string, string> = {
-    fase_0: "contenido_fase_0",
-    fase_1: "contenido_fase_1",
-    fase_2: "contenido_fase_2",
-    fase_3: "contenido_fase_3",
-    fase_4: "contenido_fase_4",
-    fase_5: "contenido_fase_5",
-  };
-
-  const faseLabels: Record<string, string> = {
-    fase_0: "Planteamiento del Tema",
-    fase_1: "Capítulo I — Marco Referencial",
-    fase_2: "Capítulo II — Marco Teórico",
-    fase_3: "Capítulos III-V — Desarrollo",
-    fase_4: "Revisión",
-    fase_5: "Conclusiones y Bibliografía",
-  };
+  const secciones: { label: string; content: string | null }[] = [
+    { label: "Resumen",                        content: nonEmpty(phaseContents["ph-resumen"]) },
+    { label: "Planteamiento del Tema",         content: nonEmpty(phaseContents["ph-cap0"]) },
+    { label: "Capítulo I — Marco Referencial", content: nonEmpty(phaseContents["ph-cap1"]) },
+    { label: "Capítulo II — Marco Teórico",    content: nonEmpty(phaseContents["ph-cap2"]) },
+    { label: "Capítulos III-V — Desarrollo",   content: caps345 },
+    { label: "Conclusiones y Bibliografía",    content: nonEmpty(phaseContents["ph-referencias"]) },
+  ];
 
   const partes: string[] = [];
-  for (const [phaseId, label] of Object.entries(faseLabels)) {
-    const content = phaseContents?.[phaseId] ?? (proyecto[legacyMap[phaseId]] as string | null) ?? null;
+  for (const { label, content } of secciones) {
     if (!content) continue;
     // Max 800 chars per phase to keep prompt manageable
     const snippet = content.length > 800 ? content.slice(0, 800) + "…(truncado)" : content;

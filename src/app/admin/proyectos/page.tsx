@@ -27,12 +27,6 @@ interface Proyecto {
   created_at: string;
   updated_at: string;
   servicios: { id: string; nombre: string } | null;
-  contenido_fase_0?: string | null;
-  contenido_fase_1?: string | null;
-  contenido_fase_2?: string | null;
-  contenido_fase_3?: string | null;
-  contenido_fase_4?: string | null;
-  contenido_fase_5?: string | null;
   phase_contents?: Record<string, string | null | undefined>;
   _meta?: ProyectoMeta;
 }
@@ -124,23 +118,11 @@ function DetalleProyecto({ proyectoId, onClose }: { proyectoId: string; onClose:
     { id: "ph-calidad",    label: "Calidad",       orden: 90 },
   ];
 
-  // Combina ambos sistemas: dynamic phase_contents + legacy contenido_fase_X
+  // Contenido del proyecto: solo phase_contents (sistema nuevo de 10 fases).
   const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
-  const fasesDynamic = FASES_DINAMICAS
+  const fases = FASES_DINAMICAS
     .map(f => ({ num: f.orden, label: f.label, contenido: phaseContents[f.id] || null }))
     .filter(f => f.contenido && f.contenido.trim().length > 50);
-
-  const fasesLegacy = [
-    { num: 0, label: "Tema", contenido: proyecto.contenido_fase_0 },
-    { num: 1, label: "Cap. I", contenido: proyecto.contenido_fase_1 },
-    { num: 2, label: "Cap. II", contenido: proyecto.contenido_fase_2 },
-    { num: 3, label: "Cap. III-V", contenido: proyecto.contenido_fase_3 },
-    { num: 4, label: "Revisión", contenido: proyecto.contenido_fase_4 },
-    { num: 5, label: "Final", contenido: proyecto.contenido_fase_5 },
-  ].filter(f => f.contenido && f.contenido.trim().length > 50);
-
-  // Si tiene phase_contents (sistema nuevo), priorizamos eso
-  const fases = fasesDynamic.length > 0 ? fasesDynamic : fasesLegacy;
 
   const contenidoActual = fases[faseVista]?.contenido ?? "";
 

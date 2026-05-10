@@ -29,17 +29,25 @@ export async function GET(_req: Request, { params }: Params) {
     const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto Académico";
     const servicio = proyecto.servicios as { nombre: string } | null;
 
+    // Contenido del proyecto: solo phase_contents (sistema nuevo de 10 fases).
+    const phaseContents = (((proyecto as unknown as Record<string, unknown>).phase_contents) ?? {}) as Record<string, string | null | undefined>;
+    const nonEmpty = (s: string | null | undefined): string | null =>
+      typeof s === "string" && s.trim() ? s : null;
+    const caps345 = [phaseContents["ph-cap3"], phaseContents["ph-cap4"], phaseContents["ph-cap5"]]
+      .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+      .join("\n\n") || null;
+
     const latexSource = generarLatex({
       titulo,
       autor: "Autor del Proyecto",
       carrera: servicio?.nombre ?? "Monografía",
       tema_aprobado: proyecto.tema_aprobado ?? undefined,
-      contenido_fase_0: proyecto.contenido_fase_0,
-      contenido_fase_1: proyecto.contenido_fase_1,
-      contenido_fase_2: proyecto.contenido_fase_2,
-      contenido_fase_3: proyecto.contenido_fase_3,
-      contenido_fase_4: proyecto.contenido_fase_4,
-      contenido_fase_5: proyecto.contenido_fase_5,
+      planteamientoTema:    nonEmpty(phaseContents["ph-cap0"]),
+      capituloI:            nonEmpty(phaseContents["ph-cap1"]),
+      capituloII:           nonEmpty(phaseContents["ph-cap2"]),
+      desarrolloIIIaV:      caps345,
+      resumen:              nonEmpty(phaseContents["ph-resumen"]),
+      conclusionesBiblio:   nonEmpty(phaseContents["ph-referencias"]),
     });
 
     const filename = nombreArchivoLatex(titulo);

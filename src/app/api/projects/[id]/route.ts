@@ -57,10 +57,6 @@ export async function PATCH(req: Request, { params }: Params) {
     if (typeof body.tipo_proyecto_id === "string")    allowed.tipo_proyecto_id = body.tipo_proyecto_id;
     if (typeof body.estado_fase === "number" && body.estado_fase >= 0) allowed.estado_fase = body.estado_fase;
 
-    for (let i = 0; i <= 5; i++) {
-      const key = `contenido_fase_${i}`;
-      if (typeof body[key] === "string") allowed[key] = body[key];
-    }
     if (body.phase_contents && typeof body.phase_contents === "object")
       allowed.phase_contents = body.phase_contents;
     if (body.academic_context && typeof body.academic_context === "object")

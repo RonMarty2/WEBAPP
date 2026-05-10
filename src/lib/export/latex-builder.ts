@@ -22,13 +22,13 @@ export interface ProyectoParaLatex {
   programa?:          string;
   version?:           string;
   tema_aprobado?:     string;
-  // Contenido por fase (texto plano o Markdown simple)
-  contenido_fase_0?:  string | null;   // Tema / Planteamiento
-  contenido_fase_1?:  string | null;   // Capítulo I
-  contenido_fase_2?:  string | null;   // Capítulo II
-  contenido_fase_3?:  string | null;   // Capítulos III-V
-  contenido_fase_4?:  string | null;   // Revisión / Compilación
-  contenido_fase_5?:  string | null;   // Entrega Final
+  // Secciones del documento (texto plano o Markdown simple).
+  resumen?:             string | null;   // Resumen ejecutivo (va antes del Cap I)
+  planteamientoTema?:   string | null;   // Planteamiento del Tema
+  capituloI?:           string | null;   // Capítulo I - Marco Referencial
+  capituloII?:          string | null;   // Capítulo II - Marco Teórico
+  desarrolloIIIaV?:    string | null;    // Capítulos III, IV y V combinados
+  conclusionesBiblio?: string | null;   // Conclusiones y Bibliografía
 }
 
 // ── Sanitizador LaTeX ─────────────────────────────────────────
@@ -101,12 +101,12 @@ export function generarLatex(proyecto: ProyectoParaLatex): string {
     programa,
     version,
     tema_aprobado,
-    contenido_fase_0,
-    contenido_fase_1,
-    contenido_fase_2,
-    contenido_fase_3,
-    contenido_fase_4,
-    contenido_fase_5,
+    resumen,
+    planteamientoTema,
+    capituloI,
+    capituloII,
+    desarrolloIIIaV,
+    conclusionesBiblio,
   } = proyecto;
 
   // ── Preámbulo ─────────────────────────────────────────────
@@ -180,14 +180,14 @@ export function generarLatex(proyecto: ProyectoParaLatex): string {
 \\clearpage
 \\pagenumbering{arabic}`;
 
-  // ── Secciones por fase ────────────────────────────────────
+  // ── Secciones del documento ──────────────────────────────
   const secciones = [
-    seccion("Planteamiento del Tema",             contenido_fase_0),
-    seccion("Capítulo I — Marco Referencial",     contenido_fase_1),
-    seccion("Capítulo II — Marco Teórico",        contenido_fase_2),
-    seccion("Capítulos III al V — Desarrollo",    contenido_fase_3),
-    seccion("Revisión y Compilación",             contenido_fase_4),
-    seccion("Conclusiones y Bibliografía Final",  contenido_fase_5),
+    seccion("Resumen",                            resumen),
+    seccion("Planteamiento del Tema",             planteamientoTema),
+    seccion("Capítulo I — Marco Referencial",     capituloI),
+    seccion("Capítulo II — Marco Teórico",        capituloII),
+    seccion("Capítulos III al V — Desarrollo",    desarrolloIIIaV),
+    seccion("Conclusiones y Bibliografía Final",  conclusionesBiblio),
   ].join("\n");
 
   const fin = "\n\\end{document}\n";

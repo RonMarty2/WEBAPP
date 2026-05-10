@@ -57,14 +57,7 @@ CREATE TABLE IF NOT EXISTS proyectos (
   modalidad_creacion        TEXT DEFAULT 'directa' CHECK (modalidad_creacion IN ('directa', 'guiada')),
   perfil_estilo_usuario     TEXT,
   requiere_actualizacion    JSONB DEFAULT '{}',
-  -- Contenido de fases (texto plano / markdown / LaTeX)
-  contenido_fase_0          TEXT,
-  contenido_fase_1          TEXT,
-  contenido_fase_2          TEXT,
-  contenido_fase_3          TEXT,
-  contenido_fase_4          TEXT,
-  contenido_fase_5          TEXT,
-  -- Contenido dinámico por phase_id
+  -- Contenido dinámico por phase_id (sistema de 10 fases: ph-cap0..ph-calidad)
   phase_contents            JSONB DEFAULT '{}',
   -- Contexto académico y memoria IA
   academic_context          JSONB DEFAULT '{}',

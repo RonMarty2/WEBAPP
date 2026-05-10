@@ -39,11 +39,6 @@ function firstNonEmptyString(...values: unknown[]): string {
   return "";
 }
 
-function getLegacyContent(proyecto: Record<string, unknown>, index: number): string | null {
-  const value = proyecto[`contenido_fase_${index}`];
-  return typeof value === "string" && value.trim() ? value : null;
-}
-
 function collectPhaseContents(proyecto: Record<string, unknown>) {
   const phaseContents = asRecord(proyecto.phase_contents);
   const servicioId = typeof proyecto.servicio_id === "string" ? proyecto.servicio_id : "mono-001";
@@ -53,8 +48,8 @@ function collectPhaseContents(proyecto: Record<string, unknown>) {
   if (phaseDefs.length > 0) {
     return [...phaseDefs]
       .sort((a, b) => a.orden - b.orden)
-      .map((phase, index) => {
-        const raw = phaseContents[phase.id] ?? phaseContents[String(index)] ?? getLegacyContent(proyecto, index);
+      .map((phase) => {
+        const raw = phaseContents[phase.id];
         return {
           label: phase.label,
           content: typeof raw === "string" ? raw : null,
@@ -63,13 +58,14 @@ function collectPhaseContents(proyecto: Record<string, unknown>) {
       .filter((item) => item.content?.trim());
   }
 
-  return Array.from({ length: 6 }, (_, index) => {
-    const raw = phaseContents[String(index)] ?? getLegacyContent(proyecto, index);
-    return {
-      label: `Capitulo ${index + 1}`,
-      content: typeof raw === "string" ? raw : null,
-    };
-  }).filter((item) => item.content?.trim());
+  // Fallback defensivo si el proyecto no tiene fases definidas (caso raro).
+  return Object.entries(phaseContents)
+    .filter(([key]) => !key.includes("_borrador") && !key.startsWith("__"))
+    .map(([key, value]) => ({
+      label: key,
+      content: typeof value === "string" ? value : null,
+    }))
+    .filter((item) => item.content?.trim());
 }
 
 function buildLocalFinalDocument(

@@ -31,6 +31,15 @@ export async function GET(_req: Request, { params }: Params) {
       ? DEFAULT_UNIVERSITIES.find(u => u.id === universidadId)
       : DEFAULT_UNIVERSITIES[0];
 
+    // Contenido del proyecto: solo phase_contents (sistema nuevo de 10 fases).
+    const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
+    const nonEmpty = (s: string | null | undefined): string | null =>
+      typeof s === "string" && s.trim() ? s : null;
+    // Cap III, IV, V del sistema nuevo se combinan en la sección "Capítulos III-V" del LaTeX.
+    const caps345 = [phaseContents["ph-cap3"], phaseContents["ph-cap4"], phaseContents["ph-cap5"]]
+      .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+      .join("\n\n") || null;
+
     const latexSource = generarLatex({
       titulo,
       autor: qs.get("nombre") || user.name,
@@ -42,12 +51,12 @@ export async function GET(_req: Request, { params }: Params) {
       programa: qs.get("programa") || undefined,
       version: qs.get("version") || undefined,
       tema_aprobado: (proyecto.tema_aprobado as string) ?? undefined,
-      contenido_fase_0: proyecto.contenido_fase_0 as string | null,
-      contenido_fase_1: proyecto.contenido_fase_1 as string | null,
-      contenido_fase_2: proyecto.contenido_fase_2 as string | null,
-      contenido_fase_3: proyecto.contenido_fase_3 as string | null,
-      contenido_fase_4: proyecto.contenido_fase_4 as string | null,
-      contenido_fase_5: proyecto.contenido_fase_5 as string | null,
+      planteamientoTema:    nonEmpty(phaseContents["ph-cap0"]),
+      capituloI:            nonEmpty(phaseContents["ph-cap1"]),
+      capituloII:           nonEmpty(phaseContents["ph-cap2"]),
+      desarrolloIIIaV:      caps345,
+      resumen:              nonEmpty(phaseContents["ph-resumen"]),
+      conclusionesBiblio:   nonEmpty(phaseContents["ph-referencias"]),
     });
 
     const filename = nombreArchivoLatex(titulo);
