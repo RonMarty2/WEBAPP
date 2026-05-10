@@ -626,22 +626,23 @@ async function generarSinSupabase({
 
     const userPrompt = userPromptParts.filter(Boolean).join("\n");
 
-    // 📏 maxTokens según fase: los caps largos (I-V) piden 10-25 páginas,
-    // necesitan más espacio para responder completo. Antes era fijo 5000
-    // (~7 páginas) y la IA se quedaba corta a mitad del Cap.
+    // 📏 maxTokens según fase. Calibrado al RANGO MEDIO de cada megaprompt
+    // para que el PDF final NO supere las ~70 páginas en total.
+    // Suma proyectada al PDF: 12+14+8+18+3+1+5 = ~61 págs (Caps I+II+III+IV+V+Resumen+Refs).
+    // Cap 0, LaTeX y Calidad no van al PDF (son procesos auxiliares).
     const TOKENS_POR_FASE: Record<string, number> = {
-      "ph-cap0":        6000,   // propuestas + JSON (~3000-5000 palabras)
-      "ph-cap1":       14000,   // 10-14 páginas
-      "ph-cap2":       14000,   // 12-16 páginas
-      "ph-cap3":        9000,   // 6-10 páginas
-      "ph-cap4":       18000,   // 15-25 páginas (el más largo)
-      "ph-cap5":        5000,   // 2-4 páginas
-      "ph-resumen":     2000,   // 250-400 palabras
-      "ph-referencias": 6000,   // lista APA
-      "ph-latex":      24000,   // documento .tex completo
-      "ph-calidad":     8000,   // informe estructurado
+      "ph-cap0":        6000,   // propuestas + JSON (no va al PDF)
+      "ph-cap1":        8000,   // ~12 págs (rango pedido 10-14)
+      "ph-cap2":        9500,   // ~14 págs (rango pedido 12-16)
+      "ph-cap3":        6000,   // ~8 págs (rango pedido 6-10)
+      "ph-cap4":       12000,   // ~18 págs (rango pedido 15-25, no llevamos al máx)
+      "ph-cap5":        2500,   // ~3 págs (rango pedido 2-4)
+      "ph-resumen":     1000,   // 250-400 palabras (1 pág)
+      "ph-referencias": 3500,   // ~5 págs de bibliografía APA
+      "ph-latex":      24000,   // documento .tex completo (no va al PDF como contenido)
+      "ph-calidad":     6000,   // informe estructurado (no va al PDF)
     };
-    const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 8000;
+    const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
 
     let textoGenerado: string;
     let proveedor: string;
@@ -813,15 +814,14 @@ async function generarSinSupabase({
   }
 
   const userPrompt = userPromptParts.filter(Boolean).join("\n");
-  // Modo legacy (6 fases). Tokens aumentados para que los caps largos
-  // (Cap I = fase 1, Cap II = fase 2) no se corten a mitad.
+  // Modo legacy (6 fases). Calibrado para que el PDF total no supere 70 págs.
   const maxTokens =
-    fase_numero === 0 ? 6000 :
-    fase_numero === 1 ? 14000 :  // Cap I — 10-14 páginas
-    fase_numero === 2 ? 14000 :  // Cap II — 12-16 páginas
-    fase_numero === 3 ? 18000 :  // Caps III-V juntos en legacy
-    fase_numero === 4 ?  8000 :  // Revisión
-                         6000;   // Final / consolidación
+    fase_numero === 0 ?  6000 :  // Tema (no va al PDF)
+    fase_numero === 1 ?  8000 :  // Cap I — ~12 págs
+    fase_numero === 2 ?  9500 :  // Cap II — ~14 págs
+    fase_numero === 3 ? 18000 :  // Caps III+IV+V juntos en legacy (~26 págs combinadas)
+    fase_numero === 4 ?  6000 :  // Revisión
+                         5000;   // Final / consolidación
 
   let textoGenerado: string;
   let proveedor: string;
