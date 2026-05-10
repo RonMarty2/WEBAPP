@@ -15,7 +15,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
-import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
+import { dbGetProyecto, dbUpdateProyecto, dbListAllProyectos } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 import {
   extractCommitments,
@@ -107,6 +107,69 @@ function buildSystemPrompt({
   }
 
   return parts.join("\n");
+}
+
+/**
+ * Construye un bloque "EVITA estos temas" para inyectar en el Cap 0,
+ * evitando que la IA proponga temas duplicados/similares a los que ya
+ * se generaron antes para estudiantes del mismo programa.
+ *
+ * Se usa solo en phase_id === "ph-cap0". Para otras fases, se omite.
+ */
+async function buildAntiDuplicacionBlock(
+  proyectoActualId: string,
+  programaActual: string,
+): Promise<string> {
+  if (!programaActual || programaActual.trim().length < 5) return "";
+
+  try {
+    const todos = await dbListAllProyectos();
+    const normalizar = (s: string) =>
+      s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+    const np = normalizar(programaActual);
+
+    const temasSimilares: string[] = [];
+    const seen = new Set<string>();
+
+    for (const p of todos) {
+      if (p.id === proyectoActualId) continue;
+      const tema = (p as { tema_aprobado?: string; titulo_provisional?: string }).tema_aprobado
+        ?? (p as { titulo_provisional?: string }).titulo_provisional ?? "";
+      if (!tema || tema.length < 10 || tema.includes("(Por definir)")) continue;
+
+      const ctx = ((p as { academic_context?: Record<string, unknown> }).academic_context ?? {}) as Record<string, unknown>;
+      const ctxIni = (ctx.contexto_inicial ?? {}) as Record<string, unknown>;
+      const progP = String(ctxIni.programa ?? "").trim();
+      if (!progP) continue;
+
+      const npp = normalizar(progP);
+      // Match parcial entre programas (algun substring de 5+ chars)
+      const matchPrograma = np === npp || np.includes(npp.slice(0, 12)) || npp.includes(np.slice(0, 12));
+      if (!matchPrograma) continue;
+
+      const key = normalizar(tema);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      temasSimilares.push(tema.length > 200 ? tema.slice(0, 200) + "..." : tema);
+      if (temasSimilares.length >= 30) break;
+    }
+
+    if (temasSimilares.length === 0) return "";
+
+    return `\n\n--- TEMAS YA GENERADOS PARA ESTUDIANTES DE PROGRAMAS SIMILARES ---
+EVITA proponer temas demasiado similares a los siguientes (no repitas el mismo objeto de estudio
+ni el mismo enfoque exacto). Variá la perspectiva, sector, periodo o alcance geográfico:
+
+${temasSimilares.map((t, i) => `${i + 1}. ${t}`).join("\n")}
+
+Si tu propuesta es muy parecida a alguno de los anteriores, redirigila hacia un sector,
+empresa, periodo, regulación o enfoque metodológico distinto.
+
+--- FIN ANTI-DUPLICACIÓN ---\n`;
+  } catch (e) {
+    console.warn("[anti-duplicacion] error obteniendo temas previos:", (e as Error).message);
+    return ""; // si falla, no bloqueamos la generación
+  }
 }
 
 function loadPhasePromptFromDisk(fase: number, tipo: "borrador" | "final"): string {
@@ -439,6 +502,16 @@ async function generarSinSupabase({
       ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
       : "";
 
+    // 🚫 ANTI-DUPLICACIÓN: solo en Cap 0, inyecta lista de temas ya generados
+    // por estudiantes del mismo programa para que la IA evite proponerlos.
+    let antiDuplicacionBlock = "";
+    if (phase_id === "ph-cap0") {
+      const ctx = (proyecto.academic_context ?? {}) as Record<string, unknown>;
+      const ctxIni = (ctx.contexto_inicial ?? {}) as Record<string, unknown>;
+      const programaActual = String(ctxIni.programa ?? "").trim();
+      antiDuplicacionBlock = await buildAntiDuplicacionBlock(proyecto_id, programaActual);
+    }
+
     const typePrompt = tipo === "borrador"
       ? currentPhase.prompt_borrador?.trim()
       : currentPhase.prompt_final?.trim();
@@ -478,6 +551,7 @@ async function generarSinSupabase({
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
       proyecto.titulo_provisional ? `TITULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
+      antiDuplicacionBlock || null,
       deepSearchBlock || null,
       referencesPhase
         ? `\n--- SOPORTE ESTRUCTURADO PARA REFERENCIAS ---\n${buildReferenceSupportBlock({
