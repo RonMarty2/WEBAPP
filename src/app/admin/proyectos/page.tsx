@@ -2,6 +2,20 @@
 
 import { useEffect, useState } from "react";
 
+interface ProyectoMeta {
+  usuario_email: string | null;
+  usuario_name: string | null;
+  usuario_plan: string | null;
+  programa: string;
+  modulos: string;
+  contexto_laboral: string;
+  universidad_nombre: string | null;
+  fases_completas: number;
+  dias_inactivo: number;
+  estado: "completo" | "en_curso" | "abandonado";
+  ultima_actividad: string | null;
+}
+
 interface Proyecto {
   id: string;
   usuario_id: string;
@@ -19,6 +33,8 @@ interface Proyecto {
   contenido_fase_3?: string | null;
   contenido_fase_4?: string | null;
   contenido_fase_5?: string | null;
+  phase_contents?: Record<string, string | null | undefined>;
+  _meta?: ProyectoMeta;
 }
 
 const FASE_LABELS = [
@@ -94,14 +110,37 @@ function DetalleProyecto({ proyectoId, onClose }: { proyectoId: string; onClose:
     );
   }
 
-  const fases = [
-    { num: 0, label: FASE_LABELS[0], contenido: proyecto.contenido_fase_0 },
-    { num: 1, label: FASE_LABELS[1], contenido: proyecto.contenido_fase_1 },
-    { num: 2, label: FASE_LABELS[2], contenido: proyecto.contenido_fase_2 },
-    { num: 3, label: FASE_LABELS[3], contenido: proyecto.contenido_fase_3 },
-    { num: 4, label: FASE_LABELS[4], contenido: proyecto.contenido_fase_4 },
-    { num: 5, label: FASE_LABELS[5], contenido: proyecto.contenido_fase_5 },
-  ].filter((fase) => fase.contenido);
+  // Mapeo del sistema NUEVO de 10 fases (phase_contents con IDs ph-capX)
+  const FASES_DINAMICAS: Array<{ id: string; label: string; orden: number }> = [
+    { id: "ph-cap0",       label: "Tema",          orden: 0 },
+    { id: "ph-cap1",       label: "Introducción",  orden: 10 },
+    { id: "ph-cap2",       label: "Marco Teórico", orden: 20 },
+    { id: "ph-cap3",       label: "Metodología",   orden: 30 },
+    { id: "ph-cap4",       label: "Resultados",    orden: 40 },
+    { id: "ph-cap5",       label: "Conclusiones",  orden: 50 },
+    { id: "ph-resumen",    label: "Resumen",       orden: 60 },
+    { id: "ph-referencias",label: "Bibliografía",  orden: 70 },
+    { id: "ph-latex",      label: "LaTeX",         orden: 80 },
+    { id: "ph-calidad",    label: "Calidad",       orden: 90 },
+  ];
+
+  // Combina ambos sistemas: dynamic phase_contents + legacy contenido_fase_X
+  const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
+  const fasesDynamic = FASES_DINAMICAS
+    .map(f => ({ num: f.orden, label: f.label, contenido: phaseContents[f.id] || null }))
+    .filter(f => f.contenido && f.contenido.trim().length > 50);
+
+  const fasesLegacy = [
+    { num: 0, label: "Tema", contenido: proyecto.contenido_fase_0 },
+    { num: 1, label: "Cap. I", contenido: proyecto.contenido_fase_1 },
+    { num: 2, label: "Cap. II", contenido: proyecto.contenido_fase_2 },
+    { num: 3, label: "Cap. III-V", contenido: proyecto.contenido_fase_3 },
+    { num: 4, label: "Revisión", contenido: proyecto.contenido_fase_4 },
+    { num: 5, label: "Final", contenido: proyecto.contenido_fase_5 },
+  ].filter(f => f.contenido && f.contenido.trim().length > 50);
+
+  // Si tiene phase_contents (sistema nuevo), priorizamos eso
+  const fases = fasesDynamic.length > 0 ? fasesDynamic : fasesLegacy;
 
   const contenidoActual = fases[faseVista]?.contenido ?? "";
 
@@ -134,7 +173,7 @@ function DetalleProyecto({ proyectoId, onClose }: { proyectoId: string; onClose:
           <div className="mt-4 flex flex-wrap gap-2">
             {fases.map((fase, index) => (
               <button
-                key={fase.num}
+                key={`${fase.num}-${index}`}
                 onClick={() => setFaseVista(index)}
                 className={`rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors ${
                   faseVista === index
@@ -142,12 +181,15 @@ function DetalleProyecto({ proyectoId, onClose }: { proyectoId: string; onClose:
                     : "border-gray-200 bg-transparent text-gray-500 hover:bg-gray-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                 }`}
               >
-                {fase.label.split("-")[0].trim()}
+                {fase.label}
+                <span className="ml-1.5 text-[10px] opacity-60">
+                  {fase.contenido ? `${Math.round(fase.contenido.length / 1000)}k` : ""}
+                </span>
               </button>
             ))}
             {fases.length === 0 && (
               <span className="text-[13px] text-gray-400 dark:text-slate-500">
-                Este proyecto aun no tiene contenido generado.
+                Este proyecto aún no tiene contenido generado.
               </span>
             )}
           </div>
@@ -190,7 +232,9 @@ export default function AdminProyectosPage() {
   const [proyectos, setProyectos] = useState<Proyecto[]>([]);
   const [loading, setLoading] = useState(true);
   const [busqueda, setBusqueda] = useState("");
-  const [filtroFase, setFiltroFase] = useState<number | "">("");
+  const [filtroPrograma, setFiltroPrograma] = useState<string>("");
+  const [filtroUniversidad, setFiltroUniversidad] = useState<string>("");
+  const [filtroEstado, setFiltroEstado] = useState<"" | "completo" | "en_curso" | "abandonado">("");
   const [proyectoDetalle, setProyectoDetalle] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -209,14 +253,32 @@ export default function AdminProyectosPage() {
       });
   }, []);
 
+  // Listas únicas de programas y universidades para los selects de filtro
+  const programasUnicos = Array.from(
+    new Set(proyectos.map(p => p._meta?.programa).filter((s): s is string => Boolean(s && s.trim().length > 2))),
+  ).sort();
+  const universidadesUnicas = Array.from(
+    new Set(proyectos.map(p => p._meta?.universidad_nombre).filter((s): s is string => Boolean(s))),
+  ).sort();
+
   const proyectosFiltrados = proyectos.filter((proyecto) => {
     const titulo = (proyecto.tema_aprobado || proyecto.titulo_provisional || "").toLowerCase();
+    const meta = proyecto._meta;
+    const search = busqueda.toLowerCase().trim();
+
     const matchBusqueda =
-      !busqueda ||
-      titulo.includes(busqueda.toLowerCase()) ||
-      proyecto.usuario_id.toLowerCase().includes(busqueda.toLowerCase());
-    const matchFase = filtroFase === "" || proyecto.estado_fase === filtroFase;
-    return matchBusqueda && matchFase;
+      !search ||
+      titulo.includes(search) ||
+      proyecto.usuario_id.toLowerCase().includes(search) ||
+      (meta?.usuario_email ?? "").toLowerCase().includes(search) ||
+      (meta?.usuario_name ?? "").toLowerCase().includes(search) ||
+      (meta?.programa ?? "").toLowerCase().includes(search);
+
+    const matchPrograma = !filtroPrograma || meta?.programa === filtroPrograma;
+    const matchUniversidad = !filtroUniversidad || meta?.universidad_nombre === filtroUniversidad;
+    const matchEstado = !filtroEstado || meta?.estado === filtroEstado;
+
+    return matchBusqueda && matchPrograma && matchUniversidad && matchEstado;
   });
 
   async function eliminarDefinitivamente(proyecto: Proyecto) {
@@ -343,9 +405,11 @@ export default function AdminProyectosPage() {
       <div className="mb-8 grid gap-4" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}>
         {[
           { label: "Total proyectos", value: proyectos.length, color: "text-blue-500 dark:text-blue-400" },
-          { label: "En proceso", value: proyectos.filter((p) => !p.completado).length, color: "text-amber-500 dark:text-amber-400" },
-          { label: "Completados", value: proyectos.filter((p) => p.completado).length, color: "text-emerald-500 dark:text-emerald-400" },
-          { label: "Ocultados", value: proyectos.filter((p) => p.oculto_por_usuario).length, color: "text-rose-500 dark:text-rose-400" },
+          { label: "🟡 En curso", value: proyectos.filter((p) => p._meta?.estado === "en_curso").length, color: "text-amber-500 dark:text-amber-400" },
+          { label: "🟢 Completos", value: proyectos.filter((p) => p._meta?.estado === "completo" || p.completado).length, color: "text-emerald-500 dark:text-emerald-400" },
+          { label: "🔴 Abandonados", value: proyectos.filter((p) => p._meta?.estado === "abandonado").length, color: "text-rose-500 dark:text-rose-400" },
+          { label: "Programas únicos", value: programasUnicos.length, color: "text-violet-500 dark:text-violet-400" },
+          { label: "Universidades", value: universidadesUnicas.length, color: "text-cyan-500 dark:text-cyan-400" },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -362,19 +426,40 @@ export default function AdminProyectosPage() {
           className="min-w-[200px] flex-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 placeholder-gray-400 transition-colors focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-slate-500 dark:focus:ring-white/10"
           value={busqueda}
           onChange={(event) => setBusqueda(event.target.value)}
-          placeholder="Buscar por tema o usuario ID..."
+          placeholder="Buscar tema, email, programa..."
         />
         <select
           className="w-[190px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 transition-colors focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-white/10"
-          value={filtroFase}
-          onChange={(event) => setFiltroFase(event.target.value === "" ? "" : Number(event.target.value))}
+          value={filtroPrograma}
+          onChange={(e) => setFiltroPrograma(e.target.value)}
+          title="Filtrar por programa / diplomado"
         >
-          <option value="">Todas las fases</option>
-          {FASE_LABELS.map((label, index) => (
-            <option key={index} value={index}>
-              {label.split("-")[0].trim()}
-            </option>
+          <option value="">Todos los programas</option>
+          {programasUnicos.map((p) => (
+            <option key={p} value={p}>{p.length > 40 ? p.slice(0, 40) + "…" : p}</option>
           ))}
+        </select>
+        <select
+          className="w-[160px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 transition-colors focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-white/10"
+          value={filtroUniversidad}
+          onChange={(e) => setFiltroUniversidad(e.target.value)}
+          title="Filtrar por universidad"
+        >
+          <option value="">Todas las universidades</option>
+          {universidadesUnicas.map((u) => (
+            <option key={u} value={u}>{u.length > 30 ? u.slice(0, 30) + "…" : u}</option>
+          ))}
+        </select>
+        <select
+          className="w-[150px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 transition-colors focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-white/10"
+          value={filtroEstado}
+          onChange={(e) => setFiltroEstado(e.target.value as "" | "completo" | "en_curso" | "abandonado")}
+          title="Filtrar por estado"
+        >
+          <option value="">Todos los estados</option>
+          <option value="en_curso">🟡 En curso</option>
+          <option value="completo">🟢 Completo</option>
+          <option value="abandonado">🔴 Abandonado</option>
         </select>
       </div>
 
@@ -393,9 +478,15 @@ export default function AdminProyectosPage() {
         <div className="flex flex-col gap-3">
           {proyectosFiltrados.map((proyecto) => {
             const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Sin titulo";
-            const fasesConContenido = [0, 1, 2, 3, 4, 5].filter(
-              (fase) => proyecto[`contenido_fase_${fase}` as keyof Proyecto]
-            );
+            const meta = proyecto._meta;
+            const fasesCount = meta?.fases_completas ?? 0;
+            const estadoEmoji = meta?.estado === "completo" ? "🟢" : meta?.estado === "abandonado" ? "🔴" : "🟡";
+            const estadoLabel = meta?.estado === "completo" ? "Completo" : meta?.estado === "abandonado" ? "Abandonado" : "En curso";
+            const estadoColor = meta?.estado === "completo"
+              ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/40 dark:bg-emerald-950/50 dark:text-emerald-300"
+              : meta?.estado === "abandonado"
+                ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-900/40 dark:bg-rose-950/50 dark:text-rose-300"
+                : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/40 dark:bg-amber-950/50 dark:text-amber-300";
 
             return (
               <div
@@ -404,32 +495,47 @@ export default function AdminProyectosPage() {
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
-                    <div className="mb-2 truncate text-[15px] font-semibold text-gray-900 dark:text-white">
+                    <div className="mb-2 text-[15px] font-semibold text-gray-900 dark:text-white">
                       {titulo}
                     </div>
+
+                    {/* Metadata: usuario + programa + universidad */}
+                    <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px] text-gray-600 dark:text-slate-400">
+                      {meta?.usuario_email ? (
+                        <span title={meta.usuario_name ?? ""}>
+                          👤 <span className="font-medium text-gray-800 dark:text-slate-200">{meta.usuario_name || meta.usuario_email}</span>
+                          {meta.usuario_plan && (
+                            <span className="ml-1.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-gray-600 dark:bg-slate-700 dark:text-slate-300">{meta.usuario_plan}</span>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="font-mono text-gray-400">👤 {proyecto.usuario_id.slice(0, 12)}…</span>
+                      )}
+                      {meta?.programa && <span>🎓 {meta.programa.length > 35 ? meta.programa.slice(0, 35) + "…" : meta.programa}</span>}
+                      {meta?.universidad_nombre && <span>🏛️ {meta.universidad_nombre}</span>}
+                    </div>
+
+                    {/* Badges */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <FaseBadge fase={proyecto.estado_fase} />
-                      {proyecto.completado && <span className="badge badge-green text-[10px]">Completo</span>}
+                      <span className={`rounded-full border px-2.5 py-0.5 text-[10px] font-semibold ${estadoColor}`}>
+                        {estadoEmoji} {estadoLabel}
+                      </span>
+                      <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/50 dark:text-blue-300">
+                        {fasesCount} {fasesCount === 1 ? "fase" : "fases"} completas
+                      </span>
                       {proyecto.oculto_por_usuario && (
                         <span className="rounded-full border border-red-200 bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600 dark:border-red-800/30 dark:bg-red-900/40 dark:text-red-400">
                           Eliminado por usuario
                         </span>
                       )}
-                      <span className="text-[12px] text-gray-500 dark:text-gray-400">
-                        {new Date(proyecto.created_at).toLocaleDateString("es-BO", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
+                      <span className="text-[11px] text-gray-500 dark:text-gray-400">
+                        Creado: {new Date(proyecto.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
-                      {fasesConContenido.length > 0 && (
-                        <span className="text-[12px] font-medium text-emerald-500 dark:text-emerald-400">
-                          {fasesConContenido.length} fase(s) con contenido
+                      {meta?.dias_inactivo !== undefined && meta.dias_inactivo > 7 && meta.estado !== "completo" && (
+                        <span className="text-[11px] text-rose-500 dark:text-rose-400" title="Días sin actividad">
+                          {meta.dias_inactivo}d sin actividad
                         </span>
                       )}
-                    </div>
-                    <div className="mt-1.5 font-mono text-[12px] text-gray-400 dark:text-slate-500">
-                      Usuario: {proyecto.usuario_id}
                     </div>
                   </div>
 
