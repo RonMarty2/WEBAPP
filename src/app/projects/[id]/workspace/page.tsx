@@ -484,12 +484,16 @@ export default function WorkspacePage() {
   }, []);
 
   // Auto-ejecutar Cap 0 la primera vez (cuando el proyecto se acaba de crear y no tiene contenido todavía).
-  // Debe ir DESPUÉS de la declaración de generarFase para evitar TDZ (temporal dead zone).
+  // Debe ir DESPUÉS de la declaración de generarFase para evitar TDZ.
+  // Usa autoCap0FiredRef para evitar loop infinito si la generación falla.
+  const autoCap0FiredRef = useRef(false);
   useEffect(() => {
+    if (autoCap0FiredRef.current) return;
     if (!proyecto || isGenerating || phaseDefs.length === 0) return;
     if (proyecto.contenido_fase_0) return;
     const cap0 = phaseDefs.find(p => p.id === "ph-cap0" || p.id === "0" || p.label?.includes("Tema"));
     if (!cap0) return;
+    autoCap0FiredRef.current = true; // 🔒 SOLO se dispara UNA vez por sesión
     queueMicrotask(() => {
       generarFase({ tipo: "borrador" }).catch(e => {
         console.error("Error auto-generando Cap 0:", e);
