@@ -45,9 +45,15 @@ interface Props {
   rawContent: string;
   temaInicial?: string;
   isGenerating?: boolean;
+  /** true si el tema ya fue confirmado (no se puede volver al selector). */
+  temaConfirmado?: boolean;
+  /** Tema final guardado en BD (para mostrar en pantalla de "ya confirmado"). */
+  temaFinalConfirmado?: string;
   onElegirOpcion?: (propuesta: Propuesta) => void;
   onRegenerar?: () => void;
   onMantenerTema?: () => void;
+  /** Callback para ir al siguiente capítulo (Cap I). */
+  onIrACapI?: () => void;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -188,15 +194,79 @@ export default function Cap0PropuestasView({
   rawContent,
   temaInicial,
   isGenerating,
+  temaConfirmado,
+  temaFinalConfirmado,
   onElegirOpcion,
   onRegenerar,
   onMantenerTema,
+  onIrACapI,
 }: Props) {
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
+  const [confirmacion, setConfirmacion] = useState<{
+    tipo: "elegir" | "mantener";
+    propuesta?: Propuesta;
+  } | null>(null);
 
   const data = useMemo(() => extractJsonBlock(rawContent), [rawContent]);
   const propuestas = data?.propuestas ?? [];
   const recomendada = detectarOpcionRecomendada(data?.recomendacion);
+
+  // ── Pantalla de TEMA CONFIRMADO (irreversible) ──────────────────────────
+  if (temaConfirmado) {
+    return (
+      <div style={{ padding: "60px 24px", maxWidth: 720, margin: "0 auto", textAlign: "center" }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: "50%",
+          background: "linear-gradient(135deg, #4ade80, #22c55e)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 auto 24px",
+          boxShadow: "0 8px 24px rgba(34,197,94,0.35)",
+          fontSize: 40,
+        }}>✓</div>
+
+        <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 800, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 10 }}>
+          Tema Confirmado
+        </div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)", margin: "0 0 18px", lineHeight: 1.35 }}>
+          {temaFinalConfirmado || temaInicial || "Tu tema de investigación"}
+        </h1>
+
+        <p style={{ fontSize: 14, color: "var(--fg-secondary)", lineHeight: 1.7, margin: "0 0 28px", maxWidth: 540, marginInline: "auto" }}>
+          Este tema se usará como base de los capítulos I al V de tu monografía.
+          Ya no podés cambiarlo desde acá: cada capítulo dependerá de él.
+        </p>
+
+        <div style={{
+          padding: "14px 18px", background: "rgba(245,158,11,0.06)",
+          border: "1px solid rgba(245,158,11,0.25)", borderRadius: 10,
+          fontSize: 12.5, color: "var(--fg-secondary)", lineHeight: 1.6,
+          maxWidth: 540, margin: "0 auto 28px",
+        }}>
+          💡 Si necesitás un tema diferente, podés crear un proyecto nuevo
+          desde el dashboard.
+        </div>
+
+        {onIrACapI && (
+          <button
+            onClick={onIrACapI}
+            style={{
+              padding: "12px 32px",
+              borderRadius: 999,
+              border: "none",
+              background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+              color: "white",
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: "pointer",
+              boxShadow: "0 6px 16px rgba(99,102,241,0.32)",
+            }}
+          >
+            Continuar al Capítulo I →
+          </button>
+        )}
+      </div>
+    );
+  }
 
   // Fallback: si no se pudo parsear el JSON, mostramos el markdown crudo
   if (!data || propuestas.length === 0) {
@@ -425,7 +495,7 @@ export default function Cap0PropuestasView({
 
               {/* Botón principal */}
               <button
-                onClick={() => onElegirOpcion?.(p)}
+                onClick={() => setConfirmacion({ tipo: "elegir", propuesta: p })}
                 disabled={isGenerating}
                 style={{
                   marginTop: "auto",
@@ -489,7 +559,7 @@ export default function Cap0PropuestasView({
           </button>
           {onMantenerTema && temaInicial && temaInicial !== "(Por definir)" && (
             <button
-              onClick={onMantenerTema}
+              onClick={() => setConfirmacion({ tipo: "mantener" })}
               disabled={isGenerating}
               style={{
                 padding: "10px 16px", borderRadius: 10,
@@ -506,6 +576,140 @@ export default function Cap0PropuestasView({
         </div>
       </div>
 
+      {/* ── Modal de confirmación irreversible ────────────────────────── */}
+      {confirmacion && (
+        <div
+          onClick={() => setConfirmacion(null)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9999,
+            background: "rgba(15,23,42,0.55)", backdropFilter: "blur(4px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: 20,
+            animation: "lab-fade-in 200ms ease-out",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: "100%", maxWidth: 480,
+              background: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              borderRadius: 16,
+              padding: "28px 28px 24px",
+              boxShadow: "0 20px 50px rgba(15,23,42,0.35)",
+              animation: "lab-scale-in 220ms cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            <div style={{
+              width: 56, height: 56, borderRadius: "50%",
+              background: "rgba(245,158,11,0.12)",
+              border: "1px solid rgba(245,158,11,0.3)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 28, marginBottom: 16,
+            }}>⚠️</div>
+
+            <h3 style={{ fontSize: 19, fontWeight: 800, color: "var(--fg-primary)", margin: "0 0 10px" }}>
+              ¿Estás seguro de tu elección?
+            </h3>
+
+            <div style={{ fontSize: 13.5, color: "var(--fg-secondary)", lineHeight: 1.65, marginBottom: 14 }}>
+              {confirmacion.tipo === "elegir" ? (
+                <>
+                  Vas a confirmar el tema:
+                  <div style={{
+                    margin: "10px 0",
+                    padding: "10px 14px",
+                    background: "rgba(99,102,241,0.06)",
+                    border: "1px solid rgba(99,102,241,0.2)",
+                    borderRadius: 8,
+                    color: "var(--fg-primary)",
+                    fontWeight: 600,
+                    fontSize: 13,
+                  }}>
+                    “{confirmacion.propuesta?.titulo}”
+                  </div>
+                </>
+              ) : (
+                <>
+                  Vas a continuar con tu tema actual:
+                  <div style={{
+                    margin: "10px 0",
+                    padding: "10px 14px",
+                    background: "rgba(99,102,241,0.06)",
+                    border: "1px solid rgba(99,102,241,0.2)",
+                    borderRadius: 8,
+                    color: "var(--fg-primary)",
+                    fontWeight: 600,
+                    fontSize: 13,
+                  }}>
+                    “{temaInicial}”
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div style={{
+              padding: "12px 14px",
+              background: "rgba(245,158,11,0.06)",
+              border: "1px solid rgba(245,158,11,0.25)",
+              borderRadius: 10,
+              fontSize: 12.5,
+              color: "var(--fg-secondary)",
+              lineHeight: 1.6,
+              marginBottom: 22,
+            }}>
+              <strong style={{ color: "#f59e0b" }}>Esta decisión es definitiva.</strong>
+              {" "}Una vez confirmes, no podrás volver al selector de tema.
+              Los Capítulos I al V se construirán sobre esta elección.
+            </div>
+
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setConfirmacion(null)}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: 10,
+                  border: "1px solid var(--border)",
+                  background: "transparent",
+                  color: "var(--fg-primary)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  if (confirmacion.tipo === "elegir" && confirmacion.propuesta) {
+                    onElegirOpcion?.(confirmacion.propuesta);
+                  } else if (confirmacion.tipo === "mantener") {
+                    onMantenerTema?.();
+                  }
+                  setConfirmacion(null);
+                }}
+                style={{
+                  padding: "10px 20px",
+                  borderRadius: 10,
+                  border: "none",
+                  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+                  color: "white",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  boxShadow: "0 4px 12px rgba(99,102,241,0.32)",
+                }}
+              >
+                Sí, confirmar y continuar
+              </button>
+            </div>
+          </div>
+          <style>{`
+            @keyframes lab-fade-in { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes lab-scale-in { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+          `}</style>
+        </div>
+      )}
     </div>
   );
 }
