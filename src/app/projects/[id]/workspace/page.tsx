@@ -115,6 +115,22 @@ function getBorrador(p: Proyecto, phaseId: string, legacyNum?: number): string |
   return null;
 }
 
+/**
+ * Devuelve el mejor contenido disponible para una fase: el FINAL si está aprobado,
+ * o el BORRADOR si solo eso existe. Sirve para mostrar progreso real en el preview.
+ */
+function getFinalOBorrador(
+  p: Proyecto,
+  phaseId: string,
+  legacyNum?: number,
+): { content: string | null; esBorrador: boolean } {
+  const final = getFinalContent(p, phaseId, legacyNum);
+  if (final?.trim()) return { content: final, esBorrador: false };
+  const borrador = getBorrador(p, phaseId, legacyNum);
+  if (borrador?.trim()) return { content: borrador, esBorrador: true };
+  return { content: null, esBorrador: false };
+}
+
 function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).length; }
 
 /**
@@ -991,10 +1007,13 @@ export default function WorkspacePage() {
     ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
     : finalContent;
   const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
+  // Fases con CUALQUIER contenido (borradores + finales) — para el preview en vivo.
+  const fasesConContenido = displayFases.filter(f => Boolean(getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content)).length;
+  const fasesEnBorrador = fasesConContenido - fasesCompletadas;
 
-  // Real-time document stats: sum words from all completed phases
+  // Real-time document stats: sum words from all phases with content (final or draft)
   const totalWords = displayFases.reduce((acc, f) => {
-    const c = getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
+    const c = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content;
     return acc + (c ? countWords(c) : 0);
   }, 0);
   const estimatedPages = totalWords > 0 ? Math.round(totalWords / 350) : 0;
@@ -1003,21 +1022,26 @@ export default function WorkspacePage() {
   const documentUniversity = university ?? DEFAULT_UNIVERSITIES[0];
   const storedFinalDocument = proyecto.final_document || proyecto.phase_contents?.__final_document || null;
   const documentoFinalListo = Boolean(storedFinalDocument);
+  // El preview incluye borradores (con etiqueta visual "borrador") para que el estudiante
+  // vea su progreso. El botón de descargar PDF sigue requiriendo `documentoFinalListo`.
   const phaseContents = storedFinalDocument
     ? { fase_0: storedFinalDocument }
     : Object.fromEntries(
         displayFases.map((f, index) => [
           `fase_${index}`,
-          getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num)
+          getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content
         ])
       );
   const phaseLabels = storedFinalDocument
     ? { fase_0: "Monografía final" }
     : Object.fromEntries(
-        displayFases.map((f, index) => [`fase_${index}`, f.label])
+        displayFases.map((f, index) => {
+          const { esBorrador } = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
+          return [`fase_${index}`, esBorrador ? `${f.label}  ·  (borrador, pendiente de aprobación)` : f.label];
+        })
       );
   const documentTitle = pdfData.tituloTrabajo?.trim() || proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento";
-  const docHtml = (fasesCompletadas > 0 || storedFinalDocument) ? generatePdfHtml({
+  const docHtml = (fasesConContenido > 0 || storedFinalDocument) ? generatePdfHtml({
     university: documentUniversity,
     studentData: pdfData,
     phaseContents,
@@ -1815,7 +1839,11 @@ export default function WorkspacePage() {
               <div>
                 <div style={{ fontSize:12, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa del Documento</div>
                 <div style={{ fontSize:11, color:"var(--border-hover)", marginTop:1 }}>
-                  {documentoFinalListo ? "Documento final consolidado" : `${fasesCompletadas} capítulo${fasesCompletadas !== 1 ? "s" : ""} finalizados`}
+                  {documentoFinalListo
+                    ? "Documento final consolidado"
+                    : fasesEnBorrador > 0
+                      ? `${fasesCompletadas} finalizado${fasesCompletadas !== 1 ? "s" : ""} · ${fasesEnBorrador} en borrador`
+                      : `${fasesCompletadas} capítulo${fasesCompletadas !== 1 ? "s" : ""} finalizados`}
                 </div>
               </div>
               {university && (
@@ -1834,17 +1862,17 @@ export default function WorkspacePage() {
                   style={{ width:"100%", height:"100%", border:0, display:"block", background:"#eef0f3" }}
                 />
               ) : (
-                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10, padding:"40px 0" }}>
+                <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10, padding:"40px 24px" }}>
                   <div style={{ fontSize:36, opacity:0.12 }}>📋</div>
-                  <div style={{ fontSize:12, color:"var(--border)", textAlign:"center", lineHeight:1.6 }}>
-                    Aquí se ensamblará el documento completo a medida que finalizas las fases.
+                  <div style={{ fontSize:12, color:"var(--border)", textAlign:"center", lineHeight:1.6, maxWidth:260 }}>
+                    Generá el borrador de cualquier capítulo y vas a verlo acá. A medida que aprobás cada fase, el documento se va consolidando.
                   </div>
                 </div>
               )}
             </div>
 
             {/* Download actions */}
-            {(fasesCompletadas > 0 || documentoFinalListo) && (
+            {(fasesConContenido > 0 || documentoFinalListo) && (
               <div style={{ padding:"12px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", display:"flex", gap:8, flexShrink:0, flexWrap:"wrap" }}>
                 <button onClick={generarDocumentoFinal} disabled={isFinalizing || fasesCompletadas === 0} className="btn-purple" style={{ flex:1, fontSize:12, padding:"8px", justifyContent:"center", minWidth: "100%" }}>
                   {isFinalizing ? "Consolidando documento..." : documentoFinalListo ? "Regenerar documento final" : "Generar documento final"}
