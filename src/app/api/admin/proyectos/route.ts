@@ -50,7 +50,7 @@ export async function GET(req: Request) {
 
       // También considerar campos legacy
       const legacyCompletas = [0, 1, 2, 3, 4, 5].filter(n => {
-        const c = (p as Record<string, unknown>)[`contenido_fase_${n}`];
+        const c = (p as unknown as Record<string, unknown>)[`contenido_fase_${n}`];
         return typeof c === "string" && c.trim().length > 100;
       }).length;
 
