@@ -1400,22 +1400,20 @@ export default function WorkspacePage() {
 
             {/* GUIADO: has borrador, needs final — oculto en Cap 0 (las cards manejan la decisión) */}
             {esGuiado && hasBorrador && !hasFinal && !isCap0Phase && (() => {
-              const status = getGenStatus(displayContent);
-              const palabrasFmt = status.palabras.toLocaleString("es");
+              const palabras = displayContent ? countWords(displayContent) : 0;
+              const palabrasFmt = palabras.toLocaleString("es");
               return (
                 <>
-                  <div style={{ fontSize:11, color: status.completo ? "#22c55e" : "#f59e0b", fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase", display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
-                    <span>{status.completo ? "✓ Borrador completo" : "⚠ Borrador puede estar incompleto"}</span>
-                    {status.palabras > 0 && (
+                  <div style={{ fontSize:11, color:"#22c55e", fontWeight:700, letterSpacing:"0.05em", textTransform:"uppercase", display:"flex", alignItems:"center", gap:8, flexWrap:"wrap" }}>
+                    <span>✓ Borrador listo</span>
+                    {palabras > 0 && (
                       <span style={{ fontSize:10, color:"var(--fg-muted)", fontWeight:600, letterSpacing:"0.02em", textTransform:"none" }}>
                         · {palabrasFmt} palabras
                       </span>
                     )}
                   </div>
                   <div style={{ fontSize:11.5, color:"var(--fg-muted)", lineHeight:1.5 }}>
-                    {status.completo
-                      ? "Lee el contenido. Si está bien, aprobá y avanzá. Si tu tutor te dio observaciones, escribilas abajo y la IA las aplicará."
-                      : "El texto parece cortado al final. Podés regenerar otra versión o aprobarlo igual si vas a completarlo manualmente."}
+                    Lee el contenido. Si está bien, aprobá y avanzá. Si tu tutor te dio observaciones, escribilas abajo y la IA las aplicará.
                   </div>
                 <textarea
                   className="input-dark"
