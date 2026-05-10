@@ -13,24 +13,6 @@ import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import { summarizePhaseForMemory } from "@/lib/academicProject.mjs";
 import { DEFAULT_PHASES } from "@/app/api/admin/workspace-prompts/route";
 
-const FASE_ETIQUETA: Record<number, string> = {
-  0: "Fase 0 - Planteamiento del Tema",
-  1: "Fase 1 - Capitulo I: Marco Referencial",
-  2: "Fase 2 - Capitulo II: Marco Teorico",
-  3: "Fase 3 - Capitulos III-V: Desarrollo",
-  4: "Fase 4 - Revision y Compilacion",
-  5: "Fase 5 - Conclusiones y Bibliografia",
-};
-
-const FASE_A_COLUMNA: Record<number, string> = {
-  0: "contenido_fase_0",
-  1: "contenido_fase_1",
-  2: "contenido_fase_2",
-  3: "contenido_fase_3",
-  4: "contenido_fase_4",
-  5: "contenido_fase_5",
-};
-
 type ProyectoLike = {
   id: string;
   usuario_id: string;
@@ -121,32 +103,20 @@ function upsertPhaseSummary(
   };
 }
 
-function resolvePhase(proyecto: ProyectoLike, phaseId?: string, faseNumero?: number) {
-  if (phaseId) {
-    const phaseDefs = phaseDefinitionsForProject({
-      servicioId: proyecto.servicio_id ?? "mono-001",
-      tipoProyectoId: proyecto.tipo_proyecto_id ?? undefined,
-    });
-    const found = phaseDefs.find((phase) => phase.id === phaseId);
-    return {
-      key: phaseId,
-      label: found?.label ?? phaseId,
-      legacyColumn: null as string | null,
-    };
-  }
-
-  const key = String(faseNumero ?? 0);
+function resolvePhase(proyecto: ProyectoLike, phaseId: string) {
+  const phaseDefs = phaseDefinitionsForProject({
+    servicioId: proyecto.servicio_id ?? "mono-001",
+    tipoProyectoId: proyecto.tipo_proyecto_id ?? undefined,
+  });
+  const found = phaseDefs.find((phase) => phase.id === phaseId);
   return {
-    key,
-    label: FASE_ETIQUETA[faseNumero ?? 0] ?? `Fase ${key}`,
-    legacyColumn: FASE_A_COLUMNA[faseNumero ?? 0] ?? null,
+    key: phaseId,
+    label: found?.label ?? phaseId,
   };
 }
 
-function currentContentFor(proyecto: ProyectoLike, key: string, legacyColumn: string | null) {
-  return proyecto.phase_contents?.[key]
-    ?? (legacyColumn ? (proyecto as Record<string, unknown>)[legacyColumn] as string | null : null)
-    ?? null;
+function currentContentFor(proyecto: ProyectoLike, key: string) {
+  return proyecto.phase_contents?.[key] ?? null;
 }
 
 async function editWithAI({
@@ -206,14 +176,14 @@ export async function POST(req: Request) {
     const body = await req.json() as {
       proyecto_id?: string;
       phase_id?: string;
-      fase_numero?: number;
       mensaje_usuario?: string;
     };
 
     const proyectoId = body.proyecto_id?.trim();
+    const phaseId = body.phase_id?.trim();
     const observacion = body.mensaje_usuario?.trim();
-    if (!proyectoId || !observacion) {
-      return NextResponse.json({ error: "proyecto_id y mensaje_usuario son obligatorios" }, { status: 400 });
+    if (!proyectoId || !phaseId || !observacion) {
+      return NextResponse.json({ error: "proyecto_id, phase_id y mensaje_usuario son obligatorios" }, { status: 400 });
     }
 
     const proyecto = await dbGetProyecto(proyectoId);
@@ -221,8 +191,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Proyecto no encontrado o sin acceso" }, { status: 404 });
     }
 
-    const phase = resolvePhase(proyecto, body.phase_id, body.fase_numero);
-    const contenidoActual = currentContentFor(proyecto, phase.key, phase.legacyColumn);
+    const phase = resolvePhase(proyecto, phaseId);
+    const contenidoActual = currentContentFor(proyecto, phase.key);
     if (!contenidoActual?.trim()) {
       return NextResponse.json({ error: "No hay contenido existente para ajustar en esta fase." }, { status: 400 });
     }
@@ -246,7 +216,6 @@ export async function POST(req: Request) {
       final_document: null,
       final_document_validation: {},
     };
-    if (phase.legacyColumn) updates[phase.legacyColumn] = contenido;
     await dbUpdateProyecto(proyectoId, updates);
 
     return NextResponse.json({

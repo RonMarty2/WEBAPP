@@ -25,18 +25,13 @@ function normalize(s: string): string {
 /** Cuenta cuántas fases tiene un proyecto con contenido real (>100 chars). */
 function fasesCompletas(p: Record<string, unknown>): number {
   const phaseContents = (p.phase_contents ?? {}) as Record<string, string | null | undefined>;
-  const dynamicCount = Object.entries(phaseContents)
+  return Object.entries(phaseContents)
     .filter(([key, value]) =>
       !key.includes("_borrador") &&
       !key.startsWith("__") &&
       typeof value === "string" &&
       value.trim().length > 100,
     ).length;
-  const legacyCount = [0, 1, 2, 3, 4, 5].filter(n => {
-    const c = p[`contenido_fase_${n}`];
-    return typeof c === "string" && c.trim().length > 100;
-  }).length;
-  return Math.max(dynamicCount, legacyCount);
 }
 
 /** Extrae 2-4 palabras clave de un título, evitando stopwords. */

@@ -134,13 +134,6 @@ export interface ProyectoRecord {
   perfil_estilo_usuario?: string | null;
   // Cache invalidation: phaseKey → needs regeneration after a later phase changed
   requiere_actualizacion?: Record<string, boolean>;
-  // Legacy fixed-phase columns (kept for backward compat)
-  contenido_fase_0: string | null;
-  contenido_fase_1: string | null;
-  contenido_fase_2: string | null;
-  contenido_fase_3: string | null;
-  contenido_fase_4: string | null;
-  contenido_fase_5: string | null;
   // Dynamic phase contents: phase_id → content (and phase_id + "_borrador" → borrador)
   phase_contents?: Record<string, string | null>;
   // Academic dossier used to keep a stable project context across AI calls.
@@ -533,12 +526,6 @@ export function hideProyectoForUser(
     modalidad_creacion: existing?.modalidad_creacion ?? seed.modalidad_creacion ?? "directa",
     perfil_estilo_usuario: existing?.perfil_estilo_usuario ?? seed.perfil_estilo_usuario ?? null,
     requiere_actualizacion: existing?.requiere_actualizacion ?? seed.requiere_actualizacion ?? {},
-    contenido_fase_0: existing?.contenido_fase_0 ?? seed.contenido_fase_0 ?? null,
-    contenido_fase_1: existing?.contenido_fase_1 ?? seed.contenido_fase_1 ?? null,
-    contenido_fase_2: existing?.contenido_fase_2 ?? seed.contenido_fase_2 ?? null,
-    contenido_fase_3: existing?.contenido_fase_3 ?? seed.contenido_fase_3 ?? null,
-    contenido_fase_4: existing?.contenido_fase_4 ?? seed.contenido_fase_4 ?? null,
-    contenido_fase_5: existing?.contenido_fase_5 ?? seed.contenido_fase_5 ?? null,
     phase_contents: existing?.phase_contents ?? seed.phase_contents ?? {},
     academic_context: existing?.academic_context ?? seed.academic_context ?? {},
     academic_memory: existing?.academic_memory ?? seed.academic_memory ?? {},

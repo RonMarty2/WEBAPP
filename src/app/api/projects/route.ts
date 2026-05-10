@@ -61,12 +61,6 @@ export async function POST(req: Request) {
       academic_memory: {},
       final_document: null,
       final_document_validation: {},
-      contenido_fase_0: null,
-      contenido_fase_1: null,
-      contenido_fase_2: null,
-      contenido_fase_3: null,
-      contenido_fase_4: null,
-      contenido_fase_5: null,
     });
 
     return NextResponse.json({ proyecto }, { status: 201 });

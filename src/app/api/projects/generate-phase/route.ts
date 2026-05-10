@@ -60,33 +60,12 @@ import {
 import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
 import { buscarFuentesAcademicas, buildFuentesVerificadasBlock } from "@/lib/deepSearch";
 
-// Fases legacy que se benefician de búsqueda académica (Marco Teórico y Bibliografía)
-const FASES_CON_DEEP_SEARCH = new Set([2, 3, 5]);
-
 // Palabras clave en el label/prompt de una fase dinámica que activan deep search
 const DEEP_SEARCH_KEYWORDS = /marco\s+te[oó]rico|bibliograf|referencias|fuentes|estado\s+del\s+arte|antecedente/i;
 
 function faseNecesitaDeepSearch(phase: { label: string; prompt?: string }): boolean {
   return DEEP_SEARCH_KEYWORDS.test(phase.label) || DEEP_SEARCH_KEYWORDS.test(phase.prompt ?? "");
 }
-
-const FASE_ETIQUETA: Record<number, string> = {
-  0: "Fase 0 — Planteamiento del Tema",
-  1: "Fase 1 — Capítulo I: Marco Referencial",
-  2: "Fase 2 — Capítulo II: Marco Teórico",
-  3: "Fase 3 — Capítulos III-V: Desarrollo",
-  4: "Fase 4 — Revisión y Compilación",
-  5: "Fase 5 — Conclusiones y Bibliografía",
-};
-
-const FASE_A_COLUMNA: Record<number, string> = {
-  0: "contenido_fase_0",
-  1: "contenido_fase_1",
-  2: "contenido_fase_2",
-  3: "contenido_fase_3",
-  4: "contenido_fase_4",
-  5: "contenido_fase_5",
-};
 
 // ── Prompt loader ─────────────────────────────────────────────────────────────
 
@@ -98,6 +77,23 @@ import { DEFAULT_PHASES } from "@/app/api/admin/workspace-prompts/route";
  * 2. User style profile
  * 3. Hilo Conductor rules (lowest priority)
  */
+const REGLA_LONGITUD = `
+=== REGLA DE COBERTURA Y LONGITUD (LEER ANTES DE EMPEZAR) ===
+Prioridad #1: COBERTURA COMPLETA. TODAS las secciones, subsecciones, tablas
+  y elementos pedidos en este prompt son OBLIGATORIOS y deben aparecer en el
+  orden indicado. NUNCA omitas una sección por falta de espacio.
+
+Prioridad #2: CONCISIÓN dentro de cada sección. Los rangos de páginas/palabras
+  son TECHO, no objetivo. Si una sección se puede explicar bien en pocos
+  párrafos, hacelo. NO inflés con relleno, NO repitas ideas, NO agregues
+  párrafos decorativos.
+
+Conflicto entre #1 y #2: si te das cuenta de que vas a quedarte corto de
+espacio, SACRIFICÁ profundidad de las secciones iniciales para asegurar que
+LLEGUES A LA ÚLTIMA sección. Mejor 5 secciones con 70% de detalle que 3 con
+100% y 2 ausentes.
+=== FIN REGLA DE COBERTURA Y LONGITUD ===`;
+
 function buildSystemPrompt({
   phasePrompt,
   perfilEstilo,
@@ -112,6 +108,7 @@ function buildSystemPrompt({
   const parts: string[] = [];
 
   parts.push(phasePrompt);
+  parts.push(REGLA_LONGITUD);
 
   // Compromisos sagrados de capítulos anteriores — máxima prioridad factual
   if (hiloConstraints?.trim()) {
@@ -196,19 +193,6 @@ empresa, periodo, regulación o enfoque metodológico distinto.
   }
 }
 
-function loadPhasePromptFromDisk(fase: number, tipo: "borrador" | "final"): string {
-  try {
-    const disk = loadFromDisk();
-    const wp = disk.workspacePrompts;
-    // Try tipo-specific key first, then generic key, then default
-    const key = String(fase);
-    const tipoKey = `${key}_${tipo}`;
-    return wp?.phases?.[tipoKey] ?? wp?.phases?.[key] ?? DEFAULT_PHASES[key as keyof typeof DEFAULT_PHASES] ?? DEFAULT_PHASES["0"];
-  } catch {
-    return DEFAULT_PHASES[String(fase) as keyof typeof DEFAULT_PHASES] ?? DEFAULT_PHASES["0"];
-  }
-}
-
 function loadPhasePromptByIdFromDisk(phase_id: string, tipo: "borrador" | "final", fallback: string): string {
   try {
     const disk = loadFromDisk();
@@ -217,15 +201,6 @@ function loadPhasePromptByIdFromDisk(phase_id: string, tipo: "borrador" | "final
     return wp?.phases?.[tipoKey] ?? wp?.phases?.[phase_id] ?? fallback;
   } catch {
     return fallback;
-  }
-}
-
-function loadOnboardingPrompt(): string {
-  try {
-    const disk = loadFromDisk();
-    return disk.workspacePrompts?.phases?.["onboarding"] ?? DEFAULT_PHASES["onboarding"];
-  } catch {
-    return DEFAULT_PHASES["onboarding"];
   }
 }
 
@@ -410,6 +385,86 @@ function buildAITraceEntry(input: {
   };
 }
 
+// ── Auto-continue: detecta y completa generaciones cortadas por max_tokens ───
+
+/**
+ * Heurística para detectar si el modelo cortó a mitad por límite de tokens.
+ * Reglas (en orden):
+ *   1. Si el texto es muy corto (<2000 chars) → otro problema, no corte.
+ *   2. Si termina con cierre limpio (punto, signo, paréntesis cerrado, etc.) → terminó natural.
+ *   3. Si última línea es fila de tabla markdown cerrada o fence ``` → terminó natural.
+ *   4. En cualquier otro caso → ALTA sospecha de corte.
+ *
+ * Nota: ya NO usamos ratio de tokens. Antes lo hacíamos pero subestimaba en textos
+ * académicos con palabras largas. La condición "no cierra limpio" sola es suficiente
+ * porque un modelo que terminó naturalmente CASI SIEMPRE cierra con punto/signo.
+ */
+function parecieraTruncado(texto: string, _maxTokens: number): boolean {
+  const tail = texto.trimEnd();
+  if (tail.length < 2000) return false; // Muy corto: probablemente otro problema.
+
+  // Cierres aceptables al final de una generación bien terminada.
+  const cierresOk = /[.!?…)}\]:;"'»”’*—]\s*$/u;
+  if (cierresOk.test(tail)) return false;
+
+  // Última línea es fila de tabla markdown cerrada o fence de bloque de código.
+  const ultimaLinea = tail.split("\n").slice(-1)[0]?.trim() ?? "";
+  if (/^\|.*\|$/.test(ultimaLinea)) return false;
+  if (ultimaLinea === "```") return false;
+
+  return true; // Alta sospecha de corte: texto largo sin cierre limpio.
+}
+
+/**
+ * Pide al modelo que continúe EXACTAMENTE desde donde se cortó la generación previa,
+ * sin repetir nada. Usa la misma cascada de proveedores que la llamada original.
+ * Devuelve "" si la continuación falla (no rompe la generación, mostramos lo parcial).
+ */
+async function continuarGeneracion(
+  systemPrompt: string,
+  textoParcial: string,
+  maxTokensTope: number,
+  servicioId?: string,
+): Promise<string> {
+  // Tomamos los últimos ~600 chars como pista de "dónde estábamos".
+  const colaParcial = textoParcial.slice(-600);
+  const userPrompt = `La generación anterior se cortó por límite de tokens. Tu tarea ahora es CONTINUAR.
+
+REGLAS ESTRICTAS:
+1. NO repitas nada de lo ya generado. NO empieces con un título nuevo ni con una introducción.
+2. NO digas "continuando...", "como decía...", ni nada similar. Empezá DIRECTO con la palabra/oración exacta donde se cortó.
+3. Mantené el mismo tono, formato (markdown), estructura y nivel de detalle.
+4. Cerrá lo que estaba pendiente y terminá ordenadamente. NO inventes secciones nuevas si no estaban planificadas.
+
+ÚLTIMOS ~600 CARACTERES YA GENERADOS (solo como referencia de dónde quedaste, NO los repitas):
+"""
+${colaParcial}
+"""
+
+CONTINUACIÓN (empezá exactamente donde se cortó):`;
+
+  try {
+    // Damos hasta 40% del techo original para completar; suele ser suficiente.
+    const continuacionMaxTokens = Math.max(2000, Math.floor(maxTokensTope * 0.4));
+    const resultado = await llamarIA(systemPrompt, userPrompt, continuacionMaxTokens, servicioId);
+    return resultado.text?.trim() ?? "";
+  } catch (e) {
+    console.warn("[auto-continue] falló la continuación:", (e as Error).message);
+    return "";
+  }
+}
+
+/** Une la generación parcial con su continuación, evitando dobles espacios. */
+function empalmarContinuacion(parcial: string, continuacion: string): string {
+  const a = parcial.trimEnd();
+  const b = continuacion.trimStart();
+  // Si `a` termina a mitad de palabra (sin whitespace), pegamos directo.
+  // Si termina con whitespace o signo, ponemos un espacio.
+  const ultimoChar = a.slice(-1);
+  const necesitaEspacio = /\s/.test(ultimoChar) ? false : /[.!?:;)\]}]/.test(ultimoChar);
+  return necesitaEspacio ? `${a} ${b}` : `${a}${b}`;
+}
+
 // ── Handler principal ─────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
@@ -419,8 +474,7 @@ export async function POST(req: Request) {
     const { user: sessionUser } = await requireAuth();
 
     let proyecto_id: string;
-    let fase_numero: number;
-    let phase_id: string | undefined;
+    let phase_id: string;
     let mensaje_usuario: string | undefined;
     let tipo: "borrador" | "final";
     let feedback_usuario: string | undefined;
@@ -428,15 +482,14 @@ export async function POST(req: Request) {
     try {
       const body = await req.json();
       proyecto_id = body.proyecto_id;
-      phase_id = body.phase_id ?? undefined;
-      fase_numero = Number(body.fase_numero ?? 0);
+      phase_id = body.phase_id;
       mensaje_usuario = body.mensaje_usuario ?? undefined;
       tipo = body.tipo === "borrador" ? "borrador" : "final";
       feedback_usuario = body.feedback_usuario ?? undefined;
 
-      if (!proyecto_id || (!phase_id && (isNaN(fase_numero) || fase_numero < 0))) {
+      if (!proyecto_id || !phase_id) {
         return NextResponse.json(
-          { error: "proyecto_id requerido, y también fase_numero (>=0) o phase_id" },
+          { error: "proyecto_id y phase_id son requeridos" },
           { status: 400 }
         );
       }
@@ -444,10 +497,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Body JSON inválido" }, { status: 400 });
     }
 
-    // Siempre usar el path principal (tabla 'proyectos' vía db layer)
     return await generarSinSupabase({
       sessionUserId: sessionUser.id,
-      proyecto_id, fase_numero, phase_id,
+      proyecto_id, phase_id,
       mensaje_usuario, tipo, feedback_usuario,
       t0,
     });
@@ -464,14 +516,13 @@ export async function POST(req: Request) {
 // ── Sin Supabase ──────────────────────────────────────────────────────────────
 
 async function generarSinSupabase({
-  sessionUserId, proyecto_id, fase_numero, phase_id,
+  sessionUserId, proyecto_id, phase_id,
   mensaje_usuario, tipo, feedback_usuario,
   t0,
 }: {
   sessionUserId: string;
   proyecto_id: string;
-  fase_numero: number;
-  phase_id?: string;
+  phase_id: string;
   mensaje_usuario?: string;
   tipo: "borrador" | "final";
   feedback_usuario?: string;
@@ -625,17 +676,17 @@ async function generarSinSupabase({
 
     const userPrompt = userPromptParts.filter(Boolean).join("\n");
 
-    // 📏 maxTokens según fase. Calibrado al RANGO MEDIO de cada megaprompt
-    // para que el PDF final NO supere las ~70 páginas en total.
-    // Suma proyectada al PDF: 12+14+8+18+3+1+5 = ~61 págs (Caps I+II+III+IV+V+Resumen+Refs).
-    // Cap 0, LaTeX y Calidad no van al PDF (son procesos auxiliares).
+    // 📏 maxTokens es TECHO, no objetivo. La IA debe usar lo mínimo necesario
+    // para cubrir el tema con calidad; estos números son margen de seguridad.
+    // Suma proyectada al PDF si se llenara cada techo: 16+14+8+15+3+1+5 = ~62 págs.
+    // El auto-continue (más abajo) reanuda si el modelo pega contra el techo.
     const TOKENS_POR_FASE: Record<string, number> = {
       "ph-cap0":        6000,   // propuestas + JSON (no va al PDF)
-      "ph-cap1":        8000,   // ~12 págs (rango pedido 10-14)
-      "ph-cap2":        9500,   // ~14 págs (rango pedido 12-16)
-      "ph-cap3":        6000,   // ~8 págs (rango pedido 6-10)
-      "ph-cap4":       12000,   // ~18 págs (rango pedido 15-25, no llevamos al máx)
-      "ph-cap5":        2500,   // ~3 págs (rango pedido 2-4)
+      "ph-cap1":       11000,   // techo ~16 págs (5 secciones obligatorias, denso)
+      "ph-cap2":        9500,   // techo ~14 págs (rango pedido 12-16)
+      "ph-cap3":        6000,   // techo ~8 págs (rango pedido 6-10)
+      "ph-cap4":       10000,   // techo ~15 págs (rango pedido 15-25, recortado)
+      "ph-cap5":        2500,   // techo ~3 págs (rango pedido 2-4)
       "ph-resumen":     1000,   // 250-400 palabras (1 pág)
       "ph-referencias": 3500,   // ~5 págs de bibliografía APA
       "ph-latex":      24000,   // documento .tex completo (no va al PDF como contenido)
@@ -649,12 +700,34 @@ async function generarSinSupabase({
     let providerModel = "";
     let traceStatus: "success" | "fallback" = "success";
     let traceError: string | null = null;
+    let autoContinuado = false;
     try {
       const resultado = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
       textoGenerado = resultado.text;
       providerId = resultado.provider;
       providerModel = resultado.model;
       proveedor = `${resultado.provider} / ${resultado.model}`;
+
+      // 🔁 Auto-continue: si el texto pareciera cortado a mitad (no termina con cierre
+      // limpio y tiene longitud sustancial), hacemos UNA segunda llamada para completar.
+      const fueCortado = parecieraTruncado(textoGenerado, maxTokensForPhase);
+      const ultimosCh = textoGenerado.trimEnd().slice(-60);
+      console.log(`[auto-continue] phase=${phase_id} chars=${textoGenerado.length} maxTokens=${maxTokensForPhase} truncado=${fueCortado} cola="${ultimosCh.replace(/\n/g, "\\n")}"`);
+      if (fueCortado) {
+        const continuacion = await continuarGeneracion(
+          systemPrompt,
+          textoGenerado,
+          maxTokensForPhase,
+          proyecto.servicio_id,
+        );
+        if (continuacion) {
+          textoGenerado = empalmarContinuacion(textoGenerado, continuacion);
+          autoContinuado = true;
+          console.log(`[auto-continue] ✓ completado. Nuevo total chars=${textoGenerado.length}`);
+        } else {
+          console.warn(`[auto-continue] ✗ continuación falló o vacía`);
+        }
+      }
     } catch (e) {
       const errorMessage = (e as Error).message;
       if (referencesPhase) {
@@ -749,181 +822,11 @@ async function generarSinSupabase({
       contenido: textoGenerado,
       requiere_actualizacion: requiereActualizacion,
       ai_trace_entry: traceEntry,
+      auto_continuado: autoContinuado,
     });
   }
 
-  // ── Modo legacy: fase_numero ──────────────────────────────────────────────
-
-  // Onboarding: fase 0 sin tema aprobado → prompt de propuesta de temas
-  const esOnboarding = fase_numero === 0 && !proyecto.tema_aprobado;
-
-  const fasesAnteriores: string[] = [];
-  for (let f = 0; f < fase_numero; f++) {
-    const key = FASE_A_COLUMNA[f] as keyof typeof proyecto;
-    let contenido = proyecto[key] as string | null;
-    if (contenido) {
-      if (contenido.length > MAX_CHARS_POR_FASE) {
-        contenido = contenido.slice(0, MAX_CHARS_POR_FASE) + "\n[... contenido truncado para optimizar tokens ...]";
-      }
-      fasesAnteriores.push(`=== ${FASE_ETIQUETA[f]} ===\n${contenido}\n=== FIN ===`);
-    }
-  }
-
-  const bloqueContexto = fasesAnteriores.length > 0
-    ? `\n\n--- RESUMEN DE FASES ANTERIORES ---\n\n${fasesAnteriores.join("\n\n")}`
-    : "";
-
-  const phaseKey = String(fase_numero);
-  const borradorKey = `${phaseKey}_borrador`;
-  const phaseContents = proyecto.phase_contents ?? {};
-  const borradorPrev = phaseContents[borradorKey] ?? (proyecto[FASE_A_COLUMNA[fase_numero] as keyof typeof proyecto] as string | null);
-
-  let phasePromptBase: string;
-  if (esOnboarding) {
-    phasePromptBase = loadOnboardingPrompt();
-  } else {
-    phasePromptBase = loadPhasePromptFromDisk(fase_numero, tipo);
-  }
-
-  const systemPrompt = esOnboarding
-    ? phasePromptBase  // onboarding doesn't use style profile
-    : buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
-
-  // Deep search para fases legacy que lo necesitan (Marco Teórico, Desarrollo, Bibliografía)
-  const legacySearchQuery = proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "";
-  const legacyDeepSearchBlock = (FASES_CON_DEEP_SEARCH.has(fase_numero) && legacySearchQuery && !esOnboarding)
-    ? await buscarFuentesAcademicas(legacySearchQuery).then(r => buildFuentesVerificadasBlock(r)).catch(() => "")
-    : "";
-
-  const userPromptParts: (string | null)[] = [
-    `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlockForProject(proyecto)}\n--- FIN EXPEDIENTE ---`,
-    `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
-    proyecto.titulo_provisional ? `TÍTULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
-    bloqueContexto,
-    legacyDeepSearchBlock || null,
-  ];
-
-  if (tipo === "final" && esGuiado && !esOnboarding) {
-    if (borradorPrev) {
-      userPromptParts.push(`\n--- BORRADOR PREVIO ---\n${borradorPrev}\n--- FIN BORRADOR ---`);
-    }
-    if (feedback_usuario?.trim()) {
-      userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
-    }
-    userPromptParts.push(`\nGenera la VERSIÓN FINAL de la ${FASE_ETIQUETA[fase_numero]} incorporando el feedback.`);
-  } else {
-    if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
-    userPromptParts.push(`\nGenera el contenido de la ${FASE_ETIQUETA[fase_numero]}.`);
-  }
-
-  const userPrompt = userPromptParts.filter(Boolean).join("\n");
-  // Modo legacy (6 fases). Calibrado para que el PDF total no supere 70 págs.
-  const maxTokens =
-    fase_numero === 0 ?  6000 :  // Tema (no va al PDF)
-    fase_numero === 1 ?  8000 :  // Cap I — ~12 págs
-    fase_numero === 2 ?  9500 :  // Cap II — ~14 págs
-    fase_numero === 3 ? 18000 :  // Caps III+IV+V juntos en legacy (~26 págs combinadas)
-    fase_numero === 4 ?  6000 :  // Revisión
-                         5000;   // Final / consolidación
-
-  let textoGenerado: string;
-  let proveedor: string;
-  let providerId = "";
-  let providerModel = "";
-  try {
-    const resultado = await llamarIA(systemPrompt, userPrompt, maxTokens, proyecto.servicio_id);
-    textoGenerado = resultado.text;
-    providerId = resultado.provider;
-    providerModel = resultado.model;
-    proveedor = `${resultado.provider} / ${resultado.model}`;
-  } catch (e) {
-    const errorMessage = (e as Error).message;
-    await dbUpdateProyecto(proyecto_id, {
-      academic_memory: appendAITrace(proyecto.academic_memory, buildAITraceEntry({
-        servicioId: proyecto.servicio_id,
-        scope: "generate-phase",
-        action: tipo === "borrador" ? "generar borrador" : "generar fase",
-        phaseId: phaseKey,
-        phaseLabel: FASE_ETIQUETA[fase_numero],
-        status: "error",
-        durationMs: Date.now() - t0,
-        error: errorMessage,
-      })),
-    });
-    return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
-  }
-
-  let requiereActualizacion = proyecto.requiere_actualizacion ?? {};
-  let updates: Partial<typeof proyecto> = {};
-
-  if (tipo === "borrador" && esGuiado) {
-    // Store borrador in phase_contents, not in legacy columns
-    updates.phase_contents = { ...phaseContents, [borradorKey]: textoGenerado };
-  } else {
-    // Final or directo: store in legacy columns + phase_contents
-    const nuevaFase = Math.max(proyecto.estado_fase, fase_numero);
-    const colKey = FASE_A_COLUMNA[fase_numero];
-    updates = {
-      estado_fase: nuevaFase,
-      [colKey]: textoGenerado,
-      phase_contents: { ...phaseContents, [phaseKey]: textoGenerado },
-      final_document: null,
-      final_document_validation: {},
-    };
-
-    // Cache invalidation for subsequent phases
-    for (let f = fase_numero + 1; f <= 5; f++) {
-      const fKey = FASE_A_COLUMNA[f] as keyof typeof proyecto;
-      const hasContent = !!(proyecto[fKey] as string | null) || !!phaseContents[String(f)];
-      if (hasContent) {
-        requiereActualizacion = { ...requiereActualizacion, [String(f)]: true };
-      }
-    }
-    delete requiereActualizacion[phaseKey];
-    updates.requiere_actualizacion = requiereActualizacion;
-    const legacyAcademicContext = getAcademicContext(proyecto.academic_context);
-    updates.academic_memory = withUpdatedReferenceCatalog(
-      upsertPhaseSummary(
-        proyecto.academic_memory,
-        phaseKey,
-        FASE_ETIQUETA[fase_numero],
-        textoGenerado
-      ) ?? {},
-      textoGenerado,
-      buildContextualReferences(buildContextualReferenceInput(legacyAcademicContext))
-    );
-  }
-
-  const traceEntry = buildAITraceEntry({
-    servicioId: proyecto.servicio_id,
-    scope: "generate-phase",
-    action: tipo === "borrador" ? "generar borrador" : "generar fase",
-    phaseId: phaseKey,
-    phaseLabel: FASE_ETIQUETA[fase_numero],
-    status: "success",
-    providerId,
-    model: providerModel,
-    durationMs: Date.now() - t0,
-  });
-  updates.academic_memory = appendAITrace(updates.academic_memory ?? proyecto.academic_memory, traceEntry);
-
-  if (!(tipo === "borrador" && esGuiado)) {
-    const newCommitmentsLegacy = extractCommitments(textoGenerado, FASE_ETIQUETA[fase_numero]);
-    updates.academic_memory = updateHiloConductor(updates.academic_memory ?? proyecto.academic_memory, newCommitmentsLegacy);
-  }
-
-  await dbUpdateProyecto(proyecto_id, updates);
-
-  return NextResponse.json({
-    ok: true,
-    fase: fase_numero,
-    tipo,
-    fase_etiqueta: FASE_ETIQUETA[fase_numero],
-    proveedor,
-    duracion_ms: Date.now() - t0,
-    contenido: textoGenerado,
-    requiere_actualizacion: requiereActualizacion,
-    ai_trace_entry: traceEntry,
-  });
+  // Defensive fallback: phase_id es obligatorio (validado en POST), nunca debería llegar aquí.
+  return NextResponse.json({ error: "phase_id requerido" }, { status: 400 });
 }
 
