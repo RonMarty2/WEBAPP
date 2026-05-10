@@ -1,4 +1,5 @@
 import { loadFromDisk, type FaseTipoProyecto, type PhaseDefinition } from "@/lib/persistence";
+import { resolvePhases } from "@/lib/scribePhases";
 
 const SERVICE_TO_PROJECT_TYPE: Record<string, string> = {
   "mono-001": "tipo-monografia",
@@ -33,6 +34,18 @@ export function phaseDefinitionsFromProjectType(
   tipoProyectoId: string,
   servicioId = serviceIdForProjectType(tipoProyectoId)
 ): PhaseDefinition[] {
+  // 1) PRIORIDAD: las fases SCRIBE editables desde /admin/fases
+  //    (incluye los 10 megaprompts maestros si no fueron editados).
+  const { phases: scribePhases } = resolvePhases(servicioId);
+  if (scribePhases.length > 0) {
+    return scribePhases.map((p) => ({
+      ...p,
+      tipo_proyecto_id: tipoProyectoId,
+    }));
+  }
+
+  // 2) FALLBACK: tabla legacy `fasesTipoProyecto` (configurada manualmente
+  //    desde el panel admin de tipos de proyecto, si el admin la usó).
   const disk = loadFromDisk();
   const phases = (disk.fasesTipoProyecto ?? [])
     .filter(phase => phase.tipo_proyecto_id === tipoProyectoId)

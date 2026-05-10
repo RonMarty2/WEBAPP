@@ -16,7 +16,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
-import { resolvePhases } from "@/app/api/admin/phase-definitions/route";
+import { resolvePhases } from "@/lib/scribePhases";
 
 export async function GET(
   req: Request,

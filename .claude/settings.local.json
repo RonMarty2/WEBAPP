@@ -78,7 +78,20 @@
       "Bash(node upload_resumen.mjs)",
       "Bash(node upload_referencias.mjs)",
       "Bash(node upload_calidad.mjs)",
-      "Bash(node upload_latex.mjs)"
+      "Bash(node upload_latex.mjs)",
+      "Bash(rm -rf .next)",
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"Status: %{http_code}\\\\n\")",
+      "Bash(curl -s \"http://localhost:3000/api/projects/test123/phases\" -o /dev/null -w \"Endpoint nuevo: %{http_code} \\(debería ser 401 — auth requerida\\)\\\\n\")",
+      "Bash(cat /tmp/dev.log 2>/dev/null | tail -40)",
+      "Bash(taskkill //F //PID 6852)",
+      "Bash(pkill -9 node)",
+      "Bash(curl -s \"http://localhost:3000/api/projects/test/phases\" -w \"\\\\nStatus: %{http_code}\\\\n\")",
+      "Bash(taskkill //F //PID 464)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(netstat -ano)",
+      "Bash(tasklist)",
+      "Bash(rm -rf .next .store)",
+      "Bash(rm -rf /c/Users/lmigu/AppData/Local/Temp/laboratorio-academico-store)"
     ]
   }
 }
