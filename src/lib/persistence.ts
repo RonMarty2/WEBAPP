@@ -112,6 +112,22 @@ export interface ObservacionTribunal {
   atendida_at?: string;
 }
 
+/**
+ * Feedback que el estudiante da sobre un borrador (al apretar "Aplicar cambios").
+ * Se acumula para que el admin detecte patrones y mejore el megaprompt maestro.
+ */
+export interface PhaseFeedback {
+  id: string;
+  proyecto_id: string;
+  usuario_id: string;
+  phase_id: string;          // "ph-cap0", "ph-cap1", etc.
+  phase_label: string;       // "Introducción", "Marco Teórico", etc.
+  programa: string;          // del academic_context para segmentar
+  feedback_text: string;     // el texto que escribió el usuario
+  tipo: "aplicar_cambios" | "regenerar" | "chat_correccion";
+  created_at: string;
+}
+
 export interface StoreData {
   proyectos: Record<string, unknown>;
   users: Record<string, unknown>;
@@ -125,6 +141,7 @@ export interface StoreData {
   solicitudesPago?: Record<string, SolicitudPagoRecord>;
   paymentConfig?: PaymentConfig;
   observacionesTribunal?: Record<string, ObservacionTribunal>;
+  phaseFeedback?: PhaseFeedback[];
 }
 
 function ensureDir() {

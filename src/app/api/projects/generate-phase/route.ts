@@ -22,7 +22,31 @@ import {
   updateHiloConductor,
   buildHiloConstraintBlock,
 } from "@/lib/hiloConductor";
-import { loadFromDisk } from "@/lib/persistence";
+import { loadFromDisk, saveToDisk, type PhaseFeedback } from "@/lib/persistence";
+
+/**
+ * Guarda feedback del estudiante para análisis posterior en /admin/dashboard.
+ * Se usa para detectar patrones (ej: "muchos usuarios piden ampliar antecedentes
+ * en Cap I") y sugerir mejoras al megaprompt maestro.
+ */
+function persistirFeedback(entry: Omit<PhaseFeedback, "id" | "created_at">): void {
+  try {
+    const disk = loadFromDisk();
+    if (!disk.phaseFeedback) disk.phaseFeedback = [];
+    disk.phaseFeedback.push({
+      ...entry,
+      id: Math.random().toString(36).slice(2) + Date.now().toString(36),
+      created_at: new Date().toISOString(),
+    });
+    // Limitamos a las últimas 5000 entradas para no inflar el archivo
+    if (disk.phaseFeedback.length > 5000) {
+      disk.phaseFeedback = disk.phaseFeedback.slice(-5000);
+    }
+    saveToDisk(disk);
+  } catch (e) {
+    console.warn("[feedback] No se pudo persistir:", (e as Error).message);
+  }
+}
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import { buildAcademicContextBlock, summarizePhaseForMemory } from "@/lib/academicProject.mjs";
 import {
@@ -569,10 +593,34 @@ async function generarSinSupabase({
       }
       if (feedback_usuario?.trim()) {
         userPromptParts.push(`\nFEEDBACK DEL ESTUDIANTE: ${feedback_usuario.trim()}`);
+        // 📊 Persistir el feedback para análisis posterior en admin/dashboard
+        const ctxIni = ((proyecto.academic_context ?? {}) as Record<string, unknown>).contexto_inicial as Record<string, unknown> | undefined;
+        persistirFeedback({
+          proyecto_id: proyecto.id,
+          usuario_id: proyecto.usuario_id ?? "anonimo",
+          phase_id,
+          phase_label: currentPhase.label,
+          programa: String(ctxIni?.programa ?? ""),
+          feedback_text: feedback_usuario.trim(),
+          tipo: "aplicar_cambios",
+        });
       }
       userPromptParts.push(`\nGenera la VERSIÓN FINAL de ${currentPhase.label} incorporando el feedback.`);
     } else {
-      if (mensaje_usuario) userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
+      if (mensaje_usuario) {
+        userPromptParts.push(`\nPETICIÓN ADICIONAL DEL USUARIO: ${mensaje_usuario}`);
+        // 📊 Persistir mensajes de chat (correcciones puntuales) para análisis
+        const ctxIni = ((proyecto.academic_context ?? {}) as Record<string, unknown>).contexto_inicial as Record<string, unknown> | undefined;
+        persistirFeedback({
+          proyecto_id: proyecto.id,
+          usuario_id: proyecto.usuario_id ?? "anonimo",
+          phase_id,
+          phase_label: currentPhase.label,
+          programa: String(ctxIni?.programa ?? ""),
+          feedback_text: mensaje_usuario,
+          tipo: "chat_correccion",
+        });
+      }
       userPromptParts.push(`\nGenera el contenido de ${currentPhase.label}.`);
     }
 
