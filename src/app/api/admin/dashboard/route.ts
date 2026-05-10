@@ -71,10 +71,10 @@ export async function GET() {
 
     // ─── KPIs principales ───
     const totalProyectos = proyectos.length;
-    const completos = proyectos.filter(p => p.completado || fasesCompletas(p as Record<string, unknown>) >= 6).length;
+    const completos = proyectos.filter(p => p.completado || fasesCompletas(p as unknown as Record<string, unknown>) >= 6).length;
     const enCurso = proyectos.filter(p => {
       if (p.completado) return false;
-      const fc = fasesCompletas(p as Record<string, unknown>);
+      const fc = fasesCompletas(p as unknown as Record<string, unknown>);
       const ua = (p as { updated_at?: string }).updated_at ?? (p as { created_at?: string }).created_at ?? null;
       const dias = ua ? (Date.now() - new Date(ua).getTime()) / (1000 * 60 * 60 * 24) : 999;
       return fc < 6 && dias <= 30;
@@ -85,9 +85,9 @@ export async function GET() {
     // ─── Funnel ───
     const funnel = {
       crearon_proyecto: totalProyectos,
-      tienen_cap0: proyectos.filter(p => fasesCompletas(p as Record<string, unknown>) >= 1).length,
-      tienen_cap1: proyectos.filter(p => fasesCompletas(p as Record<string, unknown>) >= 2).length,
-      tienen_cap5: proyectos.filter(p => fasesCompletas(p as Record<string, unknown>) >= 6).length,
+      tienen_cap0: proyectos.filter(p => fasesCompletas(p as unknown as Record<string, unknown>) >= 1).length,
+      tienen_cap1: proyectos.filter(p => fasesCompletas(p as unknown as Record<string, unknown>) >= 2).length,
+      tienen_cap5: proyectos.filter(p => fasesCompletas(p as unknown as Record<string, unknown>) >= 6).length,
       tienen_completo: completos,
     };
 
