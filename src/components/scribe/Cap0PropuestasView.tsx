@@ -52,23 +52,34 @@ interface Props {
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+/**
+ * Extrae propuestas del output del LLM. Estrategia en 3 niveles:
+ *  1) Bloque JSON fenced (```json...```) — formato ideal
+ *  2) Último bloque JSON suelto en el texto
+ *  3) Parser de markdown: detecta "Opción N", "OPCIÓN N", "## OPCIÓN N:" etc.
+ *     y arma propuestas a partir del texto. Esto cubre los casos en que el
+ *     LLM se olvida de incluir el bloque JSON estructurado.
+ */
 function extractJsonBlock(text: string): Cap0Json | null {
   if (!text) return null;
-  // Match ```json ... ``` o ```...{...}...```
+
+  // 1) JSON fenced
   const fenced = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-  const candidate = fenced?.[1];
-  if (candidate) {
-    try { return JSON.parse(candidate) as Cap0Json; } catch { /* fall through */ }
+  if (fenced?.[1]) {
+    try { return JSON.parse(fenced[1]) as Cap0Json; } catch { /* try next */ }
   }
-  // Fallback: último bloque JSON-ish del texto
+
+  // 2) JSON suelto al final
   const lastBrace = text.lastIndexOf("{");
   if (lastBrace >= 0) {
     const closing = findMatchingBrace(text, lastBrace);
     if (closing > lastBrace) {
-      try { return JSON.parse(text.slice(lastBrace, closing + 1)) as Cap0Json; } catch { /* ignore */ }
+      try { return JSON.parse(text.slice(lastBrace, closing + 1)) as Cap0Json; } catch { /* try next */ }
     }
   }
-  return null;
+
+  // 3) Fallback: parser de markdown
+  return parseFromMarkdown(text);
 }
 
 function findMatchingBrace(s: string, start: number): number {
@@ -81,6 +92,81 @@ function findMatchingBrace(s: string, start: number): number {
     }
   }
   return -1;
+}
+
+/**
+ * Extrae propuestas desde markdown cuando el LLM olvidó el bloque JSON.
+ * Detecta patrones tipo "**Opción N — Título**" o "## OPCIÓN N: Título".
+ */
+function parseFromMarkdown(text: string): Cap0Json | null {
+  if (!text) return null;
+
+  // Regex para detectar inicio de opción + capturar su título
+  // Acepta: "**Opción 1 — ...**", "## OPCIÓN 1: ...", "### Opción 1.", "Opción 1:", etc.
+  const optionPattern = /(?:^|\n)\s*(?:#{2,4}\s*)?(?:\*\*)?(?:OPCI[ÓO]N|Opci[óo]n)\s+(\d+)\s*[—:.\-]?\s*([^\n*]{0,200})(?:\*\*)?/gm;
+  const matches: Array<{ numero: number; titulo: string; start: number; end: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = optionPattern.exec(text)) !== null) {
+    matches.push({
+      numero: Number(m[1]),
+      titulo: m[2].trim().replace(/[*:.\s]+$/, ""),
+      start: m.index,
+      end: m.index + m[0].length,
+    });
+  }
+
+  if (matches.length < 2) return null; // necesitamos al menos 2 propuestas
+
+  // Para cada opción, capturar el bloque de texto que le sigue (hasta la siguiente opción)
+  const propuestas: Propuesta[] = matches.map((opt, i) => {
+    const blockStart = opt.end;
+    const blockEnd = i < matches.length - 1 ? matches[i + 1].start : Math.min(text.length, opt.end + 2000);
+    const block = text.slice(blockStart, blockEnd);
+
+    // Extraer atributos del bloque con regexes específicas
+    const ctxMatch = block.match(/(?:\*\*)?(?:Contexto|Mejora|Ajuste)(?:\*\*)?\s*[:\-—]\s*([^\n]{20,500})/i);
+    const probMatch = block.match(/(?:\*\*)?Problema(?:\s+central)?(?:\*\*)?\s*[:\-—]\s*([^\n]{10,500})/i);
+    const pregMatch = block.match(/(?:\*\*)?Pregunta[^*\n:]{0,30}(?:\*\*)?\s*[:\-—]\s*([^\n]{10,500})/i);
+    const objMatch  = block.match(/(?:\*\*)?Objetivo[^*\n:]{0,30}(?:\*\*)?\s*[:\-—]\s*([^\n]{10,500})/i);
+    const periodoMatch = block.match(/(?:\*\*)?Per[ií]odo[^*\n:]{0,30}(?:\*\*)?\s*[:\-—]\s*(\d{4}\s*[-–—]\s*\d{4}|\d{4})/i);
+    const viabMatch = block.match(/(?:\*\*)?Viabilidad[^*\n:]{0,30}(?:\*\*)?\s*[:\-—]\s*[^A-Z]*?(ALTA|MEDIA|BAJA)/i);
+    const fuentesMatch = block.match(/(?:\*\*)?Fuentes[^*\n:]{0,30}(?:\*\*)?\s*[:\-—]\s*([^\n]{5,400})/i);
+    const entrevMatch = block.match(/(?:\*\*)?(?:Requiere\s+entrevistas?|entrevistas?)(?:\*\*)?\s*[:\-—]\s*(NO|N[oO]|S[íiI])/i);
+
+    const fuentesDatos = fuentesMatch?.[1]
+      ?.split(/[,;]/)
+      ?.map(s => s.trim())
+      ?.filter(s => s.length > 2 && s.length < 80)
+      ?.slice(0, 6)
+      ?? undefined;
+
+    return {
+      numero: opt.numero,
+      titulo: opt.titulo || `Opción ${opt.numero}`,
+      contexto: ctxMatch?.[1]?.trim(),
+      problema_central: probMatch?.[1]?.trim(),
+      pregunta_investigacion: pregMatch?.[1]?.trim(),
+      objetivo_general: objMatch?.[1]?.trim(),
+      periodo_temporal: periodoMatch?.[1]?.trim(),
+      fuentes_datos: fuentesDatos,
+      viabilidad: (viabMatch?.[1]?.toUpperCase() as Propuesta["viabilidad"]) ?? "ALTA",
+      requiere_entrevistas: entrevMatch ? !/n[oO]/i.test(entrevMatch[1]) : false,
+    };
+  }).filter(p => p.titulo && p.titulo.length > 3);
+
+  if (propuestas.length === 0) return null;
+
+  // Detectar viabilidad inicial del tema y recomendación
+  const viabIniMatch = text.match(/Viabilidad\s+inicial[^A-Z\n]*?(ALTA|MEDIA|BAJA)/i);
+  const recMatch = text.match(/(?:Recomendaci[óo]n|Te\s+(?:recomiendo|sugiero))[:\s][\s\S]{0,400}?(?=\n\n|\n###|\n##|$)/i);
+
+  return {
+    etapa: 0,
+    status: "propuestas_generadas",
+    viabilidad_final: (viabIniMatch?.[1]?.toUpperCase() as Cap0Json["viabilidad_final"]) ?? "ALTA",
+    propuestas,
+    recomendacion: recMatch?.[0]?.replace(/^[*\s:]+/, "").trim().slice(0, 400),
+  };
 }
 
 function viabilidadColor(v?: string): { bg: string; border: string; text: string; emoji: string } {
