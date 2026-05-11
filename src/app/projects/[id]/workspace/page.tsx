@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
@@ -1187,79 +1187,106 @@ export default function WorkspacePage() {
   const displayContent = esGuiado
     ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
     : finalContent;
-  const fasesCompletadas = displayFases.filter(f => Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))).length;
-  // Fases con CUALQUIER contenido (borradores + finales) — para el preview en vivo.
-  const fasesConContenido = displayFases.filter(f => Boolean(getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content)).length;
-  const fasesEnBorrador = fasesConContenido - fasesCompletadas;
+  // ⚡ PERFORMANCE: todos estos cálculos se memoizan juntos. Antes corrían en CADA
+  // render (cada tecla del feedback, cada hover...) y eran caros con documentos largos
+  // porque iteraban phase_contents, contaban tablas, y generaban el HTML del preview.
+  // useMemo evita el lag horrible que reportó el usuario.
+  const docComputed = useMemo(() => {
+    const stored = proyecto.final_document || proyecto.phase_contents?.__final_document || null;
+    const finalListo = Boolean(stored);
+    const docUniv = university ?? DEFAULT_UNIVERSITIES[0];
 
-  // Real-time document stats: sum words from all phases with content (final or draft)
-  const totalWords = displayFases.reduce((acc, f) => {
-    const c = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content;
-    return acc + (c ? countWords(c) : 0);
-  }, 0);
+    // Conteo de fases (un solo recorrido)
+    let aprobadas = 0;
+    let conContenido = 0;
+    let words = 0;
+    const desglose: Array<{ id: string; label: string; pags: number; esBiblio: boolean }> = [];
 
-  // Desglose de páginas físicas (carátula + índice + contenido + page-breaks + biblio).
-  // Cap 0 (tema) NO cuenta como hoja del documento final — es solo proceso interno.
-  const desgloseFases: Array<{ id: string; label: string; pags: number; esBiblio: boolean }> = [];
-  for (const f of displayFases) {
-    if (f.id === "ph-cap0") continue; // Cap 0 no va al PDF
-    const { content } = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
-    if (!content?.trim()) continue;
-    const pags = paginasDeFase(content);
-    desgloseFases.push({
-      id: f.id,
-      label: f.label,
-      pags,
-      esBiblio: f.id === "ph-referencias",
-    });
-  }
-  const hayBiblioGenerada = desgloseFases.some(d => d.esBiblio);
-  const pagsContenido = desgloseFases.reduce((acc, d) => acc + d.pags, 0);
-  const pagsPageBreaks = desgloseFases.length; // 1 hoja extra por cada cambio de capítulo
-  const pagsBiblioExtra = hayBiblioGenerada ? 0 : PAGS_FIJAS_BIBLIO_DEFAULT;
-  const estimacionTotal = PAGS_FIJAS_CARATULA + PAGS_FIJAS_INDICE + pagsContenido + pagsPageBreaks + pagsBiblioExtra;
-  const estimatedPages = Math.round(estimacionTotal);
+    for (const f of displayFases) {
+      const fNum = (f as typeof FASES_STATIC[0]).num;
+      const finalC = getFinalContent(proyecto, f.id, fNum);
+      const final = finalC?.trim() ? finalC : null;
+      const borrC = !final ? getBorrador(proyecto, f.id, fNum) : null;
+      const borrador = borrC?.trim() ? borrC : null;
+      const content = final ?? borrador;
+
+      if (final) aprobadas++;
+      if (content) conContenido++;
+      if (content) words += countWords(content);
+      if (content && f.id !== "ph-cap0") {
+        desglose.push({
+          id: f.id,
+          label: f.label,
+          pags: paginasDeFase(content),
+          esBiblio: f.id === "ph-referencias",
+        });
+      }
+    }
+
+    const enBorrador = conContenido - aprobadas;
+    const hayBiblio = desglose.some(d => d.esBiblio);
+    const pagsContenido = desglose.reduce((acc, d) => acc + d.pags, 0);
+    const totalPags = PAGS_FIJAS_CARATULA + PAGS_FIJAS_INDICE + pagsContenido + desglose.length + (hayBiblio ? 0 : PAGS_FIJAS_BIBLIO_DEFAULT);
+
+    // Armado del preview HTML — depende de previewMode
+    const fasesParaPreview = stored
+      ? displayFases
+      : (previewMode === "fase" ? displayFases.filter(f => f.id === phaseId) : displayFases);
+    const phContents: Record<string, string | null> = {};
+    const phLabels: Record<string, string> = {};
+    if (stored) {
+      phContents.fase_0 = stored;
+      phLabels.fase_0 = "Monografía final";
+    } else {
+      fasesParaPreview.forEach((f, index) => {
+        const fNum = (f as typeof FASES_STATIC[0]).num;
+        const r = getFinalOBorrador(proyecto, f.id, fNum);
+        if (r.content) {
+          phContents[`fase_${index}`] = r.content;
+          phLabels[`fase_${index}`] = r.esBorrador
+            ? `${f.label}  ·  (borrador, pendiente de aprobación)`
+            : f.label;
+        }
+      });
+    }
+    const title = pdfData.tituloTrabajo?.trim() || proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento";
+    const hayContenido = finalListo || Object.values(phContents).some(c => typeof c === "string" && c.trim().length > 0);
+    const html = hayContenido ? generatePdfHtml({
+      university: docUniv,
+      studentData: pdfData,
+      phaseContents: phContents,
+      phaseLabels: phLabels,
+      titulo: title,
+      preview: true,
+    }) : "";
+
+    return {
+      fasesCompletadas: aprobadas,
+      fasesConContenido: conContenido,
+      fasesEnBorrador: enBorrador,
+      totalWords: words,
+      desgloseFases: desglose,
+      hayBiblioGenerada: hayBiblio,
+      estimatedPages: Math.round(totalPags),
+      documentUniversity: docUniv,
+      storedFinalDocument: stored,
+      documentoFinalListo: finalListo,
+      phaseContents: phContents,
+      phaseLabels: phLabels,
+      documentTitle: title,
+      hayContenidoPreview: hayContenido,
+      docHtml: html,
+    };
+  }, [proyecto, displayFases, previewMode, phaseId, pdfData, university]);
+
+  const {
+    fasesCompletadas, fasesConContenido, fasesEnBorrador, totalWords,
+    desgloseFases, hayBiblioGenerada, estimatedPages,
+    documentUniversity, storedFinalDocument, documentoFinalListo,
+    phaseContents, phaseLabels, documentTitle, docHtml,
+  } = docComputed;
 
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
-  const documentUniversity = university ?? DEFAULT_UNIVERSITIES[0];
-  const storedFinalDocument = proyecto.final_document || proyecto.phase_contents?.__final_document || null;
-  const documentoFinalListo = Boolean(storedFinalDocument);
-  // El preview incluye borradores (con etiqueta visual "borrador") para que el estudiante
-  // vea su progreso. El botón de descargar PDF sigue requiriendo `documentoFinalListo`.
-  // Modo "fase": solo la fase actual seleccionada. Modo "completo": todo el documento.
-  // Si hay documento final consolidado, ignoramos el modo y mostramos eso.
-  const fasesParaPreview = storedFinalDocument
-    ? displayFases
-    : (previewMode === "fase"
-        ? displayFases.filter(f => f.id === phaseId)
-        : displayFases);
-  const phaseContents = storedFinalDocument
-    ? { fase_0: storedFinalDocument }
-    : Object.fromEntries(
-        fasesParaPreview.map((f, index) => [
-          `fase_${index}`,
-          getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content
-        ])
-      );
-  const phaseLabels = storedFinalDocument
-    ? { fase_0: "Monografía final" }
-    : Object.fromEntries(
-        fasesParaPreview.map((f, index) => {
-          const { esBorrador } = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
-          return [`fase_${index}`, esBorrador ? `${f.label}  ·  (borrador, pendiente de aprobación)` : f.label];
-        })
-      );
-  const documentTitle = pdfData.tituloTrabajo?.trim() || proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento";
-  const hayContenidoPreview = Boolean(storedFinalDocument)
-    || Object.values(phaseContents).some(c => typeof c === "string" && c.trim().length > 0);
-  const docHtml = hayContenidoPreview ? generatePdfHtml({
-    university: documentUniversity,
-    studentData: pdfData,
-    phaseContents,
-    phaseLabels,
-    titulo: documentTitle,
-    preview: true,
-  }) : "";
 
   const panelBorder = "1px solid rgba(255, 255, 255, 0.4)";
   const panelBg = "rgba(255, 255, 255, 0.55)";
