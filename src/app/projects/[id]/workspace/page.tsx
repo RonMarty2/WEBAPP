@@ -255,6 +255,11 @@ function normalizarTablasMultilineaMd(md: string): string {
         buffer = buffer.trimEnd() + " " + next.trim();
         i++;
       }
+      // Garantizar "|" al final (la IA suele omitirlo en las filas).
+      const trimmed = buffer.trimEnd();
+      if (!/\|\s*$/.test(trimmed)) {
+        buffer = trimmed + " |";
+      }
       out.push(buffer);
       i++;
     } else {

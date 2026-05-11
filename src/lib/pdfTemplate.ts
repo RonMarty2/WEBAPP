@@ -79,10 +79,12 @@ function extractCaptionItems(markdown: string) {
 // ── Markdown → HTML ───────────────────────────────────────────────────────────
 
 /**
- * Pre-procesa el markdown para normalizar tablas que la IA escribe con saltos
- * de línea dentro de las celdas. Si una línea empieza con "|" y la siguiente
- * NO empieza con "|" ni está en blanco, las unimos (continuación de celda).
- * Esto convierte tablas rotas multilínea en filas de una sola línea válidas.
+ * Pre-procesa el markdown para normalizar tablas rotas que la IA escribe con:
+ *   a) Saltos de línea dentro de las celdas (líneas que continúan sin "|" inicial)
+ *   b) Líneas que empiezan con "|" pero no terminan con "|" (separador derecho omitido)
+ *
+ * Lo arreglamos uniendo continuaciones y agregando "|" al final si falta.
+ * Esto convierte tablas rotas en filas de una sola línea válidas para el parser.
  */
 function normalizarTablasMultilinea(md: string): string {
   const lines = md.split("\n");
@@ -98,9 +100,13 @@ function normalizarTablasMultilinea(md: string): string {
         const next = lines[i + 1] ?? "";
         if (next.trim() === "") break;
         if (/^\s*\|/.test(next)) break;
-        // No empieza con | y no es blank → continuación de la celda actual
         buffer = buffer.trimEnd() + " " + next.trim();
         i++;
+      }
+      // Garantizar "|" al final (la IA suele omitirlo).
+      const trimmed = buffer.trimEnd();
+      if (!/\|\s*$/.test(trimmed)) {
+        buffer = trimmed + " |";
       }
       out.push(buffer);
       i++;
