@@ -535,7 +535,10 @@ export default function WorkspacePage() {
   const [isAnalyzingStyle, setIsAnalyzingStyle] = useState(false);
 
   // PDF right panel
-  const [showPdfPanel, setShowPdfPanel] = useState(true);
+  // El preview vive ahora en /projects/[id]/documento (página dedicada).
+  // El panel derecho del workspace queda oculto por defecto. Admin puede mostrarlo
+  // con el toggle de abajo para debug, pero el flujo normal va a /documento.
+  const [showPdfPanel, setShowPdfPanel] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -1434,9 +1437,27 @@ export default function WorkspacePage() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <button onClick={() => setShowPdfPanel(v => !v)} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", gap:4, display:"flex", alignItems:"center" }}>
-            {showPdfPanel ? "✕ PDF" : "📄 PDF"}
-          </button>
+          {/* Link a la página dedicada del documento (vista completa, Q&A, descarga) */}
+          {(fasesCompletadas > 0 || fasesConContenido > 0) && (
+            <a
+              href={`/projects/${proyectoId}/documento`}
+              className="btn-cyan"
+              style={{ fontSize:11, padding:"6px 12px", gap:5, display:"flex", alignItems:"center", textDecoration:"none", fontWeight:600 }}
+              title="Ver el documento completo, descargarlo y hacerle preguntas a la IA"
+            >
+              <span>📄</span><span>Ver documento</span>
+            </a>
+          )}
+          {mostrarHerramientasAdmin && (
+            <button
+              onClick={() => setShowPdfPanel(v => !v)}
+              className="btn-ghost"
+              style={{ fontSize:10.5, padding:"5px 10px", gap:4, display:"flex", alignItems:"center", opacity:0.7 }}
+              title="Admin: mostrar/ocultar panel de preview lateral"
+            >
+              {showPdfPanel ? "✕ Preview" : "👁 Preview"}
+            </button>
+          )}
           {fasesCompletadas > 0 && (
             <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
               {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
