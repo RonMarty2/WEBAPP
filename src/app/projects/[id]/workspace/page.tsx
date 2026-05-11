@@ -133,6 +133,31 @@ function getFinalOBorrador(
 
 function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).length; }
 
+/**
+ * Heurística CONSERVADORA para detectar si una generación quedó cortada.
+ * Solo retorna true si hay alta evidencia de corte real, evitando falsos positivos:
+ *   - Texto muy corto (<1500 chars) → asumimos intencional, no cortado
+ *   - Última línea es estructura (tabla, lista, encabezado, code fence) → ok
+ *   - Último carácter es cierre limpio (.!?…)}]:; comillas, asteriscos, em-dash) → ok
+ *   - Si los últimos 200 chars NO contienen ningún punto/signo → muy sospechoso de corte
+ *   - Si los últimos chars hay signo pero el FINAL no cierra → probable corte parcial
+ */
+function pareceCortadoConservador(content: string | null | undefined): boolean {
+  if (!content) return false;
+  const trimmed = content.trim();
+  if (trimmed.length < 1500) return false;
+  const ultimoChar = trimmed.slice(-1);
+  const cierresFuertes = /[.!?…)}\]:;"'»”’*—]/u;
+  if (cierresFuertes.test(ultimoChar)) return false;
+  const ultimaLinea = trimmed.split("\n").slice(-1)[0]?.trim() ?? "";
+  if (/^\|.*\|$/.test(ultimaLinea)) return false;
+  if (ultimaLinea === "```") return false;
+  if (/^[-*]\s/.test(ultimaLinea)) return false;
+  if (/^\d+\.\s/.test(ultimaLinea)) return false;
+  if (/^#{1,6}\s/.test(ultimaLinea)) return false;
+  return true;
+}
+
 // ── Estimador realista de páginas físicas del documento ─────────────────────
 // Tiene en cuenta: caratula, indice, contenido por fase, tablas, page-breaks
 // entre capitulos y bibliografia estimada. El objetivo es coincidir con el
@@ -2016,11 +2041,46 @@ export default function WorkspacePage() {
                 />
               ) : (
                 /* Cap I-V: render markdown académico estándar */
-                <div
-                  className="doc-preview"
-                  dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }}
-                  style={{ fontSize:13.5, lineHeight:1.85 }}
-                />
+                <>
+                  <div
+                    className="doc-preview"
+                    dangerouslySetInnerHTML={{ __html: renderMd(displayContent) }}
+                    style={{ fontSize:13.5, lineHeight:1.85 }}
+                  />
+                  {/* Sello de fin: confirma visualmente que la generación llegó al final */}
+                  {(() => {
+                    const cortado = pareceCortadoConservador(displayContent);
+                    const palabras = countWords(displayContent);
+                    return (
+                      <div style={{
+                        marginTop: 36,
+                        padding: "14px 20px",
+                        borderRadius: 10,
+                        textAlign: "center",
+                        background: cortado ? "rgba(245,158,11,0.06)" : "rgba(34,197,94,0.05)",
+                        border: cortado ? "1px dashed rgba(245,158,11,0.4)" : "1px solid rgba(34,197,94,0.18)",
+                        color: cortado ? "#f59e0b" : "#16a34a",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        letterSpacing: "0.03em",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}>
+                        <div>
+                          {cortado
+                            ? "⚠ Esta versión puede haber quedado cortada al final"
+                            : "✓ Fin del capítulo"}
+                        </div>
+                        <div style={{ fontSize: 10.5, fontWeight: 500, color: "var(--fg-muted)", textTransform: "none", letterSpacing: 0 }}>
+                          {cortado
+                            ? `${palabras.toLocaleString("es")} palabras · Revisá las últimas líneas. Si falta contenido, regenerá otra versión.`
+                            : `${palabras.toLocaleString("es")} palabras · Generación completa`}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </>
               )}
             </div>
           ) : isGenerating ? (
