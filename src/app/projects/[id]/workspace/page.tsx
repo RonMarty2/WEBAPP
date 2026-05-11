@@ -914,6 +914,61 @@ export default function WorkspacePage() {
   // ── Revertir a la versión anterior (deshacer cambios) ────────────────────
   // Restaura el contenido guardado en *_anterior cuando el usuario aplicó
   // cambios y no le gustó el resultado. Solo aparece si existe un anterior.
+  /**
+   * SOLO ADMIN: borra TODO el contenido de la fase actual (borrador, final,
+   * versiones anteriores) para empezar de cero. Útil para testear regeneraciones
+   * sin acumular versiones intermedias. IRREVERSIBLE.
+   */
+  const resetearFaseAdmin = useCallback(async () => {
+    if (!proyecto || isGenerating) return;
+    const faseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
+    const fId = faseDef.id;
+    const fNum = (faseDef as typeof FASES_STATIC[0]).num;
+
+    const ok = window.confirm(
+      `⚠️ ADMIN: ¿Borrar TODO el contenido de "${faseDef.label}"?\n\n` +
+      `Se eliminarán:\n` +
+      `• Borrador actual\n` +
+      `• Versión Final aprobada (si existe)\n` +
+      `• Versiones anteriores guardadas\n\n` +
+      `Esto es IRREVERSIBLE. La fase quedará vacía y podrás generar desde cero.\n\n` +
+      `¿Procedo?`
+    );
+    if (!ok) return;
+
+    const prevContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
+    const phaseContents: Record<string, string | null | undefined> = { ...prevContents };
+
+    // Borrar las 4 keys posibles de esta fase
+    delete phaseContents[fId];
+    delete phaseContents[`${fId}_borrador`];
+    delete phaseContents[`${fId}_anterior`];
+    delete phaseContents[`${fId}_borrador_anterior`];
+
+    const body: Record<string, unknown> = { phase_contents: phaseContents };
+    // Si hay columna legacy mapeada, también limpiar
+    if (!isDynamic && fNum >= 0 && fNum <= 5) {
+      body[`contenido_fase_${fNum}`] = null;
+    }
+
+    try {
+      const res = await fetch(`/api/projects/${proyecto.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProyecto(prev => (prev ? { ...prev, ...data.proyecto } : prev));
+        setVistaActiva("borrador");
+        setFeedbackTexto("");
+        setChatMsgs([]);
+      }
+    } catch (e) {
+      console.error("Error reseteando fase:", e);
+    }
+  }, [proyecto, isGenerating, displayFases, selectedFase, isDynamic]);
+
   const revertirAlAnterior = useCallback(async () => {
     if (!proyecto || isGenerating) return;
     const faseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
@@ -1704,6 +1759,32 @@ export default function WorkspacePage() {
                         🔄 No me convence, generar otra versión
                       </button>
                     </div>
+                    {/* Reset total — SOLO ADMIN. Borra todo el contenido de la fase. */}
+                    {mostrarHerramientasAdmin && (
+                      <button
+                        onClick={resetearFaseAdmin}
+                        disabled={isGenerating}
+                        title="Solo admin: borra todo el contenido de esta fase (borrador y anteriores) para empezar de cero."
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          borderRadius: 8,
+                          border: "1px dashed rgba(239,68,68,0.4)",
+                          background: "rgba(239,68,68,0.04)",
+                          color: "#ef4444",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: isGenerating ? "not-allowed" : "pointer",
+                          opacity: isGenerating ? 0.5 : 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 6,
+                        }}
+                      >
+                        🗑️ Borrar todo y empezar de nuevo <span style={{ fontSize:9, opacity:0.7, fontWeight:500 }}>· admin</span>
+                      </button>
+                    )}
                   </div>
                 )}
               </>
@@ -1780,6 +1861,32 @@ export default function WorkspacePage() {
                       }}
                     >
                       🔄 Generar otra versión <span style={{ fontSize:9, opacity:0.7, fontWeight:500 }}>· admin</span>
+                    </button>
+                  )}
+                  {/* Reset total — SOLO ADMIN. Borra todo el contenido de la fase. */}
+                  {mostrarHerramientasAdmin && (
+                    <button
+                      onClick={resetearFaseAdmin}
+                      disabled={isGenerating}
+                      title="Solo admin: borra todo el contenido de esta fase (borrador, final, anteriores) para empezar de cero."
+                      style={{
+                        width: "100%",
+                        padding: "8px 12px",
+                        borderRadius: 8,
+                        border: "1px dashed rgba(239,68,68,0.4)",
+                        background: "rgba(239,68,68,0.04)",
+                        color: "#ef4444",
+                        fontSize: 11,
+                        fontWeight: 700,
+                        cursor: isGenerating ? "not-allowed" : "pointer",
+                        opacity: isGenerating ? 0.5 : 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      🗑️ Borrar todo y empezar de nuevo <span style={{ fontSize:9, opacity:0.7, fontWeight:500 }}>· admin</span>
                     </button>
                   )}
                 </div>
