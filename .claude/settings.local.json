@@ -91,7 +91,10 @@
       "Bash(netstat -ano)",
       "Bash(tasklist)",
       "Bash(rm -rf .next .store)",
-      "Bash(rm -rf /c/Users/lmigu/AppData/Local/Temp/laboratorio-academico-store)"
+      "Bash(rm -rf /c/Users/lmigu/AppData/Local/Temp/laboratorio-academico-store)",
+      "Bash(grep -n \"isGenerating\\\\|\\\\\\\\.\\\\\\\\.\\\\\\\\.\" src/app/projects/\\\\[id\\\\]/workspace/page.tsx)",
+      "Bash(grep -anP \"pulse-dot|animationDelay|3 puntos|map\\\\\\(.{0,20}div\" src/app/projects/\\\\[id\\\\]/workspace/page.tsx)",
+      "Bash(awk '/^export default function WorkspacePage/,0' src/app/projects/\\\\[id\\\\]/workspace/page.tsx)"
     ]
   }
 }
