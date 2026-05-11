@@ -133,6 +133,36 @@ function getFinalOBorrador(
 
 function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).length; }
 
+// ── Estimador realista de páginas físicas del documento ─────────────────────
+// Tiene en cuenta: caratula, indice, contenido por fase, tablas, page-breaks
+// entre capitulos y bibliografia estimada. El objetivo es coincidir con el
+// numero de hojas que el preview HTML va a renderizar, no solo el texto crudo.
+const PALABRAS_POR_PAGINA = 350;
+const PAGS_FIJAS_CARATULA = 1;
+const PAGS_FIJAS_INDICE = 2; // indice + posible portada de capitulos / resumen
+const PAGS_FIJAS_BIBLIO_DEFAULT = 5; // estimacion si la fase de referencias todavia no se genero
+
+/** Cuenta bloques de tabla markdown (cada bloque = una tabla) en un contenido. */
+function contarTablas(texto: string | null | undefined): number {
+  if (!texto) return 0;
+  let tablas = 0;
+  let dentroTabla = false;
+  for (const linea of texto.split("\n")) {
+    const esLineaTabla = linea.trim().startsWith("|");
+    if (esLineaTabla && !dentroTabla) { tablas++; dentroTabla = true; }
+    else if (!esLineaTabla) { dentroTabla = false; }
+  }
+  return tablas;
+}
+
+/** Páginas estimadas que ocupa una fase: texto + 0.5 pág extra por tabla. */
+function paginasDeFase(content: string | null | undefined): number {
+  if (!content?.trim()) return 0;
+  const palabras = countWords(content);
+  const tablas = contarTablas(content);
+  return palabras / PALABRAS_POR_PAGINA + tablas * 0.5;
+}
+
 /**
  * Evalúa el estado de un contenido generado:
  *   - palabras: total de palabras
@@ -395,6 +425,13 @@ export default function WorkspacePage() {
   const [chatInput, setChatInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [genElapsed, setGenElapsed] = useState(0);
+  const [showPagsDetail, setShowPagsDetail] = useState(false);
+  // Modos del preview derecho: "fase" muestra solo el capítulo actual, "completo" todo el documento.
+  const [previewMode, setPreviewMode] = useState<"fase" | "completo">("fase");
+  // Zoom del preview: 0.75 / 1 / 1.25 / 1.5
+  const [previewZoom, setPreviewZoom] = useState(1);
+  // Modal fullscreen del preview
+  const [previewFullscreen, setPreviewFullscreen] = useState(false);
   // Contador de segundos mientras la IA genera, para feedback visual al usuario.
   // Se resetea al terminar/cancelar.
   useEffect(() => {
@@ -403,6 +440,26 @@ export default function WorkspacePage() {
     const id = setInterval(() => setGenElapsed((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, [isGenerating]);
+
+  // Aplica el zoom al contenido del iframe del preview (panel y fullscreen).
+  // Usa CSS `zoom` que respeta tipografía y márgenes, soportado en navegadores modernos.
+  useEffect(() => {
+    const refs = [previewIframeRef.current, previewIframeFsRef.current];
+    for (const ref of refs) {
+      const doc = ref?.contentDocument;
+      if (doc?.body) {
+        (doc.body.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(previewZoom);
+      }
+    }
+  }, [previewZoom]);
+
+  // Cerrar fullscreen con tecla ESC.
+  useEffect(() => {
+    if (!previewFullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setPreviewFullscreen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [previewFullscreen]);
   const [isUploading, setIsUploading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isPdfDownloading, setIsPdfDownloading] = useState(false);
@@ -424,6 +481,8 @@ export default function WorkspacePage() {
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const previewIframeFsRef = useRef<HTMLIFrameElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const cacheHydratedRef = useRef(false);
   const cacheKey = `workspace:${proyectoId}`;
@@ -1016,7 +1075,28 @@ export default function WorkspacePage() {
     const c = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content;
     return acc + (c ? countWords(c) : 0);
   }, 0);
-  const estimatedPages = totalWords > 0 ? Math.round(totalWords / 350) : 0;
+
+  // Desglose de páginas físicas (carátula + índice + contenido + page-breaks + biblio).
+  // Cap 0 (tema) NO cuenta como hoja del documento final — es solo proceso interno.
+  const desgloseFases: Array<{ id: string; label: string; pags: number; esBiblio: boolean }> = [];
+  for (const f of displayFases) {
+    if (f.id === "ph-cap0") continue; // Cap 0 no va al PDF
+    const { content } = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
+    if (!content?.trim()) continue;
+    const pags = paginasDeFase(content);
+    desgloseFases.push({
+      id: f.id,
+      label: f.label,
+      pags,
+      esBiblio: f.id === "ph-referencias",
+    });
+  }
+  const hayBiblioGenerada = desgloseFases.some(d => d.esBiblio);
+  const pagsContenido = desgloseFases.reduce((acc, d) => acc + d.pags, 0);
+  const pagsPageBreaks = desgloseFases.length; // 1 hoja extra por cada cambio de capítulo
+  const pagsBiblioExtra = hayBiblioGenerada ? 0 : PAGS_FIJAS_BIBLIO_DEFAULT;
+  const estimacionTotal = PAGS_FIJAS_CARATULA + PAGS_FIJAS_INDICE + pagsContenido + pagsPageBreaks + pagsBiblioExtra;
+  const estimatedPages = Math.round(estimacionTotal);
 
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
   const documentUniversity = university ?? DEFAULT_UNIVERSITIES[0];
@@ -1024,10 +1104,17 @@ export default function WorkspacePage() {
   const documentoFinalListo = Boolean(storedFinalDocument);
   // El preview incluye borradores (con etiqueta visual "borrador") para que el estudiante
   // vea su progreso. El botón de descargar PDF sigue requiriendo `documentoFinalListo`.
+  // Modo "fase": solo la fase actual seleccionada. Modo "completo": todo el documento.
+  // Si hay documento final consolidado, ignoramos el modo y mostramos eso.
+  const fasesParaPreview = storedFinalDocument
+    ? displayFases
+    : (previewMode === "fase"
+        ? displayFases.filter(f => f.id === phaseId)
+        : displayFases);
   const phaseContents = storedFinalDocument
     ? { fase_0: storedFinalDocument }
     : Object.fromEntries(
-        displayFases.map((f, index) => [
+        fasesParaPreview.map((f, index) => [
           `fase_${index}`,
           getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num).content
         ])
@@ -1035,13 +1122,15 @@ export default function WorkspacePage() {
   const phaseLabels = storedFinalDocument
     ? { fase_0: "Monografía final" }
     : Object.fromEntries(
-        displayFases.map((f, index) => {
+        fasesParaPreview.map((f, index) => {
           const { esBorrador } = getFinalOBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num);
           return [`fase_${index}`, esBorrador ? `${f.label}  ·  (borrador, pendiente de aprobación)` : f.label];
         })
       );
   const documentTitle = pdfData.tituloTrabajo?.trim() || proyecto.tema_aprobado || proyecto.titulo_provisional || "Documento";
-  const docHtml = (fasesConContenido > 0 || storedFinalDocument) ? generatePdfHtml({
+  const hayContenidoPreview = Boolean(storedFinalDocument)
+    || Object.values(phaseContents).some(c => typeof c === "string" && c.trim().length > 0);
+  const docHtml = hayContenidoPreview ? generatePdfHtml({
     university: documentUniversity,
     studentData: pdfData,
     phaseContents,
@@ -1165,19 +1254,71 @@ export default function WorkspacePage() {
             {totalWords > 0 && (
               <>
                 <span className="hidden sm:inline">·</span>
-                <span
-                  className="hidden sm:inline"
-                  title={`${totalWords.toLocaleString("es")} palabras en total. Objetivo del documento: máx 70 páginas.`}
-                  style={{
-                    color: estimatedPages >= 65 ? "#ef4444"
-                      : estimatedPages >= 50 ? "#22c55e"
-                      : estimatedPages >= 30 ? "#facc15"
-                      : "var(--fg-secondary)",
-                    fontWeight: estimatedPages >= 65 ? 700 : 400,
-                  }}
-                >
-                  ~{estimatedPages}/70 págs · {totalWords >= 1000 ? `${(totalWords / 1000).toFixed(1)}k` : totalWords} palabras
-                  {estimatedPages >= 70 && <span style={{ marginLeft: 6 }}>⚠️ excede el límite</span>}
+                <span style={{ position: "relative", display: "inline-block" }} className="hidden sm:inline">
+                  <button
+                    type="button"
+                    onClick={() => setShowPagsDetail(v => !v)}
+                    title="Ver desglose de páginas por sección"
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      padding: 0,
+                      cursor: "pointer",
+                      color: estimatedPages >= 65 ? "#ef4444"
+                        : estimatedPages >= 50 ? "#22c55e"
+                        : estimatedPages >= 30 ? "#facc15"
+                        : "var(--fg-secondary)",
+                      fontWeight: estimatedPages >= 65 ? 700 : 400,
+                      fontSize: "inherit",
+                      textDecoration: "underline dotted",
+                      textUnderlineOffset: 3,
+                    }}
+                  >
+                    ~{estimatedPages}/70 págs · {totalWords >= 1000 ? `${(totalWords / 1000).toFixed(1)}k` : totalWords} palabras
+                    {estimatedPages >= 70 && <span style={{ marginLeft: 6 }}>⚠️ excede el límite</span>}
+                  </button>
+                  {showPagsDetail && (
+                    <>
+                      <div onClick={() => setShowPagsDetail(false)} style={{ position: "fixed", inset: 0, zIndex: 998 }} />
+                      <div style={{
+                        position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 999,
+                        minWidth: 280, padding: "12px 14px", borderRadius: 10,
+                        background: "var(--bg-card)", border: "1px solid var(--border)",
+                        boxShadow: "var(--shadow-md)",
+                        fontSize: 11.5, lineHeight: 1.6, color: "var(--fg-primary)",
+                      }}>
+                        <div style={{ fontWeight: 700, marginBottom: 8, fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--fg-muted)" }}>
+                          Desglose de páginas
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", color: "var(--fg-secondary)" }}>
+                          <span>Carátula + índice</span>
+                          <span style={{ fontVariantNumeric: "tabular-nums" }}>{PAGS_FIJAS_CARATULA + PAGS_FIJAS_INDICE} págs</span>
+                        </div>
+                        {desgloseFases.map(d => (
+                          <div key={d.id} style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+                            <span style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.label}</span>
+                            <span style={{ fontVariantNumeric: "tabular-nums" }}>{Math.round(d.pags + 1)} págs</span>
+                          </div>
+                        ))}
+                        {!hayBiblioGenerada && (
+                          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4, color: "var(--fg-secondary)", fontStyle: "italic" }}>
+                            <span>Bibliografía (estimada)</span>
+                            <span style={{ fontVariantNumeric: "tabular-nums" }}>~{PAGS_FIJAS_BIBLIO_DEFAULT} págs</span>
+                          </div>
+                        )}
+                        <div style={{ height: 1, background: "var(--border)", margin: "8px 0" }} />
+                        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700 }}>
+                          <span>Total estimado</span>
+                          <span style={{ fontVariantNumeric: "tabular-nums", color: estimatedPages >= 65 ? "#ef4444" : "var(--fg-primary)" }}>
+                            {estimatedPages}/70 págs
+                          </span>
+                        </div>
+                        <div style={{ marginTop: 8, fontSize: 10.5, color: "var(--fg-muted)", lineHeight: 1.5 }}>
+                          Incluye carátula, índice, contenido, hojas por cambio de capítulo y bibliografía. Cap 0 (Tema) no cuenta porque no va al PDF.
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </span>
               </>
             )}
@@ -1833,30 +1974,98 @@ export default function WorkspacePage() {
             style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
           >
             {/* Panel header */}
-            <div style={{ padding:"12px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", alignItems:"center", justifyContent:"space-between", flexShrink:0 }}>
-              <div>
-                <div style={{ fontSize:12, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa del Documento</div>
-                <div style={{ fontSize:11, color:"var(--border-hover)", marginTop:1 }}>
-                  {documentoFinalListo
-                    ? "Documento final consolidado"
-                    : fasesEnBorrador > 0
-                      ? `${fasesCompletadas} finalizado${fasesCompletadas !== 1 ? "s" : ""} · ${fasesEnBorrador} en borrador`
-                      : `${fasesCompletadas} capítulo${fasesCompletadas !== 1 ? "s" : ""} finalizados`}
+            <div style={{ padding:"12px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:8, flexShrink:0 }}>
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:8 }}>
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontSize:12, fontWeight:700, color:"var(--fg-muted)" }}>Vista Previa</div>
+                  <div style={{ fontSize:11, color:"var(--border-hover)", marginTop:1 }}>
+                    {documentoFinalListo
+                      ? "Documento final consolidado"
+                      : previewMode === "fase"
+                        ? currentFaseDef.label
+                        : fasesEnBorrador > 0
+                          ? `${fasesCompletadas} final${fasesCompletadas !== 1 ? "es" : ""} · ${fasesEnBorrador} borrador${fasesEnBorrador !== 1 ? "es" : ""}`
+                          : `${fasesCompletadas} capítulo${fasesCompletadas !== 1 ? "s" : ""}`}
+                  </div>
                 </div>
+                {university && (
+                  <div style={{ fontSize:10, color:"var(--fg-secondary)", textAlign:"right", maxWidth:120, lineHeight:1.4 }}>
+                    {university.name}
+                  </div>
+                )}
               </div>
-              {university && (
-                <div style={{ fontSize:10, color:"var(--fg-secondary)", textAlign:"right", maxWidth:120, lineHeight:1.4 }}>
-                  {university.name}
+
+              {/* Controles: toggle modo + zoom + fullscreen */}
+              {!documentoFinalListo && (
+                <div style={{ display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                  {/* Toggle "Esta fase | Completo" */}
+                  <div style={{ display:"inline-flex", padding:2, borderRadius:7, background:"rgba(148,163,184,0.12)", border:"1px solid rgba(148,163,184,0.2)" }}>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode("fase")}
+                      style={{
+                        padding:"4px 9px", fontSize:10.5, fontWeight:600, borderRadius:5, border:"none", cursor:"pointer",
+                        background: previewMode === "fase" ? "var(--bg-card)" : "transparent",
+                        color: previewMode === "fase" ? "var(--accent)" : "var(--fg-secondary)",
+                        boxShadow: previewMode === "fase" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+                      }}
+                    >Esta fase</button>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewMode("completo")}
+                      style={{
+                        padding:"4px 9px", fontSize:10.5, fontWeight:600, borderRadius:5, border:"none", cursor:"pointer",
+                        background: previewMode === "completo" ? "var(--bg-card)" : "transparent",
+                        color: previewMode === "completo" ? "var(--accent)" : "var(--fg-secondary)",
+                        boxShadow: previewMode === "completo" ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
+                      }}
+                    >Completo</button>
+                  </div>
+
+                  {/* Zoom */}
+                  <div style={{ display:"inline-flex", alignItems:"center", gap:2, marginLeft:"auto", padding:2, borderRadius:7, background:"rgba(148,163,184,0.12)", border:"1px solid rgba(148,163,184,0.2)" }}>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewZoom(z => Math.max(0.75, +(z - 0.25).toFixed(2)))}
+                      disabled={previewZoom <= 0.75}
+                      title="Reducir"
+                      style={{ width:24, height:22, fontSize:13, fontWeight:700, border:"none", background:"transparent", cursor: previewZoom <= 0.75 ? "not-allowed" : "pointer", color:"var(--fg-secondary)", opacity: previewZoom <= 0.75 ? 0.4 : 1, borderRadius:4 }}
+                    >−</button>
+                    <span style={{ fontSize:10.5, fontWeight:600, color:"var(--fg-secondary)", minWidth:36, textAlign:"center", fontVariantNumeric:"tabular-nums" }}>
+                      {Math.round(previewZoom * 100)}%
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPreviewZoom(z => Math.min(1.5, +(z + 0.25).toFixed(2)))}
+                      disabled={previewZoom >= 1.5}
+                      title="Aumentar"
+                      style={{ width:24, height:22, fontSize:13, fontWeight:700, border:"none", background:"transparent", cursor: previewZoom >= 1.5 ? "not-allowed" : "pointer", color:"var(--fg-secondary)", opacity: previewZoom >= 1.5 ? 0.4 : 1, borderRadius:4 }}
+                    >+</button>
+                  </div>
+
+                  {/* Fullscreen */}
+                  <button
+                    type="button"
+                    onClick={() => setPreviewFullscreen(true)}
+                    disabled={!docHtml}
+                    title="Pantalla completa"
+                    style={{ padding:"5px 8px", fontSize:11, fontWeight:600, borderRadius:6, border:"1px solid rgba(148,163,184,0.2)", background:"rgba(148,163,184,0.08)", cursor: docHtml ? "pointer" : "not-allowed", color:"var(--fg-secondary)", opacity: docHtml ? 1 : 0.4 }}
+                  >⛶ Agrandar</button>
                 </div>
               )}
             </div>
 
             {/* Document preview */}
-            <div style={{ flex:1, overflowY:"hidden", padding:0, background:"rgba(241,245,249,0.72)" }}>
+            <div style={{ flex:1, overflowY:"auto", padding:0, background:"rgba(241,245,249,0.72)" }}>
               {docHtml ? (
                 <iframe
+                  ref={previewIframeRef}
                   title="Vista previa del documento final"
                   srcDoc={docHtml}
+                  onLoad={() => {
+                    const doc = previewIframeRef.current?.contentDocument;
+                    if (doc?.body) (doc.body.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(previewZoom);
+                  }}
                   style={{ width:"100%", height:"100%", border:0, display:"block", background:"#eef0f3" }}
                 />
               ) : (
@@ -2013,6 +2222,75 @@ export default function WorkspacePage() {
 
       {/* 🛠️ Toggle admin/estudiante — visible para admin, cuentas demo/test y localhost dev */}
       <AdminViewToggle isAdmin={puedeVerToggle} />
+
+      {/* Modal fullscreen del preview */}
+      {previewFullscreen && docHtml && (
+        <div
+          onClick={() => setPreviewFullscreen(false)}
+          style={{
+            position:"fixed", inset:0, zIndex:1100,
+            background:"rgba(15,23,42,0.85)",
+            backdropFilter:"blur(4px)",
+            display:"flex", flexDirection:"column",
+            padding:"24px 24px 16px",
+          }}
+        >
+          {/* Toolbar superior */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ display:"flex", alignItems:"center", justifyContent:"space-between", gap:12, marginBottom:14, color:"white", flexShrink:0 }}
+          >
+            <div style={{ display:"flex", flexDirection:"column" }}>
+              <div style={{ fontSize:13, fontWeight:700 }}>Vista Previa · {previewMode === "fase" ? currentFaseDef.label : "Documento completo"}</div>
+              <div style={{ fontSize:11, opacity:0.7, marginTop:2 }}>
+                ESC para cerrar · Zoom: {Math.round(previewZoom * 100)}%
+              </div>
+            </div>
+            <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+              {/* Zoom en fullscreen */}
+              <div style={{ display:"inline-flex", alignItems:"center", gap:2, padding:3, borderRadius:8, background:"rgba(255,255,255,0.1)", border:"1px solid rgba(255,255,255,0.15)" }}>
+                <button
+                  type="button"
+                  onClick={() => setPreviewZoom(z => Math.max(0.75, +(z - 0.25).toFixed(2)))}
+                  disabled={previewZoom <= 0.75}
+                  style={{ width:28, height:24, fontSize:15, fontWeight:700, border:"none", background:"transparent", cursor: previewZoom <= 0.75 ? "not-allowed" : "pointer", color:"white", opacity: previewZoom <= 0.75 ? 0.4 : 1, borderRadius:5 }}
+                >−</button>
+                <span style={{ fontSize:11.5, fontWeight:600, minWidth:42, textAlign:"center", fontVariantNumeric:"tabular-nums" }}>
+                  {Math.round(previewZoom * 100)}%
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPreviewZoom(z => Math.min(1.5, +(z + 0.25).toFixed(2)))}
+                  disabled={previewZoom >= 1.5}
+                  style={{ width:28, height:24, fontSize:15, fontWeight:700, border:"none", background:"transparent", cursor: previewZoom >= 1.5 ? "not-allowed" : "pointer", color:"white", opacity: previewZoom >= 1.5 ? 0.4 : 1, borderRadius:5 }}
+                >+</button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewFullscreen(false)}
+                style={{ padding:"6px 14px", fontSize:12, fontWeight:600, borderRadius:7, border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", cursor:"pointer", color:"white" }}
+              >✕ Cerrar</button>
+            </div>
+          </div>
+
+          {/* Iframe grande */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ flex:1, background:"white", borderRadius:10, overflow:"auto", boxShadow:"0 20px 60px rgba(0,0,0,0.5)" }}
+          >
+            <iframe
+              ref={previewIframeFsRef}
+              title="Vista previa fullscreen"
+              srcDoc={docHtml}
+              onLoad={() => {
+                const doc = previewIframeFsRef.current?.contentDocument;
+                if (doc?.body) (doc.body.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(previewZoom);
+              }}
+              style={{ width:"100%", height:"100%", border:0, display:"block", background:"#eef0f3" }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
