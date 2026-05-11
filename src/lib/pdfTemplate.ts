@@ -176,9 +176,10 @@ function mdToHtml(rawMd: string): string {
       i++; continue;
     }
 
-    // Horizontal rule sola (---, ***, ___) — La IA suele agregarlas innecesariamente
-    // entre encabezados que ya separan visualmente. Las ignoramos.
-    if (/^\s*[-*_]{3,}\s*$/.test(line)) {
+    // Horizontal rule sola (---, ***, ___, ──, ══, ━━) — La IA suele agregarlas
+    // innecesariamente entre encabezados que ya separan visualmente. Las ignoramos.
+    // Incluye caracteres ASCII (-, *, _) y Unicode de dibujo de cajas (U+2500 etc).
+    if (/^\s*[-*_─━═]{3,}\s*$/u.test(line)) {
       closeList();
       i++;
       continue;

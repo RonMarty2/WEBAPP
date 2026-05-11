@@ -281,8 +281,9 @@ function renderMd(text: string): string {
     .replace(/```json\s*\{[\s\S]*?\}\s*```/g, "")
     // Esconder REFERENCIAS_ETAPA si aparece (se consolida aparte en la fase de referencias)
     .replace(/###\s*REFERENCIAS_ETAPA[\s\S]*$/i, "")
-    // Quitar separadores horizontales sueltos (---, ***, ___) — los headings ya separan
-    .replace(/^[ \t]*[-*_]{3,}[ \t]*$/gm, "");
+    // Quitar separadores horizontales sueltos (---, ***, ___, ──, ══, ━━) — los headings ya separan.
+    // Incluye Unicode de dibujo de cajas que algunos modelos LLM usan.
+    .replace(/^[ \t]*[-*_─━═]{3,}[ \t]*$/gmu, "");
 
   // Normalizar tablas multilínea (filas con saltos de línea dentro de celdas)
   cleaned = normalizarTablasMultilineaMd(cleaned);
