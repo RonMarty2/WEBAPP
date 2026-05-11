@@ -1133,54 +1133,16 @@ export default function WorkspacePage() {
     finally { setIsDownloading(false); }
   }
 
-  // ── Loading ───────────────────────────────────────────────────────────────────
+  // ⚠️ HOOKS DERIVADOS — DEBEN IR ANTES DE CUALQUIER RETURN TEMPRANO
+  // Para mantener el orden de hooks estable entre renders (Rules of Hooks).
 
-  if (loading) {
-    return (
-      <div className="gradient-bg" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
-        <div
-          style={{
-            width: "100%",
-            maxWidth: 980,
-            borderRadius: 16,
-            border: "1px solid var(--border)",
-            background: "var(--bg-card)",
-            padding: 18,
-            boxShadow: "var(--shadow-md)",
-          }}
-        >
-          <div style={{ display:"grid", gridTemplateColumns:"280px 1fr 300px", gap:14 }}>
-            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:10 }}>
-              <div style={{ height:16, width:"48%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:10 }} />
-              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)", marginBottom:8 }} />
-              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)", marginBottom:8 }} />
-              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)" }} />
-            </div>
-            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:16 }}>
-              <div style={{ height:18, width:"40%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:12 }} />
-              <div style={{ height:12, borderRadius:8, background:"var(--bg-subtle)", marginBottom:8 }} />
-              <div style={{ height:12, borderRadius:8, background:"var(--bg-subtle)", marginBottom:8 }} />
-              <div style={{ height:12, width:"82%", borderRadius:8, background:"var(--bg-subtle)" }} />
-            </div>
-            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:12 }}>
-              <div style={{ height:14, width:"60%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:10 }} />
-              <div style={{ height:180, borderRadius:10, background:"var(--bg-subtle)" }} />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-  // ⚠️ IMPORTANTE: phaseId y el useMemo deben calcularse ANTES de cualquier return temprano
-  // para mantener el orden de hooks estable entre renders (Rules of Hooks de React).
-  // Por eso phaseId tiene un fallback "" cuando displayFases aún está vacío.
+  // phaseId/currentFaseDef calculados de forma defensiva (puede ser undefined si
+  // proyecto aún no cargó o displayFases está vacío).
   const currentFaseDefForMemo = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
   const phaseIdForMemo = currentFaseDefForMemo?.id ?? "";
 
-  // ⚡ PERFORMANCE: todos estos cálculos se memoizan juntos. Antes corrían en CADA
-  // render (cada tecla del feedback, cada hover...) y eran caros con documentos largos
-  // porque iteraban phase_contents, contaban tablas, y generaban el HTML del preview.
-  // useMemo evita el lag horrible que reportó el usuario.
+  // ⚡ PERFORMANCE: todos los cálculos del documento se memoizan juntos.
+  // Si proyecto es null devuelve valores default (no ejecuta el pipeline).
   const docComputed = useMemo(() => {
     const docUnivDefault = university ?? DEFAULT_UNIVERSITIES[0];
     if (!proyecto) {
@@ -1204,7 +1166,6 @@ export default function WorkspacePage() {
     const finalListo = Boolean(stored);
     const docUniv = university ?? DEFAULT_UNIVERSITIES[0];
 
-    // Conteo de fases (un solo recorrido)
     let aprobadas = 0;
     let conContenido = 0;
     let words = 0;
@@ -1236,7 +1197,6 @@ export default function WorkspacePage() {
     const pagsContenido = desglose.reduce((acc, d) => acc + d.pags, 0);
     const totalPags = PAGS_FIJAS_CARATULA + PAGS_FIJAS_INDICE + pagsContenido + desglose.length + (hayBiblio ? 0 : PAGS_FIJAS_BIBLIO_DEFAULT);
 
-    // Armado del preview HTML — depende de previewMode
     const fasesParaPreview = stored
       ? displayFases
       : (previewMode === "fase" ? displayFases.filter(f => f.id === phaseIdForMemo) : displayFases);
@@ -1287,6 +1247,44 @@ export default function WorkspacePage() {
     };
   }, [proyecto, displayFases, previewMode, phaseIdForMemo, pdfData, university]);
 
+  // ── Loading ───────────────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="gradient-bg" style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:"24px" }}>
+        <div
+          style={{
+            width: "100%",
+            maxWidth: 980,
+            borderRadius: 16,
+            border: "1px solid var(--border)",
+            background: "var(--bg-card)",
+            padding: 18,
+            boxShadow: "var(--shadow-md)",
+          }}
+        >
+          <div style={{ display:"grid", gridTemplateColumns:"280px 1fr 300px", gap:14 }}>
+            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:10 }}>
+              <div style={{ height:16, width:"48%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:10 }} />
+              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:72, borderRadius:10, background:"var(--bg-subtle)" }} />
+            </div>
+            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:16 }}>
+              <div style={{ height:18, width:"40%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:12 }} />
+              <div style={{ height:12, borderRadius:8, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:12, borderRadius:8, background:"var(--bg-subtle)", marginBottom:8 }} />
+              <div style={{ height:12, width:"82%", borderRadius:8, background:"var(--bg-subtle)" }} />
+            </div>
+            <div style={{ border:"1px solid var(--bg-subtle)", borderRadius:12, padding:12 }}>
+              <div style={{ height:14, width:"60%", borderRadius:8, background:"var(--bg-subtle)", marginBottom:10 }} />
+              <div style={{ height:180, borderRadius:10, background:"var(--bg-subtle)" }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
   const {
     fasesCompletadas, fasesConContenido, fasesEnBorrador, totalWords,
     desgloseFases, hayBiblioGenerada, estimatedPages,
