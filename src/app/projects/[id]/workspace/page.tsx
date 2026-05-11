@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
@@ -463,6 +463,7 @@ function paginateMarkdown(text: string, unitsPerPage = 1850): string[] {
 export default function WorkspacePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const proyectoId = params.id as string;
 
   const [user, setUser] = useState<SessionUser | null>(null);
@@ -498,6 +499,16 @@ export default function WorkspacePage() {
   const [previewZoom, setPreviewZoom] = useState(1);
   // Modal fullscreen del preview
   const [previewFullscreen, setPreviewFullscreen] = useState(false);
+
+  // Si la URL trae ?fase=ph-capN, ir directo a esa fase al cargar.
+  // Esto soporta la navegación "Volver al workspace" desde /documento sin perder el lugar.
+  useEffect(() => {
+    const targetPhase = searchParams?.get("fase");
+    if (!targetPhase || displayFases.length === 0) return;
+    const idx = displayFases.findIndex(f => f.id === targetPhase);
+    if (idx >= 0) setSelectedFase(idx);
+  }, [searchParams, displayFases]);
+
   // Contador de segundos mientras la IA genera, para feedback visual al usuario.
   // Se resetea al terminar/cancelar.
   useEffect(() => {
@@ -1551,10 +1562,12 @@ export default function WorkspacePage() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Link a la página dedicada del documento (vista completa, Q&A, descarga) */}
+          {/* Link a la página dedicada del documento (vista completa, Q&A, descarga).
+              Pasamos ?from=phaseId para que el botón "Volver" de /documento sepa a
+              qué fase regresar (sino vuelve siempre al Cap 0). */}
           {(fasesCompletadas > 0 || fasesConContenido > 0) && (
             <a
-              href={`/projects/${proyectoId}/documento`}
+              href={`/projects/${proyectoId}/documento?from=${encodeURIComponent(phaseId)}`}
               className="btn-cyan"
               style={{ fontSize:11, padding:"6px 12px", gap:5, display:"flex", alignItems:"center", textDecoration:"none", fontWeight:600 }}
               title="Ver el documento completo, descargarlo y hacerle preguntas a la IA"
