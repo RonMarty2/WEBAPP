@@ -14,7 +14,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { generatePdfHtml } from "@/lib/pdfTemplate";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
 
@@ -39,7 +39,14 @@ type QAMsg = { role: "user" | "ia"; text: string; ts: number };
 export default function DocumentoPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const id = (params?.id as string) ?? "";
+  // Fase desde la que el usuario vino (workspace pasa ?from=ph-capN).
+  // Si no hay, vuelve al inicio del workspace.
+  const fromPhase = searchParams?.get("from") ?? "";
+  const backUrl = fromPhase
+    ? `/projects/${id}/workspace?fase=${encodeURIComponent(fromPhase)}`
+    : `/projects/${id}/workspace`;
 
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
@@ -269,7 +276,7 @@ export default function DocumentoPage() {
       <header style={{ padding:"14px 24px", borderBottom:"1px solid var(--border)", display:"flex", alignItems:"center", justifyContent:"space-between", gap:16, background:"var(--bg-card)" }}>
         <div style={{ display:"flex", alignItems:"center", gap:12, minWidth:0 }}>
           <button
-            onClick={() => router.push(`/projects/${id}/workspace`)}
+            onClick={() => router.push(backUrl)}
             className="btn-ghost"
             style={{ padding:"6px 12px", fontSize:12 }}
           >← Volver al workspace</button>
@@ -323,7 +330,7 @@ export default function DocumentoPage() {
               <div style={{ fontSize:12, color:"var(--fg-secondary)", lineHeight:1.6 }}>
                 Generá y aprobá al menos un capítulo en el workspace. Cuando vuelvas acá vas a ver tu documento completo, formateado como se va a entregar.
               </div>
-              <button onClick={() => router.push(`/projects/${id}/workspace`)} className="btn-cyan" style={{ marginTop:8, padding:"10px 18px", fontSize:13 }}>
+              <button onClick={() => router.push(backUrl)} className="btn-cyan" style={{ marginTop:8, padding:"10px 18px", fontSize:13 }}>
                 Ir al workspace →
               </button>
             </div>
