@@ -399,8 +399,13 @@ async function callOpenAIFormat(
     const err = await res.json().catch(() => ({}));
     throw new Error((err as { error?: { message?: string } }).error?.message || `HTTP ${res.status}`);
   }
-  const data = await res.json() as { choices: { message: { content: string } }[] };
-  return data.choices[0].message.content;
+  const data = await res.json() as { choices?: Array<{ message?: { content?: string }; finish_reason?: string }> };
+  const text = data.choices?.[0]?.message?.content;
+  if (typeof text !== "string" || text.length === 0) {
+    const reason = data.choices?.[0]?.finish_reason;
+    throw new Error(`OpenAI devolvió respuesta vacía${reason ? ` (finish_reason: ${reason})` : ""}.`);
+  }
+  return text;
 }
 
 async function callAnthropic(
@@ -419,8 +424,14 @@ async function callAnthropic(
     const err = await res.json().catch(() => ({}));
     throw new Error((err as { error?: { message?: string } }).error?.message || `HTTP ${res.status}`);
   }
-  const data = await res.json() as { content: { text: string }[] };
-  return data.content[0].text;
+  const data = await res.json() as { content?: Array<{ type?: string; text?: string }>; stop_reason?: string };
+  // Anthropic puede devolver múltiples bloques; tomamos el primer text block.
+  const textBlock = data.content?.find(b => b.type === "text" || typeof b.text === "string");
+  const text = textBlock?.text;
+  if (typeof text !== "string" || text.length === 0) {
+    throw new Error(`Anthropic devolvió respuesta vacía${data.stop_reason ? ` (stop_reason: ${data.stop_reason})` : ""}.`);
+  }
+  return text;
 }
 
 async function callGemini(
@@ -440,8 +451,42 @@ async function callGemini(
     const err = await res.json().catch(() => ({}));
     throw new Error(JSON.stringify(err) || `HTTP ${res.status}`);
   }
-  const data = await res.json() as { candidates: { content: { parts: { text: string }[] } }[] };
-  return data.candidates[0].content.parts[0].text;
+  // Parser defensivo: Gemini puede devolver respuestas vacías por safety filters,
+  // recitation, max tokens alcanzado sin contenido, o estructuras inesperadas.
+  // Antes hacíamos data.candidates[0].content.parts[0].text → crash con undefined.
+  const data = await res.json() as {
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+      finishReason?: string;
+    }>;
+    promptFeedback?: { blockReason?: string };
+  };
+
+  // Caso 1: prompt bloqueado antes de generar (safety)
+  if (data.promptFeedback?.blockReason) {
+    throw new Error(`Gemini bloqueó el prompt: ${data.promptFeedback.blockReason}`);
+  }
+
+  // Caso 2: sin candidates
+  const candidate = data.candidates?.[0];
+  if (!candidate) {
+    throw new Error(`Gemini no devolvió respuesta. Detalle: ${JSON.stringify(data).slice(0, 250)}`);
+  }
+
+  // Caso 3: razones específicas de no-contenido
+  const reason = candidate.finishReason;
+  if (reason === "SAFETY") throw new Error("Gemini bloqueó la respuesta por filtros de seguridad.");
+  if (reason === "RECITATION") throw new Error("Gemini bloqueó la respuesta por posible copia de fuente.");
+  if (reason === "PROHIBITED_CONTENT") throw new Error("Gemini detectó contenido prohibido en la respuesta.");
+
+  // Caso 4: hay candidate pero sin content/parts/text
+  const text = candidate.content?.parts?.[0]?.text;
+  if (typeof text !== "string" || text.length === 0) {
+    const reasonMsg = reason ? ` (finishReason: ${reason})` : "";
+    throw new Error(`Gemini devolvió respuesta vacía${reasonMsg}. Probá con menos tokens o reformulá el prompt.`);
+  }
+
+  return text;
 }
 
 // ── Main caller — uses provider config ───────────────────────────────────────
