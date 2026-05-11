@@ -17,6 +17,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { generatePdfHtml } from "@/lib/pdfTemplate";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
+import { useViewMode } from "@/components/scribe/AdminViewToggle";
 
 type Proyecto = {
   id: string;
@@ -40,6 +41,7 @@ export default function DocumentoPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { mode: viewMode } = useViewMode();
   const id = (params?.id as string) ?? "";
   // Fase desde la que el usuario vino (workspace pasa ?from=ph-capN).
   // Si no hay, vuelve al inicio del workspace.
@@ -47,6 +49,41 @@ export default function DocumentoPage() {
   const backUrl = fromPhase
     ? `/projects/${id}/workspace?fase=${encodeURIComponent(fromPhase)}`
     : `/projects/${id}/workspace`;
+
+  // ── Guard de admin ──────────────────────────────────────────────────────────
+  // Esta página es SOLO para admin/QA. Para el estudiante normal, el preview
+  // ensamblado a medio camino confunde más que ayuda. Si entra alguien sin
+  // permisos, lo redirigimos al workspace silenciosamente.
+  const [authChecked, setAuthChecked] = useState(false);
+  const [autorizado, setAutorizado] = useState(false);
+  useEffect(() => {
+    let cancelado = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        const data = await res.json().catch(() => ({}));
+        const user = data?.user;
+        const isAdmin = user?.role === "admin";
+        const isTestAccount = Boolean(user?.email && /demo|test|laboratorio\.test/i.test(user.email));
+        const isDevHost =
+          typeof window !== "undefined" &&
+          (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+        const puedeVerToggle = isAdmin || isTestAccount || isDevHost;
+        const tieneAccesoAdmin = puedeVerToggle && viewMode === "admin";
+        if (cancelado) return;
+        if (!tieneAccesoAdmin) {
+          router.replace(backUrl);
+          return;
+        }
+        setAutorizado(true);
+      } catch {
+        if (!cancelado) router.replace(backUrl);
+      } finally {
+        if (!cancelado) setAuthChecked(true);
+      }
+    })();
+    return () => { cancelado = true; };
+  }, [router, viewMode, backUrl]);
 
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
@@ -253,6 +290,15 @@ export default function DocumentoPage() {
   };
 
   // ─── Renderizado ────────────────────────────────────────────────────────────
+  // Bloquear render hasta confirmar admin (evita flash de contenido a no-admin)
+  if (!authChecked || !autorizado) {
+    return (
+      <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--fg-secondary)", fontSize:13 }}>
+        {authChecked ? "Redirigiendo…" : "Verificando acceso…"}
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--fg-secondary)" }}>

@@ -1562,17 +1562,20 @@ export default function WorkspacePage() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {/* Link a la página dedicada del documento (vista completa, Q&A, descarga).
-              Pasamos ?from=phaseId para que el botón "Volver" de /documento sepa a
-              qué fase regresar (sino vuelve siempre al Cap 0). */}
-          {(fasesCompletadas > 0 || fasesConContenido > 0) && (
+          {/* Link a la página /documento — SOLO ADMIN.
+              Para el estudiante normal, la vista previa del documento ensamblado a medio
+              camino puede confundir (tablas a medio formatear, espacios en blanco entre
+              capítulos). El doc final REAL lo van a ver en el PDF compilado en Overleaf
+              al exportar .tex. La vista previa es solo para testing/admin.
+              Pasamos ?from=phaseId para que el botón "Volver" sepa a qué fase regresar. */}
+          {mostrarHerramientasAdmin && (fasesCompletadas > 0 || fasesConContenido > 0) && (
             <a
               href={`/projects/${proyectoId}/documento?from=${encodeURIComponent(phaseId)}`}
               className="btn-cyan"
               style={{ fontSize:11, padding:"6px 12px", gap:5, display:"flex", alignItems:"center", textDecoration:"none", fontWeight:600 }}
-              title="Ver el documento completo, descargarlo y hacerle preguntas a la IA"
+              title="Solo admin: vista previa del documento ensamblado + Q&A con IA"
             >
-              <span>📄</span><span>Ver documento</span>
+              <span>📄</span><span>Ver documento</span><span style={{ fontSize:9, opacity:0.7, fontWeight:500 }}>· admin</span>
             </a>
           )}
           {mostrarHerramientasAdmin && (
