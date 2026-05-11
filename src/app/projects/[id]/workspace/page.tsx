@@ -211,6 +211,35 @@ function formatTraceTime(value?: string) {
  * Esconde el bloque JSON técnico final (que usa Cap 0 internamente)
  * para que no aparezca crudo en otros capítulos.
  */
+/**
+ * Une líneas de tabla multilínea: si una línea empieza con "|" y la siguiente
+ * no empieza con "|" y no es blank, la siguiente es continuación de la celda.
+ * Las uno con espacio para que el parser de tablas vea filas válidas en una sola línea.
+ */
+function normalizarTablasMultilineaMd(md: string): string {
+  const lines = md.split("\n");
+  const out: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    if (/^\s*\|/.test(line)) {
+      let buffer = line;
+      while (i + 1 < lines.length) {
+        const next = lines[i + 1] ?? "";
+        if (next.trim() === "" || /^\s*\|/.test(next)) break;
+        buffer = buffer.trimEnd() + " " + next.trim();
+        i++;
+      }
+      out.push(buffer);
+      i++;
+    } else {
+      out.push(line);
+      i++;
+    }
+  }
+  return out.join("\n");
+}
+
 function renderMd(text: string): string {
   // 1) Limpieza inicial: quitar marcadores [[DATO_EDITABLE]] y [COMPLETAR...]
   let cleaned = text
@@ -219,7 +248,12 @@ function renderMd(text: string): string {
     // Esconder bloques JSON técnicos del final (Cap 0 los procesa con su componente especial)
     .replace(/```json\s*\{[\s\S]*?\}\s*```/g, "")
     // Esconder REFERENCIAS_ETAPA si aparece (se consolida aparte en la fase de referencias)
-    .replace(/###\s*REFERENCIAS_ETAPA[\s\S]*$/i, "");
+    .replace(/###\s*REFERENCIAS_ETAPA[\s\S]*$/i, "")
+    // Quitar separadores horizontales sueltos (---, ***, ___) — los headings ya separan
+    .replace(/^[ \t]*[-*_]{3,}[ \t]*$/gm, "");
+
+  // Normalizar tablas multilínea (filas con saltos de línea dentro de celdas)
+  cleaned = normalizarTablasMultilineaMd(cleaned);
 
   // 2) Extraer y "marcar" bloques de código fenced para preservarlos
   const codeBlocks: string[] = [];
@@ -234,7 +268,7 @@ function renderMd(text: string): string {
   // 3) Extraer tablas markdown y convertirlas a HTML antes de escapar
   const tables: string[] = [];
   cleaned = cleaned.replace(
-    /(?:^\|[^\n]+\|\s*\n\|[\s|:.-]+\|\s*\n(?:\|[^\n]+\|\s*\n?)+)/gm,
+    /(?:^\|[^\n]+\|\s*\n(?:\|[\s|:.-]+\|\s*\n)?(?:\|[^\n]+\|\s*\n?)+)/gm,
     (match) => {
       const idx = tables.length;
       tables.push(renderMdTable(match));
