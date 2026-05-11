@@ -1700,6 +1700,42 @@ export default function WorkspacePage() {
                       ↩️ No me gusta, volver a la versión anterior
                     </button>
                   )}
+                  {/* Regenerar desde cero — SOLO ADMIN / cuenta de prueba.
+                      No es flujo de estudiante: ya aprobó, debe avanzar o usar chat de cambios. */}
+                  {mostrarHerramientasAdmin && (
+                    <button
+                      onClick={() => {
+                        const ok = window.confirm(
+                          "¿Generar una versión nueva de este capítulo?\n\n" +
+                          "• La versión Final actual se guardará como \"anterior\" (podés volver con ↩️).\n" +
+                          "• La IA generará un borrador nuevo desde cero.\n" +
+                          "• Tu Final aprobado actual NO se descarta hasta que apruebes el nuevo.\n\n" +
+                          "Esto gasta tokens de IA. ¿Procedo?"
+                        );
+                        if (ok) generarFase({ tipo: "borrador" });
+                      }}
+                      disabled={isGenerating}
+                      title="Solo para admin / cuenta de prueba: regenera el capítulo desde cero conservando la versión actual como respaldo."
+                      style={{
+                        width: "100%",
+                        padding: "9px 12px",
+                        borderRadius: 8,
+                        border: "1px dashed rgba(167,139,250,0.5)",
+                        background: "rgba(167,139,250,0.06)",
+                        color: "#a78bfa",
+                        fontSize: 11.5,
+                        fontWeight: 700,
+                        cursor: isGenerating ? "not-allowed" : "pointer",
+                        opacity: isGenerating ? 0.5 : 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 6,
+                      }}
+                    >
+                      🔄 Generar otra versión <span style={{ fontSize:9, opacity:0.7, fontWeight:500 }}>· admin</span>
+                    </button>
+                  )}
                 </div>
               );
             })()}
