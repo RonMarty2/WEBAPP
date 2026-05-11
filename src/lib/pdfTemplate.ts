@@ -78,7 +78,42 @@ function extractCaptionItems(markdown: string) {
 
 // ── Markdown → HTML ───────────────────────────────────────────────────────────
 
-function mdToHtml(md: string): string {
+/**
+ * Pre-procesa el markdown para normalizar tablas que la IA escribe con saltos
+ * de línea dentro de las celdas. Si una línea empieza con "|" y la siguiente
+ * NO empieza con "|" ni está en blanco, las unimos (continuación de celda).
+ * Esto convierte tablas rotas multilínea en filas de una sola línea válidas.
+ */
+function normalizarTablasMultilinea(md: string): string {
+  const lines = md.split("\n");
+  const out: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i] ?? "";
+    if (/^\s*\|/.test(line)) {
+      // Posible fila de tabla. Acumular continuaciones (líneas siguientes que
+      // no empiezan con "|" y no son línea en blanco).
+      let buffer = line;
+      while (i + 1 < lines.length) {
+        const next = lines[i + 1] ?? "";
+        if (next.trim() === "") break;
+        if (/^\s*\|/.test(next)) break;
+        // No empieza con | y no es blank → continuación de la celda actual
+        buffer = buffer.trimEnd() + " " + next.trim();
+        i++;
+      }
+      out.push(buffer);
+      i++;
+    } else {
+      out.push(line);
+      i++;
+    }
+  }
+  return out.join("\n");
+}
+
+function mdToHtml(rawMd: string): string {
+  const md = normalizarTablasMultilinea(rawMd);
   const lines = md.split("\n");
   const out: string[] = [];
   let inUl = false;
