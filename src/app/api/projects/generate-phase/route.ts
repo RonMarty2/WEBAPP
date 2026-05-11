@@ -686,7 +686,7 @@ async function generarSinSupabase({
       "ph-cap2":        9500,   // techo ~14 págs (rango pedido 12-16)
       "ph-cap3":        6000,   // techo ~8 págs (rango pedido 6-10)
       "ph-cap4":       10000,   // techo ~15 págs (rango pedido 15-25, recortado)
-      "ph-cap5":        2500,   // techo ~3 págs (rango pedido 2-4)
+      "ph-cap5":        4000,   // techo ~5 págs (rango pedido 2-4, margen para conclusiones densas)
       "ph-resumen":     1000,   // 250-400 palabras (1 pág)
       "ph-referencias": 3500,   // ~5 págs de bibliografía APA
       "ph-latex":      24000,   // documento .tex completo (no va al PDF como contenido)

@@ -438,13 +438,28 @@ async function callGemini(
   apiKey: string, model: string, system: string, user: string, maxTokens: number
 ): Promise<string> {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  // ⚙️ Gemini 2.5 (Pro/Flash) tiene "thinking mode" habilitado por default.
+  // El modelo razona internamente antes de responder y eso CONSUME tokens del budget.
+  // Para tareas de generación de texto académico largo, thinking es contraproducente:
+  // se come 1000-3000 tokens en razonamiento y deja la respuesta vacía (MAX_TOKENS).
+  // Lo deshabilitamos con thinkingBudget=0 para que TODO el budget sea para output real.
+  const es2_5 = /gemini-2\.5/.test(model);
+  const generationConfig: Record<string, unknown> = {
+    maxOutputTokens: maxTokens,
+    temperature: 0.35,
+  };
+  if (es2_5) {
+    generationConfig.thinkingConfig = { thinkingBudget: 0 };
+  }
+
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       system_instruction: { parts: [{ text: system }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
-      generationConfig: { maxOutputTokens: maxTokens, temperature: 0.35 },
+      generationConfig,
     }),
   });
   if (!res.ok) {
