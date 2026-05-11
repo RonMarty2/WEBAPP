@@ -135,20 +135,22 @@ function countWords(t: string) { return t.trim().split(/\s+/).filter(Boolean).le
 
 /**
  * Heurística CONSERVADORA para detectar si una generación quedó cortada.
- * Solo retorna true si hay alta evidencia de corte real, evitando falsos positivos:
- *   - Texto muy corto (<1500 chars) → asumimos intencional, no cortado
- *   - Última línea es estructura (tabla, lista, encabezado, code fence) → ok
- *   - Último carácter es cierre limpio (.!?…)}]:; comillas, asteriscos, em-dash) → ok
- *   - Si los últimos 200 chars NO contienen ningún punto/signo → muy sospechoso de corte
- *   - Si los últimos chars hay signo pero el FINAL no cierra → probable corte parcial
+ * Reglas (deben TODAS cumplirse para marcar como cortado):
+ *   - Texto >2000 chars (sino asumimos intencional o caso especial)
+ *   - Los últimos 120 chars NO contienen NINGÚN signo de cierre fuerte (.!?…)}])
+ *   - La última línea NO es estructura (tabla, lista numerada/bullets, encabezado, code fence)
+ *
+ * El check anterior miraba SOLO el último char, dando falsos positivos cuando el
+ * modelo terminaba con punto pero seguía un whitespace/caracter invisible.
  */
 function pareceCortadoConservador(content: string | null | undefined): boolean {
   if (!content) return false;
   const trimmed = content.trim();
-  if (trimmed.length < 1500) return false;
-  const ultimoChar = trimmed.slice(-1);
-  const cierresFuertes = /[.!?…)}\]:;"'»”’*—]/u;
-  if (cierresFuertes.test(ultimoChar)) return false;
+  if (trimmed.length < 2000) return false;
+  // Si los últimos ~120 chars tienen algún punto/signo de cierre, asumimos terminó natural.
+  const tail = trimmed.slice(-120);
+  if (/[.!?…)}\]]/u.test(tail)) return false;
+  // Última línea es estructura válida → no cortado
   const ultimaLinea = trimmed.split("\n").slice(-1)[0]?.trim() ?? "";
   if (/^\|.*\|$/.test(ultimaLinea)) return false;
   if (ultimaLinea === "```") return false;
