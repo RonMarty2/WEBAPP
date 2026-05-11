@@ -1171,27 +1171,35 @@ export default function WorkspacePage() {
       </div>
     );
   }
-  if (!proyecto) return null;
+  // ⚠️ IMPORTANTE: phaseId y el useMemo deben calcularse ANTES de cualquier return temprano
+  // para mantener el orden de hooks estable entre renders (Rules of Hooks de React).
+  // Por eso phaseId tiene un fallback "" cuando displayFases aún está vacío.
+  const currentFaseDefForMemo = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
+  const phaseIdForMemo = currentFaseDefForMemo?.id ?? "";
 
-  const esGuiado = proyecto.modalidad_creacion === "guiada";
-  const currentFaseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
-  const phaseId = currentFaseDef.id;
-  const legacyNum = (currentFaseDef as typeof FASES_STATIC[0]).num;
-  // 🎯 Cap 0 es una DECISIÓN (no documento). Las cards en el centro cubren todo.
-  // Por eso ocultamos sidebar de feedback, panel PDF, tabs y botón "Cap. I →" en Cap 0.
-  const isCap0Phase = phaseId === "ph-cap0" || (!isDynamic && legacyNum === 0);
-  const finalContent = getFinalContent(proyecto, phaseId, legacyNum);
-  const borradorContent = getBorrador(proyecto, phaseId, legacyNum);
-  const hasBorrador = Boolean(borradorContent);
-  const hasFinal = Boolean(finalContent);
-  const displayContent = esGuiado
-    ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
-    : finalContent;
   // ⚡ PERFORMANCE: todos estos cálculos se memoizan juntos. Antes corrían en CADA
   // render (cada tecla del feedback, cada hover...) y eran caros con documentos largos
   // porque iteraban phase_contents, contaban tablas, y generaban el HTML del preview.
   // useMemo evita el lag horrible que reportó el usuario.
   const docComputed = useMemo(() => {
+    const docUnivDefault = university ?? DEFAULT_UNIVERSITIES[0];
+    if (!proyecto) {
+      return {
+        fasesCompletadas: 0, fasesConContenido: 0, fasesEnBorrador: 0,
+        totalWords: 0,
+        desgloseFases: [] as Array<{ id: string; label: string; pags: number; esBiblio: boolean }>,
+        hayBiblioGenerada: false,
+        estimatedPages: 0,
+        documentUniversity: docUnivDefault,
+        storedFinalDocument: null as string | null,
+        documentoFinalListo: false,
+        phaseContents: {} as Record<string, string | null>,
+        phaseLabels: {} as Record<string, string>,
+        documentTitle: "Documento",
+        hayContenidoPreview: false,
+        docHtml: "",
+      };
+    }
     const stored = proyecto.final_document || proyecto.phase_contents?.__final_document || null;
     const finalListo = Boolean(stored);
     const docUniv = university ?? DEFAULT_UNIVERSITIES[0];
@@ -1231,7 +1239,7 @@ export default function WorkspacePage() {
     // Armado del preview HTML — depende de previewMode
     const fasesParaPreview = stored
       ? displayFases
-      : (previewMode === "fase" ? displayFases.filter(f => f.id === phaseId) : displayFases);
+      : (previewMode === "fase" ? displayFases.filter(f => f.id === phaseIdForMemo) : displayFases);
     const phContents: Record<string, string | null> = {};
     const phLabels: Record<string, string> = {};
     if (stored) {
@@ -1277,7 +1285,7 @@ export default function WorkspacePage() {
       hayContenidoPreview: hayContenido,
       docHtml: html,
     };
-  }, [proyecto, displayFases, previewMode, phaseId, pdfData, university]);
+  }, [proyecto, displayFases, previewMode, phaseIdForMemo, pdfData, university]);
 
   const {
     fasesCompletadas, fasesConContenido, fasesEnBorrador, totalWords,
@@ -1285,6 +1293,25 @@ export default function WorkspacePage() {
     documentUniversity, storedFinalDocument, documentoFinalListo,
     phaseContents, phaseLabels, documentTitle, docHtml,
   } = docComputed;
+
+  // Early return DESPUÉS de TODOS los hooks (regla de React).
+  if (!proyecto) return null;
+
+  // Variables del componente — ahora sabemos que proyecto existe.
+  const esGuiado = proyecto.modalidad_creacion === "guiada";
+  const currentFaseDef = currentFaseDefForMemo!;
+  const phaseId = phaseIdForMemo;
+  const legacyNum = (currentFaseDef as typeof FASES_STATIC[0]).num;
+  // 🎯 Cap 0 es una DECISIÓN (no documento). Las cards en el centro cubren todo.
+  // Por eso ocultamos sidebar de feedback, panel PDF, tabs y botón "Cap. I →" en Cap 0.
+  const isCap0Phase = phaseId === "ph-cap0" || (!isDynamic && legacyNum === 0);
+  const finalContent = getFinalContent(proyecto, phaseId, legacyNum);
+  const borradorContent = getBorrador(proyecto, phaseId, legacyNum);
+  const hasBorrador = Boolean(borradorContent);
+  const hasFinal = Boolean(finalContent);
+  const displayContent = esGuiado
+    ? (vistaActiva === "final" && hasFinal ? finalContent : (hasBorrador ? borradorContent : null))
+    : finalContent;
 
   const needsUpdate = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? phaseId : String(selectedFase)]);
 
