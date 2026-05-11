@@ -135,18 +135,60 @@ function mdToHtml(md: string): string {
       i++; continue;
     }
 
-    if (isTableRow(line) && isSeparatorRow(lines[i + 1] ?? "")) {
+    // Horizontal rule sola (---, ***, ___) — La IA suele agregarlas innecesariamente
+    // entre encabezados que ya separan visualmente. Las ignoramos.
+    if (/^\s*[-*_]{3,}\s*$/.test(line)) {
       closeList();
+      i++;
+      continue;
+    }
+
+    // Caption de bloque: "Tabla 1.2", "Ecuación 2.1", "Figura 3.1", "Cuadro 4.5", "Gráfico 2.3"
+    // Aparecen como subtítulos cortos sin párrafo — les damos espacio respiratorio.
+    if (/^(Tabla|Cuadro|Figura|Gr[áa]fico|Ecuaci[óo]n)\s+\d+(\.\d+)?\s*$/i.test(line)) {
+      closeList();
+      out.push(`<p class="caption-block"><strong>${inlineFormat(line.trim())}</strong></p>`);
+      i++;
+      continue;
+    }
+
+    // Tabla markdown — TOLERANTE: acepta tablas sin separador "|---|---|" después del header.
+    // Si la IA olvida el separador, igual reconocemos el bloque como tabla mientras haya
+    // filas consecutivas con formato "| ... |". Filas vacías o de solo "|" se saltan.
+    if (isTableRow(line)) {
+      closeList();
+      const tieneSeparador = isSeparatorRow(lines[i + 1] ?? "");
       const headers = splitTableCells(line);
       const rows: string[][] = [];
-      i += 2;
-      while (i < lines.length && isTableRow(lines[i])) {
-        rows.push(splitTableCells(lines[i]));
-        i++;
+      i += tieneSeparador ? 2 : 1;
+      while (i < lines.length) {
+        const candidate = lines[i];
+        if (isTableRow(candidate)) {
+          const cells = splitTableCells(candidate);
+          // Saltar filas completamente vacías (todas las celdas vacías o solo whitespace).
+          if (cells.some(c => c.length > 0)) {
+            rows.push(cells);
+          }
+          i++;
+        } else if ((candidate ?? "").trim() === "" && isTableRow(lines[i + 1] ?? "")) {
+          // Línea en blanco entre filas: aceptable, seguir.
+          i++;
+        } else {
+          break;
+        }
       }
+      // Si no había separador Y no aparecieron filas adicionales, era una sola línea con "|" —
+      // tratarla como párrafo normal en vez de tabla rota.
+      if (!tieneSeparador && rows.length === 0) {
+        out.push(`<p>${inlineFormat(line.trim())}</p>`);
+        continue;
+      }
+      // Calcular columnas máximas (algunas filas pueden tener menos celdas que el header).
+      const numCols = Math.max(headers.length, ...rows.map(r => r.length));
+      const padHeaders = [...headers, ...Array(Math.max(0, numCols - headers.length)).fill("")];
       out.push(
-        `<table class="md-table"><thead><tr>${headers.map(header => `<th>${inlineFormat(header)}</th>`).join("")}</tr></thead><tbody>${
-          rows.map(row => `<tr>${headers.map((_, idx) => `<td>${inlineFormat(row[idx] ?? "")}</td>`).join("")}</tr>`).join("")
+        `<table class="md-table"><thead><tr>${padHeaders.map(header => `<th>${inlineFormat(header)}</th>`).join("")}</tr></thead><tbody>${
+          rows.map(row => `<tr>${padHeaders.map((_, idx) => `<td>${inlineFormat(row[idx] ?? "")}</td>`).join("")}</tr>`).join("")
         }</tbody></table>`
       );
       continue;
@@ -536,6 +578,19 @@ export function buildCss(u: University): string {
       text-align: center;
       margin: 0.35em 0 0.7em;
     }
+
+    /* Bloque caption: "Tabla N.M", "Ecuación N.M", "Figura N.M" sueltos en línea.
+       Damos margin superior para separarlos del párrafo previo y centramos. */
+    p.caption-block {
+      font-size: ${size}pt;
+      font-weight: bold;
+      text-align: left;
+      margin: 1.2em 0 0.4em;
+      break-after: avoid;
+      page-break-after: avoid;
+      text-indent: 0;
+    }
+    p.caption-block strong { font-weight: bold; }
 
     /* APA 7 headings */
     h1 {
