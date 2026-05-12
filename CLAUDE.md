@@ -164,6 +164,14 @@ FINAL   → Usuario descarga .tex → Overleaf → PDF presentable
 2. **Pagos** — Tigo Money / QR Bolivia / Stripe + webhook activación cuenta
 3. **Google OAuth producción** — Google Cloud Console con dominio real
 4. **Deploy Vercel** — conectar repo GitHub + variables de entorno
+5. **Imágenes del estudiante en el ZIP de Overleaf** (Opción B) —
+   Extender `POST /api/projects/upload-document` para aceptar `image/png`,
+   `image/jpeg`, `image/webp`. Guardar en `academic_context.imagenes[]`
+   con `{ nombre, bytes_base64, anchor }`. En `paquete-latex/route.ts`
+   agregarlas a una carpeta `figuras/` del ZIP y actualizar la lista
+   `availableFiles` que pasa a `sanitizeOrphanIncludes` para que no se
+   marquen como huérfanas. La IA en `compilar-latex.ts` debe recibir
+   la lista de imágenes disponibles y referenciarlas en el `.tex`.
 
 ---
 

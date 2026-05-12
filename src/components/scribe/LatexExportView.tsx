@@ -47,6 +47,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
   const [pdfError, setPdfError] = useState("");
   const [paqueteDescargando, setPaqueteDescargando] = useState(false);
   const [paqueteError, setPaqueteError] = useState("");
+  const [paqueteWarning, setPaqueteWarning] = useState<{ count: number; names: string[] } | null>(null);
 
   /**
    * El botón PRINCIPAL del estudiante: descarga el PDF compilado directamente.
@@ -99,6 +100,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
     if (!proyectoId || paqueteDescargando) return;
     setPaqueteDescargando(true);
     setPaqueteError("");
+    setPaqueteWarning(null);
     try {
       const res = await fetch(`/api/projects/${proyectoId}/paquete-latex`);
       if (!res.ok) {
@@ -117,6 +119,16 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      // Si el servidor saneó figuras huérfanas, avisar al usuario.
+      const orphanCount = Number(res.headers.get("X-Latex-Orphan-Count") ?? "0");
+      if (orphanCount > 0) {
+        const raw = res.headers.get("X-Latex-Orphan-Names") ?? "";
+        const names = raw
+          ? raw.split(",").map(n => { try { return decodeURIComponent(n); } catch { return n; } })
+          : [];
+        setPaqueteWarning({ count: orphanCount, names });
+      }
     } catch (e) {
       setPaqueteError((e as Error).message);
     } finally {
@@ -330,6 +342,25 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           {paqueteError && (
             <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12, lineHeight: 1.5 }}>
               ⚠ {paqueteError}
+            </div>
+          )}
+          {paqueteWarning && (
+            <div style={{ marginTop: 12, padding: "14px 16px", borderRadius: 10, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.30)", color: "var(--fg-primary)", fontSize: 12.5, lineHeight: 1.55 }}>
+              <div style={{ fontWeight: 700, color: "#d97706", marginBottom: 6 }}>
+                ⚠ Se omitieron {paqueteWarning.count} {paqueteWarning.count === 1 ? "figura" : "figuras"} sin archivo asociado
+              </div>
+              <div style={{ color: "var(--fg-secondary)", marginBottom: paqueteWarning.names.length ? 6 : 0 }}>
+                El documento mencionaba imágenes pero no se subió ningún archivo correspondiente, así que se quitaron del .tex para que Overleaf compile sin error.
+              </div>
+              {paqueteWarning.names.length > 0 && (
+                <div style={{ fontSize: 11.5, color: "var(--fg-muted)", fontFamily: 'ui-monospace, "SF Mono", Consolas, monospace' }}>
+                  {paqueteWarning.names.slice(0, 5).map(n => `• ${n}`).join("  ")}
+                  {paqueteWarning.count > 5 ? `  • … (+${paqueteWarning.count - 5} más)` : ""}
+                </div>
+              )}
+              <div style={{ fontSize: 11.5, color: "var(--fg-muted)", marginTop: 6 }}>
+                Mirá el <strong>README.txt</strong> dentro del ZIP para instrucciones de cómo restaurarlas si las querés.
+              </div>
             </div>
           )}
         </div>

@@ -16,6 +16,7 @@ import JSZip from "jszip";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
+import { sanitizeOrphanIncludes } from "@/lib/latex/sanitize";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -125,7 +126,8 @@ export async function GET(_req: Request, { params }: Params) {
     };
     const texConDatos = inyectarDatosCaratula(tex, datos);
 
-    // 3) Cargar el logo de la universidad
+    // 3) Cargar el logo de la universidad — primero, para conocer qué archivos
+    //    van al ZIP y poder sanear el .tex contra esa lista.
     const universidadId = (proyecto.universidad_id as string) || "umss-001";
     const universidad = DEFAULT_UNIVERSITIES.find(u => u.id === universidadId) ?? DEFAULT_UNIVERSITIES[0];
     let logoBuffer: Buffer | null = null;
@@ -143,14 +145,26 @@ export async function GET(_req: Request, { params }: Params) {
       }
     }
 
-    // 4) Armar el ZIP
+    // 4) Saneo defensivo: eliminar \includegraphics que apuntan a archivos
+    //    que NO van en el ZIP. Esto evita que Overleaf falle con "File not found".
+    //    Por ahora el único archivo disponible es el logo institucional.
+    //    TODO (opción B, próximo sprint): aceptar imágenes del estudiante en
+    //    upload-document y meterlas en una carpeta `figuras/` del ZIP.
+    const availableFiles = logoBuffer ? [logoFilename] : [];
+    const { tex: texLimpio, orphans } = sanitizeOrphanIncludes(texConDatos, availableFiles);
+    if (orphans.length > 0) {
+      console.warn(`[paquete-latex] Se eliminaron ${orphans.length} \\includegraphics huérfano(s): ${orphans.join(", ")}`);
+    }
+
+    // 5) Armar el ZIP
     const zip = new JSZip();
     const baseName = slugify(datos.titulo);
-    zip.file(`${baseName}.tex`, texConDatos);
+    zip.file(`${baseName}.tex`, texLimpio);
     if (logoBuffer) {
       zip.file(logoFilename, logoBuffer);
     }
-    zip.file("README.txt", [
+
+    const readmeLines: string[] = [
       `Paquete generado por Laboratorio Académico PRO`,
       `Universidad: ${universidad?.name ?? "N/A"}`,
       `Proyecto: ${datos.titulo}`,
@@ -167,18 +181,47 @@ export async function GET(_req: Request, { params }: Params) {
       `Si necesitás ajustar algún dato (nombre, mes, etc.), abrí el archivo`,
       `${baseName}.tex y buscá el texto a cambiar — está al inicio del documento`,
       `en el bloque \\begin{titlepage}.`,
-    ].join("\n"));
+    ];
 
-    // 5) Generar el ZIP y devolverlo
+    if (orphans.length > 0) {
+      readmeLines.push(
+        ``,
+        `─────────────────────────────────────────────────`,
+        `AVISO: Se omitieron ${orphans.length} figura(s) sin archivo asociado:`,
+        ...orphans.map(n => `   • ${n}`),
+        ``,
+        `Estas figuras estaban referenciadas en el documento pero no se`,
+        `subió ningún archivo de imagen correspondiente. Para incluirlas:`,
+        `1. Conseguí las imágenes (formatos: .png, .jpg, .pdf).`,
+        `2. Subilas a tu proyecto Overleaf con esos mismos nombres.`,
+        `3. En el .tex, descomentá las líneas que empiezan con`,
+        `   "% [auto] Figura omitida:" y restaurá el bloque \\begin{figure}.`,
+      );
+    }
+
+    zip.file("README.txt", readmeLines.join("\n"));
+
+    // 6) Generar el ZIP y devolverlo
     const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${baseName}-overleaf.zip"`,
+      "Content-Length": String(zipBuffer.length),
+    };
+    if (orphans.length > 0) {
+      headers["X-Latex-Orphan-Count"] = String(orphans.length);
+      // Header expone nombres URL-encoded (separados por coma) para que el
+      // cliente pueda mostrar un aviso amigable. Se truncan si son muchos.
+      const list = orphans.slice(0, 10).map(encodeURIComponent).join(",");
+      headers["X-Latex-Orphan-Names"] = list;
+      // Header CORS para que el navegador exponga estos headers a fetch().
+      headers["Access-Control-Expose-Headers"] = "X-Latex-Orphan-Count,X-Latex-Orphan-Names";
+    }
 
     return new NextResponse(zipBuffer as unknown as BodyInit, {
       status: 200,
-      headers: {
-        "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${baseName}-overleaf.zip"`,
-        "Content-Length": String(zipBuffer.length),
-      },
+      headers,
     });
   } catch (e) {
     if (e instanceof AuthError) {
