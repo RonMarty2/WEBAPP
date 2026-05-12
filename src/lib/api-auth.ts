@@ -12,9 +12,23 @@ export interface AuthResult {
   user: SessionUser;
 }
 
-const ADMIN_JWT_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || "laboratorio-academico-super-secret-key-2024"
-);
+// 🛡️ Secret de admin: DEBE venir del entorno (sin fallback inseguro).
+// Lazy load para no crashear el módulo si la env var falta cuando esta
+// función no se usa. Si falta y se intenta verificar admin, lanza error
+// explícito en vez de fallar silenciosamente.
+let _adminKey: Uint8Array | null = null;
+function getAdminKey(): Uint8Array {
+  if (_adminKey) return _adminKey;
+  const value = process.env.ADMIN_JWT_SECRET;
+  if (!value || value.length < 16) {
+    throw new Error(
+      "ADMIN_JWT_SECRET no está configurada (o es demasiado corta). " +
+      "Definila con al menos 32 caracteres aleatorios.",
+    );
+  }
+  _adminKey = new TextEncoder().encode(value);
+  return _adminKey;
+}
 
 /** Verifica sesión activa de estudiante. Lanza si no está autenticado. */
 export async function requireAuth(): Promise<AuthResult> {
@@ -40,7 +54,7 @@ export async function requireAdmin(): Promise<AuthResult> {
   const adminToken = cookieStore.get("admin_session")?.value;
   if (adminToken) {
     try {
-      const { payload } = await jwtVerify(adminToken, ADMIN_JWT_SECRET);
+      const { payload } = await jwtVerify(adminToken, getAdminKey());
       if (payload.role === "admin") {
         const fakeAdminUser: SessionUser = {
           id: "admin",

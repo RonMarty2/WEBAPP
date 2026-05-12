@@ -43,3 +43,6 @@ next-env.d.ts
 
 # Worktrees creados por Claude Code
 .claude/worktrees/
+
+# .env.example es la plantilla publica (sin secretos) — debe estar en git
+!.env.example
