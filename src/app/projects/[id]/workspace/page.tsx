@@ -2156,13 +2156,16 @@ export default function WorkspacePage() {
                 </button>
               </div>
             </div>
-            {displayContent && (
-              <div style={{ display:"flex", gap:6 }}>
-                {selectedFase > 0 && <button onClick={() => setSelectedFase(f => f-1)} className="btn-ghost" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>← {displayFases[selectedFase-1]?.short}</button>}
-                {selectedFase < displayFases.length-1 && <button onClick={() => setSelectedFase(f => f+1)} className="btn-cyan" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>{displayFases[selectedFase+1]?.short} →</button>}
-              </div>
-            )}
           </div>
+    )}
+    {/* Navegación entre fases — SIEMPRE visible (excepto Cap0) */}
+    {!isCap0Phase && displayContent && (
+      <div style={{ flexShrink: 0, padding:"8px 14px 12px", borderTop: !(esGuiado && hasBorrador && !hasFinal) ? "none" : "1px solid rgba(148,163,184,0.18)", background:"rgba(255,255,255,0.5)", backdropFilter:"blur(6px)" }}>
+        <div style={{ display:"flex", gap:6 }}>
+          {selectedFase > 0 && <button onClick={() => setSelectedFase(f => f-1)} className="btn-ghost" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>← {displayFases[selectedFase-1]?.short}</button>}
+          {selectedFase < displayFases.length-1 && <button onClick={() => setSelectedFase(f => f+1)} className="btn-cyan" style={{ flex:1, fontSize:10, padding:"5px 6px", justifyContent:"center" }}>{displayFases[selectedFase+1]?.short} →</button>}
+        </div>
+      </div>
     )}
         </div>
 
