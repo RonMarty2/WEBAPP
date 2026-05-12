@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
@@ -1604,6 +1605,7 @@ export default function WorkspacePage() {
               ⚡ Admin
             </Link>
           )}
+          <ThemeToggle />
         </div>
       </header>
 

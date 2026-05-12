@@ -87,7 +87,7 @@ function LoginContent() {
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 12,
                 padding: "13px 20px", borderRadius: 10, border: "1px solid var(--border-hover)",
-                background: "#fff", color: "var(--fg-primary)", textDecoration: "none", fontWeight: 600, fontSize: 15,
+                background: "var(--bg-card)", color: "var(--fg-primary)", textDecoration: "none", fontWeight: 600, fontSize: 15,
               }}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
