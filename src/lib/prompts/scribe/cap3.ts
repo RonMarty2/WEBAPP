@@ -6,6 +6,15 @@
  * - Construir contexto con buildContextoCap3(datos) — incluye Cap I y Cap II
  * - Prepend al inicio de SISTEMA_SCRIBE_CAP3
  * - Enviar a IA (Groq → Anthropic → OpenAI)
+ *
+ * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
+ *
+ * El Cap. I tiene variantes "clasico" y "reducido". La reducida NO trae
+ * operacionalización de variables. Este Cap. III actualmente espera la
+ * operacionalización del Cap. I — incompatible con la variante reducida.
+ *
+ * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
+ *      memory/pending_variante_reducida.md
  */
 
 export const SISTEMA_SCRIBE_CAP3 = `

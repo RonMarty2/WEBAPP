@@ -6,6 +6,24 @@
  * - Construir contexto del proyecto + contenido del Cap I con buildContextoCap2(datos)
  * - Prepend al inicio de SISTEMA_SCRIBE_CAP2
  * - Enviar a IA (Groq → Anthropic → OpenAI)
+ *
+ * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
+ *
+ * El Cap. I tiene dos variantes implementadas: "clasico" y "reducido"
+ * (ver src/lib/cap1Variants.ts). La variante "reducido" NO incluye
+ * hipótesis, operacionalización ni sistematización de subpreguntas.
+ *
+ * Este Cap. II actualmente usa un único prompt para AMBAS variantes,
+ * lo cual puede ser inconsistente si el estudiante eligió "reducido"
+ * en el Cap. I (puede pedir desarrollar variables que no existen).
+ *
+ * Cuando el usuario defina la estructura reducida del Cap. II:
+ *   1. Crear src/lib/prompts/scribe/cap2-variantes/clasico.ts (alias)
+ *   2. Crear src/lib/prompts/scribe/cap2-variantes/reducido.ts (nueva)
+ *   3. Extender el patrón de resolución en /api/projects/generate-phase
+ *
+ * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
+ *      memory/pending_variante_reducida.md
  */
 
 export const SISTEMA_SCRIBE_CAP2 = `

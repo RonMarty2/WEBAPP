@@ -110,7 +110,8 @@
       "Bash(xxd)",
       "Bash(tr -d '\\\\000')",
       "Read(//c//**)",
-      "Bash(npx --yes tsx tmp-test-parser.mjs)"
+      "Bash(npx --yes tsx tmp-test-parser.mjs)",
+      "PowerShell(npx tsc --noEmit 2>&1)"
     ]
   }
 }

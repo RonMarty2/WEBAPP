@@ -23,6 +23,7 @@ import {
   buildHiloConstraintBlock,
 } from "@/lib/hiloConductor";
 import { loadFromDisk, saveToDisk, type PhaseFeedback } from "@/lib/persistence";
+import { getVariantById } from "@/lib/cap1Variants";
 
 /**
  * Guarda feedback del estudiante para análisis posterior en /admin/dashboard.
@@ -604,7 +605,28 @@ async function generarSinSupabase({
 
     // Intenta cargar el prompt de admin/phase-definitions primero
     const adminPrompt = await loadPhasePromptFromAdmin(servicio_id, phase_id);
-    const phasePromptBase = typePrompt || adminPrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
+
+    // 🎯 Variante de Cap. I — si el estudiante eligió una variante específica
+    // (ej. "reducido" para UMSS), resolverla y usarla como fallback antes del
+    // default. typePrompt y adminPrompt siguen teniendo prioridad para no
+    // romper overrides del admin.
+    //
+    // ⚠️ Solo afecta a ph-cap1. El resto de fases continúa usando el flujo
+    // original sin modificación.
+    //
+    // 🔴 PENDIENTE (memory/pending_variante_reducida.md):
+    //   Cap. II–V todavía usan un único prompt. Cuando se definan variantes
+    //   para esos capítulos, replicar este patrón aquí.
+    let variantePrompt: string | null = null;
+    if (phase_id === "ph-cap1") {
+      const ctxRaw = (proyecto.academic_context ?? {}) as Record<string, unknown>;
+      const varianteId = typeof ctxRaw.cap1_variante_id === "string"
+        ? (ctxRaw.cap1_variante_id as string)
+        : null;
+      variantePrompt = getVariantById(varianteId).prompt;
+    }
+
+    const phasePromptBase = typePrompt || adminPrompt || variantePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const systemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
     const borradorKey = `${phase_id}_borrador`;

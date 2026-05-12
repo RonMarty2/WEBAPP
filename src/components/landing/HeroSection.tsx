@@ -19,15 +19,15 @@ export default function HeroSection() {
         justifyContent: "center",
       }}
     >
-      {/* Halo central para legibilidad del texto sobre los blobs */}
+      {/* Halo central para legibilidad */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "min(760px, 90vw)",
-          height: "460px",
+          width: "min(900px, 90vw)",
+          height: "560px",
           background: "radial-gradient(ellipse at center, rgba(250,250,252,0.88) 20%, transparent 72%)",
           pointerEvents: "none",
           zIndex: 0,
@@ -35,16 +35,16 @@ export default function HeroSection() {
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
+      <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
 
-        {/* Badge */}
+        {/* Badge — identidad boliviana */}
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
           borderRadius: 999, padding: "6px 16px",
           fontSize: 13, color: "var(--fg-primary)",
-          marginBottom: 36,
+          marginBottom: 32,
           boxShadow: "0 0 0 4px rgba(99,102,241,0.06), var(--shadow-sm)",
         }}>
           <span style={{
@@ -53,10 +53,10 @@ export default function HeroSection() {
             flexShrink: 0,
             boxShadow: "0 0 6px rgba(34,197,94,0.5)",
           }} />
-          Plataforma académica con inteligencia artificial
+          Hecho en Bolivia · IA con citas verificadas
         </div>
 
-        {/* H1 — serif para el peso académico */}
+        {/* H1 — serif, peso académico */}
         <h1
           className="font-crimson"
           style={{
@@ -65,57 +65,80 @@ export default function HeroSection() {
             lineHeight: 1.05,
             letterSpacing: "-0.02em",
             color: "var(--fg-primary)",
-            maxWidth: 860,
-            margin: "0 auto 28px",
+            maxWidth: 920,
+            margin: "0 auto 24px",
           }}
         >
-          Documentos académicos
+          Tu monografía completa
           <br />
-          <span className="text-gradient">de calidad, sin esfuerzo</span>
+          <span className="text-gradient">en horas, no en meses</span>
         </h1>
 
         {/* Subheadline */}
         <p style={{
           color: "var(--fg-muted)",
-          fontSize: 18,
-          maxWidth: 500,
-          margin: "0 auto 48px",
-          lineHeight: 1.65,
+          fontSize: 19,
+          maxWidth: 620,
+          margin: "0 auto 14px",
+          lineHeight: 1.6,
           fontWeight: 400,
         }}>
-          Para estudiantes y docentes. Genera monografías, planificaciones
-          y material académico con IA — coherente, preciso y listo para presentar.
+          Capítulos I–V, bibliografía APA 7 y formato oficial de tu universidad —
+          generados por IA verificada, aprobados etapa por etapa por ti.
         </p>
 
-        {/* CTA buttons */}
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+        {/* Tagline */}
+        <p style={{
+          color: "var(--fg-secondary)",
+          fontSize: 14,
+          marginBottom: 40,
+          fontStyle: "italic",
+          letterSpacing: "0.01em",
+        }}>
+          La IA redacta. Tú apruebas. El documento es real.
+        </p>
+
+        {/* CTAs */}
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
           <button
-            id="cta-estudiantes"
+            id="cta-empezar"
             onClick={() => router.push("/login")}
             className="btn-primary"
           >
-            Para Estudiantes
+            Empezar mi monografía
           </button>
 
-          <button
-            id="cta-docentes"
-            onClick={() => router.push("/login")}
-            className="btn-secondary"
-          >
-            Para Docentes
-          </button>
+          <a href="#como-funciona" id="cta-como-funciona" className="btn-secondary">
+            Ver cómo funciona
+          </a>
 
-          <a href="/tutorial" id="cta-tutorial" className="btn-secondary">
-            Cómo funciona
+          <a href="#planes" id="cta-planes" className="btn-secondary">
+            Ver planes
           </a>
         </div>
 
-        {/* Social proof */}
+        {/* Trust badges */}
+        <div style={{
+          display: "flex", gap: 18, justifyContent: "center", flexWrap: "wrap",
+          fontSize: 13, color: "var(--fg-muted)",
+        }}>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ color: "var(--accent)" }}>✓</span> Sin citas inventadas
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ color: "var(--accent)" }}>✓</span> Formato UMSS, UMSA, UAGRM y +5
+          </span>
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <span style={{ color: "var(--accent)" }}>✓</span> Exporta a LaTeX + PDF
+          </span>
+        </div>
+
+        {/* Price line */}
         <p style={{
-          marginTop: 44, fontSize: 13,
+          marginTop: 38, fontSize: 14,
           color: "var(--fg-muted)", letterSpacing: "0.01em",
         }}>
-          Bs. 150 · Pago único · Sin suscripción
+          Desde <strong style={{ color: "var(--fg-primary)" }}>Bs. 150</strong> · Pago único · Sin suscripción obligatoria
         </p>
       </div>
     </section>

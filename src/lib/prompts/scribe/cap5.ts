@@ -6,6 +6,15 @@
  * - Construir contexto con buildContextoCap5(datos) — incluye Caps I, II, III y IV
  * - Prepend al inicio de SISTEMA_SCRIBE_CAP5
  * - Enviar a IA (Groq → Anthropic → OpenAI)
+ *
+ * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
+ *
+ * El Cap. I tiene variantes "clasico" y "reducido". La reducida NO trae
+ * hipótesis. Este Cap. V puede intentar confirmar/refutar una hipótesis
+ * que no existe en la variante reducida.
+ *
+ * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
+ *      memory/pending_variante_reducida.md
  */
 
 export const SISTEMA_SCRIBE_CAP5 = `

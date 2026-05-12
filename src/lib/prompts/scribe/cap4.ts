@@ -6,6 +6,15 @@
  * - Construir contexto con buildContextoCap4(datos) — incluye Caps I, II y III
  * - Prepend al inicio de SISTEMA_SCRIBE_CAP4
  * - Enviar a IA (Groq → Anthropic → OpenAI)
+ *
+ * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
+ *
+ * El Cap. I tiene variantes "clasico" y "reducido". La reducida NO trae
+ * subpreguntas de sistematización. Este Cap. IV puede iterar sobre
+ * subpreguntas que no existen en la variante reducida.
+ *
+ * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
+ *      memory/pending_variante_reducida.md
  */
 
 export const SISTEMA_SCRIBE_CAP4 = `

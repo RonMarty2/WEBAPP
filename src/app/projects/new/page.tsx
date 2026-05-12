@@ -28,8 +28,17 @@ interface TipoProyecto {
 type Step =
   | "loading"
   | "seleccionar-universidad"
+  | "seleccionar-variante-cap1"
   | "datos-completos"
   | "creando";
+
+interface Cap1VariantePublica {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  estructura_visible: string[];
+  nota?: string;
+}
 
 interface ArchivoSubido {
   file: File;
@@ -47,6 +56,11 @@ export default function NuevoProyectoPage() {
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
   const [universidadId, setUniversidadId] = useState("");
+
+  // Variantes de Cap. I disponibles para la universidad elegida
+  const [cap1Variantes, setCap1Variantes] = useState<Cap1VariantePublica[]>([]);
+  const [cap1VarianteId, setCap1VarianteId] = useState("");
+  const [cargandoVariantes, setCargandoVariantes] = useState(false);
 
   // Datos del proyecto (un solo formulario)
   const [tema, setTema] = useState("");                       // opcional
@@ -109,6 +123,40 @@ export default function NuevoProyectoPage() {
     }
     init();
   }, [router]);
+
+  // Carga las variantes de Cap. I disponibles para la universidad actualmente
+  // seleccionada. Si la universidad no tiene mapeo explícito el endpoint
+  // devolverá solo la variante "clasico" (compatibilidad total).
+  async function cargarVariantesYDecidirRuta() {
+    if (!universidadId) {
+      setError("Selecciona tu universidad para continuar.");
+      return;
+    }
+    setError("");
+    setCargandoVariantes(true);
+    try {
+      const res = await fetch(`/api/cap1-variants?universidad_id=${encodeURIComponent(universidadId)}`);
+      const data = await res.json();
+      const variantes: Cap1VariantePublica[] = data?.variantes ?? [];
+      setCap1Variantes(variantes);
+
+      if (variantes.length <= 1) {
+        // Solo "clasico" disponible → saltamos el selector y guardamos default
+        setCap1VarianteId(variantes[0]?.id ?? "clasico");
+        setStep("datos-completos");
+      } else {
+        // Pre-seleccionamos la primera (clasico) y mostramos el selector
+        setCap1VarianteId(variantes[0].id);
+        setStep("seleccionar-variante-cap1");
+      }
+    } catch {
+      // Si falla el endpoint, asumimos clasico y seguimos al paso de datos
+      setCap1VarianteId("clasico");
+      setStep("datos-completos");
+    } finally {
+      setCargandoVariantes(false);
+    }
+  }
 
   async function resolverServicioId(): Promise<string> {
     if (tipoProyectoId === "tipo-tesis") return "tesis-001";
@@ -186,7 +234,12 @@ export default function NuevoProyectoPage() {
         modalidad_creacion: "guiada",
         tema_aprobado: temaBase,
         titulo_provisional: temaBase,
-        academic_context: { contexto_inicial: contexto },
+        academic_context: {
+          contexto_inicial: contexto,
+          // Persistimos la variante elegida del Cap. I. Si no hay valor,
+          // se resolverá como "clasico" en /api/projects/generate-phase.
+          cap1_variante_id: cap1VarianteId || "clasico",
+        },
       };
 
       const res = await fetch("/api/projects", {
@@ -379,13 +432,135 @@ export default function NuevoProyectoPage() {
             </div>
 
             <button
-              onClick={() => { if (!universidadId) { setError("Selecciona tu universidad para continuar."); return; } setError(""); setStep("datos-completos"); }}
+              onClick={cargarVariantesYDecidirRuta}
+              disabled={cargandoVariantes}
               className="btn-cyan"
               style={{
                 width: "100%",
                 justifyContent: "center",
                 padding: "12px",
+                opacity: cargandoVariantes ? 0.6 : 1,
               }}
+            >
+              {cargandoVariantes ? "Cargando..." : "Continuar →"}
+            </button>
+          </div>
+        )}
+
+        {/* ── PASO 1.5: SELECCIONAR VARIANTE DE CAP. I ───────────────────────────────── */}
+        {step === "seleccionar-variante-cap1" && (
+          <div className="card fade-in" style={{ padding: 32 }}>
+            <button
+              onClick={() => setStep("seleccionar-universidad")}
+              style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}
+            >
+              ← Atrás
+            </button>
+            <div style={{ marginBottom: 24 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--accent)",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                }}
+              >
+                Formato del Capítulo I
+              </div>
+              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+                ¿Qué formato pide tu diplomado?
+              </h1>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
+                Algunas universidades tienen variantes del Capítulo I según el programa.
+                Elige la que coincide con tu guía de tesis o monografía.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+              {cap1Variantes.map((v) => {
+                const seleccionada = cap1VarianteId === v.id;
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => setCap1VarianteId(v.id)}
+                    style={{
+                      padding: "16px",
+                      borderRadius: 10,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      background: seleccionada ? "rgba(37,99,235,0.10)" : "rgba(255,255,255,0.84)",
+                      border: seleccionada ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                      color: "var(--fg-primary)",
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700 }}>
+                        {seleccionada ? "✓ " : ""}{v.nombre}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: seleccionada ? "var(--accent)" : "var(--fg-muted)",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                        }}
+                      >
+                        {seleccionada ? "Seleccionada" : "Elegir"}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12.5, color: "var(--fg-muted)", lineHeight: 1.5, marginBottom: 10 }}>
+                      {v.descripcion}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: "var(--fg-secondary)",
+                        background: "rgba(0,0,0,0.03)",
+                        padding: "8px 10px",
+                        borderRadius: 6,
+                        lineHeight: 1.6,
+                        whiteSpace: "pre-line",
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, color: "var(--fg-primary)", marginBottom: 4 }}>Estructura:</div>
+                      {v.estructura_visible.join("\n")}
+                    </div>
+                    {v.nota && (
+                      <div
+                        style={{
+                          marginTop: 10,
+                          fontSize: 11,
+                          color: "#b45309",
+                          background: "rgba(245,158,11,0.08)",
+                          border: "1px solid rgba(245,158,11,0.25)",
+                          padding: "8px 10px",
+                          borderRadius: 6,
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {v.nota}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => {
+                if (!cap1VarianteId) {
+                  setError("Selecciona un formato para continuar.");
+                  return;
+                }
+                setError("");
+                setStep("datos-completos");
+              }}
+              className="btn-cyan"
+              style={{ width: "100%", justifyContent: "center", padding: "12px" }}
             >
               Continuar →
             </button>
@@ -395,7 +570,10 @@ export default function NuevoProyectoPage() {
         {/* ── PASO 2: DATOS COMPLETOS (UN SOLO FORMULARIO) ────────────────────── */}
         {step === "datos-completos" && (
           <div className="card fade-in" style={{ padding: 32 }}>
-            <button onClick={() => setStep("seleccionar-universidad")} style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}>← Atrás</button>
+            <button
+              onClick={() => setStep(cap1Variantes.length > 1 ? "seleccionar-variante-cap1" : "seleccionar-universidad")}
+              style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 20, padding: 0, fontSize: 13 }}
+            >← Atrás</button>
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
                 Paso 2 de 2 — Datos del proyecto
