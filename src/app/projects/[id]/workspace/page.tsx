@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import BibliografiaInsights from "@/components/scribe/BibliografiaInsights";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
@@ -2310,6 +2311,16 @@ export default function WorkspacePage() {
             </div>
           )}
         </div>
+
+        {/* ── COL 3: PANEL DE INSIGHTS POR FASE (fases especiales sin preview PDF) ── */}
+        {!showPdfPanel && phaseId === "ph-referencias" && (
+          <div
+            className="hidden xl:flex shrink-0 flex-col relative z-40"
+            style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
+          >
+            <BibliografiaInsights rawContent={displayContent} />
+          </div>
+        )}
 
         {/* ── COL 3: PDF PREVIEW — oculto en Cap 0 (no es parte del documento) ── */}
         {showPdfPanel && !isCap0Phase && (
