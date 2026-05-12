@@ -175,52 +175,52 @@ a { color: inherit; }
 /* ── Column 1 (left 2-8%) ─────────────────────────────── */
 .pt-1  { --rot:-45deg; left:2%;  top:8%;  width:3px; height:10px; background:#6366f1; animation:pd-a 17s ease-in-out  -2s infinite; }
 .pt-2  { --rot: 30deg; left:5%;  top:35%; width:4px; height:8px;  background:#8b5cf6; animation:pd-b 21s ease-in-out  -9s infinite; }
-.pt-3  { --rot:-20deg; left:3%;  top:58%; width:3px; height:12px; background:#ec4899; animation:pd-c 19s ease-in-out  -5s infinite; }
-.pt-4  { --rot: 55deg; left:7%;  top:78%; width:4px; height:9px;  background:#06b6d4; animation:pd-d 23s ease-in-out -14s infinite; }
-.pt-5  { --rot:-60deg; left:6%;  top:90%; width:3px; height:8px;  background:#f59e0b; animation:pd-e 15s ease-in-out  -3s infinite; }
+.pt-3  { --rot:-20deg; left:3%;  top:58%; width:3px; height:12px; background:#a78bfa; animation:pd-c 19s ease-in-out  -5s infinite; }
+.pt-4  { --rot: 55deg; left:7%;  top:78%; width:4px; height:9px;  background:#6366f1; animation:pd-d 23s ease-in-out -14s infinite; }
+.pt-5  { --rot:-60deg; left:6%;  top:90%; width:3px; height:8px;  background:#8b5cf6; animation:pd-e 15s ease-in-out  -3s infinite; }
 
 /* ── Column 2 (left 14-21%) ──────────────────────────── */
-.pt-6  { --rot: 40deg; left:14%; top:12%; width:4px; height:11px; background:#10b981; animation:pd-b 18s ease-in-out  -7s infinite; }
+.pt-6  { --rot: 40deg; left:14%; top:12%; width:4px; height:11px; background:#a78bfa; animation:pd-b 18s ease-in-out  -7s infinite; }
 .pt-7  { --rot:-35deg; left:18%; top:30%; width:3px; height:9px;  background:#6366f1; animation:pd-a 22s ease-in-out -11s infinite; }
 .pt-8  { --rot: 15deg; left:16%; top:52%; width:4px; height:13px; background:#8b5cf6; animation:pd-c 20s ease-in-out  -6s infinite; }
-.pt-9  { --rot:-50deg; left:21%; top:72%; width:3px; height:8px;  background:#ec4899; animation:pd-d 24s ease-in-out -17s infinite; }
-.pt-10 { --rot: 25deg; left:15%; top:88%; width:4px; height:10px; background:#06b6d4; animation:pd-e 16s ease-in-out  -4s infinite; }
+.pt-9  { --rot:-50deg; left:21%; top:72%; width:3px; height:8px;  background:#a78bfa; animation:pd-d 24s ease-in-out -17s infinite; }
+.pt-10 { --rot: 25deg; left:15%; top:88%; width:4px; height:10px; background:#6366f1; animation:pd-e 16s ease-in-out  -4s infinite; }
 
 /* ── Column 3 (left 28-35%) ──────────────────────────── */
-.pt-11 { --rot:-30deg; left:29%; top:6%;  width:3px; height:12px; background:#f59e0b; animation:pd-c 17s ease-in-out  -8s infinite; }
-.pt-12 { --rot: 60deg; left:33%; top:25%; width:4px; height:8px;  background:#10b981; animation:pd-a 23s ease-in-out -13s infinite; }
+.pt-11 { --rot:-30deg; left:29%; top:6%;  width:3px; height:12px; background:#8b5cf6; animation:pd-c 17s ease-in-out  -8s infinite; }
+.pt-12 { --rot: 60deg; left:33%; top:25%; width:4px; height:8px;  background:#a78bfa; animation:pd-a 23s ease-in-out -13s infinite; }
 .pt-13 { --rot:-15deg; left:28%; top:45%; width:3px; height:10px; background:#6366f1; animation:pd-b 19s ease-in-out  -5s infinite; }
 .pt-14 { --rot: 45deg; left:35%; top:65%; width:4px; height:12px; background:#8b5cf6; animation:pd-d 21s ease-in-out -10s infinite; }
-.pt-15 { --rot:-55deg; left:31%; top:85%; width:3px; height:9px;  background:#ec4899; animation:pd-e 14s ease-in-out  -2s infinite; }
+.pt-15 { --rot:-55deg; left:31%; top:85%; width:3px; height:9px;  background:#a78bfa; animation:pd-e 14s ease-in-out  -2s infinite; }
 
 /* ── Column 4 (left 41-49%) ──────────────────────────── */
-.pt-16 { --rot: 20deg; left:41%; top:15%; width:4px; height:11px; background:#06b6d4; animation:pd-a 20s ease-in-out  -9s infinite; }
-.pt-17 { --rot:-40deg; left:46%; top:33%; width:3px; height:8px;  background:#f59e0b; animation:pd-c 18s ease-in-out -15s infinite; }
-.pt-18 { --rot: 10deg; left:43%; top:55%; width:4px; height:14px; background:#10b981; animation:pd-b 22s ease-in-out  -7s infinite; }
+.pt-16 { --rot: 20deg; left:41%; top:15%; width:4px; height:11px; background:#6366f1; animation:pd-a 20s ease-in-out  -9s infinite; }
+.pt-17 { --rot:-40deg; left:46%; top:33%; width:3px; height:8px;  background:#8b5cf6; animation:pd-c 18s ease-in-out -15s infinite; }
+.pt-18 { --rot: 10deg; left:43%; top:55%; width:4px; height:14px; background:#a78bfa; animation:pd-b 22s ease-in-out  -7s infinite; }
 .pt-19 { --rot:-65deg; left:49%; top:74%; width:3px; height:10px; background:#6366f1; animation:pd-e 24s ease-in-out -18s infinite; }
 .pt-20 { --rot: 50deg; left:44%; top:92%; width:4px; height:9px;  background:#8b5cf6; animation:pd-d 16s ease-in-out  -3s infinite; }
 
 /* ── Column 5 (left 53-61%) ──────────────────────────── */
-.pt-21 { --rot:-25deg; left:54%; top:8%;  width:3px; height:13px; background:#ec4899; animation:pd-b 19s ease-in-out -11s infinite; }
-.pt-22 { --rot: 35deg; left:58%; top:28%; width:4px; height:9px;  background:#06b6d4; animation:pd-a 21s ease-in-out  -6s infinite; }
-.pt-23 { --rot:-55deg; left:55%; top:50%; width:3px; height:11px; background:#f59e0b; animation:pd-c 17s ease-in-out -14s infinite; }
-.pt-24 { --rot: 15deg; left:61%; top:70%; width:4px; height:8px;  background:#10b981; animation:pd-d 23s ease-in-out  -8s infinite; }
+.pt-21 { --rot:-25deg; left:54%; top:8%;  width:3px; height:13px; background:#a78bfa; animation:pd-b 19s ease-in-out -11s infinite; }
+.pt-22 { --rot: 35deg; left:58%; top:28%; width:4px; height:9px;  background:#6366f1; animation:pd-a 21s ease-in-out  -6s infinite; }
+.pt-23 { --rot:-55deg; left:55%; top:50%; width:3px; height:11px; background:#8b5cf6; animation:pd-c 17s ease-in-out -14s infinite; }
+.pt-24 { --rot: 15deg; left:61%; top:70%; width:4px; height:8px;  background:#a78bfa; animation:pd-d 23s ease-in-out  -8s infinite; }
 .pt-25 { --rot:-35deg; left:56%; top:87%; width:3px; height:10px; background:#6366f1; animation:pd-e 15s ease-in-out  -5s infinite; }
 
 /* ── Column 6 (left 66-74%) ──────────────────────────── */
 .pt-26 { --rot: 60deg; left:67%; top:18%; width:4px; height:12px; background:#8b5cf6; animation:pd-a 20s ease-in-out -12s infinite; }
-.pt-27 { --rot:-20deg; left:72%; top:38%; width:3px; height:9px;  background:#ec4899; animation:pd-b 18s ease-in-out  -3s infinite; }
-.pt-28 { --rot: 40deg; left:68%; top:60%; width:4px; height:11px; background:#06b6d4; animation:pd-c 22s ease-in-out -16s infinite; }
-.pt-29 { --rot:-50deg; left:74%; top:80%; width:3px; height:8px;  background:#f59e0b; animation:pd-d 24s ease-in-out  -9s infinite; }
-.pt-30 { --rot: 25deg; left:70%; top:94%; width:4px; height:10px; background:#10b981; animation:pd-e 13s ease-in-out  -1s infinite; }
+.pt-27 { --rot:-20deg; left:72%; top:38%; width:3px; height:9px;  background:#a78bfa; animation:pd-b 18s ease-in-out  -3s infinite; }
+.pt-28 { --rot: 40deg; left:68%; top:60%; width:4px; height:11px; background:#6366f1; animation:pd-c 22s ease-in-out -16s infinite; }
+.pt-29 { --rot:-50deg; left:74%; top:80%; width:3px; height:8px;  background:#8b5cf6; animation:pd-d 24s ease-in-out  -9s infinite; }
+.pt-30 { --rot: 25deg; left:70%; top:94%; width:4px; height:10px; background:#a78bfa; animation:pd-e 13s ease-in-out  -1s infinite; }
 
 /* ── Column 7 (left 82-95%) ──────────────────────────── */
 .pt-31 { --rot:-45deg; left:82%; top:10%; width:3px; height:11px; background:#6366f1; animation:pd-c 21s ease-in-out  -7s infinite; }
 .pt-32 { --rot: 30deg; left:87%; top:30%; width:4px; height:8px;  background:#8b5cf6; animation:pd-a 19s ease-in-out -13s infinite; }
-.pt-33 { --rot:-10deg; left:84%; top:52%; width:3px; height:13px; background:#ec4899; animation:pd-b 23s ease-in-out  -4s infinite; }
-.pt-34 { --rot: 55deg; left:91%; top:70%; width:4px; height:9px;  background:#06b6d4; animation:pd-d 17s ease-in-out -10s infinite; }
-.pt-35 { --rot:-65deg; left:89%; top:85%; width:3px; height:10px; background:#f59e0b; animation:pd-e 20s ease-in-out  -6s infinite; }
-.pt-36 { --rot: 15deg; left:95%; top:45%; width:4px; height:12px; background:#10b981; animation:pd-a 22s ease-in-out -18s infinite; }
+.pt-33 { --rot:-10deg; left:84%; top:52%; width:3px; height:13px; background:#a78bfa; animation:pd-b 23s ease-in-out  -4s infinite; }
+.pt-34 { --rot: 55deg; left:91%; top:70%; width:4px; height:9px;  background:#6366f1; animation:pd-d 17s ease-in-out -10s infinite; }
+.pt-35 { --rot:-65deg; left:89%; top:85%; width:3px; height:10px; background:#8b5cf6; animation:pd-e 20s ease-in-out  -6s infinite; }
+.pt-36 { --rot: 15deg; left:95%; top:45%; width:4px; height:12px; background:#a78bfa; animation:pd-a 22s ease-in-out -18s infinite; }
 
 /* Reduce motion */
 @media (prefers-reduced-motion: reduce) {
@@ -480,12 +480,14 @@ a { color: inherit; }
 
 /* ── Navbar dark mode ───────────────────────────── */
 .dark .navbar {
-  background: rgba(255, 255, 255, 0.98); /* Safe fallback */
+  background: rgba(11, 15, 25, 0.98);
   border-bottom-color: var(--border);
 }
 @supports (-webkit-backdrop-filter: blur(16px)) or (backdrop-filter: blur(16px)) {
   .dark .navbar {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(11, 15, 25, 0.80);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
   }
 }
 
@@ -598,5 +600,99 @@ button:focus-visible, a:focus-visible {
 
 .glow-cyan   { box-shadow: 0 0 24px oklch(56% 0.18 250 / 0.15); }
 .glow-purple { box-shadow: 0 0 24px oklch(52% 0.20 290 / 0.15); }
+
+/* ═══ GRADIENT TEXT ANIMATED ════════════════════════════════════════════════ */
+
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 40%, #a78bfa 70%, #6366f1 100%);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* ═══ SCROLL REVEAL ANIMATIONS ══════════════════════════════════════════════ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══ CARD GRADIENT BORDER HOVER ════════════════════════════════════════════ */
+
+.card-premium {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.card-premium::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: -1;
+}
+
+.card-premium:hover::before {
+  opacity: 1;
+}
+
+.card-premium:hover {
+  border-color: transparent;
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.18);
+  transform: translateY(-3px);
+}
+
+/* ═══ CTA PREMIUM BACKGROUND ═════════════════════════════════════════════════ */
+
+.cta-premium {
+  position: relative;
+  background: linear-gradient(135deg, #0b0f19 0%, #1a1040 60%, #0f0b1e 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  overflow: hidden;
+}
+
+.cta-premium::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-premium::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.5;
+}
 
 

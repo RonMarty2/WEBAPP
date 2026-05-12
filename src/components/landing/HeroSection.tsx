@@ -19,7 +19,7 @@ export default function HeroSection() {
         justifyContent: "center",
       }}
     >
-      {/* Radial halo — ensures text stays legible but lets particles show through */}
+      {/* Radial halo */}
       <div
         aria-hidden="true"
         style={{
@@ -36,40 +36,43 @@ export default function HeroSection() {
         }}
       />
 
-      {/* All content — above halo and canvas */}
       <div style={{ position: "relative", zIndex: 1 }}>
 
+        {/* Badge */}
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 8,
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
           borderRadius: 999, padding: "6px 16px",
           fontSize: 13, color: "var(--fg-primary)",
-          marginBottom: 32,
-          boxShadow: "var(--shadow-sm)",
+          marginBottom: 36,
+          boxShadow: "0 0 0 4px rgba(99,102,241,0.06), var(--shadow-sm)",
         }}>
           <span style={{
             width: 7, height: 7, borderRadius: "50%",
             background: "#22c55e", display: "inline-block",
             flexShrink: 0,
+            boxShadow: "0 0 6px rgba(34,197,94,0.5)",
           }} />
           Plataforma académica con inteligencia artificial
         </div>
 
-        {/* H1 — full Antigravity typography tokens */}
-        <h1 style={{
-          fontSize: "var(--text-hero)",
-          fontWeight: 900,
-          lineHeight: "var(--leading-hero)",
-          letterSpacing: "var(--tracking-hero)",
-          color: "var(--fg-primary)",
-          marginBottom: 24,
-          maxWidth: 820,
-          margin: "0 auto 24px",
-        }}>
+        {/* H1 — serif para el peso académico */}
+        <h1
+          className="font-crimson"
+          style={{
+            fontSize: "var(--text-hero)",
+            fontWeight: 700,
+            lineHeight: 1.05,
+            letterSpacing: "-0.02em",
+            color: "var(--fg-primary)",
+            maxWidth: 860,
+            margin: "0 auto 28px",
+          }}
+        >
           Documentos académicos
           <br />
-          de calidad, sin esfuerzo
+          <span className="text-gradient">de calidad, sin esfuerzo</span>
         </h1>
 
         {/* Subheadline */}
@@ -77,7 +80,7 @@ export default function HeroSection() {
           color: "var(--fg-muted)",
           fontSize: 18,
           maxWidth: 500,
-          margin: "0 auto 44px",
+          margin: "0 auto 48px",
           lineHeight: 1.65,
           fontWeight: 400,
         }}>
@@ -110,7 +113,7 @@ export default function HeroSection() {
 
         {/* Social proof */}
         <p style={{
-          marginTop: 40, fontSize: 13,
+          marginTop: 44, fontSize: 13,
           color: "var(--fg-muted)", letterSpacing: "0.01em",
         }}>
           Bs. 150 · Pago único · Sin suscripción
