@@ -109,7 +109,7 @@ export default function FeaturesSection() {
   }
 
   return (
-    <div className="w-full px-4 md:px-8" style={{ maxWidth: 1100, margin: "0 auto" }}>
+    <div className="w-full px-4 md:px-8" style={{ maxWidth: "min(1300px, 92vw)", margin: "0 auto" }}>
 
       {/* ── Garantías strip ──────────────────────────────────────────── */}
       <RevealSection>

@@ -1626,16 +1626,30 @@ export default function WorkspacePage() {
         @media (min-width: 1280px) {
           .workspace-three-pane {
             display: grid;
-            grid-template-columns: minmax(320px, 360px) minmax(0, 1fr) clamp(380px, 22vw, 500px);
+            grid-template-columns: minmax(280px, 320px) minmax(0, 1fr) clamp(320px, 20vw, 440px);
             overflow: hidden;
+          }
+          .workspace-editor-inner {
+            max-width: 100%;
+            padding: 0 24px;
+          }
+        }
+        @media (min-width: 1600px) {
+          .workspace-three-pane {
+            grid-template-columns: minmax(300px, 340px) minmax(0, 1fr) clamp(360px, 21vw, 480px);
+          }
+          .workspace-editor-inner {
+            max-width: 1100px;
+            padding: 0 32px;
           }
         }
         @media (min-width: 1920px) {
           .workspace-three-pane {
-            grid-template-columns: minmax(340px, 380px) minmax(760px, 1fr) clamp(460px, 24vw, 560px);
+            grid-template-columns: minmax(320px, 360px) minmax(0, 1fr) clamp(400px, 22vw, 520px);
           }
           .workspace-editor-inner {
-            max-width: 980px;
+            max-width: 1280px;
+            padding: 0 40px;
           }
         }
       `}</style>
