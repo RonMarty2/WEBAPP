@@ -94,7 +94,23 @@
       "Bash(rm -rf /c/Users/lmigu/AppData/Local/Temp/laboratorio-academico-store)",
       "Bash(grep -n \"isGenerating\\\\|\\\\\\\\.\\\\\\\\.\\\\\\\\.\" src/app/projects/\\\\[id\\\\]/workspace/page.tsx)",
       "Bash(grep -anP \"pulse-dot|animationDelay|3 puntos|map\\\\\\(.{0,20}div\" src/app/projects/\\\\[id\\\\]/workspace/page.tsx)",
-      "Bash(awk '/^export default function WorkspacePage/,0' src/app/projects/\\\\[id\\\\]/workspace/page.tsx)"
+      "Bash(awk '/^export default function WorkspacePage/,0' src/app/projects/\\\\[id\\\\]/workspace/page.tsx)",
+      "Bash(node -e ' *)",
+      "Bash(node scripts/fix-arbol.mjs)",
+      "Bash(cd \"C:\\\\Users\\\\lmigu\\\\Desktop\\\\WEBAPP\\\\WEBAPP\\\\WEBAPP\\\\.claude\\\\worktrees\\\\angry-gates-db3cdb\" && mkdir -p \"src/app/api/projects/[id]/pdf\" && grep -an \"studentData\\\\|StudentCoverData\" \"src/app/projects/[id]/workspace/page.tsx\" | head -5)",
+      "Bash(grep -iE \"\\(error|fail|✓ Compiled|✓ Generating|\\\\\\\\[id\\\\\\\\]/pdf\\)\")",
+      "Bash(taskkill /F /PID 33544)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} en %{time_total}s\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -i \"http://localhost:3000/api/projects/zar4sbvp0bsmp1dmxe2/pdf\" --cookie-jar /tmp/c.txt --cookie /tmp/c.txt -o /tmp/test.bin)",
+      "Bash(find \"C:/Users/lmigu/Downloads/\" -name \"Dinámica*pdf\" -newer /dev/null 2>/dev/null | head -10 && echo \"---\" && ls -la \"C:/Users/lmigu/Downloads/\" 2>/dev/null | grep -i \"dinamica\" | sort -k 6,7)",
+      "Bash(grep -an \"\\\\${cover}\" src/lib/pdfTemplate.ts)",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(npx --yes tsx -e ' *)",
+      "Bash(npx --yes tsx tmp-test-sanitize.mjs)",
+      "Bash(xxd)",
+      "Bash(tr -d '\\\\000')",
+      "Read(//c//**)",
+      "Bash(npx --yes tsx tmp-test-parser.mjs)"
     ]
   }
 }
