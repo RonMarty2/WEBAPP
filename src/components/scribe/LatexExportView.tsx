@@ -290,46 +290,46 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
         </div>
       )}
 
-      {/* ACCIÓN PRINCIPAL DEL ESTUDIANTE — descarga PDF directo, sin Overleaf */}
+      {/* ACCIÓN PRINCIPAL DEL ESTUDIANTE — paquete .tex + logo + instrucciones (Overleaf) */}
       {proyectoId && (
         <div style={{ marginBottom: 16 }}>
           <button
             type="button"
-            onClick={handleDownloadPdf}
-            disabled={pdfDescargando}
+            onClick={handleDownloadPaquete}
+            disabled={paqueteDescargando}
             style={{
               width: "100%",
               padding: "20px 24px",
               borderRadius: 14,
               border: "none",
-              background: pdfDescargando
+              background: paqueteDescargando
                 ? "linear-gradient(135deg, #94a3b8, #64748b)"
-                : "linear-gradient(135deg, #2563eb, #1d4ed8)",
+                : "linear-gradient(135deg, #059669, #047857)",
               color: "white",
               fontSize: 17,
               fontWeight: 700,
-              cursor: pdfDescargando ? "wait" : "pointer",
-              boxShadow: "0 8px 22px rgba(37,99,235,0.35)",
+              cursor: paqueteDescargando ? "wait" : "pointer",
+              boxShadow: "0 8px 22px rgba(5,150,105,0.30)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               gap: 12,
               transition: "transform 0.15s ease",
             }}
-            onMouseEnter={e => { if (!pdfDescargando) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
+            onMouseEnter={e => { if (!paqueteDescargando) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
           >
-            <span style={{ fontSize: 24 }}>📥</span>
-            <span>{pdfDescargando ? "Generando tu PDF…" : "Descargar mi monografía (PDF)"}</span>
+            <span style={{ fontSize: 24 }}>📦</span>
+            <span>{paqueteDescargando ? "Preparando paquete…" : "Descargar paquete (.tex + logo + instrucciones)"}</span>
           </button>
           <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 10, lineHeight: 1.55, textAlign: "center" }}>
-            {pdfDescargando
-              ? "Esto toma 10–20 segundos. La página se queda esperando — no la cierres."
-              : "Tu monografía completa con carátula UMSS, logo, índice y formato APA 7."}
+            {paqueteDescargando
+              ? "Armando tu ZIP con el .tex, el logo institucional y el README. Un momento…"
+              : "ZIP con .tex + logo + README. Subilo a Overleaf y obtenés el PDF compilado."}
           </div>
-          {pdfError && (
+          {paqueteError && (
             <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12, lineHeight: 1.5 }}>
-              ⚠ {pdfError}
+              ⚠ {paqueteError}
             </div>
           )}
         </div>
@@ -338,26 +338,28 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
       {/* OPCIONES AVANZADAS — solo admin, escondidas detrás de <details> */}
       <details style={{ marginBottom: 16 }}>
         <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--fg-muted)", padding: "8px 0", userSelect: "none" }}>
-          Opciones avanzadas (admin) — LaTeX / Overleaf / código crudo
+          Opciones avanzadas (admin) — PDF directo / LaTeX / Overleaf / código crudo
         </summary>
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
-          {/* Paquete LaTeX para Overleaf */}
+          {/* PDF directo (admin) — útil para preview rápido sin Overleaf */}
           {proyectoId && (
-            <button
-              type="button"
-              onClick={handleDownloadPaquete}
-              disabled={paqueteDescargando}
-              style={{
-                padding: "12px 14px", borderRadius: 8, border: "1px solid var(--border)",
-                background: "rgba(16,185,129,0.06)", color: "#059669", fontSize: 12.5, fontWeight: 600,
-                cursor: paqueteDescargando ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8,
-              }}
-            >
-              <span>📦</span>
-              <span>{paqueteDescargando ? "Preparando ZIP…" : "Paquete LaTeX (.tex + logo) para Overleaf"}</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleDownloadPdf}
+                disabled={pdfDescargando}
+                style={{
+                  padding: "12px 14px", borderRadius: 8, border: "1px solid var(--border)",
+                  background: "rgba(37,99,235,0.06)", color: "#2563eb", fontSize: 12.5, fontWeight: 600,
+                  cursor: pdfDescargando ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8,
+                }}
+              >
+                <span>📥</span>
+                <span>{pdfDescargando ? "Generando PDF directo…" : "PDF directo (sin Overleaf, sin carátula)"}</span>
+              </button>
+              {pdfError && <div style={{ fontSize: 11, color: "#ef4444" }}>⚠ {pdfError}</div>}
+            </>
           )}
-          {paqueteError && <div style={{ fontSize: 11, color: "#ef4444" }}>⚠ {paqueteError}</div>}
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 10 }}>
             <ActionCard
@@ -397,10 +399,10 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           💡 ¿Cómo obtengo el PDF final?
         </summary>
         <ol style={{ margin: "10px 0 0", paddingLeft: 22, fontSize: 13, color: "var(--fg-secondary)", lineHeight: 1.7 }}>
-          <li>Apretá <strong>Abrir en Overleaf</strong> — se abrirá un proyecto nuevo con tu LaTeX</li>
-          <li>Overleaf compilará automáticamente y verás el PDF al lado derecho</li>
-          <li>Si hay errores de compilación, Overleaf los marca en rojo — corregilos ahí mismo</li>
-          <li>Cuando esté listo, descargá el PDF desde el botón de Overleaf</li>
+          <li>Apretá <strong>Descargar paquete</strong> arriba — bajás un ZIP con el .tex, el logo y un README</li>
+          <li>Entrá a <a href="https://www.overleaf.com" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>overleaf.com</a>, creá una cuenta gratis y elegí <em>New Project → Upload Project</em></li>
+          <li>Subí el ZIP completo — Overleaf compila automáticamente y verás el PDF al lado derecho</li>
+          <li>Armá tu carátula con la plantilla institucional de tu universidad y descargá el PDF final</li>
         </ol>
       </details>
 

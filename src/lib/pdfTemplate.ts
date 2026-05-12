@@ -915,7 +915,10 @@ export function generatePdfHtml(params: {
   const { university, studentData, phaseContents, phaseLabels = {}, titulo = "", preview = false } = params;
 
   const css = buildCss(university);
-  const cover = getHtmlCover(university, studentData, titulo);
+  // 🚨 Decisión de diseño: este documento NO genera carátula.
+  // El estudiante arma su propia carátula manualmente desde la plantilla institucional.
+  // Aquí se omite intencionalmente la llamada a getHtmlCover().
+  void studentData; // referencia mantenida por compatibilidad de firma
   const pageNumPos = university.format.numero_paginas_posicion ?? "top-right";
   const capacity = pageCapacity(university);
 
@@ -999,9 +1002,6 @@ export function generatePdfHtml(params: {
   <style>${css}</style>
 </head>
 <body class="${preview ? "document-preview-mode" : ""}">
-  <section class="document-sheet cover-sheet">
-    ${cover}
-  </section>
   ${toc}
   ${tableIndex}
   ${figureIndex}
