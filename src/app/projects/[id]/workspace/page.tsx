@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import ThemeToggle from "@/components/ThemeToggle";
+import BibliografiaInsights from "@/components/scribe/BibliografiaInsights";
+import ResumenInsights from "@/components/scribe/ResumenInsights";
+import CalidadInsights from "@/components/scribe/CalidadInsights";
+import CapituloInsights from "@/components/scribe/CapituloInsights";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
@@ -1694,6 +1699,7 @@ export default function WorkspacePage() {
               ⚡ Admin
             </Link>
           )}
+          <ThemeToggle />
         </div>
       </header>
 
@@ -1718,12 +1724,20 @@ export default function WorkspacePage() {
             overflow: hidden;
           }
         }
-        @media (min-width: 1920px) {
+        @media (min-width: 1600px) {
           .workspace-three-pane {
-            grid-template-columns: minmax(340px, 380px) minmax(760px, 1fr) clamp(460px, 24vw, 560px);
+            grid-template-columns: minmax(320px, 360px) minmax(0, 1fr) clamp(400px, 22vw, 520px);
           }
           .workspace-editor-inner {
-            max-width: 980px;
+            max-width: 1000px;
+          }
+        }
+        @media (min-width: 1920px) {
+          .workspace-three-pane {
+            grid-template-columns: minmax(340px, 380px) minmax(0, 1fr) clamp(440px, 23vw, 560px);
+          }
+          .workspace-editor-inner {
+            max-width: 1180px;
           }
         }
       `}</style>
@@ -2408,6 +2422,23 @@ export default function WorkspacePage() {
             </div>
           )}
         </div>
+
+        {/* ── COL 3: PANEL DE INSIGHTS POR FASE (cuando preview PDF está cerrado) ── */}
+        {!showPdfPanel && !isCap0Phase && (
+          (phaseId === "ph-referencias" || phaseId === "ph-resumen" || phaseId === "ph-calidad" || (!phaseId?.startsWith("ph-") && legacyNum != null && legacyNum >= 1 && legacyNum <= 5)) && (
+            <div
+              className="hidden xl:flex shrink-0 flex-col relative z-40"
+              style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
+            >
+              {phaseId === "ph-referencias" && <BibliografiaInsights rawContent={displayContent} />}
+              {phaseId === "ph-resumen" && <ResumenInsights rawContent={displayContent} />}
+              {phaseId === "ph-calidad" && <CalidadInsights rawContent={displayContent} />}
+              {!phaseId?.startsWith("ph-") && legacyNum != null && legacyNum >= 1 && legacyNum <= 5 && (
+                <CapituloInsights rawContent={displayContent} capLabel={currentFaseDef?.label} />
+              )}
+            </div>
+          )
+        )}
 
         {/* ── COL 3: PDF PREVIEW — oculto en Cap 0 (no es parte del documento) ── */}
         {showPdfPanel && !isCap0Phase && (

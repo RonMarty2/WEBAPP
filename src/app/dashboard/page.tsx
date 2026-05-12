@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import GlassModal from "@/components/ui/GlassModal";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface Proyecto {
   id: string;
@@ -123,7 +124,8 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <ThemeToggle />
             <Link href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </Link>
