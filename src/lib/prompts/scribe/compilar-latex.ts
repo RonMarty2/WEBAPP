@@ -299,6 +299,55 @@ Si MOTOR LATEX = pdfLaTeX:
 \\usepackage{hanging}
 
 ═══════════════════════════════════════════════════════════════
+CONFIGURACIÓN DE TÍTULOS DE CAPÍTULO Y SECCIÓN (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+PROHIBIDO usar \\titlerule, \\rule, ni líneas decorativas debajo de títulos
+de capítulo o sección. La universidad NO usa decoraciones de línea bajo
+los títulos en monografías.
+
+Configuración de titlesec OBLIGATORIA después de \\usepackage{titlesec}:
+
+\\titleformat{\\chapter}[hang]
+  {\\normalfont\\Large\\bfseries\\centering}
+  {Capítulo \\thechapter.}{0.5em}{}
+\\titlespacing*{\\chapter}{0pt}{1em}{1em}
+
+\\titleformat{\\section}
+  {\\normalfont\\large\\bfseries}
+  {\\thesection}{0.5em}{}
+\\titlespacing*{\\section}{0pt}{1em}{0.5em}
+
+\\titleformat{\\subsection}
+  {\\normalfont\\normalsize\\bfseries\\itshape}
+  {\\thesubsection}{0.5em}{}
+\\titlespacing*{\\subsection}{0pt}{0.8em}{0.4em}
+
+Eso quita el estilo display de \\chapter (que ponía "Capítulo X" en una línea
+y el título debajo en otra línea grande con mucho espacio en blanco). Ahora
+queda compacto en una sola línea: "Capítulo 3. DISEÑO METODOLÓGICO".
+
+NO uses ningún otro estilo de chapter (NO usar \\titleformat con [block],
+NO usar líneas, NO usar reglas decorativas).
+
+═══════════════════════════════════════════════════════════════
+CARÁTULA — LOGO DE LA UNIVERSIDAD
+═══════════════════════════════════════════════════════════════
+
+Incluí el logo en la carátula usando:
+
+\\includegraphics[width=3.5cm]{logo-universidad}
+
+donde "logo-universidad" es el nombre del archivo de imagen sin extensión.
+Si recibís el nombre del archivo de logo en los datos de carátula, usalo.
+Si no, usá "logo-universidad" como nombre por defecto.
+
+AGREGÁ un comentario LaTeX al inicio del documento avisando al estudiante:
+% IMPORTANTE: Subí tu archivo logo-universidad.png (o .jpg) a Overleaf
+% para que aparezca en la carátula. Si no querés logo, eliminá la línea
+% \\includegraphics correspondiente en la carátula.
+
+═══════════════════════════════════════════════════════════════
 CONFIGURACIÓN DE HIPERVÍNCULOS
 ═══════════════════════════════════════════════════════════════
 
