@@ -21,6 +21,8 @@ import { useMemo, useState } from "react";
 interface Props {
   rawContent: string;
   tituloProyecto?: string;
+  /** URL del logo de la universidad (ej. "/logos/umss.png") para descarga separada. */
+  logoUrl?: string;
 }
 
 function extractLatexCode(text: string): string | null {
@@ -36,8 +38,38 @@ function isBlockReport(text: string): boolean {
   return /REPORTE DE BLOQUEO EDITORIAL|No se genera LaTeX/i.test(text);
 }
 
-export default function LatexExportView({ rawContent, tituloProyecto }: Props) {
+export default function LatexExportView({ rawContent, tituloProyecto, logoUrl }: Props) {
   const [copied, setCopied] = useState(false);
+  const [logoDescargado, setLogoDescargado] = useState(false);
+
+  /**
+   * Descarga el logo de la universidad con el nombre EXACTO que espera el .tex
+   * (logo-universidad.png). Esto permite que el estudiante suba ambos archivos
+   * a Overleaf y el .tex compile el logo directamente.
+   */
+  async function handleDownloadLogo() {
+    if (!logoUrl) return;
+    try {
+      const res = await fetch(logoUrl);
+      if (!res.ok) throw new Error("No se pudo descargar el logo");
+      const blob = await res.blob();
+      // Intentar respetar extensión del archivo original (png/jpg)
+      const extMatch = logoUrl.match(/\.(png|jpe?g|webp|gif|svg)(\?|$)/i);
+      const ext = extMatch ? extMatch[1].toLowerCase() : "png";
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `logo-universidad.${ext === "jpeg" ? "jpg" : ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setLogoDescargado(true);
+      setTimeout(() => setLogoDescargado(false), 2500);
+    } catch (e) {
+      console.error("Error descargando logo:", e);
+    }
+  }
 
   const latex = useMemo(() => extractLatexCode(rawContent), [rawContent]);
   const isBlocked = isBlockReport(rawContent);
@@ -199,7 +231,29 @@ export default function LatexExportView({ rawContent, tituloProyecto }: Props) {
           title={copied ? "✅ Copiado" : "📋 Copiar código"}
           subtitle={copied ? "En el portapapeles" : "Pegá donde necesites"}
         />
+        {/* Descarga del logo solo aparece si la universidad tiene logo configurado */}
+        {logoUrl && (
+          <ActionCard
+            onClick={handleDownloadLogo}
+            title={logoDescargado ? "✅ Logo listo" : "🏛️ Descargar logo"}
+            subtitle={logoDescargado ? "Subílo a Overleaf" : "Imagen para Overleaf"}
+          />
+        )}
       </div>
+
+      {/* Aviso amigable cuando hay logo disponible */}
+      {logoUrl && (
+        <div style={{
+          marginBottom: 16, padding: "10px 14px", borderRadius: 8,
+          background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.25)",
+          fontSize: 12, lineHeight: 1.55, color: "var(--fg-secondary)",
+        }}>
+          💡 <strong>Para que aparezca el logo en el PDF</strong>: descargá el logo con el
+          botón &ldquo;🏛️ Descargar logo&rdquo; y subílo a Overleaf junto con el .tex (con el
+          nombre <code>logo-universidad.png</code>). Si no querés logo, simplemente
+          eliminá la línea <code>\includegraphics</code> en la carátula del .tex.
+        </div>
+      )}
 
       {/* Instrucciones rápidas */}
       <details style={{
