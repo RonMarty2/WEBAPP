@@ -19,17 +19,16 @@ export default function HeroSection() {
         justifyContent: "center",
       }}
     >
-      {/* Radial halo */}
+      {/* Halo central para legibilidad del texto sobre los blobs */}
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "min(680px, 85vw)",
-          height: "420px",
-          background: "radial-gradient(ellipse at center, var(--bg-base) 18%, transparent 68%)",
-          opacity: 0.72,
+          width: "min(760px, 90vw)",
+          height: "460px",
+          background: "radial-gradient(ellipse at center, rgba(250,250,252,0.88) 20%, transparent 72%)",
           pointerEvents: "none",
           zIndex: 0,
           borderRadius: "50%",

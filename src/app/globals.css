@@ -104,8 +104,11 @@ html, body {
   color-scheme: light dark;
   font-family: var(--font-atkinson), 'Inter', system-ui, -apple-system, sans-serif;
   background:
-    radial-gradient(circle at 72% 18%, rgba(99, 102, 241, 0.08), transparent 24vw),
-    linear-gradient(180deg, #ffffff 0%, var(--bg-base) 48%, #ffffff 100%);
+    radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(139, 92, 246, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 5%,   rgba(99, 102, 241, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 75% 55%,  rgba(167, 139, 250, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 15% 80%,  rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #fafafa 0%, #f8f8fc 50%, #fafafa 100%);
   color: var(--fg-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -115,8 +118,11 @@ html, body {
 
 .dark body {
   background:
-    radial-gradient(circle at 72% 18%, rgba(99, 102, 241, 0.06), transparent 24vw),
-    linear-gradient(180deg, #0B0F19 0%, var(--bg-base) 48%, #0B0F19 100%);
+    radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(139, 92, 246, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 5%,   rgba(99, 102, 241, 0.10) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 40% at 75% 55%,  rgba(167, 139, 250, 0.07) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 35% at 15% 80%,  rgba(99, 102, 241, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #0B0F19 0%, #0d0f1e 50%, #0B0F19 100%);
 }
 
 .font-crimson {
@@ -662,6 +668,66 @@ button:focus-visible, a:focus-visible {
   border-color: transparent;
   box-shadow: 0 8px 32px rgba(99, 102, 241, 0.18);
   transform: translateY(-3px);
+}
+
+/* ═══ MESH BACKGROUND BLOBS (landing only) ══════════════════════════════════ */
+
+@keyframes blob-drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(30px, -20px) scale(1.04); }
+  66%       { transform: translate(-15px, 25px) scale(0.97); }
+}
+
+@keyframes blob-drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-25px, 18px) scale(1.03); }
+  66%       { transform: translate(20px, -15px) scale(0.98); }
+}
+
+.mesh-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  z-index: 0;
+  will-change: transform;
+}
+
+.mesh-blob-1 {
+  width: 600px; height: 500px;
+  top: -150px; left: -120px;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.14) 0%, transparent 70%);
+  animation: blob-drift-a 18s ease-in-out infinite;
+}
+
+.mesh-blob-2 {
+  width: 500px; height: 450px;
+  top: -80px; right: -100px;
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+  animation: blob-drift-b 22s ease-in-out infinite;
+}
+
+.mesh-blob-3 {
+  width: 400px; height: 350px;
+  top: 45vh; right: 5vw;
+  background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.09) 0%, transparent 70%);
+  animation: blob-drift-a 26s ease-in-out infinite reverse;
+}
+
+.mesh-blob-4 {
+  width: 380px; height: 320px;
+  bottom: 15vh; left: 5vw;
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+  animation: blob-drift-b 20s ease-in-out infinite reverse;
+}
+
+.dark .mesh-blob-1 { background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.18) 0%, transparent 70%); }
+.dark .mesh-blob-2 { background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, transparent 70%); }
+.dark .mesh-blob-3 { background: radial-gradient(ellipse at center, rgba(167, 139, 250, 0.11) 0%, transparent 70%); }
+.dark .mesh-blob-4 { background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.10) 0%, transparent 70%); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-blob { animation: none !important; }
 }
 
 /* ═══ CTA PREMIUM BACKGROUND ═════════════════════════════════════════════════ */
