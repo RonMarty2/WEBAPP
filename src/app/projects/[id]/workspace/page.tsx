@@ -5,6 +5,9 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import BibliografiaInsights from "@/components/scribe/BibliografiaInsights";
+import ResumenInsights from "@/components/scribe/ResumenInsights";
+import CalidadInsights from "@/components/scribe/CalidadInsights";
+import CapituloInsights from "@/components/scribe/CapituloInsights";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
@@ -2312,14 +2315,21 @@ export default function WorkspacePage() {
           )}
         </div>
 
-        {/* ── COL 3: PANEL DE INSIGHTS POR FASE (fases especiales sin preview PDF) ── */}
-        {!showPdfPanel && phaseId === "ph-referencias" && (
-          <div
-            className="hidden xl:flex shrink-0 flex-col relative z-40"
-            style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
-          >
-            <BibliografiaInsights rawContent={displayContent} />
-          </div>
+        {/* ── COL 3: PANEL DE INSIGHTS POR FASE (cuando preview PDF está cerrado) ── */}
+        {!showPdfPanel && !isCap0Phase && (
+          (phaseId === "ph-referencias" || phaseId === "ph-resumen" || phaseId === "ph-calidad" || (!phaseId?.startsWith("ph-") && legacyNum != null && legacyNum >= 1 && legacyNum <= 5)) && (
+            <div
+              className="hidden xl:flex shrink-0 flex-col relative z-40"
+              style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
+            >
+              {phaseId === "ph-referencias" && <BibliografiaInsights rawContent={displayContent} />}
+              {phaseId === "ph-resumen" && <ResumenInsights rawContent={displayContent} />}
+              {phaseId === "ph-calidad" && <CalidadInsights rawContent={displayContent} />}
+              {!phaseId?.startsWith("ph-") && legacyNum != null && legacyNum >= 1 && legacyNum <= 5 && (
+                <CapituloInsights rawContent={displayContent} capLabel={currentFaseDef?.label} />
+              )}
+            </div>
+          )
         )}
 
         {/* ── COL 3: PDF PREVIEW — oculto en Cap 0 (no es parte del documento) ── */}
