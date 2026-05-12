@@ -557,6 +557,17 @@ async function generarSinSupabase({
       return NextResponse.json({ error: "Fase no encontrada" }, { status: 404 });
     }
 
+    // 🛡️ Blindaje anti-gasto de tokens: la fase "ph-calidad" se reconvirtió
+    // en Banco de Preguntas para defensa. Sus contenidos se generan en
+    // background al aprobar cada capítulo (endpoint /preguntas/generar).
+    // Si alguien intenta generar ph-calidad por el endpoint genérico estaría
+    // disparando el prompt viejo de auditoría y gastando 6K tokens al pedo.
+    if (phase_id === "ph-calidad") {
+      return NextResponse.json({
+        error: "Esta fase no se genera. Las preguntas de defensa se construyen automáticamente al aprobar cada capítulo. Si te faltan preguntas de alguna fase, regenerá desde el panel del banco.",
+      }, { status: 400 });
+    }
+
     const sorted = [...phaseDefs].sort((a, b) => a.orden - b.orden);
     const previousPhases = sorted.filter((p) => p.orden < currentPhase.orden);
     const phaseContents = proyecto.phase_contents ?? {};
@@ -691,7 +702,10 @@ async function generarSinSupabase({
       "ph-referencias": 3500,   // ~5 págs de bibliografía APA
       "ph-latex":      50000,   // documento .tex completo. Necesita espacio para TRANSCRIBIR
                                 // todos los caps sin resumir. Con 24K la IA comprimía a 6K palabras.
-      "ph-calidad":     6000,   // informe estructurado (no va al PDF)
+      "ph-calidad":      100,   // 🛡️ Reconvertida en Banco de Preguntas para defensa.
+                                // El endpoint genérico ya la rechaza (ver guard arriba), pero
+                                // dejamos un techo simbólico de 100 tokens como defensa en
+                                // profundidad — si algo bypasea el guard, el daño es ridículo.
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
 

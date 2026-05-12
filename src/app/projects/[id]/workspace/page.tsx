@@ -1402,6 +1402,11 @@ export default function WorkspacePage() {
   // 🎯 Cap 0 es una DECISIÓN (no documento). Las cards en el centro cubren todo.
   // Por eso ocultamos sidebar de feedback, panel PDF, tabs y botón "Cap. I →" en Cap 0.
   const isCap0Phase = phaseId === "ph-cap0" || (!isDynamic && legacyNum === 0);
+  // 🛡️ ph-calidad reconvertida en Banco de Preguntas. NO genera contenido propio
+  // (las preguntas se construyen al aprobar cada capítulo). Tratamos esta fase
+  // como "no-generable" para que la UI esconda los botones que dispararían
+  // una llamada inútil al endpoint genérico.
+  const isBancoFase = phaseId === "ph-calidad";
   const finalContent = getFinalContent(proyecto, phaseId, legacyNum);
   const borradorContent = getBorrador(proyecto, phaseId, legacyNum);
   const hasBorrador = Boolean(borradorContent);
@@ -1819,7 +1824,13 @@ export default function WorkspacePage() {
                   </div>
                 )}
 
-                {/* ── Generate buttons block ── */}
+                {/* ── Generate buttons block ──
+                    🛡️ En la fase Banco de Preguntas (ph-calidad reciclada) NO mostramos
+                    este bloque: las preguntas se generan al aprobar cada capítulo y
+                    el componente <BancoPreguntasView> tiene su propio botón para
+                    regenerar fases pendientes. Mostrar "Generar borrador" acá llevaría
+                    al estudiante a gastar tokens al pedo. */}
+          {!isBancoFase && (
           <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:10 }}>
             {/* GUIADO: no borrador yet */}
               {esGuiado && !hasBorrador && !hasFinal && (
@@ -2069,6 +2080,7 @@ export default function WorkspacePage() {
             )}
 
             </div>
+          )}
 
             {/* Chat messages */}
             <div style={{ flex:1, padding:"10px 14px", display:"flex", flexDirection:"column", gap:9 }}>
