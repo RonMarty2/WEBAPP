@@ -2430,11 +2430,11 @@ export default function WorkspacePage() {
               className="hidden xl:flex shrink-0 flex-col relative z-40"
               style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
             >
-              {phaseId === "ph-referencias" && <BibliografiaInsights rawContent={displayContent} />}
-              {phaseId === "ph-resumen" && <ResumenInsights rawContent={displayContent} />}
-              {phaseId === "ph-calidad" && <CalidadInsights rawContent={displayContent} />}
+              {phaseId === "ph-referencias" && <BibliografiaInsights rawContent={displayContent ?? ""} />}
+              {phaseId === "ph-resumen" && <ResumenInsights rawContent={displayContent ?? ""} />}
+              {phaseId === "ph-calidad" && <CalidadInsights rawContent={displayContent ?? ""} />}
               {!phaseId?.startsWith("ph-") && legacyNum != null && legacyNum >= 1 && legacyNum <= 5 && (
-                <CapituloInsights rawContent={displayContent} capLabel={currentFaseDef?.label} />
+                <CapituloInsights rawContent={displayContent ?? ""} capLabel={currentFaseDef?.label} />
               )}
             </div>
           )
