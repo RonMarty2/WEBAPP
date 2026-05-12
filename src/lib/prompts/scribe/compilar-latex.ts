@@ -228,9 +228,9 @@ Si MOTOR LATEX = XeLaTeX (solo si está explícitamente pedido):
 \\usepackage{geometry}
 \\geometry{letterpaper, margin=2.54cm}
 \\usepackage{setspace}
-\\onehalfspacing
+\\doublespacing
 \\usepackage{ragged2e}
-\\justifying
+\\raggedright   % Alineacion IZQUIERDA (norma APA 7 / UMSS), NO justificar margen derecho
 \\usepackage{indentfirst}
 \\setlength{\\parindent}{1.27cm}
 \\setlength{\\parskip}{0pt}
@@ -268,9 +268,9 @@ Si MOTOR LATEX = pdfLaTeX:
 \\usepackage{geometry}
 \\geometry{letterpaper, margin=2.54cm}
 \\usepackage{setspace}
-\\onehalfspacing
+\\doublespacing
 \\usepackage{ragged2e}
-\\justifying
+\\raggedright   % Alineacion IZQUIERDA (norma APA 7 / UMSS), NO justificar margen derecho
 \\usepackage{indentfirst}
 \\setlength{\\parindent}{1.27cm}
 \\setlength{\\parskip}{0pt}
@@ -299,6 +299,68 @@ Si MOTOR LATEX = pdfLaTeX:
 \\usepackage{hanging}
 
 ═══════════════════════════════════════════════════════════════
+NUMERACIÓN DE PÁGINAS — UMSS / APA 7 (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+Norma UMSS: número de página en la ESQUINA SUPERIOR DERECHA, no en el
+pie. Numeración con arábigos (1, 2, 3...) desde el primer capítulo.
+Carátula NO se numera. Índice usa romanos (i, ii, iii) opcionalmente.
+
+Configuración OBLIGATORIA con fancyhdr:
+
+\\pagestyle{fancy}
+\\fancyhf{}                           % limpia todo
+\\fancyhead[R]{\\thepage}             % numero arriba a la derecha
+\\renewcommand{\\headrulewidth}{0pt}  % SIN línea horizontal en el header
+\\setlength{\\headheight}{15pt}       % evita warning fancyhdr
+
+Y en la carátula:
+\\thispagestyle{empty}                % carátula sin número
+
+═══════════════════════════════════════════════════════════════
+CARÁTULA UMSS — ESTRUCTURA EXACTA
+═══════════════════════════════════════════════════════════════
+
+Aplica si la universidad es UMSS o universidad_id contiene "umss".
+La carátula sigue estos elementos en ORDEN VERTICAL (centrados, salvo
+indicación contraria). Times New Roman, tamaños indicados:
+
+  [Logo UMSS: \\includegraphics[width=2.5cm,height=4cm]{logo-universidad}]
+
+  UNIVERSIDAD MAYOR DE SAN SIMÓN     (14pt, bold, centrado)
+  Facultad de Ciencias Económicas    (14pt, bold, centrado)
+  Departamento de Posgrado           (14pt, bold, centrado)
+
+  [espacio]
+
+  DIPLOMADO COMO MODALIDAD DE TITULACIÓN  (12pt, bold, centrado)
+
+  [espacio]
+
+  DIPLOMADO {PROGRAMA} {VERSIÓN}     (12pt, bold, centrado)
+  (Donde {PROGRAMA} y {VERSIÓN} salen de los datos de la carátula)
+
+  [espacio]
+
+  MONOGRAFÍA                         (14pt, bold, centrado)
+
+  [espacio]
+
+  {TÍTULO DEL TRABAJO}               (14pt, bold, centrado)
+
+  [espacio]
+
+  Estudiante: {nombre estudiante}    (14pt, bold, centrado)
+
+  [vfill — empuja al fondo]
+
+  Cochabamba – Bolivia               (12pt, centrado)
+  {Mes}, {Año}                       (12pt, centrado)
+
+IMPORTANTE: si los datos {PROGRAMA}, {VERSIÓN}, {TÍTULO}, etc. no están
+disponibles, usá placeholder claro como "[Programa]" en vez de inventar.
+
+═══════════════════════════════════════════════════════════════
 CONFIGURACIÓN DE TÍTULOS DE CAPÍTULO Y SECCIÓN (OBLIGATORIO)
 ═══════════════════════════════════════════════════════════════
 
@@ -306,7 +368,21 @@ PROHIBIDO usar \\titlerule, \\rule, ni líneas decorativas debajo de títulos
 de capítulo o sección. La universidad NO usa decoraciones de línea bajo
 los títulos en monografías.
 
-Configuración de titlesec OBLIGATORIA después de \\usepackage{titlesec}:
+Configuración de titlesec OBLIGATORIA después de \\usepackage{titlesec}.
+Mapeo APA 7 → comandos LaTeX para la monografía UMSS:
+
+  APA Nivel 1 (Capítulo) = \\chapter
+    Centrado, Negrita, Cada Palabra En Mayúscula
+  APA Nivel 2 (Sección)  = \\section
+    Alineado a la izquierda, Negrita, Cada Palabra En Mayúscula
+  APA Nivel 3 (Subsec.)  = \\subsection
+    Alineado a la izquierda, Negrita CURSIVA, Cada Palabra En Mayúscula
+  APA Nivel 4 (Subsubsec.) = \\subsubsection
+    Alineado izquierda, Negrita, sangría 1.27cm, CON PUNTO FINAL,
+    el texto del párrafo arranca en la MISMA línea (inline).
+  APA Nivel 5 (Paragraph) = \\paragraph
+    Alineado izquierda, Negrita CURSIVA, sangría 1.27cm, CON PUNTO FINAL,
+    el texto arranca en la MISMA línea (inline).
 
 \\titleformat{\\chapter}[hang]
   {\\normalfont\\Large\\bfseries\\centering}
@@ -322,6 +398,18 @@ Configuración de titlesec OBLIGATORIA después de \\usepackage{titlesec}:
   {\\normalfont\\normalsize\\bfseries\\itshape}
   {\\thesubsection}{0.5em}{}
 \\titlespacing*{\\subsection}{0pt}{0.8em}{0.4em}
+
+% APA 7 Nivel 4: inline, sangría, punto final.
+\\titleformat{\\subsubsection}[runin]
+  {\\normalfont\\normalsize\\bfseries}
+  {\\thesubsubsection}{0.5em}{}[.]
+\\titlespacing*{\\subsubsection}{1.27cm}{0.5em}{0.5em}
+
+% APA 7 Nivel 5: inline, sangría, bold cursiva, punto final.
+\\titleformat{\\paragraph}[runin]
+  {\\normalfont\\normalsize\\bfseries\\itshape}
+  {}{0em}{}[.]
+\\titlespacing*{\\paragraph}{1.27cm}{0.5em}{0.5em}
 
 Eso quita el estilo display de \\chapter (que ponía "Capítulo X" en una línea
 y el título debajo en otra línea grande con mucho espacio en blanco). Ahora
