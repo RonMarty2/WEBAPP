@@ -23,6 +23,8 @@ interface Props {
   tituloProyecto?: string;
   /** URL del logo de la universidad (ej. "/logos/umss.png") para descarga separada. */
   logoUrl?: string;
+  /** ID del proyecto, necesario para llamar al endpoint de paquete completo. */
+  proyectoId?: string;
 }
 
 function extractLatexCode(text: string): string | null {
@@ -38,9 +40,45 @@ function isBlockReport(text: string): boolean {
   return /REPORTE DE BLOQUEO EDITORIAL|No se genera LaTeX/i.test(text);
 }
 
-export default function LatexExportView({ rawContent, tituloProyecto, logoUrl }: Props) {
+export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, proyectoId }: Props) {
   const [copied, setCopied] = useState(false);
   const [logoDescargado, setLogoDescargado] = useState(false);
+  const [paqueteDescargando, setPaqueteDescargando] = useState(false);
+  const [paqueteError, setPaqueteError] = useState("");
+
+  /**
+   * Descarga UN solo ZIP con .tex + logo + README. El usuario sube todo a
+   * Overleaf y compila. CERO trabajo manual de su parte.
+   */
+  async function handleDownloadPaquete() {
+    if (!proyectoId || paqueteDescargando) return;
+    setPaqueteDescargando(true);
+    setPaqueteError("");
+    try {
+      const res = await fetch(`/api/projects/${proyectoId}/paquete-latex`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      // Tomar el nombre del archivo del header Content-Disposition
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const nameMatch = cd.match(/filename="?([^"]+)"?/);
+      const filename = nameMatch?.[1] ?? `${tituloProyecto || "monografia"}-overleaf.zip`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setPaqueteError((e as Error).message);
+    } finally {
+      setPaqueteDescargando(false);
+    }
+  }
 
   /**
    * Descarga el logo de la universidad con el nombre EXACTO que espera el .tex
@@ -208,52 +246,83 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl }:
         </div>
       )}
 
-      {/* Acciones principales */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-        gap: 12, marginBottom: 24,
-      }}>
-        {/* Overleaf — destacado */}
-        <ActionCard
-          onClick={handleOverleaf}
-          title="🚀 Abrir en Overleaf"
-          subtitle="Editor online — sin instalar nada"
-          accent
-          recommended
-        />
-        <ActionCard
-          onClick={handleDownload}
-          title="💾 Descargar .tex"
-          subtitle="Archivo para usar localmente"
-        />
-        <ActionCard
-          onClick={handleCopy}
-          title={copied ? "✅ Copiado" : "📋 Copiar código"}
-          subtitle={copied ? "En el portapapeles" : "Pegá donde necesites"}
-        />
-        {/* Descarga del logo solo aparece si la universidad tiene logo configurado */}
-        {logoUrl && (
-          <ActionCard
-            onClick={handleDownloadLogo}
-            title={logoDescargado ? "✅ Logo listo" : "🏛️ Descargar logo"}
-            subtitle={logoDescargado ? "Subílo a Overleaf" : "Imagen para Overleaf"}
-          />
-        )}
-      </div>
-
-      {/* Aviso amigable cuando hay logo disponible */}
-      {logoUrl && (
-        <div style={{
-          marginBottom: 16, padding: "10px 14px", borderRadius: 8,
-          background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.25)",
-          fontSize: 12, lineHeight: 1.55, color: "var(--fg-secondary)",
-        }}>
-          💡 <strong>Para que aparezca el logo en el PDF</strong>: descargá el logo con el
-          botón &ldquo;🏛️ Descargar logo&rdquo; y subílo a Overleaf junto con el .tex (con el
-          nombre <code>logo-universidad.png</code>). Si no querés logo, simplemente
-          eliminá la línea <code>\includegraphics</code> en la carátula del .tex.
+      {/* Acción PRINCIPAL — paquete completo listo para Overleaf */}
+      {proyectoId && (
+        <div style={{ marginBottom: 16 }}>
+          <button
+            type="button"
+            onClick={handleDownloadPaquete}
+            disabled={paqueteDescargando}
+            style={{
+              width: "100%",
+              padding: "18px 24px",
+              borderRadius: 12,
+              border: "none",
+              background: paqueteDescargando
+                ? "linear-gradient(135deg, #94a3b8, #64748b)"
+                : "linear-gradient(135deg, #10b981, #059669)",
+              color: "white",
+              fontSize: 16,
+              fontWeight: 700,
+              cursor: paqueteDescargando ? "wait" : "pointer",
+              boxShadow: "0 6px 18px rgba(16,185,129,0.32)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              transition: "transform 0.15s ease",
+            }}
+            onMouseEnter={e => { if (!paqueteDescargando) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
+          >
+            <span style={{ fontSize: 22 }}>📦</span>
+            <span>{paqueteDescargando ? "Preparando paquete…" : "Descargar paquete completo (.zip)"}</span>
+          </button>
+          <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", marginTop: 8, lineHeight: 1.5, textAlign: "center" }}>
+            Incluye tu .tex con datos personalizados (nombre, fecha, programa) + logo de la
+            universidad + instrucciones. <strong>Subílo a Overleaf y compilá.</strong>
+          </div>
+          {paqueteError && (
+            <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12 }}>
+              ⚠ {paqueteError}
+            </div>
+          )}
         </div>
       )}
+
+      {/* Acciones secundarias — para usuarios avanzados / admin */}
+      <details style={{ marginBottom: 16 }}>
+        <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--fg-muted)", padding: "8px 0", userSelect: "none" }}>
+          Opciones avanzadas (admin)
+        </summary>
+        <div style={{
+          marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 10,
+        }}>
+          <ActionCard
+            onClick={handleOverleaf}
+            title="🚀 Abrir en Overleaf"
+            subtitle="Pegar código directo"
+          />
+          <ActionCard
+            onClick={handleDownload}
+            title="💾 Solo .tex"
+            subtitle="Sin logo, sin datos personalizados"
+          />
+          <ActionCard
+            onClick={handleCopy}
+            title={copied ? "✅ Copiado" : "📋 Copiar"}
+            subtitle={copied ? "En el portapapeles" : "Código crudo"}
+          />
+          {logoUrl && (
+            <ActionCard
+              onClick={handleDownloadLogo}
+              title={logoDescargado ? "✅ Logo listo" : "🏛️ Solo logo"}
+              subtitle="Por separado"
+            />
+          )}
+        </div>
+      </details>
 
       {/* Instrucciones rápidas */}
       <details style={{

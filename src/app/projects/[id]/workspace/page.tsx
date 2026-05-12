@@ -2302,11 +2302,12 @@ export default function WorkspacePage() {
                   onIrACapI={() => setSelectedFase(1)}
                 />
               ) : phaseId === "ph-latex" ? (
-                /* LaTeX: pantalla con copiar/descargar/Overleaf + logo */
+                /* LaTeX: pantalla con descarga de paquete completo (1 ZIP automático) */
                 <LatexExportView
                   rawContent={displayContent}
                   tituloProyecto={proyecto.tema_aprobado || proyecto.titulo_provisional || undefined}
                   logoUrl={university?.logo_url}
+                  proyectoId={proyectoId}
                 />
               ) : (phaseId === "ph-resumen" || phaseId === "ph-referencias" || phaseId === "ph-calidad") ? (
                 /* Fases especiales: resumen / referencias / control de calidad */
