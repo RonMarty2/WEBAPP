@@ -121,7 +121,7 @@ export default function SpecialPhaseView({ phaseId, rawContent, renderMdFn }: Pr
     const wordRangeOk = wordCount >= 250 && wordCount <= 400;
 
     return (
-      <div style={{ padding: "20px 24px", maxWidth: 820, margin: "0 auto" }}>
+      <div style={{ padding: "20px 24px", maxWidth: "min(1200px, 100%)", margin: "0 auto" }}>
         <div style={{
           padding: "32px 36px",
           background: "var(--bg-card)",
@@ -175,13 +175,13 @@ export default function SpecialPhaseView({ phaseId, rawContent, renderMdFn }: Pr
 
     if (refs.length === 0) {
       return (
-        <div className="doc-preview" style={{ padding: "20px 24px", maxWidth: 820, margin: "0 auto" }}
+        <div className="doc-preview" style={{ padding: "20px 24px", maxWidth: "min(1200px, 100%)", margin: "0 auto" }}
           dangerouslySetInnerHTML={{ __html: renderMdFn(rawContent) }} />
       );
     }
 
     return (
-      <div style={{ padding: "20px 24px 40px", maxWidth: 820, margin: "0 auto" }}>
+      <div style={{ padding: "20px 24px 40px", maxWidth: "min(1200px, 100%)", margin: "0 auto" }}>
         <div style={{ marginBottom: 20 }}>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)", margin: "0 0 6px" }}>
             📚 Referencias Bibliográficas
@@ -227,7 +227,7 @@ export default function SpecialPhaseView({ phaseId, rawContent, renderMdFn }: Pr
     const ecfg = calidadEstado ? estadoConfig[calidadEstado] : null;
 
     return (
-      <div style={{ padding: "20px 24px 40px", maxWidth: 1000, margin: "0 auto" }}>
+      <div style={{ padding: "20px 24px 40px", maxWidth: "min(1300px, 100%)", margin: "0 auto" }}>
         {ecfg && (
           <div style={{
             padding: "20px 24px", marginBottom: 20,
