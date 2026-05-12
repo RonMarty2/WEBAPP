@@ -481,13 +481,39 @@ Mapeo APA 7 → comandos LaTeX para la monografía UMSS:
     Alineado izquierda, Negrita CURSIVA, sangría 1.27cm, CON PUNTO FINAL,
     el texto arranca en la MISMA línea (inline).
 
+% 🚨 PASO PREVIO OBLIGATORIO — ANTES de \\titleformat{\\chapter}:
+% Estos dos parches resuelven dos defectos visibles del PDF UMSS:
+%   1. Numeración romana del capítulo (CAPÍTULO V, no CAPÍTULO 5).
+%   2. Eliminar el \\vspace*{50pt} que la clase report mete por defecto
+%      ANTES de cada \\chapter — sin este parche aparecen ~6cm de blanco
+%      antes del título de cada capítulo, INCLUSO si configurás titlespacing.
+\\renewcommand{\\thechapter}{\\Roman{chapter}}
+\\makeatletter
+\\def\\@makechapterhead#1{%
+  \\vspace*{0pt}%
+  {\\parindent \\z@ \\raggedright \\normalfont
+    \\interlinepenalty\\@M
+    \\large\\bfseries\\centering
+    \\@chapapp\\space\\thechapter.\\space #1\\par\\nobreak
+    \\vskip 12pt
+  }}
+\\def\\@makeschapterhead#1{%
+  \\vspace*{0pt}%
+  {\\parindent \\z@ \\raggedright \\normalfont
+    \\interlinepenalty\\@M
+    \\large\\bfseries\\centering
+    #1\\par\\nobreak
+    \\vskip 12pt
+  }}
+\\makeatother
+
 \\titleformat{\\chapter}[hang]
-  {\\normalfont\\Large\\bfseries\\centering}
+  {\\normalfont\\large\\bfseries\\centering}
   {Capítulo \\thechapter.}{0.5em}{}
-\\titlespacing*{\\chapter}{0pt}{1em}{1em}
+\\titlespacing*{\\chapter}{0pt}{0pt}{1em}
 
 \\titleformat{\\section}
-  {\\normalfont\\large\\bfseries}
+  {\\normalfont\\normalsize\\bfseries}
   {\\thesection}{0.5em}{}
 \\titlespacing*{\\section}{0pt}{1em}{0.5em}
 
@@ -509,11 +535,19 @@ Mapeo APA 7 → comandos LaTeX para la monografía UMSS:
 \\titlespacing*{\\paragraph}{1.27cm}{0.5em}{0.5em}
 
 Eso quita el estilo display de \\chapter (que ponía "Capítulo X" en una línea
-y el título debajo en otra línea grande con mucho espacio en blanco). Ahora
-queda compacto en una sola línea: "Capítulo 3. DISEÑO METODOLÓGICO".
+y el título debajo en otra línea grande con mucho espacio en blanco). Combinado
+con el parche a \\@makechapterhead de arriba, ahora queda compacto en una sola
+línea SIN el espacio en blanco enorme del top: "Capítulo III. DISEÑO METODOLÓGICO".
+
+Resultado esperado en el PDF:
+  - Numeración romana en el título visible (CAPÍTULO III, no CAPÍTULO 3).
+  - Tamaño de letra del título: \\large (≈14pt) — sobrio, NO \\Large (17pt).
+  - Sin franja blanca antes del título cuando arranca una hoja nueva.
 
 NO uses ningún otro estilo de chapter (NO usar \\titleformat con [block],
 NO usar líneas, NO usar reglas decorativas).
+NO toques \\renewcommand{\\thechapter} ni \\@makechapterhead — están parchados
+arriba justamente para resolver problemas conocidos.
 
 ═══════════════════════════════════════════════════════════════
 CONFIGURACIÓN DE HIPERVÍNCULOS
