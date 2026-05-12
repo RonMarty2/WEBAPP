@@ -274,8 +274,20 @@ Objetivo de la sección:
 Presentar investigaciones empíricas, estudios previos, antecedentes institucionales,
 normativos y el contexto actual del objeto de estudio.
 
-Debe mostrar qué se sabe sobre el problema, cómo se ha investigado y qué vacíos
-justifican la monografía.
+⚠️ DIFERENCIA CRÍTICA CON CAPÍTULO I (norma UMSS):
+- Cap I tiene "antecedentes GENERALES" (rubro amplio, tendencias macro, contexto país).
+- Este Cap II tiene "antecedentes ESPECÍFICOS": la empresa concreta, el sector
+  preciso, el problema delimitado, estudios sobre el caso particular o casos
+  análogos cercanos.
+- NO repitas el contenido GENERAL del Cap I acá. Profundizá en lo ESPECÍFICO.
+
+Debe mostrar qué se sabe sobre el problema CONCRETO, cómo se ha investigado en
+contextos similares y qué vacíos específicos justifican la monografía.
+
+PATRÓN DE CITAS OBLIGATORIO (mismo que Cap I, norma UMSS):
+- Datos/hallazgos de fuentes externas → cita APA 7 obligatoria.
+- Análisis o interpretación propia del investigador → SIN cita.
+- Patrón típico por párrafo: presentar fuente → cita → análisis propio.
 
 Redacta primero un párrafo introductorio que explique el propósito de la sección 2.2.
 

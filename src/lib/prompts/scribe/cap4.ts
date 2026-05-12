@@ -34,6 +34,15 @@ REGLAS DE LECTURA:
 - Los Capítulos I, II y III son base obligatoria. Este Capítulo IV ejecuta lo
   prometido en ellos. NO redefine tema, problema, objetivos, hipótesis ni
   metodología.
+
+PATRÓN DE CITAS OBLIGATORIO (norma UMSS / APA 7):
+- Datos cuantitativos, estadísticas, hallazgos de estudios previos, definiciones
+  conceptuales, modelos teóricos → cita APA 7 obligatoria.
+- Interpretación propia del investigador sobre los datos generados en la
+  investigación → SIN cita.
+- Cuando contrastes hallazgos con literatura: "Estos resultados coinciden con
+  [Autor (año)], que reportó... (cita). En el caso boliviano, sin embargo,
+  se observa que... (análisis propio)".
 - Los objetivos específicos del Capítulo I se convierten en los subtítulos
   numerados de este capítulo (4.1, 4.2, 4.3...).
 - Los indicadores, fórmulas y procedimientos de la Tabla 3.3 (Cap III) deben

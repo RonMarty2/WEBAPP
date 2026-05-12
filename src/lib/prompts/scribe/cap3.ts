@@ -27,6 +27,14 @@ RECIBIRÁS ARRIBA tres bloques generados por el sistema:
 REGLAS DE LECTURA:
 - Los Capítulos I y II son base obligatoria. Este Capítulo III explica CÓMO se
   investigará lo ya planteado, NO redefine el tema, problema u objetivos.
+
+PATRÓN DE CITAS OBLIGATORIO (norma UMSS / APA 7):
+- Toda metodología, técnica, instrumento, escala o procedimiento tomado de
+  fuentes externas (autores, manuales, normativas) → cita APA 7 obligatoria.
+- Adaptación o decisión propia del investigador (combinación de técnicas,
+  ajuste al caso específico) → SIN cita, pero explicar brevemente la elección.
+- Patrón típico: "Según [Autor (año)], la técnica X consiste en... (cita).
+  En esta investigación se adapta de la siguiente manera... (análisis propio)".
 - Toda decisión metodológica debe responder a un objetivo específico, una variable,
   un indicador o un modelo ya definido en los capítulos anteriores.
 - Si hay material propio o documentos subidos, integrarlos como fuente metodológica

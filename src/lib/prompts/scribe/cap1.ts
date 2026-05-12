@@ -131,16 +131,26 @@ ESTRUCTURA EXACTA DEL CAPÍTULO I
 Redacta párrafos de apertura sin subtítulo propio.
 
 Debe incluir:
-1. Dos párrafos de antecedentes del objeto de estudio.
-   - Presenta el contexto general.
-   - Aterriza progresivamente al contexto nacional, sectorial, institucional
-     o empresarial correspondiente.
-   - Evita afirmaciones vagas; todo dato concreto debe estar citado.
+1. Dos párrafos de **antecedentes GENERALES** del objeto de estudio (norma UMSS).
+   Estos cubren el rubro/sector AMPLIO, NO la empresa o problema específico
+   (eso va en Capítulo II como antecedentes específicos).
+   - Presenta el contexto MACRO: tendencias del sector durante las últimas
+     décadas, datos a nivel nacional o regional, ambiente del país, marco
+     económico-social, evolución histórica del rubro.
+   - Aterriza progresivamente desde lo macro hacia el contexto nacional
+     o sectorial, SIN llegar al caso específico.
+   - PATRÓN DE CITAS OBLIGATORIO (norma UMSS):
+       * Información de fuentes externas (artículos, blogs, datos del INE,
+         informes CEPAL/BID, etc.) → CITA OBLIGATORIA en APA 7.
+       * Análisis propio del investigador (interpretación, conclusión) → SIN cita.
+       * Patrón típico: presentar la fuente → cita textual o parafraseada
+         → análisis propio del investigador.
 
-2. Uno o dos párrafos de antecedentes teóricos y empíricos.
-   - Integra al menos cinco fuentes reales y verificables relacionadas con el tema.
+2. Uno o dos párrafos de antecedentes teóricos y empíricos GENERALES.
+   - Integra al menos cinco fuentes reales y verificables relacionadas con
+     el TEMA AMPLIO (no con la empresa específica).
    - No hagas una lista de autores; redacta en prosa.
-   - Relaciona la literatura con el problema que se investigará.
+   - Relaciona la literatura GENERAL con el problema que se investigará.
 
 3. Un párrafo de planteamiento preliminar del problema.
    - Explica qué situación problemática se observa.
@@ -171,27 +181,38 @@ Desarrolla los siguientes componentes en este orden:
 
 A) Descripción de causas y efectos
 Redacta primero un párrafo explicativo sobre la lógica causal del problema.
-Luego presenta el árbol de problemas como tabla académica, no como diagrama Mermaid.
+Después genera el ÁRBOL DE PROBLEMAS como MARCADOR ESTRUCTURADO. La plataforma
+lo convierte automáticamente en una figura TikZ profesional (cajas con bordes,
+líneas conectoras, alineación perfecta) al compilar el LaTeX final.
 
-Formato obligatorio:
+FORMATO OBLIGATORIO DEL MARCADOR (respetá la sintaxis EXACTA):
 
-**Tabla 1.1**
-*Estructura del árbol de problemas*
+[[ARBOL_PROBLEMAS]]
+central: [Problema central redactado de forma académica, en una sola línea breve]
+consecuencias:
+  - [Efecto principal 1, breve]
+  - [Efecto principal 2, breve]
+  - [Efecto principal 3, breve]
+causas:
+  - [Causa raíz 1, breve]
+  - [Causa raíz 2, breve]
+  - [Causa raíz 3, breve]
+[[/ARBOL_PROBLEMAS]]
 
-| Causas raíz | Problema central | Efectos principales |
-|---|---|---|
-| [Causa redactada de forma académica] | [Problema central] | [Efecto principal] |
-| [Causa redactada de forma académica] | [Problema central] | [Efecto principal] |
-| [Causa redactada de forma académica] | [Problema central] | [Efecto principal] |
+Reglas del marcador:
+- Cada elemento (central, consecuencias, causas) en línea separada.
+- Exactamente 3 consecuencias y 3 causas (norma UMSS).
+- Cada item debe ser BREVE (máximo 8 palabras). Si necesitás explicar más,
+  hacelo en párrafos aparte ANTES del marcador.
+- NO escribas "Tabla X.X" ni "Figura X.X" antes del marcador. La plataforma
+  agrega el caption automáticamente como "Figura: Árbol de problemas".
+- NO uses el marcador en ninguna otra parte del documento — solo acá.
+- NO inventes elementos vacíos. Si no hay datos suficientes, escribí menos
+  causas/consecuencias, pero coherentes.
 
-**Nota.** Elaboración propia con base en el análisis del objeto de estudio y las
-fuentes revisadas.
-
-Reglas para esta tabla:
-- No debe tener texto excesivamente largo.
-- No debe tener columnas desbordadas.
-- No debe contener datos vacíos.
-- No debe repetir exactamente la misma frase en todas las filas.
+DESPUÉS del marcador, redactá un párrafo final que explique la lógica del
+árbol (cómo las causas raíz generan el problema central, y cómo éste deriva
+en las consecuencias observables).
 - El problema central debe ser coherente con el título y el objetivo general.
 
 Después de la tabla, redacta un párrafo interpretativo que explique la relación

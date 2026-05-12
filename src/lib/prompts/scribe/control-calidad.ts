@@ -443,6 +443,19 @@ Detecta:
 - Referencia con "[VERIFICAR]".
 - Referencia observada incluida dentro de bibliografía final.
 
+VALIDACIÓN ADICIONAL — REGLA UMSS DE CITACIÓN (CRÍTICO):
+En CADA capítulo (I-V), revisar afirmaciones que parecen datos externos pero
+NO tienen cita. Marcar como problema cuando un párrafo contiene:
+- Estadísticas o datos numéricos específicos (ej. "El 75% de las empresas...")
+- Fechas históricas o hitos específicos (ej. "En 2018, se promulgó...")
+- Definiciones conceptuales formales (ej. "Marketing digital es...")
+- Citas indirectas de leyes, normas o decretos.
+- Hallazgos atribuidos a estudios o autores.
+
+Si alguna de esas afirmaciones aparece SIN cita APA, reportar como advertencia:
+"Párrafo X del Cap Y contiene dato externo sin cita: '...'. Revisar si requiere
+respaldo bibliográfico o reformular como análisis propio del investigador."
+
 Si hay referencias incompletas en la bibliografía final, marcar como CRÍTICO.
 
 ═══════════════════════════════════════════════════════════════
