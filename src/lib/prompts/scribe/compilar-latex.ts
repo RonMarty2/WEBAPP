@@ -183,9 +183,14 @@ Si solo hay figuras y no tablas, no incluir \\listoftables.
 PREÁMBULO RECOMENDADO
 ═══════════════════════════════════════════════════════════════
 
-Usar una configuración robusta.
+REGLA CRÍTICA: el motor por defecto es pdfLaTeX (compatible con Overleaf
+sin configuración manual). NO uses fontspec ni \\setmainfont a menos que
+el motor explícitamente sea XeLaTeX. fontspec con pdfLaTeX falla con
+"Fatal Package fontspec Error: requires XeTeX or LuaTeX".
 
-Si MOTOR LATEX = XeLaTeX:
+Usar una configuración robusta según el motor especificado:
+
+Si MOTOR LATEX = XeLaTeX (solo si está explícitamente pedido):
 
 \\documentclass[12pt,letterpaper]{report}
 \\usepackage[spanish,es-tabla]{babel}
@@ -636,7 +641,7 @@ export function buildContextoLatex(datos: {
   mesAnio: string;
   logoArchivo?: string;          // Si existe, nombre del archivo de imagen
   // Decisiones tipográficas
-  motorLatex?: "XeLaTeX" | "pdfLaTeX";  // Default: XeLaTeX
+  motorLatex?: "XeLaTeX" | "pdfLaTeX";  // Default: pdfLaTeX (compatible Overleaf sin config)
   tipoLetra?: string;            // Default: Times New Roman 12 pt
   // Contenido
   resumen_content: string;
@@ -654,7 +659,9 @@ export function buildContextoLatex(datos: {
   const modalidad = datos.modalidad || "Diplomado como modalidad de titulación";
   const ciudad = datos.ciudad || "Cochabamba";
   const pais = datos.pais || "Bolivia";
-  const motorLatex = datos.motorLatex || "XeLaTeX";
+  // Default pdfLaTeX: es el motor que Overleaf usa por defecto sin configuración
+  // adicional. XeLaTeX requiere que el usuario lo active manualmente en Settings.
+  const motorLatex = datos.motorLatex || "pdfLaTeX";
   const tipoLetra = datos.tipoLetra || "Times New Roman 12 pt";
 
   const lineas: string[] = [
