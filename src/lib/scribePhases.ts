@@ -100,11 +100,15 @@ export const DEFAULT_PHASES: PhaseDefinition[] = [
     prompt: SISTEMA_SCRIBE_LATEX,
   },
   {
+    // 🎓 Reciclamos el id "ph-calidad" para mantener compatibilidad con
+    // proyectos existentes en la BD. El comportamiento cambió: ya no audita,
+    // ahora muestra el banco de preguntas para la defensa oral generado en
+    // background tras aprobar cada capítulo.
     id: "ph-calidad",
     servicio_id: "mono-001",
     orden: 90,
-    label: "Auditoría Final",
-    short_label: "Auditoría",
+    label: "Banco de preguntas para tu defensa",
+    short_label: "Defensa",
     prompt: SISTEMA_SCRIBE_CALIDAD,
   },
 ];
