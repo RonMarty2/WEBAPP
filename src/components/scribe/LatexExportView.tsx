@@ -43,12 +43,48 @@ function isBlockReport(text: string): boolean {
 export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, proyectoId }: Props) {
   const [copied, setCopied] = useState(false);
   const [logoDescargado, setLogoDescargado] = useState(false);
+  const [pdfDescargando, setPdfDescargando] = useState(false);
+  const [pdfError, setPdfError] = useState("");
   const [paqueteDescargando, setPaqueteDescargando] = useState(false);
   const [paqueteError, setPaqueteError] = useState("");
 
   /**
-   * Descarga UN solo ZIP con .tex + logo + README. El usuario sube todo a
-   * Overleaf y compila. CERO trabajo manual de su parte.
+   * El botón PRINCIPAL del estudiante: descarga el PDF compilado directamente.
+   * El backend genera el HTML, lo renderiza con Chrome headless, y devuelve el
+   * PDF. El estudiante NO toca Overleaf ni LaTeX.
+   */
+  async function handleDownloadPdf() {
+    if (!proyectoId || pdfDescargando) return;
+    setPdfDescargando(true);
+    setPdfError("");
+    try {
+      const res = await fetch(`/api/projects/${proyectoId}/pdf`);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const nameMatch = cd.match(/filename="?([^"]+)"?/);
+      const filename = nameMatch?.[1] ?? `${tituloProyecto || "monografia"}.pdf`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setPdfError((e as Error).message);
+    } finally {
+      setPdfDescargando(false);
+    }
+  }
+
+  /**
+   * ADMIN: descarga UN solo ZIP con .tex + logo + README para editar en Overleaf.
+   * Útil para revisar o ajustar el LaTeX manualmente.
    */
   async function handleDownloadPaquete() {
     if (!proyectoId || paqueteDescargando) return;
@@ -61,7 +97,6 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
         throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
       }
       const blob = await res.blob();
-      // Tomar el nombre del archivo del header Content-Disposition
       const cd = res.headers.get("Content-Disposition") ?? "";
       const nameMatch = cd.match(/filename="?([^"]+)"?/);
       const filename = nameMatch?.[1] ?? `${tituloProyecto || "monografia"}-overleaf.zip`;
@@ -246,81 +281,99 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
         </div>
       )}
 
-      {/* Acción PRINCIPAL — paquete completo listo para Overleaf */}
+      {/* ACCIÓN PRINCIPAL DEL ESTUDIANTE — descarga PDF directo, sin Overleaf */}
       {proyectoId && (
         <div style={{ marginBottom: 16 }}>
           <button
             type="button"
-            onClick={handleDownloadPaquete}
-            disabled={paqueteDescargando}
+            onClick={handleDownloadPdf}
+            disabled={pdfDescargando}
             style={{
               width: "100%",
-              padding: "18px 24px",
-              borderRadius: 12,
+              padding: "20px 24px",
+              borderRadius: 14,
               border: "none",
-              background: paqueteDescargando
+              background: pdfDescargando
                 ? "linear-gradient(135deg, #94a3b8, #64748b)"
-                : "linear-gradient(135deg, #10b981, #059669)",
+                : "linear-gradient(135deg, #2563eb, #1d4ed8)",
               color: "white",
-              fontSize: 16,
+              fontSize: 17,
               fontWeight: 700,
-              cursor: paqueteDescargando ? "wait" : "pointer",
-              boxShadow: "0 6px 18px rgba(16,185,129,0.32)",
+              cursor: pdfDescargando ? "wait" : "pointer",
+              boxShadow: "0 8px 22px rgba(37,99,235,0.35)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 10,
+              gap: 12,
               transition: "transform 0.15s ease",
             }}
-            onMouseEnter={e => { if (!paqueteDescargando) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
+            onMouseEnter={e => { if (!pdfDescargando) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
             onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
           >
-            <span style={{ fontSize: 22 }}>📦</span>
-            <span>{paqueteDescargando ? "Preparando paquete…" : "Descargar paquete completo (.zip)"}</span>
+            <span style={{ fontSize: 24 }}>📥</span>
+            <span>{pdfDescargando ? "Generando tu PDF…" : "Descargar mi monografía (PDF)"}</span>
           </button>
-          <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", marginTop: 8, lineHeight: 1.5, textAlign: "center" }}>
-            Incluye tu .tex con datos personalizados (nombre, fecha, programa) + logo de la
-            universidad + instrucciones. <strong>Subílo a Overleaf y compilá.</strong>
+          <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 10, lineHeight: 1.55, textAlign: "center" }}>
+            {pdfDescargando
+              ? "Esto toma 10–20 segundos. La página se queda esperando — no la cierres."
+              : "Tu monografía completa con carátula UMSS, logo, índice y formato APA 7."}
           </div>
-          {paqueteError && (
-            <div style={{ marginTop: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12 }}>
-              ⚠ {paqueteError}
+          {pdfError && (
+            <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12, lineHeight: 1.5 }}>
+              ⚠ {pdfError}
             </div>
           )}
         </div>
       )}
 
-      {/* Acciones secundarias — para usuarios avanzados / admin */}
+      {/* OPCIONES AVANZADAS — solo admin, escondidas detrás de <details> */}
       <details style={{ marginBottom: 16 }}>
         <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--fg-muted)", padding: "8px 0", userSelect: "none" }}>
-          Opciones avanzadas (admin)
+          Opciones avanzadas (admin) — LaTeX / Overleaf / código crudo
         </summary>
-        <div style={{
-          marginTop: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 10,
-        }}>
-          <ActionCard
-            onClick={handleOverleaf}
-            title="🚀 Abrir en Overleaf"
-            subtitle="Pegar código directo"
-          />
-          <ActionCard
-            onClick={handleDownload}
-            title="💾 Solo .tex"
-            subtitle="Sin logo, sin datos personalizados"
-          />
-          <ActionCard
-            onClick={handleCopy}
-            title={copied ? "✅ Copiado" : "📋 Copiar"}
-            subtitle={copied ? "En el portapapeles" : "Código crudo"}
-          />
-          {logoUrl && (
-            <ActionCard
-              onClick={handleDownloadLogo}
-              title={logoDescargado ? "✅ Logo listo" : "🏛️ Solo logo"}
-              subtitle="Por separado"
-            />
+        <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
+          {/* Paquete LaTeX para Overleaf */}
+          {proyectoId && (
+            <button
+              type="button"
+              onClick={handleDownloadPaquete}
+              disabled={paqueteDescargando}
+              style={{
+                padding: "12px 14px", borderRadius: 8, border: "1px solid var(--border)",
+                background: "rgba(16,185,129,0.06)", color: "#059669", fontSize: 12.5, fontWeight: 600,
+                cursor: paqueteDescargando ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8,
+              }}
+            >
+              <span>📦</span>
+              <span>{paqueteDescargando ? "Preparando ZIP…" : "Paquete LaTeX (.tex + logo) para Overleaf"}</span>
+            </button>
           )}
+          {paqueteError && <div style={{ fontSize: 11, color: "#ef4444" }}>⚠ {paqueteError}</div>}
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 10 }}>
+            <ActionCard
+              onClick={handleOverleaf}
+              title="🚀 Abrir en Overleaf"
+              subtitle="Pegar código directo"
+            />
+            <ActionCard
+              onClick={handleDownload}
+              title="💾 Solo .tex"
+              subtitle="Sin logo ni datos"
+            />
+            <ActionCard
+              onClick={handleCopy}
+              title={copied ? "✅ Copiado" : "📋 Copiar"}
+              subtitle={copied ? "En el portapapeles" : "Código crudo"}
+            />
+            {logoUrl && (
+              <ActionCard
+                onClick={handleDownloadLogo}
+                title={logoDescargado ? "✅ Logo listo" : "🏛️ Solo logo"}
+                subtitle="Por separado"
+              />
+            )}
+          </div>
         </div>
       </details>
 
