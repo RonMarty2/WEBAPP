@@ -59,14 +59,23 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
     setPdfError("");
     try {
       const res = await fetch(`/api/projects/${proyectoId}/pdf`);
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
+        throw new Error((data as { error?: string }).error ?? `HTTP ${res.status}`);
       }
-      const blob = await res.blob();
-      const cd = res.headers.get("Content-Disposition") ?? "";
-      const nameMatch = cd.match(/filename="?([^"]+)"?/);
-      const filename = nameMatch?.[1] ?? `${tituloProyecto || "monografia"}.pdf`;
+      const { pdfBase64, bytes, fileName } = data as { pdfBase64?: string; bytes?: number; fileName?: string };
+      if (!pdfBase64 || !bytes) {
+        throw new Error("El PDF se generó pero llegó vacío. Intentá de nuevo.");
+      }
+      // Decodificar base64 → bytes → Blob → descarga
+      const binary = atob(pdfBase64);
+      const buffer = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) buffer[i] = binary.charCodeAt(i);
+      if (buffer.byteLength === 0) {
+        throw new Error("El PDF decodificado quedó vacío. Reportá esto al admin.");
+      }
+      const blob = new Blob([buffer], { type: "application/pdf" });
+      const filename = fileName ?? `${tituloProyecto || "monografia"}.pdf`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -74,7 +83,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
     } catch (e) {
       setPdfError((e as Error).message);
     } finally {

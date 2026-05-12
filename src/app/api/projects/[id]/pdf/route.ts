@@ -218,28 +218,22 @@ export async function GET(req: Request, { params }: Params) {
     if (!pdfBytes || pdfBytes.byteLength === 0) {
       throw new Error("No se pudo generar el PDF.");
     }
-    console.log(`[pdf] Devolviendo ${pdfBytes.byteLength} bytes al cliente como ReadableStream`);
 
-    // Usamos ReadableStream — el approach más confiable en Next.js 16 + Turbopack.
-    // Blob y casts a BodyInit han fallado entregando body vacío. El stream
-    // garantiza que los bytes lleguen al cliente.
-    const bytesParaEnviar = pdfBytes; // capturar referencia para el stream
-    const stream = new ReadableStream({
-      start(controller) {
-        controller.enqueue(bytesParaEnviar);
-        controller.close();
-      },
-    });
-    // NOTA: NO seteamos Content-Length manualmente — dejamos que Node/Next lo
-    // calculen del stream. Setting manual + stream a veces genera mismatch
-    // que entrega body vacío al cliente.
-    return new Response(stream, {
+    // 🔄 Approach final: devolver el PDF en base64 dentro de JSON.
+    // Probamos Buffer, Uint8Array, Blob y ReadableStream — todos perdían el
+    // body en Next.js 16 + Turbopack (los archivos llegaban 0 bytes al cliente).
+    // Base64 es 100% confiable porque viaja como string JSON. El cliente decodifica
+    // y arma el Blob localmente. Es el mismo approach que /api/export/pdf usa.
+    const base64 = Buffer.from(pdfBytes).toString("base64");
+    console.log(`[pdf] Devolviendo ${pdfBytes.byteLength} bytes (${base64.length} chars base64) al cliente`);
+
+    return NextResponse.json({
+      pdfBase64: base64,
+      bytes: pdfBytes.byteLength,
+      fileName,
+    }, {
       status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${fileName}"`,
-        "Cache-Control": "no-store",
-      },
+      headers: { "Cache-Control": "no-store" },
     });
   } catch (e) {
     if (e instanceof AuthError) {
