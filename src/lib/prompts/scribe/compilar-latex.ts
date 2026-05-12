@@ -180,13 +180,26 @@ Si solo hay tablas y no figuras, no incluir \\listoffigures.
 Si solo hay figuras y no tablas, no incluir \\listoftables.
 
 ═══════════════════════════════════════════════════════════════
-PREÁMBULO RECOMENDADO
+PREÁMBULO OBLIGATORIO (no omitir paquetes, no reordenar)
 ═══════════════════════════════════════════════════════════════
 
-REGLA CRÍTICA: el motor por defecto es pdfLaTeX (compatible con Overleaf
-sin configuración manual). NO uses fontspec ni \\setmainfont a menos que
-el motor explícitamente sea XeLaTeX. fontspec con pdfLaTeX falla con
-"Fatal Package fontspec Error: requires XeTeX or LuaTeX".
+REGLAS CRÍTICAS DEL PREÁMBULO:
+
+1. COPIÁ el preámbulo EXACTAMENTE como aparece abajo según el motor.
+   NO omitas paquetes. NO reordenes. NO sustituyas. Si un paquete está
+   en la lista, va. Punto.
+
+2. Motor por defecto = pdfLaTeX (compatible con Overleaf sin config).
+   NO uses fontspec ni \\setmainfont a menos que motor sea XeLaTeX
+   explícito. fontspec con pdfLaTeX falla con "Fatal Package fontspec
+   Error: requires XeTeX or LuaTeX".
+
+3. PAQUETES OBLIGATORIOS sin importar el motor (si los omitís, el .tex
+   no compila):
+   - ragged2e: para \\justifying. Si NO incluís ragged2e, NUNCA uses
+     \\justifying en el cuerpo. (LaTeX Error: \\justifying undefined)
+   - hyperref: para enlaces, debe ir al FINAL del preámbulo.
+   - inputenc + fontenc (solo pdfLaTeX): para acentos correctos.
 
 Usar una configuración robusta según el motor especificado:
 
@@ -398,6 +411,30 @@ Reglas:
 - No permitir texto fuera de márgenes.
 - No permitir columnas con texto sin ajuste.
 - Usar p{ancho} o X para texto largo.
+
+REGLAS CRÍTICAS DE SINTAXIS DE TABLAS (evitar errores de compilación):
+
+1. CONSISTENCIA DE COLUMNAS: el número de & por fila debe ser EXACTAMENTE
+   columnas-1. Ej. tabular{lll} → cada fila debe tener 2 ampersands. Si
+   una fila tiene menos, LaTeX da "Missing \\cr inserted" o similar.
+
+2. CIERRE DE FILAS: cada fila DEBE terminar con \\\\. Sin excepción.
+   La última fila también lleva \\\\ antes de \\bottomrule.
+
+3. ENTORNO BIEN CERRADO: cada \\begin{tabular} requiere su \\end{tabular}.
+   Igual para table, longtable, tabularx. Verificá pareado antes de cerrar.
+
+4. CONTENIDO MULTILÍNEA: si una celda tiene texto largo con saltos, NO
+   uses \\\\ dentro (eso rompe la tabla). Usá \\\\ solo entre filas. Para
+   saltos dentro de celda usá \\makecell{línea1 \\\\ línea2} o tabularx
+   con columna X.
+
+5. CARACTERES ESPECIALES dentro de celdas: %, &, _, $, # deben escaparse
+   con backslash (\\%, \\&, \\_, \\$, \\#).
+
+6. NUNCA dejar tablas inconcluidas. Si una tabla del markdown original
+   está rota o incompleta, RECONSTRUILA con datos coherentes en lugar
+   de copiarla rota.
 - Alinear números a la derecha cuando corresponda.
 - Alinear texto a la izquierda.
 - No usar líneas verticales.
