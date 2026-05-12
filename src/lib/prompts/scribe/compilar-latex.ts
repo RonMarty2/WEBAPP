@@ -32,12 +32,28 @@ RECIBIRÁS ARRIBA los siguientes bloques generados por el sistema:
 9. [REFERENCIAS BIBLIOGRÁFICAS — consolidadas en APA 7].
 10. [ANEXOS] — opcional.
 
-REGLAS DE LECTURA:
-- Tu tarea es generar un único archivo .tex completo, limpio, compilable.
-- NO modifiques el SENTIDO de los textos recibidos (no cambies argumentos ni conclusiones).
-- SÍ podés ajustar formato, consolidar referencias y resolver inconsistencias menores.
-- SÍ convierte Markdown a LaTeX correctamente.
-- SÍ aplica formato APA 7 a tablas, figuras, ecuaciones y referencias.
+REGLAS DE LECTURA (CRÍTICAS):
+
+⚠️ PROHIBIDO RESUMIR, ACORTAR, COMPRIMIR O SINTETIZAR EL CONTENIDO.
+
+Cada párrafo del contenido recibido (Cap I, II, III, IV, V, Resumen, Referencias)
+debe aparecer EN EL .TEX FINAL DE FORMA INTEGRAL Y LITERAL. La única conversión
+permitida es markdown → LaTeX (sintaxis). El TEXTO QUEDA INTACTO.
+
+Si el contenido recibido tiene 4.000 palabras, el .tex debe tener AL MENOS 4.000
+palabras de contenido (más el preámbulo y comandos LaTeX). NUNCA menos.
+
+Tu tarea es generar un único archivo .tex completo, limpio, compilable.
+- NO RESUMAS. NO ACORTES. NO PARAFRASEÉS para ahorrar espacio.
+- NO modifiques el SENTIDO ni el TEXTO de los párrafos recibidos.
+- SÍ podés ajustar FORMATO, consolidar referencias y resolver inconsistencias menores.
+- SÍ convertí Markdown a LaTeX correctamente.
+- SÍ aplicá formato APA 7 a tablas, figuras, ecuaciones y referencias.
+
+Si te quedás sin espacio (acercándote al límite de tokens), NO RESUMAS los párrafos
+finales — preferí omitir secciones decorativas (listas de figuras vacías, índices
+auxiliares, anexos opcionales) ANTES que recortar el contenido sustantivo de los
+capítulos.
 
 ═══════════════════════════════════════════════════════════════
 PRINCIPIOS GENERALES (PLATAFORMA AUTOMATIZADA)

@@ -689,7 +689,8 @@ async function generarSinSupabase({
       "ph-cap5":        4000,   // techo ~5 págs (rango pedido 2-4, margen para conclusiones densas)
       "ph-resumen":     1000,   // 250-400 palabras (1 pág)
       "ph-referencias": 3500,   // ~5 págs de bibliografía APA
-      "ph-latex":      24000,   // documento .tex completo (no va al PDF como contenido)
+      "ph-latex":      50000,   // documento .tex completo. Necesita espacio para TRANSCRIBIR
+                                // todos los caps sin resumir. Con 24K la IA comprimía a 6K palabras.
       "ph-calidad":     6000,   // informe estructurado (no va al PDF)
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;

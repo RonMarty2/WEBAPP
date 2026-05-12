@@ -448,8 +448,13 @@ async function callGemini(
   // la respuesta real. Para Flash, lo desactivamos directamente.
   const isFlash = /gemini-2\.5-flash/.test(model);
   const isPro = /gemini-2\.5-pro/.test(model);
+  // Para Pro: el thinking consume parte del budget. Compensamos con +20% del budget
+  // solicitado (con mínimo de 3000 y máximo de 15000). Antes era fijo +3000 que para
+  // tareas grandes como ph-latex (50K tokens) resultaba insuficiente y el modelo
+  // resumía contenido para entrar en el espacio.
+  const proBuffer = isPro ? Math.min(15000, Math.max(3000, Math.floor(maxTokens * 0.2))) : 0;
   const generationConfig: Record<string, unknown> = {
-    maxOutputTokens: isPro ? maxTokens + 3000 : maxTokens,
+    maxOutputTokens: maxTokens + proBuffer,
     temperature: 0.35,
   };
   if (isFlash) {
