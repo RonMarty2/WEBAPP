@@ -435,6 +435,27 @@ REGLAS CRÍTICAS DE SINTAXIS DE TABLAS (evitar errores de compilación):
 6. NUNCA dejar tablas inconcluidas. Si una tabla del markdown original
    está rota o incompleta, RECONSTRUILA con datos coherentes en lugar
    de copiarla rota.
+
+7. PROHIBIDO usar \\begin{itemize} o \\begin{enumerate} DENTRO de celdas
+   de tabular/tabularx/longtable. Esos ambientes crean MODO VERTICAL y
+   las celdas son MODO HORIZONTAL (LR mode) → error "Not allowed in LR
+   mode" + cascada de \\cr, \\endgroup, } faltantes.
+
+   Si el markdown original tiene una lista en una celda, convertila a
+   bullets manuales separados con \\newline:
+
+   MAL (rompe la compilación):
+   & Tarea & \\begin{itemize}
+       \\item Punto A
+       \\item Punto B
+     \\end{itemize} \\\\
+
+   BIEN (compila):
+   & Tarea & \\textbullet{} Punto A\\newline\\textbullet{} Punto B \\\\
+
+   Regla: el último bullet de la celda NO lleva \\newline (ya termina la celda).
+   Si la lista es muy larga (>4 items), considerá poner los items en filas
+   separadas de la tabla en lugar de en una sola celda.
 - Alinear números a la derecha cuando corresponda.
 - Alinear texto a la izquierda.
 - No usar líneas verticales.
