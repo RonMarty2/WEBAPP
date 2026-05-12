@@ -10,6 +10,7 @@ import GlassModal from "@/components/ui/GlassModal";
 import ObservacionesTribunal from "@/components/ObservacionesTribunal";
 import Cap0PropuestasView from "@/components/scribe/Cap0PropuestasView";
 import LatexExportView from "@/components/scribe/LatexExportView";
+import BancoPreguntasView from "@/components/scribe/BancoPreguntasView";
 import SpecialPhaseView from "@/components/scribe/SpecialPhaseView";
 import AdminViewToggle, { useViewMode } from "@/components/scribe/AdminViewToggle";
 import GeneratingState from "@/components/scribe/GeneratingState";
@@ -993,6 +994,19 @@ export default function WorkspacePage() {
       }
     } catch (e) {
       console.error("Error aprobando borrador como final:", e);
+    }
+
+    // 🎓 Generación de preguntas de defensa en background (fire-and-forget).
+    // Solo para fases sustantivas (caps). Si falla, no rompe el flujo del estudiante
+    // — el banco las podrá regenerar después desde la vista final.
+    const FASES_CON_PREGUNTAS = new Set(["ph-cap0","ph-cap1","ph-cap2","ph-cap3","ph-cap4","ph-cap5"]);
+    if (FASES_CON_PREGUNTAS.has(fId)) {
+      void fetch(`/api/projects/${proyecto.id}/preguntas/generar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phase_id: fId }),
+        keepalive: true,
+      }).catch(err => console.warn("[preguntas] background generation falló:", err));
     }
 
     setVistaActiva("final");
@@ -2309,8 +2323,17 @@ export default function WorkspacePage() {
                   logoUrl={university?.logo_url}
                   proyectoId={proyectoId}
                 />
-              ) : (phaseId === "ph-resumen" || phaseId === "ph-referencias" || phaseId === "ph-calidad") ? (
-                /* Fases especiales: resumen / referencias / control de calidad */
+              ) : phaseId === "ph-calidad" ? (
+                /* Banco de preguntas para defensa oral (ex-Auditoría Final).
+                   Las preguntas se generan en background al aprobar cada capítulo. */
+                <BancoPreguntasView
+                  proyectoId={proyectoId}
+                  tituloProyecto={proyecto.tema_aprobado || proyecto.titulo_provisional || undefined}
+                  phaseContents={(proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>}
+                  phaseDefs={displayFases.map(f => ({ id: f.id, label: f.label }))}
+                />
+              ) : (phaseId === "ph-resumen" || phaseId === "ph-referencias") ? (
+                /* Fases especiales: resumen / referencias */
                 <SpecialPhaseView
                   phaseId={phaseId}
                   rawContent={displayContent}
