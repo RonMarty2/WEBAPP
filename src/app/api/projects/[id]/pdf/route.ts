@@ -215,22 +215,29 @@ export async function GET(req: Request, { params }: Params) {
       await rm(pdfPath, { force: true }).catch(() => {});
     }
 
-    if (!pdfBytes) {
+    if (!pdfBytes || pdfBytes.byteLength === 0) {
       throw new Error("No se pudo generar el PDF.");
     }
+    console.log(`[pdf] Devolviendo ${pdfBytes.byteLength} bytes al cliente como ReadableStream`);
 
-    // Usamos Response nativa (no NextResponse) con el Uint8Array directo.
-    // Esto evita el problema del cast `as BodyInit` que en Next.js 16 a veces
-    // entrega body vacío al cliente.
-    // Construir un Blob desde el Uint8Array — esto es lo que Response sí acepta
-    // como BodyInit garantizando que el body llegue al cliente correctamente.
-    const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" });
-    return new Response(pdfBlob, {
+    // Usamos ReadableStream — el approach más confiable en Next.js 16 + Turbopack.
+    // Blob y casts a BodyInit han fallado entregando body vacío. El stream
+    // garantiza que los bytes lleguen al cliente.
+    const bytesParaEnviar = pdfBytes; // capturar referencia para el stream
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(bytesParaEnviar);
+        controller.close();
+      },
+    });
+    // NOTA: NO seteamos Content-Length manualmente — dejamos que Node/Next lo
+    // calculen del stream. Setting manual + stream a veces genera mismatch
+    // que entrega body vacío al cliente.
+    return new Response(stream, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${fileName}"`,
-        "Content-Length": String(pdfBytes.byteLength),
         "Cache-Control": "no-store",
       },
     });
