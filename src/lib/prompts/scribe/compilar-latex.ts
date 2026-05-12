@@ -32,13 +32,38 @@ RECIBIRÁS ARRIBA los siguientes bloques generados por el sistema:
 9. [REFERENCIAS BIBLIOGRÁFICAS — consolidadas en APA 7].
 10. [ANEXOS] — opcional.
 
-REGLAS DE LECTURA (CRÍTICAS):
+REGLAS DE LECTURA (CRÍTICAS — LEÉ ESTO PRIMERO):
 
-⚠️ PROHIBIDO RESUMIR, ACORTAR, COMPRIMIR O SINTETIZAR EL CONTENIDO.
+🚨 REGLA #1 — PROHIBIDO RESUMIR (LA MÁS IMPORTANTE).
 
-Cada párrafo del contenido recibido (Cap I, II, III, IV, V, Resumen, Referencias)
-debe aparecer EN EL .TEX FINAL DE FORMA INTEGRAL Y LITERAL. La única conversión
-permitida es markdown → LaTeX (sintaxis). El TEXTO QUEDA INTACTO.
+Esta es la regla más violada por modelos LLM al hacer esta tarea. La incumplís
+si entregás un .tex con menos del 90% de las palabras del contenido recibido.
+Mediremos esto al evaluar tu output.
+
+Procedimiento OBLIGATORIO antes de generar el .tex:
+1. Contá las palabras totales del contenido recibido (Cap I + II + III + IV + V
+   + Resumen + Referencias). Llamemos a ese número N.
+2. Tu .tex debe contener AL MENOS N × 0.90 palabras de texto sustantivo
+   (excluyendo comandos LaTeX como \\begin, \\section, etc.).
+3. Si tu .tex resultante tiene menos que eso, lo estás haciendo MAL — volvé a
+   transcribir SIN comprimir.
+
+Cada párrafo del contenido recibido debe aparecer EN EL .TEX FINAL DE FORMA
+INTEGRAL Y LITERAL. La única conversión permitida es markdown → LaTeX
+(sintaxis). El TEXTO QUEDA INTACTO, palabra por palabra.
+
+EJEMPLOS DE VIOLACIÓN (esto NO se hace nunca):
+❌ "El marketing es una actividad que..." → "El marketing es una actividad."
+   (resumiste, perdiste palabras)
+❌ "Bolivia exporta castaña, café, soja, quinua, banano..." → "Bolivia exporta
+   productos como castaña y otros." (parafraseaste, perdiste detalle)
+❌ Cap IV original tiene 4.500 palabras → tu Cap IV en .tex tiene 1.800 palabras
+   (omitiste secciones enteras)
+
+EJEMPLO CORRECTO:
+✓ Markdown "El **marketing digital** es una herramienta..." →
+  LaTeX "El \\textbf{marketing digital} es una herramienta..."
+  (solo cambió la sintaxis, el texto es idéntico)
 
 Si el contenido recibido tiene 4.000 palabras, el .tex debe tener AL MENOS 4.000
 palabras de contenido (más el preámbulo y comandos LaTeX). NUNCA menos.
@@ -654,6 +679,38 @@ Reglas:
 - No permitir texto fuera de márgenes.
 - No permitir columnas con texto sin ajuste.
 - Usar p{ancho} o X para texto largo.
+
+🚨 ANCHO MÍNIMO DE COLUMNAS (CRÍTICO — evita palabras hifenizadas a 1 letra por línea):
+
+Si una celda contiene texto multilínea (oraciones completas, no etiquetas
+cortas), su columna DEBE tener ancho suficiente. Reglas obligatorias:
+
+- Prohibido p{} con ancho menor a 2.5cm.
+- Prohibido tabular con todas las columnas l/c/r si tienen oraciones largas
+  (eso fuerza hifenización extrema tipo "Re-vis-do-cu-men-tal").
+- Si una tabla tiene 4 o más columnas Y al menos una con texto largo:
+  → OBLIGATORIO usar tabularx con \\textwidth.
+  → Las columnas con texto largo DEBEN ser de tipo X (auto-ajustable).
+  → Las columnas con texto corto pueden ser l/c/r o p{} con mínimo 2cm.
+
+EJEMPLO CORRECTO de Tabla 3.2 (Matriz de consistencia metodológica) con 5
+columnas, donde 3 tienen texto largo:
+
+\\begin{tabularx}{\\textwidth}{l X X X X}
+\\toprule
+Obj. Esp. & Técnica & Instrumento de recolección & Producto esperado & Aplicación \\\\
+\\midrule
+1. Caracterizar la dinámica... & Revisión documental y estadística
+  & Ficha de recolección de datos & Series de tiempo, tablas y gráficos sobre
+    valor y volumen de exportación & Cap. IV, Sec. 4.1 \\\\
+2. Identificar nudos críticos & Revisión documental y entrevistas
+  & Ficha de recolección & Tablas comparativas de tiempos y costos & Cap. IV \\\\
+\\bottomrule
+\\end{tabularx}
+
+EJEMPLO INCORRECTO (lo que da "Re-vis-do-cu-men-tal"):
+\\begin{tabular}{l l l l l}  ← TODAS las columnas son tipo l (auto-ancho
+                                  estrecho) — INACEPTABLE con texto largo.
 
 REGLAS CRÍTICAS DE SINTAXIS DE TABLAS (evitar errores de compilación):
 
