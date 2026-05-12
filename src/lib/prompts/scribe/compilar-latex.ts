@@ -302,9 +302,14 @@ Si MOTOR LATEX = pdfLaTeX:
 NUMERACIÓN DE PÁGINAS — UMSS / APA 7 (OBLIGATORIO)
 ═══════════════════════════════════════════════════════════════
 
-Norma UMSS: número de página en la ESQUINA SUPERIOR DERECHA, no en el
-pie. Numeración con arábigos (1, 2, 3...) desde el primer capítulo.
-Carátula NO se numera. Índice usa romanos (i, ii, iii) opcionalmente.
+Norma UMSS: número de página en la ESQUINA SUPERIOR DERECHA, no en el pie.
+Esquema completo de numeración (OBLIGATORIO):
+
+  1. Carátula → SIN número (\\thispagestyle{empty}).
+  2. Páginas preliminares (índice, lista de tablas, lista de figuras, resumen,
+     dedicatoria si la hay) → NÚMEROS ROMANOS MINÚSCULOS (i, ii, iii...).
+  3. Cuerpo del documento (Capítulo I en adelante, incluyendo conclusiones,
+     bibliografía y anexos) → NÚMEROS ARÁBIGOS (1, 2, 3...) REINICIANDO en 1.
 
 Configuración OBLIGATORIA con fancyhdr:
 
@@ -316,6 +321,24 @@ Configuración OBLIGATORIA con fancyhdr:
 
 Y en la carátula:
 \\thispagestyle{empty}                % carátula sin número
+
+ORDEN obligatorio en \\begin{document}:
+
+  \\begin{titlepage} ... \\end{titlepage}       % carátula, sin numerar
+
+  \\pagenumbering{roman}                        % arranca i, ii, iii...
+  \\tableofcontents
+  \\listoftables    % solo si hay tablas
+  \\listoffigures   % solo si hay figuras
+  % (resumen ejecutivo si va en preliminares)
+
+  \\clearpage
+  \\pagenumbering{arabic}                       % reinicia 1, 2, 3...
+  \\setcounter{page}{1}
+  \\chapter{...}    % Capítulo I empieza acá
+
+Eso garantiza la norma UMSS: carátula sin numerar, preliminares con romanos,
+cuerpo con arábigos desde el Cap I.
 
 ═══════════════════════════════════════════════════════════════
 CARÁTULA UMSS — ESTRUCTURA EXACTA
@@ -359,6 +382,73 @@ indicación contraria). Times New Roman, tamaños indicados:
 
 IMPORTANTE: si los datos {PROGRAMA}, {VERSIÓN}, {TÍTULO}, etc. no están
 disponibles, usá placeholder claro como "[Programa]" en vez de inventar.
+
+═══════════════════════════════════════════════════════════════
+ÁRBOL DE PROBLEMAS — CONVERSIÓN DE MARCADOR A TIKZ (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+Si encontrás en el contenido del Capítulo I un bloque del tipo:
+
+  [[ARBOL_PROBLEMAS]]
+  central: ...
+  consecuencias:
+    - ...
+    - ...
+    - ...
+  causas:
+    - ...
+    - ...
+    - ...
+  [[/ARBOL_PROBLEMAS]]
+
+CONVERTILO a una figura TikZ profesional con cajas reales y líneas conectoras.
+
+Agregá al preámbulo (después de los otros \\usepackage):
+  \\usepackage{tikz}
+  \\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
+
+Y reemplazá el marcador en el cuerpo por código TikZ con esta estructura:
+
+\\begin{figure}[H]
+\\centering
+\\caption*{\\textbf{Figura X.X}\\\\\\textit{Árbol de problemas}}
+\\begin{tikzpicture}[
+  node distance=0.6cm and 0.4cm,
+  every node/.style={align=center, font=\\small},
+  box/.style={draw, rectangle, minimum height=1.2cm, minimum width=3.5cm,
+              text width=3.3cm, inner sep=4pt},
+  boxcentral/.style={box, thick, minimum height=1.4cm},
+  line/.style={draw, thick, -}
+]
+% Consecuencias (arriba)
+\\node[box] (c1) {Consecuencia 1};
+\\node[box, right=of c1] (c2) {Consecuencia 2};
+\\node[box, right=of c2] (c3) {Consecuencia 3};
+% Problema central
+\\node[boxcentral, below=of c2] (central) {PROBLEMA CENTRAL};
+% Causas (abajo)
+\\node[box, below=of central, xshift=-4cm] (ca1) {Causa 1};
+\\node[box, below=of central] (ca2) {Causa 2};
+\\node[box, below=of central, xshift=4cm] (ca3) {Causa 3};
+% Líneas conectoras
+\\draw[line] (c1.south) -- (central.north);
+\\draw[line] (c2.south) -- (central.north);
+\\draw[line] (c3.south) -- (central.north);
+\\draw[line] (central.south) -- (ca1.north);
+\\draw[line] (central.south) -- (ca2.north);
+\\draw[line] (central.south) -- (ca3.north);
+\\end{tikzpicture}
+\\caption*{\\footnotesize \\textit{Nota.} Elaboración propia.}
+\\end{figure}
+\\addcontentsline{lof}{figure}{Figura X.X. Árbol de problemas}
+
+Reemplazá "Consecuencia 1", "PROBLEMA CENTRAL", "Causa 1", etc. con el contenido
+exacto del marcador. NUMERÁ la figura coherentemente con las demás (X.X).
+Si hay menos de 3 consecuencias o causas en el marcador, ajustá el código
+omitiendo nodos según corresponda (preservando la simetría visual).
+
+ELIMINÁ el marcador [[ARBOL_PROBLEMAS]] del .tex final — debe quedar solo
+el código TikZ.
 
 ═══════════════════════════════════════════════════════════════
 CONFIGURACIÓN DE TÍTULOS DE CAPÍTULO Y SECCIÓN (OBLIGATORIO)

@@ -243,6 +243,64 @@ function formatTraceTime(value?: string) {
  * no empieza con "|" y no es blank, la siguiente es continuación de la celda.
  * Las uno con espacio para que el parser de tablas vea filas válidas en una sola línea.
  */
+
+/**
+ * Renderiza un bloque [[ARBOL_PROBLEMAS]] como diagrama HTML con cajas y líneas.
+ * Estructura visual (3 niveles, top→bottom):
+ *   - Consecuencias arriba (3 cajas en fila)
+ *   - Problema central (1 caja gruesa centrada)
+ *   - Causas abajo (3 cajas en fila)
+ * Las líneas conectoras se dibujan con CSS pseudo-elements.
+ */
+function renderArbolProblemas(contenido: string): string {
+  // Parsear el formato YAML-like del marcador
+  let central = "";
+  const consecuencias: string[] = [];
+  const causas: string[] = [];
+  let modo: "central" | "consecuencias" | "causas" | null = null;
+  for (const raw of contenido.split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (/^central\s*:/i.test(line)) {
+      central = line.replace(/^central\s*:\s*/i, "").trim();
+      modo = "central";
+    } else if (/^consecuencias\s*:/i.test(line)) {
+      modo = "consecuencias";
+    } else if (/^causas\s*:/i.test(line)) {
+      modo = "causas";
+    } else if (/^[-*]\s+/.test(line)) {
+      const item = line.replace(/^[-*]\s+/, "").trim();
+      if (modo === "consecuencias") consecuencias.push(item);
+      else if (modo === "causas") causas.push(item);
+    }
+  }
+
+  if (!central && consecuencias.length === 0 && causas.length === 0) {
+    return `<div class="arbol-error" style="padding:12px;border:1px dashed #f59e0b;color:#f59e0b;font-size:12px;border-radius:8px;">Marcador [[ARBOL_PROBLEMAS]] vacío o mal formado</div>`;
+  }
+
+  const cajaStyle = `border:1.5px solid #475569;background:#f8fafc;padding:10px 12px;border-radius:6px;font-size:11.5px;line-height:1.4;text-align:center;min-height:54px;display:flex;align-items:center;justify-content:center;`;
+  const cajaCentral = `border:2.5px solid #1e293b;background:#fff;padding:14px 16px;border-radius:8px;font-size:13px;font-weight:700;line-height:1.4;text-align:center;color:#0f172a;`;
+  const lineaConectora = `<div style="width:1.5px;background:#475569;height:24px;margin:0 auto;"></div>`;
+  const cellHtml = (text: string) => `<div style="${cajaStyle}">${escapeHtml(text)}</div>`;
+
+  return `
+<figure class="arbol-problemas" style="margin:24px auto;padding:18px;border:1px solid #e2e8f0;border-radius:10px;background:#ffffff;max-width:780px;">
+  <figcaption style="font-size:11.5px;font-weight:700;text-align:center;margin-bottom:14px;color:#1e293b;">Figura: Árbol de problemas</figcaption>
+  ${consecuencias.length > 0 ? `
+  <div style="display:grid;grid-template-columns:repeat(${consecuencias.length},1fr);gap:12px;">
+    ${consecuencias.map(cellHtml).join("")}
+  </div>
+  ${lineaConectora}` : ""}
+  <div style="${cajaCentral}max-width:60%;margin:0 auto;">${escapeHtml(central || "(problema central)")}</div>
+  ${causas.length > 0 ? `${lineaConectora}
+  <div style="display:grid;grid-template-columns:repeat(${causas.length},1fr);gap:12px;">
+    ${causas.map(cellHtml).join("")}
+  </div>` : ""}
+  <div style="font-size:10.5px;color:#64748b;text-align:center;margin-top:12px;font-style:italic;">Nota. Elaboración propia.</div>
+</figure>`;
+}
+
 function normalizarTablasMultilineaMd(md: string): string {
   const lines = md.split("\n");
   const out: string[] = [];
@@ -287,6 +345,18 @@ function renderMd(text: string): string {
 
   // Normalizar tablas multilínea (filas con saltos de línea dentro de celdas)
   cleaned = normalizarTablasMultilineaMd(cleaned);
+
+  // 1.5) Detectar y renderizar [[ARBOL_PROBLEMAS]] como diagrama HTML.
+  // En LaTeX se convierte a TikZ; acá en preview lo dibujamos con CSS Grid + cajas.
+  const arboles: string[] = [];
+  cleaned = cleaned.replace(
+    /\[\[ARBOL_PROBLEMAS\]\]([\s\S]*?)\[\[\/ARBOL_PROBLEMAS\]\]/gi,
+    (_match, contenido) => {
+      const idx = arboles.length;
+      arboles.push(renderArbolProblemas(contenido));
+      return `\n ARBOL_${idx} \n`;
+    }
+  );
 
   // 2) Extraer y "marcar" bloques de código fenced para preservarlos
   const codeBlocks: string[] = [];
@@ -372,6 +442,7 @@ function renderMd(text: string): string {
   // 14) Restaurar tablas y bloques de código
   html = html.replace(/ TABLE_(\d+) /g, (_, i) => tables[Number(i)] ?? "");
   html = html.replace(/ CODE_BLOCK_(\d+) /g, (_, i) => codeBlocks[Number(i)] ?? "");
+  html = html.replace(/ ARBOL_(\d+) /g, (_, i) => arboles[Number(i)] ?? "");
 
   return html;
 }
