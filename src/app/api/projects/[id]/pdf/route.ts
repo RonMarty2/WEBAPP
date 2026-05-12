@@ -184,9 +184,10 @@ export async function GET(req: Request, { params }: Params) {
     const origin = new URL(req.url).origin;
     const fileName = `${slugify(titulo)}.pdf`;
 
+    let pdfBytes: Uint8Array | null = null;
     try {
       await writeFile(htmlPath, withAbsoluteAssets(html, origin), "utf8");
-      await execFileAsync(chromePath, [
+      const exec = await execFileAsync(chromePath, [
         "--headless=new",
         "--disable-gpu",
         "--no-sandbox",
@@ -195,26 +196,44 @@ export async function GET(req: Request, { params }: Params) {
         `--print-to-pdf=${pdfPath}`,
         `file:///${htmlPath.replace(/\\/g, "/")}`,
       ], { timeout: 60_000 });
+      console.log(`[pdf] Chrome ejecutado. stdout=${exec.stdout?.slice(0, 200) || "(vacío)"}, stderr=${exec.stderr?.slice(0, 300) || "(vacío)"}`);
 
       const pdfBuffer = await readFile(pdfPath);
+      console.log(`[pdf] PDF generado: ${pdfBuffer.byteLength} bytes`);
       const magic = pdfBuffer.subarray(0, 5).toString("ascii");
       if (pdfBuffer.byteLength === 0 || magic !== "%PDF-") {
-        throw new Error(`Chrome generó un PDF inválido (${pdfBuffer.byteLength} bytes).`);
+        throw new Error(`Chrome generó un PDF inválido (${pdfBuffer.byteLength} bytes, magic="${magic}").`);
       }
 
-      return new NextResponse(new Uint8Array(pdfBuffer) as unknown as BodyInit, {
-        status: 200,
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${fileName}"`,
-          "Content-Length": String(pdfBuffer.byteLength),
-          "Cache-Control": "no-store",
-        },
-      });
+      // Copiar a Uint8Array independiente del Buffer original (evita problemas
+      // con el finally que limpia el archivo).
+      pdfBytes = new Uint8Array(pdfBuffer.byteLength);
+      pdfBytes.set(pdfBuffer);
     } finally {
+      // Limpiar archivos temporales — pdfBytes ya está en memoria, no depende del file.
       await rm(htmlPath, { force: true }).catch(() => {});
       await rm(pdfPath, { force: true }).catch(() => {});
     }
+
+    if (!pdfBytes) {
+      throw new Error("No se pudo generar el PDF.");
+    }
+
+    // Usamos Response nativa (no NextResponse) con el Uint8Array directo.
+    // Esto evita el problema del cast `as BodyInit` que en Next.js 16 a veces
+    // entrega body vacío al cliente.
+    // Construir un Blob desde el Uint8Array — esto es lo que Response sí acepta
+    // como BodyInit garantizando que el body llegue al cliente correctamente.
+    const pdfBlob = new Blob([pdfBytes.buffer as ArrayBuffer], { type: "application/pdf" });
+    return new Response(pdfBlob, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Length": String(pdfBytes.byteLength),
+        "Cache-Control": "no-store",
+      },
+    });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });
