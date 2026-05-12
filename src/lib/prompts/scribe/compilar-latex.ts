@@ -344,69 +344,51 @@ Configuración OBLIGATORIA con fancyhdr:
 \\renewcommand{\\headrulewidth}{0pt}  % SIN línea horizontal en el header
 \\setlength{\\headheight}{15pt}       % evita warning fancyhdr
 
-Y en la carátula:
-\\thispagestyle{empty}                % carátula sin número
-
 ORDEN obligatorio en \\begin{document}:
-
-  \\begin{titlepage} ... \\end{titlepage}       % carátula, sin numerar
 
   \\pagenumbering{roman}                        % arranca i, ii, iii...
   \\tableofcontents
   \\listoftables    % solo si hay tablas
   \\listoffigures   % solo si hay figuras
-  % (resumen ejecutivo si va en preliminares)
 
   \\clearpage
   \\pagenumbering{arabic}                       % reinicia 1, 2, 3...
   \\setcounter{page}{1}
   \\chapter{...}    % Capítulo I empieza acá
 
-Eso garantiza la norma UMSS: carátula sin numerar, preliminares con romanos,
-cuerpo con arábigos desde el Cap I.
+Eso garantiza: preliminares (índice, listas) con romanos, cuerpo (Cap I+)
+con arábigos desde 1. SIN carátula (decisión de diseño — ver sección
+"CARÁTULA — NO INCLUIR" más abajo).
 
 ═══════════════════════════════════════════════════════════════
-CARÁTULA UMSS — ESTRUCTURA EXACTA
+CARÁTULA — NO INCLUIR (decisión de diseño)
 ═══════════════════════════════════════════════════════════════
 
-Aplica si la universidad es UMSS o universidad_id contiene "umss".
-La carátula sigue estos elementos en ORDEN VERTICAL (centrados, salvo
-indicación contraria). Times New Roman, tamaños indicados:
+🚨 PROHIBIDO generar carátula en el .tex final.
 
-  [Logo UMSS: \\includegraphics[width=2.5cm,height=4cm]{logo-universidad}]
+NO incluyas:
+- \\begin{titlepage} ... \\end{titlepage}
+- Logos (\\includegraphics) en la apertura del documento
+- Bloques con nombre del estudiante, mes, año, programa, tutor
+- Texto tipo "MONOGRAFÍA" / "TÍTULO DEL TRABAJO" en la apertura
+- Cualquier placeholder tipo [Nombre del Estudiante], [Mes], [Año],
+  [Programa], [Versión], [TÍTULO DEL TRABAJO]
 
-  UNIVERSIDAD MAYOR DE SAN SIMÓN     (14pt, bold, centrado)
-  Facultad de Ciencias Económicas    (14pt, bold, centrado)
-  Departamento de Posgrado           (14pt, bold, centrado)
+El documento debe arrancar DIRECTAMENTE con \\begin{document} seguido de:
 
-  [espacio]
+  \\pagenumbering{roman}
+  \\tableofcontents
+  \\listoftables    % solo si hay tablas reales
+  \\listoffigures   % solo si hay figuras reales
 
-  DIPLOMADO COMO MODALIDAD DE TITULACIÓN  (12pt, bold, centrado)
+  \\clearpage
+  \\pagenumbering{arabic}
+  \\setcounter{page}{1}
+  \\chapter{...}    % Capítulo I empieza acá
 
-  [espacio]
-
-  DIPLOMADO {PROGRAMA} {VERSIÓN}     (12pt, bold, centrado)
-  (Donde {PROGRAMA} y {VERSIÓN} salen de los datos de la carátula)
-
-  [espacio]
-
-  MONOGRAFÍA                         (14pt, bold, centrado)
-
-  [espacio]
-
-  {TÍTULO DEL TRABAJO}               (14pt, bold, centrado)
-
-  [espacio]
-
-  Estudiante: {nombre estudiante}    (14pt, bold, centrado)
-
-  [vfill — empuja al fondo]
-
-  Cochabamba – Bolivia               (12pt, centrado)
-  {Mes}, {Año}                       (12pt, centrado)
-
-IMPORTANTE: si los datos {PROGRAMA}, {VERSIÓN}, {TÍTULO}, etc. no están
-disponibles, usá placeholder claro como "[Programa]" en vez de inventar.
+El estudiante o el admin agregará la carátula manualmente al PDF compilado
+si la necesita (es lo más estándar — las carátulas universitarias se hacen
+aparte por las grandes variaciones entre instituciones, programas y formatos).
 
 ═══════════════════════════════════════════════════════════════
 ÁRBOL DE PROBLEMAS — CONVERSIÓN DE MARCADOR A TIKZ (OBLIGATORIO)
@@ -532,23 +514,6 @@ queda compacto en una sola línea: "Capítulo 3. DISEÑO METODOLÓGICO".
 
 NO uses ningún otro estilo de chapter (NO usar \\titleformat con [block],
 NO usar líneas, NO usar reglas decorativas).
-
-═══════════════════════════════════════════════════════════════
-CARÁTULA — LOGO DE LA UNIVERSIDAD
-═══════════════════════════════════════════════════════════════
-
-Incluí el logo en la carátula usando:
-
-\\includegraphics[width=3.5cm]{logo-universidad}
-
-donde "logo-universidad" es el nombre del archivo de imagen sin extensión.
-Si recibís el nombre del archivo de logo en los datos de carátula, usalo.
-Si no, usá "logo-universidad" como nombre por defecto.
-
-AGREGÁ un comentario LaTeX al inicio del documento avisando al estudiante:
-% IMPORTANTE: Subí tu archivo logo-universidad.png (o .jpg) a Overleaf
-% para que aparezca en la carátula. Si no querés logo, eliminá la línea
-% \\includegraphics correspondiente en la carátula.
 
 ═══════════════════════════════════════════════════════════════
 CONFIGURACIÓN DE HIPERVÍNCULOS
@@ -906,27 +871,21 @@ Reglas:
 - No incluir código que no fue usado.
 
 ═══════════════════════════════════════════════════════════════
-REGLAS DE CARÁTULA
+REGLAS DE CARÁTULA — DOCUMENTO SIN CARÁTULA
 ═══════════════════════════════════════════════════════════════
 
-La carátula debe ser sobria, centrada y formal.
+🚨 Decisión de diseño: este sistema NO genera carátula.
 
-Debe incluir:
-- Universidad.
-- Facultad.
-- Departamento o unidad.
-- Modalidad.
-- Programa o diplomado.
-- Título del trabajo.
-- Autor.
-- Tutor/docente, si corresponde.
-- Ciudad, país.
-- Mes y año.
+NO incluyas en el .tex final:
+- Bloque \\begin{titlepage}
+- Logos (\\includegraphics) en la apertura
+- Nombre del estudiante, mes, año, programa, tutor
+- Texto tipo "MONOGRAFÍA" / "TÍTULO DEL TRABAJO"
+- Cualquier identificación institucional (universidad, facultad, etc.)
 
-No usar colores.
-No usar adornos innecesarios.
-No usar imágenes si no se entregó logo real.
-No usar placeholder de logo visible.
+El estudiante o admin agrega la carátula manualmente al PDF compilado si
+la necesita. Cada universidad tiene formatos distintos y placeholders mal
+formateados se ven peor que no tener carátula.
 
 ═══════════════════════════════════════════════════════════════
 REGLAS DE LIMPIEZA FINAL
