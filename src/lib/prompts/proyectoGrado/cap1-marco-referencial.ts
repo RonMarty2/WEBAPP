@@ -196,9 +196,12 @@ Cada instrumento con una línea explicativa.
 Definí la población al que apunta la encuesta. Especificar: ciudad/zona,
 características demográficas, total estimado de habitantes/usuarios.
 
-Si vas a usar datos del INE, citá la fuente pero NO inventes el número
-exacto. Decí "según el censo más reciente del INE Bolivia" y el
-estudiante confirma el dato.
+Citá fuentes oficiales reales (Instituto Nacional de Estadística [INE],
+www.ine.gob.bo). Si no recordás la cifra exacta del último censo, usá
+una formulación verificable a nivel cualitativo: "según el último
+censo oficial, la población urbana de Cochabamba supera el medio
+millón de habitantes". Cifras puntuales solo si las recordás con
+certeza razonable.
 
 ### 1.8.2 Tipo de muestreo
 
@@ -219,9 +222,12 @@ Donde:
 - q = 1 - p.
 - e = margen de error (0.05 estándar).
 
-NO calcules el número final acá si no tenés N real — el sistema lo
-calcula con la función tamanoMuestra() en una fase posterior cuando
-el estudiante confirme la población.
+El cálculo numérico final (n exacto) lo realiza el sistema con la
+función tamanoMuestra() en una fase posterior usando los parámetros
+definidos acá. En esta sección solo presentás la fórmula con sus
+variables y un cálculo ilustrativo (asumiendo N plausible para la
+zona geográfica del proyecto). El estudiante NO completa nada — el
+sistema reemplaza automáticamente con el N real cuando aplica.
 
 ═══════════════════════════════════════════════════════════════
 EXTENSIÓN ESPERADA Y CALIDAD

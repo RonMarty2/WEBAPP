@@ -75,8 +75,9 @@ Definí el segmento de mercado al que apuntaría el proyecto, considerando:
 - **Psicográfico**: estilo de vida, valores, intereses relevantes.
 - **Conductual**: frecuencia de compra/uso esperada, motivación principal.
 
-Si algún dato no se puede inferir, NO inventes — dejá una nota breve
-de qué necesita confirmar el estudiante.
+Si algún dato no se puede inferir con precisión, usá un rango plausible
+y razonable (ej: "el segmento estimado supera las 50.000 personas en
+Cochabamba") en lugar de un número exacto inventado.
 
 ## Tres propuestas de título académico
 
