@@ -32,7 +32,7 @@ cambia acá.
 | 10 | Análisis estadístico | `simple-statistics` (npm), gratis |
 | 11 | Gráficos | Chart.js, gratis |
 | 12 | Tono académico | Profesional propio del sistema (NO copiar UCATEC) |
-| 13 | Cantidad de fases | 19 fases (más granular que monografía) |
+| 13 | Cantidad de fases | 20 fases (más granular que monografía) |
 | 14 | Servicio nuevo | `servicio_id: "proy-grado-001"` |
 | 15 | Carátula | NO se genera (mismo criterio que monografía después del cambio) |
 
@@ -131,7 +131,7 @@ El estudiante elige una opción y el sistema activa el subtipo correspondiente. 
 
 ---
 
-## 5. Las 19 fases del flujo
+## 5. Las 20 fases del flujo
 
 Cada fase tiene `phase_id`, `label`, `max_tokens`, herramientas externas y reglas de validación. Las marcadas con 🟦 son comunes a ambos subtipos; las marcadas con 🟧 cambian según subtipo.
 
@@ -240,14 +240,29 @@ Cada fase tiene `phase_id`, `label`, `max_tokens`, herramientas externas y regla
 | Herramientas | IA + JavaScript para cálculos de proyección |
 | Validaciones | Demanda > 0; cuota razonable (1-15% típico); proyección no exponencial irreal |
 
-### Fase 4a — Estudio organizacional (`ph-proy-cap4a`) 🟦
+### Fase 4a — Estudio Organizacional (`ph-proy-cap4a`) 🟦
 
 | Campo | Valor |
 |---|---|
-| Objetivo | Misión, visión, valores, organigrama, manuales de funciones |
+| Objetivo | Lineamientos estratégicos + estructura + funciones de cada cargo |
+| Contenido | Misión, visión, valores corporativos, descripción de la empresa, nombre y razón social, organigrama, manual de funciones por cargo |
 | Max tokens | 7000 |
 | Herramientas | IA texto + **generación de organigrama** como SVG/Mermaid |
-| Validaciones | Misión y visión presentes; organigrama con ≥3 cargos; manual por cada cargo |
+| Validaciones | Misión y visión presentes; organigrama con ≥3 cargos; manual por cada cargo del organigrama |
+
+### Fase 4a-bis — Propuesta Administrativa de RRHH (`ph-proy-cap4abis`) 🟦
+
+| Campo | Valor |
+|---|---|
+| Objetivo | Proceso de gestión del recurso humano para arrancar y operar la empresa |
+| Contenido | Proceso de gestión de RRHH (mapa), búsqueda y convocatoria, selección, evaluación, contratación, inducción, capacitación, evaluación de desempeño, política salarial básica |
+| Max tokens | 6000 |
+| Herramientas | IA texto + verificación legal RRHH Bolivia (AFP, Caja, finiquito) |
+| Validaciones | Las 5 etapas del proceso RRHH presentes; pasos numerados; sueldos en Bs.; cumplimiento normativa laboral boliviana citada |
+
+**Nota**: esta fase es independiente de la 4a porque cubre un dominio distinto
+(la gestión del talento humano vs la estructura de la organización). En los
+proyectos UCATEC aparece como sección 4.4 separada del estudio organizacional.
 
 ### Fase 4b — Estudio legal (`ph-proy-cap4b`) 🟦
 
@@ -652,8 +667,11 @@ Cuando este documento esté aprobado, el orden de trabajo es:
 - Gráficos con Chart.js.
 - Cálculo de demanda y cuota.
 
-### Semana 5 — Propositivo I (fases 4a, 4b, 4c)
-- Estudios organizacional, legal, técnico.
+### Semana 5 — Propositivo I (fases 4a, 4a-bis, 4b, 4c)
+- Estudio organizacional (estructura, organigrama, manuales).
+- Propuesta administrativa de RRHH (proceso de gestión del talento).
+- Estudio legal.
+- Estudio técnico.
 - Generación de organigrama (Mermaid SVG).
 - Variantes por subtipo en estudio técnico.
 
@@ -699,7 +717,7 @@ Cuando este documento esté aprobado, el orden de trabajo es:
 ### 12.3 Decisiones congeladas (no se discuten salvo cambio explícito del fundador)
 
 - 2 subtipos: producción + servicios.
-- 19 fases.
+- 20 fases (organizacional y RRHH están separadas, no fusionadas).
 - Estudiante elige el subtipo al inicio (no se deduce).
 - Cálculos financieros en JavaScript, no Python.
 - Búsqueda real con Gemini Grounding, no Tavily/Perplexity.
@@ -714,7 +732,7 @@ Antes de tocar código, el fundador debe revisar y confirmar:
 
 - [ ] La lista de decisiones de la sección 1 está completa y correcta.
 - [ ] Los 2 subtipos cubren los casos reales de UCATEC.
-- [ ] Las 19 fases tienen sentido y no falta ninguna importante.
+- [ ] Las 20 fases tienen sentido y no falta ninguna importante.
 - [ ] El estándar de tono y los anti-vicios están alineados con la calidad esperada.
 - [ ] Las APIs externas y su costo aproximado son aceptables.
 - [ ] Las reglas de seguridad cubren lo aprendido de monografía.
