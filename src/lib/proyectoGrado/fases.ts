@@ -34,6 +34,11 @@ import { SISTEMA_PROY_CAP4D } from "@/lib/prompts/proyectoGrado/cap4d-branding";
 import { getPromptCap4e } from "@/lib/prompts/proyectoGrado/cap4e-marketing";
 import { SISTEMA_PROY_CAP4F } from "@/lib/prompts/proyectoGrado/cap4f-financiero";
 import { SISTEMA_PROY_CAP4G } from "@/lib/prompts/proyectoGrado/cap4g-evaluacion";
+import { SISTEMA_PROY_RESUMEN } from "@/lib/prompts/proyectoGrado/resumen-ejecutivo";
+import { SISTEMA_PROY_CONCLUSIONES } from "@/lib/prompts/proyectoGrado/conclusiones";
+import { SISTEMA_PROY_REFERENCIAS } from "@/lib/prompts/proyectoGrado/referencias";
+import { SISTEMA_PROY_LATEX } from "@/lib/prompts/proyectoGrado/latex";
+import { SISTEMA_PROY_DEFENSA } from "@/lib/prompts/proyectoGrado/defensa";
 
 /** Subtipos válidos del servicio Proyecto de Grado. */
 export type SubtipoProyectoGrado = "produccion" | "servicios";
@@ -167,8 +172,18 @@ function resolvePromptForPhase(phaseId: string, subtipo: SubtipoProyectoGrado): 
       return SISTEMA_PROY_CAP4F;
     case "ph-proy-cap4g":
       return SISTEMA_PROY_CAP4G;
-    // Las demás fases todavía no tienen prompt — irán llegando en
-    // semanas siguientes según el plan PATRON_PROYECTO_GRADO.md.
+    case "ph-proy-resumen":
+      return SISTEMA_PROY_RESUMEN;
+    case "ph-proy-conclus":
+      return SISTEMA_PROY_CONCLUSIONES;
+    case "ph-proy-referencias":
+      return SISTEMA_PROY_REFERENCIAS;
+    case "ph-proy-latex":
+      return SISTEMA_PROY_LATEX;
+    case "ph-proy-defensa":
+      return SISTEMA_PROY_DEFENSA;
+    // Si llega un phase_id desconocido (no debería pasar dado que el
+    // listado FASES_SPEC define todos), caemos a placeholder seguro.
     default:
       return PROMPT_PLACEHOLDER;
   }

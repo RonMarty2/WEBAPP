@@ -750,11 +750,11 @@ async function generarSinSupabase({
       "ph-proy-cap4e":    8000,   // Mix marketing (10-20 págs, variante 4P/7P)
       "ph-proy-cap4f":    8000,   // Estudio financiero (15-22 págs, 10+ tablas)
       "ph-proy-cap4g":    6000,   // Evaluación del proyecto (10-14 págs, VAN/TIR/WACC/PE)
-      "ph-proy-resumen":   100,
-      "ph-proy-conclus":   100,
-      "ph-proy-referencias": 100,
-      "ph-proy-latex":     100,
-      "ph-proy-defensa":   100,
+      "ph-proy-resumen":   1500,   // Resumen ejecutivo (300-450 palabras, 1 página)
+      "ph-proy-conclus":   4000,   // Conclusiones + recomendaciones (5-8 págs)
+      "ph-proy-referencias": 4000, // Bibliografía consolidada APA 7
+      "ph-proy-latex":    50000,   // Documento LaTeX completo (igual que monografía)
+      "ph-proy-defensa":   2500,   // Banco de preguntas (fire-and-forget por capítulo)
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
 
