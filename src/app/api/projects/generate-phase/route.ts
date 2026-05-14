@@ -736,9 +736,9 @@ async function generarSinSupabase({
       // Fases 3a-9 todavía con prompts placeholder — se irán completando
       // según el plan PATRON_PROYECTO_GRADO.md. Tope simbólico de 100 hasta
       // entonces para que un placeholder no gaste mucho si se ejecuta por error.
-      "ph-proy-cap3a":     100,
-      "ph-proy-cap3b":     100,
-      "ph-proy-cap3c":     100,
+      "ph-proy-cap3a":    8000,   // PESTEL (12-18 págs, 4500-7000 palabras, 7 tablas)
+      "ph-proy-cap3b":    6000,   // 5 Fuerzas Porter (10-15 págs, 3500-5500 palabras, 8 tablas)
+      "ph-proy-cap3c":    5000,   // Matrices estratégicas (6-10 págs, 2500-4000 palabras, 4 matrices)
       "ph-proy-cap3d":     100,
       "ph-proy-cap3e":     100,
       "ph-proy-cap3f":     100,
