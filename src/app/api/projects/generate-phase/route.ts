@@ -14,7 +14,13 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
+import { getServiceAIStatus, llamarIA, getServiceAIConfig } from "@/lib/aiProvider";
+import {
+  llamarIAPorPlan,
+  normalizePlan,
+  type PlanTier,
+  type PhaseIndex,
+} from "@/lib/modelRouter";
 import { dbGetProyecto, dbUpdateProyecto, dbListAllProyectos } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 import {
@@ -498,8 +504,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Body JSON inválido" }, { status: 400 });
     }
 
+    const planTier = normalizePlan(sessionUser.plan ?? "demo");
+
     return await generarSinSupabase({
       sessionUserId: sessionUser.id,
+      planTier,
       proyecto_id, phase_id,
       mensaje_usuario, tipo, feedback_usuario,
       t0,
@@ -517,11 +526,12 @@ export async function POST(req: Request) {
 // ── Sin Supabase ──────────────────────────────────────────────────────────────
 
 async function generarSinSupabase({
-  sessionUserId, proyecto_id, phase_id,
+  sessionUserId, planTier, proyecto_id, phase_id,
   mensaje_usuario, tipo, feedback_usuario,
   t0,
 }: {
   sessionUserId: string;
+  planTier: PlanTier;
   proyecto_id: string;
   phase_id: string;
   mensaje_usuario?: string;
@@ -731,6 +741,12 @@ async function generarSinSupabase({
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
 
+    // Determine numeric phase index for plan-aware routing
+    const phaseIndex = Math.min(
+      sorted.findIndex((p) => p.id === phase_id),
+      5
+    ) as PhaseIndex;
+
     let textoGenerado: string;
     let proveedor: string;
     let providerId = "";
@@ -739,11 +755,23 @@ async function generarSinSupabase({
     let traceError: string | null = null;
     let autoContinuado = false;
     try {
-      const resultado = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
-      textoGenerado = resultado.text;
-      providerId = resultado.provider;
-      providerModel = resultado.model;
-      proveedor = `${resultado.provider} / ${resultado.model}`;
+      // Admin override takes priority (set via Admin → Modelos & APIs panel)
+      const adminCfg = getServiceAIConfig(proyecto.servicio_id);
+
+      let aiResult: { text: string; provider: string; model: string };
+      if (adminCfg?.api_key) {
+        // Use admin-configured provider for this service
+        const r = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
+        aiResult = { text: r.text, provider: r.provider, model: r.model };
+      } else {
+        // Route by user's plan and academic phase
+        aiResult = await llamarIAPorPlan(systemPrompt, userPrompt, phaseIndex, planTier);
+      }
+
+      textoGenerado = aiResult.text;
+      providerId = aiResult.provider;
+      providerModel = aiResult.model;
+      proveedor = `${aiResult.provider} / ${aiResult.model}`;
 
       // 🔁 Auto-continue: si el texto pareciera cortado a mitad (no termina con cierre
       // limpio y tiene longitud sustancial), hacemos UNA segunda llamada para completar.
