@@ -746,8 +746,8 @@ async function generarSinSupabase({
       "ph-proy-cap4abis": 6000,   // Propuesta administrativa RRHH (10-15 págs)
       "ph-proy-cap4b":    6000,   // Estudio legal (8-12 págs)
       "ph-proy-cap4c":    9000,   // Estudio técnico (12-18 págs, variante subtipo)
-      "ph-proy-cap4d":     100,
-      "ph-proy-cap4e":     100,
+      "ph-proy-cap4d":    4000,   // Branding (6-10 págs + briefs para logos)
+      "ph-proy-cap4e":    8000,   // Mix marketing (10-20 págs, variante 4P/7P)
       "ph-proy-cap4f":     100,
       "ph-proy-cap4g":     100,
       "ph-proy-resumen":   100,
