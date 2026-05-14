@@ -274,12 +274,15 @@ function buildContextualReferenceInput(
   };
 }
 
-function academicBlockForProject(proyecto: {
-  academic_context?: Record<string, unknown>;
-  academic_memory?: Record<string, unknown>;
-  tema_aprobado?: string | null;
-  titulo_provisional?: string | null;
-}) {
+function academicBlockForProject(
+  proyecto: {
+    academic_context?: Record<string, unknown>;
+    academic_memory?: Record<string, unknown>;
+    tema_aprobado?: string | null;
+    titulo_provisional?: string | null;
+  },
+  includeDocuments = true,
+) {
   const academicContext = getAcademicContext(proyecto.academic_context);
   const academicMemory = (proyecto.academic_memory ?? {}) as AcademicMemory;
   const studentContext = {
@@ -296,7 +299,7 @@ function academicBlockForProject(proyecto: {
       idea_central: proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "",
     },
     studentContext,
-    documents: getContextDocuments(academicContext),
+    documents: includeDocuments ? getContextDocuments(academicContext) : [],
     phaseMemory: Array.isArray(academicMemory.phase_summaries) ? academicMemory.phase_summaries : [],
   });
 }
@@ -641,7 +644,8 @@ async function generarSinSupabase({
 
     const borradorKey = `${phase_id}_borrador`;
     const borradorPrev = phaseContents[borradorKey] ?? null;
-    const academicBlock = academicBlockForProject(proyecto);
+    const ragEnabled = planTier === "pro" || planTier === "elite";
+    const academicBlock = academicBlockForProject(proyecto, ragEnabled);
     const academicContext = getAcademicContext(proyecto.academic_context);
     const academicDocuments = getContextDocuments(academicContext);
     const referenceCatalog = normalizeReferenceCatalog([
