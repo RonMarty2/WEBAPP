@@ -26,7 +26,7 @@ export type UpdateTables<T extends keyof Database["public"]["Tables"]> =
 // ── Tipos de dominio reutilizables ───────────────────────────
 
 export type UserRol  = "admin" | "user";
-export type UserPlan = "estandar" | "pro";
+export type UserPlan = "estandar" | "pro" | "elite";
 export type EstadoFase = 0 | 1 | 2 | 3 | 4 | 5;
 
 // ── Schema completo ───────────────────────────────────────────
