@@ -742,10 +742,10 @@ async function generarSinSupabase({
       "ph-proy-cap3d":    5000,   // Diseño de encuesta (5-8 págs, cuestionario completo)
       "ph-proy-cap3e":    7000,   // Análisis de encuesta (12-20 págs, 15-25 tablas)
       "ph-proy-cap3f":    4000,   // Demanda y cuota (4-6 págs, 3 tablas, proyección 5 años)
-      "ph-proy-cap4a":     100,
-      "ph-proy-cap4abis":  100,
-      "ph-proy-cap4b":     100,
-      "ph-proy-cap4c":     100,
+      "ph-proy-cap4a":    7000,   // Estudio organizacional (10-15 págs)
+      "ph-proy-cap4abis": 6000,   // Propuesta administrativa RRHH (10-15 págs)
+      "ph-proy-cap4b":    6000,   // Estudio legal (8-12 págs)
+      "ph-proy-cap4c":    9000,   // Estudio técnico (12-18 págs, variante subtipo)
       "ph-proy-cap4d":     100,
       "ph-proy-cap4e":     100,
       "ph-proy-cap4f":     100,
