@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import DefensaMaterialesModal from "@/components/admin/DefensaMaterialesModal";
 
 interface ProyectoMeta {
   usuario_email: string | null;
@@ -218,6 +219,7 @@ export default function AdminProyectosPage() {
   const [filtroUniversidad, setFiltroUniversidad] = useState<string>("");
   const [filtroEstado, setFiltroEstado] = useState<"" | "completo" | "en_curso" | "abandonado">("");
   const [proyectoDetalle, setProyectoDetalle] = useState<string | null>(null);
+  const [defensaProyecto, setDefensaProyecto] = useState<{ id: string; titulo: string } | null>(null);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [restoringId, setRestoringId] = useState<string | null>(null);
@@ -528,6 +530,14 @@ export default function AdminProyectosPage() {
                     >
                       Ver detalle
                     </button>
+                    {meta?.usuario_plan === "elite" && (
+                      <button
+                        onClick={() => setDefensaProyecto({ id: proyecto.id, titulo: titulo })}
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-5 py-2 text-[13px] font-medium text-amber-600 transition-all duration-150 hover:-translate-y-0.5 hover:border-amber-500 hover:bg-amber-500 hover:text-white dark:border-amber-400/20 dark:bg-amber-900/30 dark:text-amber-300"
+                      >
+                        🎓 Defensa
+                      </button>
+                    )}
                     <a
                       href={`/projects/${proyecto.id}/workspace`}
                       target="_blank"
@@ -563,6 +573,14 @@ export default function AdminProyectosPage() {
       <div className="mt-4 text-[12px] text-gray-400 dark:text-slate-500">
         {proyectosFiltrados.length} de {proyectos.length} proyectos
       </div>
+
+      {defensaProyecto && (
+        <DefensaMaterialesModal
+          proyectoId={defensaProyecto.id}
+          proyectoTitulo={defensaProyecto.titulo}
+          onClose={() => setDefensaProyecto(null)}
+        />
+      )}
 
       {proyectoDetalle && (
         <DetalleProyecto proyectoId={proyectoDetalle} onClose={() => setProyectoDetalle(null)} />
