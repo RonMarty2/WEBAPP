@@ -728,6 +728,33 @@ async function generarSinSupabase({
                                 // El endpoint genérico ya la rechaza (ver guard arriba), pero
                                 // dejamos un techo simbólico de 100 tokens como defensa en
                                 // profundidad — si algo bypasea el guard, el daño es ridículo.
+
+      // ── Fases del nuevo servicio Proyecto de Grado (UCATEC) ──────────────
+      "ph-proy-cap0":     3000,   // Idea de negocio (800-1500 palabras)
+      "ph-proy-cap1":    12000,   // Marco Referencial (8-14 págs, 3500-5500 palabras)
+      "ph-proy-cap2":     9000,   // Marco Teórico (25-35 conceptos, 12-18 págs)
+      // Fases 3a-9 todavía con prompts placeholder — se irán completando
+      // según el plan PATRON_PROYECTO_GRADO.md. Tope simbólico de 100 hasta
+      // entonces para que un placeholder no gaste mucho si se ejecuta por error.
+      "ph-proy-cap3a":     100,
+      "ph-proy-cap3b":     100,
+      "ph-proy-cap3c":     100,
+      "ph-proy-cap3d":     100,
+      "ph-proy-cap3e":     100,
+      "ph-proy-cap3f":     100,
+      "ph-proy-cap4a":     100,
+      "ph-proy-cap4abis":  100,
+      "ph-proy-cap4b":     100,
+      "ph-proy-cap4c":     100,
+      "ph-proy-cap4d":     100,
+      "ph-proy-cap4e":     100,
+      "ph-proy-cap4f":     100,
+      "ph-proy-cap4g":     100,
+      "ph-proy-resumen":   100,
+      "ph-proy-conclus":   100,
+      "ph-proy-referencias": 100,
+      "ph-proy-latex":     100,
+      "ph-proy-defensa":   100,
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
 

@@ -17,6 +17,9 @@
  */
 
 import type { PhaseDefinition } from "@/lib/persistence";
+import { SISTEMA_PROY_CAP0 } from "@/lib/prompts/proyectoGrado/cap0-idea-negocio";
+import { SISTEMA_PROY_CAP1 } from "@/lib/prompts/proyectoGrado/cap1-marco-referencial";
+import { getPromptCap2 } from "@/lib/prompts/proyectoGrado/cap2-marco-teorico";
 
 /** Subtipos válidos del servicio Proyecto de Grado. */
 export type SubtipoProyectoGrado = "produccion" | "servicios";
@@ -106,6 +109,29 @@ const FASES_SPEC: FaseSpec[] = [
  *
  * @param subtipo "produccion" o "servicios"
  */
+/**
+ * Devuelve el prompt real (no placeholder) para una fase dada, eligiendo
+ * la variante correcta según subtipo cuando aplica.
+ *
+ * Las fases sin prompt implementado todavía caen al PROMPT_PLACEHOLDER,
+ * que instruye a la IA a devolver un mensaje "fase en construcción"
+ * en lugar de generar contenido.
+ */
+function resolvePromptForPhase(phaseId: string, subtipo: SubtipoProyectoGrado): string {
+  switch (phaseId) {
+    case "ph-proy-cap0":
+      return SISTEMA_PROY_CAP0;
+    case "ph-proy-cap1":
+      return SISTEMA_PROY_CAP1;
+    case "ph-proy-cap2":
+      return getPromptCap2(subtipo);
+    // Las demás fases todavía no tienen prompt — irán llegando en
+    // semanas siguientes según el plan PATRON_PROYECTO_GRADO.md.
+    default:
+      return PROMPT_PLACEHOLDER;
+  }
+}
+
 export function getProyectoGradoPhases(subtipo: SubtipoProyectoGrado): PhaseDefinition[] {
   const tipoProyectoId = subtipo === "produccion" ? TIPO_PROY_PRODUCCION : TIPO_PROY_SERVICIOS;
 
@@ -116,10 +142,7 @@ export function getProyectoGradoPhases(subtipo: SubtipoProyectoGrado): PhaseDefi
     orden: spec.orden,
     label: spec.label,
     short_label: spec.short_label,
-    // TODO: cuando se implemente cada prompt, importarlo y enchufarlo acá.
-    // Las fases con subtipo_dependiente=true tendrán dos imports
-    // (uno para producción y otro para servicios) y se elige según el param.
-    prompt: PROMPT_PLACEHOLDER,
+    prompt: resolvePromptForPhase(spec.id, subtipo),
   }));
 }
 
