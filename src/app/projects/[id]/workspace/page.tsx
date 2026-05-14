@@ -1891,8 +1891,11 @@ export default function WorkspacePage() {
                     )}
                   </div>
                   <div style={{ fontSize:11.5, color:"var(--fg-muted)", lineHeight:1.5 }}>
-                    Lee el contenido. Si está bien, aprobá y avanzá. Si tu tutor te dio observaciones, escribilas abajo y la IA las aplicará.
+                    {canEditPhases
+                      ? "Lee el contenido. Si está bien, aprobá y avanzá. Si tu tutor te dio observaciones, escribilas abajo y la IA las aplicará."
+                      : "Lee el contenido. En Plan Estándar la IA genera y vos aprobás. Para correcciones con IA, actualizá a Plan Pro."}
                   </div>
+                {canEditPhases && (
                 <textarea
                   className="input-dark"
                   rows={2}
@@ -1901,9 +1904,10 @@ export default function WorkspacePage() {
                   placeholder="Ej: Mi tutor pidió ampliar los antecedentes y ajustar el tono…"
                   style={{ resize:"vertical", fontSize:12, lineHeight:1.5 }}
                 />
+                )}
 
                 {/* Botón principal: cambia según haya o no feedback */}
-                {feedbackTexto.trim() ? (
+                {canEditPhases && feedbackTexto.trim() ? (
                   // CON feedback: aplicar cambios con IA
                   <div style={{ display:"flex", gap:7 }}>
                     <button
@@ -1950,6 +1954,7 @@ export default function WorkspacePage() {
                     >
                       ✓ Aprobar y continuar al siguiente capítulo
                     </button>
+                    {canEditPhases && (
                     <div style={{ display:"flex", gap:7 }}>
                       <button
                         onClick={() => generarFase({ tipo:"borrador" })}
@@ -1961,6 +1966,7 @@ export default function WorkspacePage() {
                         🔄 No me convence, generar otra versión
                       </button>
                     </div>
+                    )}
                     {/* Reset total — SOLO ADMIN. Borra todo el contenido de la fase. */}
                     {mostrarHerramientasAdmin && (
                       <button

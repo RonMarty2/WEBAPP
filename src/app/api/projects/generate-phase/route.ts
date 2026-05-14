@@ -509,6 +509,17 @@ export async function POST(req: Request) {
 
     const planTier = normalizePlan(sessionUser.plan ?? "demo");
 
+    // Plan Estándar: no puede modificar ni regenerar con feedback/chat.
+    // La IA genera y el estudiante acepta. Para correcciones → Pro/Elite.
+    if (planTier === "estandar" || planTier === "standard") {
+      if (feedback_usuario?.trim() || mensaje_usuario?.trim()) {
+        return NextResponse.json(
+          { error: "Las correcciones requieren Plan Pro o Elite." },
+          { status: 403 },
+        );
+      }
+    }
+
     return await generarSinSupabase({
       sessionUserId: sessionUser.id,
       planTier,
