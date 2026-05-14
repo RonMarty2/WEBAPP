@@ -4,7 +4,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { requireAuth, AuthError } from "@/lib/api-auth";
+import { requirePlan, AuthError } from "@/lib/api-auth";
 import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
 import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
@@ -172,7 +172,7 @@ export async function POST(req: Request) {
   const t0 = Date.now();
 
   try {
-    const { user } = await requireAuth();
+    const { user } = await requirePlan(["pro", "elite"]);
     const body = await req.json() as {
       proyecto_id?: string;
       phase_id?: string;

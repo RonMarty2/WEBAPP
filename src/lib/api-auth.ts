@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 import type { SessionUser } from "@/lib/auth";
+import type { UserPlan } from "@/types/database";
 
 export interface AuthResult {
   user: SessionUser;
@@ -65,6 +66,23 @@ export async function requireAdmin(): Promise<AuthResult> {
   }
 
   throw new AuthError(401, "Acceso restringido al panel de administración");
+}
+
+/**
+ * Verifica que el usuario tenga uno de los planes requeridos.
+ * Admin siempre tiene acceso. Lanza 403 si el plan no alcanza.
+ */
+export async function requirePlan(allowedPlans: UserPlan[]): Promise<AuthResult> {
+  const result = await requireAuth();
+  const { user } = result;
+  if (user.role === "admin") return result;
+  const userPlan = (user.plan ?? "estandar") as UserPlan;
+  if (!allowedPlans.includes(userPlan)) {
+    const nombres: Record<UserPlan, string> = { estandar: "Estándar", pro: "Pro", elite: "Elite" };
+    const requerido = allowedPlans.map(p => nombres[p]).join(" o ");
+    throw new AuthError(403, `Esta función requiere plan ${requerido}. Tu plan actual es ${nombres[userPlan] ?? userPlan}.`);
+  }
+  return result;
 }
 
 export class AuthError extends Error {

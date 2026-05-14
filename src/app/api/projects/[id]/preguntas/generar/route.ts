@@ -21,7 +21,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { requireAuth, AuthError } from "@/lib/api-auth";
+import { requirePlan, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { llamarIA } from "@/lib/aiProvider";
 import {
@@ -47,7 +47,7 @@ const MAX_TOKENS_PREGUNTAS = 2500; // ~6-10 preguntas con respuesta breve
 
 export async function POST(req: Request, { params }: Params) {
   try {
-    const { user } = await requireAuth();
+    const { user } = await requirePlan(["elite"]);
     const { id } = await params;
 
     const body = await req.json().catch(() => ({}));

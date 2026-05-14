@@ -11,7 +11,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { requireAuth, AuthError } from "@/lib/api-auth";
+import { requirePlan, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import { llamarIA } from "@/lib/aiProvider";
 
@@ -67,7 +67,7 @@ function buildContexto(proyecto: Record<string, unknown>): string {
 
 export async function POST(req: Request, { params }: { params: Params }) {
   try {
-    const { user } = await requireAuth();
+    const { user } = await requirePlan(["elite"]);
     const { id } = await params;
 
     const proyecto = await dbGetProyecto(id);
