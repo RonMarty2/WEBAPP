@@ -15,6 +15,7 @@ interface Proyecto {
   completado: boolean;
   created_at: string;
   servicios: { id: string; nombre: string } | null;
+  defensa_lista?: boolean;
 }
 
 const FASE_LABELS = ["Planteamiento", "Cap. I", "Cap. II", "Caps. III-V", "Revisión", "Final"];
@@ -182,9 +183,12 @@ export default function DashboardPage() {
                   style={{ border: "none", background: "rgba(239,68,68,0.08)", color: "#ef4444", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, zIndex: 20 }} 
                   title="Eliminar proyecto"
                 >✕</button>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 24, gap: 4, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>
-                  {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
+                    {p.defensa_lista && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "rgba(16,185,129,0.12)", color: "#10b981", fontWeight: 700, border: "1px solid rgba(16,185,129,0.3)" }}>🎓 Defensa lista</span>}
+                  </div>
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                   {p.tema_aprobado || p.titulo_provisional || "Proyecto sin título"}

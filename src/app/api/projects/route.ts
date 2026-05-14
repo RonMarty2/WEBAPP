@@ -16,11 +16,17 @@ export async function GET() {
     const proyectos = await dbListProyectos(user.id);
 
     return NextResponse.json({
-      proyectos: proyectos.map(p => ({
-        ...p,
-        estado_fase: completedPhaseIndexForProject(p),
-        servicios: { id: p.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
-      })),
+      proyectos: proyectos.map(p => {
+        const ctx = (p.academic_context ?? {}) as Record<string, unknown>;
+        const defensa = ctx.defensa_materiales as { estado?: string; notificado_at?: string } | undefined;
+        return {
+          ...p,
+          estado_fase: completedPhaseIndexForProject(p),
+          servicios: { id: p.servicio_id, nombre: "Monografía Académica", audiencia_id: "local" },
+          defensa_lista: defensa?.estado === "listo",
+          defensa_notificado_at: defensa?.notificado_at ?? null,
+        };
+      }),
     });
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
