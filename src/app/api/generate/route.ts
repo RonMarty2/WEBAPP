@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 import { DEFAULT_PROMPTS, SECTION_STEPS } from "@/lib/data";
+import {
+  llamarIAPorPlan,
+  normalizePlan,
+  type PlanTier,
+  type PhaseIndex,
+  type SectionKey,
+} from "@/lib/modelRouter";
 
 // In-memory store for API keys (admin configurable)
 const apiKeysStore: Record<string, string> = {
@@ -22,65 +29,6 @@ function deductCredit(userId: string): void {
   if (userCredits[userId] > 0) {
     userCredits[userId] -= 1;
   }
-}
-
-async function callGroq(prompt: string, userMessage: string, model: string): Promise<string> {
-  const apiKey = apiKeysStore.groq;
-  if (!apiKey) throw new Error("Groq API key no configurada.");
-
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: model || "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: userMessage },
-      ],
-      temperature: 0.7,
-      max_tokens: 2048,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "Error en Groq API");
-  }
-
-  const data = await response.json();
-  return data.choices[0].message.content;
-}
-
-async function callOpenAI(prompt: string, userMessage: string, model: string): Promise<string> {
-  const apiKey = apiKeysStore.openai;
-  if (!apiKey) throw new Error("OpenAI API key no configurada.");
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: model || "gpt-4o-mini",
-      messages: [
-        { role: "system", content: prompt },
-        { role: "user", content: userMessage },
-      ],
-      temperature: 0.7,
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error?.message || "Error en OpenAI API");
-  }
-
-  const data = await response.json();
-  return data.choices[0].message.content;
 }
 
 function interpolateTemplate(template: string, vars: Record<string, string>): string {
@@ -135,14 +83,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Prompt no configurado para esta sección." }, { status: 500 });
     }
 
-    // Select model based on plan
-    const modelMap: Record<string, string> = {
-      demo: promptConfig.model_demo,
-      standard: promptConfig.model_standard,
-      pro: promptConfig.model_pro,
-    };
-    const model = modelMap[plan] || promptConfig.model_demo;
-
     // Build prompts with variable interpolation
     const vars = {
       programa: programa || "",
@@ -181,18 +121,20 @@ export async function POST(req: Request) {
       }
     }
 
-    // Call AI provider (default: Groq)
-    let generatedText: string;
-    try {
-      generatedText = await callGroq(systemPrompt, userMessage, model);
-    } catch (groqError) {
-      // Fallback to OpenAI if configured
-      if (apiKeysStore.openai) {
-        generatedText = await callOpenAI(systemPrompt, userMessage, "gpt-4o-mini");
-      } else {
-        throw groqError;
-      }
-    }
+    // Enrutar proveedor y modelo según plan y sección académica
+    const sectionPhaseMap: Record<string, PhaseIndex> = {
+      titulo: 0, resumen: 0,
+      introduccion: 1, planteamiento: 1, objetivos: 1,
+      marco_teorico: 2,
+      metodologia: 3,
+      resultados: 4,
+      conclusiones: 5, bibliografia: 5,
+    };
+    const phase = (sectionPhaseMap[section_key] ?? 0) as PhaseIndex;
+    const planTier = normalizePlan(plan || "demo");
+
+    const { text: generatedText, provider: usedProvider, model: usedModel } =
+      await llamarIAPorPlan(systemPrompt, userMessage, phase, planTier);
 
     // Deduct credits
     if (plan !== "pro") {
@@ -207,6 +149,7 @@ export async function POST(req: Request) {
       text: generatedText,
       section_key,
       credits_remaining: remainingCredits,
+      _meta: { provider: usedProvider, model: usedModel },
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Error desconocido";
