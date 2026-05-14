@@ -1512,6 +1512,12 @@ export default function WorkspacePage() {
     );
   }
 
+  // ── Plan-based feature flags ──────────────────────────────────────────────
+  const userPlan = user?.plan ?? "estandar";
+  const canUploadDocs  = userPlan === "pro"   || userPlan === "elite";
+  const canEditPhases  = userPlan === "pro"   || userPlan === "elite";
+  const canDefense     = userPlan === "elite";
+
   // ── 3-COLUMN WORKSPACE ────────────────────────────────────────────────────────
 
   return (
@@ -1813,11 +1819,11 @@ export default function WorkspacePage() {
                 {/* "Observaciones del tutor": solo después de Cap V (selectedFase >= 5) */}
                 {selectedFase >= 5 && (
                   <button
-                    onClick={() => setCol1Tab("tribunal")}
-                    title="Registrar observaciones del tutor o tribunal sobre el documento"
-                    style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "tribunal" ? "#f59e0b" : "var(--fg-secondary)", borderBottom: col1Tab === "tribunal" ? "2px solid #f59e0b" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                    onClick={() => canDefense ? setCol1Tab("tribunal") : undefined}
+                    title={canDefense ? "Registrar observaciones del tutor o tribunal" : "Disponible en Plan Elite"}
+                    style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: canDefense ? (col1Tab === "tribunal" ? "#f59e0b" : "var(--fg-secondary)") : "rgba(148,163,184,0.45)", borderBottom: col1Tab === "tribunal" ? "2px solid #f59e0b" : "2px solid transparent", background: "none", cursor: canDefense ? "pointer" : "not-allowed", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
                   >
-                    📋 Tutor
+                    {canDefense ? "📋" : "🔒"} Tutor
                   </button>
                 )}
               </div>
@@ -2149,6 +2155,7 @@ export default function WorkspacePage() {
           </div>
 
           {/* Subir documento de texto (PDF/TXT/MD/CSV/TSV) */}
+          {canUploadDocs ? (
           <div style={{ padding: "20px 16px", background: "rgba(167,139,250,0.04)", border: "1px dashed rgba(167,139,250,0.3)", borderRadius: 12, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
             <div style={{ fontSize: 28, opacity: 0.6 }}>📄</div>
             <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className="btn-purple" style={{ width:"100%", fontSize:12, padding:"10px", justifyContent:"center" }}>
@@ -2159,6 +2166,15 @@ export default function WorkspacePage() {
               Máx 10 MB · PDF, TXT, MD, CSV, TSV
             </div>
           </div>
+          ) : (
+          <div style={{ padding: "20px 16px", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 12, background: "rgba(245,158,11,0.04)", display: "flex", flexDirection: "column", alignItems: "center", gap: 10, textAlign: "center" }}>
+            <div style={{ fontSize: 28 }}>🔒</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#f59e0b" }}>Disponible en Plan Pro</div>
+            <div style={{ fontSize: 11, color: "var(--fg-secondary)", lineHeight: 1.6 }}>
+              Subí tus papers, normativas o datos propios y la IA los integra directamente en el Cap. II de tu monografía.
+            </div>
+          </div>
+          )}
 
           {/* Audio del tutor con transcripción automática */}
           <AudioFeedback
@@ -2192,6 +2208,15 @@ export default function WorkspacePage() {
         Oculto cuando hay borrador SIN final aún (el feedback va arriba en "BORRADOR LISTO"). */}
     {!isCap0Phase && !(esGuiado && hasBorrador && !hasFinal) && (
     <div style={{ flexShrink: 0, padding:"10px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", background:"rgba(255,255,255,0.5)", backdropFilter:"blur(6px)" }}>
+      {!canEditPhases ? (
+      <div style={{ border: "1px solid rgba(245,158,11,0.25)", borderRadius: 16, background: "rgba(245,158,11,0.04)", padding: "12px 16px", marginBottom: displayContent ? 8 : 0, display: "flex", alignItems: "center", gap: 12 }}>
+        <span style={{ fontSize: 18 }}>🔒</span>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b" }}>Correcciones disponibles en Plan Pro</div>
+          <div style={{ fontSize: 10.5, color: "var(--fg-secondary)", lineHeight: 1.5, marginTop: 2 }}>En el plan Estándar la IA genera el documento completo y vos lo aceptás. Actualizá a Pro para hacer cambios.</div>
+        </div>
+      </div>
+      ) : (
       <div
               style={{
                 border: "1px solid rgba(148,163,184,0.28)",
@@ -2253,6 +2278,7 @@ export default function WorkspacePage() {
                 </button>
               </div>
             </div>
+          )}
           </div>
     )}
     {/* Navegación entre fases — SIEMPRE visible (excepto Cap0) */}
