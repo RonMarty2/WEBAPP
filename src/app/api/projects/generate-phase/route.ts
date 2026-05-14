@@ -748,8 +748,8 @@ async function generarSinSupabase({
       "ph-proy-cap4c":    9000,   // Estudio técnico (12-18 págs, variante subtipo)
       "ph-proy-cap4d":    4000,   // Branding (6-10 págs + briefs para logos)
       "ph-proy-cap4e":    8000,   // Mix marketing (10-20 págs, variante 4P/7P)
-      "ph-proy-cap4f":     100,
-      "ph-proy-cap4g":     100,
+      "ph-proy-cap4f":    8000,   // Estudio financiero (15-22 págs, 10+ tablas)
+      "ph-proy-cap4g":    6000,   // Evaluación del proyecto (10-14 págs, VAN/TIR/WACC/PE)
       "ph-proy-resumen":   100,
       "ph-proy-conclus":   100,
       "ph-proy-referencias": 100,

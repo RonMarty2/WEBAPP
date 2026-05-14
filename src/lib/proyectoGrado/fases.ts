@@ -32,6 +32,8 @@ import { SISTEMA_PROY_CAP4B } from "@/lib/prompts/proyectoGrado/cap4b-legal";
 import { getPromptCap4c } from "@/lib/prompts/proyectoGrado/cap4c-tecnico";
 import { SISTEMA_PROY_CAP4D } from "@/lib/prompts/proyectoGrado/cap4d-branding";
 import { getPromptCap4e } from "@/lib/prompts/proyectoGrado/cap4e-marketing";
+import { SISTEMA_PROY_CAP4F } from "@/lib/prompts/proyectoGrado/cap4f-financiero";
+import { SISTEMA_PROY_CAP4G } from "@/lib/prompts/proyectoGrado/cap4g-evaluacion";
 
 /** Subtipos válidos del servicio Proyecto de Grado. */
 export type SubtipoProyectoGrado = "produccion" | "servicios";
@@ -161,6 +163,10 @@ function resolvePromptForPhase(phaseId: string, subtipo: SubtipoProyectoGrado): 
       return SISTEMA_PROY_CAP4D;
     case "ph-proy-cap4e":
       return getPromptCap4e(subtipo);
+    case "ph-proy-cap4f":
+      return SISTEMA_PROY_CAP4F;
+    case "ph-proy-cap4g":
+      return SISTEMA_PROY_CAP4G;
     // Las demás fases todavía no tienen prompt — irán llegando en
     // semanas siguientes según el plan PATRON_PROYECTO_GRADO.md.
     default:
