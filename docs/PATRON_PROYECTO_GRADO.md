@@ -1,9 +1,10 @@
 # PATRÓN DEL SERVICIO — PROYECTO DE GRADO (UCATEC)
 
-> **Estado**: borrador para revisión del fundador antes de tocar código.
-> **Rama de trabajo**: `PRUEBAS-RON`
+> **Estado**: 🟢 **IMPLEMENTADO al 100%** — 22 de 22 fases con prompt real.
+>              Pendiente: testing E2E real con IA + conexión de Gemini Imagen 4.
+> **Rama de trabajo**: `PRUEBAS-RON` (sin push a GitHub todavía).
 > **Producto destino**: nuevo servicio del SaaS Laboratorio Académico PRO.
-> **Última actualización**: 2026-05-12.
+> **Última actualización**: 2026-05-12 (Semana 9 cerrada).
 
 Este documento es la **fuente de verdad** para implementar el flujo de "Proyecto
 de Grado" dentro del SaaS. Recopila el análisis de 6 proyectos reales de UCATEC,
@@ -750,3 +751,83 @@ Cuando todas las casillas estén tildadas, **arrancamos código**.
 ---
 
 *Documento generado a partir del análisis del corpus UCATEC (6 proyectos) y las decisiones tomadas con el fundador entre 2026-05-10 y 2026-05-12. Vive en `docs/PATRON_PROYECTO_GRADO.md` de la rama `PRUEBAS-RON`. Cualquier cambio importante debe reflejarse acá antes de cerrar la tarea.*
+
+---
+
+## 14. ESTADO FINAL DE IMPLEMENTACIÓN (cerrado al 2026-05-12)
+
+### 14.1 Mapa de archivos creados
+
+```
+src/lib/proyectoGrado/
+├── calculos.ts            ← Fórmulas financieras (VAN, TIR, WACC, etc.)
+├── calculos.test.ts       ← 24/24 tests pasan
+├── encuestas.ts           ← Frecuencias, chi-cuadrado, descriptivos
+├── encuestas.test.ts      ← 18/18 tests pasan
+├── fases.ts               ← Definición de las 22 fases con prompts reales
+├── flujo.test.ts          ← 20/20 tests E2E lógicos pasan
+└── runtime-helpers.ts     ← Inyección de cálculos reales en prompts
+
+src/lib/prompts/proyectoGrado/
+├── reglas-comunes.ts      ← Reglas base prepended a cada prompt
+├── cap0-idea-negocio.ts
+├── cap1-marco-referencial.ts
+├── cap2-marco-teorico.ts        ← Variante por subtipo
+├── cap3a-pestel.ts
+├── cap3b-porter.ts
+├── cap3c-matrices.ts
+├── cap3d-diseno-encuesta.ts
+├── cap3e-analisis-encuesta.ts   ← 2 modos: con data real / proyección
+├── cap3f-demanda-cuota.ts
+├── cap4a-organizacional.ts
+├── cap4abis-rrhh.ts
+├── cap4b-legal.ts
+├── cap4c-tecnico.ts             ← Variante por subtipo
+├── cap4d-branding.ts
+├── cap4e-marketing.ts           ← Variante por subtipo
+├── cap4f-financiero.ts
+├── cap4g-evaluacion.ts
+├── resumen-ejecutivo.ts
+├── conclusiones.ts
+├── referencias.ts
+├── latex.ts                     ← Reutiliza prompt de monografía
+└── defensa.ts                   ← Reutiliza banco-preguntas de monografía
+```
+
+### 14.2 Integración con el sistema existente
+
+- `src/lib/scribePhases.ts`: `resolvePhases("proy-grado-001")` devuelve las 22 fases.
+- `src/lib/projectTypePhases.ts`: mapeo del servicio nuevo + sus 2 subtipos.
+- `src/app/api/projects/generate-phase/route.ts`: `TOKENS_POR_FASE` calibrado para las 22 fases.
+- `src/app/projects/new/page.tsx`: wizard con step de elección de subtipo.
+- `src/app/dashboard/page.tsx`: card "Proyecto de Grado" en servicios disponibles.
+
+### 14.3 Tests funcionales pasados
+
+| Test | Pasa | Total | Cobertura |
+|---|:-:|:-:|---|
+| `calculos.test.ts` | 24 | 24 | VAN, TIR, WACC, amortización 3 métodos, payback, muestra, flujo caja |
+| `encuestas.test.ts` | 18 | 18 | Frecuencias, descriptivos, tabla contingencia, chi-cuadrado |
+| `flujo.test.ts` | 20 | 20 | Orden de fases, prompts reales, variantes, coherencia IDs |
+| `npm run build` | ✓ | — | 82 rutas, sin warnings |
+
+### 14.4 Lo que queda para producción real
+
+- 🟡 **Testing E2E con IA real**: generar 3 proyectos completos (uno por subtipo + 1 caso límite) para validar outputs reales. Requiere API keys y consumo de tokens.
+- 🟡 **Conexión Gemini Imagen 4 + Ideogram** en endpoint de Fase 4d (los briefs ya están listos en el prompt).
+- 🟡 **Conexión Gemini Grounding** para PESTEL/Porter/Legal con datos reales actualizados.
+- 🟡 **Inyección automática de runtime-helpers** en el endpoint generador (Fases 3d, 4f, 4g).
+- 🔴 **Supabase real** (pendiente macro del proyecto).
+- 🔴 **Pricing y quota** mensual por plan.
+
+### 14.5 Decisión registrada: filosofía "sistema completo"
+
+Después de revisión del fundador, los prompts NUNCA piden nada al estudiante.
+NO hay placeholders `[COMPLETAR]`. NO hay frases tipo "el estudiante deberá
+verificar". El sistema entrega documento ENTREGABLE en todos los casos, con:
+
+- Cifras conservadoras y razonables cuando falta dato puntual.
+- Notas metodológicas formales cuando aplica (ej: Fase 3e sin CSV real).
+- Citas a fuentes institucionales reales (INE, BCB, SEPREC, SIN, etc.).
+- Autores académicos autorizados en una lista cerrada (no se inventan).
+
