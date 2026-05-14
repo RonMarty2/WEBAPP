@@ -32,7 +32,7 @@ cambia acá.
 | 10 | Análisis estadístico | `simple-statistics` (npm), gratis |
 | 11 | Gráficos | Chart.js, gratis |
 | 12 | Tono académico | Profesional propio del sistema (NO copiar UCATEC) |
-| 13 | Cantidad de fases | 20 fases (más granular que monografía) |
+| 13 | Cantidad de fases | 22 fases (más granular que monografía) |
 | 14 | Servicio nuevo | `servicio_id: "proy-grado-001"` |
 | 15 | Carátula | NO se genera (mismo criterio que monografía después del cambio) |
 
@@ -131,7 +131,14 @@ El estudiante elige una opción y el sistema activa el subtipo correspondiente. 
 
 ---
 
-## 5. Las 20 fases del flujo
+## 5. Las 22 fases del flujo
+
+Distribución:
+- **3** fundamentos (cap0, cap1, cap2)
+- **6** análisis situacional (cap3a → cap3f)
+- **8** marco propositivo (cap4a, cap4a-bis, cap4b → cap4g)
+- **3** cierre académico (resumen, conclusiones, referencias)
+- **2** compilación y defensa (latex, defensa)
 
 Cada fase tiene `phase_id`, `label`, `max_tokens`, herramientas externas y reglas de validación. Las marcadas con 🟦 son comunes a ambos subtipos; las marcadas con 🟧 cambian según subtipo.
 
@@ -717,7 +724,7 @@ Cuando este documento esté aprobado, el orden de trabajo es:
 ### 12.3 Decisiones congeladas (no se discuten salvo cambio explícito del fundador)
 
 - 2 subtipos: producción + servicios.
-- 20 fases (organizacional y RRHH están separadas, no fusionadas).
+- 22 fases (organizacional y RRHH están separadas, no fusionadas).
 - Estudiante elige el subtipo al inicio (no se deduce).
 - Cálculos financieros en JavaScript, no Python.
 - Búsqueda real con Gemini Grounding, no Tavily/Perplexity.
@@ -732,7 +739,7 @@ Antes de tocar código, el fundador debe revisar y confirmar:
 
 - [ ] La lista de decisiones de la sección 1 está completa y correcta.
 - [ ] Los 2 subtipos cubren los casos reales de UCATEC.
-- [ ] Las 20 fases tienen sentido y no falta ninguna importante.
+- [ ] Las 22 fases tienen sentido y no falta ninguna importante.
 - [ ] El estándar de tono y los anti-vicios están alineados con la calidad esperada.
 - [ ] Las APIs externas y su costo aproximado son aceptables.
 - [ ] Las reglas de seguridad cubren lo aprendido de monografía.
