@@ -1,0 +1,145 @@
+// src/lib/modelRouter.ts
+// Selección de proveedor + modelo según etapa académica y plan del usuario.
+// Solo importar desde API routes (servidor). Nunca desde componentes cliente.
+
+import { llamarIAConConfig, getProviderKey } from "@/lib/aiProvider";
+
+export type PlanTier = "demo" | "standard" | "estandar" | "pro" | "elite";
+
+export interface ModelConfig {
+  provider: string;
+  model: string;
+  maxTokens: number;
+}
+
+export interface AIRouteResult {
+  text: string;
+  provider: string;
+  model: string;
+}
+
+// Fases 0-5 corresponden a las etapas del documento académico:
+// 0 = propuesta de tema, 1 = Cap.I, 2 = Cap.II, 3 = Cap.III, 4 = Cap.IV, 5 = Cap.V+Biblio
+export type PhaseIndex = 0 | 1 | 2 | 3 | 4 | 5;
+
+// Section keys del endpoint /api/generate (flujo monografia clásico)
+export type SectionKey =
+  | "titulo" | "resumen" | "introduccion" | "planteamiento" | "objetivos"
+  | "marco_teorico" | "metodologia" | "resultados" | "conclusiones" | "bibliografia";
+
+const SECTION_TO_PHASE: Record<SectionKey, PhaseIndex> = {
+  titulo:        0,
+  resumen:       0,
+  introduccion:  1,
+  planteamiento: 1,
+  objetivos:     1,
+  marco_teorico: 2,
+  metodologia:   3,
+  resultados:    4,
+  conclusiones:  5,
+  bibliografia:  5,
+};
+
+type PhaseMap = Record<PhaseIndex, ModelConfig>;
+
+const DEMO: PhaseMap = {
+  0: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+  1: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+  2: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+  3: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+  4: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+  5: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+};
+
+const ESTANDAR: PhaseMap = {
+  0: { provider: "deepseek", model: "deepseek-chat", maxTokens: 3000 },
+  1: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
+  2: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
+  3: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
+  4: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
+  5: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
+};
+
+const PRO: PhaseMap = {
+  0: { provider: "gemini",    model: "gemini-2.5-flash", maxTokens: 3000  },
+  1: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
+  2: { provider: "gemini",    model: "gemini-2.5-pro",   maxTokens: 8192  },
+  3: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
+  4: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
+  5: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
+};
+
+const ELITE: PhaseMap = {
+  0: { provider: "gemini",    model: "gemini-2.5-flash", maxTokens: 4096  },
+  1: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
+  2: { provider: "gemini",    model: "gemini-2.5-pro",   maxTokens: 12000 },
+  3: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
+  4: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
+  5: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
+};
+
+const PLAN_MAP: Partial<Record<PlanTier, PhaseMap>> = {
+  demo:     DEMO,
+  standard: ESTANDAR,
+  estandar: ESTANDAR,
+  pro:      PRO,
+  elite:    ELITE,
+};
+
+/** Normaliza nombres de plan legacy ("standard") al canónico ("estandar"). Planes desconocidos → "demo". */
+export function normalizePlan(plan: string): PlanTier {
+  if (plan === "standard") return "estandar";
+  if (plan in PLAN_MAP) return plan as PlanTier;
+  return "demo";
+}
+
+/** Devuelve la configuración de modelo para una fase y plan dados. */
+export function getModelConfig(phase: PhaseIndex, plan: PlanTier): ModelConfig {
+  return PLAN_MAP[plan]?.[phase] ?? DEMO[0];
+}
+
+/** Devuelve la configuración de modelo para un section_key del flujo /api/generate. */
+export function getModelConfigForSection(sectionKey: SectionKey, plan: PlanTier): ModelConfig {
+  const phase = SECTION_TO_PHASE[sectionKey] ?? 0;
+  return getModelConfig(phase, plan);
+}
+
+/**
+ * Llama a la IA eligiendo proveedor y modelo según fase y plan.
+ * Si el proveedor preferido no tiene API key configurada, hace fallback
+ * a la cadena clásica (Groq → Anthropic → OpenAI).
+ */
+export async function llamarIAPorPlan(
+  system: string,
+  user: string,
+  phase: PhaseIndex,
+  plan: PlanTier,
+): Promise<AIRouteResult> {
+  const cfg = getModelConfig(phase, normalizePlan(plan));
+  const apiKey = getProviderKey(cfg.provider);
+
+  if (apiKey) {
+    const text = await llamarIAConConfig(cfg.provider, cfg.model, apiKey, system, user, cfg.maxTokens);
+    return { text, provider: cfg.provider, model: cfg.model };
+  }
+
+  // Fallback a cadena clásica si el proveedor preferido no tiene key
+  const fallback: { id: string; model: string }[] = [
+    { id: "groq",      model: "llama-3.3-70b-versatile"   },
+    { id: "anthropic", model: "claude-haiku-4-5-20251001" },
+    { id: "openai",    model: "gpt-4o-mini"               },
+  ];
+
+  const errors: string[] = [`${cfg.provider}: API key no configurada`];
+  for (const { id, model } of fallback) {
+    const key = getProviderKey(id);
+    if (!key) continue;
+    try {
+      const text = await llamarIAConConfig(id, model, key, system, user, cfg.maxTokens);
+      return { text, provider: id, model };
+    } catch (e) {
+      errors.push(`${id}: ${(e as Error).message}`);
+    }
+  }
+  throw new Error(`Ningún proveedor disponible para plan ${plan} fase ${phase}. ${errors.join(" | ")}`);
+}
