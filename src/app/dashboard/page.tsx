@@ -226,6 +226,15 @@ export default function DashboardPage() {
               <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Materia, reto, competencias y evidencias para defensa.</div>
             </div>
           </Link>
+
+          {/* 🎓 Proyecto de Grado — UCATEC (en desarrollo, pero ya seleccionable) */}
+          <Link href="/projects/new?tipo=proy-grado-001" className="card card-hover" style={{ textDecoration: "none", display: "flex", gap: 12, alignItems: "center", borderColor: "rgba(124,58,237,0.28)", background: "rgba(124,58,237,0.05)" }}>
+            <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3aed", fontWeight: 800 }}>PG</div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Proyecto de Grado</div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Proyecto de factibilidad (produccion o servicios). UCATEC.</div>
+            </div>
+          </Link>
         </div>
 
         <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Proximamente</h2>

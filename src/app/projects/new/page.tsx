@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 interface Servicio {
   id: string;
@@ -27,6 +27,7 @@ interface TipoProyecto {
 
 type Step =
   | "loading"
+  | "seleccionar-subtipo-grado"   // 🎓 nuevo: solo aparece si el servicio es Proyecto de Grado y el subtipo no viene predefinido
   | "seleccionar-universidad"
   | "seleccionar-variante-cap1"
   | "datos-completos"
@@ -46,8 +47,24 @@ interface ArchivoSubido {
   error?: string;
 }
 
+// Wrapper exportado: envuelve el componente real en Suspense porque
+// useSearchParams() requiere boundary explícito para que Next.js pueda
+// generar la página estáticamente sin fallar el build.
 export default function NuevoProyectoPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div className="loading-dots" />
+      </div>
+    }>
+      <NuevoProyectoPageInner />
+    </Suspense>
+  );
+}
+
+function NuevoProyectoPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>("loading");
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
@@ -116,7 +133,25 @@ export default function NuevoProyectoPage() {
           else if (tipos[0]?.id) setTipoProyectoId(tipos[0].id);
         }
 
-        setStep("seleccionar-universidad");
+        // 🎓 Si el dashboard envió ?tipo=... lo respetamos. Puede venir como
+        // tipo-monografia, proy-grado-001 (sin subtipo aún), proy-prod-001 o
+        // proy-serv-001.
+        const tipoQuery = searchParams.get("tipo") ?? "";
+        let initialStep: Step = "seleccionar-universidad";
+        if (tipoQuery === "proy-grado-001") {
+          // El estudiante apuntó al servicio nuevo sin elegir subtipo:
+          // mostramos el step de elección antes de la universidad.
+          // No seteamos tipoProyectoId todavía (lo elige en el step nuevo).
+          initialStep = "seleccionar-subtipo-grado";
+        } else if (tipoQuery === "proy-prod-001" || tipoQuery === "proy-serv-001") {
+          // Vino del dashboard con subtipo ya elegido — saltamos directo.
+          setTipoProyectoId(tipoQuery);
+          initialStep = "seleccionar-universidad";
+        } else if (tipoQuery) {
+          setTipoProyectoId(tipoQuery);
+        }
+
+        setStep(initialStep);
       } catch {
         router.replace("/login");
       }
@@ -161,6 +196,10 @@ export default function NuevoProyectoPage() {
   async function resolverServicioId(): Promise<string> {
     if (tipoProyectoId === "tipo-tesis") return "tesis-001";
     if (tipoProyectoId === "tipo-monografia") return "mono-001";
+    // 🎓 Subtipos de Proyecto de Grado mapean al mismo servicio
+    if (tipoProyectoId === "proy-prod-001" || tipoProyectoId === "proy-serv-001") {
+      return "proy-grado-001";
+    }
     if (servicioId) return servicioId;
     const res = await fetch("/api/services");
     if (!res.ok) return "";
@@ -336,6 +375,105 @@ export default function NuevoProyectoPage() {
             >
               ×
             </button>
+          </div>
+        )}
+
+        {/* ── PASO 0 (solo Proyecto de Grado): ELEGIR SUBTIPO ──────────────────────── */}
+        {step === "seleccionar-subtipo-grado" && (
+          <div className="card fade-in" style={{ padding: 32 }}>
+            <div style={{ marginBottom: 24 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--accent)",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                }}
+              >
+                Paso 1 — Tipo de proyecto
+              </div>
+              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+                ¿Qué tipo de proyecto vas a desarrollar?
+              </h1>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
+                Esta elección define las fases del flujo y el enfoque del Marco
+                Propositivo. No se puede cambiar después de creado el proyecto.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gap: 14, gridTemplateColumns: "1fr 1fr" }}>
+              {/* PRODUCCIÓN */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoProyectoId("proy-prod-001");
+                  setStep("seleccionar-universidad");
+                }}
+                className="card card-hover"
+                style={{
+                  textAlign: "left",
+                  padding: "20px 22px",
+                  border: "2px solid var(--border)",
+                  background: "var(--bg-card)",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <div style={{ fontSize: 28 }}>🏭</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--fg-primary)" }}>
+                  Producción y comercialización de un bien
+                </div>
+                <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
+                  Vas a producir alimentos, ropa, productos químicos, tecnología tangible.
+                </div>
+                <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
+                  El estudio técnico incluirá proceso productivo, maquinaria, materia prima.
+                  Marketing mix clásico de 4P.
+                </div>
+              </button>
+
+              {/* SERVICIOS */}
+              <button
+                type="button"
+                onClick={() => {
+                  setTipoProyectoId("proy-serv-001");
+                  setStep("seleccionar-universidad");
+                }}
+                className="card card-hover"
+                style={{
+                  textAlign: "left",
+                  padding: "20px 22px",
+                  border: "2px solid var(--border)",
+                  background: "var(--bg-card)",
+                  cursor: "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <div style={{ fontSize: 28 }}>☕</div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: "var(--fg-primary)" }}>
+                  Brindar un servicio
+                </div>
+                <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
+                  Vas a abrir una cafetería, taller, agencia, consultoría, salón, escuela.
+                </div>
+                <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
+                  El estudio técnico incluirá ambientación del local, capacidad de atención
+                  y protocolos. Marketing mix ampliado de 7P (incluye Personas, Procesos y
+                  Evidencia Física).
+                </div>
+              </button>
+            </div>
+
+            <div style={{ marginTop: 18, fontSize: 11.5, color: "var(--fg-muted)", textAlign: "center" }}>
+              ¿No estás seguro? Si vas a vender algo que producís vos mismo, elegí <strong>Producción</strong>.
+              Si lo principal es la experiencia que ofrecés (atención, ambiente, tiempo de tu equipo), elegí <strong>Servicios</strong>.
+            </div>
           </div>
         )}
 
