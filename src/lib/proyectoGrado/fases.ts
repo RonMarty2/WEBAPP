@@ -23,6 +23,9 @@ import { getPromptCap2 } from "@/lib/prompts/proyectoGrado/cap2-marco-teorico";
 import { SISTEMA_PROY_CAP3A } from "@/lib/prompts/proyectoGrado/cap3a-pestel";
 import { SISTEMA_PROY_CAP3B } from "@/lib/prompts/proyectoGrado/cap3b-porter";
 import { SISTEMA_PROY_CAP3C } from "@/lib/prompts/proyectoGrado/cap3c-matrices";
+import { SISTEMA_PROY_CAP3D } from "@/lib/prompts/proyectoGrado/cap3d-diseno-encuesta";
+import { SISTEMA_PROY_CAP3E } from "@/lib/prompts/proyectoGrado/cap3e-analisis-encuesta";
+import { SISTEMA_PROY_CAP3F } from "@/lib/prompts/proyectoGrado/cap3f-demanda-cuota";
 
 /** Subtipos válidos del servicio Proyecto de Grado. */
 export type SubtipoProyectoGrado = "produccion" | "servicios";
@@ -134,6 +137,12 @@ function resolvePromptForPhase(phaseId: string, subtipo: SubtipoProyectoGrado): 
       return SISTEMA_PROY_CAP3B;
     case "ph-proy-cap3c":
       return SISTEMA_PROY_CAP3C;
+    case "ph-proy-cap3d":
+      return SISTEMA_PROY_CAP3D;
+    case "ph-proy-cap3e":
+      return SISTEMA_PROY_CAP3E;
+    case "ph-proy-cap3f":
+      return SISTEMA_PROY_CAP3F;
     // Las demás fases todavía no tienen prompt — irán llegando en
     // semanas siguientes según el plan PATRON_PROYECTO_GRADO.md.
     default:

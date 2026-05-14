@@ -739,9 +739,9 @@ async function generarSinSupabase({
       "ph-proy-cap3a":    8000,   // PESTEL (12-18 págs, 4500-7000 palabras, 7 tablas)
       "ph-proy-cap3b":    6000,   // 5 Fuerzas Porter (10-15 págs, 3500-5500 palabras, 8 tablas)
       "ph-proy-cap3c":    5000,   // Matrices estratégicas (6-10 págs, 2500-4000 palabras, 4 matrices)
-      "ph-proy-cap3d":     100,
-      "ph-proy-cap3e":     100,
-      "ph-proy-cap3f":     100,
+      "ph-proy-cap3d":    5000,   // Diseño de encuesta (5-8 págs, cuestionario completo)
+      "ph-proy-cap3e":    7000,   // Análisis de encuesta (12-20 págs, 15-25 tablas)
+      "ph-proy-cap3f":    4000,   // Demanda y cuota (4-6 págs, 3 tablas, proyección 5 años)
       "ph-proy-cap4a":     100,
       "ph-proy-cap4abis":  100,
       "ph-proy-cap4b":     100,
