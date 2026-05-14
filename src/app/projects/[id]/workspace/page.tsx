@@ -16,6 +16,7 @@ import ObservacionesTribunal from "@/components/ObservacionesTribunal";
 import Cap0PropuestasView from "@/components/scribe/Cap0PropuestasView";
 import LatexExportView from "@/components/scribe/LatexExportView";
 import BancoPreguntasView from "@/components/scribe/BancoPreguntasView";
+import DefensaMaterialesView from "@/components/scribe/DefensaMaterialesView";
 import SpecialPhaseView from "@/components/scribe/SpecialPhaseView";
 import AdminViewToggle, { useViewMode } from "@/components/scribe/AdminViewToggle";
 import GeneratingState from "@/components/scribe/GeneratingState";
@@ -548,7 +549,7 @@ export default function WorkspacePage() {
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedFase, setSelectedFase] = useState(0);
-  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal">("generacion");
+  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal" | "defensa">("generacion");
   const { mode: viewMode } = useViewMode();
 
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
@@ -1826,6 +1827,15 @@ export default function WorkspacePage() {
                     {canDefense ? "📋" : "🔒"} Tutor
                   </button>
                 )}
+                {canDefense && (
+                  <button
+                    onClick={() => setCol1Tab("defensa")}
+                    title="Diapositivas, podcast y guión para tu defensa oral"
+                    style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "defensa" ? "#10b981" : "var(--fg-secondary)", borderBottom: col1Tab === "defensa" ? "2px solid #10b981" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                  >
+                    🎓 Defensa
+                  </button>
+                )}
               </div>
             )}
 
@@ -2199,6 +2209,11 @@ export default function WorkspacePage() {
             proyectoId={proyectoId}
             phaseDefs={displayFases.map(f => ({ id: f.id, label: f.label, short: f.short }))}
           />
+        </div>
+      )}
+      {col1Tab === "defensa" && canDefense && (
+        <div style={{ flex: 1, overflow: "auto" }}>
+          <DefensaMaterialesView proyectoId={proyectoId} />
         </div>
       )}
     </div> {/* END UPPER SCROLLABLE AREA */}
