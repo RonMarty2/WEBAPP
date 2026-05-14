@@ -12,7 +12,7 @@ export const SESSION_COOKIE = "lab_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
 
 export type UserRole = "admin" | "estudiante" | "docente";
-export type UserPlan = "estandar" | "pro";
+export type UserPlan = "estandar" | "pro" | "elite";
 
 export interface SessionUser {
   id: string;
