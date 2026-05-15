@@ -697,9 +697,19 @@ button:focus-visible, a:focus-visible {
   position: fixed;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(80px);
+  /* Reducido de 80px a 50px: el blur es la operación más cara del compositor de GPU. */
+  filter: blur(50px);
   z-index: 0;
   will-change: transform;
+  /* Promueve a capa GPU dedicada para que el blur no se recalcule al hacer scroll. */
+  transform: translateZ(0);
+  contain: layout paint;
+}
+
+/* En móviles, suavizamos aún más el blur y ocultamos el 4to blob. */
+@media (max-width: 768px) {
+  .mesh-blob { filter: blur(32px); }
+  .mesh-blob-4 { display: none; }
 }
 
 .mesh-blob-1 {

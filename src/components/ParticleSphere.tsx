@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -11,16 +11,48 @@ type Particle = {
   baseSize: number;                    // Base size multiplier
 };
 
+type DrawCmd = {
+  x: number; y: number; w: number; h: number;
+  angle: number; alpha: number; sc: number; color: string;
+};
+
 // ─── Tuning ──────────────────────────────────────────────────────────────────
 const FOV   = 600;
 
 const ROT_Y = 0.0003;
 const ROT_X = 0.00015;
 
-const HUE_SPEED = 0.001; 
+const HUE_SPEED = 0.001;
+
+// Cap rendering to 30 fps — Imperceptible visualmente, ahorra 50% CPU vs 60fps.
+const FRAME_INTERVAL = 1000 / 30;
+// Pausa breve durante navegación: evita stutter mientras React hidrata la ruta nueva.
+const NAV_PAUSE_MS = 300;
+// Sort cada N frames: el orden cambia poco entre frames, basta refrescarlo cada 4.
+const SORT_EVERY_N_FRAMES = 4;
+
+// ─── Hardware detection ──────────────────────────────────────────────────────
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+function getDensityScale(): number {
+  if (typeof window === "undefined" || typeof navigator === "undefined") return 1;
+  const cores = navigator.hardwareConcurrency ?? 8;
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) return 0.45;
+  if (cores <= 4) return 0.55;
+  if (cores <= 6) return 0.75;
+  return 1;
+}
 
 // ─── Volumetric Sphere ───────────────────────────────────────────────────────
-function buildParticles(shape: string = "sphere", count: number = 1000): Particle[] {
+function scaledCount(count: number, scale: number): number {
+  return Math.max(120, Math.round(count * scale));
+}
+
+function buildParticles(shape: string = "sphere", count: number = 700): Particle[] {
   const golden = Math.PI * (3 - Math.sqrt(5));
   return Array.from({ length: count }, (_, i) => {
     let nx = 0, ny = 0, nz = 0;
@@ -154,10 +186,32 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
   // Physics body for the entire point-cloud mass
   const gcRef     = useRef({ x: 0, y: 0, vx: 0, vy: 0, ghostX: 0, ghostY: 0, ready: false });
   const condenseRef = useRef(0);
-  const uiConfigRef = useRef({ shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 });
+  const uiConfigRef = useRef({ shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 });
+  const densityScaleRef = useRef(1);
+  const pausedRef = useRef(false);
+  const pauseUntilRef = useRef(0);
+  const frameCounterRef = useRef(0);
+  const lastDrawRef = useRef(0);
+  const cmdsRef = useRef<DrawCmd[]>([]);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  // ── Detect accessibility + hardware capability once on mount ──────────────
+  useEffect(() => {
+    densityScaleRef.current = getDensityScale();
+    const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (mq) {
+      setReducedMotion(mq.matches);
+      const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+      mq.addEventListener?.("change", handler);
+      return () => mq.removeEventListener?.("change", handler);
+    }
+  }, []);
 
   useEffect(() => {
+    // Pausar el render brevemente durante la navegación para que React
+    // pueda hidratar la nueva ruta sin competir por CPU con el canvas.
     if (!isPreview) {
+      pauseUntilRef.current = (typeof performance !== "undefined" ? performance.now() : Date.now()) + NAV_PAUSE_MS;
       window.dispatchEvent(new CustomEvent("ui_particle_route_change", { detail: pathname }));
     }
   }, [pathname, isPreview]);
@@ -175,10 +229,10 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       particleSize: typeof previewConfig.particleSize === "number" ? previewConfig.particleSize : 1.0,
       particleLength: typeof previewConfig.particleLength === "number" ? previewConfig.particleLength : 1.0,
       swarmSize: typeof previewConfig.swarmSize === "number" ? previewConfig.swarmSize : 1.0,
-      density: typeof previewConfig.density === "number" ? previewConfig.density : 1000,
+      density: typeof previewConfig.density === "number" ? previewConfig.density : 700,
     };
     if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
-      const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+      const newTargets = buildParticles(uiConfigRef.current.shape, scaledCount(uiConfigRef.current.density, densityScaleRef.current));
       parts.current = newTargets.map((t, i) =>
         parts.current[i]
           ? { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz }
@@ -199,10 +253,10 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         const targetModule = children[currentIndex];
         
         const DEFAULTS: Record<string, any> = {
-          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
-          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
-          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
-          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 }
+          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
+          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
+          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
+          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 600 }
         };
 
         const storageKey = `ui_particle_config_${targetModule}`;
@@ -223,11 +277,11 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
           particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : 1.0,
           particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
           swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
-          density: typeof parsed.density === "number" ? parsed.density : 1000
+          density: typeof parsed.density === "number" ? parsed.density : 700
         };
 
         if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
-          const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          const newTargets = buildParticles(uiConfigRef.current.shape, scaledCount(uiConfigRef.current.density, densityScaleRef.current));
           parts.current = newTargets.map((t, i) => {
             if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
             return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz }; // New particles grow from center
@@ -239,6 +293,9 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
   }, [pathname, isPreview]);
 
   useEffect(() => {
+    // Respetar accesibilidad: si reducedMotion, no inicializar canvas ni RAF.
+    if (reducedMotion && !isPreview) return;
+
     const loadConfig = (overridePathname?: string) => {
       try {
         const currentPath = typeof overridePathname === "string" ? overridePathname : pathname;
@@ -250,12 +307,12 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         else if (currentPath.startsWith("/nucleo")) targetModule = "nucleo";
 
         const DEFAULTS: Record<string, any> = {
-          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
-          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
-          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
-          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
-          nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1500 },
-          admin: { shape: "blackhole", palette: "plasma", wave: "magnetic", speed: 0.8, particleSize: 1.2, particleLength: 1.5, swarmSize: 1.1, density: 1800 }
+          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
+          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
+          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
+          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 600 },
+          nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 900 },
+          admin: { shape: "blackhole", palette: "plasma", wave: "magnetic", speed: 0.8, particleSize: 1.2, particleLength: 1.5, swarmSize: 1.1, density: 1000 }
         };
 
         const storageKey = `ui_particle_config_${targetModule}`;
@@ -280,11 +337,11 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
           particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : (typeof parsed.size === "number" ? parsed.size : 1.0),
           particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
           swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
-          density: typeof parsed.density === "number" ? parsed.density : 1000
+          density: typeof parsed.density === "number" ? parsed.density : 700
         };
         
         if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
-          const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          const newTargets = buildParticles(uiConfigRef.current.shape, scaledCount(uiConfigRef.current.density, densityScaleRef.current));
           parts.current = newTargets.map((t, i) => {
             if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
             return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz };
@@ -312,11 +369,11 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
           particleSize: typeof previewConfig.particleSize === "number" ? previewConfig.particleSize : 1.0,
           particleLength: typeof previewConfig.particleLength === "number" ? previewConfig.particleLength : 1.0,
           swarmSize: typeof previewConfig.swarmSize === "number" ? previewConfig.swarmSize : 1.0,
-          density: typeof previewConfig.density === "number" ? previewConfig.density : 1000
+          density: typeof previewConfig.density === "number" ? previewConfig.density : 700
         };
 
         if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
-          const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+          const newTargets = buildParticles(uiConfigRef.current.shape, scaledCount(uiConfigRef.current.density, densityScaleRef.current));
           parts.current = newTargets.map((t, i) => {
             if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
             return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz };
@@ -404,8 +461,18 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
     }
 
     // ── Main loop ─────────────────────────────────────────────────────────────
-    function tick() {
+    function tick(now?: number) {
+      raf.current = requestAnimationFrame(tick);
       if (!canvas || !ctx) return;
+
+      // Pausar render cuando la pestaña no está visible o durante la navegación.
+      const currentTime = typeof now === "number" ? now : performance.now();
+      if (pausedRef.current) return;
+      if (pauseUntilRef.current > currentTime) return;
+
+      // Frame rate cap a 30 fps — imperceptible vs 60 fps, mitad de CPU.
+      if (currentTime - lastDrawRef.current < FRAME_INTERVAL) return;
+      lastDrawRef.current = currentTime;
 
       const t  = ++tRef.current;
       const W  = isPreview && canvas.parentElement ? canvas.parentElement.clientWidth : window.innerWidth;
@@ -476,8 +543,18 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       // Full color everywhere
       const canvasAlpha = 1.0;
 
-      // ── Build draw commands ──────────────────────────────────────────────
-      const cmds = parts.current.map(p => {
+      // ── Build draw commands (buffer pre-alocado para no allocar cada frame) ──
+      const partsArr = parts.current;
+      const cmds = cmdsRef.current;
+      if (cmds.length !== partsArr.length) {
+        cmds.length = partsArr.length;
+        for (let i = 0; i < cmds.length; i++) {
+          if (!cmds[i]) cmds[i] = { x: 0, y: 0, w: 0, h: 0, angle: 0, alpha: 0, sc: 0, color: "" };
+        }
+      }
+      for (let i = 0; i < partsArr.length; i++) {
+        const p = partsArr[i];
+        const d = cmds[i];
         // 0. Liquid Morphing (Interpolation)
         if (p.tnx !== undefined) {
           p.nx += (p.tnx - p.nx) * 0.018 * uiConfigRef.current.speed;
@@ -600,14 +677,20 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
           lit *= 0.85; 
         }
 
-        return {
-          x: hx, y: hy, w, h, angle, alpha, sc,
-          color: `hsla(${hue.toFixed(1)}, ${sat.toFixed(1)}%, ${lit.toFixed(1)}%, ${alpha.toFixed(2)})`,
-        };
-      });
+        d.x = hx;
+        d.y = hy;
+        d.w = w;
+        d.h = h;
+        d.angle = angle;
+        d.alpha = alpha;
+        d.sc = sc;
+        d.color = `hsla(${hue.toFixed(1)}, ${sat.toFixed(1)}%, ${lit.toFixed(1)}%, ${alpha.toFixed(2)})`;
+      }
 
-      // Depth sort (draw back to front for proper alpha blending)
-      cmds.sort((a, b) => a.sc - b.sc);
+      // Depth sort (cada N frames — el orden cambia poco entre frames consecutivos)
+      if (frameCounterRef.current++ % SORT_EVERY_N_FRAMES === 0) {
+        cmds.sort((a, b) => a.sc - b.sc);
+      }
 
       ctx.save();
       ctx.globalAlpha = canvasAlpha;
@@ -629,8 +712,15 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       }
 
       ctx.restore();
+    }
 
-      raf.current = requestAnimationFrame(tick);
+    // ── Page visibility: detener animación si la pestaña está oculta ─────────
+    function onVisibilityChange() {
+      pausedRef.current = document.hidden;
+      // Resetear el reloj al volver, para evitar un "salto" del primer frame.
+      if (!document.hidden) {
+        lastDrawRef.current = performance.now();
+      }
     }
 
     // ── Boot ──────────────────────────────────────────────────────────────────
@@ -640,7 +730,8 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
     document.addEventListener("pointermove",  onMove);
     document.addEventListener("pointerleave", onLeave);
     window.addEventListener("scroll",       onScroll, { passive: true });
-    
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     mouseRef.current.active = false;
     raf.current = requestAnimationFrame(tick);
 
@@ -650,6 +741,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       document.removeEventListener("pointermove",  onMove);
       document.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("scroll",       onScroll);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       if (!isPreview) {
         window.removeEventListener("ui_particle_update", loadConfig as unknown as EventListener);
         window.removeEventListener("ui_particle_route_change", handleRouteChange);
@@ -657,7 +749,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       }
       window.clearTimeout(idleTimeout);
     };
-  }, [isPreview]);
+  }, [isPreview, reducedMotion]);
 
   useEffect(() => {
     if (isPreview && previewConfig) {
@@ -672,11 +764,11 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         particleSize: typeof previewConfig.particleSize === "number" ? previewConfig.particleSize : 1.0,
         particleLength: typeof previewConfig.particleLength === "number" ? previewConfig.particleLength : 1.0,
         swarmSize: typeof previewConfig.swarmSize === "number" ? previewConfig.swarmSize : 1.0,
-        density: typeof previewConfig.density === "number" ? previewConfig.density : 1000
+        density: typeof previewConfig.density === "number" ? previewConfig.density : 700
       };
 
       if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
-        const newTargets = buildParticles(uiConfigRef.current.shape, uiConfigRef.current.density);
+        const newTargets = buildParticles(uiConfigRef.current.shape, scaledCount(uiConfigRef.current.density, densityScaleRef.current));
         parts.current = newTargets.map((t, i) => {
           if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
           return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz };
@@ -684,6 +776,10 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       }
     }
   }, [isPreview, previewConfig]);
+
+  // Si el usuario prefiere movimiento reducido, no renderizamos el canvas.
+  // (En preview de admin sí, porque es la herramienta de configuración.)
+  if (reducedMotion && !isPreview) return null;
 
   return (
     <canvas
