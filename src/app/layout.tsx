@@ -40,11 +40,6 @@ export default function RootLayout({
         {/* Anti-flash theme script removed temporarily to prevent React 19 script tag errors */}
       </head>
       <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson flex flex-col`} suppressHydrationWarning>
-        {/* Mesh gradient blobs — fondo premium animado */}
-        <div aria-hidden="true" className="mesh-blob mesh-blob-1" />
-        <div aria-hidden="true" className="mesh-blob mesh-blob-2" />
-        <div aria-hidden="true" className="mesh-blob mesh-blob-3" />
-        <div aria-hidden="true" className="mesh-blob mesh-blob-4" />
         <ParticleSphere />
         <div className="app-content flex-1">
           {children}

@@ -24,8 +24,8 @@ const ROT_X = 0.00015;
 
 const HUE_SPEED = 0.001;
 
-// Cap rendering to 30 fps — Imperceptible visualmente, ahorra 50% CPU vs 60fps.
-const FRAME_INTERVAL = 1000 / 30;
+// Cap a 60 fps: en pantallas 120/144Hz evita gastar trabajo extra invisible.
+const FRAME_INTERVAL = 1000 / 60;
 // Pausa breve durante navegación: evita stutter mientras React hidrata la ruta nueva.
 const NAV_PAUSE_MS = 300;
 // Sort cada N frames: el orden cambia poco entre frames, basta refrescarlo cada 4.
@@ -470,7 +470,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
       if (pausedRef.current) return;
       if (pauseUntilRef.current > currentTime) return;
 
-      // Frame rate cap a 30 fps — imperceptible vs 60 fps, mitad de CPU.
+      // Frame rate cap a 60 fps — evita renders extra en pantallas 120/144Hz.
       if (currentTime - lastDrawRef.current < FRAME_INTERVAL) return;
       lastDrawRef.current = currentTime;
 
