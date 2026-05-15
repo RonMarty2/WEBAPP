@@ -428,7 +428,7 @@ function NuevoProyectoPageInner() {
                   Producción y comercialización de un bien
                 </div>
                 <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
-                  Vas a producir alimentos, ropa, productos químicos, tecnología tangible.
+                  Producir y comercializar bienes tangibles: alimentos, ropa, productos químicos, tecnología.
                 </div>
                 <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
                   El estudio técnico incluirá proceso productivo, maquinaria, materia prima.
@@ -460,7 +460,7 @@ function NuevoProyectoPageInner() {
                   Brindar un servicio
                 </div>
                 <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
-                  Vas a abrir una cafetería, taller, agencia, consultoría, salón, escuela.
+                  Ofrecer un servicio: cafetería, taller, agencia, consultoría, salón, escuela.
                 </div>
                 <div style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
                   El estudio técnico incluirá ambientación del local, capacidad de atención
@@ -471,8 +471,8 @@ function NuevoProyectoPageInner() {
             </div>
 
             <div style={{ marginTop: 18, fontSize: 11.5, color: "var(--fg-muted)", textAlign: "center" }}>
-              ¿No estás seguro? Si vas a vender algo que producís vos mismo, elegí <strong>Producción</strong>.
-              Si lo principal es la experiencia que ofrecés (atención, ambiente, tiempo de tu equipo), elegí <strong>Servicios</strong>.
+              ¿No estás seguro? Si vendes un producto que tú mismo fabricas, elige <strong>Producción</strong>.
+              Si lo principal es la experiencia que entregas (atención, ambiente, tiempo de tu equipo), elige <strong>Servicios</strong>.
             </div>
           </div>
         )}
