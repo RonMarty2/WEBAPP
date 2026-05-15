@@ -749,6 +749,39 @@ button:focus-visible, a:focus-visible {
   .mesh-blob { animation: none !important; }
 }
 
+/* ═══ AURA SUTIL — Solo violeta/índigo, sin animación, sin rosa ═══════════ */
+
+.aura {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+  /* Capa GPU dedicada para que el blur no se repinte al hacer scroll */
+  transform: translateZ(0);
+  contain: layout paint;
+}
+
+.aura-tl {
+  width: 620px; height: 500px;
+  top: -180px; left: -180px;
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.10) 0%, transparent 70%);
+}
+
+.aura-br {
+  width: 560px; height: 460px;
+  bottom: -160px; right: -140px;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+}
+
+.dark .aura-tl { background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.14) 0%, transparent 70%); }
+.dark .aura-br { background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.11) 0%, transparent 70%); }
+
+@media (max-width: 768px) {
+  .aura { filter: blur(40px); }
+  .aura-br { display: none; }
+}
+
 /* ═══ CTA PREMIUM BACKGROUND ═════════════════════════════════════════════════ */
 
 .cta-premium {

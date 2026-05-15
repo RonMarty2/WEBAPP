@@ -40,6 +40,8 @@ export default function RootLayout({
         {/* Anti-flash theme script removed temporarily to prevent React 19 script tag errors */}
       </head>
       <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson flex flex-col`} suppressHydrationWarning>
+        <div aria-hidden="true" className="aura aura-tl" />
+        <div aria-hidden="true" className="aura aura-br" />
         <ParticleSphere />
         <div className="app-content flex-1">
           {children}
