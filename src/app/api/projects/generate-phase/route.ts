@@ -776,6 +776,33 @@ REGLAS:
                                 // El endpoint genérico ya la rechaza (ver guard arriba), pero
                                 // dejamos un techo simbólico de 100 tokens como defensa en
                                 // profundidad — si algo bypasea el guard, el daño es ridículo.
+
+      // ── Fases del nuevo servicio Proyecto de Grado (UCATEC) ──────────────
+      "ph-proy-cap0":     3000,   // Idea de negocio (800-1500 palabras)
+      "ph-proy-cap1":    12000,   // Marco Referencial (8-14 págs, 3500-5500 palabras)
+      "ph-proy-cap2":     9000,   // Marco Teórico (25-35 conceptos, 12-18 págs)
+      // Fases 3a-9 todavía con prompts placeholder — se irán completando
+      // según el plan PATRON_PROYECTO_GRADO.md. Tope simbólico de 100 hasta
+      // entonces para que un placeholder no gaste mucho si se ejecuta por error.
+      "ph-proy-cap3a":    8000,   // PESTEL (12-18 págs, 4500-7000 palabras, 7 tablas)
+      "ph-proy-cap3b":    6000,   // 5 Fuerzas Porter (10-15 págs, 3500-5500 palabras, 8 tablas)
+      "ph-proy-cap3c":    5000,   // Matrices estratégicas (6-10 págs, 2500-4000 palabras, 4 matrices)
+      "ph-proy-cap3d":    5000,   // Diseño de encuesta (5-8 págs, cuestionario completo)
+      "ph-proy-cap3e":    7000,   // Análisis de encuesta (12-20 págs, 15-25 tablas)
+      "ph-proy-cap3f":    4000,   // Demanda y cuota (4-6 págs, 3 tablas, proyección 5 años)
+      "ph-proy-cap4a":    7000,   // Estudio organizacional (10-15 págs)
+      "ph-proy-cap4abis": 6000,   // Propuesta administrativa RRHH (10-15 págs)
+      "ph-proy-cap4b":    6000,   // Estudio legal (8-12 págs)
+      "ph-proy-cap4c":    9000,   // Estudio técnico (12-18 págs, variante subtipo)
+      "ph-proy-cap4d":    4000,   // Branding (6-10 págs + briefs para logos)
+      "ph-proy-cap4e":    8000,   // Mix marketing (10-20 págs, variante 4P/7P)
+      "ph-proy-cap4f":    8000,   // Estudio financiero (15-22 págs, 10+ tablas)
+      "ph-proy-cap4g":    6000,   // Evaluación del proyecto (10-14 págs, VAN/TIR/WACC/PE)
+      "ph-proy-resumen":   1500,   // Resumen ejecutivo (300-450 palabras, 1 página)
+      "ph-proy-conclus":   4000,   // Conclusiones + recomendaciones (5-8 págs)
+      "ph-proy-referencias": 4000, // Bibliografía consolidada APA 7
+      "ph-proy-latex":    50000,   // Documento LaTeX completo (igual que monografía)
+      "ph-proy-defensa":   2500,   // Banco de preguntas (fire-and-forget por capítulo)
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
 

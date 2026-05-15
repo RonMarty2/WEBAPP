@@ -1,12 +1,47 @@
 import { SignJWT, jwtVerify } from "jose";
 
-const ADMIN_SECRET = new TextEncoder().encode(
-  process.env.ADMIN_JWT_SECRET || "laboratorio-academico-super-secret-key-2024"
-);
+/**
+ * 🛡️ Secrets de JWT — DEBEN venir del entorno.
+ *
+ * Antes había un fallback hardcodeado que estaba publicado en GitHub. Si la
+ * env var no se seteaba en producción, el sistema firmaba tokens con un
+ * secret conocido por todo el mundo: cualquiera podía falsificar una cookie
+ * admin y entrar al panel.
+ *
+ * Ahora: si las variables faltan, el sistema lanza error explícito en la
+ * primera llamada que las use. Es preferible un error visible a una
+ * vulnerabilidad silenciosa.
+ *
+ * En desarrollo local, settear en .env.local:
+ *   ADMIN_JWT_SECRET=<32+ chars aleatorios>
+ *   AUTH_SECRET=<otros 32+ chars aleatorios>
+ *
+ * En Vercel, settear las mismas variables en Project Settings → Environment.
+ */
+function requireSecret(name: "ADMIN_JWT_SECRET" | "AUTH_SECRET"): Uint8Array {
+  const value = process.env[name];
+  if (!value || value.length < 16) {
+    throw new Error(
+      `${name} no está configurada (o es demasiado corta). ` +
+      `Definila en .env.local (dev) o en las variables de entorno de Vercel (prod) ` +
+      `con al menos 32 caracteres aleatorios.`,
+    );
+  }
+  return new TextEncoder().encode(value);
+}
 
-const SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET ?? "laboratorio-academico-secret-change-in-production"
-);
+// Lazy: se evalúan en el primer uso, no al cargar el módulo, para no
+// crashear todo el proceso si una env var falta cuando esa función no se usa.
+let _adminSecret: Uint8Array | null = null;
+let _sessionSecret: Uint8Array | null = null;
+function getAdminSecret(): Uint8Array {
+  if (!_adminSecret) _adminSecret = requireSecret("ADMIN_JWT_SECRET");
+  return _adminSecret;
+}
+function getSessionSecret(): Uint8Array {
+  if (!_sessionSecret) _sessionSecret = requireSecret("AUTH_SECRET");
+  return _sessionSecret;
+}
 
 export const SESSION_COOKIE = "lab_session";
 export const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
@@ -40,12 +75,12 @@ export async function createSessionToken(user: SessionUser): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(SECRET);
+    .sign(getSessionSecret());
 }
 
 export async function verifySessionToken(token: string): Promise<SessionUser | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, getSessionSecret());
     return (payload as { user: SessionUser }).user;
   } catch {
     return null;
@@ -54,7 +89,7 @@ export async function verifySessionToken(token: string): Promise<SessionUser | n
 
 export async function verifyAdminToken(token: string): Promise<boolean> {
   try {
-    const { payload } = await jwtVerify(token, ADMIN_SECRET);
+    const { payload } = await jwtVerify(token, getAdminSecret());
     return payload.role === "admin";
   } catch {
     return false;

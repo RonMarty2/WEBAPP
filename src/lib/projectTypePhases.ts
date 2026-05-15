@@ -4,6 +4,10 @@ import { resolvePhases } from "@/lib/scribePhases";
 const SERVICE_TO_PROJECT_TYPE: Record<string, string> = {
   "mono-001": "tipo-monografia",
   "tesis-001": "tipo-tesis",
+  // 🎓 Proyecto de Grado tiene 2 subtipos (producción/servicios) que se
+  // resuelven en runtime según la elección del estudiante. El default
+  // (cuando solo conocemos el servicio) es producción.
+  "proy-grado-001": "proy-prod-001",
 };
 
 export function projectTypeIdForService(servicioId?: string | null): string {
@@ -11,7 +15,9 @@ export function projectTypeIdForService(servicioId?: string | null): string {
 }
 
 export function serviceIdForProjectType(tipoProyectoId?: string | null): string {
-  return tipoProyectoId === "tipo-tesis" ? "tesis-001" : "mono-001";
+  if (tipoProyectoId === "tipo-tesis") return "tesis-001";
+  if (tipoProyectoId === "proy-prod-001" || tipoProyectoId === "proy-serv-001") return "proy-grado-001";
+  return "mono-001";
 }
 
 function shortLabelFromName(name: string): string {

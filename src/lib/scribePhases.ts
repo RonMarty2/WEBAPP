@@ -25,6 +25,7 @@ import { SISTEMA_SCRIBE_RESUMEN } from "@/lib/prompts/scribe/resumen-ejecutivo";
 import { SISTEMA_SCRIBE_REFERENCIAS } from "@/lib/prompts/scribe/consolidar-referencias";
 import { SISTEMA_SCRIBE_LATEX } from "@/lib/prompts/scribe/compilar-latex";
 import { SISTEMA_SCRIBE_CALIDAD } from "@/lib/prompts/scribe/control-calidad";
+import { getProyectoGradoPhases } from "@/lib/proyectoGrado/fases";
 
 export const DEFAULT_PHASES: PhaseDefinition[] = [
   {
@@ -124,6 +125,24 @@ export function resolvePhases(servicioId: string): { phases: PhaseDefinition[]; 
 
   if (servicioId === "mono-001") {
     return { phases: [...DEFAULT_PHASES].sort((a, b) => a.orden - b.orden), isDefault: true };
+  }
+
+  // 🎓 Proyecto de Grado (UCATEC) — 20 fases con 2 subtipos.
+  // El subtipo concreto (producción vs servicios) se resuelve por el
+  // tipo_proyecto_id del proyecto, no por el servicio_id. Como en este
+  // punto solo tenemos el servicio, devolvemos las fases base con prompts
+  // genéricos (placeholders). Cuando una fase se ejecuta, el endpoint
+  // mira el tipo_proyecto_id real del proyecto y resuelve el prompt
+  // específico del subtipo desde src/lib/proyectoGrado/fases.ts.
+  if (servicioId === "proy-grado-001") {
+    // Por convención devolvemos las fases del subtipo "produccion"; el orden
+    // y los labels son idénticos al subtipo "servicios". El endpoint de
+    // generación es responsable de elegir el prompt correcto a partir del
+    // tipo_proyecto_id del proyecto.
+    return {
+      phases: getProyectoGradoPhases("produccion").sort((a, b) => a.orden - b.orden),
+      isDefault: true,
+    };
   }
 
   return { phases: [], isDefault: true };
