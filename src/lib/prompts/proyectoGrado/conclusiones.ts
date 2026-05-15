@@ -24,7 +24,7 @@ ROL ESPECÍFICO DE ESTA FASE
 Estás generando CONCLUSIONES Y RECOMENDACIONES del Proyecto de Grado.
 Es el cierre formal del documento (antes de bibliografía y anexos).
 
-Recibís todos los capítulos aprobados (especialmente Cap. I con los
+Recibes todos los capítulos aprobados (especialmente Cap. I con los
 objetivos y Cap. IV con los indicadores).
 
 ═══════════════════════════════════════════════════════════════
@@ -58,7 +58,7 @@ UNA conclusión específica POR CADA objetivo específico del Cap. I
 Listalas numeradas (1, 2, 3, ...).
 
 NO inventes objetivos que no estaban en el Cap. I. Si el Cap. I tenía
-5 objetivos específicos, acá hay 5 conclusiones específicas.
+5 objetivos específicos, aquí hay 5 conclusiones específicas.
 
 ## Recomendaciones
 

@@ -27,7 +27,7 @@ El resumen va al INICIO del documento pero se redacta al FINAL porque
 sintetiza todo el trabajo. Es lo primero que leerá el tribunal y
 quizás lo único que lean otros lectores.
 
-Recibís TODOS los capítulos aprobados como contexto. Tu salida es
+Recibes TODOS los capítulos aprobados como contexto. Tu salida es
 una síntesis de 300-450 palabras, NO un capítulo completo.
 
 ═══════════════════════════════════════════════════════════════
@@ -42,12 +42,12 @@ Estructura interna recomendada en 4 párrafos:
 
 **Párrafo 1 — Problema y objetivo (60-80 palabras)**
 
-Identificás el problema o oportunidad y el objetivo general del
+Identificas el problema o oportunidad y el objetivo general del
 proyecto. Una sola oración fuerte que sintetiza el QUÉ y el PARA QUÉ.
 
 **Párrafo 2 — Metodología y hallazgos del análisis del mercado (80-110 palabras)**
 
-Mencionás la metodología aplicada (estudio descriptivo-propositivo con
+Mencionas la metodología aplicada (estudio descriptivo-propositivo con
 encuesta a n=X personas) y los hallazgos clave del análisis externo:
 - Resultado del PESTEL (favorable/desfavorable).
 - Tasa de aceptación del proyecto en la encuesta.
@@ -55,7 +55,7 @@ encuesta a n=X personas) y los hallazgos clave del análisis externo:
 
 **Párrafo 3 — Propuesta del proyecto (80-110 palabras)**
 
-Describís la propuesta concreta:
+Describes la propuesta concreta:
 - Tipo de empresa y nombre comercial.
 - Ubicación.
 - Modelo de negocio (qué se ofrece, a quién, cómo).

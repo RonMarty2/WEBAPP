@@ -73,7 +73,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
       const buffer = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i += 1) buffer[i] = binary.charCodeAt(i);
       if (buffer.byteLength === 0) {
-        throw new Error("El PDF decodificado quedó vacío. Reportá esto al admin.");
+        throw new Error("El PDF decodificado quedó vacío. Reporta esto al admin.");
       }
       const blob = new Blob([buffer], { type: "application/pdf" });
       const filename = fileName ?? `${tituloProyecto || "monografia"}.pdf`;
@@ -287,7 +287,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           📄 Tu monografía está lista para compilar
         </h1>
         <p style={{ fontSize: 13.5, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
-          Documento LaTeX completo generado. Elegí cómo seguir abajo.
+          Documento LaTeX completo generado. Elige cómo seguir abajo.
         </p>
       </div>
 
@@ -337,7 +337,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 10, lineHeight: 1.55, textAlign: "center" }}>
             {paqueteDescargando
               ? "Armando tu ZIP con el .tex, el logo institucional y el README. Un momento…"
-              : "ZIP con .tex + logo + README. Subilo a Overleaf y obtenés el PDF compilado."}
+              : "ZIP con .tex + logo + README. Súbelo a Overleaf y obtienes el PDF compilado."}
           </div>
           {paqueteError && (
             <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12, lineHeight: 1.5 }}>
@@ -359,7 +359,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
                 </div>
               )}
               <div style={{ fontSize: 11.5, color: "var(--fg-muted)", marginTop: 6 }}>
-                Mirá el <strong>README.txt</strong> dentro del ZIP para instrucciones de cómo restaurarlas si las querés.
+                Mira el <strong>README.txt</strong> dentro del ZIP para instrucciones sobre cómo restaurarlas si las quieres.
               </div>
             </div>
           )}
@@ -430,10 +430,10 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           💡 ¿Cómo obtengo el PDF final?
         </summary>
         <ol style={{ margin: "10px 0 0", paddingLeft: 22, fontSize: 13, color: "var(--fg-secondary)", lineHeight: 1.7 }}>
-          <li>Apretá <strong>Descargar paquete</strong> arriba — bajás un ZIP con el .tex, el logo y un README</li>
-          <li>Entrá a <a href="https://www.overleaf.com" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>overleaf.com</a>, creá una cuenta gratis y elegí <em>New Project → Upload Project</em></li>
-          <li>Subí el ZIP completo — Overleaf compila automáticamente y verás el PDF al lado derecho</li>
-          <li>Armá tu carátula con la plantilla institucional de tu universidad y descargá el PDF final</li>
+          <li>Pulsa <strong>Descargar paquete</strong> arriba — bajas un ZIP con el .tex, el logo y un README</li>
+          <li>Entra a <a href="https://www.overleaf.com" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", textDecoration: "underline" }}>overleaf.com</a>, crea una cuenta gratis y elige <em>New Project → Upload Project</em></li>
+          <li>Sube el ZIP completo — Overleaf compila automáticamente y verás el PDF al lado derecho</li>
+          <li>Arma tu carátula con la plantilla institucional de tu universidad y descarga el PDF final</li>
         </ol>
       </details>
 
@@ -444,7 +444,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
             Vista previa del código
           </h3>
           <span style={{ fontSize: 11, color: "var(--fg-muted)" }}>
-            Solo lectura · Edita en Overleaf si necesitás cambios
+            Solo lectura · Edita en Overleaf si necesitas cambios
           </span>
         </div>
         <pre style={{

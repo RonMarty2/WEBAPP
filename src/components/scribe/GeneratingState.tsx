@@ -112,7 +112,7 @@ const MENSAJES_DEFAULT = [
 const TIPS_RANDOM = [
   "💡 La IA solo usa fuentes públicas reales (INE, BCB, IBCE, etc.)",
   "💡 Cada capítulo se construye sobre el anterior",
-  "💡 Si algo no te convence, podés regenerar después",
+  "💡 Si algo no te convence, puedes regenerar después",
   "💡 Los datos secundarios públicos son la base de cada análisis",
   "💡 La calidad académica está priorizada sobre la velocidad",
   "💡 Tu monografía sigue formato APA 7 y normas UMSS",

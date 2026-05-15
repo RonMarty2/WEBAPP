@@ -32,10 +32,10 @@ Es la sub-fase que CIERRA el Marco Propositivo con los indicadores
 financieros que demuestran si el proyecto es VIABLE.
 
 Importante: los cálculos exactos los hace el sistema con calculos.ts.
-Vos producís las tablas estructuradas y las interpretaciones. Los
+Tú produces las tablas estructuradas y las interpretaciones. Los
 valores numéricos puntuales se reemplazan en runtime cuando aplica.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 4f APROBADA — ESTUDIO FINANCIERO] — inversión, costos, ingresos.
 
@@ -96,7 +96,7 @@ WACC típico para proyectos UCATEC: 12-16%.
 
 Resultado: WACC = X.XX%.
 
-Cerrá con interpretación: el WACC es la tasa MÍNIMA que el proyecto
+Cierra con interpretación: el WACC es la tasa MÍNIMA que el proyecto
 debe rendir para crear valor.
 
 ### 4.8.3 Cálculo del Valor Actual Neto (VAN)
@@ -135,7 +135,7 @@ Decisión:
 - TIR < WACC: RECHAZAR.
 - TIR = WACC: indiferente.
 
-Cerrá con interpretación cuantitativa: si TIR es X% mayor que WACC,
+Cierra con interpretación cuantitativa: si TIR es X% mayor que WACC,
 significa que cada peso invertido renta X% sobre lo mínimo exigido.
 
 ### 4.8.5 Punto de equilibrio
@@ -164,7 +164,7 @@ Donde:
 | **Punto de equilibrio en unidades** | **X.XXX** |
 | **Punto de equilibrio en monto (Bs)** | **XXX.XXX** |
 
-Cerrá con: ¿está el punto de equilibrio por debajo de la demanda
+Cierra con: ¿está el punto de equilibrio por debajo de la demanda
 esperada año 1? Si sí, el proyecto es viable. Si no, alerta.
 
 ### 4.8.6 Período de recuperación (Payback descontado)
@@ -190,7 +190,7 @@ Decisión:
 | Punto de equilibrio | X.XXX unidades / XXX.XXX Bs | < demanda año 1 | ✓ / ✗ |
 | Payback descontado | X.XX años | < 5 años | ✓ / ✗ |
 
-Cerrá con un párrafo de cierre de TODO el Cap. IV. Síntesis de:
+Cierra con un párrafo de cierre de TODO el Cap. IV. Síntesis de:
 - Es el proyecto VIABLE técnica, legal, comercial y financieramente.
 - ¿Cuál es el indicador más sensible (el que más impactaría si cambiara)?
 - ¿Qué recomendaría al inversionista — invertir, esperar, redirigir?

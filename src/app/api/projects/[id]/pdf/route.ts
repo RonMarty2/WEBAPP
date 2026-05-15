@@ -153,7 +153,7 @@ export async function GET(req: Request, { params }: Params) {
     const totalContenido = Object.values(phaseContents).filter(c => typeof c === "string" && c.trim()).length;
     if (totalContenido === 0) {
       return NextResponse.json(
-        { error: "Todavía no hay contenido aprobado. Aprobá al menos un capítulo primero." },
+        { error: "Todavía no hay contenido aprobado. Aprueba al menos un capítulo primero." },
         { status: 400 }
       );
     }

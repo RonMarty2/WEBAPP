@@ -297,7 +297,7 @@ normativos y el contexto actual del objeto de estudio.
 - Este Cap II tiene "antecedentes ESPECÍFICOS": la empresa concreta, el sector
   preciso, el problema delimitado, estudios sobre el caso particular o casos
   análogos cercanos.
-- NO repitas el contenido GENERAL del Cap I acá. Profundizá en lo ESPECÍFICO.
+- NO repitas el contenido GENERAL del Cap I aquí. Profundiza en lo ESPECÍFICO.
 
 Debe mostrar qué se sabe sobre el problema CONCRETO, cómo se ha investigado en
 contextos similares y qué vacíos específicos justifican la monografía.

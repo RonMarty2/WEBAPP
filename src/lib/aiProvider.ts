@@ -508,7 +508,7 @@ async function callGemini(
   const text = candidate.content?.parts?.[0]?.text;
   if (typeof text !== "string" || text.length === 0) {
     const reasonMsg = reason ? ` (finishReason: ${reason})` : "";
-    throw new Error(`Gemini devolvió respuesta vacía${reasonMsg}. Probá con menos tokens o reformulá el prompt.`);
+    throw new Error(`Gemini devolvió respuesta vacía${reasonMsg}. Prueba con menos tokens o reformula el prompt.`);
   }
 
   return text;

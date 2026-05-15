@@ -43,7 +43,7 @@ por cada factor. Cada sección debe tener:
 3. Tabla de variables del factor, con su puntuación.
 4. Interpretación de la tabla.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO] — Idea, subtipo, ubicación, título.
 2. [CAPÍTULO I APROBADO] — Marco Referencial (para conocer el segmento
    y alcance geográfico exacto).
@@ -82,7 +82,7 @@ Después del análisis, presentá:
 Donde Impacto y Probabilidad se valoran de 1 (muy bajo) a 5 (muy alto),
 y Puntuación = Impacto × Probabilidad / 5 (escala 1-5).
 
-Cerrá con un párrafo interpretando la tabla: ¿el factor político es
+Cierra con un párrafo interpretando la tabla: ¿el factor político es
 favorable, neutro o adverso para el proyecto?
 
 ### 3.1.2 Factor Económico
@@ -169,7 +169,7 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
   solo PESTEL; las conclusiones del Cap. III completo se ven más
   adelante, después de las otras sub-fases (Porter, Matrices, Encuesta).
 - NO uses tono de "consultor de negocio" ni de "vendedor del proyecto".
-  Sos analista académico imparcial.
+  Eres analista académico imparcial.
 `.trim();
 
 /**

@@ -26,7 +26,7 @@ const STOPWORDS = new Set([
   "de", "la", "el", "los", "las", "un", "una", "y", "o", "en", "del", "al",
   "para", "por", "con", "sin", "su", "sus", "se", "este", "esta", "esto",
   "como", "que", "es", "son", "ha", "han", "no", "si", "lo", "mas", "menos",
-  "me", "mi", "mis", "te", "tu", "tus", "le", "les", "yo", "nos", "vos",
+  "me", "mi", "mis", "te", "tu", "tus", "le", "les", "yo", "nos", "tú",
   "muy", "algo", "todo", "toda", "todos", "todas", "tambien", "tan", "ya",
   "pero", "porque", "cuando", "donde", "como", "quien", "cual", "cuales",
   "ese", "esa", "esos", "esas", "aqui", "alli", "ahi", "antes", "despues",
@@ -90,7 +90,7 @@ function generarSugerencias(
     sugerencias.push({
       phase_id: phaseId,
       phase_label: phaseLabel,
-      sugerencia: `Considerá actualizar el megaprompt de "${phaseLabel}" para incluir por defecto: ${items}. ${fbs.length} estudiantes pidieron ajustes en esta fase.`,
+      sugerencia: `Considera actualizar el megaprompt de "${phaseLabel}" para incluir por defecto: ${items}. ${fbs.length} estudiantes pidieron ajustes en esta fase.`,
       evidencia,
     });
   }

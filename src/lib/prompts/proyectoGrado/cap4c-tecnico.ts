@@ -30,7 +30,7 @@ const COMUN_LOCALIZACION_Y_TAMANO = `
 #### Macro-localización
 
 Departamento y ciudad. Para proyectos UCATEC, casi siempre Cochabamba.
-Justificá brevemente: cercanía al mercado objetivo, infraestructura,
+Justifica brevemente: cercanía al mercado objetivo, infraestructura,
 acceso a mano de obra calificada, proveedores.
 
 #### Micro-localización (método de puntaje ponderado)
@@ -54,7 +54,7 @@ de Cochabamba).
 Calificación 1 (muy malo) a 5 (excelente). Puntuación = peso × calif.
 Ganadora = mayor puntuación total.
 
-Cerrá con párrafo: ¿dónde se ubicará el proyecto y por qué?
+Cierra con párrafo: ¿dónde se ubicará el proyecto y por qué?
 
 ### 4.4.2 Tamaño del proyecto
 
@@ -66,7 +66,7 @@ proyectada en Fase 3f.
 
 #### Distribución del espacio (layout)
 
-Describí cómo se distribuye el espacio físico:
+Describe cómo se distribuye el espacio físico:
 - Área operativa (lo que se hace).
 - Área administrativa (oficinas, gerencia).
 - Área de atención al cliente (si aplica).
@@ -118,7 +118,7 @@ de gama alta para proyectos de licenciatura — equilibrá costo y función.
 |---|---|:-:|:-:|
 | (3-6 insumos clave) | | | |
 
-Proveedores genéricos por tipo si no recordás nombres comerciales
+Proveedores genéricos por tipo si no recuerdas nombres comerciales
 exactos (ej: "distribuidoras de quinua en mercados zonales", "empresas
 importadoras del Eje Troncal").
 
@@ -142,7 +142,7 @@ Año 1 típico: 40-60% de la capacidad instalada. Año 5: 70-85%.
 const BLOQUE_SERVICIOS = `
 ### 4.4.3 Ambientación del local
 
-Describí el entorno físico que el cliente experimentará. Para servicios,
+Describe el entorno físico que el cliente experimentará. Para servicios,
 la "evidencia física" (uno de los 7P del marketing de servicios) es
 parte CRÍTICA del posicionamiento.
 
@@ -183,7 +183,7 @@ Año 1 típico: 35-55% de capacidad. Año 5: 65-80%.
 
 ### 4.4.6 Protocolo de atención
 
-Describí paso a paso cómo se atenderá al cliente desde que entra hasta
+Describe paso a paso cómo se atenderá al cliente desde que entra hasta
 que se va:
 
 1. Recepción y bienvenida.
@@ -221,7 +221,7 @@ ROL ESPECÍFICO DE ESTA FASE
 Estás generando la sub-sección 4.4 — ESTUDIO TÉCNICO del Cap. IV
 para un proyecto del subtipo ${subtipoLegible}.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [CAP III COMPLETO] — para la demanda proyectada y la cuota de mercado.
 3. [FASE 4a] — para el organigrama y el dimensionamiento del equipo.
@@ -254,11 +254,11 @@ PROHIBICIONES ESPECÍFICAS
 ═══════════════════════════════════════════════════════════════
 
 - NO mezcles bloques de producción y servicios (estás en el subtipo
-  ${subtipoLegible}; el otro no aplica acá).
+  ${subtipoLegible}; el otro no aplica aquí).
 - NO uses pesos iguales para todos los factores en el cálculo de
   localización (eso es análisis flojo).
 - NO inventes nombres comerciales de proveedores específicos —
-  usá descriptores genéricos coherentes.
+  usa descriptores genéricos coherentes.
 - NO uses precios irreales de maquinaria/equipamiento.
 - NO dimensiones capacidad mayor a la demanda + 20% (sobredimensión
   destruye el VAN del proyecto).

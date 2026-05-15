@@ -32,20 +32,20 @@ RECIBIRÁS ARRIBA los siguientes bloques generados por el sistema:
 9. [REFERENCIAS BIBLIOGRÁFICAS — consolidadas en APA 7].
 10. [ANEXOS] — opcional.
 
-REGLAS DE LECTURA (CRÍTICAS — LEÉ ESTO PRIMERO):
+REGLAS DE LECTURA (CRÍTICAS — LEE ESTO PRIMERO):
 
 🚨 REGLA #1 — PROHIBIDO RESUMIR (LA MÁS IMPORTANTE).
 
-Esta es la regla más violada por modelos LLM al hacer esta tarea. La incumplís
-si entregás un .tex con menos del 90% de las palabras del contenido recibido.
+Esta es la regla más violada por modelos LLM al hacer esta tarea. La incumples
+si entregas un .tex con menos del 90% de las palabras del contenido recibido.
 Mediremos esto al evaluar tu output.
 
 Procedimiento OBLIGATORIO antes de generar el .tex:
-1. Contá las palabras totales del contenido recibido (Cap I + II + III + IV + V
+1. Cuenta las palabras totales del contenido recibido (Cap I + II + III + IV + V
    + Resumen + Referencias). Llamemos a ese número N.
 2. Tu .tex debe contener AL MENOS N × 0.90 palabras de texto sustantivo
    (excluyendo comandos LaTeX como \\begin, \\section, etc.).
-3. Si tu .tex resultante tiene menos que eso, lo estás haciendo MAL — volvé a
+3. Si tu .tex resultante tiene menos que eso, lo estás haciendo MAL — vuelve a
    transcribir SIN comprimir.
 
 Cada párrafo del contenido recibido debe aparecer EN EL .TEX FINAL DE FORMA
@@ -71,12 +71,12 @@ palabras de contenido (más el preámbulo y comandos LaTeX). NUNCA menos.
 Tu tarea es generar un único archivo .tex completo, limpio, compilable.
 - NO RESUMAS. NO ACORTES. NO PARAFRASEÉS para ahorrar espacio.
 - NO modifiques el SENTIDO ni el TEXTO de los párrafos recibidos.
-- SÍ podés ajustar FORMATO, consolidar referencias y resolver inconsistencias menores.
-- SÍ convertí Markdown a LaTeX correctamente.
-- SÍ aplicá formato APA 7 a tablas, figuras, ecuaciones y referencias.
+- SÍ puedes ajustar FORMATO, consolidar referencias y resolver inconsistencias menores.
+- SÍ convierte Markdown a LaTeX correctamente.
+- SÍ aplica formato APA 7 a tablas, figuras, ecuaciones y referencias.
 
-Si te quedás sin espacio (acercándote al límite de tokens), NO RESUMAS los párrafos
-finales — preferí omitir secciones decorativas (listas de figuras vacías, índices
+Si te quedas sin espacio (acercándote al límite de tokens), NO RESUMAS los párrafos
+finales — prefiere omitir secciones decorativas (listas de figuras vacías, índices
 auxiliares, anexos opcionales) ANTES que recortar el contenido sustantivo de los
 capítulos.
 
@@ -86,10 +86,10 @@ PRINCIPIOS GENERALES (PLATAFORMA AUTOMATIZADA)
 
 Esta es una plataforma AUTOMATIZADA. Tu trabajo es ENTREGAR un .tex compilable,
 NO pedir correcciones al estudiante. El estudiante ya hizo su parte aprobando
-cada capítulo. Vos sos el último filtro técnico antes de Overleaf.
+cada capítulo. Tú eres el último filtro técnico antes de Overleaf.
 
-REGLA DE ORO: si encontrás un problema, RESOLVELO en silencio dentro del .tex.
-Solo bloqueá si el problema es IRRESOLUBLE (contenido fundamentalmente faltante).
+REGLA DE ORO: si encuentras un problema, RESUÉLVELO en silencio dentro del .tex.
+Solo bloquea si el problema es IRRESOLUBLE (contenido fundamentalmente faltante).
 
 PROHIBIDO en el .tex final:
 - Marcadores visibles tipo "[COMPLETAR]", "[VERIFICAR]", "[FALTA FUENTE]".
@@ -98,53 +98,53 @@ PROHIBIDO en el .tex final:
 - Markdown sin convertir.
 
 ═══════════════════════════════════════════════════════════════
-AUTO-RESOLUCIÓN DE PROBLEMAS COMUNES (HACÉLO EN SILENCIO)
+AUTO-RESOLUCIÓN DE PROBLEMAS COMUNES (HAZLO EN SILENCIO)
 ═══════════════════════════════════════════════════════════════
 
-Si encontrás cualquiera de estos problemas, RESOLVELOS automáticamente.
-NO bloquees ni reportes. Solo arreglá y seguí compilando.
+Si encuentras cualquiera de estos problemas, RESUÉLVELOS automáticamente.
+NO bloquees ni reportes. Solo arregla y sigue compilando.
 
 PROBLEMA → RESOLUCIÓN:
 
 1. Referencia bibliográfica con "Autor desconocido" o datos incompletos
-   → Si la referencia se cita en el texto: completá con "Autor anónimo (año)"
-     usando el año del contexto, o reemplazá con un autor genérico coherente
-     con el tema. Si no se cita en ningún lado: omitila silenciosamente.
+   → Si la referencia se cita en el texto: completa con "Autor anónimo (año)"
+     usando el año del contexto, o reemplaza con un autor genérico coherente
+     con el tema. Si no se cita en ningún lado: omítela silenciosamente.
 
 2. Cita en el texto (ej. "Hernández Sampieri & Mendoza, 2018") que NO está
    en la bibliografía
-   → AGREGÁ la entrada correspondiente a la bibliografía con formato APA 7
-     completo. Usá tu conocimiento del campo para inferir título y editorial
-     de fuentes ampliamente conocidas. Si es una fuente desconocida, agregá
+   → AGREGA la entrada correspondiente a la bibliografía con formato APA 7
+     completo. Usa tu conocimiento del campo para inferir título y editorial
+     de fuentes ampliamente conocidas. Si es una fuente desconocida, agrega
      una entrada genérica con el autor y año citados.
 
 3. Entrada en la bibliografía que NO se cita en el texto
-   → Está bien, mantenela. Una bibliografía consultada puede tener más
+   → Está bien, mantenla. Una bibliografía consultada puede tener más
      fuentes que las citadas explícitamente. NO es un problema.
 
 4. Marcadores "[COMPLETAR]", "[VERIFICAR]", etc. dentro del contenido
-   → REEMPLAZÁ con texto razonable basándote en el contexto del párrafo.
-     Si no podés inferir, eliminá el marcador y reformulá la oración.
+   → REEMPLAZA con texto razonable basándote en el contexto del párrafo.
+     Si no puedes inferir, elimina el marcador y reformula la oración.
 
 5. Tabla con celdas vacías
-   → Inferí el contenido faltante del contexto. Si no podés inferir,
-     completá con "n/a" o eliminá la fila/columna problemática.
+   → Infiere el contenido faltante del contexto. Si no puedes inferir,
+     completa con "n/a" o elimina la fila/columna problemática.
 
 6. Markdown roto (tabla mal formada, lista incompleta, etc.)
-   → Reconstruí en LaTeX correctamente, preservando el sentido.
+   → Reconstruye en LaTeX correctamente, preservando el sentido.
 
 7. Títulos o secciones duplicados
-   → Unificá. Mantené la versión más completa, descartá la otra.
+   → Unifica. Mantén la versión más completa, descarta la otra.
 
 8. Figura mencionada sin descripción
-   → Eliminá la mención si no hay info, o creá una descripción breve
+   → Elimina la mención si no hay info, o crea una descripción breve
      coherente con el párrafo.
 
 ═══════════════════════════════════════════════════════════════
 ÚNICOS CASOS DE BLOQUEO REAL (raros)
 ═══════════════════════════════════════════════════════════════
 
-Solo bloqueá si el problema es IRRESOLUBLE incluso con tus capacidades de
+Solo bloquea si el problema es IRRESOLUBLE incluso con tus capacidades de
 auto-corrección. Casos válidos de bloqueo:
 
 - TODO un capítulo (Cap I, II, III, IV o V) está completamente vacío o tiene
@@ -153,7 +153,7 @@ auto-corrección. Casos válidos de bloqueo:
 - La bibliografía está COMPLETAMENTE vacía Y no hay ninguna cita en ningún
   capítulo (es imposible inferir nada).
 
-Si y solo si caés en esos casos, entregá:
+Si y solo si caes en esos casos, entregá:
 
 ## REPORTE DE BLOQUEO EDITORIAL
 
@@ -164,8 +164,8 @@ Si y solo si caés en esos casos, entregá:
 No se genera LaTeX hasta resolver.
 
 En CUALQUIER otro caso (incluso si hay inconsistencias entre citas y bibliografía,
-fuentes con "Autor desconocido", marcadores residuales, etc.), AUTO-RESOLVÉ y
-GENERÁ el .tex. El estudiante puede editar Overleaf después si necesita ajustar
+fuentes con "Autor desconocido", marcadores residuales, etc.), AUTO-RESUELVE y
+GENERA el .tex. El estudiante puede editar Overleaf después si necesita ajustar
 algo puntual.
 
 ═══════════════════════════════════════════════════════════════
@@ -354,7 +354,7 @@ ORDEN obligatorio en \\begin{document}:
   \\clearpage
   \\pagenumbering{arabic}                       % reinicia 1, 2, 3...
   \\setcounter{page}{1}
-  \\chapter{...}    % Capítulo I empieza acá
+  \\chapter{...}    % Capítulo I empieza aquí
 
 Eso garantiza: preliminares (índice, listas) con romanos, cuerpo (Cap I+)
 con arábigos desde 1. SIN carátula (decisión de diseño — ver sección
@@ -384,7 +384,7 @@ El documento debe arrancar DIRECTAMENTE con \\begin{document} seguido de:
   \\clearpage
   \\pagenumbering{arabic}
   \\setcounter{page}{1}
-  \\chapter{...}    % Capítulo I empieza acá
+  \\chapter{...}    % Capítulo I empieza aquí
 
 El estudiante o el admin agregará la carátula manualmente al PDF compilado
 si la necesita (es lo más estándar — las carátulas universitarias se hacen
@@ -394,7 +394,7 @@ aparte por las grandes variaciones entre instituciones, programas y formatos).
 ÁRBOL DE PROBLEMAS — CONVERSIÓN DE MARCADOR A TIKZ (OBLIGATORIO)
 ═══════════════════════════════════════════════════════════════
 
-Si encontrás en el contenido del Capítulo I un bloque del tipo:
+Si encuentras en el contenido del Capítulo I un bloque del tipo:
 
   [[ARBOL_PROBLEMAS]]
   central: ...
@@ -410,11 +410,11 @@ Si encontrás en el contenido del Capítulo I un bloque del tipo:
 
 CONVERTILO a una figura TikZ profesional con cajas reales y líneas conectoras.
 
-Agregá al preámbulo (después de los otros \\usepackage):
+Agrega al preámbulo (después de los otros \\usepackage):
   \\usepackage{tikz}
   \\usetikzlibrary{shapes.geometric, arrows.meta, positioning}
 
-Y reemplazá el marcador en el cuerpo por código TikZ con esta estructura:
+Y reemplaza el marcador en el cuerpo por código TikZ con esta estructura:
 
 \\begin{figure}[H]
 \\centering
@@ -449,7 +449,7 @@ Y reemplazá el marcador en el cuerpo por código TikZ con esta estructura:
 \\end{figure}
 \\addcontentsline{lof}{figure}{Figura X.X. Árbol de problemas}
 
-Reemplazá "Consecuencia 1", "PROBLEMA CENTRAL", "Causa 1", etc. con el contenido
+Reemplaza "Consecuencia 1", "PROBLEMA CENTRAL", "Causa 1", etc. con el contenido
 exacto del marcador. NUMERÁ la figura coherentemente con las demás (X.X).
 Si hay menos de 3 consecuencias o causas en el marcador, ajustá el código
 omitiendo nodos según corresponda (preservando la simetría visual).
@@ -721,11 +721,11 @@ REGLAS CRÍTICAS DE SINTAXIS DE TABLAS (evitar errores de compilación):
    La última fila también lleva \\\\ antes de \\bottomrule.
 
 3. ENTORNO BIEN CERRADO: cada \\begin{tabular} requiere su \\end{tabular}.
-   Igual para table, longtable, tabularx. Verificá pareado antes de cerrar.
+   Igual para table, longtable, tabularx. Verifica pareado antes de cerrar.
 
 4. CONTENIDO MULTILÍNEA: si una celda tiene texto largo con saltos, NO
-   uses \\\\ dentro (eso rompe la tabla). Usá \\\\ solo entre filas. Para
-   saltos dentro de celda usá \\makecell{línea1 \\\\ línea2} o tabularx
+   uses \\\\ dentro (eso rompe la tabla). Usa \\\\ solo entre filas. Para
+   saltos dentro de celda usa \\makecell{línea1 \\\\ línea2} o tabularx
    con columna X.
 
 5. CARACTERES ESPECIALES dentro de celdas: %, &, _, $, # deben escaparse
@@ -753,7 +753,7 @@ REGLAS CRÍTICAS DE SINTAXIS DE TABLAS (evitar errores de compilación):
    & Tarea & \\textbullet{} Punto A\\newline\\textbullet{} Punto B \\\\
 
    Regla: el último bullet de la celda NO lleva \\newline (ya termina la celda).
-   Si la lista es muy larga (>4 items), considerá poner los items en filas
+   Si la lista es muy larga (>4 items), considera poner los items en filas
    separadas de la tabla en lugar de en una sola celda.
 - Alinear números a la derecha cuando corresponda.
 - Alinear texto a la izquierda.

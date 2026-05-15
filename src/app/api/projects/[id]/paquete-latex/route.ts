@@ -105,7 +105,7 @@ export async function GET(_req: Request, { params }: Params) {
     const rawLatex = phaseContents["ph-latex"] || phaseContents["ph-latex_borrador"] || "";
     if (!rawLatex.trim()) {
       return NextResponse.json(
-        { error: "Todavía no hay LaTeX generado. Generá la fase 'Compilar LaTeX' primero." },
+        { error: "Todavía no hay LaTeX generado. Genera la fase 'Compilar LaTeX' primero." },
         { status: 400 }
       );
     }
@@ -172,14 +172,14 @@ export async function GET(_req: Request, { params }: Params) {
       `Fecha: ${datos.mes} ${datos.anio}`,
       ``,
       `INSTRUCCIONES:`,
-      `1. Abrí Overleaf (overleaf.com) y creá un proyecto nuevo "Upload Project".`,
-      `2. Subí TODO el contenido de este ZIP (descomprimido) a tu proyecto Overleaf.`,
-      `3. Asegurate de que el motor sea pdfLaTeX (por defecto ya lo es).`,
-      `4. Apretá "Recompile". El PDF se genera automáticamente con el logo,`,
+      `1. Abre Overleaf (overleaf.com) y crea un proyecto nuevo "Upload Project".`,
+      `2. Sube TODO el contenido de este ZIP (descomprimido) a tu proyecto Overleaf.`,
+      `3. Asegúrate de que el motor sea pdfLaTeX (por defecto ya lo es).`,
+      `4. Pulsa "Recompile". El PDF se genera automáticamente con el logo,`,
       `   tu nombre, fecha y programa ya cargados.`,
       ``,
-      `Si necesitás ajustar algún dato (nombre, mes, etc.), abrí el archivo`,
-      `${baseName}.tex y buscá el texto a cambiar — está al inicio del documento`,
+      `Si necesitas ajustar algún dato (nombre, mes, etc.), abre el archivo`,
+      `${baseName}.tex y busca el texto a cambiar — está al inicio del documento`,
       `en el bloque \\begin{titlepage}.`,
     ];
 
@@ -192,7 +192,7 @@ export async function GET(_req: Request, { params }: Params) {
         ``,
         `Estas figuras estaban referenciadas en el documento pero no se`,
         `subió ningún archivo de imagen correspondiente. Para incluirlas:`,
-        `1. Conseguí las imágenes (formatos: .png, .jpg, .pdf).`,
+        `1. Consigue las imágenes (formatos: .png, .jpg, .pdf).`,
         `2. Subilas a tu proyecto Overleaf con esos mismos nombres.`,
         `3. En el .tex, descomentá las líneas que empiezan con`,
         `   "% [auto] Figura omitida:" y restaurá el bloque \\begin{figure}.`,

@@ -31,11 +31,11 @@ Es la sub-fase más extensa del marco propositivo y la que alimenta
 toda la evaluación del proyecto (Fase 4g).
 
 Importante: los cálculos numéricos los hace el sistema con
-calculos.ts. Vos producís las TABLAS estructuradas con datos
+calculos.ts. Tú produces las TABLAS estructuradas con datos
 plausibles y la interpretación. El sistema reemplaza valores
 puntuales en runtime cuando es necesario.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 3f] — demanda proyectada y cuota → base para ingresos.
 3. [FASE 4a-bis] — política salarial → costos de personal.
@@ -179,7 +179,7 @@ francés (cuota fija) — el más común en bancos bolivianos.
 | **Total** | — | **XXX.XXX** | **XXX.XXX** | XXX.XXX | 0 |
 
 El sistema calcula la tabla exacta con amortizacion() de calculos.ts;
-acá presentás un resumen anual con totales.
+aquí presentas un resumen anual con totales.
 
 ### 4.7.9 Resumen general de costos e ingresos
 
@@ -196,7 +196,7 @@ acá presentás un resumen anual con totales.
 | (-) IUE 25% | X.XXX | X.XXX | X.XXX | X.XXX | X.XXX |
 | **Utilidad neta** | **XX.XXX** | **XX.XXX** | **XX.XXX** | **XX.XXX** | **XX.XXX** |
 
-Cerrá con párrafo interpretando la tendencia (¿utilidad creciente?
+Cierra con párrafo interpretando la tendencia (¿utilidad creciente?
 ¿hay año de pérdida inicial? ¿cuándo se equilibra?).
 
 ═══════════════════════════════════════════════════════════════

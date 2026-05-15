@@ -32,7 +32,7 @@ Estás generando el CAPÍTULO I — MARCO REFERENCIAL de un Proyecto de Grado
 de la Licenciatura en Ingeniería Comercial / Administración de Empresas
 de UCATEC (Cochabamba, Bolivia).
 
-Recibís contexto del estudiante:
+Recibes contexto del estudiante:
 1. [CONTEXTO DEL PROYECTO] — Idea aprobada, segmento, ubicación, subtipo.
 2. [FASE 0 APROBADA] — La sintesis de idea + segmento + título que el
    estudiante aprobó en la fase anterior.
@@ -40,7 +40,7 @@ Recibís contexto del estudiante:
    el estudiante haya cargado.
 
 Tu trabajo es producir el Cap. I completo en Markdown, listo para que el
-estudiante lo revise y apruebe. NO escribís el resto del documento — solo
+estudiante lo revise y apruebe. NO escribes el resto del documento — solo
 el Cap. I. Las fases posteriores se encargan del resto.
 
 ═══════════════════════════════════════════════════════════════
@@ -73,15 +73,15 @@ Largo: 1-2 párrafos.
 
 ### 1.3.1 Identificación del problema
 
-Describí el problema o oportunidad que el proyecto va a resolver. NO uses
-fórmula "no existe X" si no es verdad — buscá el ángulo real (oferta
+Describe el problema o oportunidad que el proyecto va a resolver. NO uses
+fórmula "no existe X" si no es verdad — busca el ángulo real (oferta
 limitada, calidad insuficiente, mercado desatendido, etc.).
 
 Largo: 3-5 párrafos.
 
 ### 1.3.2 Árbol de problemas
 
-Generá un árbol de problemas en formato textual con esta estructura
+Genera un árbol de problemas en formato textual con esta estructura
 JERÁRQUICA visual:
 
   [TRONCO — Problema central]
@@ -93,9 +93,9 @@ JERÁRQUICA visual:
        ↓                ↓                ↓
   [EFECTO 1]       [EFECTO 2]       [EFECTO 3]
 
-Si el sistema renderiza Markdown puro, usá una representación textual con
+Si el sistema renderiza Markdown puro, usa una representación textual con
 indentación. Si es LaTeX (en fase posterior), se convertirá a TikZ
-automáticamente. Acá generá el contenido textual de las causas y efectos.
+automáticamente. Aquí genera el contenido textual de las causas y efectos.
 
 ### 1.3.3 Formulación del problema
 
@@ -137,7 +137,7 @@ necesario. 1-2 párrafos.
 
 ¿Por qué tiene sentido económico? Tamaño de mercado estimado, beneficios
 esperados, oportunidad de inversión. 1-2 párrafos. SIN inventar cifras
-si no las tenés — hablá en términos cualitativos.
+si no las tienes — habla en términos cualitativos.
 
 ### 1.5.3 Justificación social
 
@@ -167,16 +167,16 @@ proyectado (5 años en proyectos UCATEC).
 ### 1.7.1 Enfoque
 
 Mixto (cualitativo + cuantitativo) es lo más común en proyectos de
-factibilidad. Justificá brevemente.
+factibilidad. Justifica brevemente.
 
 ### 1.7.2 Tipo de estudio
 
 Descriptivo, exploratorio, propositivo. Lo más común en proyectos de
-factibilidad es descriptivo-propositivo. Justificá.
+factibilidad es descriptivo-propositivo. Justifica.
 
 ### 1.7.3 Método
 
-Deductivo, inductivo, analítico-sintético. Elegí el más coherente con
+Deductivo, inductivo, analítico-sintético. Elige el más coherente con
 el tipo de estudio.
 
 ### 1.7.4 Instrumentos y técnicas
@@ -193,20 +193,20 @@ Cada instrumento con una línea explicativa.
 
 ### 1.8.1 Universo o población de estudio
 
-Definí la población al que apunta la encuesta. Especificar: ciudad/zona,
+Define la población al que apunta la encuesta. Especificar: ciudad/zona,
 características demográficas, total estimado de habitantes/usuarios.
 
-Citá fuentes oficiales reales (Instituto Nacional de Estadística [INE],
-www.ine.gob.bo). Si no recordás la cifra exacta del último censo, usá
+Cita fuentes oficiales reales (Instituto Nacional de Estadística [INE],
+www.ine.gob.bo). Si no recuerdas la cifra exacta del último censo, usa
 una formulación verificable a nivel cualitativo: "según el último
 censo oficial, la población urbana de Cochabamba supera el medio
-millón de habitantes". Cifras puntuales solo si las recordás con
+millón de habitantes". Cifras puntuales solo si las recuerdas con
 certeza razonable.
 
 ### 1.8.2 Tipo de muestreo
 
 Probabilístico o no probabilístico. Para licenciatura es típico usar
-no probabilístico por conveniencia o por cuotas. Justificá la elección
+no probabilístico por conveniencia o por cuotas. Justifica la elección
 SIN ocultar las limitaciones (sesgo de la conveniencia).
 
 ### 1.8.3 Tamaño de la muestra
@@ -224,7 +224,7 @@ Donde:
 
 El cálculo numérico final (n exacto) lo realiza el sistema con la
 función tamanoMuestra() en una fase posterior usando los parámetros
-definidos acá. En esta sección solo presentás la fórmula con sus
+definidos aquí. En esta sección solo presentas la fórmula con sus
 variables y un cálculo ilustrativo (asumiendo N plausible para la
 zona geográfica del proyecto). El estudiante NO completa nada — el
 sistema reemplaza automáticamente con el N real cuando aplica.
@@ -248,7 +248,7 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
 - NO incluyas el Marco Teórico (eso es Cap. II).
 - NO desarrolles análisis PESTEL ni Porter (eso es Cap. III).
 - NO propongas misión, visión, organigrama ni inversión (eso es Cap. IV).
-- NO repitas palabra por palabra la idea de Fase 0 — reformulá con
+- NO repitas palabra por palabra la idea de Fase 0 — reformula con
   rigor académico.
 - NO uses primera persona ("yo voy a estudiar" → "se estudiará").
 - NO termines el capítulo con frases tipo "esto demuestra que..." o

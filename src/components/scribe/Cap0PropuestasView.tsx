@@ -233,7 +233,7 @@ export default function Cap0PropuestasView({
 
         <p style={{ fontSize: 14, color: "var(--fg-secondary)", lineHeight: 1.7, margin: "0 0 28px", maxWidth: 540, marginInline: "auto" }}>
           Este tema se usará como base de los capítulos I al V de tu monografía.
-          Ya no podés cambiarlo desde acá: cada capítulo dependerá de él.
+          Ya no puedes cambiarlo desde aquí: cada capítulo dependerá de él.
         </p>
 
         <div style={{
@@ -242,7 +242,7 @@ export default function Cap0PropuestasView({
           fontSize: 12.5, color: "var(--fg-secondary)", lineHeight: 1.6,
           maxWidth: 540, margin: "0 auto 28px",
         }}>
-          💡 Si necesitás un tema diferente, podés crear un proyecto nuevo
+          💡 Si necesitas un tema diferente, puedes crear un proyecto nuevo
           desde el dashboard.
         </div>
 
@@ -278,7 +278,7 @@ export default function Cap0PropuestasView({
           borderRadius: 10, fontSize: 13, color: "#f59e0b",
         }}>
           ⚠️ La IA generó un formato que no se pudo procesar como cards.
-          Mira el texto y elige manualmente. Si querés intentar otra vez, presioná
+          Mira el texto y elige manualmente. Si quieres intentar otra vez, presiona
           &quot;Regenerar propuestas&quot; abajo.
         </div>
         <pre style={{
@@ -333,7 +333,7 @@ export default function Cap0PropuestasView({
         </h1>
         <p style={{ fontSize: 13.5, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
           Cada propuesta es un tema viable con datos públicos verificables.
-          Elegí una para continuar con el Capítulo I, o pedí otras opciones.
+          Elige una para continuar con el Capítulo I, o pedí otras opciones.
         </p>
       </div>
 

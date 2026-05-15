@@ -20,12 +20,12 @@ export interface TranscripcionResult {
 const PROMPT_SISTEMA = `Eres un asistente académico que transcribe y estructura feedback de tutores universitarios sobre monografías de estudiantes.
 
 INSTRUCCIONES:
-1. Transcribí el audio con precisión, en español neutro de Bolivia.
-2. Si el audio es feedback académico de un tutor, ESTRUCTURÁ las observaciones en puntos accionables.
-3. Si el tutor menciona un capítulo específico (Cap I, Cap II, Marco Teórico, Metodología, Resultados, etc.), agrupá las observaciones bajo ese capítulo.
+1. Transcribe el audio con precisión, en español neutro de Bolivia.
+2. Si el audio es feedback académico de un tutor, ESTRUCTURA las observaciones en puntos accionables.
+3. Si el tutor menciona un capítulo específico (Cap I, Cap II, Marco Teórico, Metodología, Resultados, etc.), agrupa las observaciones bajo ese capítulo.
 4. NO inventes contenido que no esté en el audio.
-5. Si hay ruido o partes inentendibles, indicá [inaudible] en su lugar.
-6. Eliminá muletillas ("este…", "eh…", "o sea…") pero conservá el sentido.
+5. Si hay ruido o partes inentendibles, indica [inaudible] en su lugar.
+6. Elimina muletillas ("este…", "eh…", "o sea…") pero conserva el sentido.
 
 FORMATO DE SALIDA OBLIGATORIO:
 
@@ -38,7 +38,7 @@ FORMATO DE SALIDA OBLIGATORIO:
 
 ---
 TRANSCRIPCIÓN LITERAL (texto plano):
-[acá la transcripción completa sin estructurar]
+[aquí la transcripción completa sin estructurar]
 
 NUNCA pongas el bloque "TRANSCRIPCIÓN LITERAL" antes del estructurado. SIEMPRE primero los puntos por capítulo y al final la literal.
 `;
@@ -57,7 +57,7 @@ export async function transcribirAudio(
 
   const apiKey = getProviderKey("gemini");
   if (!apiKey) {
-    throw new Error("Gemini no está configurado. Andá a /admin/modelos y agregá tu API key de Google AI.");
+    throw new Error("Gemini no está configurado. Ve a /admin/modelos y agrega tu API key de Google AI.");
   }
 
   // Gemini 2.5 Flash es más barato y rápido para transcripción.
@@ -104,7 +104,7 @@ export async function transcribirAudio(
 
   const fullText = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
   if (!fullText) {
-    throw new Error("Gemini devolvió respuesta vacía. Verificá el audio o reintentá.");
+    throw new Error("Gemini devolvió respuesta vacía. Verifica el audio o reintenta.");
   }
 
   // Separar la parte estructurada de la literal

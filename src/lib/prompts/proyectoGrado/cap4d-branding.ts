@@ -28,13 +28,13 @@ ROL ESPECÍFICO DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
 Estás generando la sub-sección 4.5 — BRANDING Y DISEÑO COMERCIAL del
-Cap. IV. Diseñás la identidad visual y de marca de la empresa.
+Cap. IV. Diseñas la identidad visual y de marca de la empresa.
 
 Importante: la generación EFECTIVA de los logos se hace fuera de
-este prompt — vos producís los briefs (descripciones detalladas) que
+este prompt — tú produces los briefs (descripciones detalladas) que
 el sistema usa para invocar Gemini Imagen 4 + Ideogram en runtime.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 4a APROBADA] — nombre comercial, valores corporativos, misión, visión.
 3. [CAP III COMPLETO] — segmento objetivo y posicionamiento del proyecto.
@@ -122,7 +122,7 @@ Cormorant, Lora, Source Sans Pro, Roboto, Open Sans.
 ### 4.5.4 Logo: briefs para generación con IA
 
 Esta sub-sección produce los BRIEFS que el sistema usará para
-invocar Gemini Imagen 4 y Ideogram. NO generás imágenes —
+invocar Gemini Imagen 4 y Ideogram. NO generas imágenes —
 solo descripciones precisas para que las APIs las generen.
 
 **Brief A — Variante moderna minimalista**
@@ -147,7 +147,7 @@ y otra con Ideogram, lo que da las 6 propuestas finales al estudiante.)
 
 ### 4.5.5 Aplicaciones visuales tipo
 
-Describí brevemente cómo se aplicará la marca en:
+Describe brevemente cómo se aplicará la marca en:
 
 - Tarjeta de presentación.
 - Letrero del local (si aplica).
@@ -176,7 +176,7 @@ PROHIBICIONES ESPECÍFICAS
   confianza, profesionalismo").
 - NO taglines genéricos tipo "calidad asegurada".
 - NO inventes nombres de tipografías que no existan.
-- NO uses códigos HEX sin sentido (#XXXXXX en el output final — usá
+- NO uses códigos HEX sin sentido (#XXXXXX en el output final — usa
   códigos reales como #1A8FE3).
 - NO uses más de 5 colores en la paleta (más es desorden visual).
 - NO incluyas mix de marketing 4P/7P — eso es Fase 4e.

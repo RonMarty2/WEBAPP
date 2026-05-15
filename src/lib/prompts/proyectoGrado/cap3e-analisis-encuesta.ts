@@ -32,13 +32,13 @@ ROL ESPECÍFICO DE ESTA FASE
 Estás generando la sub-sección 3.5 — ANÁLISIS DE RESULTADOS DE LA
 ENCUESTA del Cap. III.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 3d APROBADA — DISEÑO DE LA ENCUESTA] — el cuestionario formal.
 3. [MODO DE TRABAJO] — uno de los dos:
    - "CON_DATA_REAL" + un bloque con tablas ya calculadas por el
      sistema (frecuencias, porcentajes, chi-cuadrado bivariado).
-   - "PROYECCION" sin tablas — generás resultados plausibles
+   - "PROYECCION" sin tablas — generas resultados plausibles
      coherentes con el segmento.
 
 ═══════════════════════════════════════════════════════════════
@@ -48,7 +48,7 @@ ESTRUCTURA OBLIGATORIA (igual en ambos modos)
 ## 3.5 Análisis de Resultados de la Encuesta
 
 (Párrafo introductorio: cómo se aplicó la encuesta, cuántos respondieron,
-horizonte temporal. Si el modo es PROYECCION, incluí una nota metodológica
+horizonte temporal. Si el modo es PROYECCION, incluye una nota metodológica
 breve y profesional explicando que los datos provienen de investigación
 secundaria del segmento — esto es estándar académico cuando no se aplica
 encuesta primaria en proyectos de licenciatura.)
@@ -73,8 +73,8 @@ Para CADA pregunta clave:
 
 Interpretación de 1-2 párrafos: ¿qué dice este resultado sobre el segmento?
 
-(Si el modo es CON_DATA_REAL, copiá las tablas que recibís. Si es
-PROYECCION, generá distribuciones plausibles coherentes con el segmento
+(Si el modo es CON_DATA_REAL, copia las tablas que recibes. Si es
+PROYECCION, genera distribuciones plausibles coherentes con el segmento
 definido en 3.4.1 — por ejemplo, si el segmento es "mujeres 25-45 NSE
 medio en Cochabamba", la distribución de género debe ser ~95% femenino,
 no 50/50.)
@@ -89,7 +89,7 @@ no 50/50.)
 
 #### 3.5.1.4 Intención hacia la propuesta del proyecto
 
-LA SECCIÓN MÁS IMPORTANTE. Acá se mide:
+LA SECCIÓN MÁS IMPORTANTE. Aquí se mide:
 
 - % de aceptación de la propuesta (¿estarían dispuestos a probarla?).
 - Disposición a pagar (rangos en Bs).
@@ -209,9 +209,9 @@ export function buildContextoCap3e(datos: {
     );
   } else {
     parts.push(
-      "El estudiante no aplicó encuesta primaria. Generá resultados proyectados",
+      "El estudiante no aplicó encuesta primaria. Genera resultados proyectados",
       "coherentes con el segmento definido y con investigación secundaria del rubro.",
-      "Los datos deben sonar plausibles y realistas. Incluí en el párrafo introductorio",
+      "Los datos deben sonar plausibles y realistas. Incluye en el párrafo introductorio",
       "una NOTA METODOLÓGICA breve y formal indicando que los resultados provienen",
       "de proyección basada en estudios secundarios del segmento — esto es estándar",
       "académico aceptado en proyectos de licenciatura.",

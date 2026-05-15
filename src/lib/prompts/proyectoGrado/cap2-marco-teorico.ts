@@ -131,7 +131,7 @@ que el lector necesita conocer para entender el resto del documento.
 Cada concepto se define en 1 a 3 párrafos con cita APA 7 de un autor
 reconocido de administración, marketing o evaluación de proyectos.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO] — Idea aprobada, subtipo, título.
 2. [CAPÍTULO I APROBADO] — El Cap. I completo (sirve para detectar qué
    conceptos extras hay que definir más allá de la lista obligatoria).
@@ -162,11 +162,11 @@ Cada entrada:
 
 ## 2.X Nombre del concepto
 
-Definición en 1 a 3 párrafos. Empezá con la definición técnica del
-autor citado, después aclará en lenguaje propio cómo aplica al
+Definición en 1 a 3 párrafos. Empieza con la definición técnica del
+autor citado, después aclara en lenguaje propio cómo aplica al
 proyecto. NO copies literal — parafraseá con rigor.
 
-Citá UN autor reconocido por concepto. Autores legítimos para esta
+Cita UN autor reconocido por concepto. Autores legítimos para esta
 materia (NO inventes otros):
 
 - **Sapag Chain & Sapag Chain** (Preparación y evaluación de proyectos)
@@ -204,7 +204,7 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
 - NO incluyas análisis PESTEL real, Porter real, FODA real con datos
-  del proyecto (eso es Cap. III — acá solo se DEFINEN los conceptos).
+  del proyecto (eso es Cap. III — aquí solo se DEFINEN los conceptos).
 - NO cites autores inventados. Si dudás de un autor, no lo cites.
 - NO uses bullets sueltos como definición ("PESTEL: Político,
   Económico, Social, Tecnológico, Ecológico, Legal."). Las definiciones

@@ -130,7 +130,7 @@ export async function POST(req: Request, { params }: Params) {
       phaseContentsNuevo[`${phaseId}_preguntas_raw`] = rawAI;
       await dbUpdateProyecto(id, { phase_contents: phaseContentsNuevo });
       return NextResponse.json(
-        { error: "La IA devolvió un formato inesperado. Probá regenerar." },
+        { error: "La IA devolvió un formato inesperado. Prueba regenerar." },
         { status: 502 },
       );
     }

@@ -202,15 +202,15 @@ causas:
 Reglas del marcador:
 - Cada elemento (central, consecuencias, causas) en línea separada.
 - Exactamente 3 consecuencias y 3 causas (norma UMSS).
-- Cada item debe ser BREVE (máximo 8 palabras). Si necesitás explicar más,
-  hacelo en párrafos aparte ANTES del marcador.
+- Cada item debe ser BREVE (máximo 8 palabras). Si necesitas explicar más,
+  hazlo en párrafos aparte ANTES del marcador.
 - NO escribas "Tabla X.X" ni "Figura X.X" antes del marcador. La plataforma
   agrega el caption automáticamente como "Figura: Árbol de problemas".
-- NO uses el marcador en ninguna otra parte del documento — solo acá.
-- NO inventes elementos vacíos. Si no hay datos suficientes, escribí menos
+- NO uses el marcador en ninguna otra parte del documento — solo aquí.
+- NO inventes elementos vacíos. Si no hay datos suficientes, escribe menos
   causas/consecuencias, pero coherentes.
 
-DESPUÉS del marcador, redactá un párrafo final que explique la lógica del
+DESPUÉS del marcador, redacta un párrafo final que explique la lógica del
 árbol (cómo las causas raíz generan el problema central, y cómo éste deriva
 en las consecuencias observables).
 - El problema central debe ser coherente con el título y el objetivo general.

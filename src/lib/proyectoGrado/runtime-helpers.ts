@@ -10,7 +10,7 @@
  *
  *   - Fase 3d: cálculo real del tamaño de muestra `n` con tamanoMuestra().
  *   - Fase 3e (modo CON_DATA_REAL): tabulación con frecuencias() y
- *     chiCuadrado() del módulo encuestas.ts. Esto NO va acá — el
+ *     chiCuadrado() del módulo encuestas.ts. Esto NO va aquí — el
  *     endpoint precalcula y pasa a la IA antes de generar.
  *   - Fase 4f / 4g: cálculo real de VAN, TIR, WACC, punto de equilibrio
  *     con flujo de caja, una vez aprobados los parámetros financieros.

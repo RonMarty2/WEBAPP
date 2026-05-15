@@ -226,9 +226,9 @@ Reglas del marcador:
 - Exactamente 3 consecuencias y 3 causas.
 - Cada item debe ser BREVE (máximo 8 palabras).
 - NO escribas "Tabla X.X" ni "Figura X.X" antes del marcador.
-- NO uses el marcador en ninguna otra parte del documento — solo acá.
+- NO uses el marcador en ninguna otra parte del documento — solo aquí.
 
-DESPUÉS del marcador, redactá un párrafo final que explique la lógica del
+DESPUÉS del marcador, redacta un párrafo final que explique la lógica del
 árbol (cómo las causas raíz generan el problema central, y cómo éste deriva
 en las consecuencias observables).
 

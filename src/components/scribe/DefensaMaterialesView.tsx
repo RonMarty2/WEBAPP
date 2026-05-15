@@ -100,7 +100,7 @@ export default function DefensaMaterialesView({ proyectoId }: { proyectoId: stri
           <span style={{ fontSize: 22 }}>✅</span>
           <div>
             <div style={{ fontSize: 12, fontWeight: 700, color: "#10b981" }}>Materiales listos</div>
-            <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 2 }}>Descargá los archivos abajo para preparar tu defensa.</div>
+            <div style={{ fontSize: 11, color: "var(--fg-secondary)", marginTop: 2 }}>Descarga los archivos abajo para preparar tu defensa.</div>
           </div>
         </div>
       )}

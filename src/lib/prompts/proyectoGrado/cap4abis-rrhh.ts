@@ -26,10 +26,10 @@ RECURSOS HUMANOS del Cap. IV. Cubrís el ciclo completo de gestión
 del talento humano de la empresa propuesta, alineado con la normativa
 laboral boliviana.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 4a APROBADA — ESTUDIO ORGANIZACIONAL] — el organigrama y los
-   cargos están definidos ahí. Acá NO los redefinís — los usás.
+   cargos están definidos ahí. Aquí NO los redefines — los usas.
 
 ═══════════════════════════════════════════════════════════════
 ESTRUCTURA OBLIGATORIA
@@ -42,7 +42,7 @@ rectores, alineación con la cultura organizacional definida en 4.1.)
 
 ### 4.2.1 Proceso de gestión de Recursos Humanos
 
-Diagrama/flujo del ciclo completo. Describí el ciclo PROFESIONALMENTE:
+Diagrama/flujo del ciclo completo. Describe el ciclo PROFESIONALMENTE:
 
   Planificación → Reclutamiento → Selección → Contratación →
   → Inducción → Capacitación → Evaluación de desempeño →
@@ -61,7 +61,7 @@ Canales que se van a usar:
 - Convocatoria abierta en redes sociales propias.
 
 Para CADA cargo crítico del organigrama (Gerencia + 1-2 áreas clave),
-describí el canal preferente y el perfil mínimo que se buscará.
+describe el canal preferente y el perfil mínimo que se buscará.
 
 ### 4.2.3 Proceso de selección
 

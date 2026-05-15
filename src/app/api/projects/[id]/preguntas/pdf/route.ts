@@ -154,7 +154,7 @@ function buildHtml(params: {
       ${renderItems(b.conocimiento, "conocimiento")}
     ` : ""}
     ${b.autoria.length > 0 ? `
-      <h3 class="kind autoria">🔍 De autoría y proceso — cómo verifican que vos hiciste el trabajo</h3>
+      <h3 class="kind autoria">🔍 De autoría y proceso — cómo verifican que tú hiciste el trabajo</h3>
       ${renderItems(b.autoria, "autoria")}
     ` : ""}
   `).join("");
@@ -229,7 +229,7 @@ export async function GET(_req: Request, { params }: Params) {
 
     if (bloques.length === 0) {
       return NextResponse.json(
-        { error: "Todavía no hay preguntas generadas. Aprobá al menos un capítulo." },
+        { error: "Todavía no hay preguntas generadas. Aprueba al menos un capítulo." },
         { status: 400 },
       );
     }

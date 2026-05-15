@@ -19,15 +19,15 @@ type Params = Promise<{ id: string }>;
 const SISTEMA_QA = `Eres un asistente académico que responde preguntas sobre el contenido de una monografía universitaria boliviana.
 
 REGLAS ESTRICTAS:
-1. Respondé ÚNICAMENTE basándote en el contenido del documento que se te proporciona como contexto. NUNCA inventes datos, citas o información que no esté en el texto.
-2. Si la pregunta requiere información que NO está en el documento, decílo claramente: "Esa información no está en tu documento actual."
-3. Cuando hagas referencia a un capítulo o sección, mencionalo (ej: "En el Capítulo II definís...").
+1. Responde ÚNICAMENTE basándote en el contenido del documento que se te proporciona como contexto. NUNCA inventes datos, citas o información que no esté en el texto.
+2. Si la pregunta requiere información que NO está en el documento, dilo claramente: "Esa información no está en tu documento actual."
+3. Cuando hagas referencia a un capítulo o sección, menciónalo (ej: "En el Capítulo II defines...").
 4. Sé directo y conciso. Máximo 3-4 párrafos. Si la respuesta cabe en 2 oraciones, mejor.
-5. Usá español académico neutro de Bolivia. Tono formal pero accesible.
-6. Si te piden un resumen, hacelo enfocado en los puntos clave, no copies fragmentos.
-7. Si te piden detectar problemas, citá secciones específicas con texto entre comillas cortas.
+5. Usa español académico neutro de Bolivia. Tono formal pero accesible.
+6. Si te piden un resumen, hazlo enfocado en los puntos clave, no copies fragmentos.
+7. Si te piden detectar problemas, cita secciones específicas con texto entre comillas cortas.
 
-NO necesitas justificar tu rol ni hacer preámbulos. Andá directo a la respuesta.`;
+NO necesitas justificar tu rol ni hacer preámbulos. Ve directo a la respuesta.`;
 
 function buildContextoDoc(proyecto: Record<string, unknown>): { contexto: string; secciones: string[] } {
   const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
@@ -103,7 +103,7 @@ ${contexto}
 PREGUNTA DEL ESTUDIANTE:
 ${pregunta}
 
-Respondé basándote SOLO en el contenido anterior. Si no hay información suficiente para responder, decílo.`;
+Responde basándote SOLO en el contenido anterior. Si no hay información suficiente para responder, dilo.`;
 
     const servicioId = proyectoRec.servicio_id as string | undefined;
     const resultado = await llamarIA(SISTEMA_QA, userPrompt, 1500, servicioId);

@@ -32,7 +32,7 @@ Estás generando la sub-sección 3.4 — DISEÑO DEL INSTRUMENTO DE
 INVESTIGACIÓN del Cap. III. Tu trabajo: producir un cuestionario formal
 listo para aplicación, con su justificación metodológica.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [CAP I APROBADO] — para conocer la formulación del problema y el segmento.
 3. [CAP II APROBADO] — para usar conceptos definidos.
@@ -79,7 +79,7 @@ Aplicación al proyecto: cálculo con un N estimado plausible para el
 segmento. El n resultante típico para muestreo no probabilístico por
 conveniencia en una población urbana de Cochabamba es 384 personas.
 
-Cerrá con: "La muestra final será de n = X personas. El sistema
+Cierra con: "La muestra final será de n = X personas. El sistema
 recalcula automáticamente el n exacto al confirmarse los parámetros
 finales del proyecto."
 
@@ -89,7 +89,7 @@ una vez aprobada la fase.)
 ### 3.4.3 Tipo de muestreo
 
 Para proyectos de licenciatura UCATEC es típico **no probabilístico por
-conveniencia o por cuotas**. Justificá la elección sin ocultar las
+conveniencia o por cuotas**. Justifica la elección sin ocultar las
 limitaciones (sesgo). 2 párrafos.
 
 ### 3.4.4 Cuestionario
@@ -118,7 +118,7 @@ Satisfacción con opciones existentes, problemas identificados, qué
 mejorarían. Escala Likert 1-5 donde aplique.
 
 **Bloque 4 — Intención hacia la propuesta del proyecto** (3-5 preguntas)
-Aquí está el core. Describí brevemente la propuesta del proyecto y
+Aquí está el core. Describe brevemente la propuesta del proyecto y
 medí:
 - Interés (Likert 1-5).
 - Disposición a probar (Sí / No / Tal vez).
@@ -155,10 +155,10 @@ PROHIBICIONES ESPECÍFICAS
   mismo bloque.
 - NO uses jerga académica en las preguntas — el encuestado promedio no
   sabe qué es "Likert".
-- NO uses preguntas SÍ/NO para medir intensidad (usá Likert).
+- NO uses preguntas SÍ/NO para medir intensidad (usa Likert).
 - NO superes 20 preguntas (la tasa de respuesta cae fuerte).
 - NO incluyas preguntas que el encuestado no pueda responder de buena
-  fe (por ejemplo: "¿cuánto gastaría exactamente al mes?" — usá rangos).
+  fe (por ejemplo: "¿cuánto gastaría exactamente al mes?" — usa rangos).
 `.trim();
 
 export function buildContextoCap3d(datos: {

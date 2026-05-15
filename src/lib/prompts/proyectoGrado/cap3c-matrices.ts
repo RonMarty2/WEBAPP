@@ -24,10 +24,10 @@ ROL ESPECÍFICO DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
 Estás generando la sub-sección 3.3 — MATRICES ESTRATÉGICAS del Cap. III.
-Sintetizás el análisis externo (PESTEL + Porter ya aprobados) en
+Sintetizas el análisis externo (PESTEL + Porter ya aprobados) en
 matrices canónicas de UCATEC.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 3a APROBADA — PESTEL].
 3. [FASE 3b APROBADA — Porter].
@@ -78,7 +78,7 @@ Reglas:
 - Suma total ≥ 2.50 → el proyecto responde bien al entorno externo.
 - Suma total < 2.50 → el proyecto NO está aprovechando el entorno.
 
-Cerrá con interpretación: ¿el proyecto responde bien al entorno?
+Cierra con interpretación: ¿el proyecto responde bien al entorno?
 
 ### 3.3.3 Matriz MPC (Perfil Competitivo)
 
@@ -95,12 +95,12 @@ de éxito.
 Donde para cada competidor: Cal = calificación (1-4), Pt = puntuación
 (peso × cal).
 
-Si no recordás nombres reales de competidores en Cochabamba, usá
+Si no recuerdas nombres reales de competidores en Cochabamba, usa
 descriptores genéricos coherentes con lo que dijiste en la fase Porter
 (p. ej. "Cadena local con presencia consolidada", "Competidor informal
 de barrio").
 
-Cerrá con interpretación: ¿el proyecto está por encima o por debajo
+Cierra con interpretación: ¿el proyecto está por encima o por debajo
 de la competencia? ¿en qué factores supera y en cuáles está rezagado?
 
 ### 3.3.4 Matriz FODA (síntesis)
@@ -120,7 +120,7 @@ Para cada cuadrante listá 2-3 estrategias concretas. NO frases huecas
 ("aprovechar las oportunidades", "minimizar las amenazas") — estrategias
 ACCIONABLES con verbo en infinitivo.
 
-Cerrá con: ¿cuál cuadrante tiene más peso? ¿hacia qué tipo de estrategia
+Cierra con: ¿cuál cuadrante tiene más peso? ¿hacia qué tipo de estrategia
 debería inclinarse el proyecto?
 
 ═══════════════════════════════════════════════════════════════
@@ -139,7 +139,7 @@ PROHIBICIONES ESPECÍFICAS
 
 - NO listes 20 oportunidades y 1 amenaza (balance razonable).
 - NO uses pesos iguales para todos los factores en EFE (eso indica
-  análisis flojo — usá pesos que reflejen importancia real).
+  análisis flojo — usa pesos que reflejen importancia real).
 - NO termines el Cap. III completo todavía — esta fase solo cierra
   las matrices; quedan Encuesta y Demanda por venir.
 - NO inventes competidores con nombres falsos en MPC. Genéricos

@@ -24,13 +24,13 @@ ROL ESPECÍFICO DE ESTA FASE
 
 Estás generando la sub-sección 4.1 — ESTUDIO ORGANIZACIONAL del Cap. IV.
 
-Diseñás la estructura organizacional de la empresa que el proyecto va a
-crear. Acá NO se diseña RRHH (eso es Fase 4a-bis), solo:
+Diseñas la estructura organizacional de la empresa que el proyecto va a
+crear. Aquí NO se diseña RRHH (eso es Fase 4a-bis), solo:
 - Identidad corporativa.
 - Estructura jerárquica (organigrama).
 - Funciones de cada cargo.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [CAP I APROBADO] — para la formulación del problema y objetivos.
 3. [CAP III COMPLETO] — para el segmento, demanda y posicionamiento.
@@ -54,7 +54,7 @@ se conecta con los hallazgos del Cap. III.)
 
 Propuesta concreta de nombre comercial + razón social formal según
 el régimen empresarial elegido (típicamente S.R.L. para emprendimientos
-de licenciatura en Bolivia). Justificá brevemente la elección del nombre
+de licenciatura en Bolivia). Justifica brevemente la elección del nombre
 y del régimen.
 
 #### Descripción de la actividad
@@ -90,7 +90,7 @@ una definición operativa.
 
 #### Objetivos organizacionales
 
-Diferentes de los objetivos de investigación del Cap. I. Acá son:
+Diferentes de los objetivos de investigación del Cap. I. Aquí son:
 - Objetivo comercial (mensual o anual).
 - Objetivo operacional.
 - Objetivo financiero (vinculado al WACC esperado).

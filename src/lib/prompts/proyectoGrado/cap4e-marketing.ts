@@ -20,13 +20,13 @@ import { REGLAS_BASE_PROYECTO_GRADO } from "./reglas-comunes";
 const BLOQUE_4P_BASE = `
 ### 4.6.1 Estrategia de Producto / Servicio
 
-Para subtipo PRODUCCIÓN: describí el producto en detalle (composición,
+Para subtipo PRODUCCIÓN: describe el producto en detalle (composición,
 beneficios, presentación, líneas o variedades, ciclo de vida proyectado).
 
-Para subtipo SERVICIOS: describí el servicio en detalle (qué se entrega,
+Para subtipo SERVICIOS: describe el servicio en detalle (qué se entrega,
 duración típica, niveles de servicio, valor diferencial percibido).
 
-Incluí:
+Incluye:
 - Atributos centrales (qué resuelve).
 - Atributos diferenciales (qué hace distinto a la competencia).
 - Líneas o variantes ofrecidas.
@@ -38,7 +38,7 @@ Política de precios:
 
 - **Estrategia general**: penetración (precio bajo para ganar mercado),
   descreme (precio alto inicial), paridad competitiva, premium.
-  Justificá la elección con base en la disposición a pagar
+  Justifica la elección con base en la disposición a pagar
   identificada en la encuesta (Fase 3e).
 - **Estructura de precios**: tarifas por producto/servicio.
 - **Descuentos y promociones**: política de descuentos por volumen,
@@ -111,7 +111,7 @@ Conectar con la política salarial y de capacitación de Fase 4a-bis.
 ### 4.6.6 Estrategia de Procesos
 
 Cómo se entrega el servicio paso a paso. Conectar con el protocolo
-de atención definido en Fase 4c. Profundizar acá en:
+de atención definido en Fase 4c. Profundizar aquí en:
 
 - Estandarización vs personalización: ¿hay un guion único o se
   adapta a cada cliente?
@@ -161,7 +161,7 @@ un proyecto del subtipo ${subtipoLegible}.
 
 Modelo aplicado: ${modeloMix}.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [CAP III COMPLETO] — para el perfil del cliente y disposición a pagar.
 3. [FASE 4a] — para la identidad corporativa.

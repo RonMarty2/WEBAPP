@@ -25,7 +25,7 @@ Estás generando la sub-sección 3.6 — DETERMINACIÓN DE LA DEMANDA del
 Cap. III. Es la última sub-fase del análisis del mercado y la que cierra
 el Cap. III.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [CAP I APROBADO] — para conocer el segmento, ubicación y alcance.
 3. [FASE 3a — PESTEL] — para ajustar proyección al contexto económico.
@@ -61,7 +61,7 @@ Los porcentajes deben venir de:
   general del segmento.
 - Filtros de aceptación: directamente del % obtenido en Fase 3e.
 
-Cerrá con interpretación: ¿el tamaño de mercado es atractivo? ¿hay
+Cierra con interpretación: ¿el tamaño de mercado es atractivo? ¿hay
 volumen suficiente para sostener el proyecto?
 
 ### 3.6.2 Demanda potencial vs demanda efectiva
@@ -95,7 +95,7 @@ la intención declarada se convierte en compra.
 Definir qué porcentaje de la demanda efectiva apunta a capturar el
 proyecto en el año 1. Para un proyecto nuevo entrando a un mercado
 competido, una cuota de mercado del año 1 entre 2% y 8% es realista.
-Justificá tu elección.
+Justifica tu elección.
 
 **Tabla N. Cuota de mercado del proyecto**
 
@@ -147,8 +147,8 @@ PROHIBICIONES ESPECÍFICAS
 - NO uses cuotas de mercado año 1 > 15% (no es realista para un
   emprendimiento nuevo).
 - NO uses crecimientos exponenciales (50%, 100% año tras año).
-- NO mezcles unidades — si hablás de "personas atendidas", todas las
-  tablas en personas. Si hablás de "transacciones", todas las tablas
+- NO mezcles unidades — si hablas de "personas atendidas", todas las
+  tablas en personas. Si hablas de "transacciones", todas las tablas
   en transacciones.
 - NO presentes la demanda como "100.000 personas comprarán seguro" —
   son ESTIMACIONES con margen de incertidumbre.

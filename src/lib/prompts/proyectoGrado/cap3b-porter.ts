@@ -32,13 +32,13 @@ de Porter, versión UCATEC expandida) del Capítulo III del Proyecto de
 Grado.
 
 Tu trabajo: producir un análisis competitivo del rubro y la zona del
-proyecto. Identificá competidores REALES del rubro local. Si no recordás
-nombres exactos de competidores en Cochabamba, usá descriptores
+proyecto. Identifica competidores REALES del rubro local. Si no recuerdas
+nombres exactos de competidores en Cochabamba, usa descriptores
 plausibles ("cadenas de cafeterías de origen nacional con presencia en
 Cocha y Santa Cruz", "talleres familiares de chapería ubicados en la
 zona sud") sin inventar nombres comerciales falsos.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO] — Idea, subtipo, ubicación, título.
 2. [CAPÍTULO I APROBADO] — Para el segmento y la formulación del problema.
 3. [CAPÍTULO II APROBADO] — Para usar las definiciones de Porter.
@@ -78,7 +78,7 @@ fijos de salida, restricciones gubernamentales, barreras emocionales.)
 
 ### 3.2.3 Acciones gubernamentales
 
-Variable propia de UCATEC. Acá analizás cómo el gobierno boliviano (y
+Variable propia de UCATEC. Aquí analizás cómo el gobierno boliviano (y
 local de Cochabamba) puede afectar al rubro: regulaciones recientes,
 subsidios, controles de precios, fomento al emprendedurismo, etc.
 
@@ -86,8 +86,8 @@ subsidios, controles de precios, fomento al emprendedurismo, etc.
 
 ### 3.2.4 Rivalidad entre competidores existentes
 
-Acá identificás a los competidores REALES del rubro en la ubicación
-del proyecto. Mínimo 3 competidores nominales si los recordás con
+Aquí identificas a los competidores REALES del rubro en la ubicación
+del proyecto. Mínimo 3 competidores nominales si los recuerdas con
 certeza razonable, sino describilos por tipo ("cadena nacional de
 origen cochabambino con 12+ años de presencia").
 
@@ -105,7 +105,7 @@ de sus insumos, costo de cambio, integración vertical posible.)
 
 ### 3.2.7 Disponibilidad de sustitutos
 
-(Análisis + tabla. Identificá productos/servicios que satisfacen la
+(Análisis + tabla. Identifica productos/servicios que satisfacen la
 misma necesidad por vías distintas.)
 
 ### 3.2.8 Análisis de la industria (Resumen)
@@ -133,7 +133,7 @@ COMPETIDORES — CÓMO TRATARLOS
 
 Si CONOCÉS nombres reales de competidores del rubro en Cochabamba,
 mencionalos con seguridad. Si NO los conocés con certeza, NO inventes
-nombres falsos — usá descriptores por tipo:
+nombres falsos — usa descriptores por tipo:
 
   ✓ "Operan en la zona varias cadenas nacionales de origen cochabambino
      con 10+ años de presencia, además de competidores informales que
@@ -153,7 +153,7 @@ EXTENSIÓN Y CALIDAD
 - Total esperado: 10 a 15 páginas (3500 a 5500 palabras), incluyendo
   las 8 tablas (7 fuerzas + resumen).
 - Cada fuerza con 2-3 párrafos de análisis + tabla + interpretación.
-- Mantené consistencia con el análisis PESTEL (Fase 3a anterior). Si
+- Mantén consistencia con el análisis PESTEL (Fase 3a anterior). Si
   Porter detecta que el gobierno favorece al rubro, eso debe alinear
   con el factor Político del PESTEL.
 

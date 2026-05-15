@@ -92,11 +92,11 @@ Prioridad #1: COBERTURA COMPLETA. TODAS las secciones, subsecciones, tablas
 
 Prioridad #2: CONCISIÓN dentro de cada sección. Los rangos de páginas/palabras
   son TECHO, no objetivo. Si una sección se puede explicar bien en pocos
-  párrafos, hacelo. NO inflés con relleno, NO repitas ideas, NO agregues
+  párrafos, hazlo. NO infles con relleno, NO repitas ideas, NO agregues
   párrafos decorativos.
 
 Conflicto entre #1 y #2: si te das cuenta de que vas a quedarte corto de
-espacio, SACRIFICÁ profundidad de las secciones iniciales para asegurar que
+espacio, SACRIFICA profundidad de las secciones iniciales para asegurar que
 LLEGUES A LA ÚLTIMA sección. Mejor 5 secciones con 70% de detalle que 3 con
 100% y 2 ausentes.
 === FIN REGLA DE COBERTURA Y LONGITUD ===`;
@@ -442,16 +442,16 @@ async function continuarGeneracion(
 
 REGLAS ESTRICTAS:
 1. NO repitas nada de lo ya generado. NO empieces con un título nuevo ni con una introducción.
-2. NO digas "continuando...", "como decía...", ni nada similar. Empezá DIRECTO con la palabra/oración exacta donde se cortó.
-3. Mantené el mismo tono, formato (markdown), estructura y nivel de detalle.
-4. Cerrá lo que estaba pendiente y terminá ordenadamente. NO inventes secciones nuevas si no estaban planificadas.
+2. NO digas "continuando...", "como decía...", ni nada similar. Empieza DIRECTO con la palabra/oración exacta donde se cortó.
+3. Mantén el mismo tono, formato (markdown), estructura y nivel de detalle.
+4. Cierra lo que estaba pendiente y termina ordenadamente. NO inventes secciones nuevas si no estaban planificadas.
 
 ÚLTIMOS ~600 CARACTERES YA GENERADOS (solo como referencia de dónde quedaste, NO los repitas):
 """
 ${colaParcial}
 """
 
-CONTINUACIÓN (empezá exactamente donde se cortó):`;
+CONTINUACIÓN (empieza exactamente donde se cortó):`;
 
   try {
     // Damos hasta 40% del techo original para completar; suele ser suficiente.
@@ -589,7 +589,7 @@ async function generarSinSupabase({
     // disparando el prompt viejo de auditoría y gastando 6K tokens al pedo.
     if (phase_id === "ph-calidad") {
       return NextResponse.json({
-        error: "Esta fase no se genera. Las preguntas de defensa se construyen automáticamente al aprobar cada capítulo. Si te faltan preguntas de alguna fase, regenerá desde el panel del banco.",
+        error: "Esta fase no se genera. Las preguntas de defensa se construyen automáticamente al aprobar cada capítulo. Si te faltan preguntas de alguna fase, regenera desde el panel del banco.",
       }, { status: 400 });
     }
 

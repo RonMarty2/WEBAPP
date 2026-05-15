@@ -374,7 +374,7 @@ export default function DocumentoPage() {
               <div style={{ fontSize:48, opacity:0.25 }}>📄</div>
               <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)" }}>Todavía no hay nada que mostrar</div>
               <div style={{ fontSize:12, color:"var(--fg-secondary)", lineHeight:1.6 }}>
-                Generá y aprobá al menos un capítulo en el workspace. Cuando vuelvas acá vas a ver tu documento completo, formateado como se va a entregar.
+                Genera y aprueba al menos un capítulo en el workspace. Cuando vuelvas aquí verás tu documento completo, formateado como se va a entregar.
               </div>
               <button onClick={() => router.push(backUrl)} className="btn-cyan" style={{ marginTop:8, padding:"10px 18px", fontSize:13 }}>
                 Ir al workspace →
@@ -416,7 +416,7 @@ export default function DocumentoPage() {
               disabled={isFinalizing || fasesAprobadas.length === 0}
               className="btn-purple"
               style={{ width:"100%", padding:"10px", fontSize:12.5, justifyContent:"center", opacity: fasesAprobadas.length === 0 ? 0.5 : 1, cursor: fasesAprobadas.length === 0 ? "not-allowed" : "pointer" }}
-              title={fasesAprobadas.length === 0 ? "Aprobá al menos un capítulo primero" : "Consolida los capítulos aprobados en un documento único"}
+              title={fasesAprobadas.length === 0 ? "Aprueba al menos un capítulo primero" : "Consolida los capítulos aprobados en un documento único"}
             >
               {isFinalizing ? "Consolidando…" : documentoFinalListo ? "Regenerar documento" : "Consolidar documento"}
             </button>
@@ -441,7 +441,7 @@ export default function DocumentoPage() {
             <div style={{ padding:"12px 18px 8px", borderBottom:"1px solid var(--border)" }}>
               <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--fg-muted)" }}>Preguntale a tu documento</div>
               <div style={{ fontSize:11, color:"var(--fg-muted)", marginTop:4, lineHeight:1.5 }}>
-                La IA responde sobre el contenido que ya generaste. Ej: &ldquo;¿Cuál es la hipótesis?&rdquo;, &ldquo;Resumí el Cap III&rdquo;, &ldquo;¿Qué falta?&rdquo;
+                La IA responde sobre el contenido que ya generaste. Ej: &ldquo;¿Cuál es la hipótesis?&rdquo;, &ldquo;Resume el Cap III&rdquo;, &ldquo;¿Qué falta?&rdquo;
               </div>
             </div>
 
@@ -450,7 +450,7 @@ export default function DocumentoPage() {
                 <div style={{ display:"flex", flexDirection:"column", gap:6, marginTop:8 }}>
                   {[
                     "¿Cuál es la hipótesis principal?",
-                    "Resumí el contenido del documento",
+                    "Resume el contenido del documento",
                     "¿Qué capítulos faltan o están incompletos?",
                     "¿Qué fortalezas tiene el trabajo?",
                   ].map(sug => (
@@ -494,7 +494,7 @@ export default function DocumentoPage() {
                 value={qaInput}
                 onChange={e => setQaInput(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); preguntarIA(); }}}
-                placeholder="Escribí tu pregunta…"
+                placeholder="Escribe tu pregunta…"
                 className="input-dark"
                 style={{ flex:1, fontSize:12, padding:"8px 10px" }}
                 disabled={qaLoading || !tieneAlgoListo}
@@ -508,7 +508,7 @@ export default function DocumentoPage() {
             </div>
             {!tieneAlgoListo && (
               <div style={{ padding:"8px 18px 14px", fontSize:10.5, color:"var(--fg-muted)", lineHeight:1.5 }}>
-                Aprobá al menos un capítulo para hacer preguntas.
+                Aprueba al menos un capítulo para hacer preguntas.
               </div>
             )}
           </section>

@@ -35,8 +35,8 @@ REGLAS DE LECTURA:
 - Las preguntas DEBEN derivarse ÚNICAMENTE del contenido aprobado de esta fase.
 - NO inventes información que no esté en el contenido.
 - NO hagas preguntas sobre temas que el contenido NO toca.
-- Si el contenido es breve o superficial, generá menos preguntas pero más relevantes.
-- Si el contenido es extenso y rico, generá más preguntas pero variadas.
+- Si el contenido es breve o superficial, genera menos preguntas pero más relevantes.
+- Si el contenido es extenso y rico, genera más preguntas pero variadas.
 
 ═══════════════════════════════════════════════════════════════
 ROL Y TAREA
@@ -64,7 +64,7 @@ Verifican si el estudiante DOMINA el tema teóricamente.
 EJEMPLOS para un cap. de Marco Teórico:
 - "¿Cuál es la diferencia entre exportación tradicional y no tradicional según
    los autores que citaste?"
-- "Mencionás la teoría de ventajas comparativas de Ricardo: ¿en qué supuestos
+- "Mencionas la teoría de ventajas comparativas de Ricardo: ¿en qué supuestos
    se basa y cuál es su principal crítica contemporánea?"
 
 BLOQUE B — PREGUNTAS DE AUTORÍA Y PROCESO (Tribunal estricto):
@@ -86,16 +86,16 @@ EJEMPLOS para un cap. de Metodología:
 CANTIDAD Y CALIDAD
 ═══════════════════════════════════════════════════════════════
 
-Generá entre 6 y 10 preguntas en TOTAL (sumando ambos bloques).
+Genera entre 6 y 10 preguntas en TOTAL (sumando ambos bloques).
 Distribución ideal:
 - Bloque A (conocimiento): 3–5 preguntas.
 - Bloque B (autoría): 3–5 preguntas.
 
 CALIDAD POR ENCIMA DE CANTIDAD:
-- Preferí 6 preguntas profundas que 10 superficiales.
+- Prefiere 6 preguntas profundas que 10 superficiales.
 - Cada pregunta debe poderse responder con info del propio capítulo.
 - NUNCA hagas preguntas genéricas tipo "¿qué te parece tu trabajo?" o
-  "¿cómo te sentís con el resultado?".
+  "¿cómo te sientes con el resultado?".
 - NUNCA repitas el mismo concepto en dos preguntas distintas.
 
 ═══════════════════════════════════════════════════════════════
@@ -108,7 +108,7 @@ funciona como una pista de cómo responder en la defensa.
 
 REGLAS para la respuesta sugerida:
 - Sacala del CONTENIDO de la fase. NO inventes.
-- Resumí en lenguaje propio del estudiante, no copies literal.
+- Resume en lenguaje propio del estudiante, no copies literal.
 - Si el contenido no da material suficiente para responder, NO generes la
   pregunta — descártala.
 - Que la respuesta apunte a la sección del capítulo donde aparece el tema
@@ -118,7 +118,7 @@ REGLAS para la respuesta sugerida:
 FORMATO DE SALIDA — JSON ESTRICTO
 ═══════════════════════════════════════════════════════════════
 
-Devolvé EXCLUSIVAMENTE un objeto JSON válido con esta estructura. Sin texto
+Devuelve EXCLUSIVAMENTE un objeto JSON válido con esta estructura. Sin texto
 antes ni después, sin comentarios markdown, sin fences \`\`\`json. Solo el JSON.
 
 {
@@ -139,8 +139,8 @@ antes ni después, sin comentarios markdown, sin fences \`\`\`json. Solo el JSON
 REGLAS DE FORMATO:
 - "pregunta" y "respuesta_sugerida" son SIEMPRE strings (nunca null, nunca arrays).
 - No agregues campos extra. No envuelvas en otro objeto.
-- Si por algún motivo no podés generar preguntas para uno de los bloques (porque
-  el capítulo no aporta material suficiente para ese tipo), devolvé el array
+- Si por algún motivo no puedes generar preguntas para uno de los bloques (porque
+  el capítulo no aporta material suficiente para ese tipo), devuelve el array
   vacío [] — NO inventes preguntas para llenarlo.
 
 ═══════════════════════════════════════════════════════════════
@@ -149,7 +149,7 @@ PROHIBIDO
 
 - Preguntas sobre datos que no estén en el contenido recibido.
 - Preguntas redundantes o reformulaciones del mismo concepto.
-- Preguntas tipo "¿qué te parece?" o "¿cómo te sentís?".
+- Preguntas tipo "¿qué te parece?" o "¿cómo te sientes?".
 - Respuestas sugeridas vacías, genéricas o que diga "según el contenido…".
 - Texto fuera del JSON (saludos, despedidas, explicaciones de tu proceso).
 - Fences markdown alrededor del JSON.

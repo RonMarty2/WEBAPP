@@ -8,7 +8,7 @@
  * fase y permite descargar todo en un PDF para estudiar.
  *
  * Las preguntas se guardan en `phase_contents[${faseId}_preguntas]` como JSON
- * serializado. Acá las leemos del proyecto cargado en el cliente, las
+ * serializado. Aquí las leemos del proyecto cargado en el cliente, las
  * deserializamos y las renderizamos.
  */
 
@@ -162,9 +162,9 @@ export default function BancoPreguntasView({ proyectoId, tituloProyecto, phaseCo
           Tu banco de preguntas se arma solo
         </h2>
         <p style={{ fontSize: 14, color: "var(--fg-secondary)", lineHeight: 1.65, margin: 0 }}>
-          Cada vez que aprobás un capítulo, la IA genera preguntas que tu tribunal podría
+          Cada vez que apruebas un capítulo, la IA genera preguntas que tu tribunal podría
           hacerte sobre ese tema — con una respuesta breve sacada de tu propio texto.
-          Cuando termines todos los capítulos, vas a poder descargar acá el banco completo
+          Cuando termines todos los capítulos, podrás descargar aquí el banco completo
           en PDF para estudiar antes de la defensa.
         </p>
       </div>
@@ -242,7 +242,7 @@ export default function BancoPreguntasView({ proyectoId, tituloProyecto, phaseCo
           </div>
           <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", lineHeight: 1.55, marginBottom: 10 }}>
             La generación corre en background al aprobar cada capítulo. Si quedó alguna pendiente,
-            podés forzar ahora:
+            puedes forzarla ahora:
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {fasesPendientes.map(f => (
@@ -301,7 +301,7 @@ export default function BancoPreguntasView({ proyectoId, tituloProyecto, phaseCo
           {bloque.autoria.length > 0 && (
             <BloqueLista
               titulo="🔍 De autoría / proceso"
-              descripcion="Cómo verifican que vos hiciste el trabajo"
+              descripcion="Cómo verifican que tú hiciste el trabajo"
               items={bloque.autoria}
               color="#7c3aed"
             />

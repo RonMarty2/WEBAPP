@@ -354,7 +354,7 @@ function renderMd(text: string): string {
   cleaned = normalizarTablasMultilineaMd(cleaned);
 
   // 1.5) Detectar y renderizar [[ARBOL_PROBLEMAS]] como diagrama HTML.
-  // En LaTeX se convierte a TikZ; acá en preview lo dibujamos con CSS Grid + cajas.
+  // En LaTeX se convierte a TikZ; aquí en preview lo dibujamos con CSS Grid + cajas.
   const arboles: string[] = [];
   cleaned = cleaned.replace(
     /\[\[ARBOL_PROBLEMAS\]\]([\s\S]*?)\[\[\/ARBOL_PROBLEMAS\]\]/gi,
@@ -1858,7 +1858,7 @@ export default function WorkspacePage() {
                     🛡️ En la fase Banco de Preguntas (ph-calidad reciclada) NO mostramos
                     este bloque: las preguntas se generan al aprobar cada capítulo y
                     el componente <BancoPreguntasView> tiene su propio botón para
-                    regenerar fases pendientes. Mostrar "Generar borrador" acá llevaría
+                    regenerar fases pendientes. Mostrar "Generar borrador" aquí llevaría
                     al estudiante a gastar tokens al pedo. */}
           {!isBancoFase && (
           <div style={{ padding:"12px 14px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:10 }}>
@@ -1892,8 +1892,8 @@ export default function WorkspacePage() {
                   </div>
                   <div style={{ fontSize:11.5, color:"var(--fg-muted)", lineHeight:1.5 }}>
                     {canEditPhases
-                      ? "Lee el contenido. Si está bien, aprobá y avanzá. Si tu tutor te dio observaciones, escribilas abajo y la IA las aplicará."
-                      : "Lee el contenido. En Plan Estándar la IA genera y vos aprobás. Para correcciones con IA, actualizá a Plan Pro."}
+                      ? "Lee el contenido. Si está bien, aprueba y avanzá. Si tu tutor te dio observaciones, escribilas abajo y la IA las aplicará."
+                      : "Lee el contenido. En Plan Estándar la IA genera y tú apruebas. Para correcciones con IA, actualizá a Plan Pro."}
                   </div>
                 {canEditPhases && (
                 <textarea
@@ -2042,7 +2042,7 @@ export default function WorkspacePage() {
                       onClick={() => {
                         const ok = window.confirm(
                           "¿Generar una versión nueva de este capítulo?\n\n" +
-                          "• La versión Final actual se guardará como \"anterior\" (podés volver con ↩️).\n" +
+                          "• La versión Final actual se guardará como \"anterior\" (puedes volver con ↩️).\n" +
                           "• La IA generará un borrador nuevo desde cero.\n" +
                           "• Tu Final aprobado actual NO se descarta hasta que apruebes el nuevo.\n\n" +
                           "Esto gasta tokens de IA. ¿Procedo?"
@@ -2151,7 +2151,7 @@ export default function WorkspacePage() {
                 <div style={{ fontSize:10.5, color:"var(--fg-secondary)", lineHeight:1.5 }}>
                   {genElapsed < 90
                     ? "Suele tardar entre 30 y 90 segundos. No cierres esta pestaña."
-                    : "Estamos cerca, no cierres la pestaña. Si pasan 3 minutos sin respuesta, podés cancelar y reintentar."}
+                    : "Estamos cerca, no cierres la pestaña. Si pasan 3 minutos sin respuesta, puedes cancelar y reintentar."}
                 </div>
               </div>
             )}
@@ -2166,7 +2166,7 @@ export default function WorkspacePage() {
             📎 Material adicional
           </div>
           <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.6 }}>
-            ¿Tenés un paper, normativa o documento extra? Subilo. Se incorpora
+            ¿Tienes un paper, normativa o documento extra? Súbelo. Se incorpora
             en la <strong>próxima generación</strong> de cualquier fase.
           </div>
 
@@ -2187,7 +2187,7 @@ export default function WorkspacePage() {
             <div style={{ fontSize: 28 }}>🔒</div>
             <div style={{ fontSize: 12, fontWeight: 700, color: "#f59e0b" }}>Disponible en Plan Pro</div>
             <div style={{ fontSize: 11, color: "var(--fg-secondary)", lineHeight: 1.6 }}>
-              Subí tus papers, normativas o datos propios y la IA los integra directamente en el Cap. II de tu monografía.
+              Sube tus papers, normativas o datos propios y la IA los integra directamente en el Cap. II de tu monografía.
             </div>
           </div>
           )}
@@ -2205,7 +2205,7 @@ export default function WorkspacePage() {
 
           <div style={{ fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.5, padding: "8px 4px" }}>
             💡 Si ya subiste material en el wizard inicial, ese ya está activo en todas las fases.
-            Acá podés <strong>agregar más</strong> sin perder lo anterior.
+            Aquí puedes <strong>agregar más</strong> sin perder lo anterior.
           </div>
         </div>
       )}
@@ -2234,7 +2234,7 @@ export default function WorkspacePage() {
         <span style={{ fontSize: 18 }}>🔒</span>
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b" }}>Correcciones disponibles en Plan Pro</div>
-          <div style={{ fontSize: 10.5, color: "var(--fg-secondary)", lineHeight: 1.5, marginTop: 2 }}>En el plan Estándar la IA genera el documento completo y vos lo aceptás. Actualizá a Pro para hacer cambios.</div>
+          <div style={{ fontSize: 10.5, color: "var(--fg-secondary)", lineHeight: 1.5, marginTop: 2 }}>En el plan Estándar la IA genera el documento completo y tú lo aceptás. Actualizá a Pro para hacer cambios.</div>
         </div>
       </div>
       ) : (
@@ -2450,7 +2450,7 @@ export default function WorkspacePage() {
                         </div>
                         <div style={{ fontSize: 10.5, fontWeight: 500, color: "var(--fg-muted)", textTransform: "none", letterSpacing: 0 }}>
                           {cortado
-                            ? `${palabras.toLocaleString("es")} palabras · Revisá las últimas líneas. Si falta contenido, regenerá otra versión.`
+                            ? `${palabras.toLocaleString("es")} palabras · Revisa las últimas líneas. Si falta contenido, regenera otra versión.`
                             : `${palabras.toLocaleString("es")} palabras · Generación completa`}
                         </div>
                       </div>
@@ -2595,7 +2595,7 @@ export default function WorkspacePage() {
                 <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", gap:10, padding:"40px 24px" }}>
                   <div style={{ fontSize:36, opacity:0.12 }}>📋</div>
                   <div style={{ fontSize:12, color:"var(--border)", textAlign:"center", lineHeight:1.6, maxWidth:260 }}>
-                    Generá el borrador de cualquier capítulo y vas a verlo acá. A medida que aprobás cada fase, el documento se va consolidando.
+                    Genera el borrador de cualquier capítulo y vas a verlo aquí. A medida que apruebas cada fase, el documento se va consolidando.
                   </div>
                 </div>
               )}

@@ -62,11 +62,11 @@ Esta fase está reservada en el flujo del servicio Proyecto de Grado pero
 aún no tiene su prompt definitivo escrito. Está prevista para una
 iteración futura según el documento docs/PATRON_PROYECTO_GRADO.md.
 
-Si llegaste a esta fase, devolvé exactamente el siguiente mensaje al
+Si llegaste a esta fase, devuelve exactamente el siguiente mensaje al
 estudiante (sin agregar ni quitar nada):
 
 "⚙️ Esta fase todavía está en construcción. Estamos perfeccionando el
-prompt y las validaciones para entregarte la mejor calidad. Volvé pronto."
+prompt y las validaciones para entregarte la mejor calidad. Vuelve pronto."
 
 NO intentes generar contenido académico de esta fase. NO inventes.
 `.trim();
@@ -124,7 +124,7 @@ const FASES_SPEC: FaseSpec[] = [
  *
  * Por ahora todos los prompts son placeholders. A medida que las semanas
  * del plan avancen, este módulo importará los prompts reales desde
- * `src/lib/prompts/proyectoGrado/*.ts` y los enchufará acá.
+ * `src/lib/prompts/proyectoGrado/*.ts` y los enchufará aquí.
  *
  * @param subtipo "produccion" o "servicios"
  */

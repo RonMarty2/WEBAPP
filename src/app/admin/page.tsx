@@ -412,8 +412,8 @@ export default function AdminDashboard() {
             </div>
             <div className="adm-caption">
               {insights.totalFeedbacks === 0
-                ? "Aún no hay feedback registrado. Cuando los estudiantes apliquen cambios o usen el chat de correcciones, sus mensajes aparecerán acá analizados."
-                : `${insights.totalFeedbacks} mensaje(s) capturados de los estudiantes al pedir cambios. Mirá las recomendaciones automáticas debajo.`}
+                ? "Aún no hay feedback registrado. Cuando los estudiantes apliquen cambios o usen el chat de correcciones, sus mensajes aparecerán aquí analizados."
+                : `${insights.totalFeedbacks} mensaje(s) capturados de los estudiantes al pedir cambios. Mira las recomendaciones automáticas debajo.`}
             </div>
           </div>
 

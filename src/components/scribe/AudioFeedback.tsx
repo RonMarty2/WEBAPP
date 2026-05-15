@@ -82,7 +82,7 @@ export default function AudioFeedback({ proyectoId, onAplicarComoFeedback }: Pro
   const startRecording = useCallback(async () => {
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Tu navegador no soporta grabación. Subí un archivo en su lugar.");
+        throw new Error("Tu navegador no soporta grabación. Sube un archivo en su lugar.");
       }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
@@ -234,7 +234,7 @@ export default function AudioFeedback({ proyectoId, onAplicarComoFeedback }: Pro
       <Card>
         <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-            ✓ Transcripción lista — revisá y aplicá
+            ✓ Transcripción lista — revisa y aplica
           </div>
           {estado.nombreArchivo && (
             <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>
@@ -253,7 +253,7 @@ export default function AudioFeedback({ proyectoId, onAplicarComoFeedback }: Pro
               minHeight: 160,
               fontFamily: "var(--font-crimson), Georgia, serif",
             }}
-            placeholder="La transcripción aparecerá acá..."
+            placeholder="La transcripción aparecerá aquí..."
           />
           {estado.literal && estado.literal !== estado.estructurada && (
             <details>
@@ -345,8 +345,8 @@ export default function AudioFeedback({ proyectoId, onAplicarComoFeedback }: Pro
           🎙️ Audio del tutor
         </div>
         <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
-          Subí o grabá el feedback de tu tutor. La IA transcribe y estructura las
-          observaciones automáticamente. Después podés aplicar al feedback de la
+          Sube o graba el feedback de tu tutor. La IA transcribe y estructura las
+          observaciones automáticamente. Después puedes aplicarlo al feedback de la
           fase actual con un click.
         </div>
 

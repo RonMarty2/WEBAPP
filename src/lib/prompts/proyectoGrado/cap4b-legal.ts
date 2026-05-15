@@ -28,11 +28,11 @@ ROL ESPECÍFICO DE ESTA FASE
 
 Estás generando la sub-sección 4.3 — ESTUDIO LEGAL del Cap. IV.
 
-Diseñás el camino legal para constituir formalmente la empresa
-propuesta, conforme a la normativa boliviana vigente. Citás
+Diseñas el camino legal para constituir formalmente la empresa
+propuesta, conforme a la normativa boliviana vigente. Citas
 instituciones REALES que existen en Bolivia.
 
-Recibís:
+Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 4a APROBADA] — para conocer nombre comercial y razón social.
 
@@ -47,7 +47,7 @@ cumplimiento normativo para la operación.)
 
 ### 4.3.1 Forma jurídica elegida
 
-Justificá la elección del tipo de sociedad. Opciones disponibles en
+Justifica la elección del tipo de sociedad. Opciones disponibles en
 Bolivia:
 
 - **Empresa Unipersonal**: dueño único, responsabilidad ilimitada,
@@ -59,7 +59,7 @@ Bolivia:
   inversionistas. Trámite más complejo.
 
 Para un proyecto de licenciatura, lo típico es S.R.L. con 2 socios
-(emprendedor + inversionista o cónyuge). Justificá la elección.
+(emprendedor + inversionista o cónyuge). Justifica la elección.
 
 ### 4.3.2 Constitución legal de la empresa
 
@@ -147,7 +147,7 @@ Tiempo total estimado del proceso: 4 a 6 semanas.
 
 ### 4.3.4 Marco normativo aplicable
 
-Citá las normas reales (sin inventar números de leyes desconocidos):
+Cita las normas reales (sin inventar números de leyes desconocidos):
 
 - **Código de Comercio de Bolivia** (Decreto Ley N° 14379 de 1977 y
   sus actualizaciones).
@@ -162,7 +162,7 @@ Citá las normas reales (sin inventar números de leyes desconocidos):
 
 ### 4.3.5 Permisos especiales según el rubro
 
-Identificá los permisos adicionales que necesita el proyecto
+Identifica los permisos adicionales que necesita el proyecto
 específico, según corresponda:
 
 - **Si manipula alimentos**: registro sanitario en SENASAG.
@@ -180,7 +180,7 @@ EXTENSIÓN Y CALIDAD
 ═══════════════════════════════════════════════════════════════
 
 - Total esperado: 8 a 12 páginas (3000 a 4500 palabras).
-- Citá URLs raíz reales de instituciones (sin inventar páginas
+- Cita URLs raíz reales de instituciones (sin inventar páginas
   internas que pueden cambiar).
 - Cifras de costos coherentes con el mercado boliviano actual.
 
@@ -190,14 +190,14 @@ PROHIBICIONES ESPECÍFICAS
 
 - NO inventes nombres de leyes (no escribas "Ley N° 8.547 de
   Promoción Empresarial" si no existe).
-- NO inventes nombres de instituciones — usá las reales: SEPREC, SIN,
+- NO inventes nombres de instituciones — usa las reales: SEPREC, SIN,
   AFP Futuro de Bolivia, BBVA Previsión, Caja Nacional de Salud,
   SENASAG, MMAyA, etc.
 - NO uses costos absurdos (constituir una S.R.L. en Bolivia NO cuesta
   50.000 Bs ni 50 Bs — el rango realista es 3.000 a 5.000 Bs).
-- NO citá URLs específicas con paths internos (www.seprec.gob.bo/
-  tramites/page-N-345); usá solo URLs raíz verificables.
-- NO incluyas redacción de la minuta entera — solo describí su
+- NO cita URLs específicas con paths internos (www.seprec.gob.bo/
+  tramites/page-N-345); usa solo URLs raíz verificables.
+- NO incluyas redacción de la minuta entera — solo describe su
   contenido. La minuta real la redacta un abogado.
 `.trim();
 
