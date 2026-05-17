@@ -308,14 +308,24 @@ export function getServiceAIConfig(servicioId: string): ServiceConfig | undefine
 export function getServiceAIStatus(servicioId: string) {
   const cfg = getServiceAIConfig(servicioId);
   if (!cfg) {
-    return { configured: false, provider_id: "", provider_name: "", model: "" };
+    return { configured: false, provider_id: "", provider_name: "", model: "", key_source: "none" as const };
   }
   const provider = getProviderInfo(cfg.provider_id);
+  // Una config se considera "configurada" si:
+  //   (a) tiene una api_key personal guardada en el panel admin, O
+  //   (b) el provider correspondiente tiene su env var seteada (uso compartido)
+  // Antes solo el caso (a) contaba — esto causaba que el workspace dijera
+  // "IA sin configurar" aunque el admin haya elegido provider+model y haya
+  // env var (caso típico: Gemini con GEMINI_API_KEY en Vercel).
+  const personalKey = Boolean(cfg.api_key);
+  const envKey = Boolean(getProviderKey(cfg.provider_id));
+  const configured = personalKey || envKey;
   return {
-    configured: Boolean(cfg.api_key),
+    configured,
     provider_id: cfg.provider_id,
     provider_name: provider?.name ?? cfg.provider_id,
     model: cfg.model,
+    key_source: personalKey ? ("personal" as const) : envKey ? ("env" as const) : ("none" as const),
   };
 }
 
