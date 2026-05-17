@@ -80,6 +80,9 @@ function NuevoProyectoPageInner() {
   const [servicioId, setServicioId] = useState("");
   const [tipoProyectoId, setTipoProyectoId] = useState("tipo-monografia");
 
+  // Modal de previsualización de PDF (guías oficiales UMSS)
+  const [pdfPreview, setPdfPreview] = useState<{ url: string; titulo: string } | null>(null);
+
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
   const [universidadId, setUniversidadId] = useState("");
@@ -760,28 +763,19 @@ function NuevoProyectoPageInner() {
                         {v.descripcion}
                       </div>
 
-                      {/* Botón: Ver guía oficial (PDF) — el estudiante puede
-                          confirmar visualmente si es el formato que pide su diplomado.
-                          Estrategia: anchor dinámico programático. Es el método más
-                          compatible y NO es bloqueado por browsers (es interaccion
-                          directa de usuario). window.open() y <a target=_blank>
-                          anidados fallaban abriendo about:blank en este contexto. */}
+                      {/* Botón: Ver guía oficial (PDF) — abre modal con iframe
+                          embebido. Mucho mejor UX que pestaña nueva (el estudiante
+                          no pierde su flujo) y bypassea los problemas de popups. */}
                       {v.guia_oficial?.url_documento_pdf && (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             e.preventDefault();
-                            const url = v.guia_oficial!.url_documento_pdf!;
-                            // Anchor dinámico: el navegador lo trata como
-                            // navegación de usuario y NUNCA lo bloquea.
-                            const link = document.createElement("a");
-                            link.href = url;
-                            link.target = "_blank";
-                            link.rel = "noopener noreferrer";
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
+                            setPdfPreview({
+                              url: v.guia_oficial!.url_documento_pdf!,
+                              titulo: v.guia_oficial!.nombre,
+                            });
                           }}
                           style={{
                             display: "flex",
@@ -1112,6 +1106,100 @@ function NuevoProyectoPageInner() {
         )}
 
       </div>
+
+      {/* ── MODAL: Previsualización PDF guías UMSS ─────────────────────────── */}
+      {pdfPreview && (
+        <div
+          onClick={() => setPdfPreview(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.75)",
+            backdropFilter: "blur(4px)",
+            zIndex: 10000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 1100,
+              height: "92vh",
+              background: "white",
+              borderRadius: 12,
+              boxShadow: "0 24px 80px rgba(0,0,0,0.5)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header del modal */}
+            <div
+              style={{
+                padding: "14px 20px",
+                borderBottom: "1px solid rgba(0,0,0,0.08)",
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+                background: "#f8fafc",
+              }}
+            >
+              <div style={{ fontSize: 22 }}>📄</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 2 }}>
+                  Guía oficial UMSS
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {pdfPreview.titulo}
+                </div>
+              </div>
+              <a
+                href={pdfPreview.url}
+                download
+                style={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  padding: "8px 14px",
+                  borderRadius: 8,
+                  background: "white",
+                  border: "1px solid #cbd5e1",
+                  color: "#0f172a",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ⬇ Descargar
+              </a>
+              <button
+                type="button"
+                onClick={() => setPdfPreview(null)}
+                style={{
+                  fontSize: 13,
+                  fontWeight: 700,
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  background: "#0f172a",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Cerrar ✕
+              </button>
+            </div>
+            {/* Iframe con el PDF */}
+            <iframe
+              src={pdfPreview.url}
+              title={pdfPreview.titulo}
+              style={{ flex: 1, width: "100%", border: 0, background: "#525659" }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

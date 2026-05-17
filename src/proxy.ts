@@ -102,8 +102,11 @@ export async function proxy(req: NextRequest) {
 
 // matcher: corre el proxy en todas las rutas excepto estáticos y archivos
 // de _next. Incluye /api/admin/* (a diferencia del default que excluía /api).
+// IMPORTANTE: incluimos .pdf en exclusiones porque X-Frame-Options: DENY
+// rompe la previsualización de PDFs en iframes y la apertura en pestaña nueva
+// (algunos navegadores se confunden con application/pdf + header DENY).
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico|webp|woff|woff2|ttf|otf)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|svg|ico|webp|woff|woff2|ttf|otf|pdf)$).*)",
   ],
 };
