@@ -11,16 +11,12 @@
  *
  * El Cap. I tiene dos variantes implementadas: "clasico" y "reducido"
  * (ver src/lib/cap1Variants.ts). La variante "reducido" NO incluye
- * hipótesis, operacionalización ni sistematización de subpreguntas.
+ * hipótesis, operacionalización ni opera con variables medibles.
  *
- * Este Cap. II actualmente usa un único prompt para AMBAS variantes,
- * lo cual puede ser inconsistente si el estudiante eligió "reducido"
- * en el Cap. I (puede pedir desarrollar variables que no existen).
- *
- * Cuando el usuario defina la estructura reducida del Cap. II:
- *   1. Crear src/lib/prompts/scribe/cap2-variantes/clasico.ts (alias)
- *   2. Crear src/lib/prompts/scribe/cap2-variantes/reducido.ts (nueva)
- *   3. Extender el patrón de resolución en /api/projects/generate-phase
+ * Este Cap. II usa un único prompt maestro pero el builder
+ * `buildContextoCap2` recibe un parámetro opcional `variante` y
+ * adapta el bloque de contexto para que la IA NO asuma hipótesis ni
+ * operacionalización cuando se trate de la variante reducida.
  *
  * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
  *      memory/pending_variante_reducida.md
@@ -137,9 +133,39 @@ Reglas de integridad:
 - No citar fuentes que no correspondan al contenido.
 - No usar bibliografía decorativa.
 - No incluir referencias no citadas.
-- Las citas en el texto deben seguir APA 7.
+- Las citas en el texto deben seguir APA 7 (ver bloque APA 7 detallado más abajo).
 - Priorizar bibliografía nueva y complementaria respecto del Capítulo I; solo
   reutilizar referencias del Capítulo I si son estrictamente indispensables.
+
+═══════════════════════════════════════════════════════════════
+REGLAS DETALLADAS DE CITAS APA 7 (NORMA OBLIGATORIA UMSS)
+═══════════════════════════════════════════════════════════════
+
+A) CITAS TEXTUALES CORTAS (menos de 40 palabras):
+   - Texto entre comillas dobles "" dentro del párrafo.
+   - Al final, paréntesis con (Autor, Año, p. X). La página es OBLIGATORIA si
+     la cita es textual.
+
+B) CITAS TEXTUALES LARGAS (40 palabras o más):
+   - Párrafo INDEPENDIENTE, SIN comillas.
+   - Sangría de 1.27 cm (block quote) en TODO el bloque.
+   - Al final del bloque, (Autor, Año, p. X).
+   - Después, un párrafo de interpretación propia del investigador.
+
+C) CITAS PARAFRASEADAS:
+   - Reformular la idea con palabras propias.
+   - Al final, (Autor, Año). La página es recomendada pero NO obligatoria.
+
+D) APORTE PROPIO DEL AUTOR:
+   - NO lleva cita. Es regla explícita APA 7 + UMSS.
+
+E) FUENTES INSTITUCIONALES (autor corporativo):
+   - (INE, 2023), (Banco Mundial, 2022), (Ministerio de Economía, 2024).
+   - Primera mención con nombre completo; menciones posteriores con sigla.
+
+F) REFERENCIAS:
+   - Bloque REFERENCIAS_ETAPA al final, con SANGRÍA FRANCESA de 1.27 cm.
+   - Orden alfabético por apellido del primer autor.
 
 ═══════════════════════════════════════════════════════════════
 ROL Y TAREA
@@ -577,7 +603,16 @@ export function buildContextoCap2(datos: {
   cap1_content: string;
   documentosUsuario?: string;
   fuentesPrioritarias?: string[];
+  formatoUmss?: string;
+  /**
+   * Variante de Cap. I elegida por el estudiante. Determina si la IA debe
+   * asumir hipótesis y operacionalización (clásico) o NO (reducido).
+   * Default: "clasico" para no romper compatibilidad.
+   */
+  variante?: "clasico" | "reducido";
 }): string {
+  const variante = datos.variante ?? "clasico";
+
   const lineas: string[] = [
     "═══════════════════════════════════════════════════════════════",
     "[CONTEXTO DEL PROYECTO — generado por el sistema]",
@@ -598,11 +633,35 @@ export function buildContextoCap2(datos: {
   if (datos.fuentesPrioritarias && datos.fuentesPrioritarias.length > 0) {
     lineas.push(`Fuentes institucionales prioritarias: ${datos.fuentesPrioritarias.join(", ")}`);
   }
+  if (datos.formatoUmss) lineas.push(`formato_umss: ${datos.formatoUmss}`);
+  lineas.push(`variante_cap1: ${variante}`);
+
   if (datos.documentosUsuario) {
     lineas.push("");
     lineas.push("DOCUMENTOS SUBIDOS POR EL USUARIO (priorizar como fuente):");
     lineas.push(datos.documentosUsuario);
   }
+
+  // Bloque dinámico de coherencia con la variante de Cap. I
+  lineas.push("");
+  lineas.push("───────────────────────────────────────────────────────────────");
+  if (variante === "reducido") {
+    lineas.push("[VARIANTE CAP. I = REDUCIDO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- El Cap. I NO formuló hipótesis ni operacionalización de variables.");
+    lineas.push("- NO inventes una hipótesis en este Cap. II.");
+    lineas.push("- NO desarrolles teoría que requiera variables operacionalizadas.");
+    lineas.push("- Sí desarrolla el marco teórico/referencial sobre el problema, las");
+    lineas.push("  categorías de análisis (no variables medibles) y los conceptos");
+    lineas.push("  necesarios para responder los objetivos específicos.");
+    lineas.push("- Sí puedes desarrollar modelos o indicadores como referencia teórica,");
+    lineas.push("  pero NO los presentes como variables a contrastar.");
+  } else {
+    lineas.push("[VARIANTE CAP. I = CLÁSICO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- El Cap. I puede haber formulado hipótesis y operacionalización (sección 1.6).");
+    lineas.push("- Desarrolla la fundamentación teórica de cada variable o categoría definida en el Cap. I.");
+    lineas.push("- Conecta los modelos e indicadores con las variables a contrastar en el Cap. IV.");
+  }
+  lineas.push("───────────────────────────────────────────────────────────────");
 
   lineas.push("");
   lineas.push("═══════════════════════════════════════════════════════════════");

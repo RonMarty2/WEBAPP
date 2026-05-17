@@ -17,6 +17,7 @@ import { requireAuth, AuthError } from "@/lib/api-auth";
 import { getServiceAIStatus, llamarIA, getServiceAIConfig } from "@/lib/aiProvider";
 import {
   llamarIAPorPlan,
+  llamarCompiladorLaTeX,
   normalizePlan,
   type PlanTier,
   type PhaseIndex,
@@ -642,13 +643,36 @@ async function generarSinSupabase({
     //   Cap. II–V todavía usan un único prompt. Cuando se definan variantes
     //   para esos capítulos, replicar este patrón aquí.
     let variantePrompt: string | null = null;
+    // Resolver la variante elegida por el estudiante (se persiste como
+    // cap1_variante_id en academic_context al crear el proyecto).
+    const ctxVar = (proyecto.academic_context ?? {}) as Record<string, unknown>;
+    const varianteIdResuelta = typeof ctxVar.cap1_variante_id === "string"
+      ? (ctxVar.cap1_variante_id as string)
+      : "clasico";
     if (phase_id === "ph-cap1") {
-      const ctxRaw = (proyecto.academic_context ?? {}) as Record<string, unknown>;
-      const varianteId = typeof ctxRaw.cap1_variante_id === "string"
-        ? (ctxRaw.cap1_variante_id as string)
-        : null;
-      variantePrompt = getVariantById(varianteId).prompt;
+      variantePrompt = getVariantById(varianteIdResuelta).prompt;
     }
+    // 🎯 Propagación de variante a Cap II-V: el prompt maestro se mantiene
+    // (alineado a Guía 1 UMSS), pero inyectamos un bloque al userPrompt que
+    // instruye a la IA sobre las restricciones de la variante "reducido"
+    // (no asumir hipótesis ni operacionalización porque el Cap I reducido
+    // no las genera). Esto evita la incoherencia entre capítulos sin
+    // requerir builders separados por variante.
+    const necesitaAvisoVarianteReducido =
+      varianteIdResuelta === "reducido" &&
+      ["ph-cap2", "ph-cap3", "ph-cap4", "ph-cap5"].includes(phase_id);
+    const bloqueVariante = necesitaAvisoVarianteReducido
+      ? `\n--- VARIANTE DEL DOCUMENTO: REDUCIDO (Guía 2 Céspedes UMSS) ---
+El Capítulo I de esta monografía NO contiene hipótesis ni operacionalización
+de variables (la variante "reducido" las omite por diseño). Por lo tanto:
+  • NO menciones ni "contrastes" hipótesis formales en este capítulo.
+  • NO asumas que existe una tabla de operacionalización (Tabla 1.X).
+  • Si necesitas referenciar el planteamiento del Cap I, hazlo sobre las
+    SUBPREGUNTAS DE SISTEMATIZACIÓN y las CAUSAS/EFECTOS, no sobre hipótesis.
+  • Las conclusiones (Cap V) se construyen por OBJETIVOS ESPECÍFICOS cumplidos,
+    no por hipótesis aceptadas/rechazadas.
+--- FIN AVISO VARIANTE ---\n`
+      : null;
 
     const phasePromptBase = typePrompt || adminPrompt || variantePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const baseSystemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
@@ -707,6 +731,7 @@ REGLAS:
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
       proyecto.titulo_provisional ? `TITULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
+      bloqueVariante,
       antiDuplicacionBlock || null,
       deepSearchBlock || null,
       referencesPhase
@@ -828,6 +853,11 @@ REGLAS:
         // Use admin-configured provider for this service
         const r = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
         aiResult = { text: r.text, provider: r.provider, model: r.model };
+      } else if (phase_id === "ph-latex" || phase_id === "ph-proy-latex") {
+        // 🎯 Fase de compilación LaTeX: usa routing premium dedicado
+        // (Claude Opus 4.7 con 16K tokens en plan PRO/ELITE) para evitar que
+        // la IA resuma el documento por falta de budget.
+        aiResult = await llamarCompiladorLaTeX(systemPrompt, userPrompt, planTier);
       } else {
         // Route by user's plan and academic phase
         aiResult = await llamarIAPorPlan(systemPrompt, userPrompt, phaseIndex, planTier);

@@ -10,8 +10,10 @@
  * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
  *
  * El Cap. I tiene variantes "clasico" y "reducido". La reducida NO trae
- * subpreguntas de sistematización. Este Cap. IV puede iterar sobre
- * subpreguntas que no existen en la variante reducida.
+ * hipótesis ni operacionalización. Este Cap. IV usa un único prompt
+ * maestro pero el builder `buildContextoCap4` recibe un parámetro
+ * opcional `variante` y adapta el bloque de contexto para que la IA
+ * NO fuerce contrastación de hipótesis cuando la variante es reducida.
  *
  * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
  *      memory/pending_variante_reducida.md
@@ -177,7 +179,36 @@ Reglas:
 - No usar fuentes no confiables si existen fuentes institucionales.
 - No atribuir a una fuente algo que no dice.
 - No presentar estimaciones como datos oficiales.
-- Citar en APA 7 cuando corresponda.
+- Citar en APA 7 cuando corresponda (ver bloque APA 7 detallado más abajo).
+
+═══════════════════════════════════════════════════════════════
+REGLAS DETALLADAS DE CITAS APA 7 (NORMA OBLIGATORIA UMSS)
+═══════════════════════════════════════════════════════════════
+
+A) CITAS TEXTUALES CORTAS (menos de 40 palabras):
+   - Texto entre comillas dobles "" dentro del párrafo.
+   - Al final, (Autor, Año, p. X). Página OBLIGATORIA si es textual.
+
+B) CITAS TEXTUALES LARGAS (40 palabras o más):
+   - Párrafo INDEPENDIENTE, SIN comillas.
+   - Sangría de 1.27 cm (block quote) en TODO el bloque.
+   - Al final, (Autor, Año, p. X).
+
+C) CITAS PARAFRASEADAS:
+   - Al final, (Autor, Año). Página recomendada pero no obligatoria.
+
+D) APORTE PROPIO DEL INVESTIGADOR (interpretación de los datos generados):
+   - NO lleva cita. Es regla explícita APA 7 + UMSS.
+   - Patrón al contrastar hallazgos con literatura: "Estos resultados coinciden
+     con Pérez (2021), que reportó... (cita). En el caso boliviano, sin
+     embargo, se observa que... (análisis propio, sin cita)".
+
+E) FUENTES INSTITUCIONALES (autor corporativo):
+   - (INE, 2023), (Banco Mundial, 2022), (ASFI, 2024).
+
+F) REFERENCIAS:
+   - Bloque REFERENCIAS_ETAPA al final, con SANGRÍA FRANCESA de 1.27 cm.
+   - Orden alfabético por apellido del primer autor.
 
 ═══════════════════════════════════════════════════════════════
 ROL Y TAREA
@@ -610,7 +641,16 @@ export function buildContextoCap4(datos: {
   tablasElaboradas?: string;
   graficosElaborados?: string;
   propuestasPreliminares?: string;
+  formatoUmss?: string;
+  /**
+   * Variante de Cap. I elegida por el estudiante. Default: "clasico".
+   * Si es "reducido", la IA evita forzar una sección de contrastación de
+   * hipótesis (porque no existe hipótesis formal en esa variante).
+   */
+  variante?: "clasico" | "reducido";
 }): string {
+  const variante = datos.variante ?? "clasico";
+
   const lineas: string[] = [
     "═══════════════════════════════════════════════════════════════",
     "[CONTEXTO DEL PROYECTO — generado por el sistema]",
@@ -631,6 +671,30 @@ export function buildContextoCap4(datos: {
   if (datos.fuentesPrioritarias && datos.fuentesPrioritarias.length > 0) {
     lineas.push(`Fuentes institucionales prioritarias: ${datos.fuentesPrioritarias.join(", ")}`);
   }
+  if (datos.formatoUmss) lineas.push(`formato_umss: ${datos.formatoUmss}`);
+  lineas.push(`variante_cap1: ${variante}`);
+
+  // Bloque dinámico de coherencia con la variante de Cap. I
+  lineas.push("");
+  lineas.push("───────────────────────────────────────────────────────────────");
+  if (variante === "reducido") {
+    lineas.push("[VARIANTE CAP. I = REDUCIDO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- El Cap. I NO formuló hipótesis ni operacionalización formal.");
+    lineas.push("- NO incluyas una sección titulada 'Contrastación de hipótesis' ni");
+    lineas.push("  'Aceptación/rechazo de hipótesis'.");
+    lineas.push("- Si fuera relevante, puedes mencionar en prosa cómo los hallazgos");
+    lineas.push("  respaldan o matizan los supuestos implícitos del problema, pero SIN");
+    lineas.push("  estructurarlo como contrastación formal.");
+    lineas.push("- Concentra el capítulo en responder los objetivos específicos uno por uno");
+    lineas.push("  (subtítulos 4.1, 4.2, ...) y desarrollar la propuesta del objetivo de propuesta.");
+  } else {
+    lineas.push("[VARIANTE CAP. I = CLÁSICO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- Si el Cap. I incluyó hipótesis u operacionalización (sección 1.6),");
+    lineas.push("  desarrolla la contrastación de hipótesis tal como exige la REGLA 7.");
+    lineas.push("- Si NO se incluyó 1.6 en el Cap. I, omite la contrastación formal y");
+    lineas.push("  ciérrala como síntesis cualitativa.");
+  }
+  lineas.push("───────────────────────────────────────────────────────────────");
 
   // Insumos empíricos opcionales para el Cap IV
   if (datos.datosBrutos) {

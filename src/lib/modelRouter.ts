@@ -20,7 +20,12 @@ export interface AIRouteResult {
 
 // Fases 0-5 corresponden a las etapas del documento académico:
 // 0 = propuesta de tema, 1 = Cap.I, 2 = Cap.II, 3 = Cap.III, 4 = Cap.IV, 5 = Cap.V+Biblio
-export type PhaseIndex = 0 | 1 | 2 | 3 | 4 | 5;
+// Fase 6 = compilación final LaTeX (megaprompt SCRIBE_LATEX, requiere modelo premium
+// con techo alto de tokens — 30-70 págs de transcripción sin resumir).
+export type PhaseIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/** Fase especial: compilación final del documento .tex. */
+export const PHASE_COMPILAR_LATEX: PhaseIndex = 6;
 
 // Section keys del endpoint /api/generate (flujo monografia clásico)
 export type SectionKey =
@@ -49,6 +54,9 @@ const DEMO: PhaseMap = {
   3: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
   4: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
   5: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 2048 },
+  // Compilar LaTeX en DEMO: groq 70B con 7K (legacy fallback — suficiente
+  // para demos cortas; usuarios de pago obtienen Opus 4.7 con 16K).
+  6: { provider: "groq", model: "llama-3.3-70b-versatile", maxTokens: 7000 },
 };
 
 const ESTANDAR: PhaseMap = {
@@ -58,6 +66,8 @@ const ESTANDAR: PhaseMap = {
   3: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
   4: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
   5: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
+  // Compilar LaTeX en ESTANDAR: deepseek-chat con 12K.
+  6: { provider: "deepseek", model: "deepseek-chat", maxTokens: 12000 },
 };
 
 const PRO: PhaseMap = {
@@ -67,6 +77,9 @@ const PRO: PhaseMap = {
   3: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
   4: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
   5: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
+  // Compilar LaTeX en PRO: Claude Opus 4.7 con 16K — necesario para
+  // transcribir 30-70 páginas sin violar la regla "PROHIBIDO RESUMIR".
+  6: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 16384 },
 };
 
 const ELITE: PhaseMap = {
@@ -76,6 +89,8 @@ const ELITE: PhaseMap = {
   3: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
   4: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
   5: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
+  // Compilar LaTeX en ELITE: idem PRO — Claude Opus 4.7 con 16K.
+  6: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 16384 },
 };
 
 const PLAN_MAP: Partial<Record<PlanTier, PhaseMap>> = {
@@ -142,4 +157,24 @@ export async function llamarIAPorPlan(
     }
   }
   throw new Error(`Ningún proveedor disponible para plan ${plan} fase ${phase}. ${errors.join(" | ")}`);
+}
+
+/**
+ * Llama al compilador final de LaTeX (megaprompt SCRIBE_LATEX) con el routing
+ * premium definido para la fase 6 del plan del usuario.
+ *
+ * - DEMO     → groq llama-3.3-70b (7K tokens, legacy fallback)
+ * - ESTANDAR → deepseek-chat (12K tokens)
+ * - PRO      → claude-opus-4-7 (16K tokens)
+ * - ELITE    → claude-opus-4-7 (16K tokens)
+ *
+ * Si el proveedor preferido no tiene API key, hace fallback a la cadena
+ * clásica (Groq → Anthropic → OpenAI).
+ */
+export async function llamarCompiladorLaTeX(
+  system: string,
+  user: string,
+  plan: PlanTier | string,
+): Promise<AIRouteResult> {
+  return llamarIAPorPlan(system, user, PHASE_COMPILAR_LATEX, normalizePlan(plan));
 }

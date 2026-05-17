@@ -7,19 +7,47 @@
  * `proyecto.academic_context.cap1_variante_id`.
  *
  * 🔴 ESTADO ACTUAL (ver memory/pending_variante_reducida.md):
- *   - Cap. I clásico y reducido implementados.
- *   - Cap. II–V todavía usan un único prompt para AMBAS variantes.
- *     Cuando el usuario defina la estructura reducida de Cap. II–V,
- *     extender este registry con `cap2Variants.ts`, `cap3Variants.ts`, etc.
- *     y replicar el patrón de resolución en /api/projects/generate-phase.
+ *   - Cap. I clásico y reducido implementados alineados a UMSS Guías 1 y 2.
+ *   - Cap. II–V ya soportan el parámetro `variante` en sus builders
+ *     (`buildContextoCap2`/3/4/5) y adaptan su comportamiento para no
+ *     contradecir la variante reducida (no asumir hipótesis ni
+ *     operacionalización). Falta que /api/projects/generate-phase pase
+ *     este parámetro a los builders.
  *
  * Server-only — los prompts NUNCA salen al cliente. La metadata pública
- * (id, nombre, descripcion, estructura_visible) se expone vía
+ * (id, nombre, descripcion, estructura_visible, guia_oficial) se expone vía
  * /api/cap1-variants.
  */
 
 import { SISTEMA_SCRIBE_CAP1_CLASICO } from "@/lib/prompts/scribe/cap1-variantes/clasico";
 import { SISTEMA_SCRIBE_CAP1_REDUCIDO } from "@/lib/prompts/scribe/cap1-variantes/reducido";
+
+/**
+ * Mapeo de la variante a la guía oficial UMSS que sigue.
+ * Permite a la UI mostrar qué documento normativo cubre cada variante.
+ *
+ * - `id`: identificador estable
+ * - `nombre`: etiqueta humana para el estudiante
+ * - `formato_umss`: clave técnica que viaja al builder para que la IA
+ *   ajuste interlineado / márgenes / notas editoriales
+ */
+export interface GuiaOficialUmss {
+  id: "guia_1_posgrado_fce" | "guia_2_cespedes";
+  nombre: string;
+  formato_umss: "guia_1_posgrado" | "guia_2_cespedes";
+}
+
+const GUIA_1_POSGRADO_FCE: GuiaOficialUmss = {
+  id: "guia_1_posgrado_fce",
+  nombre: "Guía Posgrado FCE UMSS (Sept 2024) — Doble Titulación",
+  formato_umss: "guia_1_posgrado",
+};
+
+const GUIA_2_CESPEDES: GuiaOficialUmss = {
+  id: "guia_2_cespedes",
+  nombre: "Estilo Céspedes Tapia (Guía 2 UMSS — versión extendida)",
+  formato_umss: "guia_2_cespedes",
+};
 
 export interface Cap1Variant {
   id: string;
@@ -39,44 +67,66 @@ export interface Cap1Variant {
    * (opcional). Útil para advertencias o aclaraciones.
    */
   nota?: string;
+  /**
+   * Guía oficial UMSS a la que corresponde esta variante.
+   */
+  guia_oficial: GuiaOficialUmss;
 }
 
 const CLASICO: Cap1Variant = {
   id: "clasico",
   nombre: "Clásico",
   descripcion:
-    "Estructura completa con sistematización, hipótesis y operacionalización de variables. Recomendada para tesis y monografías de investigación cuantitativa o mixta.",
+    "Estructura UMSS Posgrado FCE (Guía 1, Sept 2024 — Doble Titulación). Incluye antecedentes generales y específicos, planteamiento con árbol de problemas y formulación, objetivos, justificación metodológica/práctica/social, alcances y, opcionalmente, hipótesis con operacionalización de variables. Recomendada para tesis y monografías cuantitativas, correlacionales, descriptivas o proyectivas.",
   estructura_visible: [
-    "Introducción y antecedentes generales",
-    "1.1 Planteamiento y formulación del problema",
-    "    1.1.1 Planteamiento (árbol de problemas, pronóstico, control)",
-    "    1.1.2 Formulación y sistematización (pregunta central + subpreguntas)",
-    "1.2 Objetivos (general + específicos)",
-    "1.3 Justificación (teórica, práctica y social)",
-    "1.4 Alcances (temático, temporal, espacial)",
-    "1.5 Hipótesis y operacionalización de variables",
+    "Capítulo I: Introducción",
+    "1.1 Antecedentes",
+    "    1.1.1 Antecedentes generales",
+    "    1.1.2 Antecedentes específicos",
+    "1.2 Planteamiento del problema",
+    "    1.2.1 Descripción del problema",
+    "    1.2.2 Árbol de problemas",
+    "    1.2.3 Causas y efectos",
+    "    1.2.4 Formulación del problema",
+    "1.3 Objetivos de investigación",
+    "    1.3.1 Objetivo general",
+    "    1.3.2 Objetivos específicos",
+    "1.4 Justificación de la investigación",
+    "    1.4.1 Justificación metodológica",
+    "    1.4.2 Justificación práctica",
+    "    1.4.3 Justificación social",
+    "1.5 Alcances de la investigación",
+    "    1.5.1 Alcance temático",
+    "    1.5.2 Alcance temporal",
+    "    1.5.3 Alcance espacial",
+    "1.6 Hipótesis y operacionalización (opcional, según tipo de monografía)",
   ],
   prompt: SISTEMA_SCRIBE_CAP1_CLASICO,
+  guia_oficial: GUIA_1_POSGRADO_FCE,
 };
 
 const REDUCIDO: Cap1Variant = {
   id: "reducido",
   nombre: "Reducido",
   descripcion:
-    "Estructura simplificada sin hipótesis ni operacionalización. Justificación enfocada en lo Social y Económico. Útil para diplomados o programas que piden un enfoque ejecutivo y aplicado.",
+    "Estilo Céspedes Tapia (Guía 2 UMSS — versión extendida). Mantiene la numeración 1.1–1.5 alineada a UMSS, incluye sistematización del problema (4–5 subpreguntas), justificación metodológica/práctica/social, pero NO incluye hipótesis ni operacionalización de variables. Útil para diplomados y programas con enfoque ejecutivo, cualitativo o documental sin variables medibles.",
   estructura_visible: [
-    "Introducción",
+    "Capítulo I: Introducción",
     "1.1 Antecedentes",
+    "    1.1.1 Antecedentes generales",
+    "    1.1.2 Antecedentes específicos",
     "1.2 Planteamiento del problema",
     "    1.2.1 Descripción del problema",
     "    1.2.2 Árbol de problemas",
-    "    1.2.3 Formulación del problema",
+    "    1.2.3 Causas y efectos",
+    "    1.2.4 Formulación del problema (pregunta central + sistematización)",
     "1.3 Objetivos de investigación",
     "    1.3.1 Objetivo general",
     "    1.3.2 Objetivos específicos",
     "1.4 Justificación de la investigación",
-    "    1.4.1 Justificación social",
-    "    1.4.2 Justificación económica",
+    "    1.4.1 Justificación metodológica",
+    "    1.4.2 Justificación práctica",
+    "    1.4.3 Justificación social",
     "1.5 Alcances de la investigación",
     "    1.5.1 Alcance temático",
     "    1.5.2 Alcance temporal",
@@ -84,7 +134,8 @@ const REDUCIDO: Cap1Variant = {
   ],
   prompt: SISTEMA_SCRIBE_CAP1_REDUCIDO,
   nota:
-    "⚠️ Beta — Esta variante está optimizada para el Capítulo I. Los capítulos II–V se generarán por ahora con el formato clásico hasta que tu diplomado nos confirme su estructura específica.",
+    "Esta variante NO incluye sección 1.6 (Hipótesis ni Operacionalización). Los capítulos II–V se adaptan automáticamente para no asumir hipótesis ni variables operacionalizadas.",
+  guia_oficial: GUIA_2_CESPEDES,
 };
 
 const REGISTRY: Record<string, Cap1Variant> = {
@@ -131,6 +182,7 @@ export function getVariantById(variantId: string | null | undefined): Cap1Varian
 
 /**
  * Devuelve solo la metadata pública (sin el prompt) — segura para enviar al cliente.
+ * Incluye `guia_oficial` para que la UI pueda mostrar a qué guía corresponde.
  */
 export function toPublicVariant(v: Cap1Variant): Omit<Cap1Variant, "prompt"> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -10,8 +10,24 @@
  * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
  *
  * El Cap. I tiene variantes "clasico" y "reducido". La reducida NO trae
- * operacionalización de variables. Este Cap. III actualmente espera la
- * operacionalización del Cap. I — incompatible con la variante reducida.
+ * operacionalización de variables. Este Cap. III usa un único prompt
+ * maestro pero el builder `buildContextoCap3` recibe un parámetro
+ * opcional `variante` y adapta el bloque de contexto para que la IA NO
+ * exija operacionalización inexistente cuando la variante es reducida.
+ *
+ * Estructura UMSS Guía 1 (Posgrado FCE) para Cap. III:
+ *   3.1 Enfoque metodológico
+ *   3.2 Fuentes de información
+ *   3.3 Método y técnicas de recolección
+ *       3.3.1 Población
+ *       3.3.2 Diseño muestral
+ *       3.3.3 Tamaño de la muestra
+ *       3.3.4 Muestreo
+ *   3.4 Matriz metodológica
+ *
+ * El prompt mantiene una estructura más completa (3.1–3.7) pero la sección
+ * de población/muestra se desarrolla con las sub-subdivisiones UMSS 3.6.1–3.6.4
+ * (equivalentes a 3.3.1–3.3.4 de la Guía 1).
  *
  * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
  *      memory/pending_variante_reducida.md
@@ -142,8 +158,37 @@ Reglas:
 - No inventar URLs ni DOI.
 - No usar autores sin citarlos en el texto.
 - No incluir referencias no usadas.
-- Las citas deben seguir APA 7.
+- Las citas deben seguir APA 7 (ver bloque APA 7 detallado más abajo).
 - Las fuentes metodológicas deben apoyar decisiones concretas, no decorar el capítulo.
+
+═══════════════════════════════════════════════════════════════
+REGLAS DETALLADAS DE CITAS APA 7 (NORMA OBLIGATORIA UMSS)
+═══════════════════════════════════════════════════════════════
+
+A) CITAS TEXTUALES CORTAS (menos de 40 palabras):
+   - Texto entre comillas dobles "" dentro del párrafo.
+   - Al final, (Autor, Año, p. X). La página es OBLIGATORIA si la cita es textual.
+
+B) CITAS TEXTUALES LARGAS (40 palabras o más):
+   - Párrafo INDEPENDIENTE, SIN comillas.
+   - Sangría de 1.27 cm (block quote) en TODO el bloque.
+   - Al final del bloque, (Autor, Año, p. X).
+
+C) CITAS PARAFRASEADAS:
+   - Al final, (Autor, Año). Página recomendada pero no obligatoria.
+
+D) APORTE PROPIO DEL INVESTIGADOR (decisión metodológica, adaptación de técnica):
+   - NO lleva cita. Es regla explícita APA 7 + UMSS.
+   - Patrón: "Según Hernández Sampieri et al. (2018), la técnica X consiste en
+     ... (cita). En esta investigación se adapta combinándola con Y
+     (decisión propia, sin cita)".
+
+E) FUENTES INSTITUCIONALES (autor corporativo):
+   - (INE, 2023), (Banco Mundial, 2022), (ASFI, 2024).
+
+F) REFERENCIAS:
+   - Bloque REFERENCIAS_ETAPA al final, con SANGRÍA FRANCESA de 1.27 cm.
+   - Orden alfabético por apellido del primer autor.
 
 ═══════════════════════════════════════════════════════════════
 ROL Y TAREA
@@ -400,42 +445,89 @@ Explica:
 - Relación con las variables o categorías del estudio.
 
 ───────────────────────────────────────────────────────────────
-### 3.6. Población y tamaño de la muestra / unidad de análisis documental
+### 3.6. Población, diseño muestral, tamaño y muestreo
+       (equivalente a UMSS Guía 1 §3.3.1–3.3.4)
 ───────────────────────────────────────────────────────────────
 
-Esta sección debe adaptarse al tipo de investigación.
+Esta sección debe seguir la estructura UMSS Guía 1 (Posgrado FCE) cuando el
+estudio requiera población / muestra. Desarrolla las CUATRO sub-subdivisiones
+explícitas (3.6.1, 3.6.2, 3.6.3, 3.6.4).
 
-CASO A — Si la investigación requiere personas, empresas, usuarios, clientes,
-productores, funcionarios o informantes:
+Si el estudio es PURAMENTE documental, estadístico, normativo o bibliográfico
+y NO requiere población de personas, reemplaza la sección 3.6 completa por
+una versión adaptada (ver "CASO DOCUMENTAL" al final).
 
-Desarrolla:
-1. Población o universo.
-2. Unidad de análisis.
-3. Marco muestral, si existe.
-4. Tipo de muestreo:
-   - Probabilístico, si existe base poblacional y se requiere inferencia.
-   - No probabilístico, si el estudio es exploratorio, cualitativo, documental
-     o con informantes clave.
-5. Tamaño de muestra, si existe dato suficiente.
-6. Justificación del tamaño y técnica de selección.
+───────────────────────────────────────────────────────────────
+#### 3.6.1. Población
+───────────────────────────────────────────────────────────────
 
-No inventes cantidades.
-Si no se conoce el número total de población, plantea muestreo no probabilístico
-justificado por criterio, conveniencia razonada o informantes clave, según corresponda.
+Define:
+- Población o universo del estudio (cantidad estimada, si se conoce).
+- Unidad de análisis (persona, empresa, hogar, transacción, documento, etc.).
+- Criterios de inclusión y exclusión.
+- Justificación de por qué esa población responde a los objetivos.
 
-CASO B — Si la investigación es documental, estadística, normativa, financiera,
-bibliográfica o de series de datos:
+No inventes cantidades. Si no se conoce el tamaño exacto, descríbelo
+cualitativamente (ej. "todas las cooperativas de ahorro registradas en ASFI
+en el periodo 2020–2024").
 
-No fuerces población y muestra de personas.
+───────────────────────────────────────────────────────────────
+#### 3.6.2. Diseño muestral
+───────────────────────────────────────────────────────────────
 
-Desarrolla:
-1. Unidad de análisis documental.
-2. Universo documental o estadístico.
-3. Criterios de inclusión.
-4. Criterios de exclusión.
-5. Periodo de análisis.
-6. Fuentes institucionales.
-7. Justificación de suficiencia documental.
+Explica:
+- Tipo de diseño muestral elegido:
+    * Probabilístico (aleatorio simple, estratificado, por conglomerados, sistemático).
+    * No probabilístico (por conveniencia, por juicio, bola de nieve, informantes clave).
+- Justificación del diseño en función del problema, la población y los recursos.
+- Marco muestral, si existe (lista o base desde la cual se extrae la muestra).
+
+───────────────────────────────────────────────────────────────
+#### 3.6.3. Tamaño de la muestra
+───────────────────────────────────────────────────────────────
+
+Indica:
+- Tamaño de la muestra (número aproximado).
+- Si es probabilística: nivel de confianza, margen de error y fórmula usada
+  (ej. fórmula para población finita). Cita la fórmula con APA 7.
+- Si es no probabilística: criterio de saturación, número de informantes
+  clave seleccionados y por qué.
+- Si no se puede calcular un número exacto, justifica el criterio de
+  selección sin inventar cantidades.
+
+───────────────────────────────────────────────────────────────
+#### 3.6.4. Muestreo
+───────────────────────────────────────────────────────────────
+
+Describe el PROCEDIMIENTO concreto de muestreo:
+- Cómo se seleccionarán los elementos de la muestra (paso a paso).
+- Quién aplicará el procedimiento.
+- Cómo se reemplazarán los casos no respondientes (si corresponde).
+- Cómo se garantizará la representatividad o la pertinencia (según el tipo).
+
+───────────────────────────────────────────────────────────────
+#### CASO DOCUMENTAL — alternativa si NO hay población de personas
+───────────────────────────────────────────────────────────────
+
+Si la investigación es documental, estadística, normativa, financiera o
+bibliográfica, REEMPLAZA las sub-subdivisiones 3.6.1–3.6.4 por:
+
+A) Unidad de análisis documental.
+B) Universo documental o estadístico.
+C) Criterios de inclusión y exclusión.
+D) Periodo de análisis.
+E) Fuentes institucionales.
+F) Justificación de suficiencia documental.
+
+Ejemplos de unidad de análisis documental:
+- Series estadísticas anuales del periodo definido.
+- Informes institucionales.
+- Estados financieros.
+- Normas legales.
+- Registros administrativos.
+- Publicaciones sectoriales.
+- Bases de datos oficiales.
+- Estudios empíricos.
 
 Ejemplos de unidad de análisis documental:
 - Series estadísticas anuales del periodo definido.
@@ -655,7 +747,16 @@ export function buildContextoCap3(datos: {
   tecnicasPrevistas?: string[];
   softwarePrevisto?: string[];
   requiereTrabajoDeCampo?: boolean;
+  formatoUmss?: string;
+  /**
+   * Variante de Cap. I elegida por el estudiante. Determina si la IA debe
+   * asumir hipótesis y operacionalización (clásico) o NO (reducido).
+   * Default: "clasico" para no romper compatibilidad.
+   */
+  variante?: "clasico" | "reducido";
 }): string {
+  const variante = datos.variante ?? "clasico";
+
   const lineas: string[] = [
     "═══════════════════════════════════════════════════════════════",
     "[CONTEXTO DEL PROYECTO — generado por el sistema]",
@@ -689,12 +790,34 @@ export function buildContextoCap3(datos: {
   if (typeof datos.requiereTrabajoDeCampo === "boolean") {
     lineas.push(`Requiere trabajo de campo: ${datos.requiereTrabajoDeCampo ? "SÍ" : "NO"}`);
   }
+  if (datos.formatoUmss) lineas.push(`formato_umss: ${datos.formatoUmss}`);
+  lineas.push(`variante_cap1: ${variante}`);
 
   if (datos.documentosUsuario) {
     lineas.push("");
     lineas.push("DOCUMENTOS SUBIDOS POR EL USUARIO:");
     lineas.push(datos.documentosUsuario);
   }
+
+  // Bloque dinámico de coherencia con la variante de Cap. I
+  lineas.push("");
+  lineas.push("───────────────────────────────────────────────────────────────");
+  if (variante === "reducido") {
+    lineas.push("[VARIANTE CAP. I = REDUCIDO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- El Cap. I NO formuló hipótesis ni operacionalización de variables.");
+    lineas.push("- NO incluyas en este Cap. III ninguna sección que exija contrastar");
+    lineas.push("  hipótesis ni que asuma variables medibles preestablecidas.");
+    lineas.push("- Diseña la metodología en torno a categorías de análisis derivadas de los");
+    lineas.push("  objetivos específicos (no de variables operacionalizadas inexistentes).");
+    lineas.push("- Si el enfoque resulta cualitativo o documental, prioriza unidad de análisis");
+    lineas.push("  documental sobre población de personas.");
+  } else {
+    lineas.push("[VARIANTE CAP. I = CLÁSICO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- El Cap. I puede haber formulado hipótesis y operacionalización (sección 1.6).");
+    lineas.push("- Diseña la metodología para permitir contrastar/operacionalizar dichas variables.");
+    lineas.push("- Si no hubo hipótesis explícita, igualmente alinea la metodología a los objetivos.");
+  }
+  lineas.push("───────────────────────────────────────────────────────────────");
 
   lineas.push("");
   lineas.push("═══════════════════════════════════════════════════════════════");

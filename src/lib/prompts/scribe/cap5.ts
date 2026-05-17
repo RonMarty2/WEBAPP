@@ -10,8 +10,10 @@
  * ⚠️ VARIANTES — LEER ANTES DE MODIFICAR
  *
  * El Cap. I tiene variantes "clasico" y "reducido". La reducida NO trae
- * hipótesis. Este Cap. V puede intentar confirmar/refutar una hipótesis
- * que no existe en la variante reducida.
+ * hipótesis. Este Cap. V usa un único prompt maestro pero el builder
+ * `buildContextoCap5` recibe un parámetro opcional `variante` y adapta
+ * el bloque de contexto para NO forzar el cierre de una hipótesis
+ * inexistente cuando la variante es reducida.
  *
  * Ver: docs/PENDIENTE_VARIANTE_REDUCIDA.md
  *      memory/pending_variante_reducida.md
@@ -350,6 +352,22 @@ Antes de cerrar el Capítulo V, verifica internamente:
 10. Que el documento pueda pasar al resumen ejecutivo sin contradicciones.
 
 ═══════════════════════════════════════════════════════════════
+REGLAS DETALLADAS DE CITAS APA 7 (NORMA OBLIGATORIA UMSS)
+═══════════════════════════════════════════════════════════════
+
+En principio, el Capítulo V NO incluye citas nuevas. Si excepcionalmente
+necesitas citar una fuente ya usada previamente, respeta APA 7:
+
+A) CITAS TEXTUALES CORTAS (<40 palabras): entre comillas + (Autor, Año, p. X).
+B) CITAS TEXTUALES LARGAS (>=40 palabras): párrafo independiente sin comillas,
+   sangría 1.27 cm, (Autor, Año, p. X) al final.
+C) CITAS PARAFRASEADAS: (Autor, Año). Página recomendada pero no obligatoria.
+D) APORTE PROPIO DEL INVESTIGADOR: SIN cita.
+E) FUENTES INSTITUCIONALES: (INE, 2023), (Banco Mundial, 2022).
+F) REFERENCIAS_ETAPA: solo si excepcionalmente hubo cita; SANGRÍA FRANCESA
+   de 1.27 cm; orden alfabético.
+
+═══════════════════════════════════════════════════════════════
 SALIDA FINAL OBLIGATORIA
 ═══════════════════════════════════════════════════════════════
 
@@ -393,7 +411,15 @@ export function buildContextoCap5(datos: {
   cap4_content: string;
   documentosUsuario?: string;
   fuentesPrioritarias?: string[];
+  formatoUmss?: string;
+  /**
+   * Variante de Cap. I elegida por el estudiante. Default: "clasico".
+   * Si es "reducido", la IA NO incluye contrastación/cierre de hipótesis.
+   */
+  variante?: "clasico" | "reducido";
 }): string {
+  const variante = datos.variante ?? "clasico";
+
   const lineas: string[] = [
     "═══════════════════════════════════════════════════════════════",
     "[CONTEXTO DEL PROYECTO — generado por el sistema]",
@@ -414,11 +440,31 @@ export function buildContextoCap5(datos: {
   if (datos.fuentesPrioritarias && datos.fuentesPrioritarias.length > 0) {
     lineas.push(`Fuentes institucionales prioritarias: ${datos.fuentesPrioritarias.join(", ")}`);
   }
+  if (datos.formatoUmss) lineas.push(`formato_umss: ${datos.formatoUmss}`);
+  lineas.push(`variante_cap1: ${variante}`);
+
   if (datos.documentosUsuario) {
     lineas.push("");
     lineas.push("DOCUMENTOS SUBIDOS POR EL USUARIO:");
     lineas.push(datos.documentosUsuario);
   }
+
+  // Bloque dinámico de coherencia con la variante de Cap. I
+  lineas.push("");
+  lineas.push("───────────────────────────────────────────────────────────────");
+  if (variante === "reducido") {
+    lineas.push("[VARIANTE CAP. I = REDUCIDO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- El Cap. I NO formuló hipótesis ni supuesto formal.");
+    lineas.push("- NO incluyas la sub-sección 'Contrastación de hipótesis o supuesto'.");
+    lineas.push("- Cierra las conclusiones objetivo por objetivo y la conclusión general,");
+    lineas.push("  sin forzar cierre de hipótesis.");
+  } else {
+    lineas.push("[VARIANTE CAP. I = CLÁSICO — INSTRUCCIONES ESPECÍFICAS]");
+    lineas.push("- Si el Cap. I incluyó hipótesis o supuesto (sección 1.6) y el Cap. IV los contrastó,");
+    lineas.push("  cierra explícitamente esa hipótesis/supuesto en la sub-sección correspondiente.");
+    lineas.push("- Si no hubo 1.6, omite el cierre de hipótesis (sin explicarlo).");
+  }
+  lineas.push("───────────────────────────────────────────────────────────────");
 
   // Capítulos previos
   lineas.push("");

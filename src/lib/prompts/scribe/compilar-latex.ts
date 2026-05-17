@@ -253,9 +253,15 @@ Si MOTOR LATEX = XeLaTeX (solo si está explícitamente pedido):
 \\usepackage{geometry}
 \\geometry{letterpaper, margin=2.54cm}
 \\usepackage{setspace}
+% Interlineado: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% - formato_umss = guia_1_posgrado → \\doublespacing
+% - formato_umss = guia_2_cespedes → \\onehalfspacing
 \\doublespacing
 \\usepackage{ragged2e}
-\\raggedright   % Alineacion IZQUIERDA (norma APA 7 / UMSS), NO justificar margen derecho
+% Alineación: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% - formato_umss = guia_1_posgrado → \\raggedright (sin justificar, norma UMSS Posgrado)
+% - formato_umss = guia_2_cespedes → \\justify (margen justificado, variante Céspedes)
+\\raggedright
 \\usepackage{indentfirst}
 \\setlength{\\parindent}{1.27cm}
 \\setlength{\\parskip}{0pt}
@@ -293,9 +299,15 @@ Si MOTOR LATEX = pdfLaTeX:
 \\usepackage{geometry}
 \\geometry{letterpaper, margin=2.54cm}
 \\usepackage{setspace}
+% Interlineado: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% - formato_umss = guia_1_posgrado → \\doublespacing
+% - formato_umss = guia_2_cespedes → \\onehalfspacing
 \\doublespacing
 \\usepackage{ragged2e}
-\\raggedright   % Alineacion IZQUIERDA (norma APA 7 / UMSS), NO justificar margen derecho
+% Alineación: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% - formato_umss = guia_1_posgrado → \\raggedright (sin justificar, norma UMSS Posgrado)
+% - formato_umss = guia_2_cespedes → \\justify (margen justificado, variante Céspedes)
+\\raggedright
 \\usepackage{indentfirst}
 \\setlength{\\parindent}{1.27cm}
 \\setlength{\\parskip}{0pt}
@@ -357,24 +369,83 @@ ORDEN obligatorio en \\begin{document}:
   \\chapter{...}    % Capítulo I empieza aquí
 
 Eso garantiza: preliminares (índice, listas) con romanos, cuerpo (Cap I+)
-con arábigos desde 1. SIN carátula (decisión de diseño — ver sección
-"CARÁTULA — NO INCLUIR" más abajo).
+con arábigos desde 1. La inclusión (o no) de carátula y su contenido se
+decide según el flag [incluir_caratula_umss] del bloque [DATOS DE CARÁTULA]
+— ver sección "CARÁTULA UMSS" más abajo.
 
 ═══════════════════════════════════════════════════════════════
-CARÁTULA — NO INCLUIR (decisión de diseño)
+CARÁTULA UMSS — CONDICIONAL (según incluir_caratula_umss)
 ═══════════════════════════════════════════════════════════════
 
-🚨 PROHIBIDO generar carátula en el .tex final.
+Mirá el bloque [DATOS DE CARÁTULA] que recibís arriba. Tiene un flag llamado
+\`incluir_caratula_umss\` que puede valer "true" o "false".
 
-NO incluyas:
-- \\begin{titlepage} ... \\end{titlepage}
-- Logos (\\includegraphics) en la apertura del documento
-- Bloques con nombre del estudiante, mes, año, programa, tutor
-- Texto tipo "MONOGRAFÍA" / "TÍTULO DEL TRABAJO" en la apertura
-- Cualquier placeholder tipo [Nombre del Estudiante], [Mes], [Año],
-  [Programa], [Versión], [TÍTULO DEL TRABAJO]
+────────────────────────────────────────────────────────────────
+CASO A — incluir_caratula_umss = true (default UMSS Posgrado)
+────────────────────────────────────────────────────────────────
 
-El documento debe arrancar DIRECTAMENTE con \\begin{document} seguido de:
+Generá la carátula oficial UMSS USANDO EXACTAMENTE el template LaTeX que
+sigue, sustituyendo los datos del bloque [DATOS DE CARÁTULA]. Insertala
+INMEDIATAMENTE después de \\begin{document} y ANTES de \\pagenumbering{roman}.
+
+Reglas:
+- Margen superior carátula: 2.54 cm (ya viene del preámbulo).
+- Carátula SIN número de página → usá \\thispagestyle{empty}.
+- Logo: usá \\IfFileExists{logos/umss.png}{...}{...} para mostrar
+  un placeholder de texto si el archivo del logo no está disponible
+  en el ZIP de Overleaf.
+- Después de la carátula viene la página de \\pagenumbering{roman}
+  con el índice (i, ii, iii...).
+- El Capítulo I arranca en \\pagenumbering{arabic} reiniciando en 1.
+
+TEMPLATE LATEX EXACTO (copialo tal cual, reemplazando solo los campos
+entre << >> con los datos del bloque [DATOS DE CARÁTULA]):
+
+\\begin{titlepage}
+\\thispagestyle{empty}
+\\begin{center}
+\\IfFileExists{logos/umss.png}{%
+  \\includegraphics[height=4cm,width=2.5cm,keepaspectratio]{logos/umss.png}%
+}{%
+  \\framebox[2.5cm]{\\parbox[c][4cm][c]{2.2cm}{\\centering\\footnotesize Logo\\\\UMSS}}%
+}
+
+\\vspace{0.8cm}
+
+{\\fontsize{14pt}{17pt}\\selectfont \\textbf{<<UNIVERSIDAD>>}}\\\\[4pt]
+{\\fontsize{14pt}{17pt}\\selectfont <<FACULTAD>>}\\\\[4pt]
+{\\fontsize{14pt}{17pt}\\selectfont <<DEPARTAMENTO>>}
+
+\\vspace{1.2cm}
+
+{\\fontsize{12pt}{15pt}\\selectfont <<MODALIDAD>>}\\\\[6pt]
+{\\fontsize{12pt}{15pt}\\selectfont <<PROGRAMA>> <<VERSION_DIPLOMADO>>}
+
+\\vspace{1.6cm}
+
+{\\fontsize{14pt}{17pt}\\selectfont \\textbf{MONOGRAFÍA}}
+
+\\vspace{0.8cm}
+
+{\\fontsize{14pt}{17pt}\\selectfont <<TITULO_TRABAJO>>}
+
+\\vspace{1.2cm}
+
+{\\fontsize{14pt}{17pt}\\selectfont Estudiante: <<ESTUDIANTE>>}
+
+\\vfill
+
+{\\fontsize{12pt}{15pt}\\selectfont <<CIUDAD>> – <<PAIS>>}\\\\[4pt]
+{\\fontsize{12pt}{15pt}\\selectfont <<MES_ANIO>>}
+\\end{center}
+\\end{titlepage}
+
+────────────────────────────────────────────────────────────────
+CASO B — incluir_caratula_umss = false
+────────────────────────────────────────────────────────────────
+
+NO generes carátula. El documento arranca DIRECTAMENTE con
+\\begin{document} seguido de:
 
   \\pagenumbering{roman}
   \\tableofcontents
@@ -386,9 +457,12 @@ El documento debe arrancar DIRECTAMENTE con \\begin{document} seguido de:
   \\setcounter{page}{1}
   \\chapter{...}    % Capítulo I empieza aquí
 
-El estudiante o el admin agregará la carátula manualmente al PDF compilado
-si la necesita (es lo más estándar — las carátulas universitarias se hacen
-aparte por las grandes variaciones entre instituciones, programas y formatos).
+PROHIBIDO en CASO B:
+- \\begin{titlepage} ... \\end{titlepage}
+- Logos (\\includegraphics) en la apertura del documento
+- Bloques con nombre del estudiante, mes, año, programa, tutor
+- Texto tipo "MONOGRAFÍA" / "TÍTULO DEL TRABAJO" en la apertura
+- Placeholders tipo [Nombre del Estudiante], [Mes], [Año], [Programa]
 
 ═══════════════════════════════════════════════════════════════
 ÁRBOL DE PROBLEMAS — CONVERSIÓN DE MARCADOR A TIKZ (OBLIGATORIO)
@@ -905,21 +979,20 @@ Reglas:
 - No incluir código que no fue usado.
 
 ═══════════════════════════════════════════════════════════════
-REGLAS DE CARÁTULA — DOCUMENTO SIN CARÁTULA
+REGLAS DE CARÁTULA — RECORDATORIO
 ═══════════════════════════════════════════════════════════════
 
-🚨 Decisión de diseño: este sistema NO genera carátula.
+La inclusión de carátula depende del flag \`incluir_caratula_umss\` que
+viene en el bloque [DATOS DE CARÁTULA].
 
-NO incluyas en el .tex final:
-- Bloque \\begin{titlepage}
-- Logos (\\includegraphics) en la apertura
-- Nombre del estudiante, mes, año, programa, tutor
-- Texto tipo "MONOGRAFÍA" / "TÍTULO DEL TRABAJO"
-- Cualquier identificación institucional (universidad, facultad, etc.)
+- Si incluir_caratula_umss = true  → generá la carátula UMSS oficial usando
+  el template definido en la sección "CARÁTULA UMSS — CONDICIONAL" más arriba.
+- Si incluir_caratula_umss = false → arrancá directamente con
+  \\pagenumbering{roman} + \\tableofcontents, sin titlepage.
 
-El estudiante o admin agrega la carátula manualmente al PDF compilado si
-la necesita. Cada universidad tiene formatos distintos y placeholders mal
-formateados se ven peor que no tener carátula.
+En CUALQUIER caso NO uses placeholders sin reemplazar (todo entre << >>
+debe sustituirse por el valor real del bloque [DATOS DE CARÁTULA] antes
+de entregar el .tex).
 
 ═══════════════════════════════════════════════════════════════
 REGLAS DE LIMPIEZA FINAL
@@ -976,7 +1049,10 @@ No incluyas instrucciones adicionales.
  * - Resumen Ejecutivo + 5 capítulos + Referencias consolidadas (todos obligatorios)
  * - Anexos opcionales
  */
-export function buildContextoLatex(datos: {
+/** Formato académico UMSS. Controla interlineado y alineación del cuerpo. */
+export type FormatoUMSS = "guia_1_posgrado" | "guia_2_cespedes";
+
+export interface ContextoLatex {
   // Carátula
   universidad?: string;          // Default: UNIVERSIDAD MAYOR DE SAN SIMÓN
   facultad?: string;             // Default: Facultad de Ciencias Económicas
@@ -991,6 +1067,18 @@ export function buildContextoLatex(datos: {
   pais?: string;                 // Default: Bolivia
   mesAnio: string;
   logoArchivo?: string;          // Si existe, nombre del archivo de imagen
+  /**
+   * Si se incluye la carátula UMSS oficial al inicio del .tex.
+   * Default: true cuando `universidad` incluye "UMSS" o "MAYOR DE SAN SIMÓN".
+   * Si es false, el documento arranca directo en \tableofcontents.
+   */
+  incluir_caratula_umss?: boolean;
+  /**
+   * Formato académico UMSS:
+   * - guia_1_posgrado (default UMSS Posgrado FCE): interlineado doble, sin justificar.
+   * - guia_2_cespedes (variante Céspedes): interlineado 1.5, márgenes justificados.
+   */
+  formato_umss?: FormatoUMSS;
   // Decisiones tipográficas
   motorLatex?: "XeLaTeX" | "pdfLaTeX";  // Default: pdfLaTeX (compatible Overleaf sin config)
   tipoLetra?: string;            // Default: Times New Roman 12 pt
@@ -1003,7 +1091,9 @@ export function buildContextoLatex(datos: {
   cap5_content: string;
   referencias_content: string;
   anexos_content?: string;
-}): string {
+}
+
+export function buildContextoLatex(datos: ContextoLatex): string {
   const universidad = datos.universidad || "UNIVERSIDAD MAYOR DE SAN SIMÓN";
   const facultad = datos.facultad || "Facultad de Ciencias Económicas";
   const departamento = datos.departamento || "Departamento de Posgrado";
@@ -1014,6 +1104,21 @@ export function buildContextoLatex(datos: {
   // adicional. XeLaTeX requiere que el usuario lo active manualmente en Settings.
   const motorLatex = datos.motorLatex || "pdfLaTeX";
   const tipoLetra = datos.tipoLetra || "Times New Roman 12 pt";
+
+  // Formato UMSS: default guia_1_posgrado (interlineado doble, sin justificar).
+  const formatoUmss: FormatoUMSS = datos.formato_umss || "guia_1_posgrado";
+  const esGuia1 = formatoUmss === "guia_1_posgrado";
+  const interlineadoLegible = esGuia1 ? "doble" : "1.5";
+  const interlineadoLatex = esGuia1 ? "\\doublespacing" : "\\onehalfspacing";
+  const alineacionLegible = esGuia1 ? "izquierda (sin justificar margen derecho)" : "justificada";
+  const alineacionLatex = esGuia1 ? "\\raggedright" : "\\justify";
+
+  // Carátula UMSS: default true cuando la universidad es UMSS.
+  const universidadUpper = universidad.toUpperCase();
+  const esUMSS = universidadUpper.includes("UMSS")
+    || universidadUpper.includes("MAYOR DE SAN SIMÓN")
+    || universidadUpper.includes("MAYOR DE SAN SIMON");
+  const incluirCaratula = datos.incluir_caratula_umss ?? esUMSS;
 
   const lineas: string[] = [
     "═══════════════════════════════════════════════════════════════",
@@ -1038,6 +1143,7 @@ export function buildContextoLatex(datos: {
   } else {
     lineas.push("Logo: NO — usar carátula sin logo, solo texto institucional");
   }
+  lineas.push(`incluir_caratula_umss: ${incluirCaratula ? "true" : "false"}`);
 
   lineas.push("");
   lineas.push("═══════════════════════════════════════════════════════════════");
@@ -1046,7 +1152,9 @@ export function buildContextoLatex(datos: {
   lineas.push("");
   lineas.push(`Tamaño de papel: Carta`);
   lineas.push(`Márgenes: 2.54 cm en los cuatro lados`);
-  lineas.push(`Interlineado: 1.5`);
+  lineas.push(`formato_umss: ${formatoUmss}`);
+  lineas.push(`Interlineado: ${interlineadoLegible} → en LaTeX usá ${interlineadoLatex}`);
+  lineas.push(`Alineación del cuerpo: ${alineacionLegible} → en LaTeX usá ${alineacionLatex}`);
   lineas.push(`Tipo de letra: ${tipoLetra}`);
   lineas.push(`Motor LaTeX: ${motorLatex}`);
   lineas.push(`Idioma: Español`);
