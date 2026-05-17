@@ -84,7 +84,10 @@ export async function POST(req: Request) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: false, // true en producción HTTPS
+    // secure: true en HTTPS (prod en Vercel) / false en HTTP (dev local).
+    // Sin esto Chrome Android rechaza la cookie en https:// y el login parece
+    // exitoso pero la sesión nunca se persiste.
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: SESSION_MAX_AGE,
     path: "/",

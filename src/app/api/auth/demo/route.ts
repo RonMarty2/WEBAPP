@@ -24,7 +24,9 @@ export async function POST(req: Request) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    secure: false,
+    // secure: true en HTTPS (Vercel) / false en HTTP local. Sin esto
+    // browsers móviles modernos descartan la cookie en https://.
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: SESSION_MAX_AGE,
     path: "/",

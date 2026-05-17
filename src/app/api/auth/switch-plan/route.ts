@@ -57,7 +57,9 @@ export async function POST(req: Request) {
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE, token, {
       httpOnly: true,
-      secure: false,
+      // secure: true en producción HTTPS (Vercel) para que el browser acepte
+      // la cookie. Sin esto Chrome Android la descarta silenciosamente.
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: SESSION_MAX_AGE,
       path: "/",
