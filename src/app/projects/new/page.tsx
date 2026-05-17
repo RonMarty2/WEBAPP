@@ -82,6 +82,41 @@ function NuevoProyectoPageInner() {
 
   // Modal de previsualización de PDF (guías oficiales UMSS)
   const [pdfPreview, setPdfPreview] = useState<{ url: string; titulo: string } | null>(null);
+  // Blob URL del PDF (evade extensiones tipo TeraBox que interceptan PDFs por URL).
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  // Cuando se abre el modal, baja el PDF y lo convierte a blob URL.
+  useEffect(() => {
+    if (!pdfPreview) {
+      // Cleanup del blob anterior al cerrar
+      if (pdfBlobUrl) {
+        URL.revokeObjectURL(pdfBlobUrl);
+        setPdfBlobUrl(null);
+      }
+      return;
+    }
+    let cancelado = false;
+    setPdfLoading(true);
+    fetch(pdfPreview.url)
+      .then((r) => r.blob())
+      .then((blob) => {
+        if (cancelado) return;
+        const blobUrl = URL.createObjectURL(blob);
+        setPdfBlobUrl(blobUrl);
+      })
+      .catch(() => {
+        if (cancelado) return;
+        setPdfBlobUrl(null);
+      })
+      .finally(() => {
+        if (!cancelado) setPdfLoading(false);
+      });
+    return () => {
+      cancelado = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfPreview]);
 
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
@@ -1191,17 +1226,39 @@ function NuevoProyectoPageInner() {
                 Cerrar ✕
               </button>
             </div>
-            {/* Visor del PDF: object es más compatible que iframe y permite
-                fallback gracioso si el navegador no puede renderizarlo
-                (ej. extensiones como TeraBox que interceptan PDFs). */}
-            <object
-              data={pdfPreview.url}
-              type="application/pdf"
-              style={{ flex: 1, width: "100%", background: "#525659" }}
-            >
+            {/* Visor del PDF via Blob URL — evade extensiones que interceptan
+                URLs http directas (TeraBox, etc.). Los blob URLs son recursos
+                internos del navegador y no pasan por webRequest interceptors. */}
+            {pdfLoading && (
               <div
                 style={{
-                  height: "100%",
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  gap: 14,
+                  background: "#f8fafc",
+                  color: "#475569",
+                  fontSize: 13,
+                }}
+              >
+                <div style={{ fontSize: 32 }}>⏳</div>
+                <div>Cargando PDF…</div>
+              </div>
+            )}
+            {!pdfLoading && pdfBlobUrl && (
+              <iframe
+                key={pdfBlobUrl}
+                src={pdfBlobUrl}
+                title={pdfPreview.titulo}
+                style={{ flex: 1, width: "100%", border: 0, background: "#525659" }}
+              />
+            )}
+            {!pdfLoading && !pdfBlobUrl && (
+              <div
+                style={{
+                  flex: 1,
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
@@ -1214,12 +1271,7 @@ function NuevoProyectoPageInner() {
               >
                 <div style={{ fontSize: 48 }}>📄</div>
                 <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
-                  Tu navegador no puede previsualizar el PDF
-                </div>
-                <div style={{ fontSize: 13, color: "#475569", maxWidth: 480, lineHeight: 1.6 }}>
-                  Suele pasar si tenés una extensión instalada que intercepta archivos PDF
-                  (como TeraBox, Adobe, etc.). Usá el botón <strong>⬇ Descargar</strong> de arriba
-                  para abrirlo con el visor de tu sistema.
+                  No se pudo cargar el PDF
                 </div>
                 <a
                   href={pdfPreview.url}
@@ -1237,23 +1289,7 @@ function NuevoProyectoPageInner() {
                   ⬇ Descargar PDF
                 </a>
               </div>
-            </object>
-            {/* Aviso flotante de TeraBox/extensiones (siempre visible) */}
-            <div
-              style={{
-                padding: "8px 16px",
-                background: "#fef3c7",
-                borderTop: "1px solid #fde68a",
-                fontSize: 11.5,
-                color: "#92400e",
-                textAlign: "center",
-                lineHeight: 1.5,
-              }}
-            >
-              💡 Si no ves el PDF: tu navegador puede tener una extensión interceptando archivos
-              (TeraBox, etc.). Usá <strong>⬇ Descargar</strong> o probá en una <strong>ventana de
-              incógnito</strong>.
-            </div>
+            )}
           </div>
         </div>
       )}
