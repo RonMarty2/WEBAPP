@@ -762,16 +762,26 @@ function NuevoProyectoPageInner() {
 
                       {/* Botón: Ver guía oficial (PDF) — el estudiante puede
                           confirmar visualmente si es el formato que pide su diplomado.
-                          Usamos window.open en onClick (no <a target=_blank>) para
-                          evitar el bloqueo de popups que abre about:blank cuando el
-                          anchor está dentro de un contenedor clickeable. */}
+                          Estrategia: anchor dinámico programático. Es el método más
+                          compatible y NO es bloqueado por browsers (es interaccion
+                          directa de usuario). window.open() y <a target=_blank>
+                          anidados fallaban abriendo about:blank en este contexto. */}
                       {v.guia_oficial?.url_documento_pdf && (
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            e.preventDefault();
                             const url = v.guia_oficial!.url_documento_pdf!;
-                            window.open(url, "_blank", "noopener,noreferrer");
+                            // Anchor dinámico: el navegador lo trata como
+                            // navegación de usuario y NUNCA lo bloquea.
+                            const link = document.createElement("a");
+                            link.href = url;
+                            link.target = "_blank";
+                            link.rel = "noopener noreferrer";
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
                           }}
                           style={{
                             display: "flex",
