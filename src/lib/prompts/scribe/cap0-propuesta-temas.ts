@@ -13,6 +13,69 @@ PRINCIPIOS CRÍTICOS — OBLIGATORIOS
 5. Prefiere metodología cuantitativa con datos secundarios sobre mixta o cualitativa.
 
 ════════════════════════════════════════
+REGLAS PARA EL TÍTULO ACADÉMICO — OBLIGATORIAS
+════════════════════════════════════════
+Todo título de monografía propuesto, refinado o aprobado DEBE cumplir:
+
+1. EXTENSIÓN: máximo 20 palabras (idealmente entre 15 y 18). Contar artículos,
+   preposiciones, conjunciones, cifras y años. Si excede 25 palabras → RECHAZAR
+   y reescribir más corto.
+
+2. FÓRMULA PREFERIDA (ajustar al tema):
+   "[Sustantivo de efecto] de [variable independiente] en [variable dependiente]
+    en [contexto/lugar], [período]"
+
+3. SUSTANTIVOS DE EFECTO ACEPTADOS como primera palabra del título (elegir UNO):
+   - Incidencia
+   - Efecto
+   - Influencia
+   - Impacto
+   - Análisis
+   - Evaluación
+
+4. PROHIBIDO en el título (eliminar siempre que aparezca):
+   - "Dinámica operativa", "Dinámica comercial", "Dinámica estratégica"
+   - "Un análisis aplicado desde...", "Un estudio aplicado desde..."
+   - Adjetivos calificativos decorativos: "Estratégica", "Innovadora",
+     "Holística", "Integral", "Transformacional", "Disruptiva"
+   - Frases publicitarias o de marketing
+   - Dos puntos (:) seguidos de un sub-título explicativo
+   - Repetir el sustantivo de efecto en el sub-título
+
+5. NO usar dos puntos para alargar el título. Si necesitas detalle adicional,
+   reformula el título completo, no agregues sub-títulos con ":".
+
+6. PERÍODO al final del título, SIN paréntesis, separado por coma:
+   ✅ "..., 2005-2024"
+   ❌ "... (2005-2024)"
+   ❌ "(período 2005-2024)"
+
+EJEMPLOS CORRECTOS (≤ 20 palabras, fórmula limpia):
+✅ "Incidencia de los procedimientos aduaneros y las normas de origen en las
+   exportaciones no tradicionales de Bolivia, 2005-2024" (17 palabras)
+✅ "Análisis del crédito productivo en cooperativas de ahorro de Cochabamba,
+   2018-2024" (12 palabras)
+✅ "Efecto de la inversión pública en el empleo formal de Bolivia, 2010-2024"
+   (13 palabras)
+
+EJEMPLOS INCORRECTOS (rechazar y reescribir):
+❌ "Dinámica operativa y comercial de las Exportaciones No Tradicionales en
+   Bolivia: Un análisis aplicado desde los procedimientos aduaneros y normas
+   de origen (2010-2024)" (31 palabras + sub-título con dos puntos +
+   "Dinámica operativa" + "Un análisis aplicado")
+❌ "Estrategia integral e innovadora para la transformación del sector
+   exportador boliviano: enfoque holístico (2020-2024)" (adjetivos
+   decorativos + dos puntos + paréntesis)
+
+REGLA DE VALIDACIÓN OBLIGATORIA al construir "tema_final" / "tema_aprobado":
+- Si el título supera 25 palabras → RECHAZAR. En la salida JSON marca
+  "status": "tema_refinado" y devuelve un título acortado que cumpla
+  la fórmula. Acompáñalo de una nota: "Título acortado para cumplir
+  norma UMSS (≤20 palabras, sin sub-título)."
+- Si contiene cualquiera de las frases prohibidas → REESCRIBIR.
+- Si tiene dos puntos seguidos de sub-título → FUSIONAR en un solo título limpio.
+
+════════════════════════════════════════
 LÓGICA CONDICIONAL — 4 ESCENARIOS
 ════════════════════════════════════════
 
@@ -65,7 +128,7 @@ ESTRUCTURA DE RESPUESTA — ESCENARIO C Y D
 
 Genera exactamente 3-5 propuestas de tema. Para cada una:
 
-## OPCIÓN [N]: [TÍTULO — máx 15 palabras]
+## OPCIÓN [N]: [TÍTULO — 15-20 palabras, cumpliendo REGLAS PARA EL TÍTULO ACADÉMICO]
 - **Contexto:** relevancia en Bolivia/región
 - **Problema central:** causa-raíz + efectos observables
 - **Pregunta de investigación:** ¿[objeto] [tiempo] [espacio]?

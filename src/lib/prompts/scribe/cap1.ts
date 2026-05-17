@@ -19,9 +19,10 @@
  *          1.3.1  Objetivo general
  *          1.3.2  Objetivos específicos
  *     1.4  Justificación de la investigación
- *          1.4.1  Justificación metodológica
- *          1.4.2  Justificación práctica
- *          1.4.3  Justificación social
+ *          1.4.1  Justificación académica
+ *          1.4.2  Justificación metodológica
+ *          1.4.3  Justificación práctica
+ *          1.4.4  Justificación social
  *     1.5  Alcances de la investigación
  *          1.5.1  Alcance temático
  *          1.5.2  Alcance temporal
@@ -340,6 +341,57 @@ C) RELACIÓN CAUSAL — un párrafo de cierre que explique cómo las causas raí
    producen el problema central y cómo éste deriva en las consecuencias
    observables.
 
+═══════════════════════════════════════════════════════════════
+REGLA DE FACTIBILIDAD DE DATOS (OBLIGATORIA) — APLICA A 1.2.3
+═══════════════════════════════════════════════════════════════
+
+Antes de proponer cualquier INDICADOR, VARIABLE MEDIBLE o EVIDENCIA
+CUANTITATIVA en las causas o efectos, la IA DEBE verificar que la
+fuente de datos esté PÚBLICAMENTE DISPONIBLE.
+
+FUENTES ACEPTABLES (datos públicos accesibles a un estudiante boliviano):
+- INE Bolivia (ine.gob.bo) — Censos, encuestas industriales, comercio exterior.
+- BCB — Banco Central de Bolivia (bcb.gob.bo) — Reservas, balanza, tipo de cambio.
+- IBCE — Instituto Boliviano de Comercio Exterior (ibce.org.bo) — Anuarios.
+- Aduana Nacional de Bolivia (aduana.gob.bo) — Estadísticas de comercio exterior.
+- ASFI — Autoridad de Supervisión del Sistema Financiero (asfi.gob.bo).
+- Ministerios oficiales bolivianos (economía, hidrocarburos, desarrollo productivo, etc.).
+- UDAPE — Unidad de Análisis de Políticas Sociales y Económicas.
+- CEPAL (cepal.org), Banco Mundial, FMI, BID, OMC, UNCTAD.
+- Censos publicados, anuarios estadísticos oficiales, gacetas oficiales.
+- SciELO, Redalyc, repositorios universitarios públicos.
+
+FUENTES NO ACEPTABLES (descartar el indicador si DEPENDE de estas):
+- Registros internos de empresas privadas (no publicados).
+- Bases de datos privadas que requieren suscripción de pago.
+- Encuestas no publicadas o estudios de mercado no abiertos.
+- Datos por requerimiento formal a institución (que el estudiante no puede gestionar).
+- Tiempos, costos o métricas operativas internas de una empresa específica
+  (salvo que el estudiante haya declarado material propio que los contenga).
+
+REGLA OPERATIVA:
+- Si un indicador propuesto requiere datos NO públicos → DESCARTARLO y proponer
+  un PROXY alternativo medible con fuentes accesibles.
+- Cada indicador, variable o evidencia cuantitativa mencionada en 1.2.3 debe
+  ir acompañada ENTRE PARÉNTESIS de la FUENTE específica donde el estudiante
+  puede consultarla.
+
+EJEMPLO CORRECTO:
+"Volumen de exportaciones FOB de productos no tradicionales (Fuente: IBCE,
+Anuario Estadístico 2024; INE, Estadísticas de Comercio Exterior 2010-2024)."
+
+EJEMPLO INCORRECTO (descartar y reemplazar):
+"Tiempos de despacho aduanero, costos logísticos internos y utilización
+de preferencias arancelarias por empresa." → Datos NO públicos por empresa.
+Reemplazar por proxies públicos: "Días promedio de despacho (Fuente: Doing
+Business Bolivia, Banco Mundial); índice de desempeño logístico (Fuente:
+LPI, Banco Mundial); valor FOB exportado bajo régimen preferencial
+(Fuente: Aduana Nacional, Estadísticas Anuales)."
+
+Esta regla se aplica con el mismo rigor en 1.3.2 (objetivos específicos) y
+en 1.5 (alcances). Si un objetivo o un alcance dependen de un indicador
+NO público, reformularlos para que sean factibles con fuentes accesibles.
+
 ───────────────────────────────────────────────────────────────
 #### 1.2.4 Formulación del problema
 ───────────────────────────────────────────────────────────────
@@ -393,16 +445,78 @@ Reglas:
 - No incluyas objetivos que no puedan desarrollarse con fuentes o datos
   razonablemente disponibles.
 
+VERBOS ACADÉMICOS APROBADOS (usar SOLO estos como primer verbo del
+objetivo general y de cada objetivo específico):
+Analizar, Determinar, Evaluar, Identificar, Diagnosticar, Caracterizar,
+Comparar, Describir, Establecer, Examinar, Investigar, Proponer (este
+último SOLO si va seguido de un elemento concreto: "Proponer un modelo
+de...", "Proponer lineamientos para..."), Estudiar, Sistematizar,
+Explicar, Demostrar, Verificar, Cuantificar, Medir, Estimar, Clasificar,
+Relacionar.
+
+VERBOS PROHIBIDOS (sustituirlos SIEMPRE por su equivalente académico):
+- "Maximizar" → "Mejorar" o "Incrementar"
+- "Minimizar" → "Reducir"
+- "Reingeniería" / "Reingenierizar" → "Optimizar" o "Reestructurar"
+- "Disrumpir" → "Transformar"
+- "Revolucionar" → "Modernizar"
+- "Impulsar", "Potenciar", "Empoderar" (sin más) → "Fortalecer" o "Mejorar"
+- Cualquier verbo imperativo comercial, publicitario o de coaching.
+- Sustantivos disfrazados de verbo: "Reingeniería procedimental",
+  "Operativización estratégica" → reformular con verbo académico simple.
+
+REGLA DE MEDIBILIDAD CON FUENTES (obligatoria):
+Cada objetivo específico debe ser MEDIBLE o VERIFICABLE con las FUENTES
+PÚBLICAS ya identificadas en 1.2.3 (ver REGLA DE FACTIBILIDAD DE DATOS).
+- Si el objetivo no puede medirse con datos accesibles → REFORMULAR el
+  objetivo o cambiar el indicador por un proxy público.
+- Si el objetivo exige acceso a información interna no pública (registros
+  privados de empresas, datos confidenciales) → reformularlo en términos
+  de análisis documental o normativo basado en fuentes abiertas.
+- Cada objetivo específico debe poder conectarse con AL MENOS una fuente
+  pública declarada en el planteamiento del problema.
+
 ───────────────────────────────────────────────────────────────
 ### 1.4 Justificación de la investigación
 ───────────────────────────────────────────────────────────────
 
 Redacta un párrafo introductorio breve explicando que la justificación se
-desarrolla en TRES dimensiones (metodológica, práctica, social), tal como lo
-exige la Guía Oficial UMSS Posgrado FCE.
+desarrolla en CUATRO dimensiones (académica, metodológica, práctica, social),
+tal como lo exige la Guía Oficial UMSS Posgrado FCE.
+
+⚠️ OBLIGATORIO: las CUATRO subsecciones deben aparecer. NO omitas la
+justificación académica. Es la primera subsección por orden y por importancia
+para un trabajo de posgrado.
 
 ───────────────────────────────────────────────────────────────
-#### 1.4.1 Justificación metodológica
+#### 1.4.1 Justificación académica
+───────────────────────────────────────────────────────────────
+
+Mínimo 2 párrafos. Debe responder de forma explícita:
+
+(a) ¿Qué aporta este estudio al diplomado / posgrado / programa que cursa
+    el estudiante? Vincúlalo con módulos específicos del programa declarado
+    en el [CONTEXTO DEL PROYECTO].
+
+(b) ¿Qué VACÍO DE CONOCIMIENTO llena en la disciplina? Identifica de forma
+    concreta el aspecto poco estudiado en la literatura boliviana o
+    latinoamericana sobre el tema.
+
+(c) ¿Cómo puede SERVIR DE BASE PARA FUTURAS INVESTIGACIONES o trabajos
+    de mayor profundidad (tesis de maestría, tesis doctoral, líneas de
+    investigación del programa)? Indica qué preguntas abre o qué metodología
+    pueden retomar otros investigadores.
+
+(d) ¿Refuerza algún MODELO TEÓRICO existente, lo complementa, lo cuestiona
+    o lo adapta al contexto boliviano? Menciona el modelo o marco teórico
+    de referencia.
+
+NO confundir con justificación práctica (utilidad operativa) ni con
+metodológica (aporte instrumental). El énfasis aquí es el aporte al
+CONOCIMIENTO y a la formación académica.
+
+───────────────────────────────────────────────────────────────
+#### 1.4.2 Justificación metodológica
 ───────────────────────────────────────────────────────────────
 
 Uno o dos párrafos explicando:
@@ -414,7 +528,7 @@ Uno o dos párrafos explicando:
   central.
 
 ───────────────────────────────────────────────────────────────
-#### 1.4.2 Justificación práctica
+#### 1.4.3 Justificación práctica
 ───────────────────────────────────────────────────────────────
 
 Uno o dos párrafos explicando:
@@ -424,7 +538,7 @@ Uno o dos párrafos explicando:
 - Qué problema real busca aportar a resolver o caracterizar.
 
 ───────────────────────────────────────────────────────────────
-#### 1.4.3 Justificación social
+#### 1.4.4 Justificación social
 ───────────────────────────────────────────────────────────────
 
 Uno o dos párrafos explicando:
@@ -574,7 +688,7 @@ SALIDA FINAL OBLIGATORIA
 
 Entrega únicamente el contenido académico del Capítulo I, respetando los
 subtítulos numerados (1.1, 1.1.1, 1.1.2, 1.2, 1.2.1, 1.2.2, 1.2.3, 1.2.4,
-1.3, 1.3.1, 1.3.2, 1.4, 1.4.1, 1.4.2, 1.4.3, 1.5, 1.5.1, 1.5.2, 1.5.3,
+1.3, 1.3.1, 1.3.2, 1.4, 1.4.1, 1.4.2, 1.4.3, 1.4.4, 1.5, 1.5.1, 1.5.2, 1.5.3,
 y opcionalmente 1.6) EXACTAMENTE como se indicaron arriba.
 
 Al final exacto de la respuesta, incluye una sección titulada:

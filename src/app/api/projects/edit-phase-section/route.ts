@@ -119,12 +119,63 @@ function currentContentFor(proyecto: ProyectoLike, key: string) {
   return proyecto.phase_contents?.[key] ?? null;
 }
 
+/**
+ * Modos de edición soportados. Cada modo genera instrucciones específicas
+ * para la IA y limita el alcance del cambio.
+ */
+export type TipoEdicion =
+  /** Reformula el contenido completo del capítulo aplicando la observación.
+   *  Modo por defecto, compatible con comportamiento anterior. */
+  | "reformular"
+  /** Solo AGREGA contenido nuevo (sección, párrafo, bullet). NO modifica lo existente.
+   *  Útil para observaciones tipo "agregar Justificación Académica". */
+  | "agregar"
+  /** Reformula SOLO un bloque/sección específico identificado por marcador.
+   *  El parámetro `bloque` indica qué buscar (ej. "1.3 Objetivos"). */
+  | "reformular_bloque";
+
+function buildEditInstructions(tipo: TipoEdicion, bloque?: string): string {
+  switch (tipo) {
+    case "agregar":
+      return `MODO: AGREGAR contenido nuevo SIN modificar lo existente.
+
+REGLAS ABSOLUTAS:
+1. NO modifiques NINGUNA palabra del contenido actual.
+2. Tu tarea es ÚNICAMENTE agregar lo que la observación pide (una nueva sección, párrafo, viñeta, etc.).
+3. Insértalo en el lugar lógico (ej. si pide agregar una sub-sección 1.4.2, ponla entre 1.4.1 y 1.4.3 existentes).
+4. Devuelve el documento COMPLETO con la adición incluida.
+5. Si después de tu edición comparamos línea por línea con el original, TODAS las líneas originales deben aparecer intactas. Solo se agregan líneas nuevas.`;
+
+    case "reformular_bloque":
+      return `MODO: REFORMULAR SOLO el bloque "${bloque ?? "indicado"}".
+
+REGLAS ABSOLUTAS:
+1. Identifica en el contenido actual el bloque/sección titulado "${bloque ?? "indicado"}".
+2. Reformula SOLO ese bloque aplicando la observación.
+3. Todo lo demás del documento debe quedar EXACTAMENTE igual, palabra por palabra.
+4. Devuelve el documento COMPLETO con el bloque reformulado en su lugar.
+5. Si el bloque no se encuentra, devuelve el contenido sin cambios y añade un comentario al inicio: "[NOTA: bloque ${bloque} no encontrado]".`;
+
+    case "reformular":
+    default:
+      return `MODO: REFORMULAR el documento aplicando la observación.
+
+REGLAS:
+1. Ajusta SOLO lo necesario para atender la observación.
+2. Conserva el estilo y la voz del autor existente.
+3. Si la observación afecta solo una sección, NO toques las demás.
+4. Devuelve el documento COMPLETO con los cambios incluidos.`;
+  }
+}
+
 async function editWithAI({
   proyecto,
   key,
   label,
   contenidoActual,
   observacion,
+  tipo,
+  bloque,
   t0,
 }: {
   proyecto: ProyectoLike;
@@ -132,6 +183,8 @@ async function editWithAI({
   label: string;
   contenidoActual: string;
   observacion: string;
+  tipo: TipoEdicion;
+  bloque?: string;
   t0: number;
 }) {
   const servicioId = proyecto.servicio_id ?? "mono-001";
@@ -140,15 +193,18 @@ async function editWithAI({
     proyecto.perfil_estilo_usuario,
     loadHilosFromDisk()
   );
+  const instrucciones = buildEditInstructions(tipo, bloque);
   const userPrompt = `FASE A EDITAR: ${label}
+
+${instrucciones}
 
 --- CONTENIDO ACTUAL ---
 ${contenidoActual}
 
---- OBSERVACION APLICAR ---
+--- OBSERVACION A APLICAR ---
 ${observacion}
 
-Devuelve el contenido completo de la fase corregida.`;
+Devuelve el contenido completo de la fase con los cambios aplicados.`;
 
   const result = await llamarIA(systemPrompt, userPrompt, 3500, servicioId);
   const traceEntry = buildAITraceEntry({
@@ -177,13 +233,26 @@ export async function POST(req: Request) {
       proyecto_id?: string;
       phase_id?: string;
       mensaje_usuario?: string;
+      /** "preview" devuelve el resultado SIN persistir. "aplicar" persiste. Default: "aplicar". */
+      modo?: "preview" | "aplicar";
+      /** Estrategia de edición. Default: "reformular". */
+      tipo_edicion?: TipoEdicion;
+      /** Identificador del bloque a reformular (requerido si tipo_edicion="reformular_bloque"). */
+      bloque?: string;
     };
 
     const proyectoId = body.proyecto_id?.trim();
     const phaseId = body.phase_id?.trim();
     const observacion = body.mensaje_usuario?.trim();
+    const modo = body.modo === "preview" ? "preview" : "aplicar";
+    const tipoEdicion: TipoEdicion = body.tipo_edicion ?? "reformular";
+    const bloque = body.bloque?.trim();
+
     if (!proyectoId || !phaseId || !observacion) {
       return NextResponse.json({ error: "proyecto_id, phase_id y mensaje_usuario son obligatorios" }, { status: 400 });
+    }
+    if (tipoEdicion === "reformular_bloque" && !bloque) {
+      return NextResponse.json({ error: "tipo_edicion='reformular_bloque' requiere el parámetro 'bloque'" }, { status: 400 });
     }
 
     const proyecto = await dbGetProyecto(proyectoId);
@@ -203,9 +272,29 @@ export async function POST(req: Request) {
       label: phase.label,
       contenidoActual,
       observacion,
+      tipo: tipoEdicion,
+      bloque,
       t0,
     });
 
+    // En modo PREVIEW NO persistimos: devolvemos el contenido nuevo + el actual
+    // para que el cliente pueda mostrar un diff y decidir si aplicar.
+    if (modo === "preview") {
+      return NextResponse.json({
+        ok: true,
+        modo: "preview",
+        phase_id: phase.key,
+        fase_etiqueta: phase.label,
+        tipo_edicion: tipoEdicion,
+        bloque: bloque ?? null,
+        contenido_actual: contenidoActual,
+        contenido_propuesto: contenido,
+        proveedor,
+        duracion_ms: Date.now() - t0,
+      });
+    }
+
+    // Modo APLICAR: persistir cambios en el store.
     const phaseContents = { ...(proyecto.phase_contents ?? {}), [phase.key]: contenido };
     const updates: Record<string, unknown> = {
       phase_contents: phaseContents,
@@ -220,8 +309,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       ok: true,
+      modo: "aplicar",
       phase_id: phase.key,
       fase_etiqueta: phase.label,
+      tipo_edicion: tipoEdicion,
       proveedor,
       duracion_ms: Date.now() - t0,
       contenido,
