@@ -14,7 +14,7 @@
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
-import { getServiceAIStatus, llamarIA, getServiceAIConfig } from "@/lib/aiProvider";
+import { getServiceAIStatus, llamarIA, getServiceAIConfig, hydrateAIConfigAsync } from "@/lib/aiProvider";
 import {
   llamarIAPorPlan,
   llamarCompiladorLaTeX,
@@ -483,6 +483,9 @@ export async function POST(req: Request) {
 
   try {
     const { user: sessionUser } = await requireAuth();
+
+    // Hidratar caches de IA desde Supabase (Vercel serverless arranca con caches vacíos)
+    await hydrateAIConfigAsync();
 
     let proyecto_id: string;
     let phase_id: string;

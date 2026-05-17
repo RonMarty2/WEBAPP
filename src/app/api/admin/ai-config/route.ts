@@ -5,9 +5,15 @@ import {
   hasProviderKey,
   setServiceAIConfig,
   listServiceIncidents,
+  hydrateAIConfigAsync,
   AI_PROVIDERS,
 } from "@/lib/aiProvider";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
+import {
+  dbSaveProviderKey,
+  dbDeleteProviderKey,
+  dbSaveServiceConfig,
+} from "@/lib/db/aiConfig";
 
 function maskKey(key: string): string {
   if (!key || key.length < 8) return key ? "********" : "";
@@ -24,6 +30,11 @@ function isLikelyValidKeyForProvider(providerId: string, apiKey: string): boolea
 }
 
 export async function GET() {
+  // 1. Hidratar desde Supabase (fuente primaria). En Vercel serverless arranca
+  //    con caches vacíos, esto los repuebla.
+  await hydrateAIConfigAsync();
+
+  // 2. Fallback: leer disco (dev local). En Vercel ephemeral suele estar vacío.
   const disk = loadFromDisk();
   const aiConfig = (disk as { aiConfig?: Record<string, unknown> }).aiConfig ?? {};
   const providerKeys = (aiConfig.providerKeys ?? {}) as Record<string, string>;
@@ -96,6 +107,9 @@ export async function POST(req: Request) {
       aiConfig.providerKeys[provider_id] = api_key;
       disk.aiConfig = aiConfig as Record<string, unknown>;
       saveToDisk(disk);
+      // 🌐 También persistimos en Supabase (la fuente que sobrevive a
+      //    Vercel serverless). El disk save sigue siendo backup local.
+      await dbSaveProviderKey(provider_id, api_key);
       return NextResponse.json({ ok: true, keyMasked: maskKey(api_key) });
     }
 
@@ -114,6 +128,8 @@ export async function POST(req: Request) {
       aiConfig.serviceConfigs[servicio_id] = cfg;
       disk.aiConfig = aiConfig as Record<string, unknown>;
       saveToDisk(disk);
+      // 🌐 Persistencia en Supabase.
+      await dbSaveServiceConfig(servicio_id, provider_id, model);
       return NextResponse.json({ ok: true });
     }
 
@@ -135,6 +151,8 @@ export async function DELETE(req: Request) {
     setProviderKey(provider_id, "");
     disk.aiConfig = aiConfig as Record<string, unknown>;
     saveToDisk(disk);
+    // 🌐 Borrar también en Supabase.
+    await dbDeleteProviderKey(provider_id);
     return NextResponse.json({ ok: true });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

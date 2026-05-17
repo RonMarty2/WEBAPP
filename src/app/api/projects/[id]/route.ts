@@ -7,7 +7,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto, dbUpdateProyecto, dbHideProyecto } from "@/lib/db";
-import { getServiceAIStatus } from "@/lib/aiProvider";
+import { getServiceAIStatus, hydrateAIConfigAsync } from "@/lib/aiProvider";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -22,6 +22,9 @@ export async function GET(_req: Request, { params }: Params) {
     if (!p || p.usuario_id !== user.id) {
       return NextResponse.json({ error: "Proyecto no encontrado" }, { status: 404 });
     }
+
+    // Hidratar caches de IA desde Supabase (Vercel serverless arranca con caches vacíos)
+    await hydrateAIConfigAsync();
 
     return NextResponse.json({
       proyecto: {

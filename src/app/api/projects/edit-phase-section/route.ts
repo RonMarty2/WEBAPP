@@ -5,7 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { requirePlan, AuthError } from "@/lib/api-auth";
-import { getServiceAIStatus, llamarIA } from "@/lib/aiProvider";
+import { getServiceAIStatus, llamarIA, hydrateAIConfigAsync } from "@/lib/aiProvider";
 import { dbGetProyecto, dbUpdateProyecto } from "@/lib/db";
 import { appendAITrace } from "@/lib/aiTrace.mjs";
 import { loadFromDisk } from "@/lib/persistence";
@@ -229,6 +229,8 @@ export async function POST(req: Request) {
 
   try {
     const { user } = await requirePlan(["pro", "elite"]);
+    // Hidratar caches de IA desde Supabase
+    await hydrateAIConfigAsync();
     const body = await req.json() as {
       proyecto_id?: string;
       phase_id?: string;

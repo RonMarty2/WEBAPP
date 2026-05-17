@@ -347,6 +347,12 @@ const providerKeyCache = new Map<string, string>([
 
 let diskConfigHydrated = false;
 
+/**
+ * Carga sincrónica desde .store/data.json. Útil para dev local sin Supabase.
+ * En Vercel serverless prácticamente nunca encuentra nada (filesystem ephemeral),
+ * pero corre rápido y no estorba — la fuente real ahora es Supabase via
+ * hydrateAIConfigAsync().
+ */
 export function hydrateAIConfigFromDisk() {
   if (diskConfigHydrated) return;
   diskConfigHydrated = true;
@@ -368,6 +374,33 @@ export function hydrateAIConfigFromDisk() {
     }
   } catch {
     /* Persistence is optional in development. */
+  }
+}
+
+/**
+ * Carga async desde Supabase. Llamar al inicio de cada API route que use IA
+ * (en Vercel serverless cada invocación arranca con caches vacíos). Cachea
+ * el resultado por 60s para evitar hits repetidos a Supabase en la misma
+ * invocación caliente.
+ */
+let lastSupabaseHydrate = 0;
+const HYDRATE_TTL_MS = 60_000;
+
+export async function hydrateAIConfigAsync(): Promise<void> {
+  const now = Date.now();
+  if (now - lastSupabaseHydrate < HYDRATE_TTL_MS) return;
+  lastSupabaseHydrate = now;
+
+  // Lazy-load para no romper desarrollo sin Supabase ni el bundle.
+  const { dbLoadAIConfig } = await import("@/lib/db/aiConfig");
+  const { providerKeys, serviceConfigs } = await dbLoadAIConfig();
+
+  for (const [providerId, key] of Object.entries(providerKeys)) {
+    if (key) providerKeyCache.set(providerId, key);
+  }
+  for (const [serviceId, cfg] of Object.entries(serviceConfigs)) {
+    if (!cfg?.provider_id || !cfg?.model) continue;
+    serviceConfigCache.set(serviceId, cfg);
   }
 }
 
