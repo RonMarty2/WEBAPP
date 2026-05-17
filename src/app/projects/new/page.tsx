@@ -39,6 +39,14 @@ interface Cap1VariantePublica {
   descripcion: string;
   estructura_visible: string[];
   nota?: string;
+  guia_oficial: {
+    id: string;
+    nombre: string;
+    formato_umss: "guia_1_posgrado" | "guia_2_cespedes";
+    autor: string;
+    fecha: string;
+    caracteristicas: string[];
+  };
 }
 
 interface ArchivoSubido {
@@ -594,7 +602,7 @@ function NuevoProyectoPageInner() {
             >
               ← Atrás
             </button>
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 28 }}>
               <div
                 style={{
                   fontSize: 11,
@@ -605,87 +613,243 @@ function NuevoProyectoPageInner() {
                   marginBottom: 6,
                 }}
               >
-                Formato del Capítulo I
+                Formato oficial del Capítulo I
               </div>
-              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
-                ¿Qué formato pide tu diplomado?
+              <h1 style={{ fontSize: 24, fontWeight: 800, marginBottom: 10 }}>
+                ¿Qué guía oficial sigue tu diplomado?
               </h1>
-              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
-                Algunas universidades tienen variantes del Capítulo I según el programa.
-                Elige la que coincide con tu guía de tesis o monografía.
+              <p style={{ color: "var(--fg-muted)", fontSize: 13.5, lineHeight: 1.6 }}>
+                UMSS publicó dos guías para monografías de Posgrado. Cada variante
+                que ofrecemos está alineada exactamente a una de ellas — elegí la
+                que coincida con la que te entregó tu coordinador.
               </p>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+            {/* Grid responsivo: 2 columnas en desktop, 1 en mobile */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                gap: 16,
+                marginBottom: 24,
+              }}
+            >
               {cap1Variantes.map((v) => {
                 const seleccionada = cap1VarianteId === v.id;
+                const esGuia1 = v.guia_oficial?.formato_umss === "guia_1_posgrado";
+                const colorGuia = esGuia1 ? "#2563eb" : "#7c3aed";
+                const bgGuia = esGuia1 ? "rgba(37,99,235,0.08)" : "rgba(124,58,237,0.08)";
+
                 return (
                   <button
                     key={v.id}
                     onClick={() => setCap1VarianteId(v.id)}
                     style={{
-                      padding: "16px",
-                      borderRadius: 10,
+                      padding: 0,
+                      borderRadius: 14,
                       cursor: "pointer",
                       textAlign: "left",
-                      background: seleccionada ? "rgba(37,99,235,0.10)" : "rgba(255,255,255,0.84)",
-                      border: seleccionada ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                      background: seleccionada ? bgGuia : "rgba(255,255,255,0.92)",
+                      border: seleccionada
+                        ? `2.5px solid ${colorGuia}`
+                        : "1.5px solid var(--border)",
                       color: "var(--fg-primary)",
-                      transition: "all 0.15s",
+                      transition: "all 0.18s ease",
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                      boxShadow: seleccionada
+                        ? `0 8px 24px ${esGuia1 ? "rgba(37,99,235,0.15)" : "rgba(124,58,237,0.15)"}`
+                        : "0 1px 3px rgba(0,0,0,0.04)",
                     }}
                   >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                      <div style={{ fontSize: 15, fontWeight: 700 }}>
-                        {seleccionada ? "✓ " : ""}{v.nombre}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 10,
-                          fontWeight: 700,
-                          color: seleccionada ? "var(--accent)" : "var(--fg-muted)",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.08em",
-                        }}
-                      >
-                        {seleccionada ? "Seleccionada" : "Elegir"}
-                      </div>
-                    </div>
-                    <div style={{ fontSize: 12.5, color: "var(--fg-muted)", lineHeight: 1.5, marginBottom: 10 }}>
-                      {v.descripcion}
-                    </div>
+                    {/* Header con badge de guía oficial */}
                     <div
                       style={{
-                        fontSize: 11,
-                        color: "var(--fg-secondary)",
-                        background: "rgba(0,0,0,0.03)",
-                        padding: "8px 10px",
-                        borderRadius: 6,
-                        lineHeight: 1.6,
-                        whiteSpace: "pre-line",
+                        padding: "14px 18px",
+                        background: bgGuia,
+                        borderBottom: `1px solid ${colorGuia}25`,
                       }}
                     >
-                      <div style={{ fontWeight: 700, color: "var(--fg-primary)", marginBottom: 4 }}>Estructura:</div>
-                      {v.estructura_visible.join("\n")}
-                    </div>
-                    {v.nota && (
-                      <div
-                        style={{
-                          marginTop: 10,
-                          fontSize: 11,
-                          color: "#b45309",
-                          background: "rgba(245,158,11,0.08)",
-                          border: "1px solid rgba(245,158,11,0.25)",
-                          padding: "8px 10px",
-                          borderRadius: 6,
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {v.nota}
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+                        <div style={{ flex: 1 }}>
+                          <div
+                            style={{
+                              fontSize: 9.5,
+                              fontWeight: 700,
+                              color: colorGuia,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.1em",
+                              marginBottom: 4,
+                            }}
+                          >
+                            {esGuia1 ? "Guía 1 UMSS" : "Guía 2 UMSS"} · {v.guia_oficial?.fecha}
+                          </div>
+                          <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.2 }}>
+                            {seleccionada ? "✓ " : ""}Formato {v.nombre}
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            padding: "4px 10px",
+                            borderRadius: 999,
+                            background: seleccionada ? colorGuia : "rgba(0,0,0,0.05)",
+                            color: seleccionada ? "white" : "var(--fg-muted)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.06em",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {seleccionada ? "Elegida" : "Elegir"}
+                        </div>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Cuerpo */}
+                    <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 14, flex: 1 }}>
+                      {/* Documento oficial */}
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: "var(--fg-muted)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                            marginBottom: 4,
+                          }}
+                        >
+                          📖 Documento oficial
+                        </div>
+                        <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.4, marginBottom: 2 }}>
+                          {v.guia_oficial?.nombre}
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.4 }}>
+                          {v.guia_oficial?.autor}
+                        </div>
+                      </div>
+
+                      {/* Descripción corta */}
+                      <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
+                        {v.descripcion}
+                      </div>
+
+                      {/* Características clave de la guía */}
+                      {v.guia_oficial?.caracteristicas?.length > 0 && (
+                        <div>
+                          <div
+                            style={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              color: "var(--fg-muted)",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.08em",
+                              marginBottom: 6,
+                            }}
+                          >
+                            ✅ Esta guía exige
+                          </div>
+                          <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 4 }}>
+                            {v.guia_oficial.caracteristicas.map((c, i) => (
+                              <li
+                                key={i}
+                                style={{
+                                  fontSize: 11.5,
+                                  color: "var(--fg-secondary)",
+                                  lineHeight: 1.45,
+                                  paddingLeft: 14,
+                                  position: "relative",
+                                }}
+                              >
+                                <span style={{ position: "absolute", left: 0, color: colorGuia, fontWeight: 700 }}>•</span>
+                                {c}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Estructura del Capítulo I */}
+                      <div>
+                        <div
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            color: "var(--fg-muted)",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.08em",
+                            marginBottom: 6,
+                          }}
+                        >
+                          📋 Estructura del Capítulo I
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 11,
+                            color: "var(--fg-secondary)",
+                            background: "rgba(0,0,0,0.025)",
+                            padding: "10px 12px",
+                            borderRadius: 8,
+                            lineHeight: 1.7,
+                            whiteSpace: "pre-line",
+                            fontFamily: "ui-monospace, SF Mono, Menlo, monospace",
+                            maxHeight: 240,
+                            overflowY: "auto",
+                          }}
+                        >
+                          {v.estructura_visible.join("\n")}
+                        </div>
+                      </div>
+
+                      {/* Nota (warning) */}
+                      {v.nota && (
+                        <div
+                          style={{
+                            fontSize: 11.5,
+                            color: "#92400e",
+                            background: "rgba(245,158,11,0.10)",
+                            border: "1px solid rgba(245,158,11,0.30)",
+                            padding: "10px 12px",
+                            borderRadius: 8,
+                            lineHeight: 1.5,
+                            display: "flex",
+                            gap: 8,
+                          }}
+                        >
+                          <span style={{ flexShrink: 0 }}>⚠️</span>
+                          <span>{v.nota}</span>
+                        </div>
+                      )}
+                    </div>
                   </button>
                 );
               })}
+            </div>
+
+            {/* Ayuda contextual */}
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--fg-muted)",
+                background: "rgba(0,0,0,0.025)",
+                padding: "12px 14px",
+                borderRadius: 8,
+                lineHeight: 1.55,
+                marginBottom: 20,
+                display: "flex",
+                gap: 10,
+              }}
+            >
+              <span style={{ flexShrink: 0, fontSize: 14 }}>💡</span>
+              <span>
+                <strong>¿No sabes cuál elegir?</strong> Si tu diplomado pertenece a la
+                Facultad de Ciencias Económicas (Doble Titulación 2024 en adelante),
+                usá <strong>Clásico</strong>. Si tu coordinador te entregó la guía con
+                ejemplos por diplomado (Comercio Internacional, Banca, Finanzas, etc.),
+                usá <strong>Reducido</strong>.
+              </span>
             </div>
 
             <button
@@ -698,9 +862,9 @@ function NuevoProyectoPageInner() {
                 setStep("datos-completos");
               }}
               className="btn-cyan"
-              style={{ width: "100%", justifyContent: "center", padding: "12px" }}
+              style={{ width: "100%", justifyContent: "center", padding: "14px" }}
             >
-              Continuar →
+              Continuar con formato {cap1Variantes.find(v => v.id === cap1VarianteId)?.nombre ?? ""} →
             </button>
           </div>
         )}
