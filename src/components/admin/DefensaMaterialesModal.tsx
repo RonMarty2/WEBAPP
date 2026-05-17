@@ -194,7 +194,7 @@ export default function DefensaMaterialesModal({
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               {estado === "listo" ? (
                 <button onClick={volverAEnProceso} style={{ padding: "10px 18px", borderRadius: 10, border: "1px solid #f59e0b", background: "#fff", color: "#f59e0b", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
-                  Volver a "En proceso"
+                  Volver a &quot;En proceso&quot;
                 </button>
               ) : (
                 <button

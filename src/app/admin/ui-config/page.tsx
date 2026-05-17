@@ -4,7 +4,18 @@ import { useState, useEffect } from "react";
 import AdminShell from "@/components/admin/AdminShell";
 import ParticleSphere from "@/components/ParticleSphere";
 
-const DEFAULT_CONFIGS: Record<string, any> = {
+type ParticleConfig = {
+  shape: string;
+  palette: string;
+  wave: string;
+  speed: number;
+  particleSize: number;
+  particleLength: number;
+  swarmSize: number;
+  density: number;
+};
+
+const DEFAULT_CONFIGS: Record<string, ParticleConfig> = {
   scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
   axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
   lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
@@ -62,22 +73,22 @@ export default function UIConfigPage() {
     const storageKey = `ui_particle_config_${targetModule}`;
     const stored = localStorage.getItem(storageKey);
     let loadedConfig = DEFAULT_CONFIGS[targetModule];
-    
+
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
         loadedConfig = { ...loadedConfig, ...parsed };
-      } catch (e) {}
+      } catch {}
     }
-    
+
     setConfig(loadedConfig);
     setHasChanges(false);
-    
+
     // Ya no emitimos evento global para previsualizar.
     // El background global no se altera.
   }, [targetModule]);
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = <K extends keyof ParticleConfig>(key: K, value: ParticleConfig[K]) => {
     const newConfig = { ...config, [key]: value };
     setConfig(newConfig);
     setHasChanges(true);
@@ -110,7 +121,7 @@ export default function UIConfigPage() {
           <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-black z-10" />
           <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-black z-10" />
           <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 adm-label">
-            // visor_de_esfera (live)
+            {"// visor_de_esfera (live)"}
           </div>
         </div>
       </div>
@@ -125,7 +136,7 @@ export default function UIConfigPage() {
           
           {/* Selector Madre */}
           <div>
-            <label className="adm-label mb-1 block">// módulo_objetivo</label>
+            <label className="adm-label mb-1 block">{"// módulo_objetivo"}</label>
             <select 
               value={targetModule}
               onChange={(e) => setTargetModule(e.target.value)}
@@ -142,21 +153,21 @@ export default function UIConfigPage() {
 
           <div className="flex flex-col gap-4">
             <div>
-              <label className="adm-label mb-1 block">// patrón_geométrico</label>
+              <label className="adm-label mb-1 block">{"// patrón_geométrico"}</label>
               <select value={config.shape} onChange={(e) => handleChange("shape", e.target.value)} className="adm-select w-full">
                 {SHAPES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="adm-label mb-1 block">// paleta_color</label>
+              <label className="adm-label mb-1 block">{"// paleta_color"}</label>
               <select value={config.palette} onChange={(e) => handleChange("palette", e.target.value)} className="adm-select w-full">
                 {PALETTES.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
 
             <div>
-              <label className="adm-label mb-1 block">// comportamiento_físico</label>
+              <label className="adm-label mb-1 block">{"// comportamiento_físico"}</label>
               <select value={config.wave} onChange={(e) => handleChange("wave", e.target.value)} className="adm-select w-full">
                 {WAVES.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>
@@ -169,7 +180,7 @@ export default function UIConfigPage() {
           <div className="flex flex-col gap-4">
             <div>
               <div className="flex justify-between items-end mb-1">
-                <label className="adm-label">// velocidad</label>
+                <label className="adm-label">{"// velocidad"}</label>
                 <span className="adm-muted">[{config.speed.toFixed(1)}x]</span>
               </div>
               <input type="range" min="0.1" max="3.0" step="0.1" value={config.speed} onChange={(e) => handleChange("speed", parseFloat(e.target.value))} className="w-full accent-black" />
@@ -177,7 +188,7 @@ export default function UIConfigPage() {
 
             <div>
               <div className="flex justify-between items-end mb-1">
-                <label className="adm-label">// escala</label>
+                <label className="adm-label">{"// escala"}</label>
                 <span className="adm-muted">[{config.swarmSize.toFixed(1)}x]</span>
               </div>
               <input type="range" min="0.3" max="2.0" step="0.1" value={config.swarmSize} onChange={(e) => handleChange("swarmSize", parseFloat(e.target.value))} className="w-full accent-black" />
@@ -185,18 +196,18 @@ export default function UIConfigPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="adm-label block mb-1">// grosor</label>
+                <label className="adm-label block mb-1">{"// grosor"}</label>
                 <input type="range" min="0.2" max="3.0" step="0.1" value={config.particleSize} onChange={(e) => handleChange("particleSize", parseFloat(e.target.value))} className="w-full accent-black" />
               </div>
               <div>
-                <label className="adm-label block mb-1">// estela</label>
+                <label className="adm-label block mb-1">{"// estela"}</label>
                 <input type="range" min="0.2" max="4.0" step="0.1" value={config.particleLength} onChange={(e) => handleChange("particleLength", parseFloat(e.target.value))} className="w-full accent-black" />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-end mb-1">
-                <label className="adm-label">// densidad</label>
+                <label className="adm-label">{"// densidad"}</label>
                 <span className="adm-muted">[{config.density} uds]</span>
               </div>
               <input type="range" min="100" max="2500" step="50" value={config.density} onChange={(e) => handleChange("density", parseInt(e.target.value))} className="w-full accent-black" />

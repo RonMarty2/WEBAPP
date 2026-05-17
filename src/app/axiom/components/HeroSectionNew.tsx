@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface HeroSectionNewProps {
   stats?: {
@@ -130,7 +131,7 @@ export default function HeroSectionNew({ stats }: HeroSectionNewProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
         >
-          <a href="/axiom/simulador">
+          <Link href="/axiom/simulador">
             <motion.button
               whileHover={{
                 scale: 1.03,
@@ -148,7 +149,7 @@ export default function HeroSectionNew({ stats }: HeroSectionNewProps) {
                 →
               </motion.span>
             </motion.button>
-          </a>
+          </Link>
         </motion.div>
       </div>
     </motion.section>

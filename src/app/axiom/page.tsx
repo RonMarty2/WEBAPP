@@ -8,9 +8,23 @@ import QuickActionsNew from "./components/QuickActionsNew";
 import StatsNew from "./components/StatsNew";
 import CTANew from "./components/CTANew";
 
+interface RankingItem {
+  id: string;
+  nombre: string;
+  email: string;
+  nota: number;
+  racha?: number;
+}
+
+interface AuthUser {
+  id: string;
+  name: string;
+  email?: string;
+}
+
 export default function AxiomLandingPage() {
-  const [ranking, setRanking] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
+  const [ranking, setRanking] = useState<RankingItem[]>([]);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     const loadData = async () => {

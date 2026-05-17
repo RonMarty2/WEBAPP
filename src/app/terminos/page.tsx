@@ -1,10 +1,12 @@
+import Link from "next/link";
+
 export default function TerminosPage() {
   return (
     <div style={{ background: "#020617", minHeight: "100vh", color: "var(--fg-primary)" }}>
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "60px 24px" }}>
-        <a href="/" style={{ color: "var(--accent)", textDecoration: "none", fontSize: 13, display: "inline-block", marginBottom: 32 }}>
+        <Link href="/" style={{ color: "var(--accent)", textDecoration: "none", fontSize: 13, display: "inline-block", marginBottom: 32 }}>
           ← Volver al inicio
-        </a>
+        </Link>
 
         <h1 style={{ fontSize: 32, fontWeight: 900, marginBottom: 8 }}>Términos y Condiciones</h1>
         <p style={{ color: "var(--fg-muted)", fontSize: 14, marginBottom: 40 }}>Última actualización: 30 de abril de 2026</p>

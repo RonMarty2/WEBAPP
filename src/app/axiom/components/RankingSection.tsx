@@ -3,8 +3,16 @@
 import { motion } from "framer-motion";
 import RankingPodios from "./RankingPodios";
 
+interface RankingItem {
+  id: string;
+  nombre: string;
+  email: string;
+  nota: number;
+  racha?: number;
+}
+
 interface RankingSectionProps {
-  ranking: any[];
+  ranking: RankingItem[];
   currentUserId?: string;
 }
 

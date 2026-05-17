@@ -12,7 +12,7 @@ const CAMPOS_PORTADA_OPCIONES = [
   { key: "carrera",   label: "Carrera" },
 ];
 
-export interface UniversityFormData extends Omit<University, "id"> {}
+export type UniversityFormData = Omit<University, "id">;
 
 interface UniversityModalProps {
   open: boolean;

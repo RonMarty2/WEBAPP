@@ -223,7 +223,7 @@ async function loadPhasePromptFromAdmin(servicioId: string, phaseId: string): Pr
   try {
     const disk = loadFromDisk();
     const phases = disk.phaseDefinitions?.[servicioId] ?? [];
-    const phase = phases.find((p: any) => p.id === phaseId);
+    const phase = phases.find((p: { id?: string; prompt?: string }) => p.id === phaseId);
     return phase?.prompt ?? null;
   } catch {
     return null;

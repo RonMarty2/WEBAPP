@@ -29,15 +29,15 @@ export default function GlassModal({
 
   useEffect(() => {
     if (isOpen) {
-      setShow(true);
       document.body.style.overflow = "hidden";
-    } else {
-      setTimeout(() => setShow(false), 200); // Wait for fade out
-      document.body.style.overflow = "unset";
+      setShow(true);
+      return () => {
+        document.body.style.overflow = "unset";
+      };
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
+    document.body.style.overflow = "unset";
+    const t = setTimeout(() => setShow(false), 200);
+    return () => clearTimeout(t);
   }, [isOpen]);
 
   if (!isOpen && !show) return null;

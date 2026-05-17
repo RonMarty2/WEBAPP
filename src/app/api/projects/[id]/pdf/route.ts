@@ -79,7 +79,7 @@ async function findChrome(): Promise<string | null> {
 
 function withAbsoluteAssets(html: string, origin: string): string {
   const o = origin.replace(/\/$/, "");
-  let head = `<base href="${o}/">`;
+  const head = `<base href="${o}/">`;
   let result = html.includes("<head>") ? html.replace("<head>", `<head>${head}`) : `${head}${html}`;
   result = result
     .replace(/\b(src|href)=["']\/(?!\/)([^"']*)["']/g, (_m, attr, url) => `${attr}="${o}/${url}"`)

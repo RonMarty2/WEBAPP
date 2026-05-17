@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 function LoginContent() {
   const router = useRouter();
@@ -195,7 +196,7 @@ function LoginContent() {
           <a href="/privacidad" style={{ color: "var(--accent)" }}>Privacidad</a>
         </p>
         <div style={{ textAlign: "center", marginTop: 10 }}>
-          <a href="/" style={{ color: "var(--fg-secondary)", fontSize: 13, textDecoration: "none" }}>← Inicio</a>
+          <Link href="/" style={{ color: "var(--fg-secondary)", fontSize: 13, textDecoration: "none" }}>← Inicio</Link>
         </div>
       </div>
     </div>

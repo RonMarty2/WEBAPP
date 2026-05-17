@@ -1,50 +1,79 @@
 # Laboratorio Académico PRO — Contexto Maestro del Proyecto
 
 ## ¿Qué es este proyecto?
-SaaS de generación de monografías académicas con IA para Bolivia y Latinoamérica.
-Estudiantes de diplomados y postgrados generan documentos completos (Caps. I–V + bibliografía APA 7)
-de forma guiada, sin alucinaciones, en 4 etapas validadas.
+SaaS académico con IA para Bolivia y Latinoamérica. Plataforma multi-producto:
+estudiantes generan **monografías**, **proyectos de grado** y se preparan para
+**exámenes** con guardrails anti-alucinación y validación en cada fase.
 
 **Principio central:** "La IA redacta. El estudiante aprueba. El documento es real."
 
 ---
 
 ## Stack Tecnológico
-- **Framework:** Next.js 16.2.4 — App Router SIEMPRE (nunca Pages Router)
-- **UI:** React 19 + Tailwind CSS 4
-- **Lenguaje:** TypeScript 5 (estricto)
-- **Base de datos:** Supabase (PostgreSQL) — actualmente con fallback in-memory
+- **Framework:** Next.js 16.2.6 — App Router SIEMPRE (nunca Pages Router)
+- **UI:** React 19.2.4 + Tailwind CSS 4 + Framer Motion 12
+- **Lenguaje:** TypeScript 5 (estricto, sin `any` sin justificación)
+- **Base de datos:** Supabase (PostgreSQL) — con fallback in-memory + disk (`.store/data.json`)
 - **Auth:** Google OAuth + JWT (librería `jose`)
+- **PDF:** pdf-parse + jsPDF + ZIP (jszip) para Overleaf
 - **IA Principal:** Groq → `llama-3.3-70b-versatile`
-- **IA Fallback 1:** Anthropic → `claude-haiku-4-5`
+- **IA Fallback 1:** Anthropic → `claude-haiku-4-5-20251001`
 - **IA Fallback 2:** OpenAI → `gpt-4o-mini`
+- **Otros proveedores soportados:** Google Gemini, Mistral, DeepSeek, xAI, Cohere, Together AI, Perplexity, LM Studio Local
 - **Export:** LaTeX → Overleaf → PDF
 - **Deploy pendiente:** Vercel
+
+---
+
+## Módulos del Producto (16 áreas, no "4 etapas")
+
+| Módulo | Ruta | Descripción |
+|--------|------|-------------|
+| **Scribe** | `/scribe`, `/projects/[id]/workspace` | Generador de monografías (5 caps + bibliografía APA 7) |
+| **Proyecto de Grado** | `/projects/[id]/workspace` (tipo=PG) | Plan de negocio completo (23 fases: PESTEL/Porter/matrices/encuestas/RRHH/legal/técnico/branding/marketing/financiero/evaluación) |
+| **Axiom** | `/axiom`, `/axiom/simulador` | Simulador de exámenes con ranking de podios y plan personalizado |
+| **Lumen** | `/lumen` | Generador docente |
+| **Mentor** | `/mentor` | Tutoría y feedback |
+| **Núcleo** | `/nucleo` | Hub padre que orquesta los productos |
+| **Laboratorio** | `/laboratorio` | Sandbox / experimentación |
+| **Pagos** | `/pago`, `/admin/pagos` | Tigo Money / QR bancario / transferencia (Bolivia) |
+| **Admin** | `/admin/**` | Panel completo (ver tabla abajo) |
+| **Auth** | `/login`, `/api/auth/*` | Google OAuth + demo + pendiente |
+| **Tutorial / Legales** | `/tutorial`, `/terminos`, `/privacidad` | Páginas estáticas |
+
+### Subpaneles de Admin
+`/admin/{ai-config, calibration-questions, dashboard, estadisticas, fases, feedback-insights, logs, modelos, monografias, pagos, project-types, prompts, proyectos, ui-config, universidades, usuarios, workspace-prompts}`
 
 ---
 
 ## Arquitectura de Prompts — REGLA CRÍTICA DE SEGURIDAD
 
 ```
-UBICACIÓN: src/lib/prompts/index.ts
+UBICACIÓN: src/lib/prompts/
 ACCESO: Solo servidor (API routes). NUNCA desde el cliente.
 ```
 
-### Prompts existentes:
-| Constante | Función |
-|-----------|---------|
-| `SISTEMA_ETAPA_0` | Validación y propuesta de temas de investigación |
-| `SISTEMA_ETAPA_1` | Generación del Capítulo I (Planteamiento del problema) |
-| `SISTEMA_ETAPA_2` | Generación del Capítulo II (Marco teórico) |
-| `SISTEMA_ETAPA_3` | Generación de Caps. III, IV, V + Bibliografía |
+### Sistemas de prompts (2 motores separados):
 
-### Funciones builder:
-| Función | Input |
-|---------|-------|
-| `buildUserEtapa0(datos)` | diplomado, temas_abordados, area_interes, contexto_geografico, trabajas_en? |
-| `buildUserEtapa1(datos)` | tema, antecedentes, literatura, causas, objetivos, justificacion |
-| `buildUserEtapa2(datos)` | cap1_content, documentos_usuario? |
-| `buildUserEtapa3(datos)` | cap1_content, cap2_content, metodologia |
+**1. `scribe/` — Monografías académicas (12 archivos)**
+- `cap0-propuesta-temas.ts` — generación de propuestas de tema
+- `cap1.ts`, `cap2.ts`, `cap3.ts`, `cap4.ts`, `cap5.ts` — capítulos del documento
+- `cap1-variantes/` — variantes por universidad (UMSS, etc.)
+- `banco-preguntas.ts` — generador de preguntas de defensa
+- `compilar-latex.ts` — compilación final LaTeX
+- `consolidar-referencias.ts` — bibliografía APA 7
+- `control-calidad.ts` — guardrails anti-alucinación
+- `resumen-ejecutivo.ts` — abstract
+
+**2. `proyectoGrado/` — Plan de negocio (23 archivos)**
+- `cap0-idea-negocio.ts` — validación de viabilidad
+- `cap1-marco-referencial.ts`, `cap2-marco-teorico.ts`
+- `cap3a-pestel.ts`, `cap3b-porter.ts`, `cap3c-matrices.ts`
+- `cap3d-diseno-encuesta.ts`, `cap3e-analisis-encuesta.ts`, `cap3f-demanda-cuota.ts`
+- `cap4a-organizacional.ts`, `cap4abis-rrhh.ts`, `cap4b-legal.ts`, `cap4c-tecnico.ts`
+- `cap4d-branding.ts`, `cap4e-marketing.ts`, `cap4f-financiero.ts`, `cap4g-evaluacion.ts`
+- `conclusiones.ts`, `defensa.ts`, `referencias.ts`, `resumen-ejecutivo.ts`
+- `latex.ts`, `reglas-comunes.ts`
 
 ### REGLAS ABSOLUTAS de prompts:
 - ❌ NUNCA importar `SISTEMA_ETAPA_*` en componentes cliente (.tsx sin 'use server')
@@ -54,63 +83,99 @@ ACCESO: Solo servidor (API routes). NUNCA desde el cliente.
 
 ---
 
-## Estructura de Páginas (App Router)
+## API Routes Existentes (60+ endpoints)
 
-| Ruta | Archivo | Estado |
-|------|---------|--------|
-| `/` | `src/app/page.tsx` | Landing con planes, productos, garantías |
-| `/login` | `src/app/login/` | Google OAuth + modo demo |
-| `/dashboard` | `src/app/dashboard/` | Lista proyectos del usuario |
-| `/monografia` | `src/app/monografia/` | Flujo principal 4 etapas |
-| `/projects/new` | `src/app/projects/` | Wizard creación proyecto |
-| `/projects/[id]/workspace` | `src/app/projects/[id]/` | Editor por fases |
-| `/admin` | `src/app/admin/` | Dashboard admin (KPIs, stats) |
-| `/admin/usuarios` | `src/app/admin/usuarios/` | Gestión usuarios |
-| `/admin/prompts` | `src/app/admin/prompts/` | Editor prompts por etapa |
-| `/admin/modelos` | `src/app/admin/modelos/` | Config proveedores IA |
-| `/admin/estadisticas` | `src/app/admin/estadisticas/` | Gráficos de uso |
-| `/admin/logs` | `src/app/admin/logs/` | Registro errores |
-| `/tutorial` | `src/app/tutorial/` | Guía de uso |
-| `/terminos` `/privacidad` | `src/app/terminos/` | Páginas legales |
+### Núcleo de Generación (Projects/Workspace)
+- `GET/POST /api/projects` — gestión de proyectos (monografía o proyecto-grado)
+- `GET /api/projects/[id]` — detalle del proyecto
+- `POST /api/projects/generate-phase` — generar fase con IA (motor principal)
+- `POST /api/projects/edit-phase-section` — editar sección específica
+- `POST /api/projects/finalize` — finalizar y exportar
+- `POST /api/projects/upload-document` — subir PDF para RAG
+- `POST /api/projects/analyze-style` — analizador de estilo del estudiante
+- `GET/POST /api/projects/route-options`, `/select-route` — wizard inicial
+- `GET/POST /api/projects/[id]/phases` — fases del proyecto
+- `GET/POST /api/projects/[id]/observaciones[/[obsId]][/atender]` — feedback de tutor
+- `POST /api/projects/[id]/qa` — Q&A sobre el documento
+- `POST /api/projects/[id]/defensa`, `/defensa-materiales` — preparación de defensa
+- `POST /api/projects/[id]/preguntas/generar`, `/preguntas/pdf` — banco de preguntas
+- `POST /api/projects/[id]/latex`, `/paquete-latex`, `/pdf` — exports
+
+### Monografías legacy (Scribe original)
+- `POST /api/monografias`, `GET /api/monografias/[id]`
+- `POST /api/compilar/[monografia_id]`, `POST /api/export/latex`, `/export/pdf`
+- `GET/POST /api/citas[/monografia_id]`, `/api/documentos[/monografia_id]`
+- `POST /api/cap1-variants` — variantes por universidad
+
+### Axiom (simulador exámenes)
+- `GET/POST /api/axiom/examenes` — gestión de exámenes
+- `POST /api/axiom/plan-personalizado` — plan IA personalizado
+- `GET /api/axiom/progreso/estadisticas` — métricas usuario
+- `GET /api/axiom/ranking` — ranking de podios
+
+### Pagos
+- `POST /api/payments` — crear solicitud (tigo_money | qr_bancario | transferencia)
+- `GET/PATCH /api/payments/[id]` — estado y aprobación
+
+### Auth
+- `POST /api/auth/google`, `GET /api/auth/callback/google`
+- `POST /api/auth/demo`, `/logout`, `GET /api/auth/me`
+
+### Admin (panel completo)
+- `GET /api/admin/dashboard`, `/estadisticas`, `/logs`, `/feedback-insights`
+- `GET/POST /api/admin/{usuarios, proyectos, monografias, payments, prompts}`
+- `GET/POST /api/admin/{phase-definitions, project-types, universities, university-assets}`
+- `GET/POST /api/admin/{workspace-prompts, ai-config, calibration-questions, hilos}`
+- `GET /api/admin/recent-topics`, `/usuarios/[id]/historial`
+- `POST /api/admin/auth[/check]`, `/descargar-latex/[id]`
+- `POST /api/admin/projects/[id]/defensa-materiales`
+
+### Otros
+- `GET /api/services` — lista de servicios/productos
+- `POST /api/generate` — endpoint genérico de generación
 
 ---
 
-## API Routes Existentes
+## Librerías Internas Clave (`src/lib/`)
 
-| Endpoint | Método | Función |
-|----------|--------|---------|
-| `/api/monografias` | POST | Crear monografía |
-| `/api/monografias/[id]` | GET | Obtener monografía completa |
-| `/api/etapas/[0-3]/generar` | POST | Generar etapa con IA |
-| `/api/etapas/[n]/revisar` | POST | Revisar con feedback |
-| `/api/etapas/[n]/chat` | POST | Chat de modificaciones |
-| `/api/etapas/0/tema-directo` | POST | Tema propio sin propuestas |
-| `/api/citas` | GET/POST | Gestión bibliografía APA 7 |
-| `/api/documentos` | GET/POST | Documentos del usuario |
-| `/api/compilar/[id]` | POST | Compilar LaTeX final |
-| `/api/export/latex` | POST | Exportar .tex |
-| `/api/projects` | GET/POST | Gestión proyectos |
-| `/api/auth/google` | POST | Google OAuth |
-| `/api/auth/demo` | POST | Login demo |
-| `/api/auth/me` | GET | Sesión actual |
-| `/api/admin/estadisticas` | GET | Stats del sistema |
-| `/api/admin/usuarios` | GET | Gestión usuarios |
-| `/api/admin/logs` | GET | Logs de errores |
-
----
-
-## Librerías Internas Clave
-
+### IA y prompts
 | Archivo | Función |
 |---------|---------|
-| `src/lib/aiProvider.ts` | Cascada Groq → Anthropic → OpenAI |
-| `src/lib/memoryStore.ts` | Store in-memory (fallback sin Supabase real) |
-| `src/lib/latexMonografia.ts` | Generador LaTeX (markdown → LaTeX) |
-| `src/lib/validaciones.ts` | Anti-alucinación, coherencia, APA 7 |
-| `src/lib/pdfUtils.ts` | Extracción texto de PDFs |
-| `src/lib/auth.ts` | JWT, Google OAuth, roles |
-| `src/lib/ai/guardian.ts` | Guardián anti-alucinación |
-| `src/lib/ai/rag-processor.ts` | RAG para documentos del usuario |
+| `aiProvider.ts` | Cascada Groq → Anthropic → OpenAI (+ 8 fallbacks adicionales) |
+| `modelRouter.ts` | Selección de modelo por fase / contexto |
+| `ai/guardian.ts` | Guardián anti-alucinación |
+| `ai/rag-processor.ts` | RAG para documentos del usuario |
+| `aiTokenPolicy.mjs` | Política de tokens por fase |
+| `aiTrace.mjs` | Trazabilidad de llamadas IA |
+| `prompts/scribe/*` | Prompts del motor Scribe (monografías) |
+| `prompts/proyectoGrado/*` | Prompts del motor Proyecto de Grado |
+
+### Persistencia
+| Archivo | Función |
+|---------|---------|
+| `db/index.ts` | Abstracción transparente Supabase ↔ in-memory |
+| `persistence.ts` | `saveToDisk()` a `.store/data.json` |
+| `memoryStore.ts` | Fallback in-memory |
+| `data.ts` | Datos seed y constantes |
+
+### Generación de documentos
+| Archivo | Función |
+|---------|---------|
+| `latexMonografia.ts`, `latex/*` | Generador LaTeX (markdown → LaTeX) |
+| `pdfTemplate.ts`, `pdfUtils.ts` | Plantilla PDF + extracción de texto |
+| `export/latex-builder.ts` | Builder de ZIP para Overleaf |
+| `defensaMateriales.ts` | Materiales de defensa |
+| `hiloConductor.ts` | Hilo conductor entre fases |
+
+### Auth y dominio
+| Archivo | Función |
+|---------|---------|
+| `auth.ts`, `api-auth.ts` | JWT, Google OAuth, roles (incluye plan `elite`) |
+| `projectTypePhases.ts` | Definición de fases por tipo de proyecto |
+| `cap1Variants.ts` | Variantes del Cap.I por universidad |
+| `projectReferences.mjs` | Referencias compartidas entre proyectos |
+| `axiom/*` | Lógica del simulador (evaluador, PDF builder, etc.) |
+| `proyectoGrado/*` | Helpers específicos (encuestas, etc.) |
 
 ---
 
@@ -129,21 +194,44 @@ ACCESO: Solo servidor (API routes). NUNCA desde el cliente.
 
 ---
 
-## Flujo de Generación (4 Etapas)
+## Flujos de Generación por Producto
 
+### Scribe — Monografía (6 fases: Cap.0 a Cap.5)
 ```
-INICIO → Datos estudiante (diplomado, intereses, contexto geográfico Bolivia)
+Wizard → Tipo proyecto + Universidad + Tema
    ↓
-ETAPA 0 → IA genera 3 propuestas de tema viables con datos secundarios públicos
-            ↓ usuario elige UNA (o ingresa tema propio via /api/etapas/0/tema-directo)
-ETAPA 1 → Usuario llena antecedentes, literatura, causas, objetivos
-            ↓ IA genera Capítulo I completo (secciones 1.1 → 1.5, ~8-12 páginas)
-ETAPA 2 → IA genera Cap. II automáticamente usando Cap. I como contexto
-            (marco teórico + estudios relacionados, usuario puede subir PDFs)
-ETAPA 3 → IA genera Caps. III, IV, V + Bibliografía final completa
-            ↓ validación de coherencia total entre capítulos
-FINAL   → Usuario descarga .tex → Overleaf → PDF presentable
+Fase 0: Propuesta de tema (3 alternativas IA o tema directo)
+Fase 1: Cap.I — Planteamiento del problema (con variantes por universidad)
+Fase 2: Cap.II — Marco teórico (puede usar PDFs subidos vía RAG)
+Fase 3: Cap.III — Diseño metodológico
+Fase 4: Cap.IV — Resultados / análisis
+Fase 5: Cap.V — Conclusiones + Bibliografía APA 7 consolidada
+   ↓
+Control de calidad → Banco de preguntas defensa → Compilar LaTeX → ZIP Overleaf → PDF
 ```
+
+### Proyecto de Grado — Plan de negocio (23 fases)
+```
+Cap.0: Idea de negocio (validación de viabilidad)
+Cap.1: Marco referencial   |   Cap.2: Marco teórico
+Cap.3a-f: Análisis externo (PESTEL, Porter, matrices, encuesta, análisis, demanda)
+Cap.4a-g: Diseño interno (organizacional, RRHH, legal, técnico, branding, marketing,
+          financiero, evaluación)
+Conclusiones → Defensa → Referencias → Resumen ejecutivo → LaTeX
+```
+
+### Axiom — Simulador de exámenes
+```
+Estudiante → plan personalizado IA → exámenes → ranking de podios
+```
+
+**Para cada fase de cualquier producto:** `POST /api/projects/generate-phase`
+con `{ projectId, phaseId, contexto, modo? }`. El backend orquesta:
+1. Carga prompt desde `src/lib/prompts/<motor>/<fase>.ts`
+2. Aplica `hiloConductor` para coherencia con fases previas
+3. Llama IA con cascada (`aiProvider.ts`)
+4. Pasa por `guardian.ts` anti-alucinación
+5. Persiste resultado (Supabase o in-memory)
 
 ---
 
@@ -161,7 +249,8 @@ FINAL   → Usuario descarga .tex → Overleaf → PDF presentable
 ## Pendientes Prioritarios (Próximo Sprint)
 
 1. **Supabase real** — conectar credenciales y migrar del in-memory store
-2. **Pagos** — Tigo Money / QR Bolivia / Stripe + webhook activación cuenta
+2. **Pagos: webhook real de activación** — el flujo manual ya está
+   (`/api/payments`, `/admin/pagos`); falta integración real con Tigo / QR / Stripe
 3. **Google OAuth producción** — Google Cloud Console con dominio real
 4. **Deploy Vercel** — conectar repo GitHub + variables de entorno
 5. **Imágenes del estudiante en el ZIP de Overleaf** (Opción B) —
@@ -172,6 +261,26 @@ FINAL   → Usuario descarga .tex → Overleaf → PDF presentable
    `availableFiles` que pasa a `sanitizeOrphanIncludes` para que no se
    marquen como huérfanas. La IA en `compilar-latex.ts` debe recibir
    la lista de imágenes disponibles y referenciarlas en el `.tex`.
+
+---
+
+## ⚠️ Deuda Técnica Conocida — React 19 strict mode (10 errores lint)
+
+Tras refactor general (2026-05-16) quedan 10 errores `react-hooks/purity` e
+`react-hooks/immutability` que requieren refactor más profundo, no son bloqueantes:
+
+- **`react-hooks/purity` (8)** — `Math.random()` / `Date.now()` llamados durante
+  el render. Causan hydration mismatch potencial en SSR. Mover a `useState(() => ...)`
+  con lazy init o a `useEffect`. Archivos:
+  - `src/app/axiom/components/ParticleBackground.tsx:24,25,31,33`
+  - `src/app/laboratorio/page.tsx:15,35`
+  - `src/components/scribe/GeneratingState.tsx:322,323`
+- **`react-hooks/immutability` (2)** — mutación de `iframe.contentDocument` vía ref
+  en `src/app/projects/[id]/workspace/page.tsx:2590,2810`. Patrón legítimo para
+  preview HTML, pero React 19 lo detecta. Considerar `srcDoc` o portal.
+
+La regla `react-hooks/set-state-in-effect` (Next 16, overly strict para patrones
+React estándar) está **desactivada** en `eslint.config.mjs` con justificación.
 
 ---
 

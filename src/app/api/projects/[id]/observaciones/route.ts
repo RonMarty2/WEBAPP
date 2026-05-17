@@ -9,6 +9,7 @@ import { dbGetProyecto } from "@/lib/db";
 import {
   dbListObservaciones,
   dbCreateObservacion,
+  dbUpdateObservacion,
 } from "@/lib/db/observaciones";
 import { llamarIA } from "@/lib/aiProvider";
 
@@ -88,7 +89,7 @@ Responde SOLO con el número: 1, 2, o 3`;
         tipo,
       };
       // Guardar tipo directamente en db actualizando
-      const dbObs = require("@/lib/db/observaciones").dbUpdateObservacion(obs.id, { tipo });
+      const dbObs = dbUpdateObservacion(obs.id, { tipo });
 
       return NextResponse.json({ ok: true, observacion: dbObs || obsConTipo }, { status: 201 });
     } catch {

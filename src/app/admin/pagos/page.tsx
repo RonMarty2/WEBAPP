@@ -212,7 +212,7 @@ export default function PagosAdminPage() {
                         <span className="adm-muted">{new Date(s.created_at).toLocaleString("es-BO")}</span>
                         {s.comprobante_b64 && <span style={{ color: "#4ade80" }}>📎 Comprobante</span>}
                       </div>
-                      {s.notas_usuario && <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8", fontStyle: "italic" }}>"{s.notas_usuario}"</div>}
+                      {s.notas_usuario && <div style={{ marginTop: 6, fontSize: 12, color: "#94a3b8", fontStyle: "italic" }}>&quot;{s.notas_usuario}&quot;</div>}
                     </div>
                   );
                 })}

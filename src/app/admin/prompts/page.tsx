@@ -346,7 +346,7 @@ export default function PromptsPage() {
         })}
 
         <div style={{ marginTop: "auto", padding: "16px", borderTop: "1px solid #e5e7eb", fontSize: 10, color: "#999", fontFamily: "'IBM Plex Mono', monospace" }}>
-          <div className="adm-label mb-2" style={{ fontSize: 9 }}>// info</div>
+          <div className="adm-label mb-2" style={{ fontSize: 9 }}>{"// info"}</div>
           <p style={{ margin: 0, lineHeight: 1.6, fontSize: 10 }}>
             <strong>Borrador</strong>: primera pasada Modo Guiado.<br />
             <strong>Final</strong>: con feedback del estudiante.<br />

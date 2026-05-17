@@ -174,7 +174,20 @@ function rot3(
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
-export default function ParticleSphere({ isPreview = false, previewConfig }: { isPreview?: boolean, previewConfig?: any }) {
+type ParticleConfigInput = Partial<{
+  shape: string;
+  palette: string;
+  wave: string;
+  speed: number;
+  particleSize: number;
+  particleLength: number;
+  swarmSize: number;
+  density: number;
+  /** Legacy alias for particleSize, kept for backward-compat with stored configs. */
+  size: number;
+}>;
+
+export default function ParticleSphere({ isPreview = false, previewConfig }: { isPreview?: boolean, previewConfig?: ParticleConfigInput }) {
   const pathname = usePathname();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const parts     = useRef<Particle[]>(buildParticles("sphere"));
@@ -252,7 +265,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         currentIndex = (currentIndex + 1) % children.length;
         const targetModule = children[currentIndex];
         
-        const DEFAULTS: Record<string, any> = {
+        const DEFAULTS: Record<string, ParticleConfigInput> = {
           scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
@@ -270,9 +283,9 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         const oldDensity = uiConfigRef.current.density;
         
         uiConfigRef.current = {
-          shape: parsed.shape,
-          palette: parsed.palette,
-          wave: parsed.wave,
+          shape: parsed.shape ?? "sphere",
+          palette: parsed.palette ?? "antigravity",
+          wave: parsed.wave ?? "magnetic",
           speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
           particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : 1.0,
           particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
@@ -306,7 +319,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         else if (currentPath.startsWith("/mentor")) targetModule = "mentor";
         else if (currentPath.startsWith("/nucleo")) targetModule = "nucleo";
 
-        const DEFAULTS: Record<string, any> = {
+        const DEFAULTS: Record<string, ParticleConfigInput> = {
           scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
@@ -330,9 +343,9 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         const oldDensity = uiConfigRef.current.density;
         
         uiConfigRef.current = {
-          shape: parsed.shape,
-          palette: parsed.palette,
-          wave: parsed.wave,
+          shape: parsed.shape ?? "sphere",
+          palette: parsed.palette ?? "antigravity",
+          wave: parsed.wave ?? "magnetic",
           speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
           particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : (typeof parsed.size === "number" ? parsed.size : 1.0),
           particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,

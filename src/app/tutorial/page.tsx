@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const PASOS = [
   {
@@ -109,11 +110,11 @@ export default function TutorialPage() {
       {/* Header */}
       <header style={{ borderBottom: "1px solid var(--border)", padding: "0 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 58 }}>
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
             <span style={{ fontSize: 20 }}>🧪</span>
             <span style={{ fontWeight: 800, fontSize: 16, color: "var(--fg-primary)" }}>Laboratorio</span>
             <span style={{ fontWeight: 800, fontSize: 16, color: "var(--accent)" }}>Académico</span>
-          </a>
+          </Link>
           <button
             className="btn-cyan"
             onClick={() => router.push("/monografia")}
