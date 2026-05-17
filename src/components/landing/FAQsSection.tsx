@@ -22,7 +22,7 @@ const FAQS: FAQ[] = [
   {
     pregunta: "¿Cuánto tiempo toma generar una monografía completa?",
     respuesta:
-      "Entre 2 y 4 horas de tu trabajo activo: revisando, aprobando, ajustando cada etapa. La generación de IA en sí toma minutos por etapa. Es un proceso guiado, no automático — tú decides en cada paso.",
+      "Para una Monografía, el primer borrador completo está listo en menos de 3 horas. Para un Proyecto de Grado (más extenso), en menos de 6 horas. Las correcciones del tutor se aplican en minutos. Es un proceso guiado: tú apruebas en cada paso.",
   },
   {
     pregunta: "¿Qué pasa si la IA falla durante la generación?",
@@ -57,7 +57,17 @@ const FAQS: FAQ[] = [
   {
     pregunta: "¿Cómo es el pago?",
     respuesta:
-      "Por QR boliviano (Tigo Money, BCP, BNB) o transferencia bancaria. Recibirás acceso completo en menos de 24 horas tras confirmar el pago. El plan Estándar es pago único (Bs. 150). El plan Pro es mensual (Bs. 300/mes) con 3 documentos al mes.",
+      "Por QR boliviano (Tigo Money, BCP, BNB) o transferencia bancaria. Recibirás acceso completo en menos de 24 horas tras confirmar el pago. Todos los planes son de pago único (no hay suscripciones mensuales obligatorias).",
+  },
+  {
+    pregunta: "¿Cuál plan me conviene?",
+    respuesta:
+      "Si solo necesitas el documento entregado y vas a defender sin tutor exigente, te alcanza con Básico. Si esperas observaciones del tutor y quieres corregirlas sin rehacer todo, elige Plus (es el más elegido). Si esta defensa decide tu titulación y quieres todo el respaldo hasta el día del tribunal (banco de preguntas, materiales impresos, soporte 24/7), ve con Premium.",
+  },
+  {
+    pregunta: "¿Puedo cambiar de plan después?",
+    respuesta:
+      "Sí. Si empezaste con Básico y te das cuenta de que necesitas correcciones, puedes pasar a Plus pagando solo la diferencia. Lo mismo para subir a Premium. No pierdes el trabajo ya generado.",
   },
 ];
 

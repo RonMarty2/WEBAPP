@@ -295,6 +295,28 @@ React estándar) está **desactivada** en `eslint.config.mjs` con justificación
 
 ---
 
+## 🇧🇴 REGLA DE COPY — NUNCA USAR ARGENTINISMOS (VOSEO)
+
+**El SaaS es para mercado boliviano. Usar SIEMPRE español neutro con tuteo.**
+
+❌ PROHIBIDO (voseo argentino/uruguayo):
+- "sabés", "querés", "tenés", "necesitás", "descargás", "subís", "conversás", "elegís", "regenerás", "podés", "esperás"
+- "vos", "tu monografía está lista, sin vueltas"
+- Expresiones rioplatenses: "sin vueltas", "buena onda", "macanudo", "che", "bárbaro"
+
+✅ CORRECTO (tuteo neutro boliviano):
+- "sabes", "quieres", "tienes", "necesitas", "descargas", "subes", "conversas", "eliges", "regeneras", "puedes", "esperas"
+- "tú", "tu monografía está lista, sin rodeos"
+- Expresiones neutras: "sin complicaciones", "sin rodeos", "directo al punto"
+
+**Esta regla aplica a TODO copy visible al usuario:** UI, emails, mensajes de error,
+documentación, mockups, landing, pricing, tooltips, placeholders, prompts visibles.
+Históricamente Claude ha cometido este error varias veces (ver commits e1f0dc4
+y be75c9f). El usuario lo considera bloqueante de calidad — verificar
+cada copy generado.
+
+---
+
 ## Skills Instaladas en Este Proyecto
 
 - `brainstorming` — Refina ideas antes de codificar

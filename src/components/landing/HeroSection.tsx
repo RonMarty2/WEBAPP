@@ -69,23 +69,35 @@ export default function HeroSection() {
             margin: "0 auto 24px",
           }}
         >
-          Tu monografía completa
+          Termina tu monografía
           <br />
-          <span className="text-gradient">en horas, no en meses</span>
+          <span className="text-gradient">antes de que llegue el lunes</span>
         </h1>
 
         {/* Subheadline */}
         <p style={{
           color: "var(--fg-muted)",
           fontSize: 19,
-          maxWidth: 620,
-          margin: "0 auto 14px",
-          lineHeight: 1.6,
+          maxWidth: 640,
+          margin: "0 auto 18px",
+          lineHeight: 1.55,
           fontWeight: 400,
         }}>
-          Capítulos I–V, bibliografía APA 7 y formato oficial de tu universidad —
-          generados por IA verificada, aprobados etapa por etapa por ti.
+          La IA redacta. Tú apruebas. Tu tutor aprueba. Llegas a la defensa con
+          tiempo y con todo en orden.
         </p>
+
+        {/* Badge de tiempo (impacto rápido) */}
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 8,
+          padding: "10px 22px", borderRadius: 999,
+          background: "var(--accent)", color: "white",
+          fontWeight: 700, fontSize: 14.5,
+          boxShadow: "0 8px 20px rgba(99, 102, 241, 0.30)",
+          marginBottom: 18,
+        }}>
+          ⚡ Primer borrador completo en menos de 3 horas
+        </div>
 
         {/* Tagline */}
         <p style={{

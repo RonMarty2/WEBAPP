@@ -1,11 +1,13 @@
 "use client";
 
 import HeroSection from "@/components/landing/HeroSection";
+import DoloresSection from "@/components/landing/DoloresSection";
+import SolucionesSection from "@/components/landing/SolucionesSection";
 import ComoFuncionaSection from "@/components/landing/ComoFuncionaSection";
-import DiferenciadoresSection from "@/components/landing/DiferenciadoresSection";
 import UniversidadesSection from "@/components/landing/UniversidadesSection";
-import FeaturesSection from "@/components/landing/FeaturesSection";
+import PricingSection from "@/components/landing/PricingSection";
 import FAQsSection from "@/components/landing/FAQsSection";
+import CTAFinalSection from "@/components/landing/CTAFinalSection";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function HomePage() {
@@ -31,7 +33,6 @@ export default function HomePage() {
             {/* Nav links */}
             <nav className="hidden md:flex items-center gap-5 justify-center" style={{ flex: 1.4 }}>
               <a href="#como-funciona" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Cómo funciona</a>
-              <a href="#diferenciadores" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Por qué somos diferentes</a>
               <a href="#universidades" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Universidades</a>
               <a href="#planes" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Precios</a>
               <a href="#faqs" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>FAQs</a>
@@ -66,22 +67,28 @@ export default function HomePage() {
         {/* ── Hero ──────────────────────────────────────────────── */}
         <HeroSection />
 
-        {/* ── Cómo funciona ─────────────────────────────────────── */}
+        {/* ── ¿Te suena? — DOLORES ──────────────────────────────── */}
+        <DoloresSection />
+
+        {/* ── Cómo te resolvemos — SOLUCIONES ───────────────────── */}
+        <SolucionesSection />
+
+        {/* ── Cómo funciona (los 3 pasos) ───────────────────────── */}
         <ComoFuncionaSection />
 
-        {/* ── Diferenciadores ───────────────────────────────────── */}
-        <DiferenciadoresSection />
+        {/* ── Pricing por producto (acordeón) ───────────────────── */}
+        <main>
+          <PricingSection />
+        </main>
 
         {/* ── Universidades soportadas ──────────────────────────── */}
         <UniversidadesSection />
 
-        {/* ── Garantías + Productos + Planes + CTA premium ──────── */}
-        <main>
-          <FeaturesSection />
-        </main>
-
         {/* ── FAQs ──────────────────────────────────────────────── */}
         <FAQsSection />
+
+        {/* ── CTA Final ─────────────────────────────────────────── */}
+        <CTAFinalSection />
 
         {/* ── Footer ────────────────────────────────────────────── */}
         <footer className="border-t border-gray-200 dark:border-white/10 px-4 md:px-8 py-10">
@@ -113,7 +120,6 @@ export default function HomePage() {
                     Producto
                   </div>
                   <a href="#como-funciona" style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Cómo funciona</a>
-                  <a href="#diferenciadores" style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Diferenciadores</a>
                   <a href="#universidades" style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Universidades</a>
                   <a href="#planes" style={{ fontSize: 13, color: "var(--fg-muted)", textDecoration: "none" }}>Precios</a>
                 </div>
@@ -149,7 +155,7 @@ export default function HomePage() {
                 Laboratorio Académico © 2026 · Hecho en Bolivia
               </span>
               <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>
-                Bs. 150 pago único · Bs. 300 / mes Pro
+                Monografía desde Bs. 150 · Proyecto de Grado desde Bs. 350
               </span>
             </div>
           </div>

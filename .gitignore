@@ -46,3 +46,4 @@ next-env.d.ts
 
 # .env.example es la plantilla publica (sin secretos) — debe estar en git
 !.env.example
+.superpowers/
