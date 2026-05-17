@@ -119,6 +119,7 @@ const GLOBAL_NAV = [
 const MODULE_NAV: Record<string, Array<{ href: string; label: string; Icon: React.ComponentType }>> = {
   SCRIBE: [
     { href: "/admin/proyectos", label: "Proyectos de Alumnos", Icon: IconFolder },
+    { href: "/admin/banco-observaciones", label: "Banco de Observaciones", Icon: IconList },
     { href: "/admin/universidades", label: "Universidades", Icon: IconBuilding },
     { href: "/admin/project-types", label: "Tipos de Proyecto", Icon: IconLayers },
     { href: "/admin/fases", label: "Fases del Proyecto", Icon: IconList },
