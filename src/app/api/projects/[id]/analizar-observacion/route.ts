@@ -158,6 +158,10 @@ export async function POST(req: Request, { params }: Params) {
       justificacion_para_tutor: analizado.justificacion_para_tutor,
       contenido_actual: contenidoActual,
       contenido_propuesto: analizado.propuesta_de_cambio,
+      // Nuevo: si el cambio afecta el título oficial del proyecto,
+      // el frontend lo usa para actualizar también `tema_aprobado`.
+      nuevo_titulo: analizado.nuevo_titulo,
+      titulo_actual: proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? null,
       fase_id: phaseId,
       fase_label: phase.label ?? phaseId,
       proveedor: `${aiResult.provider} / ${aiResult.model}`,

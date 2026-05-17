@@ -610,6 +610,9 @@ export default function WorkspacePage() {
     justificacionParaTutor: string | null;
     contenidoActual: string;
     contenidoPropuesto: string | null;
+    /** Si el cambio modifica el TÍTULO OFICIAL del proyecto, viene aquí. */
+    nuevoTitulo: string | null;
+    tituloActual: string | null;
   }
   const [revisionStatus, setRevisionStatus] = useState<RevisionStatus>("idle");
   const [revisionPreview, setRevisionPreview] = useState<RevisionPreviewData | null>(null);
@@ -1135,6 +1138,8 @@ export default function WorkspacePage() {
         justificacionParaTutor: (data.justificacion_para_tutor as string | null) ?? null,
         contenidoActual: (data.contenido_actual as string | undefined) ?? "",
         contenidoPropuesto: (data.contenido_propuesto as string | null) ?? null,
+        nuevoTitulo: (data.nuevo_titulo as string | null) ?? null,
+        tituloActual: (data.titulo_actual as string | null) ?? null,
       });
       setRevisionStatus("preview");
     } catch (e) {
@@ -1178,13 +1183,21 @@ export default function WorkspacePage() {
         ...currentPhaseContents,
         [revisionPreview.phaseId]: revisionPreview.contenidoPropuesto,
       };
+      // Si la observación cambia el TÍTULO OFICIAL, lo actualizamos también
+      // (tema_aprobado + titulo_provisional) para que se propague a todas las
+      // demás fases y a la portada del PDF/LaTeX.
+      const patchBody: Record<string, unknown> = {
+        phase_contents: nuevoPhaseContents,
+        final_document: null, // invalidar consolidado, hay que regenerar
+      };
+      if (revisionPreview.nuevoTitulo && revisionPreview.nuevoTitulo.trim()) {
+        patchBody.tema_aprobado = revisionPreview.nuevoTitulo.trim();
+        patchBody.titulo_provisional = revisionPreview.nuevoTitulo.trim();
+      }
       const res = await fetch(`/api/projects/${proyecto.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          phase_contents: nuevoPhaseContents,
-          final_document: null, // invalidar consolidado, hay que regenerar
-        }),
+        body: JSON.stringify(patchBody),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -1206,10 +1219,13 @@ export default function WorkspacePage() {
       const labelDecision = revisionPreview.decision === "aplicar_con_reserva"
         ? "✅ Ajuste aplicado (con reserva)"
         : "✅ Ajuste aplicado";
+      const tituloMsg = revisionPreview.nuevoTitulo
+        ? ` Además, el TÍTULO OFICIAL del proyecto se actualizó a: "${revisionPreview.nuevoTitulo}".`
+        : "";
       setChatMsgs((prev) => [
         ...prev,
         { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
-        { role: "assistant", text: `${labelDecision} en ${revisionPreview.phaseLabel}.`, ts: Date.now() },
+        { role: "assistant", text: `${labelDecision} en ${revisionPreview.phaseLabel}.${tituloMsg}`, ts: Date.now() },
       ]);
       // Limpiar estado y desbloquear input
       setRevisionPreview(null);
@@ -3275,6 +3291,39 @@ export default function WorkspacePage() {
                 }}>
                   <strong>🤖 Análisis IA:</strong> {revisionPreview.analisisIa}
                 </div>
+
+                {/* Warning amarillo: cambio de título oficial */}
+                {revisionPreview.nuevoTitulo && !isRechazar && (
+                  <div style={{
+                    marginTop: 10,
+                    padding: "10px 14px",
+                    background: "rgba(245,158,11,0.10)",
+                    border: "2px solid #d97706",
+                    borderRadius: 10,
+                    fontSize: 12.5,
+                    color: "#7c2d12",
+                    lineHeight: 1.5,
+                  }}>
+                    <div style={{ fontWeight: 800, marginBottom: 4, color: "#92400e" }}>
+                      ⚠️ Este cambio actualiza el TÍTULO OFICIAL del proyecto
+                    </div>
+                    {revisionPreview.tituloActual && (
+                      <div style={{ marginBottom: 4 }}>
+                        <span style={{ color: "#92400e", fontWeight: 600 }}>Título anterior:</span>{" "}
+                        <span style={{ textDecoration: "line-through", color: "#a8a29e" }}>
+                          {revisionPreview.tituloActual}
+                        </span>
+                      </div>
+                    )}
+                    <div>
+                      <span style={{ color: "#92400e", fontWeight: 600 }}>Título nuevo:</span>{" "}
+                      <strong style={{ color: "#7c2d12" }}>{revisionPreview.nuevoTitulo}</strong>
+                    </div>
+                    <div style={{ marginTop: 6, fontSize: 11, color: "#92400e", fontStyle: "italic" }}>
+                      Si aceptás, el título cambia en TODO el proyecto: portada, encabezados, citas internas y referencias de futuros capítulos.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Cuerpo: diff (si aplicar/reserva) o justificación (si rechazar) */}

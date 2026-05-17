@@ -26,7 +26,8 @@ Debes devolver un JSON con esta estructura EXACTA:
   "patron_detectado": "string corto (ej: 'cambio_titulo', 'agregar_seccion', 'cambiar_verbos', 'reducir_alcance')",
   "analisis_ia": "razonamiento académico de 2-4 oraciones explicando POR QUÉ tomaste esa decisión",
   "justificacion_para_tutor": "SOLO si decision='rechazar' o 'aplicar_con_reserva'. Texto de 1-2 párrafos que el estudiante puede usar literalmente para responder al tutor de forma respetuosa pero firme. Debe estar en primera persona ('Estimado profesor, agradezco su observación...'). Si decision='aplicar', poner null.",
-  "propuesta_de_cambio": "SOLO si decision='aplicar' o 'aplicar_con_reserva'. El texto reformulado del capítulo completo aplicando la observación. Si decision='rechazar', poner null."
+  "propuesta_de_cambio": "SOLO si decision='aplicar' o 'aplicar_con_reserva'. El texto reformulado del capítulo completo aplicando la observación. Si decision='rechazar', poner null.",
+  "nuevo_titulo": "SOLO si la observación implica cambiar el TÍTULO PRINCIPAL del trabajo (no subtítulos, no nombres de sección). El nuevo título oficial sin comillas ni prefijos. Si la observación no toca el título, poner null."
 }
 
 ═══════════════════════════════════════════════════════════════
@@ -109,7 +110,8 @@ export function buildAnalizadorUserPrompt(input: AnalizadorInput): string {
   const partes = [
     `═══ CONTEXTO DEL TRABAJO ═══`,
     `Servicio: ${input.servicioNombre}`,
-    `Tema aprobado: "${input.tema}"`,
+    `TÍTULO OFICIAL ACTUAL: "${input.tema}"`,
+    `(Si la observación implica cambiar este título, debes devolver el nuevo en el campo "nuevo_titulo" del JSON.)`,
     `Fase actual: ${input.faseLabel} (${input.faseId})`,
     input.formatoUmss ? `Formato UMSS: ${input.formatoUmss}` : null,
     input.variante ? `Variante: ${input.variante}` : null,
@@ -132,6 +134,13 @@ export interface AnalizadorOutput {
   analisis_ia: string;
   justificacion_para_tutor: string | null;
   propuesta_de_cambio: string | null;
+  /**
+   * Si la observación implica cambiar el TÍTULO OFICIAL del trabajo,
+   * la IA devuelve aquí el nuevo título. Permite actualizar también
+   * `tema_aprobado` del proyecto, no solo el contenido del capítulo.
+   * null cuando la observación no afecta al título.
+   */
+  nuevo_titulo: string | null;
 }
 
 /**
@@ -150,12 +159,22 @@ export function parseAnalizadorOutput(rawText: string): AnalizadorOutput | null 
     if (!parsed.decision || !["aplicar", "aplicar_con_reserva", "rechazar"].includes(parsed.decision)) {
       return null;
     }
+    // Limpiar el nuevo título si vino con comillas o prefijos comunes
+    const tituloLimpio = typeof parsed.nuevo_titulo === "string"
+      ? parsed.nuevo_titulo
+          .trim()
+          .replace(/^["'«»]+|["'«»]+$/g, "")  // comillas al inicio/fin
+          .replace(/^(t[íi]tulo:?\s*)/i, "")  // prefijo "Título:"
+          .trim()
+      : null;
+
     return {
       decision: parsed.decision,
       patron_detectado: parsed.patron_detectado ?? "",
       analisis_ia: parsed.analisis_ia ?? "",
       justificacion_para_tutor: parsed.justificacion_para_tutor ?? null,
       propuesta_de_cambio: parsed.propuesta_de_cambio ?? null,
+      nuevo_titulo: tituloLimpio && tituloLimpio.length > 0 ? tituloLimpio : null,
     };
   } catch {
     return null;
