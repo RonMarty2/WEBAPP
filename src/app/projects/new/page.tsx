@@ -646,9 +646,19 @@ function NuevoProyectoPageInner() {
                 const bgGuia = esGuia1 ? "rgba(37,99,235,0.08)" : "rgba(124,58,237,0.08)";
 
                 return (
-                  <button
+                  // div clickeable (no button) para permitir <a target=_blank>
+                  // anidado dentro — un button no acepta anchors validamente.
+                  <div
                     key={v.id}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setCap1VarianteId(v.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setCap1VarianteId(v.id);
+                      }
+                    }}
                     style={{
                       padding: 0,
                       borderRadius: 14,
@@ -864,7 +874,7 @@ function NuevoProyectoPageInner() {
                         </div>
                       )}
                     </div>
-                  </button>
+                  </div>
                 );
               })}
             </div>
