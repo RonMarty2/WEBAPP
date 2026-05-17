@@ -1171,7 +1171,7 @@ function NuevoProyectoPageInner() {
                 </div>
               </div>
               <a
-                href={pdfPreview.url}
+                href={`${pdfPreview.url}?formato=raw`}
                 download
                 style={{
                   fontSize: 12,

@@ -33,30 +33,50 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     return NextResponse.json({ error: "Guía no encontrada" }, { status: 404 });
   }
 
+  const url = new URL(_req.url);
+  const formato = url.searchParams.get("formato") ?? "json";
   const filePath = path.join(process.cwd(), "public", "guias-umss", guia.archivo);
 
   try {
     const buffer = await readFile(filePath);
 
-    return new NextResponse(new Uint8Array(buffer), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Length": String(buffer.length),
-        // Header genérico (no "attachment") para que PDF.js lo procese inline.
-        // Usamos el nombre de archivo (ASCII) en filename + filename* RFC 5987
-        // con el título humano UTF-8 encoded.
-        "Content-Disposition": `inline; filename="${guia.archivo}"; filename*=UTF-8''${encodeURIComponent(guia.titulo + ".pdf")}`,
-        // Cachear 1 día — el archivo es estático y rara vez cambia.
-        "Cache-Control": "public, max-age=86400",
+    // Modo "raw": devuelve el PDF binario (para botón de descarga).
+    if (formato === "raw") {
+      return new NextResponse(new Uint8Array(buffer), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Length": String(buffer.length),
+          "Content-Disposition": `attachment; filename="${guia.archivo}"`,
+          "Cache-Control": "public, max-age=86400",
+        },
+      });
+    }
+
+    // Modo "json" (default): devuelve el PDF como base64 dentro de JSON.
+    // Esto es CRITICO para esquivar extensiones como TeraBox que detectan
+    // CUALQUIER response con Content-Type: application/pdf y la reemplazan
+    // por 204 vacío. JSON pasa sin que TeraBox lo toque.
+    const base64 = buffer.toString("base64");
+    return NextResponse.json(
+      {
+        titulo: guia.titulo,
+        archivo: guia.archivo,
+        bytes: buffer.length,
+        // El PDF entero como base64. El cliente lo decodifica a Uint8Array
+        // y lo pasa a PDF.js como `{data: bytes}`.
+        data_base64: base64,
       },
-    });
+      {
+        status: 200,
+        headers: { "Cache-Control": "public, max-age=86400" },
+      },
+    );
   } catch (e) {
     return NextResponse.json(
       {
         error: "No se pudo leer el archivo de la guía",
         detalle: e instanceof Error ? e.message : String(e),
-        ruta_buscada: filePath,
       },
       { status: 500 },
     );

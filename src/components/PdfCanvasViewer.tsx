@@ -4,15 +4,19 @@
  * PdfCanvasViewer
  *
  * Renderiza un PDF como una serie de canvases usando react-pdf (Mozilla PDF.js).
- * Diferencia clave vs <iframe> o <object>: las páginas se dibujan como CANVAS
- * (imagen rasterizada). Las extensiones de browser tipo TeraBox, IDM, etc.
- * NO pueden interceptar canvases — solo interceptan requests HTTP de PDFs.
  *
- * Esto resuelve definitivamente el problema "el navegador descarga el PDF
- * en vez de mostrarlo" causado por extensiones del usuario.
+ * Estrategia anti-interceptor (TeraBox, IDM, etc.):
+ *   1. Recibe la URL del endpoint que devuelve el PDF como JSON+base64
+ *      (NO como Content-Type: application/pdf, que es lo que esas extensiones
+ *      detectan e interceptan respondiendo 204 vacío).
+ *   2. Decodifica el base64 a Uint8Array en el cliente.
+ *   3. Pasa los bytes a PDF.js como {data: uint8array}, que renderiza cada
+ *      página como CANVAS (no interceptable por extensiones).
+ *
+ * Resultado: el PDF se ve aunque el usuario tenga TeraBox/IDM/Adobe activos.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -21,6 +25,7 @@ import "react-pdf/dist/Page/TextLayer.css";
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface Props {
+  /** URL del endpoint que devuelve { data_base64: string }. */
   url: string;
   /** Ancho máximo de cada página renderizada (en píxeles). */
   pageWidth?: number;
@@ -29,6 +34,38 @@ interface Props {
 export default function PdfCanvasViewer({ url, pageWidth = 900 }: Props) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null);
+  const [fetching, setFetching] = useState(true);
+
+  // Descarga el PDF como JSON (TeraBox no intercepta JSON) y decodifica el base64.
+  useEffect(() => {
+    let cancelado = false;
+    setFetching(true);
+    setError(null);
+    setPdfBytes(null);
+
+    fetch(url, { headers: { Accept: "application/json" } })
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const json = await r.json();
+        if (!json.data_base64) throw new Error("Respuesta sin data_base64");
+        // Decodifica base64 → binary string → Uint8Array
+        const bin = atob(json.data_base64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        if (!cancelado) setPdfBytes(bytes);
+      })
+      .catch((e) => {
+        if (!cancelado) setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => {
+        if (!cancelado) setFetching(false);
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, [url]);
 
   return (
     <div
@@ -42,8 +79,14 @@ export default function PdfCanvasViewer({ url, pageWidth = 900 }: Props) {
         alignItems: "center",
       }}
     >
+      {fetching && (
+        <div style={{ color: "white", textAlign: "center", padding: 60, fontSize: 14 }}>
+          <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+          <div>Descargando PDF…</div>
+        </div>
+      )}
       <Document
-        file={url}
+        file={pdfBytes ? { data: pdfBytes } : null}
         onLoadSuccess={({ numPages: n }) => {
           setNumPages(n);
           setError(null);
@@ -52,10 +95,12 @@ export default function PdfCanvasViewer({ url, pageWidth = 900 }: Props) {
           setError(e?.message ?? "No se pudo cargar el PDF");
         }}
         loading={
-          <div style={{ color: "white", textAlign: "center", padding: 60, fontSize: 14 }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-            <div>Cargando PDF…</div>
-          </div>
+          pdfBytes ? (
+            <div style={{ color: "white", textAlign: "center", padding: 60, fontSize: 14 }}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
+              <div>Renderizando páginas…</div>
+            </div>
+          ) : null
         }
       >
         {numPages &&
