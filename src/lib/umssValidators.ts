@@ -237,7 +237,9 @@ export const GUIAS_UMSS_OFICIALES: Record<FormatoUMSS, {
     nombre: "Guía de Elaboración de Trabajos de Monografía",
     autor: "UMSS — Facultad de Ciencias Económicas, Departamento de Posgrado",
     fecha: "Septiembre 2024",
-    url_documento_pdf: "/guias-umss/umss-guia1-posgrado-fce-2024.pdf",
+    // URL sin extension .pdf — evade extensiones tipo TeraBox que detectan
+    // URLs .pdf y las interceptan respondiendo 204 vacio.
+    url_documento_pdf: "/api/guias-umss/guia1",
     caracteristicas: [
       "Doble titulación (Diplomado + Monografía)",
       "30-70 páginas numeradas (sin carátula/índice/anexos)",
@@ -251,7 +253,8 @@ export const GUIAS_UMSS_OFICIALES: Record<FormatoUMSS, {
     nombre: "Guía de Estilo y Contenido para Realizar una Monografía Académica o de Investigación",
     autor: "Mgr. Lic. Álvaro Céspedes Tapia",
     fecha: "Variante extendida UMSS",
-    url_documento_pdf: "/guias-umss/umss-guia2-cespedes-tapia.pdf",
+    // URL sin extension .pdf (ver comentario en guia_1_posgrado)
+    url_documento_pdf: "/api/guias-umss/guia2",
     caracteristicas: [
       "50-70 páginas totales (incluye todo)",
       "Interlineado 1.5, texto justificado",
