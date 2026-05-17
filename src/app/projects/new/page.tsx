@@ -3,6 +3,17 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import UmssDuplicidadCheck from "@/components/UmssDuplicidadCheck";
+import dynamic from "next/dynamic";
+
+// PdfCanvasViewer es client-only (react-pdf necesita browser APIs).
+const PdfCanvasViewer = dynamic(() => import("@/components/PdfCanvasViewer"), {
+  ssr: false,
+  loading: () => (
+    <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", background: "#525659", color: "white" }}>
+      Cargando visor…
+    </div>
+  ),
+});
 
 interface Servicio {
   id: string;
@@ -80,43 +91,10 @@ function NuevoProyectoPageInner() {
   const [servicioId, setServicioId] = useState("");
   const [tipoProyectoId, setTipoProyectoId] = useState("tipo-monografia");
 
-  // Modal de previsualización de PDF (guías oficiales UMSS)
+  // Modal de previsualización de PDF (guías oficiales UMSS).
+  // El visor renderiza el PDF como canvas (PdfCanvasViewer + Mozilla PDF.js)
+  // para esquivar extensiones tipo TeraBox que interceptan archivos PDF.
   const [pdfPreview, setPdfPreview] = useState<{ url: string; titulo: string } | null>(null);
-  // Blob URL del PDF (evade extensiones tipo TeraBox que interceptan PDFs por URL).
-  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
-  const [pdfLoading, setPdfLoading] = useState(false);
-
-  // Cuando se abre el modal, baja el PDF y lo convierte a blob URL.
-  useEffect(() => {
-    if (!pdfPreview) {
-      // Cleanup del blob anterior al cerrar
-      if (pdfBlobUrl) {
-        URL.revokeObjectURL(pdfBlobUrl);
-        setPdfBlobUrl(null);
-      }
-      return;
-    }
-    let cancelado = false;
-    setPdfLoading(true);
-    fetch(pdfPreview.url)
-      .then((r) => r.blob())
-      .then((blob) => {
-        if (cancelado) return;
-        const blobUrl = URL.createObjectURL(blob);
-        setPdfBlobUrl(blobUrl);
-      })
-      .catch(() => {
-        if (cancelado) return;
-        setPdfBlobUrl(null);
-      })
-      .finally(() => {
-        if (!cancelado) setPdfLoading(false);
-      });
-    return () => {
-      cancelado = true;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfPreview]);
 
   // Universidad
   const [universidades, setUniversidades] = useState<Universidad[]>([]);
@@ -1226,70 +1204,9 @@ function NuevoProyectoPageInner() {
                 Cerrar ✕
               </button>
             </div>
-            {/* Visor del PDF via Blob URL — evade extensiones que interceptan
-                URLs http directas (TeraBox, etc.). Los blob URLs son recursos
-                internos del navegador y no pasan por webRequest interceptors. */}
-            {pdfLoading && (
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  gap: 14,
-                  background: "#f8fafc",
-                  color: "#475569",
-                  fontSize: 13,
-                }}
-              >
-                <div style={{ fontSize: 32 }}>⏳</div>
-                <div>Cargando PDF…</div>
-              </div>
-            )}
-            {!pdfLoading && pdfBlobUrl && (
-              <iframe
-                key={pdfBlobUrl}
-                src={pdfBlobUrl}
-                title={pdfPreview.titulo}
-                style={{ flex: 1, width: "100%", border: 0, background: "#525659" }}
-              />
-            )}
-            {!pdfLoading && !pdfBlobUrl && (
-              <div
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 16,
-                  padding: 32,
-                  textAlign: "center",
-                  background: "#f8fafc",
-                }}
-              >
-                <div style={{ fontSize: 48 }}>📄</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
-                  No se pudo cargar el PDF
-                </div>
-                <a
-                  href={pdfPreview.url}
-                  download
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 700,
-                    padding: "10px 20px",
-                    borderRadius: 8,
-                    background: "#2563eb",
-                    color: "white",
-                    textDecoration: "none",
-                  }}
-                >
-                  ⬇ Descargar PDF
-                </a>
-              </div>
-            )}
+            {/* Visor que renderiza el PDF como canvas (PDF.js de Mozilla).
+                Esquiva extensiones tipo TeraBox que interceptan archivos PDF. */}
+            <PdfCanvasViewer url={pdfPreview.url} pageWidth={900} />
           </div>
         </div>
       )}
