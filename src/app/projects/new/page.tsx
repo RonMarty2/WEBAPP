@@ -630,15 +630,24 @@ function NuevoProyectoPageInner() {
               </p>
             </div>
 
-            {/* Grid responsivo: 2 columnas en desktop, 1 en mobile */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                gap: 16,
-                marginBottom: 24,
-              }}
-            >
+            {/* Grid responsivo: 2 columnas en desktop, 1 en mobile.
+                Usamos clase + media query inline para forzar el breakpoint
+                (auto-fit con minmax 320px se colapsaba a 1 col si el
+                contenedor padre es chico). */}
+            <style>{`
+              .umss-variant-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 16px;
+                margin-bottom: 24px;
+              }
+              @media (min-width: 720px) {
+                .umss-variant-grid {
+                  grid-template-columns: 1fr 1fr;
+                }
+              }
+            `}</style>
+            <div className="umss-variant-grid">
               {cap1Variantes.map((v) => {
                 const seleccionada = cap1VarianteId === v.id;
                 const esGuia1 = v.guia_oficial?.formato_umss === "guia_1_posgrado";
@@ -752,13 +761,18 @@ function NuevoProyectoPageInner() {
                       </div>
 
                       {/* Botón: Ver guía oficial (PDF) — el estudiante puede
-                          confirmar visualmente si es el formato que pide su diplomado */}
+                          confirmar visualmente si es el formato que pide su diplomado.
+                          Usamos window.open en onClick (no <a target=_blank>) para
+                          evitar el bloqueo de popups que abre about:blank cuando el
+                          anchor está dentro de un contenedor clickeable. */}
                       {v.guia_oficial?.url_documento_pdf && (
-                        <a
-                          href={v.guia_oficial.url_documento_pdf}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const url = v.guia_oficial!.url_documento_pdf!;
+                            window.open(url, "_blank", "noopener,noreferrer");
+                          }}
                           style={{
                             display: "flex",
                             alignItems: "center",
@@ -768,11 +782,12 @@ function NuevoProyectoPageInner() {
                             background: "white",
                             border: `1.5px solid ${colorGuia}`,
                             color: colorGuia,
-                            textDecoration: "none",
                             fontWeight: 700,
                             fontSize: 12.5,
                             transition: "all 0.15s",
                             cursor: "pointer",
+                            textAlign: "left",
+                            width: "100%",
                           }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.background = bgGuia;
@@ -784,7 +799,7 @@ function NuevoProyectoPageInner() {
                           <span style={{ fontSize: 16 }}>📄</span>
                           <span style={{ flex: 1 }}>Ver guía oficial (PDF)</span>
                           <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7 }}>↗</span>
-                        </a>
+                        </button>
                       )}
 
                       {/* Características clave de la guía */}
