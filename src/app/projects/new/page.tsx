@@ -1191,12 +1191,69 @@ function NuevoProyectoPageInner() {
                 Cerrar ✕
               </button>
             </div>
-            {/* Iframe con el PDF */}
-            <iframe
-              src={pdfPreview.url}
-              title={pdfPreview.titulo}
-              style={{ flex: 1, width: "100%", border: 0, background: "#525659" }}
-            />
+            {/* Visor del PDF: object es más compatible que iframe y permite
+                fallback gracioso si el navegador no puede renderizarlo
+                (ej. extensiones como TeraBox que interceptan PDFs). */}
+            <object
+              data={pdfPreview.url}
+              type="application/pdf"
+              style={{ flex: 1, width: "100%", background: "#525659" }}
+            >
+              <div
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 16,
+                  padding: 32,
+                  textAlign: "center",
+                  background: "#f8fafc",
+                }}
+              >
+                <div style={{ fontSize: 48 }}>📄</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: "#0f172a" }}>
+                  Tu navegador no puede previsualizar el PDF
+                </div>
+                <div style={{ fontSize: 13, color: "#475569", maxWidth: 480, lineHeight: 1.6 }}>
+                  Suele pasar si tenés una extensión instalada que intercepta archivos PDF
+                  (como TeraBox, Adobe, etc.). Usá el botón <strong>⬇ Descargar</strong> de arriba
+                  para abrirlo con el visor de tu sistema.
+                </div>
+                <a
+                  href={pdfPreview.url}
+                  download
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 700,
+                    padding: "10px 20px",
+                    borderRadius: 8,
+                    background: "#2563eb",
+                    color: "white",
+                    textDecoration: "none",
+                  }}
+                >
+                  ⬇ Descargar PDF
+                </a>
+              </div>
+            </object>
+            {/* Aviso flotante de TeraBox/extensiones (siempre visible) */}
+            <div
+              style={{
+                padding: "8px 16px",
+                background: "#fef3c7",
+                borderTop: "1px solid #fde68a",
+                fontSize: 11.5,
+                color: "#92400e",
+                textAlign: "center",
+                lineHeight: 1.5,
+              }}
+            >
+              💡 Si no ves el PDF: tu navegador puede tener una extensión interceptando archivos
+              (TeraBox, etc.). Usá <strong>⬇ Descargar</strong> o probá en una <strong>ventana de
+              incógnito</strong>.
+            </div>
           </div>
         </div>
       )}
