@@ -308,8 +308,10 @@ export default function GeneratingState({ phaseId, phaseLabel }: Props) {
 
 /** Partículas SVG orbitando sobre el núcleo central. */
 function ParticleOrbit() {
-  // 12 partículas distribuidas en 3 órbitas concéntricas
-  const particles = useMemo(() => {
+  // 12 partículas distribuidas en 3 órbitas concéntricas.
+  // Lazy init con useState para evitar react-hooks/purity (Math.random
+  // durante render). Se computa UNA vez por mount, igual que con useMemo.
+  const [particles] = useState(() => {
     const arr: Array<{ orbit: number; angle: number; size: number; duration: number; color: string }> = [];
     const colors = ["rgba(99,102,241,0.9)", "rgba(167,139,250,0.9)", "rgba(34,211,238,0.85)", "rgba(244,114,182,0.85)"];
     for (let orbit = 0; orbit < 3; orbit++) {
@@ -325,7 +327,7 @@ function ParticleOrbit() {
       }
     }
     return arr;
-  }, []);
+  });
 
   const radii = [110, 160, 220];
 

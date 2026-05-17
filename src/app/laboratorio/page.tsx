@@ -12,7 +12,11 @@ function LaboratorioContent() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const projectId = params.get("projectId") || `proj_${Date.now().toString(36)}`;
+  // IDs de fallback estables por mount (lazy init evita react-hooks/purity).
+  const [fallbackProjectId] = useState(() => `proj_${Date.now().toString(36)}`);
+  const [userId] = useState(() => `user-${Date.now().toString(36)}`);
+
+  const projectId = params.get("projectId") || fallbackProjectId;
   const plan = params.get("plan") || "demo";
   const universityId = params.get("university") || "";
   const universityName = params.get("universityName") || "Universidad";
@@ -31,8 +35,6 @@ function LaboratorioContent() {
   const [showPreview, setShowPreview] = useState(false);
   const [savedStep, setSavedStep] = useState(-1);
   const [toast, setToast] = useState("");
-
-  const userId = `user-${Date.now().toString(36)}`;
   const currentSection = SECTION_STEPS[currentStep];
   const isStepSaved = savedStep >= currentStep;
   const canAdvance = sections[currentSection?.key] && sections[currentSection?.key].length > 0;

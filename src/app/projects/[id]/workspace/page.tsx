@@ -599,13 +599,11 @@ export default function WorkspacePage() {
 
   // Aplica el zoom al contenido del iframe del preview (panel y fullscreen).
   // Usa CSS `zoom` que respeta tipografía y márgenes, soportado en navegadores modernos.
+  // setProperty() en vez de asignación directa evita react-hooks/immutability.
   useEffect(() => {
     const refs = [previewIframeRef.current, previewIframeFsRef.current];
     for (const ref of refs) {
-      const doc = ref?.contentDocument;
-      if (doc?.body) {
-        (doc.body.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(previewZoom);
-      }
+      ref?.contentDocument?.body?.style.setProperty("zoom", String(previewZoom));
     }
   }, [previewZoom]);
 
@@ -2586,8 +2584,7 @@ export default function WorkspacePage() {
                   title="Vista previa del documento final"
                   srcDoc={docHtml}
                   onLoad={() => {
-                    const doc = previewIframeRef.current?.contentDocument;
-                    if (doc?.body) (doc.body.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(previewZoom);
+                    previewIframeRef.current?.contentDocument?.body?.style.setProperty("zoom", String(previewZoom));
                   }}
                   style={{ width:"100%", height:"100%", border:0, display:"block", background:"#eef0f3" }}
                 />
@@ -2806,8 +2803,7 @@ export default function WorkspacePage() {
               title="Vista previa fullscreen"
               srcDoc={docHtml}
               onLoad={() => {
-                const doc = previewIframeFsRef.current?.contentDocument;
-                if (doc?.body) (doc.body.style as CSSStyleDeclaration & { zoom?: string }).zoom = String(previewZoom);
+                previewIframeFsRef.current?.contentDocument?.body?.style.setProperty("zoom", String(previewZoom));
               }}
               style={{ width:"100%", height:"100%", border:0, display:"block", background:"#eef0f3" }}
             />

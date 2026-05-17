@@ -1,24 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 
-export default function ParticleBackground() {
-  const colors = [
-    "rgba(139, 92, 246, 0.8)",
-    "rgba(168, 85, 247, 0.75)",
-    "rgba(147, 112, 219, 0.75)",
-    "rgba(186, 85, 211, 0.7)",
-    "rgba(123, 104, 238, 0.75)",
-  ];
+const COLORS = [
+  "rgba(139, 92, 246, 0.8)",
+  "rgba(168, 85, 247, 0.75)",
+  "rgba(147, 112, 219, 0.75)",
+  "rgba(186, 85, 211, 0.7)",
+  "rgba(123, 104, 238, 0.75)",
+];
 
-  // Crear partículas distribuidas uniformemente en una grid
-  const particles = Array.from({ length: 16 }, (_, i) => {
+function generarParticulas() {
+  return Array.from({ length: 16 }, (_, i) => {
     const cols = 4;
     const rows = 4;
     const col = i % cols;
     const row = Math.floor(i / cols);
 
-    // Distribuir en grid 4x4 con variación random
+    // Distribuir en grid 4x4 con variación random (solo una vez por mount).
     const baseX = (col / cols) * 100 + 12.5;
     const baseY = (row / rows) * 100 + 12.5;
     const x = baseX + (Math.random() - 0.5) * 20;
@@ -29,11 +29,17 @@ export default function ParticleBackground() {
       x: Math.max(5, Math.min(95, x)),
       y: Math.max(5, Math.min(95, y)),
       size: 150 + Math.random() * 200,
-      color: colors[i % colors.length],
+      color: COLORS[i % COLORS.length],
       duration: 18 + Math.random() * 14,
       delay: (i % 4) * 0.5,
     };
   });
+}
+
+export default function ParticleBackground() {
+  // Lazy init: las partículas se generan UNA vez por mount, no en cada render.
+  // Evita la regla react-hooks/purity (Math.random durante render).
+  const [particles] = useState(generarParticulas);
 
   return (
     <div
