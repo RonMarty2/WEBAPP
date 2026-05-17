@@ -574,17 +574,26 @@ export default function WorkspacePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [genElapsed, setGenElapsed] = useState(0);
 
-  // 🎯 Sistema de revisión con preview obligatorio antes de aplicar:
-  // El usuario debe pedir UNA observación a la vez. Mientras la IA analiza
-  // y mientras hay un diff pendiente de aprobar, el input queda BLOQUEADO
-  // (candado visible) para que no se envíen 2 observaciones a la vez.
+  // 🎯 Sistema de revisión con ANALIZADOR DE PERTINENCIA + preview obligatorio:
+  // 1. El usuario pega UNA observación del tutor
+  // 2. El analizador IA decide: aplicar / aplicar_con_reserva / rechazar
+  // 3. Según el veredicto se muestra:
+  //    - aplicar  → modal DiffPreview (puede aprobar o cancelar)
+  //    - aplicar_con_reserva → modal DiffPreview con warning amarillo
+  //    - rechazar → modal con la justificación argumentada (NO diff)
+  // 4. El input queda bloqueado durante todo el flujo.
   type RevisionStatus = "idle" | "loading" | "preview" | "applying";
   interface RevisionPreviewData {
+    observacionId: string | null;
     phaseId: string;
     phaseLabel: string;
     mensajeUsuario: string;
+    decision: "aplicar" | "aplicar_con_reserva" | "rechazar";
+    patronDetectado: string;
+    analisisIa: string;
+    justificacionParaTutor: string | null;
     contenidoActual: string;
-    contenidoPropuesto: string;
+    contenidoPropuesto: string | null;
   }
   const [revisionStatus, setRevisionStatus] = useState<RevisionStatus>("idle");
   const [revisionPreview, setRevisionPreview] = useState<RevisionPreviewData | null>(null);
@@ -1059,29 +1068,33 @@ export default function WorkspacePage() {
     setRevisionError(null);
 
     try {
-      const res = await fetch("/api/projects/edit-phase-section", {
+      // Llama al ANALIZADOR DE PERTINENCIA (no aplica nada todavía).
+      // Devuelve veredicto: aplicar / aplicar_con_reserva / rechazar.
+      const res = await fetch(`/api/projects/${proyecto.id}/analizar-observacion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          proyecto_id: proyecto.id,
           phase_id: faseDef.id,
-          mensaje_usuario: mensaje,
-          modo: "preview",
-          tipo_edicion: "reformular",
+          observacion: mensaje,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setRevisionError(data.error ?? "Error al pedir vista previa");
+        setRevisionError(data.error ?? "Error al analizar la observación");
         setRevisionStatus("idle");
         return;
       }
       setRevisionPreview({
+        observacionId: data.observacion_id ?? null,
         phaseId: faseDef.id,
-        phaseLabel: faseDef.label ?? faseDef.id,
+        phaseLabel: data.fase_label ?? faseDef.label ?? faseDef.id,
         mensajeUsuario: mensaje,
+        decision: data.decision,
+        patronDetectado: data.patron_detectado ?? "",
+        analisisIa: data.analisis_ia ?? "",
+        justificacionParaTutor: data.justificacion_para_tutor ?? null,
         contenidoActual: data.contenido_actual ?? "",
-        contenidoPropuesto: data.contenido_propuesto ?? "",
+        contenidoPropuesto: data.contenido_propuesto ?? null,
       });
       setRevisionStatus("preview");
     } catch (e) {
@@ -1092,6 +1105,26 @@ export default function WorkspacePage() {
 
   const aplicarRevision = useCallback(async () => {
     if (!proyecto || !revisionPreview || revisionStatus !== "preview") return;
+    // Si la decisión fue rechazar, "aplicar" no tiene sentido (no hay cambio
+    // que ejecutar). En ese caso solo cerramos el modal y la observación
+    // queda registrada en el banco con la justificación para defender ante
+    // el tutor.
+    if (revisionPreview.decision === "rechazar" || !revisionPreview.contenidoPropuesto) {
+      setChatMsgs((prev) => [
+        ...prev,
+        { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
+        {
+          role: "assistant",
+          text: `🛡️ Observación analizada y registrada en tu Bitácora del Tutor. Decisión: NO aplicar. Tienes una respuesta argumentada lista para defender ante tu tutor.`,
+          ts: Date.now(),
+        },
+      ]);
+      setRevisionPreview(null);
+      setRevisionStatus("idle");
+      setChatInput("");
+      return;
+    }
+
     setRevisionStatus("applying");
     setRevisionError(null);
 
@@ -1118,11 +1151,22 @@ export default function WorkspacePage() {
       }
       // Actualizar el state local
       setProyecto((prev) => (prev ? { ...prev, ...data.proyecto } : prev));
+      // Marcar en el banco como aplicada (fire-and-forget, no bloquea)
+      if (revisionPreview.observacionId) {
+        fetch(`/api/projects/${proyecto.id}/observaciones-banco/${revisionPreview.observacionId}/aplicada`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contenido_despues: revisionPreview.contenidoPropuesto }),
+        }).catch(() => { /* silent */ });
+      }
       // Agregar al historial del chat
+      const labelDecision = revisionPreview.decision === "aplicar_con_reserva"
+        ? "✅ Ajuste aplicado (con reserva)"
+        : "✅ Ajuste aplicado";
       setChatMsgs((prev) => [
         ...prev,
         { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
-        { role: "assistant", text: `✅ Ajuste aplicado en ${revisionPreview.phaseLabel}.`, ts: Date.now() },
+        { role: "assistant", text: `${labelDecision} en ${revisionPreview.phaseLabel}.`, ts: Date.now() },
       ]);
       // Limpiar estado y desbloquear input
       setRevisionPreview(null);
@@ -2939,75 +2983,221 @@ export default function WorkspacePage() {
       {/* 🛠️ Toggle admin/estudiante — visible para admin, cuentas demo/test y localhost dev */}
       <AdminViewToggle isAdmin={puedeVerToggle} />
 
-      {/* ── MODAL: DiffPreview de la revisión propuesta por la IA ───────────── */}
-      {revisionStatus === "preview" && revisionPreview && (
-        <div
-          onClick={(e) => { if (e.target === e.currentTarget) cancelarRevision(); }}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 1200,
-            background: "rgba(15,23,42,0.75)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-        >
+      {/* ── MODAL: Veredicto del Analizador de Pertinencia ─────────────────── */}
+      {revisionStatus === "preview" && revisionPreview && (() => {
+        const isAplicar = revisionPreview.decision === "aplicar";
+        const isReserva = revisionPreview.decision === "aplicar_con_reserva";
+        const isRechazar = revisionPreview.decision === "rechazar";
+        const decisionColor = isAplicar ? "#16a34a"  // verde
+                            : isReserva ? "#d97706"  // ámbar
+                            : "#dc2626";              // rojo
+        const decisionBg = isAplicar ? "rgba(22,163,74,0.08)"
+                         : isReserva ? "rgba(217,119,6,0.08)"
+                         : "rgba(220,38,38,0.08)";
+        const decisionLabel = isAplicar ? "✅ APLICAR"
+                            : isReserva ? "⚠️ APLICAR CON RESERVA"
+                            : "🛡️ NO APLICAR — Justificación lista para el tutor";
+        const ctaLabel = isRechazar ? "Guardar en Bitácora del Tutor"
+                       : isReserva ? "Aplicar con reserva"
+                       : "Aplicar cambio";
+
+        return (
           <div
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => { if (e.target === e.currentTarget) cancelarRevision(); }}
             style={{
-              width: "100%",
-              maxWidth: 1100,
-              height: "88vh",
-              background: "white",
-              borderRadius: 14,
-              boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
+              position: "fixed",
+              inset: 0,
+              zIndex: 1200,
+              background: "rgba(15,23,42,0.75)",
+              backdropFilter: "blur(4px)",
               display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 20,
             }}
           >
-            {/* Header con info de la observación */}
-            <div style={{
-              padding: "14px 20px",
-              borderBottom: "1px solid rgba(0,0,0,0.08)",
-              background: "#f8fafc",
-            }}>
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: "100%",
+                maxWidth: 1100,
+                maxHeight: "92vh",
+                background: "white",
+                borderRadius: 14,
+                boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
+              {/* Header con veredicto */}
               <div style={{
-                fontSize: 11,
-                color: "var(--accent)",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-                marginBottom: 4,
+                padding: "16px 20px",
+                borderBottom: "1px solid rgba(0,0,0,0.08)",
+                background: decisionBg,
               }}>
-                Revisión propuesta · {revisionPreview.phaseLabel}
+                <div style={{
+                  fontSize: 11,
+                  color: decisionColor,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  marginBottom: 4,
+                }}>
+                  Análisis de pertinencia · {revisionPreview.phaseLabel}
+                </div>
+                <div style={{
+                  fontSize: 17,
+                  fontWeight: 800,
+                  color: decisionColor,
+                  marginBottom: 8,
+                }}>
+                  {decisionLabel}
+                </div>
+                <div style={{
+                  fontSize: 12.5,
+                  color: "var(--fg-secondary)",
+                  fontStyle: "italic",
+                  lineHeight: 1.5,
+                  marginBottom: 8,
+                }}>
+                  Observación del tutor: &ldquo;{revisionPreview.mensajeUsuario}&rdquo;
+                </div>
+                <div style={{
+                  fontSize: 12,
+                  color: "var(--fg-primary)",
+                  background: "white",
+                  padding: "8px 12px",
+                  borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.08)",
+                  lineHeight: 1.5,
+                }}>
+                  <strong>🤖 Análisis IA:</strong> {revisionPreview.analisisIa}
+                </div>
               </div>
-              <div style={{
-                fontSize: 12.5,
-                color: "var(--fg-secondary)",
-                fontStyle: "italic",
-                lineHeight: 1.5,
-              }}>
-                Observación: &ldquo;{revisionPreview.mensajeUsuario}&rdquo;
-              </div>
-            </div>
 
-            <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-              <DiffPreview
-                contenidoActual={revisionPreview.contenidoActual}
-                contenidoPropuesto={revisionPreview.contenidoPropuesto}
-                onAplicar={aplicarRevision}
-                onCancelar={cancelarRevision}
-                aplicando={(revisionStatus as RevisionStatus) === "applying"}
-                titulo={`Cambios en ${revisionPreview.phaseLabel}`}
-              />
+              {/* Cuerpo: diff (si aplicar/reserva) o justificación (si rechazar) */}
+              <div style={{ flex: 1, overflow: "auto", display: "flex", flexDirection: "column" }}>
+                {isRechazar ? (
+                  <div style={{ padding: 24, maxWidth: 800, margin: "0 auto" }}>
+                    <div style={{
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: "var(--fg-muted)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      marginBottom: 10,
+                    }}>
+                      💬 Respuesta argumentada para tu tutor
+                    </div>
+                    <div style={{
+                      padding: 20,
+                      background: "var(--bg-base)",
+                      border: "1.5px solid rgba(15,23,42,0.18)",
+                      borderRadius: 12,
+                      fontSize: 14,
+                      lineHeight: 1.65,
+                      color: "var(--fg-primary)",
+                      whiteSpace: "pre-wrap",
+                    }}>
+                      {revisionPreview.justificacionParaTutor ?? "—"}
+                    </div>
+                    <div style={{
+                      marginTop: 16,
+                      padding: 12,
+                      background: "rgba(99,102,241,0.06)",
+                      border: "1px dashed rgba(99,102,241,0.3)",
+                      borderRadius: 8,
+                      fontSize: 12,
+                      color: "var(--fg-muted)",
+                      lineHeight: 1.5,
+                    }}>
+                      💡 Puedes copiar este texto y enviárselo al tutor. Esta observación
+                      queda registrada en tu <strong>Bitácora del Tutor</strong> para
+                      defender tu decisión académica.
+                    </div>
+                  </div>
+                ) : revisionPreview.contenidoPropuesto ? (
+                  <>
+                    {isReserva && (
+                      <div style={{
+                        margin: "16px 20px 0",
+                        padding: 12,
+                        background: "rgba(217,119,6,0.08)",
+                        border: "1px solid rgba(217,119,6,0.3)",
+                        borderRadius: 8,
+                        fontSize: 12.5,
+                        color: "#92400e",
+                        lineHeight: 1.5,
+                      }}>
+                        ⚠️ <strong>Aplicar con reserva:</strong> el cambio se ejecuta pero la
+                        IA detectó que tiene caveats. Revisa el análisis arriba antes de aprobar.
+                      </div>
+                    )}
+                    <DiffPreview
+                      contenidoActual={revisionPreview.contenidoActual}
+                      contenidoPropuesto={revisionPreview.contenidoPropuesto}
+                      onAplicar={aplicarRevision}
+                      onCancelar={cancelarRevision}
+                      aplicando={(revisionStatus as RevisionStatus) === "applying"}
+                      titulo={`Cambios en ${revisionPreview.phaseLabel}`}
+                    />
+                  </>
+                ) : (
+                  <div style={{ padding: 24, textAlign: "center", color: "var(--fg-muted)" }}>
+                    Sin propuesta de cambio disponible.
+                  </div>
+                )}
+              </div>
+
+              {/* Footer SOLO si rechazo (DiffPreview ya tiene sus propios botones) */}
+              {isRechazar && (
+                <div style={{
+                  padding: "14px 20px",
+                  borderTop: "1px solid rgba(0,0,0,0.08)",
+                  display: "flex",
+                  gap: 10,
+                  justifyContent: "flex-end",
+                  background: "var(--bg-base)",
+                }}>
+                  <button
+                    type="button"
+                    onClick={cancelarRevision}
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      padding: "10px 18px",
+                      borderRadius: 8,
+                      background: "white",
+                      border: "1px solid rgba(15,23,42,0.22)",
+                      color: "var(--fg-secondary)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Cerrar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={aplicarRevision}
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 700,
+                      padding: "10px 20px",
+                      borderRadius: 8,
+                      background: decisionColor,
+                      color: "white",
+                      border: "none",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {ctaLabel}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Modal fullscreen del preview */}
       {previewFullscreen && docHtml && (
