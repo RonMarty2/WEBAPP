@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { SessionUser } from "@/lib/auth";
 import GlassModal from "@/components/ui/GlassModal";
 import ThemeToggle from "@/components/ThemeToggle";
+import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
 
 interface Proyecto {
   id: string;
@@ -117,10 +118,13 @@ export default function DashboardPage() {
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)" }}>{user.name}</div>
               <div style={{ fontSize: 12, color: "var(--fg-muted)", display: "flex", alignItems: "center", gap: 6 }}>
                 <span>{user.email}</span>
-                {user.plan && (
+                {user.plan && user.role !== "admin" && (
                   <span className={`badge ${user.plan === "pro" ? "badge-purple" : "badge-cyan"}`} style={{ fontSize: 10 }}>
                     {user.plan.toUpperCase()}
                   </span>
+                )}
+                {user.role === "admin" && (
+                  <AdminPlanSwitcher currentPlan={user.plan ?? "pro"} />
                 )}
               </div>
             </div>

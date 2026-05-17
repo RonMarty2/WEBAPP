@@ -14,6 +14,37 @@ function LoginContent() {
   const [demoPlan, setDemoPlan] = useState<"estandar" | "pro">("estandar");
   const [loading, setLoading] = useState(false);
 
+  // ── Admin login (real, con email + password del .env) ─────────────────
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
+  const [adminPlan, setAdminPlan] = useState<"estandar" | "pro" | "elite">("pro");
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [adminLoading, setAdminLoading] = useState(false);
+
+  async function handleAdminLogin() {
+    setAdminLoading(true);
+    setAdminError(null);
+    try {
+      const res = await fetch("/api/auth/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: adminEmail.trim(), password: adminPassword, plan: adminPlan }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setAdminError(data?.error ?? "Error al iniciar sesión");
+        setAdminLoading(false);
+        return;
+      }
+      router.push("/dashboard");
+      router.refresh();
+    } catch (e) {
+      setAdminError(e instanceof Error ? e.message : "Error de red");
+      setAdminLoading(false);
+    }
+  }
+
   const errorMsg =
     error === "oauth_failed" ? "Error al conectar con Google. Intenta nuevamente."
     : error === "profile_failed" ? "No se pudo obtener tu perfil de Google."
@@ -105,6 +136,110 @@ function LoginContent() {
           </div>
 
           {/* Divisor */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
+            <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>o</span>
+            <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
+          </div>
+
+          {/* Admin login (real, con email + password) */}
+          <div>
+            <p style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+              🔐 Acceso administrador
+            </p>
+
+            {!showAdmin ? (
+              <button
+                onClick={() => setShowAdmin(true)}
+                style={{
+                  width: "100%", padding: "12px", borderRadius: 10,
+                  border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.06)",
+                  color: "#7c3aed", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                }}
+              >
+                🛠️ Soy admin (email + contraseña)
+              </button>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <input
+                  type="email"
+                  placeholder="Tu email admin (ej. tu@email.com)"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  autoComplete="email"
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border-hover)",
+                    background: "rgba(255,255,255,0.9)",
+                    fontSize: 14,
+                    color: "var(--fg-primary)",
+                  }}
+                />
+                <input
+                  type="password"
+                  placeholder="Contraseña admin"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  autoComplete="current-password"
+                  onKeyDown={(e) => { if (e.key === "Enter") handleAdminLogin(); }}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 8,
+                    border: "1px solid var(--border-hover)",
+                    background: "rgba(255,255,255,0.9)",
+                    fontSize: 14,
+                    color: "var(--fg-primary)",
+                  }}
+                />
+                <div>
+                  <label style={{ fontSize: 11.5, color: "var(--fg-muted)", display: "block", marginBottom: 4 }}>
+                    Entrar como plan: <span style={{ color: "#7c3aed", fontWeight: 600 }}>(podés cambiarlo después sin perder proyectos)</span>
+                  </label>
+                  <select
+                    value={adminPlan}
+                    onChange={(e) => setAdminPlan(e.target.value as "estandar" | "pro" | "elite")}
+                    style={{ ...selectStyle, width: "100%" }}
+                  >
+                    <option value="estandar">⭐ Estándar (limitado, sin edición)</option>
+                    <option value="pro">🚀 Pro (recomendado, edición quirúrgica)</option>
+                    <option value="elite">💎 Elite (máximo, 16K tokens)</option>
+                  </select>
+                </div>
+
+                {adminError && (
+                  <div style={{ fontSize: 12, color: "#b91c1c", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, padding: "8px 10px" }}>
+                    ❌ {adminError}
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 10 }}>
+                  <button
+                    onClick={() => { setShowAdmin(false); setAdminError(null); }}
+                    style={{ padding: "10px 16px", borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--fg-muted)", fontSize: 13, cursor: "pointer" }}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={handleAdminLogin}
+                    disabled={adminLoading || !adminEmail.trim() || !adminPassword}
+                    style={{
+                      flex: 1, padding: "10px", borderRadius: 8,
+                      background: "rgba(124,58,237,0.15)", border: "1px solid rgba(124,58,237,0.4)",
+                      color: "#7c3aed", fontWeight: 700, fontSize: 14,
+                      cursor: adminLoading ? "not-allowed" : "pointer",
+                      opacity: (adminLoading || !adminEmail.trim() || !adminPassword) ? 0.5 : 1,
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    }}
+                  >
+                    {adminLoading ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Entrando…</> : "Entrar como admin →"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Divisor admin/demo */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
             <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>o</span>
