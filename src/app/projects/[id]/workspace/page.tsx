@@ -5,6 +5,7 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
+import DiffPreview from "@/components/DiffPreview";
 import BibliografiaInsights from "@/components/scribe/BibliografiaInsights";
 import ResumenInsights from "@/components/scribe/ResumenInsights";
 import CalidadInsights from "@/components/scribe/CalidadInsights";
@@ -572,6 +573,22 @@ export default function WorkspacePage() {
   const [chatInput, setChatInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [genElapsed, setGenElapsed] = useState(0);
+
+  // 🎯 Sistema de revisión con preview obligatorio antes de aplicar:
+  // El usuario debe pedir UNA observación a la vez. Mientras la IA analiza
+  // y mientras hay un diff pendiente de aprobar, el input queda BLOQUEADO
+  // (candado visible) para que no se envíen 2 observaciones a la vez.
+  type RevisionStatus = "idle" | "loading" | "preview" | "applying";
+  interface RevisionPreviewData {
+    phaseId: string;
+    phaseLabel: string;
+    mensajeUsuario: string;
+    contenidoActual: string;
+    contenidoPropuesto: string;
+  }
+  const [revisionStatus, setRevisionStatus] = useState<RevisionStatus>("idle");
+  const [revisionPreview, setRevisionPreview] = useState<RevisionPreviewData | null>(null);
+  const [revisionError, setRevisionError] = useState<string | null>(null);
   const [showPagsDetail, setShowPagsDetail] = useState(false);
   // Modos del preview derecho: "fase" muestra solo el capítulo actual, "completo" todo el documento.
   const [previewMode, setPreviewMode] = useState<"fase" | "completo">("fase");
@@ -1019,6 +1036,110 @@ export default function WorkspacePage() {
       setSelectedFase(selectedFase + 1);
     }
   }, [proyecto, isGenerating, displayFases, selectedFase, isDynamic]);
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // ── FLUJO DE REVISIÓN CON PREVIEW OBLIGATORIO ─────────────────────────────
+  // ──────────────────────────────────────────────────────────────────────────
+  // Cuando el usuario pega UNA observación del tutor, se ejecuta este flujo:
+  //   1. pedirRevisionConPreview → llama /api/projects/edit-phase-section
+  //      con modo=preview → devuelve contenido propuesto SIN persistir.
+  //   2. Mientras procesa, input bloqueado con candado 🔒.
+  //   3. Modal con DiffPreview se abre mostrando el diff línea por línea.
+  //   4. Usuario aprueba → aplicarRevision PATCH directo al proyecto (sin
+  //      llamar a IA otra vez — usa el contenido del preview).
+  //   5. Usuario cancela → cancelarRevision libera el input.
+  // ──────────────────────────────────────────────────────────────────────────
+
+  const pedirRevisionConPreview = useCallback(async (mensaje: string) => {
+    if (!proyecto || revisionStatus !== "idle") return;
+    const faseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
+    if (!faseDef?.id) return;
+
+    setRevisionStatus("loading");
+    setRevisionError(null);
+
+    try {
+      const res = await fetch("/api/projects/edit-phase-section", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proyecto_id: proyecto.id,
+          phase_id: faseDef.id,
+          mensaje_usuario: mensaje,
+          modo: "preview",
+          tipo_edicion: "reformular",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRevisionError(data.error ?? "Error al pedir vista previa");
+        setRevisionStatus("idle");
+        return;
+      }
+      setRevisionPreview({
+        phaseId: faseDef.id,
+        phaseLabel: faseDef.label ?? faseDef.id,
+        mensajeUsuario: mensaje,
+        contenidoActual: data.contenido_actual ?? "",
+        contenidoPropuesto: data.contenido_propuesto ?? "",
+      });
+      setRevisionStatus("preview");
+    } catch (e) {
+      setRevisionError(e instanceof Error ? e.message : "Error de red");
+      setRevisionStatus("idle");
+    }
+  }, [proyecto, revisionStatus, displayFases, selectedFase]);
+
+  const aplicarRevision = useCallback(async () => {
+    if (!proyecto || !revisionPreview || revisionStatus !== "preview") return;
+    setRevisionStatus("applying");
+    setRevisionError(null);
+
+    try {
+      // PATCH directo al proyecto sin llamar a IA otra vez (ahorra tokens).
+      const currentPhaseContents = (proyecto as unknown as { phase_contents?: Record<string, string | null> }).phase_contents ?? {};
+      const nuevoPhaseContents = {
+        ...currentPhaseContents,
+        [revisionPreview.phaseId]: revisionPreview.contenidoPropuesto,
+      };
+      const res = await fetch(`/api/projects/${proyecto.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phase_contents: nuevoPhaseContents,
+          final_document: null, // invalidar consolidado, hay que regenerar
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setRevisionError(data.error ?? "Error al aplicar la corrección");
+        setRevisionStatus("preview");
+        return;
+      }
+      // Actualizar el state local
+      setProyecto((prev) => (prev ? { ...prev, ...data.proyecto } : prev));
+      // Agregar al historial del chat
+      setChatMsgs((prev) => [
+        ...prev,
+        { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
+        { role: "assistant", text: `✅ Ajuste aplicado en ${revisionPreview.phaseLabel}.`, ts: Date.now() },
+      ]);
+      // Limpiar estado y desbloquear input
+      setRevisionPreview(null);
+      setRevisionStatus("idle");
+      setChatInput("");
+    } catch (e) {
+      setRevisionError(e instanceof Error ? e.message : "Error de red");
+      setRevisionStatus("preview");
+    }
+  }, [proyecto, revisionPreview, revisionStatus]);
+
+  const cancelarRevision = useCallback(() => {
+    // El input mantiene su texto para que el usuario pueda editarlo y reintentar.
+    setRevisionPreview(null);
+    setRevisionStatus("idle");
+    setRevisionError(null);
+  }, []);
 
   // ── Revertir a la versión anterior (deshacer cambios) ────────────────────
   // Restaura el contenido guardado en *_anterior cuando el usuario aplicó
@@ -2252,21 +2373,79 @@ export default function WorkspacePage() {
                 marginBottom: displayContent ? 8 : 0,
               }}
             >
+              {/* Header con label dinámico según status. Cuando hay revisión
+                  en curso, el badge cambia para que el usuario VEA que está
+                  bloqueado. */}
               <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6 }}>
-                <span style={{ fontSize:10, color:"var(--fg-secondary)", padding:"4px 10px", border:"1px solid rgba(148,163,184,0.35)", borderRadius:999, background:"rgba(255,255,255,0.85)" }}>
-                  Revision / cambios
+                <span style={{
+                  fontSize:10,
+                  color: revisionStatus === "idle" ? "var(--fg-secondary)" : "var(--accent)",
+                  padding:"4px 10px",
+                  border: revisionStatus === "idle"
+                    ? "1px solid rgba(148,163,184,0.35)"
+                    : "1px solid rgba(99,102,241,0.4)",
+                  borderRadius:999,
+                  background: revisionStatus === "idle"
+                    ? "rgba(255,255,255,0.85)"
+                    : "rgba(99,102,241,0.08)",
+                  fontWeight: revisionStatus === "idle" ? 400 : 700,
+                }}>
+                  {revisionStatus === "loading" && "🤖 Analizando…"}
+                  {revisionStatus === "preview" && "🔒 Revisa el cambio propuesto"}
+                  {revisionStatus === "applying" && "💾 Aplicando…"}
+                  {revisionStatus === "idle" && "Revisión / cambios — UNA observación a la vez"}
                 </span>
-                <span style={{ fontSize:10, color:"var(--fg-secondary)" }}>Ctrl+Enter para enviar</span>
+                <span style={{ fontSize:10, color:"var(--fg-secondary)" }}>
+                  {revisionStatus === "idle" ? "Ctrl+Enter para enviar" : "Esperá…"}
+                </span>
               </div>
 
-              <div style={{ display:"flex", gap:8, alignItems:"flex-end" }}>
+              {/* Mensaje informativo si el input está bloqueado */}
+              {revisionStatus !== "idle" && (
+                <div style={{
+                  fontSize: 10.5,
+                  color: "var(--fg-muted)",
+                  background: "rgba(99,102,241,0.05)",
+                  border: "1px dashed rgba(99,102,241,0.25)",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  marginBottom: 8,
+                  fontStyle: "italic",
+                }}>
+                  💡 No envíes otra observación hasta que apruebes o canceles el cambio propuesto.
+                </div>
+              )}
+
+              {revisionError && (
+                <div style={{
+                  fontSize: 11,
+                  color: "#b91c1c",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.25)",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  marginBottom: 8,
+                }}>
+                  ❌ {revisionError}
+                </div>
+              )}
+
+              <div style={{ display:"flex", gap:8, alignItems:"flex-end", opacity: revisionStatus !== "idle" ? 0.55 : 1 }}>
                 <textarea
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
-                  onKeyDown={e => { if (e.key==="Enter" && (e.ctrlKey||e.metaKey) && chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }}
-                  placeholder="Ej: El tutor pide reforzar marco teorico con 2 autores latinoamericanos y mejorar conclusiones..."
+                  onKeyDown={e => {
+                    if (e.key==="Enter" && (e.ctrlKey||e.metaKey) && chatInput.trim() && revisionStatus === "idle") {
+                      pedirRevisionConPreview(chatInput.trim());
+                    }
+                  }}
+                  placeholder={
+                    revisionStatus === "idle"
+                      ? "Ej: El tutor pide reforzar el marco teórico con 2 autores latinoamericanos…"
+                      : "Bloqueado mientras hay una revisión en curso"
+                  }
                   rows={2}
-                  disabled={isGenerating}
+                  disabled={isGenerating || revisionStatus !== "idle"}
                   style={{
                     flex:1,
                     resize:"none",
@@ -2277,29 +2456,40 @@ export default function WorkspacePage() {
                     background:"transparent",
                     color:"var(--fg-primary)",
                     padding:"4px 2px",
+                    cursor: revisionStatus !== "idle" ? "not-allowed" : "text",
                   }}
                 />
                 <button
-                  onClick={() => { if (chatInput.trim()) generarFase({ mensajeOverride: chatInput.trim() }); }}
-                  disabled={isGenerating || !chatInput.trim()}
+                  onClick={() => {
+                    if (chatInput.trim() && revisionStatus === "idle") {
+                      pedirRevisionConPreview(chatInput.trim());
+                    }
+                  }}
+                  disabled={isGenerating || !chatInput.trim() || revisionStatus !== "idle"}
                   style={{
                     width:36,
                     height:36,
                     flexShrink:0,
-                    background: isGenerating||!chatInput.trim() ? "rgba(148,163,184,0.45)" : "var(--accent)",
+                    background: (isGenerating || !chatInput.trim() || revisionStatus !== "idle")
+                      ? "rgba(148,163,184,0.45)"
+                      : "var(--accent)",
                     border:"none",
                     borderRadius:"50%",
-                    cursor: isGenerating||!chatInput.trim() ? "not-allowed" : "pointer",
+                    cursor: (isGenerating || !chatInput.trim() || revisionStatus !== "idle") ? "not-allowed" : "pointer",
                     color:"#fff",
                     fontSize:16,
                     display:"flex",
                     alignItems:"center",
                     justifyContent:"center",
-                    boxShadow: isGenerating||!chatInput.trim() ? "none" : "0 8px 16px rgba(37,99,235,0.32)",
+                    boxShadow: (isGenerating || !chatInput.trim() || revisionStatus !== "idle") ? "none" : "0 8px 16px rgba(37,99,235,0.32)",
                   }}
                   aria-label="Enviar instrucción"
                 >
-                  {isGenerating ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "↑"}
+                  {revisionStatus === "loading" || revisionStatus === "applying"
+                    ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/>
+                    : revisionStatus === "preview"
+                    ? "🔒"
+                    : "↑"}
                 </button>
               </div>
             </div>
@@ -2748,6 +2938,76 @@ export default function WorkspacePage() {
 
       {/* 🛠️ Toggle admin/estudiante — visible para admin, cuentas demo/test y localhost dev */}
       <AdminViewToggle isAdmin={puedeVerToggle} />
+
+      {/* ── MODAL: DiffPreview de la revisión propuesta por la IA ───────────── */}
+      {revisionStatus === "preview" && revisionPreview && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) cancelarRevision(); }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1200,
+            background: "rgba(15,23,42,0.75)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 20,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%",
+              maxWidth: 1100,
+              height: "88vh",
+              background: "white",
+              borderRadius: 14,
+              boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {/* Header con info de la observación */}
+            <div style={{
+              padding: "14px 20px",
+              borderBottom: "1px solid rgba(0,0,0,0.08)",
+              background: "#f8fafc",
+            }}>
+              <div style={{
+                fontSize: 11,
+                color: "var(--accent)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                marginBottom: 4,
+              }}>
+                Revisión propuesta · {revisionPreview.phaseLabel}
+              </div>
+              <div style={{
+                fontSize: 12.5,
+                color: "var(--fg-secondary)",
+                fontStyle: "italic",
+                lineHeight: 1.5,
+              }}>
+                Observación: &ldquo;{revisionPreview.mensajeUsuario}&rdquo;
+              </div>
+            </div>
+
+            <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              <DiffPreview
+                contenidoActual={revisionPreview.contenidoActual}
+                contenidoPropuesto={revisionPreview.contenidoPropuesto}
+                onAplicar={aplicarRevision}
+                onCancelar={cancelarRevision}
+                aplicando={(revisionStatus as RevisionStatus) === "applying"}
+                titulo={`Cambios en ${revisionPreview.phaseLabel}`}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal fullscreen del preview */}
       {previewFullscreen && docHtml && (
