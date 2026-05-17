@@ -104,7 +104,7 @@ function NuevoProyectoPageInner() {
         const [meRes, svcRes, univRes] = await Promise.all([
           fetch("/api/auth/me"),
           fetch("/api/services"),
-          fetch("/api/admin/universities"),
+          fetch("/api/universities"),
         ]);
         const meData = await meRes.json();
         if (!meData.user) {
