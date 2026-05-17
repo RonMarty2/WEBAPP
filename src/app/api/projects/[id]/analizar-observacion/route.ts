@@ -101,6 +101,8 @@ export async function POST(req: Request, { params }: Params) {
       observacionTutor: observacion,
     });
 
+    console.log(`[analizador] llamando IA para proyecto=${proyectoId} fase=${phaseId} obs="${observacion.slice(0, 80)}"`);
+
     // Llamar a la IA con budget generoso (puede devolver el documento completo
     // si decide aplicar, además de la justificación).
     const aiResult = await llamarIA(
@@ -110,17 +112,22 @@ export async function POST(req: Request, { params }: Params) {
       proyecto.servicio_id ?? "mono-001",
     );
 
+    console.log(`[analizador] IA respondió: provider=${aiResult.provider} model=${aiResult.model} length=${aiResult.text.length} preview="${aiResult.text.slice(0, 200)}"`);
+
     // Parsear el JSON de la IA
     const analizado = parseAnalizadorOutput(aiResult.text);
     if (!analizado) {
+      console.error(`[analizador] PARSER FALLÓ. Texto completo de la IA:\n${aiResult.text}`);
       return NextResponse.json(
         {
-          error: "La IA devolvió un formato no parseable. Reintentar.",
-          raw: aiResult.text.slice(0, 500),
+          error: `La IA (${aiResult.provider}/${aiResult.model}) devolvió un formato no parseable. Texto recibido: "${aiResult.text.slice(0, 300)}..."`,
+          raw: aiResult.text.slice(0, 1000),
         },
         { status: 502 },
       );
     }
+
+    console.log(`[analizador] decisión=${analizado.decision} patrón=${analizado.patron_detectado}`);
 
     const duracionMs = Date.now() - t0;
 

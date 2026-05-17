@@ -1078,14 +1078,18 @@ export default function WorkspacePage() {
   const pedirRevisionConPreview = useCallback(async (mensaje: string) => {
     if (!proyecto || revisionStatus !== "idle") return;
     const faseDef = displayFases[Math.min(selectedFase, displayFases.length - 1)] ?? displayFases[0];
-    if (!faseDef?.id) return;
+    if (!faseDef?.id) {
+      setRevisionError("No se pudo identificar la fase activa. Recarga la página.");
+      return;
+    }
 
     setRevisionStatus("loading");
     setRevisionError(null);
+    // Log que el admin pueda leer fácil sin abrir F12
+    console.log("[analizador] enviando observación", { proyectoId: proyecto.id, faseId: faseDef.id, observacion: mensaje.slice(0, 80) });
 
     try {
       // Llama al ANALIZADOR DE PERTINENCIA (no aplica nada todavía).
-      // Devuelve veredicto: aplicar / aplicar_con_reserva / rechazar.
       const res = await fetch(`/api/projects/${proyecto.id}/analizar-observacion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1094,28 +1098,51 @@ export default function WorkspacePage() {
           observacion: mensaje,
         }),
       });
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: Record<string, unknown> = {};
+      try { data = JSON.parse(rawText); } catch { data = { error: `Respuesta no-JSON del servidor (${res.status}): ${rawText.slice(0, 200)}` }; }
+
+      console.log("[analizador] respuesta", { status: res.status, ok: res.ok, data });
+
       if (!res.ok) {
-        setRevisionError(data.error ?? "Error al analizar la observación");
+        const errorMsg = (typeof data.error === "string" ? data.error : null)
+          ?? `Error ${res.status}: ${rawText.slice(0, 200)}`;
+        setRevisionError(errorMsg);
         setRevisionStatus("idle");
+        // Alerta visible que NO puede ser ignorada
+        alert(`❌ Error del analizador:\n\n${errorMsg}`);
         return;
       }
+
+      // Validación defensiva: la decisión debe estar presente
+      const decision = data.decision as string | undefined;
+      if (!decision || !["aplicar", "aplicar_con_reserva", "rechazar"].includes(decision)) {
+        const errorMsg = `La IA no devolvió una decisión válida (recibido: ${decision ?? "vacío"}). Posible problema con el proveedor IA.`;
+        setRevisionError(errorMsg);
+        setRevisionStatus("idle");
+        alert(`❌ ${errorMsg}`);
+        return;
+      }
+
       setRevisionPreview({
-        observacionId: data.observacion_id ?? null,
+        observacionId: (data.observacion_id as string | null) ?? null,
         phaseId: faseDef.id,
-        phaseLabel: data.fase_label ?? faseDef.label ?? faseDef.id,
+        phaseLabel: (data.fase_label as string | undefined) ?? faseDef.label ?? faseDef.id,
         mensajeUsuario: mensaje,
-        decision: data.decision,
-        patronDetectado: data.patron_detectado ?? "",
-        analisisIa: data.analisis_ia ?? "",
-        justificacionParaTutor: data.justificacion_para_tutor ?? null,
-        contenidoActual: data.contenido_actual ?? "",
-        contenidoPropuesto: data.contenido_propuesto ?? null,
+        decision: decision as "aplicar" | "aplicar_con_reserva" | "rechazar",
+        patronDetectado: (data.patron_detectado as string | undefined) ?? "",
+        analisisIa: (data.analisis_ia as string | undefined) ?? "",
+        justificacionParaTutor: (data.justificacion_para_tutor as string | null) ?? null,
+        contenidoActual: (data.contenido_actual as string | undefined) ?? "",
+        contenidoPropuesto: (data.contenido_propuesto as string | null) ?? null,
       });
       setRevisionStatus("preview");
     } catch (e) {
-      setRevisionError(e instanceof Error ? e.message : "Error de red");
+      const errorMsg = e instanceof Error ? e.message : "Error de red al contactar al analizador";
+      console.error("[analizador] error", e);
+      setRevisionError(errorMsg);
       setRevisionStatus("idle");
+      alert(`❌ Error de conexión:\n\n${errorMsg}`);
     }
   }, [proyecto, revisionStatus, displayFases, selectedFase]);
 
