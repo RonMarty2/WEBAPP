@@ -551,7 +551,23 @@ export default function WorkspacePage() {
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedFase, setSelectedFase] = useState(0);
-  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal" | "defensa">("generacion");
+  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal" | "bitacora" | "defensa">("generacion");
+
+  // Bitácora del Tutor — observaciones analizadas por la IA (banco acumulado).
+  interface BitacoraRow {
+    id: string;
+    fase_id: string;
+    observacion_textual: string;
+    patron_detectado: string | null;
+    decision: "aplicar" | "aplicar_con_reserva" | "rechazar";
+    analisis_ia: string;
+    justificacion_para_tutor: string | null;
+    aplicado_at: string | null;
+    created_at: string;
+  }
+  const [bitacora, setBitacora] = useState<BitacoraRow[]>([]);
+  const [bitacoraLoading, setBitacoraLoading] = useState(false);
+  const [bitacoraExpandedId, setBitacoraExpandedId] = useState<string | null>(null);
   const { mode: viewMode } = useViewMode();
 
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
@@ -1184,6 +1200,35 @@ export default function WorkspacePage() {
     setRevisionStatus("idle");
     setRevisionError(null);
   }, []);
+
+  // ── Bitácora del Tutor ───────────────────────────────────────────────────
+  // Carga todas las observaciones analizadas del proyecto desde el banco.
+  const cargarBitacora = useCallback(async () => {
+    if (!proyecto) return;
+    setBitacoraLoading(true);
+    try {
+      const res = await fetch(`/api/projects/${proyecto.id}/bitacora`);
+      if (!res.ok) throw new Error("No se pudo cargar la bitácora");
+      const data = await res.json();
+      setBitacora((data.observaciones ?? []) as BitacoraRow[]);
+    } catch {
+      setBitacora([]);
+    } finally {
+      setBitacoraLoading(false);
+    }
+  }, [proyecto]);
+
+  // Auto-carga la bitácora cuando el usuario abre la pestaña.
+  useEffect(() => {
+    if (col1Tab === "bitacora" && proyecto) {
+      cargarBitacora();
+    }
+  }, [col1Tab, proyecto, cargarBitacora]);
+
+  const abrirCartaDefensa = useCallback(() => {
+    if (!proyecto) return;
+    window.open(`/api/projects/${proyecto.id}/bitacora/imprimible`, "_blank", "noopener");
+  }, [proyecto]);
 
   // ── Revertir a la versión anterior (deshacer cambios) ────────────────────
   // Restaura el contenido guardado en *_anterior cuando el usuario aplicó
@@ -1996,6 +2041,13 @@ export default function WorkspacePage() {
                     {canDefense ? "📋" : "🔒"} Tutor
                   </button>
                 )}
+                <button
+                  onClick={() => setCol1Tab("bitacora")}
+                  title="Bitácora del Tutor: registro de cada observación con su análisis y respuesta"
+                  style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "bitacora" ? "#6366f1" : "var(--fg-secondary)", borderBottom: col1Tab === "bitacora" ? "2px solid #6366f1" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                >
+                  📒 Bitácora
+                </button>
                 {canDefense && (
                   <button
                     onClick={() => setCol1Tab("defensa")}
@@ -2384,6 +2436,128 @@ export default function WorkspacePage() {
             proyectoId={proyectoId}
             phaseDefs={displayFases.map(f => ({ id: f.id, label: f.label, short: f.short }))}
           />
+        </div>
+      )}
+      {col1Tab === "bitacora" && (
+        <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
+          <div style={{ marginBottom: 16, padding: "12px 14px", background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)", borderRadius: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: "#4338CA", marginBottom: 4 }}>
+              📒 Bitácora del Tutor
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
+              Cada observación de tu tutor queda registrada con su análisis académico y, si fue rechazada,
+              con la respuesta lista para entregar. Puedes imprimir todo como un documento formal.
+            </div>
+          </div>
+
+          <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>
+              {bitacoraLoading
+                ? "Cargando…"
+                : `${bitacora.length} observación${bitacora.length === 1 ? "" : "es"} registrada${bitacora.length === 1 ? "" : "s"}`}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={cargarBitacora}
+                disabled={bitacoraLoading}
+                title="Recargar"
+                style={{ padding: "6px 10px", fontSize: 11, fontWeight: 600, borderRadius: 8, border: "1px solid rgba(148,163,184,0.3)", background: "white", color: "var(--fg-secondary)", cursor: bitacoraLoading ? "wait" : "pointer" }}
+              >
+                ↻
+              </button>
+              <button
+                onClick={abrirCartaDefensa}
+                disabled={bitacora.length === 0}
+                title="Abrir carta imprimible (Ctrl+P → Guardar como PDF)"
+                style={{ padding: "6px 12px", fontSize: 11.5, fontWeight: 700, borderRadius: 8, border: "none", background: bitacora.length === 0 ? "rgba(148,163,184,0.25)" : "#1E1B4B", color: bitacora.length === 0 ? "var(--fg-muted)" : "white", cursor: bitacora.length === 0 ? "not-allowed" : "pointer" }}
+              >
+                🖨️ Imprimir / PDF
+              </button>
+            </div>
+          </div>
+
+          {bitacora.length === 0 && !bitacoraLoading && (
+            <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--fg-muted)", fontSize: 12, background: "rgba(148,163,184,0.05)", borderRadius: 12, border: "1px dashed rgba(148,163,184,0.25)" }}>
+              Cuando pegues una observación del tutor en el chat, la IA la analizará y quedará archivada aquí.
+            </div>
+          )}
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {bitacora.map((obs) => {
+              const isOpen = bitacoraExpandedId === obs.id;
+              const palette = obs.decision === "rechazar"
+                ? { bg: "rgba(239,68,68,0.05)", border: "rgba(239,68,68,0.3)", chip: "#EF4444", label: "Defendida" }
+                : obs.decision === "aplicar_con_reserva"
+                  ? { bg: "rgba(245,158,11,0.05)", border: "rgba(245,158,11,0.3)", chip: "#F59E0B", label: "Aplicada con reserva" }
+                  : { bg: "rgba(16,185,129,0.05)", border: "rgba(16,185,129,0.3)", chip: "#10B981", label: "Aplicada" };
+              const fecha = obs.created_at ? new Date(obs.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short", year: "numeric" }) : "";
+              const phaseLabel = displayFases.find(f => f.id === obs.fase_id)?.label ?? obs.fase_id;
+
+              return (
+                <div
+                  key={obs.id}
+                  style={{ background: palette.bg, border: `1px solid ${palette.border}`, borderRadius: 10, overflow: "hidden" }}
+                >
+                  <button
+                    onClick={() => setBitacoraExpandedId(isOpen ? null : obs.id)}
+                    style={{ width: "100%", padding: "10px 12px", background: "none", border: "none", textAlign: "left", cursor: "pointer", display: "flex", flexDirection: "column", gap: 6 }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "space-between" }}>
+                      <span style={{ padding: "2px 8px", background: palette.chip, color: "white", fontSize: 9.5, fontWeight: 800, borderRadius: 999, letterSpacing: 0.4, textTransform: "uppercase" }}>
+                        {palette.label}
+                      </span>
+                      <span style={{ fontSize: 10, color: "var(--fg-muted)" }}>{fecha}</span>
+                    </div>
+                    <div style={{ fontSize: 10.5, color: "var(--fg-muted)", fontWeight: 600 }}>
+                      {phaseLabel}{obs.patron_detectado ? ` · ${obs.patron_detectado}` : ""}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--fg-primary)", lineHeight: 1.45, fontWeight: 500 }}>
+                      &ldquo;{obs.observacion_textual.length > 140 ? obs.observacion_textual.slice(0, 140) + "…" : obs.observacion_textual}&rdquo;
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div style={{ padding: "0 12px 12px", display: "flex", flexDirection: "column", gap: 10, borderTop: `1px solid ${palette.border}`, paddingTop: 10 }}>
+                      <div>
+                        <div style={{ fontSize: 9.5, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                          Observación completa
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "var(--fg-primary)", lineHeight: 1.5, whiteSpace: "pre-wrap" }}>
+                          {obs.observacion_textual}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 9.5, fontWeight: 700, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                          Análisis académico
+                        </div>
+                        <div style={{ fontSize: 11.5, color: "var(--fg-primary)", lineHeight: 1.5 }}>
+                          {obs.analisis_ia}
+                        </div>
+                      </div>
+                      {obs.justificacion_para_tutor && (
+                        <div style={{ padding: 10, background: "rgba(99,102,241,0.06)", borderRadius: 8, border: "1px solid rgba(99,102,241,0.18)" }}>
+                          <div style={{ fontSize: 9.5, fontWeight: 700, color: "#4338CA", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>
+                            Respuesta al tutor
+                          </div>
+                          <div style={{ fontSize: 11.5, color: "var(--fg-primary)", lineHeight: 1.55, whiteSpace: "pre-wrap" }}>
+                            {obs.justificacion_para_tutor}
+                          </div>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(obs.justificacion_para_tutor ?? "").catch(() => {});
+                            }}
+                            style={{ marginTop: 8, padding: "4px 10px", fontSize: 10.5, fontWeight: 600, borderRadius: 6, border: "1px solid rgba(99,102,241,0.4)", background: "white", color: "#4338CA", cursor: "pointer" }}
+                          >
+                            📋 Copiar respuesta
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
       {col1Tab === "defensa" && canDefense && (
