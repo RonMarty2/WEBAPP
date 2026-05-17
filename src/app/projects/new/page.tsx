@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import UmssDuplicidadCheck from "@/components/UmssDuplicidadCheck";
 
 interface Servicio {
   id: string;
@@ -902,6 +903,14 @@ function NuevoProyectoPageInner() {
                   placeholder="Si ya tienes tema, escríbelo aquí. Si no, déjalo vacío y la IA propondrá."
                   style={{ resize: "vertical" }}
                 />
+
+                {/* Verificación de duplicidad UMSS — solo aparece si la
+                    universidad es UMSS y hay tema con texto suficiente. */}
+                {universidadId === "umss-001" && tema.trim().length >= 6 && (
+                  <div style={{ marginTop: 12 }}>
+                    <UmssDuplicidadCheck tema={tema.trim()} colapsarTrasConfirmar />
+                  </div>
+                )}
               </div>
 
               {/* DIPLOMADO (obligatorio) */}
