@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
+import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
 import BibliografiaInsights from "@/components/scribe/BibliografiaInsights";
 import ResumenInsights from "@/components/scribe/ResumenInsights";
 import CalidadInsights from "@/components/scribe/CalidadInsights";
@@ -1700,9 +1701,14 @@ export default function WorkspacePage() {
             </Link>
           )}
           {user?.role === "admin" && (
-            <Link href="/admin" className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4, textDecoration:"none" }}>
-              ⚡ Admin
-            </Link>
+            <>
+              {/* 🎚️ Switch de plan en caliente (solo admin). Cambia qué plan
+                  ve el workspace SIN crear proyecto nuevo ni perder avance. */}
+              <AdminPlanSwitcher currentPlan={user.plan ?? "pro"} />
+              <Link href="/admin" className="btn-purple" style={{ padding:"5px 10px", fontSize:11, display:"flex", alignItems:"center", gap:4, textDecoration:"none" }}>
+                ⚡ Admin
+              </Link>
+            </>
           )}
           <ThemeToggle />
         </div>
