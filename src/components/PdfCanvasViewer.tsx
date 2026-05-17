@@ -16,7 +16,7 @@
  * Resultado: el PDF se ve aunque el usuario tenga TeraBox/IDM/Adobe activos.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -36,6 +36,15 @@ export default function PdfCanvasViewer({ url, pageWidth = 900 }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [pdfBytes, setPdfBytes] = useState<Uint8Array | null>(null);
   const [fetching, setFetching] = useState(true);
+
+  // PDF.js Worker transfiere el ArrayBuffer (lo detacha del thread principal).
+  // Si React re-renderiza, el array ya esta detached y crashea. useMemo +
+  // clon fresco garantiza que cada montaje del <Document> tenga su propia copia.
+  const fileObj = useMemo(() => {
+    if (!pdfBytes) return null;
+    // .slice() clona el buffer entero (immutable input para PDF.js).
+    return { data: pdfBytes.slice() };
+  }, [pdfBytes]);
 
   // Descarga el PDF como JSON (TeraBox no intercepta JSON) y decodifica el base64.
   useEffect(() => {
@@ -86,7 +95,7 @@ export default function PdfCanvasViewer({ url, pageWidth = 900 }: Props) {
         </div>
       )}
       <Document
-        file={pdfBytes ? { data: pdfBytes } : null}
+        file={fileObj}
         onLoadSuccess={({ numPages: n }) => {
           setNumPages(n);
           setError(null);
