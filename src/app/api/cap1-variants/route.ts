@@ -31,6 +31,7 @@ export async function GET(req: Request) {
           autor: guiaOficialDetalle?.autor ?? "",
           fecha: guiaOficialDetalle?.fecha ?? "",
           caracteristicas: guiaOficialDetalle?.caracteristicas ?? [],
+          url_documento_pdf: guiaOficialDetalle?.url_documento_pdf ?? null,
         },
       };
     });

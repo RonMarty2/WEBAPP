@@ -47,6 +47,7 @@ interface Cap1VariantePublica {
     autor: string;
     fecha: string;
     caracteristicas: string[];
+    url_documento_pdf: string | null;
   };
 }
 
@@ -623,8 +624,9 @@ function NuevoProyectoPageInner() {
               </h1>
               <p style={{ color: "var(--fg-muted)", fontSize: 13.5, lineHeight: 1.6 }}>
                 UMSS publicó dos guías para monografías de Posgrado. Cada variante
-                que ofrecemos está alineada exactamente a una de ellas — elegí la
-                que coincida con la que te entregó tu coordinador.
+                que ofrecemos está alineada exactamente a una de ellas — abrí el{" "}
+                <strong>PDF oficial</strong> y comparalo con el que te entregó tu
+                coordinador para elegir con seguridad.
               </p>
             </div>
 
@@ -738,6 +740,42 @@ function NuevoProyectoPageInner() {
                       <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
                         {v.descripcion}
                       </div>
+
+                      {/* Botón: Ver guía oficial (PDF) — el estudiante puede
+                          confirmar visualmente si es el formato que pide su diplomado */}
+                      {v.guia_oficial?.url_documento_pdf && (
+                        <a
+                          href={v.guia_oficial.url_documento_pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 14px",
+                            borderRadius: 10,
+                            background: "white",
+                            border: `1.5px solid ${colorGuia}`,
+                            color: colorGuia,
+                            textDecoration: "none",
+                            fontWeight: 700,
+                            fontSize: 12.5,
+                            transition: "all 0.15s",
+                            cursor: "pointer",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = bgGuia;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "white";
+                          }}
+                        >
+                          <span style={{ fontSize: 16 }}>📄</span>
+                          <span style={{ flex: 1 }}>Ver guía oficial (PDF)</span>
+                          <span style={{ fontSize: 10, fontWeight: 600, opacity: 0.7 }}>↗</span>
+                        </a>
+                      )}
 
                       {/* Características clave de la guía */}
                       {v.guia_oficial?.caracteristicas?.length > 0 && (
