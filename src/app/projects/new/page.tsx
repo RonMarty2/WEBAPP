@@ -561,9 +561,11 @@ function NuevoProyectoPageInner() {
                           ? "var(--accent)"
                           : "var(--fg-muted)",
                       marginBottom: 4,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em",
                     }}
                   >
-                    {universidadId === u.id ? "✓ " : ""}Seleccionada
+                    {universidadId === u.id ? "✓ Seleccionada" : "Elegir"}
                   </div>
                   <div
                     style={{
