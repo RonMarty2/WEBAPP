@@ -13,6 +13,7 @@ import { NextResponse } from "next/server";
 import { requirePlan, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import { llamarIA } from "@/lib/aiProvider";
+import { validarCoherencia } from "@/lib/ai/guardian";
 
 type Params = Promise<{ id: string }>;
 
@@ -91,6 +92,18 @@ export async function POST(req: Request, { params }: { params: Params }) {
     const tema = (proyectoRec.tema_aprobado as string | null)
       ?? (proyectoRec.titulo_provisional as string | null)
       ?? "Tema no definido";
+
+    // 🛡️ Guardián anti-alucinación: bloquea preguntas fuera del tema del proyecto.
+    // Solo se activa si hay tema definido. Si Groq no está configurado, es permisivo.
+    if (tema !== "Tema no definido") {
+      const guardian = await validarCoherencia(pregunta, tema);
+      if (!guardian.permitido) {
+        return NextResponse.json({
+          error: "Tu pregunta parece no estar relacionada con el tema de tu monografía. Reformúlala enfocándote en tu tema aprobado.",
+          razon: guardian.razon,
+        }, { status: 422 });
+      }
+    }
 
     const userPrompt = `TEMA DE LA MONOGRAFÍA: "${tema}"
 
