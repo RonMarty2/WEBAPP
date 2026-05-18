@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Plantillas LaTeX por universidad boliviana.
  * Cada template define: márgenes, espaciado, fuente y carátula de respaldo.
  */
@@ -38,7 +38,7 @@ export interface UniversityTemplate {
   preambleExtras?: string;
 }
 
-// ─── Helpers comunes ──────────────────────────────────────────
+// --- Helpers comunes ------------------------------------------
 
 function esc(s: string | undefined) {
   return escaparLatexPlain(s ?? "");
@@ -69,7 +69,7 @@ function defaultCaratula(nombre: string, ciudad: string, input: CaratulaInput): 
   ].filter(l => l !== "").join("\n");
 }
 
-// ─── UMSA ─────────────────────────────────────────────────────
+// --- UMSA -----------------------------------------------------
 
 const UMSA: UniversityTemplate = {
   id: "umsa",
@@ -102,7 +102,7 @@ const UMSA: UniversityTemplate = {
   ].filter(l => l !== "").join("\n"),
 };
 
-// ─── UMSS ─────────────────────────────────────────────────────
+// --- UMSS -----------------------------------------------------
 
 /**
  * Carátula oficial UMSS — Posgrado FCE / Céspedes.
@@ -200,7 +200,7 @@ const UMSS: UniversityTemplate = {
   buildCaratula: caratulaUMSS,
 };
 
-// ─── UCB ──────────────────────────────────────────────────────
+// --- UCB ------------------------------------------------------
 
 const UCB: UniversityTemplate = {
   id: "ucb",
@@ -232,7 +232,7 @@ const UCB: UniversityTemplate = {
   ].filter(l => l !== "").join("\n"),
 };
 
-// ─── UPB ──────────────────────────────────────────────────────
+// --- UPB ------------------------------------------------------
 
 const UPB: UniversityTemplate = {
   id: "upb",
@@ -261,7 +261,7 @@ const UPB: UniversityTemplate = {
   ].filter(l => l !== "").join("\n"),
 };
 
-// ─── UPEA ─────────────────────────────────────────────────────
+// --- UPEA -----------------------------------------------------
 
 const UPEA: UniversityTemplate = {
   id: "upea",
@@ -273,7 +273,7 @@ const UPEA: UniversityTemplate = {
   buildCaratula: (input) => defaultCaratula("UNIVERSIDAD PÚBLICA DE EL ALTO", "El Alto", input),
 };
 
-// ─── USFX ─────────────────────────────────────────────────────
+// --- USFX -----------------------------------------------------
 
 const USFX: UniversityTemplate = {
   id: "usfx",
@@ -305,7 +305,7 @@ const USFX: UniversityTemplate = {
   ].filter(l => l !== "").join("\n"),
 };
 
-// ─── Registro ─────────────────────────────────────────────────
+// --- Registro -------------------------------------------------
 
 const UNIVERSITY_REGISTRY: Record<string, UniversityTemplate> = {
   umsa: UMSA,

@@ -1,4 +1,4 @@
-// LaTeX document builder for monografías.
+﻿// LaTeX document builder for monografías.
 // Format: 12pt, letterpaper, Times New Roman, 2.54 cm margins, 1.5 spacing.
 
 import { getUniversityTemplate, type CaratulaInput } from "./universityTemplates";
@@ -293,7 +293,7 @@ export function generarLatexMonografia(input: MonografiaLatexInput): string {
 
   return `\\documentclass[12pt, letterpaper]{article}
 
-% ─── Paquetes ───────────────────────────────────────────────
+% --- Paquetes -----------------------------------------------
 \\usepackage[utf8]{inputenc}
 \\usepackage[spanish,es-noshorthands]{babel}
 ${fontPackage}
@@ -322,13 +322,13 @@ ${uniTpl.preambleExtras ?? ""}
 \\IfFileExists{pgf-pie.sty}{\\usepackage{pgf-pie}}{}
 ${caratulaPdf ? "\\usepackage{pdfpages}" : ""}
 
-% ─── Encabezados y pies de página ───────────────────────────
+% --- Encabezados y pies de página ---------------------------
 \\pagestyle{fancy}
 \\fancyhf{}
 \\rfoot{\\thepage}
 \\renewcommand{\\headrulewidth}{0pt}
 
-% ─── Profundidad de secciones (UMSS: arábigos hasta 5 niveles) ──
+% --- Profundidad de secciones (UMSS: arábigos hasta 5 niveles) --
 \\setcounter{secnumdepth}{4}
 \\setcounter{tocdepth}{3}
 % Numeración arábiga estándar (1, 1.1, 1.1.1, etc.) — la default de
@@ -341,22 +341,22 @@ ${caratulaPdf ? "\\usepackage{pdfpages}" : ""}
 \\begin{document}
 \\thispagestyle{empty}
 
-% ─── Carátula ───────────────────────────────────────────────
+% --- Carátula -----------------------------------------------
 ${caratulaBlock}
 
-% ─── Tabla de contenidos ────────────────────────────────────
+% --- Tabla de contenidos ------------------------------------
 \\pagenumbering{roman}
 \\setcounter{page}{2}
 \\tableofcontents
 \\newpage
 
-% ─── Capítulos ──────────────────────────────────────────────
+% --- Capítulos ----------------------------------------------
 \\pagenumbering{arabic}
 \\setcounter{page}{1}
 
 ${capitulosLatex}
 
-% ─── Bibliografía ───────────────────────────────────────────
+% --- Bibliografía -------------------------------------------
 ${generarBibliografiaLatex(bibliografia)}
 
 \\end{document}
