@@ -285,9 +285,11 @@ export function generarLatexMonografia(input: MonografiaLatexInput): string {
     ? `\\includepdf[pages=1]{${caratulaPdf}}\n\\newpage`
     : uniTpl.buildCaratula(caratulaData ?? { titulo, diplomado });
 
+  // mathptmx es la versión moderna de "times" — funciona en Overleaf y MiKTeX
+  // sin el warning "package times is obsolete" y NO requiere fontspec.
   const fontPackage = uniTpl.fuente === "arial"
     ? "\\usepackage{helvet}\n\\renewcommand{\\familydefault}{\\sfdefault}"
-    : "\\usepackage{times}";
+    : "\\usepackage{mathptmx}";
 
   return `\\documentclass[12pt, letterpaper]{article}
 
