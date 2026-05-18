@@ -25,6 +25,8 @@ interface Props {
   logoUrl?: string;
   /** ID del proyecto, necesario para llamar al endpoint de paquete completo. */
   proyectoId?: string;
+  /** Callback para abrir el modal "Configurar Carátula" (provisto por el workspace). */
+  onConfigurarCaratula?: () => void;
 }
 
 function extractLatexCode(text: string): string | null {
@@ -40,7 +42,7 @@ function isBlockReport(text: string): boolean {
   return /REPORTE DE BLOQUEO EDITORIAL|No se genera LaTeX/i.test(text);
 }
 
-export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, proyectoId }: Props) {
+export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, proyectoId, onConfigurarCaratula }: Props) {
   const [copied, setCopied] = useState(false);
   const [logoDescargado, setLogoDescargado] = useState(false);
   const [pdfDescargando, setPdfDescargando] = useState(false);
@@ -364,6 +366,54 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           <Stat label="Líneas" value={stats.lines.toLocaleString()} icon="📝" />
           <Stat label="Caracteres" value={stats.chars.toLocaleString()} icon="🔤" />
           <Stat label="Tamaño" value={`${stats.kb} KB`} icon="💾" />
+        </div>
+      )}
+
+      {/* ⚙️ CONFIGURAR CARÁTULA — visible y accesible antes de pedir el PDF.
+         Permite al estudiante editar nombre, mes/año, tutor, programa, etc.
+         Los datos se persisten en el proyecto y el backend los usa al
+         armar el PDF. */}
+      {onConfigurarCaratula && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: "14px 18px",
+            background: "linear-gradient(135deg, rgba(6,182,212,0.06), rgba(14,165,233,0.06))",
+            border: "1px solid rgba(6,182,212,0.25)",
+            borderRadius: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-primary)", marginBottom: 2 }}>
+              ⚙️ Antes de pedir tu PDF, configurá tu carátula
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", lineHeight: 1.5 }}>
+              Nombre completo, tutor, programa, mes y año de presentación. Estos datos van
+              en la portada oficial del PDF.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onConfigurarCaratula}
+            style={{
+              padding: "10px 18px",
+              borderRadius: 8,
+              border: "none",
+              background: "linear-gradient(135deg, #06B6D4, #0891B2)",
+              color: "white",
+              fontSize: 12.5,
+              fontWeight: 700,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              boxShadow: "0 4px 12px rgba(6,182,212,0.25)",
+            }}
+          >
+            ⚙️ Configurar carátula
+          </button>
         </div>
       )}
 

@@ -3312,6 +3312,7 @@ export default function WorkspacePage() {
                   tituloProyecto={proyecto.tema_aprobado || proyecto.titulo_provisional || undefined}
                   logoUrl={university?.logo_url}
                   proyectoId={proyectoId}
+                  onConfigurarCaratula={() => setShowCoverSettings(true)}
                 />
               ) : phaseId === "ph-calidad" ? (
                 /* Banco de preguntas para defensa oral (ex-Auditoría Final).
