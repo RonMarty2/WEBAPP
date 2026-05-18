@@ -25,11 +25,48 @@ export interface MonografiaLatexInput {
 }
 
 /**
+ * Limpia caracteres Unicode "problemáticos" que rompen pdflatex con
+ * inputenc utf8. La IA al generar markdown a veces incluye caracteres
+ * de dibujo de cajas, dashes especiales, comillas tipográficas, etc.
+ * que pdflatex no soporta por default.
+ *
+ * Si NO se hace esta limpieza, el .tex falla con:
+ *   "! LaTeX Error: Unicode character ─ (U+2500) not set up for use with LaTeX"
+ */
+function sanearUnicodeParaLatex(text: string): string {
+  if (!text) return "";
+  return text
+    // Box-drawing (cajas) U+2500–U+257F → guion ASCII
+    .replace(/[─-╿]/g, "-")
+    // Block elements U+2580–U+259F → espacio
+    .replace(/[▀-▟]/g, " ")
+    // Dashes especiales (figure dash, en-dash, em-dash, horizontal bar)
+    .replace(/[‐-―]/g, "-")
+    // Comillas tipográficas izquierdas/derechas → comillas rectas
+    .replace(/[‘’‚‛]/g, "'")
+    .replace(/[“”„‟]/g, '"')
+    // Primes (′ ″ ‴) → comillas rectas
+    .replace(/′/g, "'")
+    .replace(/″/g, '"')
+    // Horizontal ellipsis (…) → tres puntos
+    .replace(/…/g, "...")
+    // Bullets (• ‣ ⁃) → guion
+    .replace(/[•‣⁃]/g, "-")
+    // Espacios especiales (no-break space, thin space, etc.) → espacio normal
+    .replace(/[  -​  　]/g, " ")
+    // Soft hyphen → vacío
+    .replace(/­/g, "")
+    // Zero-width joiners y similares → vacío
+    .replace(/[‌‍⁠﻿]/g, "");
+}
+
+/**
  * Escapes special LaTeX characters in plain text (non-formatted).
+ * Aplica también saneo de Unicode problemático.
  */
 export function escaparLatexPlain(text: string): string {
   if (!text) return "";
-  return text
+  return sanearUnicodeParaLatex(text)
     .replace(/\\/g, "\\textbackslash{}")
     .replace(/\{/g, "\\{")
     .replace(/\}/g, "\\}")
@@ -60,6 +97,12 @@ export const escaparLatex = escaparLatexPlain;
  */
 export function mdALatex(text: string): string {
   if (!text) return "";
+  // ⚠️ CRÍTICO: sanear Unicode ANTES de procesar líneas. La IA suele
+  // generar caracteres de dibujo (─), comillas tipográficas ("") o
+  // ellipsis (…) en el markdown. pdflatex con inputenc utf8 los rechaza
+  // con "Unicode character not set up for use with LaTeX".
+  // sanearUnicodeParaLatex los reemplaza por equivalentes ASCII compatibles.
+  text = sanearUnicodeParaLatex(text);
   const lines = text.split("\n");
   const out: string[] = [];
   let inItemize = false;
