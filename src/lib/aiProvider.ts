@@ -619,11 +619,36 @@ export async function llamarIA(
         clearServiceIncident(servicioId);
         return { text, provider: cfg.provider_id, model: cfg.model };
       } catch (e) {
-        setServiceIncident(servicioId, cfg, (e as Error).message);
-        throw new Error(`La IA configurada para este servicio fallo (${cfg.provider_id} / ${cfg.model}): ${(e as Error).message}`);
+        const errMsg = (e as Error).message;
+        setServiceIncident(servicioId, cfg, errMsg);
+        // ⚠️ FALLBACK AUTOMÁTICO: si el proveedor configurado falla (saturación,
+        // rate limit, timeout, etc.), reintentamos con la cascada de proveedores
+        // disponibles en env vars. El usuario nunca ve el error si hay backup.
+        console.warn(`[aiProvider] ${cfg.provider_id}/${cfg.model} falló: ${errMsg.slice(0, 200)}. Intentando cascada de fallback...`);
+        const fallbackChain: { id: string; model: string }[] = [
+          { id: "anthropic", model: "claude-haiku-4-5-20251001" },
+          { id: "groq",      model: "llama-3.3-70b-versatile" },
+          { id: "openai",    model: "gpt-4o-mini" },
+          { id: "gemini",    model: "gemini-2.5-flash" },
+        ].filter(p => p.id !== cfg.provider_id); // no reintentar con el mismo que falló
+
+        for (const { id, model } of fallbackChain) {
+          const key = getProviderKey(id);
+          if (!key) continue;
+          try {
+            console.log(`[aiProvider] Fallback intentando ${id}/${model}...`);
+            const text = await llamarIAConConfig(id, model, key, system, user, maxTokens);
+            console.log(`[aiProvider] ✓ Fallback ${id}/${model} OK.`);
+            return { text, provider: id, model };
+          } catch (fbErr) {
+            console.warn(`[aiProvider] Fallback ${id} también falló: ${(fbErr as Error).message.slice(0, 200)}`);
+          }
+        }
+        // Si todos los fallbacks fallaron también, lanzar error amigable.
+        throw new Error(`Estamos teniendo problemas temporales con los proveedores de IA. Por favor intentá de nuevo en unos minutos. Si el problema persiste contactá al equipo.`);
       }
     }
-    throw new Error(`No hay IA configurada para el servicio ${servicioId}. Configurala en Admin -> Modelos & APIs.`);
+    throw new Error(`La inteligencia artificial no está configurada para este servicio. Si sos admin, configurala en Admin → Modelos & APIs.`);
   }
 
   // Legacy endpoints without service context keep the environment chain.

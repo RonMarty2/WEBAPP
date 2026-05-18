@@ -229,8 +229,12 @@ export async function POST(req: Request) {
             error: (e as Error).message,
           })),
         });
+        const errMsg = (e as Error).message;
+        console.error(`[finalize] IA error: ${errMsg}`);
         return NextResponse.json({
-          error: `Error de IA: ${(e as Error).message}`,
+          error: errMsg.includes("temporales") || errMsg.includes("intentá de nuevo")
+            ? errMsg
+            : "Estamos teniendo problemas temporales para finalizar el documento. Intentá de nuevo en unos minutos.",
           steps,
         }, { status: 502 });
       }

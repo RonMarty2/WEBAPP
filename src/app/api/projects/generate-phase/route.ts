@@ -912,7 +912,12 @@ de variables (la variante "reducido" las omite por diseño). Por lo tanto:
             error: errorMessage,
           })),
         });
-        return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+        // Log técnico para admin, mensaje amigable para el usuario.
+        console.error(`[generate-phase] IA error: ${(e as Error).message}`);
+        const userMessage = (e as Error).message.includes("temporales") || (e as Error).message.includes("intentá de nuevo")
+          ? (e as Error).message
+          : "Estamos teniendo problemas temporales para generar tu contenido. Por favor intentá de nuevo en unos minutos.";
+        return NextResponse.json({ error: userMessage }, { status: 502 });
       }
     }
 

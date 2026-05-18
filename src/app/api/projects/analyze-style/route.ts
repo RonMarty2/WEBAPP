@@ -90,7 +90,11 @@ export async function POST(req: Request) {
           error: (e as Error).message,
         }),
       });
-      return NextResponse.json({ error: `Error de IA: ${(e as Error).message}` }, { status: 502 });
+      console.error(`[analyze-style] IA error: ${(e as Error).message}`);
+      const msg = (e as Error).message.includes("temporales") || (e as Error).message.includes("intentá de nuevo")
+        ? (e as Error).message
+        : "Estamos teniendo problemas temporales para analizar tu estilo. Intentá de nuevo en unos minutos.";
+      return NextResponse.json({ error: msg }, { status: 502 });
     }
 
     // Save to project
