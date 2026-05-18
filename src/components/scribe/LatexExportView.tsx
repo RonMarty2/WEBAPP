@@ -16,7 +16,7 @@
  * problemas y se niega a generar el .tex.
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface Props {
   rawContent: string;
@@ -48,6 +48,71 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
   const [paqueteDescargando, setPaqueteDescargando] = useState(false);
   const [paqueteError, setPaqueteError] = useState("");
   const [paqueteWarning, setPaqueteWarning] = useState<{ count: number; names: string[] } | null>(null);
+
+  // ── Flujo PDF compilado manualmente por el admin ───────────────────────
+  //
+  // El estudiante final NO compila LaTeX. Solo hace 1 click "Pedir mi PDF",
+  // espera 1-2 horas, y descarga el PDF terminado que el admin subió.
+  type EstadoPdf = "no_solicitado" | "en_preparacion" | "listo";
+  const [estadoPdf, setEstadoPdf] = useState<EstadoPdf>("no_solicitado");
+  const [pdfSolicitadoAt, setPdfSolicitadoAt] = useState<string | null>(null);
+  const [pdfCompiladoAt, setPdfCompiladoAt] = useState<string | null>(null);
+  const [pdfBytes, setPdfBytes] = useState<number | null>(null);
+  const [solicitandoPdf, setSolicitandoPdf] = useState(false);
+  const [solicitudError, setSolicitudError] = useState("");
+
+  /** Carga el estado actual del PDF compilado desde el backend. */
+  const recargarEstadoPdf = useCallback(async () => {
+    if (!proyectoId) return;
+    try {
+      const res = await fetch(`/api/projects/${proyectoId}/pdf-compilado?meta=1`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setEstadoPdf((data.estado as EstadoPdf) ?? "no_solicitado");
+      setPdfSolicitadoAt(data.pdf_solicitado_at ?? null);
+      setPdfCompiladoAt(data.pdf_compilado_at ?? null);
+      setPdfBytes(data.pdf_compilado_bytes ?? null);
+    } catch {
+      /* silent: sin estado actualizado, default no_solicitado */
+    }
+  }, [proyectoId]);
+
+  useEffect(() => { recargarEstadoPdf(); }, [recargarEstadoPdf]);
+
+  /** Estudiante solicita compilación del PDF al admin. */
+  async function handleSolicitarPdf() {
+    if (!proyectoId || solicitandoPdf) return;
+    if (estadoPdf === "listo") {
+      const ok = window.confirm(
+        "Tu PDF anterior se descartará y se generará uno nuevo. " +
+        "Esto tarda 1-2 horas mientras el equipo lo prepara. ¿Continuar?"
+      );
+      if (!ok) return;
+    }
+    setSolicitandoPdf(true);
+    setSolicitudError("");
+    try {
+      const res = await fetch(`/api/projects/${proyectoId}/pdf-compilado`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "solicitar" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Error al solicitar PDF");
+      await recargarEstadoPdf();
+    } catch (e) {
+      setSolicitudError(e instanceof Error ? e.message : "Error de red");
+    } finally {
+      setSolicitandoPdf(false);
+    }
+  }
+
+  /** Estudiante descarga el PDF ya compilado por el admin. */
+  function handleDescargarPdfCompilado() {
+    if (!proyectoId) return;
+    // GET directo al endpoint que devuelve el PDF binario
+    window.open(`/api/projects/${proyectoId}/pdf-compilado`, "_blank", "noopener");
+  }
 
   /**
    * El botón PRINCIPAL del estudiante: descarga el PDF compilado directamente.
@@ -302,65 +367,124 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
         </div>
       )}
 
-      {/* ACCIÓN PRINCIPAL DEL ESTUDIANTE — paquete .tex + logo + instrucciones (Overleaf) */}
+      {/* ─────────────────────────────────────────────────────────────────
+         ACCIÓN PRINCIPAL DEL ESTUDIANTE — PDF compilado por el equipo
+         3 estados visuales: pedir / esperando / descargar
+         ─────────────────────────────────────────────────────────────────*/}
       {proyectoId && (
         <div style={{ marginBottom: 16 }}>
-          <button
-            type="button"
-            onClick={handleDownloadPaquete}
-            disabled={paqueteDescargando}
-            style={{
-              width: "100%",
-              padding: "20px 24px",
-              borderRadius: 14,
-              border: "none",
-              background: paqueteDescargando
-                ? "linear-gradient(135deg, #94a3b8, #64748b)"
-                : "linear-gradient(135deg, #059669, #047857)",
-              color: "white",
-              fontSize: 17,
-              fontWeight: 700,
-              cursor: paqueteDescargando ? "wait" : "pointer",
-              boxShadow: "0 8px 22px rgba(5,150,105,0.30)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-              transition: "transform 0.15s ease",
-            }}
-            onMouseEnter={e => { if (!paqueteDescargando) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
-          >
-            <span style={{ fontSize: 24 }}>📦</span>
-            <span>{paqueteDescargando ? "Preparando paquete…" : "Descargar paquete (.tex + logo + instrucciones)"}</span>
-          </button>
-          <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 10, lineHeight: 1.55, textAlign: "center" }}>
-            {paqueteDescargando
-              ? "Armando tu ZIP con el .tex, el logo institucional y el README. Un momento…"
-              : "ZIP con .tex + logo + README. Súbelo a Overleaf y obtienes el PDF compilado."}
-          </div>
-          {paqueteError && (
-            <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12, lineHeight: 1.5 }}>
-              ⚠ {paqueteError}
-            </div>
+          {estadoPdf === "no_solicitado" && (
+            <>
+              <button
+                type="button"
+                onClick={handleSolicitarPdf}
+                disabled={solicitandoPdf}
+                style={{
+                  width: "100%",
+                  padding: "22px 24px",
+                  borderRadius: 14,
+                  border: "none",
+                  background: solicitandoPdf
+                    ? "linear-gradient(135deg, #94a3b8, #64748b)"
+                    : "linear-gradient(135deg, #6366F1, #4338CA)",
+                  color: "white",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  cursor: solicitandoPdf ? "wait" : "pointer",
+                  boxShadow: "0 8px 22px rgba(99,102,241,0.35)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
+                  transition: "transform 0.15s ease",
+                }}
+                onMouseEnter={e => { if (!solicitandoPdf) (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"; }}
+              >
+                <span style={{ fontSize: 26 }}>📥</span>
+                <span>{solicitandoPdf ? "Enviando solicitud…" : "Pedir mi PDF terminado"}</span>
+              </button>
+              <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", marginTop: 12, lineHeight: 1.6, textAlign: "center" }}>
+                Nuestro equipo compila tu documento con formato UMSS profesional (gráficos, tablas, márgenes y tipografía exactos).
+                <br/><strong>Tiempo estimado: 1-2 horas hábiles.</strong>
+              </div>
+            </>
           )}
-          {paqueteWarning && (
-            <div style={{ marginTop: 12, padding: "14px 16px", borderRadius: 10, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.30)", color: "var(--fg-primary)", fontSize: 12.5, lineHeight: 1.55 }}>
-              <div style={{ fontWeight: 700, color: "#d97706", marginBottom: 6 }}>
-                ⚠ Se omitieron {paqueteWarning.count} {paqueteWarning.count === 1 ? "figura" : "figuras"} sin archivo asociado
-              </div>
-              <div style={{ color: "var(--fg-secondary)", marginBottom: paqueteWarning.names.length ? 6 : 0 }}>
-                El documento mencionaba imágenes pero no se subió ningún archivo correspondiente, así que se quitaron del .tex para que Overleaf compile sin error.
-              </div>
-              {paqueteWarning.names.length > 0 && (
-                <div style={{ fontSize: 11.5, color: "var(--fg-muted)", fontFamily: 'ui-monospace, "SF Mono", Consolas, monospace' }}>
-                  {paqueteWarning.names.slice(0, 5).map(n => `• ${n}`).join("  ")}
-                  {paqueteWarning.count > 5 ? `  • … (+${paqueteWarning.count - 5} más)` : ""}
+
+          {estadoPdf === "en_preparacion" && (
+            <>
+              <div
+                style={{
+                  width: "100%", padding: "22px 24px", borderRadius: 14,
+                  background: "linear-gradient(135deg, rgba(245,158,11,0.10), rgba(217,119,6,0.08))",
+                  border: "2px solid rgba(217,119,6,0.4)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
+                  flexDirection: "column",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <span style={{ fontSize: 32 }}>⏳</span>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontSize: 17, fontWeight: 800, color: "#92400e" }}>
+                      Tu PDF se está preparando
+                    </div>
+                    <div style={{ fontSize: 12.5, color: "#78350f", marginTop: 2 }}>
+                      Tiempo estimado: <strong>1-2 horas hábiles</strong> desde tu solicitud
+                      {pdfSolicitadoAt ? ` (pedido el ${new Date(pdfSolicitadoAt).toLocaleString("es-BO", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })})` : ""}
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div style={{ fontSize: 11.5, color: "var(--fg-muted)", marginTop: 6 }}>
-                Mira el <strong>README.txt</strong> dentro del ZIP para instrucciones sobre cómo restaurarlas si las quieres.
+                <button
+                  type="button"
+                  onClick={recargarEstadoPdf}
+                  style={{ padding: "6px 14px", fontSize: 11.5, fontWeight: 600, borderRadius: 8, border: "1px solid rgba(217,119,6,0.4)", background: "white", color: "#92400e", cursor: "pointer", marginTop: 6 }}
+                >
+                  ↻ Verificar si ya está listo
+                </button>
               </div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", marginTop: 10, lineHeight: 1.55, textAlign: "center" }}>
+                Cuando tu PDF esté listo, este botón cambia a verde y podrás descargarlo desde acá mismo.
+              </div>
+            </>
+          )}
+
+          {estadoPdf === "listo" && (
+            <>
+              <button
+                type="button"
+                onClick={handleDescargarPdfCompilado}
+                style={{
+                  width: "100%",
+                  padding: "22px 24px",
+                  borderRadius: 14,
+                  border: "none",
+                  background: "linear-gradient(135deg, #10B981, #059669)",
+                  color: "white",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  boxShadow: "0 8px 22px rgba(16,185,129,0.35)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 14,
+                  transition: "transform 0.15s ease",
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)"}
+                onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)"}
+              >
+                <span style={{ fontSize: 26 }}>✅</span>
+                <span>Descargar mi PDF terminado</span>
+                {pdfBytes && (
+                  <span style={{ fontSize: 12, fontWeight: 600, opacity: 0.85 }}>
+                    ({(pdfBytes / 1024 / 1024).toFixed(2)} MB)
+                  </span>
+                )}
+              </button>
+              <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", marginTop: 10, lineHeight: 1.55, textAlign: "center" }}>
+                ✓ Compilado{pdfCompiladoAt ? ` el ${new Date(pdfCompiladoAt).toLocaleString("es-BO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}` : ""}.
+                {" "}Si modificaste capítulos después de pedir el PDF, puedes <button type="button" onClick={handleSolicitarPdf} style={{ background: "none", border: "none", color: "var(--accent)", textDecoration: "underline", cursor: "pointer", fontSize: "inherit", padding: 0 }}>pedir una nueva versión</button>.
+              </div>
+            </>
+          )}
+
+          {solicitudError && (
+            <div style={{ marginTop: 12, padding: "12px 14px", borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", color: "#ef4444", fontSize: 12, lineHeight: 1.5 }}>
+              ⚠ {solicitudError}
             </div>
           )}
         </div>
@@ -369,10 +493,35 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
       {/* OPCIONES AVANZADAS — solo admin, escondidas detrás de <details> */}
       <details style={{ marginBottom: 16 }}>
         <summary style={{ cursor: "pointer", fontSize: 12, color: "var(--fg-muted)", padding: "8px 0", userSelect: "none" }}>
-          Opciones avanzadas (admin) — PDF directo / LaTeX / Overleaf / código crudo
+          Opciones avanzadas (admin) — Paquete .tex / PDF directo / Overleaf / código crudo
         </summary>
         <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 10 }}>
-          {/* PDF directo (admin) — útil para preview rápido sin Overleaf */}
+          {/* ZIP paquete (.tex + logo + README) — el admin lo baja, lo compila y sube el PDF */}
+          {proyectoId && (
+            <>
+              <button
+                type="button"
+                onClick={handleDownloadPaquete}
+                disabled={paqueteDescargando}
+                style={{
+                  padding: "12px 14px", borderRadius: 8, border: "1px solid rgba(5,150,105,0.4)",
+                  background: "rgba(5,150,105,0.06)", color: "#059669", fontSize: 12.5, fontWeight: 700,
+                  cursor: paqueteDescargando ? "wait" : "pointer", display: "flex", alignItems: "center", gap: 8,
+                }}
+              >
+                <span>📦</span>
+                <span>{paqueteDescargando ? "Preparando paquete…" : "Paquete .tex + logo + README (para compilar en Overleaf/MiKTeX)"}</span>
+              </button>
+              {paqueteError && <div style={{ fontSize: 11, color: "#ef4444" }}>⚠ {paqueteError}</div>}
+              {paqueteWarning && (
+                <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.25)", fontSize: 11.5, color: "var(--fg-secondary)" }}>
+                  ⚠ Se omitieron {paqueteWarning.count} figura{paqueteWarning.count === 1 ? "" : "s"} sin archivo. Mirá el README dentro del ZIP.
+                </div>
+              )}
+            </>
+          )}
+
+          {/* PDF directo (admin) — Chrome headless desde HTML, sin gráficos pgfplots */}
           {proyectoId && (
             <>
               <button
@@ -386,7 +535,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
                 }}
               >
                 <span>📥</span>
-                <span>{pdfDescargando ? "Generando PDF directo…" : "PDF directo (sin Overleaf, sin carátula)"}</span>
+                <span>{pdfDescargando ? "Generando PDF directo…" : "PDF directo HTML (sin gráficos pgfplots, sin Overleaf)"}</span>
               </button>
               {pdfError && <div style={{ fontSize: 11, color: "#ef4444" }}>⚠ {pdfError}</div>}
             </>
