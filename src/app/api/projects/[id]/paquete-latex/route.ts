@@ -45,38 +45,69 @@ function extractLatex(raw: string): string {
 }
 
 /**
- * Reemplaza los placeholders típicos que la IA deja en la carátula con datos
+ * Reemplaza los placeholders que la IA deja en la carátula con datos
  * reales del proyecto. Se hace en el servidor para que el usuario NO tenga
  * que tocar el .tex.
+ *
+ * IMPORTANTE: el prompt actual usa formato `<<PLACEHOLDER>>`. Mantenemos
+ * compatibilidad hacia atrás con `[Placeholder]` y `{Placeholder}` por si
+ * versiones viejas o ediciones del admin usan esos formatos.
  */
 function inyectarDatosCaratula(tex: string, datos: Record<string, string>): string {
+  // Datos derivados / defaults
+  const universidad = datos.universidad || "UNIVERSIDAD MAYOR DE SAN SIMÓN";
+  const facultad = datos.facultad || "FACULTAD DE CIENCIAS ECONÓMICAS";
+  const departamento = datos.departamento || "ESCUELA UNIVERSITARIA DE POSGRADO";
+  const modalidad = datos.modalidad || "DIPLOMADO";
+  const ciudad = datos.ciudad || "Cochabamba";
+  const pais = datos.pais || "Bolivia";
+  const mesAnio = `${datos.mes} ${datos.anio}`;
+
   const replacements: Array<[RegExp, string]> = [
-    // Nombre del estudiante (varios formatos que la IA puede generar)
+    // ── Formato actual del prompt: <<PLACEHOLDER>> ─────────────────
+    [/<<\s*ESTUDIANTE\s*>>/g, datos.nombre],
+    [/<<\s*UNIVERSIDAD\s*>>/g, universidad],
+    [/<<\s*FACULTAD\s*>>/g, facultad],
+    [/<<\s*DEPARTAMENTO\s*>>/g, departamento],
+    [/<<\s*MODALIDAD\s*>>/g, modalidad],
+    [/<<\s*PROGRAMA\s*>>/g, datos.programa],
+    [/<<\s*VERSION_DIPLOMADO\s*>>/g, datos.version],
+    [/<<\s*VERSI[ÓO]N\s*>>/g, datos.version],
+    [/<<\s*TITULO_TRABAJO\s*>>/g, datos.titulo],
+    [/<<\s*T[ÍI]TULO\s*>>/g, datos.titulo],
+    [/<<\s*MES_ANIO\s*>>/g, mesAnio],
+    [/<<\s*MES\s*>>/g, datos.mes],
+    [/<<\s*A[ÑN]IO\s*>>/g, datos.anio],
+    [/<<\s*A[ÑN]O\s*>>/g, datos.anio],
+    [/<<\s*TUTOR\s*>>/g, datos.tutor],
+    [/<<\s*CIUDAD\s*>>/g, ciudad],
+    [/<<\s*PAIS\s*>>/g, pais],
+
+    // ── Compatibilidad hacia atrás: [Placeholder] / {Placeholder} ─
     [/\[Nombre del Estudiante\]/gi, datos.nombre],
     [/\[Nombre Estudiante\]/gi, datos.nombre],
     [/\{Nombre del Estudiante\}/gi, datos.nombre],
     [/\{nombre estudiante\}/gi, datos.nombre],
-    // Programa
     [/\[Programa\]/gi, datos.programa],
     [/\{PROGRAMA\}/gi, datos.programa],
-    // Versión
-    [/\[Versión\]/gi, datos.version],
-    [/\[Version\]/gi, datos.version],
-    [/\{VERSIÓN\}/gi, datos.version],
-    [/\{VERSION\}/gi, datos.version],
-    // Mes y año
+    [/\[Versi[óo]n\]/gi, datos.version],
+    [/\{VERSI[ÓO]N\}/gi, datos.version],
     [/\[Mes\]/gi, datos.mes],
     [/\{Mes\}/gi, datos.mes],
-    [/\[Año\]/gi, datos.anio],
-    [/\[Anio\]/gi, datos.anio],
-    [/\{Año\}/gi, datos.anio],
-    // Tutor
+    [/\[A[ñn]o\]/gi, datos.anio],
+    [/\{A[ñn]o\}/gi, datos.anio],
     [/\[Nombre del Tutor.*?\]/gi, datos.tutor],
     [/\[Tutor\]/gi, datos.tutor],
-    // Título de trabajo (si quedó como placeholder)
-    [/\[TÍTULO DEL TRABAJO\]/gi, datos.titulo],
-    [/\{TÍTULO DEL TRABAJO\}/gi, datos.titulo],
-    [/\{TITULO DEL TRABAJO\}/gi, datos.titulo],
+    [/\[T[ÍI]TULO DEL TRABAJO\]/gi, datos.titulo],
+    [/\{T[ÍI]TULO DEL TRABAJO\}/gi, datos.titulo],
+
+    // ── Limpieza de placeholders sin reemplazar (sobrevivientes) ──
+    //    La IA a veces deja literalmente "Estudiante del Programa",
+    //    "Nombre del Estudiante", "Mes Año", etc. cuando no encuentra
+    //    los datos. Los reemplazamos por los valores reales.
+    [/Estudiante del Programa/g, datos.nombre],
+    [/Nombre del Estudiante/g, datos.nombre],
+    [/Nombre Estudiante/g, datos.nombre],
   ];
 
   let resultado = tex;
@@ -129,6 +160,11 @@ export async function GET(_req: Request, { params }: Params) {
     const nombreEstudiante = typeof ctxInicial.nombre === "string" && ctxInicial.nombre.trim()
       ? ctxInicial.nombre
       : (user.name || "Estudiante");
+    // Resolver universidad ANTES de construir `datos`, para inyectar nombre,
+    // facultad y departamento en los placeholders <<UNIVERSIDAD>>, etc.
+    const universidadId = (proyecto.universidad_id as string) || "umss-001";
+    const universidad = DEFAULT_UNIVERSITIES.find(u => u.id === universidadId) ?? DEFAULT_UNIVERSITIES[0];
+    const uniRecord = (universidad as unknown as Record<string, unknown>) ?? {};
     const datos: Record<string, string> = {
       nombre: nombreEstudiante,
       programa: String(ctxInicial.programa ?? "Diplomado"),
@@ -137,13 +173,16 @@ export async function GET(_req: Request, { params }: Params) {
       anio: anioElegido,
       tutor: String(ctxInicial.tutor ?? ""),
       titulo: String(proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "Monografía"),
+      universidad: String(uniRecord.name ?? "UNIVERSIDAD MAYOR DE SAN SIMÓN").toUpperCase(),
+      facultad: String(uniRecord.facultad ?? "FACULTAD DE CIENCIAS ECONÓMICAS").toUpperCase(),
+      departamento: String(uniRecord.departamento ?? "ESCUELA UNIVERSITARIA DE POSGRADO").toUpperCase(),
+      modalidad: String(ctxInicial.modalidad ?? "DIPLOMADO").toUpperCase(),
+      ciudad: String(ctxInicial.ciudad ?? uniRecord.ciudad ?? "Cochabamba"),
+      pais: String(ctxInicial.pais ?? uniRecord.pais ?? "Bolivia"),
     };
     const texConDatos = inyectarDatosCaratula(tex, datos);
 
-    // 3) Cargar el logo de la universidad — primero, para conocer qué archivos
-    //    van al ZIP y poder sanear el .tex contra esa lista.
-    const universidadId = (proyecto.universidad_id as string) || "umss-001";
-    const universidad = DEFAULT_UNIVERSITIES.find(u => u.id === universidadId) ?? DEFAULT_UNIVERSITIES[0];
+    // 3) Cargar el logo de la universidad para incluirlo en el ZIP.
     let logoBuffer: Buffer | null = null;
     // ⚠️ IMPORTANTE: el prompt LaTeX referencia el logo como `logos/umss.png`
     //    (carpeta `logos/` dentro del ZIP). Si cambiás este path, también hay
