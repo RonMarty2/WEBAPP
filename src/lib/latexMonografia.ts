@@ -310,11 +310,14 @@ ${uniTpl.preambleExtras ?? ""}
 \\usepackage{hyperref}
 \\hypersetup{hidelinks}
 \\usepackage{graphicx}
-% 📊 Soporte para gráficos pgfplots/TikZ generados por la IA en fases analíticas
+% 📊 Soporte para gráficos pgfplots/TikZ (fases analíticas).
+% pgf-pie se carga SOLO si está disponible — no es estándar en Overleaf free,
+% si no está instalado simplemente se omite (los gráficos de torta usan
+% pgfplots como fallback).
 \\usepackage{tikz}
 \\usepackage{pgfplots}
 \\pgfplotsset{compat=1.18}
-\\usepackage{pgf-pie}
+\\IfFileExists{pgf-pie.sty}{\\usepackage{pgf-pie}}{}
 ${caratulaPdf ? "\\usepackage{pdfpages}" : ""}
 
 % ─── Encabezados y pies de página ───────────────────────────
@@ -323,14 +326,11 @@ ${caratulaPdf ? "\\usepackage{pdfpages}" : ""}
 \\rfoot{\\thepage}
 \\renewcommand{\\headrulewidth}{0pt}
 
-% ─── Profundidad de secciones ───────────────────────────────
+% ─── Profundidad de secciones (UMSS: arábigos hasta 5 niveles) ──
 \\setcounter{secnumdepth}{4}
 \\setcounter{tocdepth}{3}
-
-% ─── Sin numeración automática en \\section ──────────────────
-\\renewcommand{\\thesection}{}
-\\renewcommand{\\thesubsection}{\\arabic{subsection}}
-\\renewcommand{\\thesubsubsection}{\\arabic{subsection}.\\arabic{subsubsection}}
+% Numeración arábiga estándar (1, 1.1, 1.1.1, etc.) — la default de
+% \\article ya hace esto. No necesitamos renewcommand para sobreescribir.
 
 \\title{${escaparLatexPlain(titulo)}}
 \\author{}
