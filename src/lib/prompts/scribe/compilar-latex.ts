@@ -85,6 +85,30 @@ PRESERVAR pero limpiar:
   marcarlos como datos aproximados con [datos preliminares].
 
 ═══════════════════════════════════════════════════════════════
+🚨 REGLA #0-QUATER — ESCAPAR AMPERSAND EN BIBLIOGRAFÍA (CRÍTICO)
+═══════════════════════════════════════════════════════════════
+
+El carácter ampersand (el símbolo "y comercial") es un comando especial
+en LaTeX (separador de columnas en tablas). Si aparece dentro del texto
+debe escaparse como backslash-ampersand.
+
+En las REFERENCIAS BIBLIOGRÁFICAS aparece MUY frecuentemente entre autores:
+  MAL:  "Giordano, P. R., Campos, R., & Michalczewsky, K. (2023)..."
+  BIEN: "Giordano, P. R., Campos, R., \\& Michalczewsky, K. (2023)..."
+
+REGLA OBLIGATORIA: en TODA referencia bibliográfica con 2+ autores,
+el ampersand que une el último autor DEBE escaparse como \\&. Esto vale
+tanto dentro de \\begin{hangparas} como en \\begin{thebibliography}
+o cualquier lugar donde aparezca un autor.
+
+Otros caracteres también deben escaparse en bibliografía:
+  porcentaje → \\%
+  dólar → \\$
+  numeral → \\#
+  guion bajo → \\_
+  tilde → \\textasciitilde{}
+  acento circunflejo → \\textasciicircum{}
+
 🚨 REGLA #0-TER — NO DUPLICAR TÍTULOS DE CAPÍTULO
 ═══════════════════════════════════════════════════════════════
 

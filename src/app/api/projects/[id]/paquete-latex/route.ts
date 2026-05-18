@@ -153,7 +153,16 @@ export async function GET(_req: Request, { params }: Params) {
         { status: 400 }
       );
     }
-    const tex = extractLatex(rawLatex);
+    let tex = extractLatex(rawLatex);
+
+    // 🔧 Saneo post-IA: escapar `&` sueltos dentro de bloques de bibliografía
+    // (\begin{hangparas}...\end{hangparas} o \begin{thebibliography}...\end{...}).
+    // La IA a veces deja "Giordano, P. R., & Michalczewsky..." sin escapar,
+    // y LaTeX falla con "Misplaced alignment tab character &".
+    tex = tex.replace(
+      /(\\begin\{(?:hangparas|thebibliography)\}[\s\S]*?\\end\{(?:hangparas|thebibliography)\})/g,
+      (block) => block.replace(/(?<!\\)&/g, "\\&"),
+    );
 
     // 2) Datos para inyectar en la carátula
     //
