@@ -262,12 +262,19 @@ ${uniTpl.preambleExtras ?? ""}
 \\usepackage{float}
 \\usepackage{array}
 \\usepackage{tabularx}
+\\usepackage{booktabs}
 \\usepackage{xcolor}
 \\usepackage{parskip}
 \\setlength{\\parskip}{0.45em}
 \\usepackage{fancyhdr}
 \\usepackage{hyperref}
 \\hypersetup{hidelinks}
+\\usepackage{graphicx}
+% 📊 Soporte para gráficos pgfplots/TikZ generados por la IA en fases analíticas
+\\usepackage{tikz}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+\\usepackage{pgf-pie}
 ${caratulaPdf ? "\\usepackage{pdfpages}" : ""}
 
 % ─── Encabezados y pies de página ───────────────────────────

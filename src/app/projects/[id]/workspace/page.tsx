@@ -12,6 +12,7 @@ import CalidadInsights from "@/components/scribe/CalidadInsights";
 import CapituloInsights from "@/components/scribe/CapituloInsights";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
+import { isPhaseTecnica } from "@/lib/phaseCategories";
 import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
 import GlassModal from "@/components/ui/GlassModal";
 import ObservacionesTribunal from "@/components/ObservacionesTribunal";
@@ -1504,7 +1505,8 @@ export default function WorkspacePage() {
     const docUnivDefault = university ?? DEFAULT_UNIVERSITIES[0];
     if (!proyecto) {
       return {
-        fasesCompletadas: 0, fasesConContenido: 0, fasesEnBorrador: 0,
+        fasesCompletadas: 0, fasesCompletadasAcademicas: 0, totalFasesAcademicas: 0,
+        fasesConContenido: 0, fasesEnBorrador: 0,
         totalWords: 0,
         desgloseFases: [] as Array<{ id: string; label: string; pags: number; esBiblio: boolean }>,
         hayBiblioGenerada: false,
@@ -1525,6 +1527,7 @@ export default function WorkspacePage() {
 
     let aprobadas = 0;
     let conContenido = 0;
+    let aprobadasAcademicas = 0;   // Solo capítulos académicos aprobados
     let words = 0;
     const desglose: Array<{ id: string; label: string; pags: number; esBiblio: boolean }> = [];
 
@@ -1536,7 +1539,10 @@ export default function WorkspacePage() {
       const borrador = borrC?.trim() ? borrC : null;
       const content = final ?? borrador;
 
-      if (final) aprobadas++;
+      if (final) {
+        aprobadas++;
+        if (!isPhaseTecnica(f.id)) aprobadasAcademicas++;
+      }
       if (content) conContenido++;
       if (content) words += countWords(content);
       if (content && f.id !== "ph-cap0") {
@@ -1548,6 +1554,11 @@ export default function WorkspacePage() {
         });
       }
     }
+
+    // Total de fases académicas (excluye técnicas como LaTeX, banco preguntas, etc).
+    // El contador del header muestra "X de Y capítulos" usando ESTOS valores
+    // para no confundir al usuario con fases de procesamiento interno.
+    const totalAcademicas = displayFases.filter(f => !isPhaseTecnica(f.id)).length;
 
     const enBorrador = conContenido - aprobadas;
     const hayBiblio = desglose.some(d => d.esBiblio);
@@ -1587,6 +1598,8 @@ export default function WorkspacePage() {
 
     return {
       fasesCompletadas: aprobadas,
+      fasesCompletadasAcademicas: aprobadasAcademicas,
+      totalFasesAcademicas: totalAcademicas,
       fasesConContenido: conContenido,
       fasesEnBorrador: enBorrador,
       totalWords: words,
@@ -1643,7 +1656,8 @@ export default function WorkspacePage() {
     );
   }
   const {
-    fasesCompletadas, fasesConContenido, fasesEnBorrador, totalWords,
+    fasesCompletadas, fasesCompletadasAcademicas, totalFasesAcademicas,
+    fasesConContenido, fasesEnBorrador, totalWords,
     desgloseFases, hayBiblioGenerada, estimatedPages,
     documentUniversity, storedFinalDocument, documentoFinalListo,
     phaseContents, phaseLabels, documentTitle, docHtml,
@@ -1787,11 +1801,11 @@ export default function WorkspacePage() {
             <span>{proyecto.servicios?.nombre ?? "Monografía"}</span>
             <span className="hidden sm:inline">·</span>
             <span className="hidden sm:inline">
-              {fasesCompletadas === 0
+              {fasesCompletadasAcademicas === 0
                 ? "Comenzando"
-                : fasesCompletadas === displayFases.length
+                : fasesCompletadasAcademicas === totalFasesAcademicas
                   ? "Completo ✓"
-                  : `${fasesCompletadas} de ${displayFases.length} capítulos`}
+                  : `${fasesCompletadasAcademicas} de ${totalFasesAcademicas} capítulos`}
             </span>
             {totalWords > 0 && (
               <>
@@ -1893,26 +1907,54 @@ export default function WorkspacePage() {
 
         {/* Phase dots */}
         <div className="flex gap-1 md:gap-1.5 items-center overflow-x-auto no-scrollbar w-full md:w-auto order-last md:order-none py-1 md:py-0 border-t border-[var(--bg-subtle)] md:border-t-0 mt-1 md:mt-0">
-          {displayFases.map((f, idx) => {
-            const fId = f.id;
-            const done = Boolean(getFinalContent(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
-            const hasBorr = Boolean(getBorrador(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
-            const needsUpd = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? fId : String(idx)]);
-            const sel = idx === selectedFase;
-            return (
-              <button key={f.id} onClick={() => setSelectedFase(idx)} title={f.label + (needsUpd ? " — ⚠️ Desactualizado" : "")}
-                className="shrink-0"
-                style={{
-                  width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
-                  border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
-                  background: sel ? "rgba(37,99,235,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
-                  color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "var(--fg-secondary)",
-                  display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s",
-                }}>
-                {needsUpd ? "!" : done ? "✓" : hasBorr ? "~" : idx}
-              </button>
-            );
-          })}
+          {(() => {
+            // Buscamos el índice de la PRIMERA fase técnica para insertar un separador visual ⚙
+            const firstTecnicaIdx = displayFases.findIndex(f => isPhaseTecnica(f.id));
+            return displayFases.map((f, idx) => {
+              const fId = f.id;
+              const done = Boolean(getFinalContent(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
+              const hasBorr = Boolean(getBorrador(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
+              const needsUpd = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? fId : String(idx)]);
+              const sel = idx === selectedFase;
+              const esTecnica = isPhaseTecnica(fId);
+              // Insertar un separador antes de la primera fase técnica
+              const showSep = firstTecnicaIdx >= 0 && idx === firstTecnicaIdx && idx > 0;
+              const tituloTooltip = esTecnica
+                ? `${f.label} — ⚙️ Proceso automático (se genera al finalizar)`
+                : f.label + (needsUpd ? " — ⚠️ Desactualizado" : "");
+              return (
+                <span key={f.id} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  {showSep && (
+                    <span
+                      title="Procesos finales automáticos (LaTeX, banco de preguntas, bibliografía)"
+                      style={{
+                        fontSize: 11, color: "var(--fg-muted)", padding: "0 4px",
+                        opacity: 0.6, fontWeight: 700, letterSpacing: 1,
+                      }}
+                    >
+                      ·⚙·
+                    </span>
+                  )}
+                  <button
+                    onClick={() => setSelectedFase(idx)}
+                    title={tituloTooltip}
+                    className="shrink-0"
+                    style={{
+                      width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
+                      border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
+                      background: sel ? "rgba(37,99,235,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
+                      color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "var(--fg-secondary)",
+                      display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s",
+                      // Las fases técnicas se atenúan (queda claro que son "automáticas")
+                      opacity: esTecnica && !sel ? 0.45 : 1,
+                    }}
+                  >
+                    {needsUpd ? "!" : done ? "✓" : hasBorr ? "~" : esTecnica ? "⚙" : idx}
+                  </button>
+                </span>
+              );
+            });
+          })()}
         </div>
 
         {/* Actions */}

@@ -288,6 +288,10 @@ Si MOTOR LATEX = XeLaTeX (solo si está explícitamente pedido):
 \\usepackage{pdflscape}
 \\usepackage{adjustbox}
 \\usepackage{hanging}
+\\usepackage{tikz}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+\\usepackage{pgf-pie}
 
 Si MOTOR LATEX = pdfLaTeX:
 
@@ -334,6 +338,10 @@ Si MOTOR LATEX = pdfLaTeX:
 \\usepackage{pdflscape}
 \\usepackage{adjustbox}
 \\usepackage{hanging}
+\\usepackage{tikz}
+\\usepackage{pgfplots}
+\\pgfplotsset{compat=1.18}
+\\usepackage{pgf-pie}
 
 ═══════════════════════════════════════════════════════════════
 NUMERACIÓN DE PÁGINAS — UMSS / APA 7 (OBLIGATORIO)

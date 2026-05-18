@@ -66,6 +66,8 @@ import {
   withUpdatedReferenceCatalog,
 } from "@/lib/projectReferences.mjs";
 import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
+import { isPhaseAnalitica } from "@/lib/phaseCategories";
+import { getFortalecimientoAnaliticoBlock } from "@/lib/prompts/fortalecimiento-analitico";
 import { buscarFuentesAcademicas, buildFuentesVerificadasBlock } from "@/lib/deepSearch";
 
 // Palabras clave en el label/prompt de una fase dinámica que activan deep search
@@ -729,12 +731,23 @@ REGLAS:
           .catch(() => "")
       : "";
 
+    // 📊 FORTALECIMIENTO ANALÍTICO — para fases que requieren tablas y gráficos
+    //    (Cap IV monografía, PESTEL/Porter/matrices/financiero/evaluación de PG)
+    //    Inyectamos un bloque que obliga a la IA a generar:
+    //      - Tablas markdown estructuradas (Nivel 1)
+    //      - Gráficos pgfplots/TikZ que se renderizan en LaTeX (Nivel 2)
+    //      - Sugerencias visuales para el estudiante
+    const bloqueFortalecimientoAnalitico = isPhaseAnalitica(phase_id)
+      ? getFortalecimientoAnaliticoBlock(phase_id)
+      : null;
+
     const userPromptParts = [
       `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlock}\n--- FIN EXPEDIENTE ---`,
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
       proyecto.titulo_provisional ? `TITULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
       bloqueVariante,
+      bloqueFortalecimientoAnalitico,
       antiDuplicacionBlock || null,
       deepSearchBlock || null,
       referencesPhase
