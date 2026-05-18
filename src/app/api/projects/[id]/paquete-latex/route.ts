@@ -17,9 +17,19 @@ import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
 import { sanitizeOrphanIncludes } from "@/lib/latex/sanitize";
-// (Reservado para futuros usos del generador local; ahora la IA arma el .tex)
-// import { generarLatexMonografia, mdALatex } from "@/lib/latexMonografia";
-// import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
+import { llamarIA, hydrateAIConfigAsync } from "@/lib/aiProvider";
+import {
+  SISTEMA_COMPILAR_CAPITULO,
+  buildCompilarCapituloUserPrompt,
+} from "@/lib/prompts/scribe/compilar-capitulo";
+import {
+  buildPreambleUMSS,
+  buildCaratulaUMSS,
+  buildResumenHeader,
+  buildIndice,
+  buildBibliografiaHeader,
+  buildFinDocumento,
+} from "@/lib/latex/preamble-umss";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -134,35 +144,110 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
     }
 
-    // 1) Leer el .tex generado por la IA en la fase "Compilar LaTeX".
-    //    El prompt SISTEMA_SCRIBE_LATEX (server-only) recibe todos los caps
-    //    y entrega un .tex limpio con estructura UMSS exacta:
-    //      - Carátula UMSS oficial (logo izquierda + datos derecha)
-    //      - Resumen Ejecutivo antes del índice
-    //      - \tableofcontents
-    //      - Cap I-V con numeración arábiga
-    //      - Referencias bibliográficas al final
-    //    La IA además LIMPIA marcadores internos (REFERENCIAS_ETAPA,
-    //    [VERIFICAR], 10.xxxx, separadores —, etc.) preservando 95%+ del
-    //    contenido sustantivo (objetivo 50-70 págs UMSS).
+    // 1) CHUNKING — Compilar cada capítulo por separado en paralelo.
+    //
+    // ⚠️ HISTORIA: Antes leíamos phase_contents['ph-latex'] que era un .tex
+    // monolítico generado por una sola llamada IA con TODOS los caps. Gemini
+    // resumía contenido porque era demasiado para una sola call.
+    //
+    // AHORA: 7 llamadas chicas en paralelo (1 por cap + resumen + biblio).
+    // Cada llamada procesa 3-6K palabras, dentro del sweet-spot del modelo.
+    // Cero presión para resumir.
+    //
+    // Después un script (buildPreambleUMSS + buildCaratulaUMSS + etc.) ensambla
+    // todo con la estructura UMSS oficial (carátula → resumen → índice → caps
+    // → bibliografía). 100% determinista, sin riesgo de errores estructurales.
+    await hydrateAIConfigAsync();
     const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
-    const rawLatex = phaseContents["ph-latex"] || phaseContents["ph-latex_borrador"] || "";
-    if (!rawLatex.trim()) {
+
+    const getContent = (faseId: string): string => {
+      const final = phaseContents[faseId];
+      const borrador = phaseContents[`${faseId}_borrador`];
+      const txt = typeof final === "string" && final.trim() ? final
+                : typeof borrador === "string" && borrador.trim() ? borrador
+                : "";
+      return txt.trim();
+    };
+
+    const FASES_CAP: Array<{ faseId: string; numero: number | "RESUMEN" | "BIBLIOGRAFIA"; titulo: string }> = [
+      { faseId: "ph-resumen",     numero: "RESUMEN",      titulo: "RESUMEN EJECUTIVO" },
+      { faseId: "ph-cap1",        numero: 1, titulo: "INTRODUCCIÓN Y ANTECEDENTES DEL TEMA DE INVESTIGACIÓN" },
+      { faseId: "ph-cap2",        numero: 2, titulo: "MARCO TEÓRICO Y REFERENCIAL" },
+      { faseId: "ph-cap3",        numero: 3, titulo: "DISEÑO METODOLÓGICO DE LA INVESTIGACIÓN" },
+      { faseId: "ph-cap4",        numero: 4, titulo: "ANÁLISIS DE RESULTADOS Y PROPUESTA DE SOLUCIÓN" },
+      { faseId: "ph-cap5",        numero: 5, titulo: "CONCLUSIONES Y RECOMENDACIONES" },
+      { faseId: "ph-referencias", numero: "BIBLIOGRAFIA", titulo: "REFERENCIAS BIBLIOGRÁFICAS" },
+    ];
+
+    // Filtrar solo fases que tienen contenido
+    const fasesConContenido = FASES_CAP
+      .map((f) => ({ ...f, contenidoMd: getContent(f.faseId) }))
+      .filter((f) => f.contenidoMd.length > 0);
+
+    if (fasesConContenido.length === 0) {
       return NextResponse.json(
-        { error: "Todavía no hay LaTeX generado. Genera la fase 'Compilar LaTeX' primero." },
-        { status: 400 }
+        { error: "Aún no hay capítulos generados. Generá Cap I-V primero." },
+        { status: 400 },
       );
     }
-    let tex = extractLatex(rawLatex);
 
-    // 🔧 Saneo post-IA: escapar `&` sueltos dentro de bloques de bibliografía
-    // (\begin{hangparas}...\end{hangparas} o \begin{thebibliography}...\end{...}).
-    // La IA a veces deja "Giordano, P. R., & Michalczewsky..." sin escapar,
-    // y LaTeX falla con "Misplaced alignment tab character &".
-    tex = tex.replace(
-      /(\\begin\{(?:hangparas|thebibliography)\}[\s\S]*?\\end\{(?:hangparas|thebibliography)\})/g,
-      (block) => block.replace(/(?<!\\)&/g, "\\&"),
+    const servicioId = (proyecto.servicio_id as string) || "mono-001";
+    console.log(`[paquete-latex] chunking: compilando ${fasesConContenido.length} secciones en paralelo (svc=${servicioId})`);
+
+    // Compilar TODAS las secciones en paralelo. Cada call es chica (4-8K palabras),
+    // dentro del sweet-spot del modelo. Si una falla, captura el error pero
+    // las otras siguen — al final reportamos cuáles fallaron.
+    const results = await Promise.all(
+      fasesConContenido.map(async (f) => {
+        try {
+          const userPrompt = buildCompilarCapituloUserPrompt({
+            numero: f.numero,
+            titulo: f.titulo,
+            contenidoMd: f.contenidoMd,
+          });
+          const result = await llamarIA(
+            SISTEMA_COMPILAR_CAPITULO,
+            userPrompt,
+            12000, // suficiente para un cap de 4-6K palabras
+            servicioId,
+          );
+          return { faseId: f.faseId, numero: f.numero, latex: result.text.trim(), error: null };
+        } catch (e) {
+          console.error(`[paquete-latex] error compilando ${f.faseId}:`, (e as Error).message);
+          return {
+            faseId: f.faseId,
+            numero: f.numero,
+            latex: `% ⚠️ ERROR al compilar este capítulo: ${(e as Error).message}\n% El contenido original está en markdown, no se pudo convertir.\n`,
+            error: (e as Error).message,
+          };
+        }
+      }),
     );
+
+    // Si ALL fallaron, reportar error
+    const failed = results.filter((r) => r.error !== null);
+    if (failed.length === results.length) {
+      return NextResponse.json(
+        { error: "No se pudo compilar ninguna sección. Verificá que la IA esté configurada y disponible." },
+        { status: 502 },
+      );
+    }
+    if (failed.length > 0) {
+      console.warn(`[paquete-latex] ${failed.length}/${results.length} secciones fallaron.`);
+    }
+
+    // Helper: limpiar bloques code fence ```latex que la IA pudo dejar
+    const limpiarLatexBlock = (latex: string): string => {
+      let cleaned = latex.replace(/```(?:latex|tex)?\s*\n([\s\S]*?)\n```/g, "$1");
+      cleaned = cleaned.replace(/```\s*\n?/g, "");
+      // Sanear bibliografía: escapar `&` sueltos dentro de hangparas/thebibliography
+      cleaned = cleaned.replace(
+        /(\\begin\{(?:hangparas|thebibliography)\}[\s\S]*?\\end\{(?:hangparas|thebibliography)\})/g,
+        (block) => block.replace(/(?<!\\)&/g, "\\&"),
+      );
+      return cleaned;
+    };
+    results.forEach((r) => { r.latex = limpiarLatexBlock(r.latex); });
 
     // 2) Datos para inyectar en la carátula
     //
@@ -216,9 +301,65 @@ export async function GET(_req: Request, { params }: Params) {
       pais: pick("pais", "pais", "Bolivia"),
     };
 
-    // Inyectar datos editables del estudiante en los placeholders <<...>>
-    // del .tex que generó la IA.
-    const texConDatos = inyectarDatosCaratula(tex, datos);
+    // ENSAMBLAR el .tex final de forma determinista (sin IA).
+    // Estructura UMSS oficial garantizada en orden correcto:
+    //   1. Preámbulo (paquetes + config tipográfica)
+    //   2. \begin{document}
+    //   3. Carátula UMSS (logo izq + datos derecha)
+    //   4. Resumen Ejecutivo (con \section*)
+    //   5. Índice general (\tableofcontents)
+    //   6. Capítulos 1-5 (\chapter)
+    //   7. Bibliografía
+    //   8. \end{document}
+    const preamble = buildPreambleUMSS();
+    const caratula = buildCaratulaUMSS({
+      nombre: datos.nombre,
+      titulo: datos.titulo,
+      programa: datos.programa,
+      version: datos.version,
+      modalidad: datos.modalidad,
+      universidad: datos.universidad,
+      facultad: datos.facultad,
+      departamento: datos.departamento,
+      ciudad: datos.ciudad,
+      pais: datos.pais,
+      mes: datos.mes,
+      anio: datos.anio,
+      tutor: datos.tutor || undefined,
+    });
+
+    // Ubicar cada sección por su faseId
+    const resumenLatex = results.find((r) => r.faseId === "ph-resumen")?.latex ?? "";
+    const cap1Latex = results.find((r) => r.faseId === "ph-cap1")?.latex ?? "";
+    const cap2Latex = results.find((r) => r.faseId === "ph-cap2")?.latex ?? "";
+    const cap3Latex = results.find((r) => r.faseId === "ph-cap3")?.latex ?? "";
+    const cap4Latex = results.find((r) => r.faseId === "ph-cap4")?.latex ?? "";
+    const cap5Latex = results.find((r) => r.faseId === "ph-cap5")?.latex ?? "";
+    const biblioLatex = results.find((r) => r.faseId === "ph-referencias")?.latex ?? "";
+
+    const partes: string[] = [
+      preamble,
+      caratula,
+    ];
+    if (resumenLatex) {
+      // La IA debería haber generado \section*{RESUMEN EJECUTIVO}, pero por seguridad
+      // agregamos también la cabecera + numeración roman.
+      partes.push(buildResumenHeader());
+      partes.push(resumenLatex);
+    }
+    partes.push(buildIndice());
+    if (cap1Latex) partes.push(cap1Latex);
+    if (cap2Latex) partes.push(cap2Latex);
+    if (cap3Latex) partes.push(cap3Latex);
+    if (cap4Latex) partes.push(cap4Latex);
+    if (cap5Latex) partes.push(cap5Latex);
+    if (biblioLatex) {
+      partes.push(buildBibliografiaHeader());
+      partes.push(biblioLatex);
+    }
+    partes.push(buildFinDocumento());
+
+    const texConDatos = partes.join("\n\n");
 
     // 3) Cargar el logo de la universidad para incluirlo en el ZIP.
     let logoBuffer: Buffer | null = null;
