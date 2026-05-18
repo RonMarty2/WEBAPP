@@ -1985,6 +1985,51 @@ export default function WorkspacePage() {
               {showPdfPanel ? "✕ Preview" : "👁 Preview"}
             </button>
           )}
+          {/* 🔄 Regenerar fase actual — SOLO ADMIN, SIEMPRE visible cuando hay contenido.
+              Resuelve el caso donde los botones admin internos están ocultos por
+              flags como esGuiado/hasFinal. Útil para forzar regeneración aplicando
+              prompts nuevos (ej. fortalecimiento analítico). */}
+          {mostrarHerramientasAdmin && !isCap0Phase && (hasFinal || hasBorrador) && (
+            <button
+              onClick={async () => {
+                const fase = displayFases[selectedFase];
+                const label = fase?.label ?? phaseId;
+                const ok = window.confirm(
+                  `¿Regenerar "${label}" desde cero?\n\n` +
+                  `• Borra el contenido actual de esta fase\n` +
+                  `• Vuelve a llamar a la IA con los prompts más nuevos\n` +
+                  `• Si la fase es analítica (Cap IV, PESTEL, etc.), la nueva versión incluirá tablas + gráficos pgfplots\n\n` +
+                  `Esto gasta tokens de IA y NO se puede deshacer. ¿Procedo?`
+                );
+                if (!ok) return;
+                try {
+                  await resetearFaseAdmin();
+                  // Tras reset, lanzar generación nueva inmediatamente
+                  setTimeout(() => generarFase({ tipo: "borrador" }), 300);
+                } catch (e) {
+                  alert(`Error: ${e instanceof Error ? e.message : "desconocido"}`);
+                }
+              }}
+              disabled={isGenerating}
+              className="btn-ghost"
+              style={{
+                fontSize: 11,
+                padding: "6px 12px",
+                gap: 5,
+                display: "flex",
+                alignItems: "center",
+                background: "rgba(167,139,250,0.08)",
+                border: "1px solid rgba(167,139,250,0.35)",
+                color: "#a78bfa",
+                fontWeight: 700,
+                cursor: isGenerating ? "wait" : "pointer",
+                opacity: isGenerating ? 0.5 : 1,
+              }}
+              title="Borra y regenera esta fase aplicando los prompts más nuevos. Sirve para activar fortalecimiento analítico en fases viejas."
+            >
+              🔄 Regenerar fase <span style={{ fontSize: 9, opacity: 0.7, fontWeight: 500 }}>· admin</span>
+            </button>
+          )}
           {fasesCompletadas > 0 && (
             <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
               {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
