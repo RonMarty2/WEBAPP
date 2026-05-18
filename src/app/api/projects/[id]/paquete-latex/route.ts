@@ -330,9 +330,15 @@ export async function GET(_req: Request, { params }: Params) {
     }
 
     // 5) Armar el ZIP
+    //
+    // ⚠️ IMPORTANTE: Overleaf busca `main.tex` por default al hacer Upload
+    //    Project. Si el archivo tiene otro nombre, da el error
+    //    "Emergency stop / file error in nonstop mode" porque pdftex no
+    //    encuentra el archivo. Por eso guardamos como `main.tex`.
+    //    El nombre descriptivo del proyecto va solo en el README.
     const zip = new JSZip();
     const baseName = slugify(datos.titulo);
-    zip.file(`${baseName}.tex`, texLimpio);
+    zip.file("main.tex", texLimpio);
     if (logoBuffer) {
       zip.file(logoFilename, logoBuffer);
     }
@@ -352,7 +358,7 @@ export async function GET(_req: Request, { params }: Params) {
       `   tu nombre, fecha y programa ya cargados.`,
       ``,
       `Si necesitas ajustar algún dato (nombre, mes, etc.), abre el archivo`,
-      `${baseName}.tex y busca el texto a cambiar — está al inicio del documento`,
+      `main.tex y busca el texto a cambiar — está al inicio del documento`,
       `en el bloque \\begin{titlepage}.`,
     ];
 
