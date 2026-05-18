@@ -112,15 +112,29 @@ export async function GET(_req: Request, { params }: Params) {
     const tex = extractLatex(rawLatex);
 
     // 2) Datos para inyectar en la carátula
+    //
+    // Si el estudiante editó mes/año en el modal "Configurar Carátula" del
+    // workspace, esos valores quedaron persistidos en
+    // academic_context.contexto_inicial.{mes_presentacion, anio_presentacion}.
+    // Los usamos preferentemente; si no existen, fallback a la fecha actual.
     const ahora = new Date();
     const academicContext = (proyecto.academic_context ?? {}) as Record<string, unknown>;
     const ctxInicial = (academicContext.contexto_inicial ?? {}) as Record<string, unknown>;
+    const mesElegido = typeof ctxInicial.mes_presentacion === "string" && ctxInicial.mes_presentacion.trim()
+      ? ctxInicial.mes_presentacion
+      : MESES[ahora.getMonth()];
+    const anioElegido = typeof ctxInicial.anio_presentacion === "string" && ctxInicial.anio_presentacion.trim()
+      ? ctxInicial.anio_presentacion
+      : String(ahora.getFullYear());
+    const nombreEstudiante = typeof ctxInicial.nombre === "string" && ctxInicial.nombre.trim()
+      ? ctxInicial.nombre
+      : (user.name || "Estudiante");
     const datos: Record<string, string> = {
-      nombre: user.name || "Estudiante",
+      nombre: nombreEstudiante,
       programa: String(ctxInicial.programa ?? "Diplomado"),
       version: String(ctxInicial.version ?? ctxInicial.numero_version ?? "1° Versión"),
-      mes: MESES[ahora.getMonth()],
-      anio: String(ahora.getFullYear()),
+      mes: mesElegido,
+      anio: anioElegido,
       tutor: String(ctxInicial.tutor ?? ""),
       titulo: String(proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "Monografía"),
     };

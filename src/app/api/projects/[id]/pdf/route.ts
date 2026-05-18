@@ -116,10 +116,21 @@ export async function GET(req: Request, { params }: Params) {
     const academicContext = (proyecto.academic_context ?? {}) as Record<string, unknown>;
     const ctxInicial = (academicContext.contexto_inicial ?? {}) as Record<string, unknown>;
     const titulo = String(proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "Monografía");
+    // Mes/año/nombre editados por el estudiante en el modal "Configurar
+    // Carátula" — persistidos en contexto_inicial. Fallback: fecha actual.
+    const mesElegido = typeof ctxInicial.mes_presentacion === "string" && ctxInicial.mes_presentacion.trim()
+      ? ctxInicial.mes_presentacion
+      : MESES[ahora.getMonth()];
+    const anioElegido = typeof ctxInicial.anio_presentacion === "string" && ctxInicial.anio_presentacion.trim()
+      ? ctxInicial.anio_presentacion
+      : String(ahora.getFullYear());
+    const nombreEstudiante = typeof ctxInicial.nombre === "string" && ctxInicial.nombre.trim()
+      ? ctxInicial.nombre
+      : (user.name || "Estudiante");
     const studentData: StudentCoverData = {
-      nombre: user.name || "Estudiante",
-      mes: MESES[ahora.getMonth()],
-      anio: String(ahora.getFullYear()),
+      nombre: nombreEstudiante,
+      mes: mesElegido,
+      anio: anioElegido,
       programa: String(ctxInicial.programa ?? "Diplomado"),
       version: String(ctxInicial.version ?? ctxInicial.numero_version ?? "1° Versión"),
       tutor: String(ctxInicial.tutor ?? ""),

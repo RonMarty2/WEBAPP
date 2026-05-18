@@ -619,6 +619,10 @@ export default function WorkspacePage() {
     programa: "", version: "", tutor: "", carrera: "",
   });
   const [showCoverSettings, setShowCoverSettings] = useState(false);
+  /** Indica si pdfData fue editado desde el modal (para persistir al cerrar). */
+  const pdfDataDirtyRef = useRef(false);
+  /** Evita re-hidratación múltiple cuando el proyecto se refresca. */
+  const pdfDataHydratedRef = useRef(false);
 
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -831,6 +835,69 @@ export default function WorkspacePage() {
       /* storage quota or private mode */
     }
   }, [cacheKey, user, proyecto, university, pdfData, selectedFase, isDynamic, phaseDefs, loading]);
+
+  // 📅 Hidratar pdfData (mes/año/nombre/tutor/programa) desde el proyecto la
+  //    primera vez que se carga. Si el estudiante ya editó esos campos antes
+  //    (los tiene en academic_context.contexto_inicial), se respetan.
+  //    Si no, se mantienen los defaults (fecha actual).
+  useEffect(() => {
+    if (pdfDataHydratedRef.current || !proyecto || !user) return;
+    const ctx = ((proyecto as unknown as { academic_context?: Record<string, unknown> }).academic_context ?? {}) as Record<string, unknown>;
+    const ctxIni = (ctx.contexto_inicial ?? {}) as Record<string, unknown>;
+    setPdfData((prev) => ({
+      ...prev,
+      nombre: (typeof ctxIni.nombre === "string" && ctxIni.nombre) || user.name || prev.nombre,
+      mes: (typeof ctxIni.mes_presentacion === "string" && ctxIni.mes_presentacion) || prev.mes,
+      anio: (typeof ctxIni.anio_presentacion === "string" && ctxIni.anio_presentacion) || prev.anio,
+      programa: (typeof ctxIni.programa === "string" && ctxIni.programa) || prev.programa,
+      version: (typeof ctxIni.version === "string" && ctxIni.version) || prev.version,
+      tutor: (typeof ctxIni.tutor === "string" && ctxIni.tutor) || prev.tutor,
+      carrera: (typeof ctxIni.carrera === "string" && ctxIni.carrera) || prev.carrera,
+      tituloTrabajo: ((proyecto as unknown as { tema_aprobado?: string }).tema_aprobado) || prev.tituloTrabajo,
+    }));
+    pdfDataHydratedRef.current = true;
+  }, [proyecto, user]);
+
+  /**
+   * Persiste los datos de la carátula en el proyecto cuando el estudiante
+   * cierra el modal "Configurar Carátula". Guarda en academic_context.contexto_inicial
+   * para que paquete-latex (server) los use al generar el ZIP.
+   */
+  const guardarDatosCaratula = useCallback(async () => {
+    if (!proyecto || !pdfDataDirtyRef.current) {
+      setShowCoverSettings(false);
+      return;
+    }
+    pdfDataDirtyRef.current = false;
+    try {
+      const ctxActual = ((proyecto as unknown as { academic_context?: Record<string, unknown> }).academic_context ?? {}) as Record<string, unknown>;
+      const ctxIniActual = (ctxActual.contexto_inicial ?? {}) as Record<string, unknown>;
+      const ctxIniNuevo = {
+        ...ctxIniActual,
+        nombre: pdfData.nombre,
+        mes_presentacion: pdfData.mes,
+        anio_presentacion: pdfData.anio,
+        programa: pdfData.programa ?? ctxIniActual.programa,
+        version: pdfData.version ?? ctxIniActual.version,
+        tutor: pdfData.tutor ?? ctxIniActual.tutor,
+        carrera: pdfData.carrera ?? ctxIniActual.carrera,
+      };
+      const academicContextNuevo = { ...ctxActual, contexto_inicial: ctxIniNuevo };
+      const res = await fetch(`/api/projects/${proyecto.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ academic_context: academicContextNuevo }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProyecto((prev) => prev ? { ...prev, ...data.proyecto } : prev);
+      }
+    } catch (e) {
+      console.error("[caratula] error al guardar", e);
+    } finally {
+      setShowCoverSettings(false);
+    }
+  }, [proyecto, pdfData]);
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMsgs]);
   useEffect(() => {
@@ -3532,35 +3599,35 @@ export default function WorkspacePage() {
         )}
       </div>
 
-      <GlassModal isOpen={showCoverSettings} onClose={() => setShowCoverSettings(false)} title="Configurar Carátula">
+      <GlassModal isOpen={showCoverSettings} onClose={guardarDatosCaratula} title="Configurar Carátula">
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           <p style={{ fontSize: 13, color: "var(--fg-secondary)", margin: 0 }}>
             Completa los datos para generar tu carátula interactiva y aplicar el formato a tu exportación.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Nombre Completo del Estudiante</label>
-            <input className="input-dark" value={pdfData.nombre} onChange={e => setPdfData({ ...pdfData, nombre: e.target.value })} placeholder="Ej. Juan Pérez" />
+            <input className="input-dark" value={pdfData.nombre} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, nombre: e.target.value })); }} placeholder="Ej. Juan Pérez" />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>T&iacute;tulo del Trabajo</label>
-            <input className="input-dark" value={pdfData.tituloTrabajo ?? documentTitle} onChange={e => setPdfData({ ...pdfData, tituloTrabajo: e.target.value })} placeholder="Ej. Estrategias de..." />
+            <input className="input-dark" value={pdfData.tituloTrabajo ?? documentTitle} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, tituloTrabajo: e.target.value })); }} placeholder="Ej. Estrategias de..." />
           </div>
           {(documentUniversity.campos_portada || []).includes("tutor") && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Nombre del Tutor/a</label>
-              <input className="input-dark" value={pdfData.tutor || ""} onChange={e => setPdfData({ ...pdfData, tutor: e.target.value })} placeholder="Ej. Dra. María Gómez" />
+              <input className="input-dark" value={pdfData.tutor || ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, tutor: e.target.value })); }} placeholder="Ej. Dra. María Gómez" />
             </div>
           )}
           {(documentUniversity.campos_portada || []).includes("programa") && (
             <div style={{ display: "flex", gap: 12 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
                 <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Programa (Ej. Educación Superior)</label>
-                <input className="input-dark" value={pdfData.programa || ""} onChange={e => setPdfData({ ...pdfData, programa: e.target.value })} placeholder="Educación Superior..." />
+                <input className="input-dark" value={pdfData.programa || ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, programa: e.target.value })); }} placeholder="Educación Superior..." />
               </div>
               {(documentUniversity.campos_portada || []).includes("version") && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 120 }}>
                   <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Versión</label>
-                  <input className="input-dark" value={pdfData.version || ""} onChange={e => setPdfData({ ...pdfData, version: e.target.value })} placeholder="Ej. VII" />
+                  <input className="input-dark" value={pdfData.version || ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, version: e.target.value })); }} placeholder="Ej. VII" />
                 </div>
               )}
             </div>
@@ -3568,23 +3635,23 @@ export default function WorkspacePage() {
           {(documentUniversity.campos_portada || []).includes("carrera") && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Carrera / Especialidad</label>
-              <input className="input-dark" value={pdfData.carrera || ""} onChange={e => setPdfData({ ...pdfData, carrera: e.target.value })} placeholder="Ej. Ingeniería de Sistemas" />
+              <input className="input-dark" value={pdfData.carrera || ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, carrera: e.target.value })); }} placeholder="Ej. Ingeniería de Sistemas" />
             </div>
           )}
           <div style={{ display: "flex", gap: 12 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Mes de Presentación</label>
-              <select className="input-dark" value={pdfData.mes} onChange={e => setPdfData({ ...pdfData, mes: e.target.value })} style={{ height: 38 }}>
+              <select className="input-dark" value={pdfData.mes} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, mes: e.target.value })); }} style={{ height: 38 }}>
                 {MESES.map(m => <option key={m} value={m}>{m}</option>)}
               </select>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 100 }}>
               <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Año</label>
-              <input className="input-dark" value={pdfData.anio} onChange={e => setPdfData({ ...pdfData, anio: e.target.value })} placeholder="2026" />
+              <input className="input-dark" value={pdfData.anio} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, anio: e.target.value })); }} placeholder="2026" />
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
-            <button className="btn-cyan" onClick={() => setShowCoverSettings(false)} style={{ padding: "10px 24px" }}>Listo</button>
+            <button className="btn-cyan" onClick={guardarDatosCaratula} style={{ padding: "10px 24px" }}>Guardar y cerrar</button>
           </div>
         </div>
       </GlassModal>
