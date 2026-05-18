@@ -704,6 +704,31 @@ No dejar símbolos Markdown visibles:
 - >
 - ---
 
+⚠️ EXCEPCIÓN CRÍTICA — BLOQUES LATEX RAW:
+Si en el contenido fuente encontrás un bloque de código tipo:
+  \`\`\`latex
+  \\begin{figure}[H]
+    \\centering
+    \\begin{tikzpicture}
+    ...
+    \\end{tikzpicture}
+    \\caption{...}
+  \\end{figure}
+  \`\`\`
+
+  (también con etiquetas: \`\`\`tex, \`\`\`tikz, \`\`\`pgfplots)
+
+DEBÉS:
+- ELIMINAR la línea con \`\`\`latex (apertura) y la línea con \`\`\` (cierre)
+- PEGAR el contenido interno TAL CUAL al .tex final, SIN escapar caracteres,
+  SIN envolver en \\begin{verbatim}, SIN modificar nada
+- El preámbulo ya incluye tikz + pgfplots + pgf-pie, por lo que esos bloques
+  se renderizarán como GRÁFICOS REALES en el PDF compilado
+
+Estos bloques vienen del fortalecimiento analítico (Cap IV, PESTEL, Porter,
+matrices, financiero, evaluación) y son fundamentales para la calidad visual.
+NUNCA los conviertas en verbatim ni los escapes.
+
 ═══════════════════════════════════════════════════════════════
 REGLAS PARA CITAS APA EN EL TEXTO
 ═══════════════════════════════════════════════════════════════

@@ -66,6 +66,11 @@ export function mdALatex(text: string): string {
   let inEnumerate = false;
   let inTabular = false;
   let tabularCols = 0;
+  // 📊 Detección de bloques ```latex ... ``` (TikZ, pgfplots, figure, etc.)
+  // Estos bloques se pegan TAL CUAL al .tex final, sin escapar caracteres.
+  // El preamble tiene tikz + pgfplots + pgf-pie, así que el compilador
+  // LaTeX renderiza el gráfico real en el PDF.
+  let inLatexBlock = false;
 
   function closeList() {
     if (inItemize) { out.push("\\end{itemize}"); inItemize = false; }
@@ -82,6 +87,41 @@ export function mdALatex(text: string): string {
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
     const line = raw.trimEnd();
+
+    // 📊 Bloque LaTeX raw (```latex / ```tex / ```tikz)
+    const fenceMatch = line.match(/^\s*```(latex|tex|tikz|pgfplots)?\s*$/i);
+    if (fenceMatch) {
+      const lang = (fenceMatch[1] ?? "").toLowerCase();
+      if (!inLatexBlock && (lang === "latex" || lang === "tex" || lang === "tikz" || lang === "pgfplots")) {
+        // Abrir bloque LaTeX: cerrar listas/tablas y entrar en modo raw
+        closeList();
+        closeTabular();
+        inLatexBlock = true;
+        continue;
+      }
+      if (inLatexBlock) {
+        // Cierre del bloque ```
+        inLatexBlock = false;
+        out.push(""); // separador
+        continue;
+      }
+      // Bloque de código de OTRO lenguaje → lo pasamos a verbatim
+      closeList();
+      closeTabular();
+      out.push("\\begin{verbatim}");
+      i++;
+      while (i < lines.length && !/^\s*```/.test(lines[i])) {
+        out.push(lines[i]);
+        i++;
+      }
+      out.push("\\end{verbatim}");
+      continue;
+    }
+    if (inLatexBlock) {
+      // Dentro del bloque LaTeX: pasar la línea TAL CUAL, sin escapar
+      out.push(raw);
+      continue;
+    }
 
     // Table row detection
     if (/^\s*\|/.test(line)) {
