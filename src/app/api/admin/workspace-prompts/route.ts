@@ -6,6 +6,14 @@
 
 import { NextResponse } from "next/server";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
+
+function authErrorResponse(e: unknown): NextResponse | null {
+  if (e instanceof AuthError) {
+    return NextResponse.json({ error: e.message }, { status: e.status });
+  }
+  return null;
+}
 
 const PHASE_KEYS = ["onboarding", "edicion-chat", "0", "1", "2", "3", "4", "5"] as const;
 type PhaseKey = (typeof PHASE_KEYS)[number];
@@ -562,6 +570,13 @@ Extensión: 800-1200 palabras (sin contar bibliografía). Tono académico formal
 };
 
 export async function GET() {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    const r = authErrorResponse(e);
+    if (r) return r;
+    throw e;
+  }
   const disk = loadFromDisk();
   const stored = disk.workspacePrompts ?? { hilos: [], phases: {} };
 
@@ -582,6 +597,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    await requireAdmin();
     const body = await req.json() as {
       type: "phase" | "hilos";
       key?: string;
@@ -613,12 +629,15 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "type debe ser 'phase' o 'hilos'" }, { status: 400 });
   } catch (e) {
+    const r = authErrorResponse(e);
+    if (r) return r;
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
   try {
+    await requireAdmin();
     const { key } = await req.json() as { key: string };
     const disk = loadFromDisk();
     if (disk.workspacePrompts?.phases) {
@@ -627,6 +646,8 @@ export async function DELETE(req: Request) {
     }
     return NextResponse.json({ ok: true });
   } catch (e) {
+    const r = authErrorResponse(e);
+    if (r) return r;
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }

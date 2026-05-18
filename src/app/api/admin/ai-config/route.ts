@@ -14,6 +14,14 @@ import {
   dbDeleteProviderKey,
   dbSaveServiceConfig,
 } from "@/lib/db/aiConfig";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
+
+function authErrorResponse(e: unknown): NextResponse | null {
+  if (e instanceof AuthError) {
+    return NextResponse.json({ error: e.message }, { status: e.status });
+  }
+  return null;
+}
 
 function maskKey(key: string): string {
   if (!key || key.length < 8) return key ? "********" : "";
@@ -30,6 +38,13 @@ function isLikelyValidKeyForProvider(providerId: string, apiKey: string): boolea
 }
 
 export async function GET() {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    const r = authErrorResponse(e);
+    if (r) return r;
+    throw e;
+  }
   // 1. Hidratar desde Supabase (fuente primaria). En Vercel serverless arranca
   //    con caches vacíos, esto los repuebla.
   await hydrateAIConfigAsync();
@@ -76,6 +91,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    await requireAdmin();
     const body = await req.json();
     const disk = loadFromDisk();
     const aiConfig = ((disk as { aiConfig?: Record<string, unknown> }).aiConfig ?? {}) as {
@@ -135,12 +151,15 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: "type debe ser 'provider_key' o 'service_config'" }, { status: 400 });
   } catch (e) {
+    const r = authErrorResponse(e);
+    if (r) return r;
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }
 
 export async function DELETE(req: Request) {
   try {
+    await requireAdmin();
     const { provider_id } = (await req.json()) as { provider_id: string };
     const disk = loadFromDisk();
     const aiConfig = ((disk as { aiConfig?: Record<string, unknown> }).aiConfig ?? {}) as {
@@ -155,6 +174,8 @@ export async function DELETE(req: Request) {
     await dbDeleteProviderKey(provider_id);
     return NextResponse.json({ ok: true });
   } catch (e) {
+    const r = authErrorResponse(e);
+    if (r) return r;
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });
   }
 }

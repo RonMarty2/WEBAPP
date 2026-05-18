@@ -63,19 +63,26 @@ export function guardarArchivoDefensa(
   };
 }
 
+// Resuelve ruta relativa contra ROOT y verifica que el resultado esté
+// dentro de ROOT. Bloquea path traversal (..), rutas absolutas, null bytes
+// y casos en que normalize() sola no detectaría.
+function resolverDentroDeRoot(rutaRelativa: string): string | null {
+  if (typeof rutaRelativa !== "string" || rutaRelativa.includes("\0")) return null;
+  const full = path.resolve(ROOT, rutaRelativa);
+  const rootWithSep = ROOT.endsWith(path.sep) ? ROOT : ROOT + path.sep;
+  if (full !== ROOT && !full.startsWith(rootWithSep)) return null;
+  return full;
+}
+
 export function leerArchivoDefensa(rutaRelativa: string): Buffer | null {
-  const safe = path.normalize(rutaRelativa);
-  if (safe.startsWith("..") || path.isAbsolute(safe)) return null;
-  const full = path.join(ROOT, safe);
-  if (!fs.existsSync(full)) return null;
+  const full = resolverDentroDeRoot(rutaRelativa);
+  if (!full || !fs.existsSync(full)) return null;
   return fs.readFileSync(full);
 }
 
 export function eliminarArchivoDefensa(rutaRelativa: string): boolean {
-  const safe = path.normalize(rutaRelativa);
-  if (safe.startsWith("..") || path.isAbsolute(safe)) return false;
-  const full = path.join(ROOT, safe);
-  if (!fs.existsSync(full)) return false;
+  const full = resolverDentroDeRoot(rutaRelativa);
+  if (!full || !fs.existsSync(full)) return false;
   fs.unlinkSync(full);
   return true;
 }

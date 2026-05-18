@@ -147,7 +147,7 @@ export default function BancoObservacionesPage() {
         <div className="adm-card p-4">
           <div className="adm-label mb-3">TOP PATRONES DETECTADOS</div>
           {topPatrones.length === 0 ? (
-            <div className="adm-muted" style={{ fontSize: 11 }}>// aún sin datos</div>
+            <div className="adm-muted" style={{ fontSize: 11 }}>Aún sin datos</div>
           ) : (
             <div className="flex flex-col gap-1.5">
               {topPatrones.slice(0, 10).map((p, i) => (
@@ -174,7 +174,7 @@ export default function BancoObservacionesPage() {
         <div className="adm-card p-4">
           <div className="adm-label mb-3">POR SERVICIO</div>
           {porServicio.length === 0 ? (
-            <div className="adm-muted" style={{ fontSize: 11 }}>// sin datos</div>
+            <div className="adm-muted" style={{ fontSize: 11 }}>Sin datos</div>
           ) : (
             <div className="flex flex-col gap-1.5">
               {porServicio.map((s) => (
@@ -200,7 +200,7 @@ export default function BancoObservacionesPage() {
         <div className="adm-card p-4">
           <div className="adm-label mb-3">POR FASE</div>
           {porFase.length === 0 ? (
-            <div className="adm-muted" style={{ fontSize: 11 }}>// sin datos</div>
+            <div className="adm-muted" style={{ fontSize: 11 }}>Sin datos</div>
           ) : (
             <div className="flex flex-col gap-1.5">
               {porFase.slice(0, 10).map((f) => (

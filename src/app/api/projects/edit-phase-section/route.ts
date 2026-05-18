@@ -12,6 +12,7 @@ import { loadFromDisk } from "@/lib/persistence";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 import { summarizePhaseForMemory } from "@/lib/academicProject.mjs";
 import { DEFAULT_PHASES } from "@/app/api/admin/workspace-prompts/route";
+import { validarCoherencia } from "@/lib/ai/guardian";
 
 type ProyectoLike = {
   id: string;
@@ -24,6 +25,8 @@ type ProyectoLike = {
   perfil_estilo_usuario?: string | null;
   final_document?: string | null;
   final_document_validation?: Record<string, unknown>;
+  tema_aprobado?: string | null;
+  titulo_provisional?: string | null;
 };
 
 function loadHilosFromDisk(): string[] {
@@ -266,6 +269,20 @@ export async function POST(req: Request) {
     const contenidoActual = currentContentFor(proyecto, phase.key);
     if (!contenidoActual?.trim()) {
       return NextResponse.json({ error: "No hay contenido existente para ajustar en esta fase." }, { status: 400 });
+    }
+
+    // 🛡️ Guardián anti-alucinación: valida que la observación del usuario sea
+    // coherente con el tema aprobado del proyecto. Si Groq no está configurado,
+    // el guardián retorna permitido=true (modo permisivo, no bloquea).
+    const temaProyecto = proyecto.tema_aprobado?.trim() || proyecto.titulo_provisional?.trim();
+    if (temaProyecto) {
+      const guardian = await validarCoherencia(observacion, temaProyecto);
+      if (!guardian.permitido) {
+        return NextResponse.json({
+          error: "La observación parece fuera del tema aprobado de tu proyecto. Reformúlala enfocándote en tu tema.",
+          razon: guardian.razon,
+        }, { status: 422 });
+      }
     }
 
     const { contenido, proveedor, traceEntry } = await editWithAI({
