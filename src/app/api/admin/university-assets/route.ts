@@ -8,6 +8,7 @@ import {
   universityLogoFolder,
   type UniversityLogoAsset,
 } from "@/lib/logoAssets";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 
 export const runtime = "nodejs";
 
@@ -42,56 +43,72 @@ async function listAssets(universityName: string): Promise<UniversityLogoAsset[]
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const universityName = searchParams.get("universityName")?.trim();
-  if (!universityName) {
-    return NextResponse.json({ error: "Nombre de universidad requerido." }, { status: 400 });
-  }
+  try {
+    await requireAdmin();
+    const { searchParams } = new URL(request.url);
+    const universityName = searchParams.get("universityName")?.trim();
+    if (!universityName) {
+      return NextResponse.json({ error: "Nombre de universidad requerido." }, { status: 400 });
+    }
 
-  const assets = await listAssets(universityName);
-  return NextResponse.json({
-    folder: `/logos/${universityLogoFolder(universityName)}`,
-    assets,
-  });
+    const assets = await listAssets(universityName);
+    return NextResponse.json({
+      folder: `/logos/${universityLogoFolder(universityName)}`,
+      assets,
+    });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const form = await request.formData();
-  const universityName = String(form.get("universityName") ?? "").trim();
-  const files = form.getAll("files").filter((item): item is File => item instanceof File);
+  try {
+    await requireAdmin();
+    const form = await request.formData();
+    const universityName = String(form.get("universityName") ?? "").trim();
+    const files = form.getAll("files").filter((item): item is File => item instanceof File);
 
-  if (!universityName) {
-    return NextResponse.json({ error: "Nombre de universidad requerido." }, { status: 400 });
-  }
-  if (!files.length) {
-    return NextResponse.json({ error: "Selecciona al menos un archivo." }, { status: 400 });
-  }
-
-  const dir = publicLogoDir(universityName);
-  await mkdir(dir, { recursive: true });
-
-  let primaryAsset: UniversityLogoAsset | null = null;
-
-  for (const file of files) {
-    const ext = path.extname(file.name).toLowerCase();
-    if (!ALLOWED_EXTENSIONS.has(ext)) {
-      return NextResponse.json({ error: `Formato no permitido: ${file.name}` }, { status: 400 });
+    if (!universityName) {
+      return NextResponse.json({ error: "Nombre de universidad requerido." }, { status: 400 });
     }
-    if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: `El archivo supera 2 MB: ${file.name}` }, { status: 413 });
+    if (!files.length) {
+      return NextResponse.json({ error: "Selecciona al menos un archivo." }, { status: 400 });
     }
 
-    const baseName = slugifyAssetPart(file.name.replace(/\.[^.]+$/, ""));
-    const fileName = `${baseName}${ext}`;
-    const bytes = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(dir, fileName), bytes);
-    primaryAsset ??= assetFromFile(universityName, fileName);
-  }
+    const dir = publicLogoDir(universityName);
+    await mkdir(dir, { recursive: true });
 
-  const assets = await listAssets(universityName);
-  return NextResponse.json({
-    folder: `/logos/${universityLogoFolder(universityName)}`,
-    assets,
-    primaryAsset,
-  });
+    let primaryAsset: UniversityLogoAsset | null = null;
+
+    for (const file of files) {
+      const ext = path.extname(file.name).toLowerCase();
+      if (!ALLOWED_EXTENSIONS.has(ext)) {
+        return NextResponse.json({ error: `Formato no permitido: ${file.name}` }, { status: 400 });
+      }
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json({ error: `El archivo supera 2 MB: ${file.name}` }, { status: 413 });
+      }
+
+      const baseName = slugifyAssetPart(file.name.replace(/\.[^.]+$/, ""));
+      const fileName = `${baseName}${ext}`;
+      const bytes = Buffer.from(await file.arrayBuffer());
+      await writeFile(path.join(dir, fileName), bytes);
+      primaryAsset ??= assetFromFile(universityName, fileName);
+    }
+
+    const assets = await listAssets(universityName);
+    return NextResponse.json({
+      folder: `/logos/${universityLogoFolder(universityName)}`,
+      assets,
+      primaryAsset,
+    });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    return NextResponse.json({ error: "Error interno" }, { status: 500 });
+  }
 }
