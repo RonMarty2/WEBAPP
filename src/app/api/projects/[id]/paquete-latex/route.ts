@@ -263,10 +263,23 @@ export async function GET(_req: Request, { params }: Params) {
       //   \caption{Cuadro 4.2. Texto...}  →  \caption{Texto...}
       //   \caption{Tabla 1.1: Texto...}   →  \caption{Texto...}
       //   \caption{Figura 3.2 - Texto...} →  \caption{Texto...}
-      // LaTeX agrega automáticamente "Cuadro X.Y" via \counterwithin{table}{chapter}.
       cleaned = cleaned.replace(
         /\\caption\{\s*(?:Cuadro|Tabla|Figura|Tab\.|Fig\.)\s*\d+(?:[.\-:]\d+)?\s*[.\-:]\s*/gi,
         "\\caption{",
+      );
+      // Limpiar numeración duplicada en secciones/subsecciones:
+      //   \section{3.2. Tipo de investigación}     → \section{Tipo de investigación}
+      //   \subsection{1.4 Justificación}           → \subsection{Justificación}
+      //   \subsubsection{2.3.1 Concepto}           → \subsubsection{Concepto}
+      // LaTeX numera automáticamente; los números manuales son duplicados.
+      cleaned = cleaned.replace(
+        /(\\(?:sub){0,3}section\*?\{)\s*\d+(?:\.\d+){0,3}\.?\s+/g,
+        "$1",
+      );
+      // Limpiar también \chapter{Capítulo 1. Texto} → \chapter{Texto}
+      cleaned = cleaned.replace(
+        /(\\chapter\*?\{)\s*(?:Cap[íi]tulo|CAP[ÍI]TULO)\s+(?:[IVX]+|\d+)\s*[.:\-]?\s*/gi,
+        "$1",
       );
       return cleaned;
     };

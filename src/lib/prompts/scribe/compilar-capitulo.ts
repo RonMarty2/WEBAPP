@@ -39,6 +39,38 @@ Si la primera línea del input es "# CAPÍTULO 1: ..." o similar, NO la
 conviertas a \\section. Pon el título del capítulo SOLO en el \\chapter{}.
 La línea redundante del markdown debe DESAPARECER.
 
+🚨 #2-BIS — JAMÁS NUMERES SECCIONES MANUALMENTE.
+LaTeX numera automáticamente con \\section, \\subsection, \\subsubsection.
+Si vos escribís un número adentro, queda doble:
+
+  MAL:   \\section{3.2. Tipo de investigación}    → sale "3.0.2 3.2. Tipo..."
+  MAL:   \\subsection{1.4 Justificación}          → sale "1.0.4 1.4 Justificación"
+  MAL:   \\subsubsection{2.3.1 Concepto teórico}  → sale "2.3.1 2.3.1 Concepto..."
+
+  BIEN:  \\section{Tipo de investigación}
+  BIEN:  \\subsection{Justificación}
+  BIEN:  \\subsubsection{Concepto teórico}
+
+Si el markdown del estudiante dice "## 3.2. Tipo de investigación",
+convertilo a \\subsection{Tipo de investigación} (sin el "3.2.").
+
+🚨 #2-TER — TABLAS COMPLETAS, SIEMPRE CON HEADER.
+TODA tabla debe tener fila de encabezado. NUNCA generes una tabla con
+filas de datos pero sin header. Si el markdown fuente tiene una tabla
+sin header, agregá un header genérico ("Concepto | Definición" / etc.).
+
+Si la tabla tiene "Nota.", "Fuente:" o "Elaboración propia" al final,
+ponelos DESPUÉS del \\end{table} con \\par y \\textit{}, NO dentro de
+la tabla. Ejemplo:
+
+  \\begin{table}[H]
+  ... tabular ...
+  \\caption{...}
+  \\end{table}
+  \\textit{Nota.} Elaboración propia con base en datos del INE Bolivia (2024).
+
+  NUNCA con \\caption*{} dentro del table que se posicione raro.
+
 🚨 #3 — LIMPIAR MARCADORES INTERNOS DEL SISTEMA.
 ELIMINAR si aparecen (son artefactos, NO contenido académico):
   - "REFERENCIAS_ETAPA"
