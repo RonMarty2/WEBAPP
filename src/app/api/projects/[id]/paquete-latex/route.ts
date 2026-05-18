@@ -237,9 +237,23 @@ export async function GET(_req: Request, { params }: Params) {
     }
 
     // Helper: limpiar bloques code fence ```latex que la IA pudo dejar
-    const limpiarLatexBlock = (latex: string): string => {
+    // + quitar cabeceras duplicadas en RESUMEN y BIBLIOGRAFIA (el script
+    //   ya las agrega, no queremos doble título en el TOC).
+    const limpiarLatexBlock = (latex: string, faseId: string): string => {
       let cleaned = latex.replace(/```(?:latex|tex)?\s*\n([\s\S]*?)\n```/g, "$1");
       cleaned = cleaned.replace(/```\s*\n?/g, "");
+      // Quitar \section*{RESUMEN EJECUTIVO} o REFERENCIAS BIBLIOGRÁFICAS
+      // que la IA pudo haber agregado a pesar del prompt (defensa profunda).
+      if (faseId === "ph-resumen" || faseId === "ph-referencias") {
+        cleaned = cleaned.replace(
+          /\\section\*\{[^}]*(RESUMEN EJECUTIVO|REFERENCIAS BIBLIOGR[AÁ]FICAS)[^}]*\}\s*/gi,
+          "",
+        );
+        cleaned = cleaned.replace(
+          /\\addcontentsline\{toc\}\{section\}\{[^}]*(RESUMEN EJECUTIVO|REFERENCIAS BIBLIOGR[AÁ]FICAS)[^}]*\}\s*/gi,
+          "",
+        );
+      }
       // Sanear bibliografía: escapar `&` sueltos dentro de hangparas/thebibliography
       cleaned = cleaned.replace(
         /(\\begin\{(?:hangparas|thebibliography)\}[\s\S]*?\\end\{(?:hangparas|thebibliography)\})/g,
@@ -247,7 +261,7 @@ export async function GET(_req: Request, { params }: Params) {
       );
       return cleaned;
     };
-    results.forEach((r) => { r.latex = limpiarLatexBlock(r.latex); });
+    results.forEach((r) => { r.latex = limpiarLatexBlock(r.latex, r.faseId); });
 
     // 2) Datos para inyectar en la carátula
     //

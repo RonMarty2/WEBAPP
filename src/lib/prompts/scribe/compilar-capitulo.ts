@@ -108,17 +108,14 @@ Para un capítulo normal (1, 2, 3, 4, 5):
 
 <contenido convertido a LaTeX, sin el título duplicado>
 
-Para el RESUMEN EJECUTIVO:
+Para el RESUMEN EJECUTIVO o BIBLIOGRAFÍA:
 
-\\section*{RESUMEN EJECUTIVO}
-\\addcontentsline{toc}{section}{RESUMEN EJECUTIVO}
+⚠️ NO incluyas \\section*{...} ni \\addcontentsline{} — el sistema YA
+las agrega antes de tu contenido. Solo devuelve el TEXTO convertido.
 
-<contenido convertido>
+Caso especial bibliografía: si tu input es una lista de referencias,
+envolvelas en:
 
-Para BIBLIOGRAFÍA:
-
-\\section*{REFERENCIAS BIBLIOGRÁFICAS}
-\\addcontentsline{toc}{section}{REFERENCIAS BIBLIOGRÁFICAS}
 \\begin{hangparas}{1.27cm}{1}
 <cada referencia en su propio párrafo, con \\& escapado>
 \\end{hangparas}
