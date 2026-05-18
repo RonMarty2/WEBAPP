@@ -34,11 +34,80 @@ RECIBIRÁS ARRIBA los siguientes bloques generados por el sistema:
 
 REGLAS DE LECTURA (CRÍTICAS — LEE ESTO PRIMERO):
 
+═══════════════════════════════════════════════════════════════
+🚨 REGLA #0 — ESTRUCTURA UMSS POSGRADO (OBLIGATORIA)
+═══════════════════════════════════════════════════════════════
+
+El .tex DEBE seguir EXACTAMENTE este orden (sin opcionales que no estén abajo):
+
+  1. Carátula (titlepage) — diseño UMSS oficial (logo izquierda + datos derecha).
+  2. RESUMEN EJECUTIVO — \\section*{RESUMEN EJECUTIVO}
+     · Tomado del bloque [RESUMEN EJECUTIVO] del input.
+     · Sin numeración de capítulo.
+     · CON \\addcontentsline{toc}{section}{RESUMEN EJECUTIVO}
+  3. \\tableofcontents (Índice general)
+  4. \\listoftables  (solo si hay tablas en el documento)
+  5. \\listoffigures (solo si hay figuras en el documento)
+  6. CAPÍTULO 1 — \\chapter{INTRODUCCIÓN Y ANTECEDENTES DEL TEMA DE INVESTIGACIÓN}
+  7. CAPÍTULO 2 — \\chapter{MARCO TEÓRICO Y REFERENCIAL}
+  8. CAPÍTULO 3 — \\chapter{DISEÑO METODOLÓGICO DE LA INVESTIGACIÓN}
+  9. CAPÍTULO 4 — \\chapter{ANÁLISIS DE RESULTADOS Y PROPUESTA DE SOLUCIÓN}
+  10. CAPÍTULO 5 — \\chapter{CONCLUSIONES Y RECOMENDACIONES}
+  11. REFERENCIAS BIBLIOGRÁFICAS — \\section*{...} + \\addcontentsline
+
+PROHIBIDO incluir: dedicatoria, agradecimientos, página de aprobación,
+lista de abreviaturas. NO se piden en este diplomado.
+
+═══════════════════════════════════════════════════════════════
+🚨 REGLA #0-BIS — LIMPIEZA DE MARCADORES (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+El contenido fuente tiene MARCADORES INTERNOS del sistema que NO deben
+aparecer en el .tex final. ELIMINARLOS sin dejar rastro:
+
+ELIMINAR si lo encuentras:
+- "REFERENCIAS_ETAPA" (en cualquier mayúscula/posición) — es un marker interno
+- "[VERIFICAR]", "[REVISAR]", "[COMPLETAR]", "[FALTA ...]"
+- Líneas con solo caracteres de separación: ─── / ════ / ---- / ____
+- "Falta el título completo del reporte" y frases tipo "Referencias observadas
+  que requieren verificación" — son notas internas del sistema
+- DOI placeholders como "10.xxxx/..." → reemplazar por URL real si la conocés
+  o omitir la línea si es una cita inventada
+- Texto entre brackets que sea instrucción al estudiante: "[Insertar foto X]",
+  "[Reemplazar por dato real]"
+- Bloques completos de "Sugerencias para enriquecer esta sección" con emojis
+  (💡 📷 📊 etc.) — esos van al cuadernillo del estudiante, NO al documento.
+
+PRESERVAR pero limpiar:
+- Si una referencia tiene "Autor desconocido (s.f.)" → mantener pero usar
+  un autor genérico coherente con el tema si tu conocimiento lo permite.
+- Si hay tablas con marcadores "[DATOS]", "[NÚMEROS]" → mantener tabla pero
+  marcarlos como datos aproximados con [datos preliminares].
+
+═══════════════════════════════════════════════════════════════
+🚨 REGLA #0-TER — NO DUPLICAR TÍTULOS DE CAPÍTULO
+═══════════════════════════════════════════════════════════════
+
+Si el contenido del Cap I empieza con líneas como:
+  # CAPÍTULO I: PLANTEAMIENTO DEL PROBLEMA
+  ## CAPÍTULO 1
+  CAPÍTULO PRIMERO
+
+→ NO conviertas esas líneas a otro \\chapter, \\section, etc. El \\chapter{}
+   YA lo agregás vos al inicio. Eliminá la línea de título redundante del
+   contenido fuente para que el TOC no muestre dos veces el mismo capítulo.
+
 🚨 REGLA #1 — PROHIBIDO RESUMIR (LA MÁS IMPORTANTE).
 
 Esta es la regla más violada por modelos LLM al hacer esta tarea. La incumples
-si entregas un .tex con menos del 90% de las palabras del contenido recibido.
+si entregas un .tex con menos del 95% de las palabras del contenido recibido.
 Mediremos esto al evaluar tu output.
+
+🎯 OBJETIVO DE EXTENSIÓN: 50-70 páginas (norma UMSS Posgrado FCE).
+Si el contenido fuente suma ~25 mil palabras, tu .tex debe producir entre
+50 y 70 páginas al compilar en pdflatex con 12pt + doble espacio + márgenes
+2.54cm. NO comprimas para hacer "más corto" — al contrario, expandí lo
+necesario para llegar al rango.
 
 Procedimiento OBLIGATORIO antes de generar el .tex:
 1. Cuenta las palabras totales del contenido recibido (Cap I + II + III + IV + V

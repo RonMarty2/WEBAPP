@@ -17,8 +17,9 @@ import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
 import { sanitizeOrphanIncludes } from "@/lib/latex/sanitize";
-import { generarLatexMonografia, mdALatex } from "@/lib/latexMonografia";
-import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
+// (Reservado para futuros usos del generador local; ahora la IA arma el .tex)
+// import { generarLatexMonografia, mdALatex } from "@/lib/latexMonografia";
+// import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -133,66 +134,26 @@ export async function GET(_req: Request, { params }: Params) {
       return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
     }
 
-    // 1) Construir el .tex directamente desde los phase_contents de los
-    //    capítulos (Cap I, II, III, IV, V) usando generarLatexMonografia.
-    //
-    // ⚠️ HISTORIA: Antes leíamos el .tex que generaba la IA en la fase
-    // "Compilar LaTeX". El problema: cada vez que se regeneraba, la IA
-    // CONDENSABA contenido (de 30 págs a 10 págs) a pesar del prompt que
-    // decía "PROHIBIDO RESUMIR". Resultado: el estudiante perdía sus 70
-    // páginas reales cada vez que regeneraba.
-    //
-    // Ahora: usamos el conversor markdown→LaTeX local (mdALatex) que NO
-    // pasa por IA, NO resume, NO inventa. Conversión 1:1 literal.
+    // 1) Leer el .tex generado por la IA en la fase "Compilar LaTeX".
+    //    El prompt SISTEMA_SCRIBE_LATEX (server-only) recibe todos los caps
+    //    y entrega un .tex limpio con estructura UMSS exacta:
+    //      - Carátula UMSS oficial (logo izquierda + datos derecha)
+    //      - Resumen Ejecutivo antes del índice
+    //      - \tableofcontents
+    //      - Cap I-V con numeración arábiga
+    //      - Referencias bibliográficas al final
+    //    La IA además LIMPIA marcadores internos (REFERENCIAS_ETAPA,
+    //    [VERIFICAR], 10.xxxx, separadores —, etc.) preservando 95%+ del
+    //    contenido sustantivo (objetivo 50-70 págs UMSS).
     const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
-    const servicioId = (proyecto.servicio_id as string) || "mono-001";
-    const tipoProyectoId = proyecto.tipo_proyecto_id as string | undefined;
-    const phaseDefs = phaseDefinitionsForProject({ servicioId, tipoProyectoId });
-
-    // Helper: lee el contenido final de una fase (o el borrador si no hay final).
-    const getContent = (faseId: string): string => {
-      const final = phaseContents[faseId];
-      const borrador = phaseContents[`${faseId}_borrador`];
-      const txt = (typeof final === "string" && final.trim()) ? final
-                : (typeof borrador === "string" && borrador.trim()) ? borrador
-                : "";
-      return txt.trim();
-    };
-
-    // Mapear las fases académicas (Cap I a Cap V) al formato que
-    // generarLatexMonografia espera. Si una fase está vacía, la omitimos.
-    const capituloContenidos: Array<{ numero: number; titulo: string; contenido: string }> = [];
-    const FASES_CAP: Array<{ id: string; numero: number }> = [
-      { id: "ph-cap1", numero: 1 },
-      { id: "ph-cap2", numero: 2 },
-      { id: "ph-cap3", numero: 3 },
-      { id: "ph-cap4", numero: 4 },
-      { id: "ph-cap5", numero: 5 },
-    ];
-    for (const { id: faseId, numero } of FASES_CAP) {
-      const c = getContent(faseId);
-      if (c) {
-        const def = phaseDefs.find(p => p.id === faseId);
-        capituloContenidos.push({
-          numero,
-          titulo: def?.label ?? `Capítulo ${numero}`,
-          contenido: c,
-        });
-      }
-    }
-    if (capituloContenidos.length === 0) {
+    const rawLatex = phaseContents["ph-latex"] || phaseContents["ph-latex_borrador"] || "";
+    if (!rawLatex.trim()) {
       return NextResponse.json(
-        { error: "Aún no hay capítulos generados. Generá Cap I-V primero." },
-        { status: 400 },
+        { error: "Todavía no hay LaTeX generado. Genera la fase 'Compilar LaTeX' primero." },
+        { status: 400 }
       );
     }
-    console.log(`[paquete-latex] Capítulos detectados: ${capituloContenidos.length} (caps ${capituloContenidos.map(c=>c.numero).join(",")}). Palabras totales: ${capituloContenidos.reduce((sum,c)=>sum+c.contenido.split(/\s+/).length,0)}`);
-
-    // Bibliografía: leer del phase_contents si existe.
-    // generarLatexMonografia solo procesa caps 1-5, así que la bibliografía
-    // se anexa MANUALMENTE al .tex generado más adelante (antes de
-    // \\end{document}) para preservar su contenido completo.
-    const bibliografiaContenido = getContent("ph-referencias");
+    const tex = extractLatex(rawLatex);
 
     // 2) Datos para inyectar en la carátula
     //
@@ -246,57 +207,9 @@ export async function GET(_req: Request, { params }: Params) {
       pais: pick("pais", "pais", "Bolivia"),
     };
 
-    // 🎯 GENERACIÓN LITERAL — markdown→LaTeX sin IA.
-    //
-    // generarLatexMonografia es 100% determinista: convierte el markdown de
-    // cada capítulo a LaTeX preservando el texto palabra por palabra. NO
-    // resume, NO inventa, NO omite. La carátula la arma `caratulaUMSS` (en
-    // universityTemplates.ts) con el formato oficial UMSS Posgrado.
-    const universidadIdParaTpl = universidadId === "umss-001" ? "umss"
-      : universidadId === "umsa-001" ? "umsa"
-      : universidadId === "ucb-001" ? "ucb"
-      : universidadId === "upb-001" ? "upb"
-      : universidadId === "upea-001" ? "upea"
-      : universidadId === "usfx-001" ? "usfx"
-      : "umss";
-    let texGenerado = generarLatexMonografia({
-      titulo: datos.titulo,
-      diplomado: datos.programa,
-      capituloContenidos,
-      bibliografia: [],
-      universidad_id: universidadIdParaTpl,
-      caratulaData: {
-        titulo: datos.titulo,
-        diplomado: datos.programa,
-        autor: datos.nombre,
-        tutor: datos.tutor || undefined,
-        año: datos.anio,
-        mes: datos.mes,
-        facultad: datos.facultad,
-        departamento: datos.departamento,
-        modalidad: datos.modalidad,
-        programa: datos.programa,
-        version: datos.version,
-        ciudad: datos.ciudad,
-        pais: datos.pais,
-      },
-    });
-
-    // Inyectar bibliografía (si existe en phase_contents) antes de \end{document}.
-    // Lo hacemos manualmente porque generarLatexMonografia solo procesa caps 1-5.
-    if (bibliografiaContenido) {
-      const seccionBiblio = [
-        "",
-        "\\newpage",
-        "\\section*{REFERENCIAS BIBLIOGRÁFICAS}",
-        "\\addcontentsline{toc}{section}{REFERENCIAS BIBLIOGRÁFICAS}",
-        "",
-        mdALatex(bibliografiaContenido),
-        "",
-      ].join("\n");
-      texGenerado = texGenerado.replace(/\\end\{document\}/, `${seccionBiblio}\n\\end{document}`);
-    }
-    const texConDatos = texGenerado;
+    // Inyectar datos editables del estudiante en los placeholders <<...>>
+    // del .tex que generó la IA.
+    const texConDatos = inyectarDatosCaratula(tex, datos);
 
     // 3) Cargar el logo de la universidad para incluirlo en el ZIP.
     let logoBuffer: Buffer | null = null;
