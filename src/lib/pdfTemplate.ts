@@ -16,6 +16,13 @@ export interface StudentCoverData {
   tutor?: string;
   carrera?: string;
   ciudad?: string;
+  // Campos institucionales editables (carátula UMSS exacta).
+  // Si vienen vacíos, el endpoint los reemplaza por los defaults UMSS.
+  universidad?: string;
+  facultad?: string;
+  departamento?: string;
+  modalidad?: string;
+  pais?: string;
 }
 
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];

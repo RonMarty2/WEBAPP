@@ -854,6 +854,13 @@ export default function WorkspacePage() {
       tutor: (typeof ctxIni.tutor === "string" && ctxIni.tutor) || prev.tutor,
       carrera: (typeof ctxIni.carrera === "string" && ctxIni.carrera) || prev.carrera,
       tituloTrabajo: ((proyecto as unknown as { tema_aprobado?: string }).tema_aprobado) || prev.tituloTrabajo,
+      // Datos institucionales editables (carátula UMSS):
+      universidad: (typeof ctxIni.universidad === "string" && ctxIni.universidad) || prev.universidad,
+      facultad: (typeof ctxIni.facultad === "string" && ctxIni.facultad) || prev.facultad,
+      departamento: (typeof ctxIni.departamento === "string" && ctxIni.departamento) || prev.departamento,
+      modalidad: (typeof ctxIni.modalidad === "string" && ctxIni.modalidad) || prev.modalidad,
+      ciudad: (typeof ctxIni.ciudad === "string" && ctxIni.ciudad) || prev.ciudad,
+      pais: (typeof ctxIni.pais === "string" && ctxIni.pais) || prev.pais,
     }));
     pdfDataHydratedRef.current = true;
   }, [proyecto, user]);
@@ -881,6 +888,13 @@ export default function WorkspacePage() {
         version: pdfData.version ?? ctxIniActual.version,
         tutor: pdfData.tutor ?? ctxIniActual.tutor,
         carrera: pdfData.carrera ?? ctxIniActual.carrera,
+        // Datos institucionales editables:
+        universidad: pdfData.universidad ?? ctxIniActual.universidad,
+        facultad: pdfData.facultad ?? ctxIniActual.facultad,
+        departamento: pdfData.departamento ?? ctxIniActual.departamento,
+        modalidad: pdfData.modalidad ?? ctxIniActual.modalidad,
+        ciudad: pdfData.ciudad ?? ctxIniActual.ciudad,
+        pais: pdfData.pais ?? ctxIniActual.pais,
       };
       const academicContextNuevo = { ...ctxActual, contexto_inicial: ctxIniNuevo };
       const res = await fetch(`/api/projects/${proyecto.id}`, {
@@ -3651,6 +3665,42 @@ export default function WorkspacePage() {
               <input className="input-dark" value={pdfData.anio} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, anio: e.target.value })); }} placeholder="2026" />
             </div>
           </div>
+
+          {/* ── Datos institucionales (editable, formato UMSS exacto) ── */}
+          <details style={{ marginTop: 6 }}>
+            <summary style={{ cursor: "pointer", fontSize: 11.5, color: "var(--accent)", fontWeight: 600, padding: "4px 0", userSelect: "none" }}>
+              ⚙ Datos institucionales (universidad, facultad, ciudad…)
+            </summary>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 10, paddingLeft: 8, borderLeft: "2px solid rgba(99,102,241,0.2)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Universidad</label>
+                <input className="input-dark" value={pdfData.universidad ?? ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, universidad: e.target.value })); }} placeholder="UNIVERSIDAD MAYOR DE SAN SIMÓN" />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Facultad</label>
+                <input className="input-dark" value={pdfData.facultad ?? ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, facultad: e.target.value })); }} placeholder="FACULTAD DE CIENCIAS ECONÓMICAS" />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Departamento / Escuela</label>
+                <input className="input-dark" value={pdfData.departamento ?? ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, departamento: e.target.value })); }} placeholder="ESCUELA UNIVERSITARIA DE POSGRADO" />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Modalidad de Titulación</label>
+                <input className="input-dark" value={pdfData.modalidad ?? ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, modalidad: e.target.value })); }} placeholder="DIPLOMADO COMO MODALIDAD DE TITULACIÓN" />
+              </div>
+              <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>Ciudad</label>
+                  <input className="input-dark" value={pdfData.ciudad ?? ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, ciudad: e.target.value })); }} placeholder="Cochabamba" />
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-primary)" }}>País</label>
+                  <input className="input-dark" value={pdfData.pais ?? ""} onChange={e => { pdfDataDirtyRef.current = true; setPdfData(prev => ({ ...prev, pais: e.target.value })); }} placeholder="Bolivia" />
+                </div>
+              </div>
+            </div>
+          </details>
+
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 16 }}>
             <button className="btn-cyan" onClick={guardarDatosCaratula} style={{ padding: "10px 24px" }}>Guardar y cerrar</button>
           </div>

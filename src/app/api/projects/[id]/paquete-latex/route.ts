@@ -162,23 +162,36 @@ export async function GET(_req: Request, { params }: Params) {
       : (user.name || "Estudiante");
     // Resolver universidad ANTES de construir `datos`, para inyectar nombre,
     // facultad y departamento en los placeholders <<UNIVERSIDAD>>, etc.
+    // Orden de prioridad:
+    //   1) Si el estudiante editó el campo en el modal "Configurar Carátula"
+    //      (persistido en contexto_inicial), usar ese valor.
+    //   2) Si la universidad del proyecto tiene datos en data.ts, usar esos.
+    //   3) Default UMSS hardcoded.
     const universidadId = (proyecto.universidad_id as string) || "umss-001";
     const universidad = DEFAULT_UNIVERSITIES.find(u => u.id === universidadId) ?? DEFAULT_UNIVERSITIES[0];
     const uniRecord = (universidad as unknown as Record<string, unknown>) ?? {};
+    const pick = (campoCtx: string, campoUni: string, fallback: string, mayusculas = false): string => {
+      const v = typeof ctxInicial[campoCtx] === "string" && (ctxInicial[campoCtx] as string).trim()
+        ? (ctxInicial[campoCtx] as string)
+        : typeof uniRecord[campoUni] === "string" && (uniRecord[campoUni] as string).trim()
+          ? (uniRecord[campoUni] as string)
+          : fallback;
+      return mayusculas ? v.toUpperCase() : v;
+    };
     const datos: Record<string, string> = {
       nombre: nombreEstudiante,
       programa: String(ctxInicial.programa ?? "Diplomado"),
-      version: String(ctxInicial.version ?? ctxInicial.numero_version ?? "1° Versión"),
+      version: String(ctxInicial.version ?? ctxInicial.numero_version ?? "1°"),
       mes: mesElegido,
       anio: anioElegido,
       tutor: String(ctxInicial.tutor ?? ""),
       titulo: String(proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? "Monografía"),
-      universidad: String(uniRecord.name ?? "UNIVERSIDAD MAYOR DE SAN SIMÓN").toUpperCase(),
-      facultad: String(uniRecord.facultad ?? "FACULTAD DE CIENCIAS ECONÓMICAS").toUpperCase(),
-      departamento: String(uniRecord.departamento ?? "ESCUELA UNIVERSITARIA DE POSGRADO").toUpperCase(),
-      modalidad: String(ctxInicial.modalidad ?? "DIPLOMADO").toUpperCase(),
-      ciudad: String(ctxInicial.ciudad ?? uniRecord.ciudad ?? "Cochabamba"),
-      pais: String(ctxInicial.pais ?? uniRecord.pais ?? "Bolivia"),
+      universidad: pick("universidad", "name", "UNIVERSIDAD MAYOR DE SAN SIMÓN", true),
+      facultad: pick("facultad", "facultad", "FACULTAD DE CIENCIAS ECONÓMICAS", true),
+      departamento: pick("departamento", "departamento", "ESCUELA UNIVERSITARIA DE POSGRADO", true),
+      modalidad: pick("modalidad", "modalidad", "DIPLOMADO COMO MODALIDAD DE TITULACIÓN", true),
+      ciudad: pick("ciudad", "ciudad", "Cochabamba"),
+      pais: pick("pais", "pais", "Bolivia"),
     };
     const texConDatos = inyectarDatosCaratula(tex, datos);
 

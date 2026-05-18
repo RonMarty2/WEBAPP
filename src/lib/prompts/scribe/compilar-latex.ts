@@ -409,41 +409,68 @@ Reglas:
 TEMPLATE LATEX EXACTO (copialo tal cual, reemplazando solo los campos
 entre << >> con los datos del bloque [DATOS DE CARÁTULA]):
 
+═══ LAYOUT OFICIAL UMSS POSGRADO ═══
+Encabezado en 2 columnas:
+  · IZQUIERDA: logo UMSS (4cm de alto × 2.5cm de ancho).
+  · DERECHA:  Universidad / Facultad / Departamento (Times New Roman 14pt).
+Luego centrado abajo:
+  · "DIPLOMADO COMO MODALIDAD DE TITULACIÓN" (12pt).
+  · "DIPLOMADO EN <PROGRAMA> — <VERSIÓN> VERSIÓN" (12pt).
+  · "MONOGRAFÍA" (14pt, negrita).
+  · "<TÍTULO DEL TRABAJO>" (14pt).
+  · "Estudiante: <NOMBRE>" (14pt).
+Pie centrado:
+  · "<CIUDAD> – <PAÍS>" (12pt).
+  · "<MES, AÑO>" (12pt).
+
 \\begin{titlepage}
 \\thispagestyle{empty}
+
+% ── BLOQUE SUPERIOR: 2 columnas (logo izquierda + universidad derecha) ──
+\\noindent
+\\begin{minipage}[t]{0.30\\textwidth}
+  \\vspace{0pt}
+  \\IfFileExists{logos/umss.png}{%
+    \\includegraphics[width=2.5cm,height=4cm,keepaspectratio]{logos/umss.png}%
+  }{%
+    \\framebox[2.5cm]{\\parbox[c][4cm][c]{2.2cm}{\\centering\\footnotesize Logo\\\\UMSS}}%
+  }
+\\end{minipage}%
+\\hfill%
+\\begin{minipage}[t]{0.66\\textwidth}
+  \\vspace{0pt}
+  \\raggedright
+  {\\fontsize{14pt}{17pt}\\selectfont \\textbf{<<UNIVERSIDAD>>}}\\\\[4pt]
+  {\\fontsize{14pt}{17pt}\\selectfont <<FACULTAD>>}\\\\[4pt]
+  {\\fontsize{14pt}{17pt}\\selectfont <<DEPARTAMENTO>>}
+\\end{minipage}
+
+\\vspace{2.5cm}
+
+% ── BLOQUE CENTRAL: modalidad + programa + tipo trabajo + título + estudiante ──
 \\begin{center}
-\\IfFileExists{logos/umss.png}{%
-  \\includegraphics[height=4cm,width=2.5cm,keepaspectratio]{logos/umss.png}%
-}{%
-  \\framebox[2.5cm]{\\parbox[c][4cm][c]{2.2cm}{\\centering\\footnotesize Logo\\\\UMSS}}%
-}
+{\\fontsize{12pt}{15pt}\\selectfont <<MODALIDAD>>}
 
 \\vspace{0.8cm}
 
-{\\fontsize{12pt}{15pt}\\selectfont \\textbf{<<UNIVERSIDAD>>}}\\\\[4pt]
-{\\fontsize{12pt}{15pt}\\selectfont <<FACULTAD>>}\\\\[4pt]
-{\\fontsize{12pt}{15pt}\\selectfont <<DEPARTAMENTO>>}
+{\\fontsize{12pt}{15pt}\\selectfont DIPLOMADO EN <<PROGRAMA>> --- <<VERSION_DIPLOMADO>> VERSIÓN}
+
+\\vspace{2cm}
+
+{\\fontsize{14pt}{17pt}\\selectfont \\textbf{MONOGRAFÍA}}
 
 \\vspace{1.2cm}
 
-{\\fontsize{12pt}{15pt}\\selectfont <<MODALIDAD>>}\\\\[6pt]
-{\\fontsize{12pt}{15pt}\\selectfont <<PROGRAMA>> <<VERSION_DIPLOMADO>>}
+{\\fontsize{14pt}{17pt}\\selectfont <<TITULO_TRABAJO>>}
 
-\\vspace{1.6cm}
+\\vspace{1.5cm}
 
-{\\fontsize{12pt}{15pt}\\selectfont \\textbf{MONOGRAFÍA}}
-
-\\vspace{0.8cm}
-
-{\\fontsize{12pt}{15pt}\\selectfont <<TITULO_TRABAJO>>}
-
-\\vspace{1.2cm}
-
-{\\fontsize{12pt}{15pt}\\selectfont Estudiante: <<ESTUDIANTE>>}
+{\\fontsize{14pt}{17pt}\\selectfont Estudiante: <<ESTUDIANTE>>}
 
 \\vfill
 
-{\\fontsize{12pt}{15pt}\\selectfont <<CIUDAD>> – <<PAIS>>}\\\\[4pt]
+% ── PIE: ciudad y mes/año ──
+{\\fontsize{12pt}{15pt}\\selectfont <<CIUDAD>> -- <<PAIS>>}\\\\[4pt]
 {\\fontsize{12pt}{15pt}\\selectfont <<MES_ANIO>>}
 \\end{center}
 \\end{titlepage}
