@@ -11,7 +11,16 @@ export interface CaratulaInput {
   autor?: string;
   tutor?: string;
   año?: string | number;
+  mes?: string;
   facultad?: string;
+  departamento?: string;
+  modalidad?: string;
+  programa?: string;
+  version?: string;
+  ciudad?: string;
+  pais?: string;
+  /** Si está presente, se inserta como imagen del escudo institucional. */
+  logoPath?: string;
 }
 
 export interface UniversityTemplate {
@@ -95,14 +104,100 @@ const UMSA: UniversityTemplate = {
 
 // ─── UMSS ─────────────────────────────────────────────────────
 
+/**
+ * Carátula oficial UMSS — Posgrado FCE / Céspedes.
+ *
+ * Layout exacto exigido por la guía:
+ *   - Encabezado: logo (4cm) a la IZQUIERDA + Universidad / Facultad /
+ *     Departamento a la DERECHA (Times New Roman 14pt).
+ *   - Modalidad de Titulación centrada (12pt).
+ *   - DIPLOMADO EN <PROGRAMA> --- <VERSION> VERSION (12pt).
+ *   - MONOGRAFÍA en negrita (14pt).
+ *   - Título del trabajo (14pt).
+ *   - Estudiante (14pt).
+ *   - Ciudad – País / Mes, Año al pie (12pt).
+ *
+ * Usa \\IfFileExists para mostrar el logo real si el ZIP lo incluye,
+ * o un framebox de fallback si no.
+ */
+function caratulaUMSS(input: CaratulaInput): string {
+  const universidad = (input as { universidad?: string }).universidad ?? "UNIVERSIDAD MAYOR DE SAN SIMÓN";
+  const facultad = input.facultad ?? "FACULTAD DE CIENCIAS ECONÓMICAS";
+  const departamento = input.departamento ?? "ESCUELA UNIVERSITARIA DE POSGRADO";
+  const modalidad = input.modalidad ?? "DIPLOMADO COMO MODALIDAD DE TITULACIÓN";
+  const programa = input.programa ?? input.diplomado ?? "";
+  const version = input.version ?? "1°";
+  const ciudad = input.ciudad ?? "Cochabamba";
+  const pais = input.pais ?? "Bolivia";
+  const mes = input.mes ?? "";
+  const anio = String(input.año ?? new Date().getFullYear());
+  const mesAnio = mes ? `${esc(mes)}, ${esc(anio)}` : esc(anio);
+
+  return [
+    "\\begin{titlepage}",
+    "\\thispagestyle{empty}",
+    "",
+    "% Bloque superior: 2 columnas (logo izquierda + universidad derecha)",
+    "\\noindent",
+    "\\begin{minipage}[t]{0.30\\textwidth}",
+    "  \\vspace{0pt}",
+    "  \\IfFileExists{logos/umss.png}{%",
+    "    \\includegraphics[width=2.5cm,height=4cm,keepaspectratio]{logos/umss.png}%",
+    "  }{%",
+    "    \\framebox[2.5cm]{\\parbox[c][4cm][c]{2.2cm}{\\centering\\footnotesize Logo\\\\UMSS}}%",
+    "  }",
+    "\\end{minipage}%",
+    "\\hfill%",
+    "\\begin{minipage}[t]{0.66\\textwidth}",
+    "  \\vspace{0pt}",
+    "  \\raggedright",
+    `  {\\fontsize{14pt}{17pt}\\selectfont \\textbf{${esc(universidad)}}}\\\\[4pt]`,
+    `  {\\fontsize{14pt}{17pt}\\selectfont ${esc(facultad)}}\\\\[4pt]`,
+    `  {\\fontsize{14pt}{17pt}\\selectfont ${esc(departamento)}}`,
+    "\\end{minipage}",
+    "",
+    "\\vspace{2.5cm}",
+    "",
+    "\\begin{center}",
+    `{\\fontsize{12pt}{15pt}\\selectfont ${esc(modalidad)}}`,
+    "",
+    "\\vspace{0.8cm}",
+    "",
+    programa
+      ? `{\\fontsize{12pt}{15pt}\\selectfont DIPLOMADO EN ${esc(programa)} --- ${esc(version)} VERSIÓN}`
+      : `{\\fontsize{12pt}{15pt}\\selectfont DIPLOMADO --- ${esc(version)} VERSIÓN}`,
+    "",
+    "\\vspace{2cm}",
+    "",
+    "{\\fontsize{14pt}{17pt}\\selectfont \\textbf{MONOGRAFÍA}}",
+    "",
+    "\\vspace{1.2cm}",
+    "",
+    `{\\fontsize{14pt}{17pt}\\selectfont ${esc(input.titulo)}}`,
+    "",
+    "\\vspace{1.5cm}",
+    "",
+    input.autor
+      ? `{\\fontsize{14pt}{17pt}\\selectfont Estudiante: ${esc(input.autor)}}`
+      : "",
+    "",
+    "\\vfill",
+    "",
+    `{\\fontsize{12pt}{15pt}\\selectfont ${esc(ciudad)} --- ${esc(pais)}}\\\\[4pt]`,
+    `{\\fontsize{12pt}{15pt}\\selectfont ${mesAnio}}`,
+    "\\end{center}",
+    "\\end{titlepage}",
+  ].filter(l => l !== "").join("\n");
+}
+
 const UMSS: UniversityTemplate = {
   id: "umss",
   nombre: "Universidad Mayor de San Simón",
   ciudad: "Cochabamba",
   margenes: { izq: 2.54, der: 2.54, sup: 2.54, inf: 2.54 },
   fuente: "times",
-  espaciado: 1.5,
-  buildCaratula: (input) => defaultCaratula("UNIVERSIDAD MAYOR DE SAN SIMÓN", "Cochabamba", input),
+  espaciado: 2.0,
+  buildCaratula: caratulaUMSS,
 };
 
 // ─── UCB ──────────────────────────────────────────────────────
