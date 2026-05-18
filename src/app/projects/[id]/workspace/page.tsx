@@ -13,6 +13,7 @@ import CapituloInsights from "@/components/scribe/CapituloInsights";
 import type { SessionUser } from "@/lib/auth";
 import { DEFAULT_UNIVERSITIES, type University } from "@/lib/data";
 import { isPhaseTecnica } from "@/lib/phaseCategories";
+import { estimarPaginas as estimarPaginasUMSS, type FormatoUMSS } from "@/lib/umssValidators";
 import { MESES, type StudentCoverData, generatePdfHtml } from "@/lib/pdfTemplate";
 import GlassModal from "@/components/ui/GlassModal";
 import ObservacionesTribunal from "@/components/ObservacionesTribunal";
@@ -171,10 +172,13 @@ function pareceCortadoConservador(content: string | null | undefined): boolean {
 }
 
 // ── Estimador realista de páginas físicas del documento ─────────────────────
-// Tiene en cuenta: caratula, indice, contenido por fase, tablas, page-breaks
-// entre capitulos y bibliografia estimada. El objetivo es coincidir con el
-// numero de hojas que el preview HTML va a renderizar, no solo el texto crudo.
-const PALABRAS_POR_PAGINA = 350;
+// Usa la misma función oficial de `umssValidators.ts` que limpia comandos
+// LaTeX y markdown antes de contar palabras, y aplica la constante correcta
+// según el formato UMSS del proyecto:
+//   - guia_1_posgrado (doble espacio): 250 palabras/pág
+//   - guia_2_cespedes (1.5 espacio):  400 palabras/pág
+// Antes usábamos PALABRAS_POR_PAGINA = 350 + 0.5 pág por tabla, lo que daba
+// estimaciones ~2-3× la realidad (80 págs vs 31 reales en PDF compilado).
 const PAGS_FIJAS_CARATULA = 1;
 const PAGS_FIJAS_INDICE = 2; // indice + posible portada de capitulos / resumen
 const PAGS_FIJAS_BIBLIO_DEFAULT = 5; // estimacion si la fase de referencias todavia no se genero
@@ -192,12 +196,23 @@ function contarTablas(texto: string | null | undefined): number {
   return tablas;
 }
 
-/** Páginas estimadas que ocupa una fase: texto + 0.5 pág extra por tabla. */
-function paginasDeFase(content: string | null | undefined): number {
+/**
+ * Páginas estimadas que ocupa una fase, según el formato UMSS del proyecto.
+ * Usa estimarPaginasUMSS que es coherente con el cálculo del backend y
+ * del validador (`umssValidators.ts`).
+ *
+ * Notas:
+ *  - Sin formato definido → asumimos `guia_1_posgrado` (doble espacio, el
+ *    más estricto y más común en posgrado UMSS).
+ *  - Ya NO sumamos 0.5 pág por tabla — la fórmula real de UMSS ya
+ *    contempla densidad típica con tablas.
+ */
+function paginasDeFase(
+  content: string | null | undefined,
+  formato: FormatoUMSS = "guia_1_posgrado",
+): number {
   if (!content?.trim()) return 0;
-  const palabras = countWords(content);
-  const tablas = contarTablas(content);
-  return palabras / PALABRAS_POR_PAGINA + tablas * 0.5;
+  return estimarPaginasUMSS(content, formato);
 }
 
 /**
@@ -1598,6 +1613,13 @@ export default function WorkspacePage() {
     let words = 0;
     const desglose: Array<{ id: string; label: string; pags: number; esBiblio: boolean }> = [];
 
+    // Formato UMSS del proyecto (define palabras/página realista).
+    // Por defecto guia_1_posgrado (doble espacio = ~250 pal/pág).
+    const academicCtx = ((proyecto as unknown as { academic_context?: Record<string, unknown> }).academic_context ?? {}) as Record<string, unknown>;
+    const formatoUmssProyecto = (typeof academicCtx.formato_umss === "string"
+      ? academicCtx.formato_umss
+      : "guia_1_posgrado") as FormatoUMSS;
+
     for (const f of displayFases) {
       const fNum = (f as typeof FASES_STATIC[0]).num;
       const finalC = getFinalContent(proyecto, f.id, fNum);
@@ -1616,7 +1638,7 @@ export default function WorkspacePage() {
         desglose.push({
           id: f.id,
           label: f.label,
-          pags: paginasDeFase(content),
+          pags: paginasDeFase(content, formatoUmssProyecto),
           esBiblio: f.id === "ph-referencias",
         });
       }

@@ -420,9 +420,9 @@ entre << >> con los datos del bloque [DATOS DE CARÁTULA]):
 
 \\vspace{0.8cm}
 
-{\\fontsize{14pt}{17pt}\\selectfont \\textbf{<<UNIVERSIDAD>>}}\\\\[4pt]
-{\\fontsize{14pt}{17pt}\\selectfont <<FACULTAD>>}\\\\[4pt]
-{\\fontsize{14pt}{17pt}\\selectfont <<DEPARTAMENTO>>}
+{\\fontsize{12pt}{15pt}\\selectfont \\textbf{<<UNIVERSIDAD>>}}\\\\[4pt]
+{\\fontsize{12pt}{15pt}\\selectfont <<FACULTAD>>}\\\\[4pt]
+{\\fontsize{12pt}{15pt}\\selectfont <<DEPARTAMENTO>>}
 
 \\vspace{1.2cm}
 
@@ -431,15 +431,15 @@ entre << >> con los datos del bloque [DATOS DE CARÁTULA]):
 
 \\vspace{1.6cm}
 
-{\\fontsize{14pt}{17pt}\\selectfont \\textbf{MONOGRAFÍA}}
+{\\fontsize{12pt}{15pt}\\selectfont \\textbf{MONOGRAFÍA}}
 
 \\vspace{0.8cm}
 
-{\\fontsize{14pt}{17pt}\\selectfont <<TITULO_TRABAJO>>}
+{\\fontsize{12pt}{15pt}\\selectfont <<TITULO_TRABAJO>>}
 
 \\vspace{1.2cm}
 
-{\\fontsize{14pt}{17pt}\\selectfont Estudiante: <<ESTUDIANTE>>}
+{\\fontsize{12pt}{15pt}\\selectfont Estudiante: <<ESTUDIANTE>>}
 
 \\vfill
 
@@ -564,18 +564,24 @@ Mapeo APA 7 → comandos LaTeX para la monografía UMSS:
     el texto arranca en la MISMA línea (inline).
 
 % 🚨 PASO PREVIO OBLIGATORIO — ANTES de \\titleformat{\\chapter}:
-% Estos dos parches resuelven dos defectos visibles del PDF UMSS:
-%   1. Numeración romana del capítulo (CAPÍTULO V, no CAPÍTULO 5).
-%   2. Eliminar el \\vspace*{50pt} que la clase report mete por defecto
+% Estos dos parches resuelven defectos visibles del PDF UMSS:
+%   1. Eliminar el \\vspace*{50pt} que la clase report mete por defecto
 %      ANTES de cada \\chapter — sin este parche aparecen ~6cm de blanco
 %      antes del título de cada capítulo, INCLUSO si configurás titlespacing.
-\\renewcommand{\\thechapter}{\\Roman{chapter}}
+%   2. UMSS Guía 1 (Posgrado FCE) y Guía 2 (Céspedes) exigen NUMERACIÓN
+%      ARÁBIGA (1, 2, 3 ...) — NO romana. Las secciones son 1.1, 1.2,
+%      las sub-secciones 1.1.1, hasta 5 niveles (1.1.1.1.1).
+%   3. Tipografía 12pt en TODO el documento (cuerpo, títulos, captions).
+%      El \\large por default de \\@makechapterhead da ~14.4pt → demasiado
+%      grande según la norma. Usamos \\normalsize\\bfseries que es 12pt.
+\\counterwithin{table}{chapter}    % Tabla 2.1, Tabla 2.2, Tabla 3.1...
+\\counterwithin{figure}{chapter}   % Figura 2.1, Figura 2.2, Figura 3.1...
 \\makeatletter
 \\def\\@makechapterhead#1{%
   \\vspace*{0pt}%
   {\\parindent \\z@ \\raggedright \\normalfont
     \\interlinepenalty\\@M
-    \\large\\bfseries\\centering
+    \\normalsize\\bfseries\\centering
     \\@chapapp\\space\\thechapter.\\space #1\\par\\nobreak
     \\vskip 12pt
   }}
@@ -583,14 +589,14 @@ Mapeo APA 7 → comandos LaTeX para la monografía UMSS:
   \\vspace*{0pt}%
   {\\parindent \\z@ \\raggedright \\normalfont
     \\interlinepenalty\\@M
-    \\large\\bfseries\\centering
+    \\normalsize\\bfseries\\centering
     #1\\par\\nobreak
     \\vskip 12pt
   }}
 \\makeatother
 
 \\titleformat{\\chapter}[hang]
-  {\\normalfont\\large\\bfseries\\centering}
+  {\\normalfont\\normalsize\\bfseries\\centering}
   {Capítulo \\thechapter.}{0.5em}{}
 \\titlespacing*{\\chapter}{0pt}{0pt}{1em}
 
@@ -622,8 +628,14 @@ con el parche a \\@makechapterhead de arriba, ahora queda compacto en una sola
 línea SIN el espacio en blanco enorme del top: "Capítulo III. DISEÑO METODOLÓGICO".
 
 Resultado esperado en el PDF:
-  - Numeración romana en el título visible (CAPÍTULO III, no CAPÍTULO 3).
-  - Tamaño de letra del título: \\large (≈14pt) — sobrio, NO \\Large (17pt).
+  - Numeración ARÁBIGA en el título visible (CAPÍTULO 3, no CAPÍTULO III).
+    Esto sigue lo que exige UMSS Guía 1 (Posgrado) y Guía 2 (Céspedes).
+  - Tamaño de letra del título: \\normalsize (12pt) — coherente con cuerpo,
+    NO \\large ni \\Large. UMSS exige 12pt en TODO el documento.
+  - Secciones numeradas 1.1, 1.2 / sub-secciones 1.1.1 / hasta 5 niveles
+    (1.1.1.1.1) según norma UMSS.
+  - Tablas y figuras numeradas por capítulo (Tabla 2.1, Figura 3.4)
+    gracias a \\counterwithin del preámbulo.
   - Sin franja blanca antes del título cuando arranca una hoja nueva.
 
 NO uses ningún otro estilo de chapter (NO usar \\titleformat con [block],
@@ -650,28 +662,32 @@ No usar colores llamativos en el PDF final.
 CONFIGURACIÓN DE CAPÍTULOS Y SECCIONES
 ═══════════════════════════════════════════════════════════════
 
-Los capítulos deben aparecer como:
+Los capítulos deben aparecer como (ARÁBIGO, NO ROMANO):
 
-CAPÍTULO I
+CAPÍTULO 1
 INTRODUCCIÓN Y ANTECEDENTES DEL TEMA DE INVESTIGACIÓN
 
-CAPÍTULO II
+CAPÍTULO 2
 MARCO TEÓRICO Y REFERENCIAL
 
-CAPÍTULO III
+CAPÍTULO 3
 DISEÑO METODOLÓGICO DE LA INVESTIGACIÓN
 
-CAPÍTULO IV
+CAPÍTULO 4
 ANÁLISIS DE RESULTADOS Y PROPUESTA DE SOLUCIÓN
 
-CAPÍTULO V
+CAPÍTULO 5
 CONCLUSIONES Y RECOMENDACIONES
 
-Reglas:
-- Numeración romana para el número de capítulo en el título visible.
+Reglas (UMSS Guía 1 Posgrado FCE / Guía 2 Céspedes):
+- Numeración ARÁBIGA para el número de capítulo: 1, 2, 3, 4, 5.
+- NO uses números romanos (I, II, III) — la norma exige arábigo.
 - Numeración arábiga para secciones: 1.1, 1.2, 2.1, 3.1, etc.
-- No duplicar "Capítulo I" dentro del texto si ya lo genera el comando.
-- Evitar encabezados excesivamente grandes.
+- Hasta 5 niveles permitidos: 1.1.1.1.1
+- Tablas y figuras numeradas por capítulo: Tabla 2.1, Figura 3.4
+  (\\counterwithin ya activo en el preámbulo).
+- No duplicar "Capítulo 1" dentro del texto si ya lo genera el comando.
+- Tamaño de letra de TODOS los títulos: 12pt (igual al cuerpo).
 - Mantener estilo sobrio.
 
 Puedes usar títulos manuales con \\chapter* y \\addcontentsline si eso permite

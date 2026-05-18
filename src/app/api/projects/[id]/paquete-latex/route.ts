@@ -131,14 +131,18 @@ export async function GET(_req: Request, { params }: Params) {
     const universidadId = (proyecto.universidad_id as string) || "umss-001";
     const universidad = DEFAULT_UNIVERSITIES.find(u => u.id === universidadId) ?? DEFAULT_UNIVERSITIES[0];
     let logoBuffer: Buffer | null = null;
-    let logoFilename = "logo-universidad.png";
+    // ⚠️ IMPORTANTE: el prompt LaTeX referencia el logo como `logos/umss.png`
+    //    (carpeta `logos/` dentro del ZIP). Si cambiás este path, también hay
+    //    que cambiar `\IfFileExists{logos/umss.png}` en compilar-latex.ts.
+    let logoFilename = "logos/umss.png";
     if (universidad?.logo_url) {
       try {
         // El logo_url es una ruta relativa como "/logos/umss.png" → leer de public/
         const logoPath = path.join(process.cwd(), "public", universidad.logo_url.replace(/^\//, ""));
         logoBuffer = await fs.readFile(logoPath);
         const ext = path.extname(universidad.logo_url).toLowerCase() || ".png";
-        logoFilename = `logo-universidad${ext}`;
+        // Mantener la extensión real del archivo pero conservar la ruta logos/umss.<ext>
+        logoFilename = `logos/umss${ext}`;
       } catch (e) {
         console.warn("[paquete-latex] No se pudo cargar el logo:", (e as Error).message);
         // Continuamos sin logo — el .tex tiene un comentario explicando
