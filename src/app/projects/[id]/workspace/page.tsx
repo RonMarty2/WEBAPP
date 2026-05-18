@@ -552,7 +552,26 @@ export default function WorkspacePage() {
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedFase, setSelectedFase] = useState(0);
-  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal" | "bitacora" | "defensa">("generacion");
+  const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal" | "bitacora" | "cuadernillo" | "defensa">("generacion");
+
+  // 📕 Cuadernillo del estudiante — hoja de ruta personal por fase analítica.
+  // Contenido aparte que NO se entrega al tutor, solo el estudiante lo ve.
+  interface CuadernilloVista {
+    id: string;
+    fase_id: string;
+    fase_label: string;
+    resumen_capitulo: string;
+    limitaciones_ia: Array<{ tipo: string; descripcion: string; ubicacion_sugerida: string; como_obtenerlo: string }>;
+    sugerencias_fortalecimiento: Array<{ area: string; que_hacer: string; impacto: "alto" | "medio" | "bajo"; tiempo_estimado: string }>;
+    datos_a_buscar: Array<{ que: string; donde: string; para_que: string }>;
+    preguntas_tutor_probables: Array<{ pregunta: string; respuesta_sugerida: string; evidencia_a_tener_lista: string }>;
+    errores_comunes_evitar: string[];
+    tips_presentacion_oral: string[];
+    created_at: string;
+  }
+  const [cuadernillos, setCuadernillos] = useState<CuadernilloVista[]>([]);
+  const [cuadernilloLoading, setCuadernilloLoading] = useState(false);
+  const [cuadernilloGenerando, setCuadernilloGenerando] = useState<string | null>(null);
 
   // Bitácora del Tutor — observaciones analizadas por la IA (banco acumulado).
   interface BitacoraRow {
@@ -1272,6 +1291,54 @@ export default function WorkspacePage() {
   const abrirCartaDefensa = useCallback(() => {
     if (!proyecto) return;
     window.open(`/api/projects/${proyecto.id}/bitacora/imprimible`, "_blank", "noopener");
+  }, [proyecto]);
+
+  // ── Cuadernillo del Estudiante ───────────────────────────────────────────
+  const cargarCuadernillos = useCallback(async () => {
+    if (!proyecto) return;
+    setCuadernilloLoading(true);
+    try {
+      const res = await fetch(`/api/projects/${proyecto.id}/cuadernillo`);
+      if (!res.ok) throw new Error("No se pudo cargar el cuadernillo");
+      const data = await res.json();
+      setCuadernillos((data.cuadernillos ?? []) as CuadernilloVista[]);
+    } catch {
+      setCuadernillos([]);
+    } finally {
+      setCuadernilloLoading(false);
+    }
+  }, [proyecto]);
+
+  useEffect(() => {
+    if (col1Tab === "cuadernillo" && proyecto) {
+      cargarCuadernillos();
+    }
+  }, [col1Tab, proyecto, cargarCuadernillos]);
+
+  /** Genera/regenera el cuadernillo para una fase específica. */
+  const generarCuadernilloFase = useCallback(async (faseId: string) => {
+    if (!proyecto) return;
+    setCuadernilloGenerando(faseId);
+    try {
+      const res = await fetch(`/api/projects/${proyecto.id}/cuadernillo/${faseId}`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`❌ ${data.error ?? "Error generando cuadernillo"}`);
+        return;
+      }
+      await cargarCuadernillos();
+    } catch (e) {
+      alert(`❌ ${e instanceof Error ? e.message : "Error de red"}`);
+    } finally {
+      setCuadernilloGenerando(null);
+    }
+  }, [proyecto, cargarCuadernillos]);
+
+  const abrirCuadernilloImprimible = useCallback(() => {
+    if (!proyecto) return;
+    window.open(`/api/projects/${proyecto.id}/cuadernillo/imprimible`, "_blank", "noopener");
   }, [proyecto]);
 
   // ── Revertir a la versión anterior (deshacer cambios) ────────────────────
@@ -2178,6 +2245,13 @@ export default function WorkspacePage() {
                 >
                   📒 Bitácora
                 </button>
+                <button
+                  onClick={() => setCol1Tab("cuadernillo")}
+                  title="Tu Cuadernillo Personal: sugerencias, datos a buscar, preguntas probables del tutor. Solo tú lo ves."
+                  style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "cuadernillo" ? "#a855f7" : "var(--fg-secondary)", borderBottom: col1Tab === "cuadernillo" ? "2px solid #a855f7" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                >
+                  📕 Cuadernillo
+                </button>
                 {canDefense && (
                   <button
                     onClick={() => setCol1Tab("defensa")}
@@ -2687,6 +2761,215 @@ export default function WorkspacePage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+      {col1Tab === "cuadernillo" && (
+        <div style={{ flex: 1, overflow: "auto", padding: "16px" }}>
+          <div style={{ marginBottom: 14, padding: "12px 14px", background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.22)", borderRadius: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 800, color: "#7e22ce", marginBottom: 4 }}>
+              📕 Tu Cuadernillo Personal
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
+              Hoja de ruta privada. Cada capítulo aprobado tiene su cuadernillo con:
+              qué te falta hacer (fotos, datos propios), sugerencias para mejorar,
+              datos públicos a buscar, preguntas probables de tu tutor y tips de defensa.
+              <strong> Solo tú lo ves — no se entrega al tutor.</strong>
+            </div>
+          </div>
+
+          {/* Acciones globales */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 14, alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
+            <div style={{ fontSize: 11, color: "var(--fg-muted)" }}>
+              {cuadernilloLoading
+                ? "Cargando…"
+                : `${cuadernillos.length} cuadernillo${cuadernillos.length === 1 ? "" : "s"} generado${cuadernillos.length === 1 ? "" : "s"}`}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={cargarCuadernillos}
+                disabled={cuadernilloLoading}
+                title="Recargar"
+                style={{ padding: "6px 10px", fontSize: 11, fontWeight: 600, borderRadius: 8, border: "1px solid rgba(148,163,184,0.3)", background: "white", color: "var(--fg-secondary)", cursor: cuadernilloLoading ? "wait" : "pointer" }}
+              >
+                ↻
+              </button>
+              <button
+                onClick={abrirCuadernilloImprimible}
+                disabled={cuadernillos.length === 0}
+                title="Abrir todos los cuadernillos como documento imprimible (Ctrl+P → Guardar PDF)"
+                style={{ padding: "6px 12px", fontSize: 11.5, fontWeight: 700, borderRadius: 8, border: "none", background: cuadernillos.length === 0 ? "rgba(148,163,184,0.25)" : "#7e22ce", color: cuadernillos.length === 0 ? "var(--fg-muted)" : "white", cursor: cuadernillos.length === 0 ? "not-allowed" : "pointer" }}
+              >
+                🖨️ Imprimir / PDF
+              </button>
+            </div>
+          </div>
+
+          {/* Lista de fases del proyecto. Para cada una: ver/generar cuadernillo. */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {displayFases
+              .filter(f => !isPhaseTecnica(f.id) && f.id !== "ph-cap0")
+              .map((f) => {
+                const cuad = cuadernillos.find(c => c.fase_id === f.id);
+                const tieneContenido = Boolean(
+                  (proyecto.phase_contents?.[f.id]?.trim() ?? "") ||
+                  (proyecto.phase_contents?.[`${f.id}_borrador`]?.trim() ?? "")
+                );
+                const enProgreso = cuadernilloGenerando === f.id;
+
+                return (
+                  <div
+                    key={f.id}
+                    style={{
+                      background: cuad ? "rgba(168,85,247,0.04)" : "rgba(148,163,184,0.04)",
+                      border: cuad ? "1px solid rgba(168,85,247,0.22)" : "1px solid rgba(148,163,184,0.2)",
+                      borderRadius: 10,
+                      overflow: "hidden",
+                    }}
+                  >
+                    {/* Header de la fase */}
+                    <div style={{ padding: "10px 12px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: "var(--fg-primary)" }}>{f.label}</div>
+                        {cuad
+                          ? <div style={{ fontSize: 10.5, color: "#7e22ce", marginTop: 2 }}>
+                              ✓ Cuadernillo listo · {new Date(cuad.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short" })}
+                            </div>
+                          : <div style={{ fontSize: 10.5, color: "var(--fg-muted)", marginTop: 2 }}>
+                              {tieneContenido ? "Sin cuadernillo aún" : "Generá la fase primero"}
+                            </div>
+                        }
+                      </div>
+                      <button
+                        onClick={() => generarCuadernilloFase(f.id)}
+                        disabled={!tieneContenido || enProgreso}
+                        style={{
+                          padding: "6px 12px", fontSize: 11, fontWeight: 700, borderRadius: 8,
+                          border: "1px solid rgba(168,85,247,0.4)",
+                          background: enProgreso ? "rgba(168,85,247,0.15)" : "white",
+                          color: "#7e22ce",
+                          cursor: (!tieneContenido || enProgreso) ? "not-allowed" : "pointer",
+                          opacity: !tieneContenido ? 0.4 : 1,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {enProgreso ? "Generando…" : cuad ? "🔄 Regenerar" : "✨ Generar"}
+                      </button>
+                    </div>
+
+                    {/* Contenido expandido del cuadernillo */}
+                    {cuad && (
+                      <div style={{ padding: "10px 12px 12px", borderTop: "1px solid rgba(168,85,247,0.15)", display: "flex", flexDirection: "column", gap: 10 }}>
+                        {/* Resumen */}
+                        {cuad.resumen_capitulo && (
+                          <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", fontStyle: "italic", lineHeight: 1.5 }}>
+                            {cuad.resumen_capitulo}
+                          </div>
+                        )}
+
+                        {/* Limitaciones IA (ámbar) */}
+                        {cuad.limitaciones_ia.length > 0 && (
+                          <details>
+                            <summary style={{ fontSize: 11, fontWeight: 700, color: "#92400e", cursor: "pointer", padding: "4px 0" }}>
+                              ⚠️ Lo que falta agregar tú ({cuad.limitaciones_ia.length})
+                            </summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                              {cuad.limitaciones_ia.map((l, i) => (
+                                <div key={i} style={{ padding: 8, background: "rgba(245,158,11,0.08)", borderLeft: "3px solid #f59e0b", borderRadius: 4, fontSize: 11, lineHeight: 1.5 }}>
+                                  <div style={{ fontWeight: 700, color: "#92400e", marginBottom: 3 }}>{l.tipo.toUpperCase().replace(/_/g, " ")}</div>
+                                  <div><strong>Qué:</strong> {l.descripcion}</div>
+                                  <div><strong>Dónde:</strong> {l.ubicacion_sugerida}</div>
+                                  <div><strong>Cómo:</strong> {l.como_obtenerlo}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+
+                        {/* Sugerencias */}
+                        {cuad.sugerencias_fortalecimiento.length > 0 && (
+                          <details>
+                            <summary style={{ fontSize: 11, fontWeight: 700, color: "#4338ca", cursor: "pointer", padding: "4px 0" }}>
+                              💪 Sugerencias para fortalecer ({cuad.sugerencias_fortalecimiento.length})
+                            </summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                              {cuad.sugerencias_fortalecimiento.map((s, i) => (
+                                <div key={i} style={{ padding: 8, background: "rgba(99,102,241,0.06)", borderRadius: 4, fontSize: 11, lineHeight: 1.5, display: "flex", alignItems: "center", gap: 8 }}>
+                                  <span style={{ padding: "2px 7px", fontSize: 9.5, fontWeight: 800, color: "white", borderRadius: 999, background: s.impacto === "alto" ? "#dc2626" : s.impacto === "medio" ? "#d97706" : "#65a30d" }}>
+                                    {s.impacto.toUpperCase()}
+                                  </span>
+                                  <span style={{ flex: 1 }}><strong>{s.area}:</strong> {s.que_hacer}</span>
+                                  <span style={{ fontSize: 10, color: "var(--fg-muted)" }}>⏱ {s.tiempo_estimado}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+
+                        {/* Datos a buscar */}
+                        {cuad.datos_a_buscar.length > 0 && (
+                          <details>
+                            <summary style={{ fontSize: 11, fontWeight: 700, color: "#0369a1", cursor: "pointer", padding: "4px 0" }}>
+                              🔍 Datos públicos a buscar ({cuad.datos_a_buscar.length})
+                            </summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                              {cuad.datos_a_buscar.map((d, i) => (
+                                <div key={i} style={{ padding: 8, background: "rgba(59,130,246,0.06)", borderRadius: 4, fontSize: 11, lineHeight: 1.5 }}>
+                                  <div><strong>Qué:</strong> {d.que}</div>
+                                  <div><strong>Dónde:</strong> {d.donde}</div>
+                                  <div><strong>Para qué:</strong> {d.para_que}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+
+                        {/* Preguntas tutor (verde) */}
+                        {cuad.preguntas_tutor_probables.length > 0 && (
+                          <details>
+                            <summary style={{ fontSize: 11, fontWeight: 700, color: "#065f46", cursor: "pointer", padding: "4px 0" }}>
+                              ❓ Preguntas probables del tutor ({cuad.preguntas_tutor_probables.length})
+                            </summary>
+                            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                              {cuad.preguntas_tutor_probables.map((p, i) => (
+                                <div key={i} style={{ padding: 8, background: "rgba(16,185,129,0.06)", borderRadius: 4, fontSize: 11, lineHeight: 1.5 }}>
+                                  <div style={{ fontWeight: 700, color: "#065f46", marginBottom: 4 }}>P{i + 1}: {p.pregunta}</div>
+                                  <div style={{ marginBottom: 3 }}><strong>Respuesta:</strong> {p.respuesta_sugerida}</div>
+                                  {p.evidencia_a_tener_lista && (
+                                    <div style={{ fontSize: 10.5, color: "var(--fg-secondary)" }}>📌 Tener a mano: {p.evidencia_a_tener_lista}</div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
+
+                        {/* Errores y tips */}
+                        {cuad.errores_comunes_evitar.length > 0 && (
+                          <details>
+                            <summary style={{ fontSize: 11, fontWeight: 700, color: "#991b1b", cursor: "pointer", padding: "4px 0" }}>
+                              🚫 Errores que evitar ({cuad.errores_comunes_evitar.length})
+                            </summary>
+                            <ul style={{ marginTop: 6, paddingLeft: 20, fontSize: 11, lineHeight: 1.55 }}>
+                              {cuad.errores_comunes_evitar.map((e, i) => <li key={i}>{e}</li>)}
+                            </ul>
+                          </details>
+                        )}
+                        {cuad.tips_presentacion_oral.length > 0 && (
+                          <details>
+                            <summary style={{ fontSize: 11, fontWeight: 700, color: "#1e40af", cursor: "pointer", padding: "4px 0" }}>
+                              🎤 Tips para la defensa oral ({cuad.tips_presentacion_oral.length})
+                            </summary>
+                            <ul style={{ marginTop: 6, paddingLeft: 20, fontSize: 11, lineHeight: 1.55 }}>
+                              {cuad.tips_presentacion_oral.map((t, i) => <li key={i}>{t}</li>)}
+                            </ul>
+                          </details>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
           </div>
         </div>
       )}

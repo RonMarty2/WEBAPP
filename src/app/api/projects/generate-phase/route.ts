@@ -682,28 +682,14 @@ de variables (la variante "reducido" las omite por diseño). Por lo tanto:
     const phasePromptBase = typePrompt || adminPrompt || variantePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const baseSystemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
-    // Plan Estándar: agregar instrucción para incluir recomendaciones visuales al final de cada sección.
-    // Esto convierte una "limitación" (no hay edición) en un diferencial positivo.
-    const systemPrompt = planTier === "estandar" || planTier === "standard"
-      ? baseSystemPrompt + `
-
-═══════════════════════════════════════════════════════════════
-INSTRUCCIÓN ADICIONAL — RECOMENDACIONES VISUALES (PLAN ESTÁNDAR)
-═══════════════════════════════════════════════════════════════
-
-Al final de CADA SECCIÓN PRINCIPAL que generes, incluye un bloque con este formato exacto:
-
-> 💡 **Sugerencias para enriquecer esta sección:**
-> - 📷 [Solo si aplica: describe exactamente qué fotografiar o qué imagen incluir]
-> - 📊 [Solo si aplica: describe qué tabla construir y con qué datos]
-> - 📈 [Solo si aplica: describe qué gráfico elaborar y qué muestra]
-> - 🗺️ [Solo si aplica: describe qué mapa, organigrama o diagrama dibujar]
-
-REGLAS:
-- Solo incluye los íconos que sean realmente útiles para esa sección. No los fuerces todos.
-- Sé específico al contexto del estudiante, no genérico. Malo: "incluir una foto". Bueno: "📷 Fotografía del área de estudio en [lugar del proyecto] mostrando [elemento específico mencionado en el texto]."
-- Estas sugerencias ayudan al estudiante a personalizar el documento impreso con material propio.`
-      : baseSystemPrompt;
+    // 📘 El documento académico debe ser ENTREGABLE: limpio, profesional, sin
+    //    sugerencias inline. Antes inyectábamos "💡 Sugerencias para enriquecer"
+    //    al final de cada sección (plan estándar), pero eso contaminaba el PDF
+    //    que el estudiante presenta al tutor. Ahora todas las sugerencias se
+    //    generan SEPARADAS en el "Cuadernillo del Estudiante" (ver
+    //    src/lib/prompts/cuadernillo-estudiante.ts) — un documento aparte que
+    //    solo el estudiante ve y descarga por su lado.
+    const systemPrompt = baseSystemPrompt;
 
     const borradorKey = `${phase_id}_borrador`;
     const borradorPrev = phaseContents[borradorKey] ?? null;

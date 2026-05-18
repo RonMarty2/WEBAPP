@@ -129,23 +129,22 @@ REGLAS CRÍTICAS de gráficos:
   qué muestra el gráfico y qué se concluye
 
 ───────────────────────────────────────────────────────────────
-C) INDICACIONES PARA EL ESTUDIANTE (si aplica)
+C) PROHIBICIONES ABSOLUTAS
 ───────────────────────────────────────────────────────────────
 
-Al final de cada sección analítica, agrega un bloque:
+DOCUMENTO LIMPIO Y ENTREGABLE — Este contenido va al PDF final que
+el estudiante presenta al tutor. NO incluyas:
+- ❌ Meta-comentarios dirigidos al estudiante
+- ❌ Bloques tipo "💡 Sugerencias para enriquecer"
+- ❌ Notas con emojis sobre qué falta agregar
+- ❌ Instrucciones tipo "el estudiante debería..."
+- ❌ Marcadores tipo "[INSERTAR FOTO AQUÍ]"
 
-> 💡 **Sugerencias para enriquecer esta sección:**
-> - 📊 [Especifica qué tabla adicional construir y con qué datos propios del estudiante]
-> - 📈 [Especifica qué gráfico adicional convendría agregar]
-> - 📷 [Si aplica: qué fotografía/imagen tomar y dónde insertarla]
-> - 📐 [Si aplica: qué diagrama/esquema dibujar]
+Las sugerencias para el estudiante se generan en un cuadernillo
+SEPARADO (no en este documento). Aquí solo va prosa académica
+profesional, tablas con fuente, y gráficos pgfplots.
 
-Estas sugerencias son OPCIONALES para el estudiante pero le ayudan a
-personalizar el documento con material propio.
-
-───────────────────────────────────────────────────────────────
-D) PROHIBICIONES ABSOLUTAS
-───────────────────────────────────────────────────────────────
+OTRAS PROHIBICIONES TÉCNICAS:
 
 - ❌ NUNCA digas "ver gráfico anexo" o "ver figura X" sin generar el código
 - ❌ NUNCA describas datos en prosa sin acompañarlos con tabla
