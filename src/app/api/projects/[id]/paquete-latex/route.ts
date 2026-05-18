@@ -259,6 +259,15 @@ export async function GET(_req: Request, { params }: Params) {
         /(\\begin\{(?:hangparas|thebibliography)\}[\s\S]*?\\end\{(?:hangparas|thebibliography)\})/g,
         (block) => block.replace(/(?<!\\)&/g, "\\&"),
       );
+      // Limpiar numeración duplicada en captions:
+      //   \caption{Cuadro 4.2. Texto...}  →  \caption{Texto...}
+      //   \caption{Tabla 1.1: Texto...}   →  \caption{Texto...}
+      //   \caption{Figura 3.2 - Texto...} →  \caption{Texto...}
+      // LaTeX agrega automáticamente "Cuadro X.Y" via \counterwithin{table}{chapter}.
+      cleaned = cleaned.replace(
+        /\\caption\{\s*(?:Cuadro|Tabla|Figura|Tab\.|Fig\.)\s*\d+(?:[.\-:]\d+)?\s*[.\-:]\s*/gi,
+        "\\caption{",
+      );
       return cleaned;
     };
     results.forEach((r) => { r.latex = limpiarLatexBlock(r.latex, r.faseId); });

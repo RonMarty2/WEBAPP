@@ -86,10 +86,46 @@ Sintaxis (aplicar siempre):
   - bullet                    → \\begin{itemize} \\item bullet ... \\end{itemize}
   1. número                   → \\begin{enumerate} \\item número ... \\end{enumerate}
 
-Tablas markdown ( |col1|col2| ) → \\begin{tabular}{|p{width}|p{width}|}
-  Usar \\hline después de header y al final.
-  Cada celda escapada (& en autor → \\&).
-  Envolver en \\begin{table}[H] ... \\caption{Tabla X.Y. ...} ... \\end{table}.
+Tablas markdown ( |col1|col2| ):
+
+  ⚠️ REGLA CRÍTICA — captions limpios:
+  El sistema LaTeX agrega automáticamente "Cuadro X.Y" antes de tu caption.
+  NO escribas "Cuadro X.X." ni "Tabla X.X." al inicio del caption — eso
+  causa numeración duplicada como "Cuadro 4.5: Cuadro 4.2. Texto...".
+
+  MAL:   \\caption{Cuadro 4.2. Comparativa de regímenes...}
+  BIEN:  \\caption{Comparativa de regímenes de origen (CAN vs. MERCOSUR)}
+
+  ⚠️ REGLA CRÍTICA — tablas anchas:
+  Si la tabla tiene 4+ columnas o columnas con texto largo, envolvela
+  en \\begin{adjustbox}{width=\\textwidth,center}...\\end{adjustbox}
+  para que se ajuste al ancho de la página.
+
+  Si la tabla es MUY ancha, considera usar \\footnotesize o \\small dentro
+  del entorno table para reducir el tamaño del texto.
+
+  Estructura recomendada:
+
+  \\begin{table}[H]
+  \\centering
+  \\caption{Descripción breve (SIN número manual)}
+  \\label{tab:nombre-corto}
+  \\begin{adjustbox}{width=\\textwidth,center}
+  \\small
+  \\begin{tabular}{|p{2.5cm}|p{3cm}|p{3cm}|p{3cm}|p{3cm}|}
+  \\hline
+  Header 1 & Header 2 & Header 3 & Header 4 & Header 5 \\\\
+  \\hline
+  Celda... & ... & ... & ... & ... \\\\
+  \\hline
+  \\end{tabular}
+  \\end{adjustbox}
+  \\end{table}
+
+  Reglas técnicas:
+  - \\hline después del header y al final.
+  - Cada celda con caracteres especiales escapados (& → \\&).
+  - Anchos de columna en cm o usar tabularx para auto-ajuste.
 
 Bloques de código \`\`\`latex ... \`\`\`:
   PEGAR el contenido TAL CUAL, SIN escapar nada (es código LaTeX puro).
