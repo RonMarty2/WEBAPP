@@ -31,6 +31,7 @@ import {
 } from "@/lib/hiloConductor";
 import { loadFromDisk, saveToDisk, type PhaseFeedback } from "@/lib/persistence";
 import { getVariantById } from "@/lib/cap1Variants";
+import { SISTEMA_SCRIBE_REFERENCIAS_UCB } from "@/lib/prompts/scribe/consolidar-referencias-ucb";
 
 /**
  * Guarda feedback del estudiante para análisis posterior en /admin/dashboard.
@@ -656,6 +657,13 @@ async function generarSinSupabase({
       : "clasico";
     if (phase_id === "ph-cap1") {
       variantePrompt = getVariantById(varianteIdResuelta).prompt;
+    }
+    // 🎯 Override por universidad: UCB usa sistema autor-fecha propio para
+    // la bibliografía, NO APA 7. Cuando el proyecto es UCB-001 y la fase
+    // es "ph-referencias", reemplazamos el megaprompt por el de UCB.
+    const esUniversidadUCB = proyecto.universidad_id === "ucb-001";
+    if (esUniversidadUCB && phase_id === "ph-referencias") {
+      variantePrompt = SISTEMA_SCRIBE_REFERENCIAS_UCB;
     }
     // 🎯 Propagación de variante a Cap II-V: el prompt maestro se mantiene
     // (alineado a Guía 1 UMSS), pero inyectamos un bloque al userPrompt que

@@ -7,31 +7,50 @@
  * NUNCA sale por aquí.
  *
  * GET /api/cap1-variants?universidad_id=umss-001
+ * GET /api/cap1-variants?universidad_id=ucb-001
  */
 
 import { NextResponse } from "next/server";
-import { getVariantsForUniversity, toPublicVariant } from "@/lib/cap1Variants";
+import { getVariantsForUniversity, toPublicVariant, isGuiaUmss } from "@/lib/cap1Variants";
 import { GUIAS_UMSS_OFICIALES, type FormatoUMSS } from "@/lib/umssValidators";
+import { GUIAS_UCB_OFICIALES, type FormatoUCB } from "@/lib/ucbValidators";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const universidadId = searchParams.get("universidad_id");
 
-  // Enriquecer cada variante con la información oficial de la guía UMSS
-  // (autor, fecha, características) para que la UI pueda mostrarla.
+  // Enriquecer cada variante con la información oficial de la guía a la
+  // que pertenece (UMSS o UCB). El consumidor (wizard UI) recibe el mismo
+  // shape para ambas, pero la metadata específica viene del validator
+  // correspondiente.
   const variantes = getVariantsForUniversity(universidadId)
     .map(toPublicVariant)
     .map((v) => {
-      const formato = v.guia_oficial.formato_umss as FormatoUMSS;
-      const guiaOficialDetalle = GUIAS_UMSS_OFICIALES[formato];
+      if (isGuiaUmss(v.guia_oficial)) {
+        const formato = v.guia_oficial.formato_umss as FormatoUMSS;
+        const detalle = GUIAS_UMSS_OFICIALES[formato];
+        return {
+          ...v,
+          guia_oficial: {
+            ...v.guia_oficial,
+            autor: detalle?.autor ?? "",
+            fecha: detalle?.fecha ?? "",
+            caracteristicas: detalle?.caracteristicas ?? [],
+            url_documento_pdf: detalle?.url_documento_pdf ?? null,
+          },
+        };
+      }
+      // Rama UCB (u otra universidad no-UMSS)
+      const formato = v.guia_oficial.formato_universidad as FormatoUCB;
+      const detalle = GUIAS_UCB_OFICIALES[formato];
       return {
         ...v,
         guia_oficial: {
           ...v.guia_oficial,
-          autor: guiaOficialDetalle?.autor ?? "",
-          fecha: guiaOficialDetalle?.fecha ?? "",
-          caracteristicas: guiaOficialDetalle?.caracteristicas ?? [],
-          url_documento_pdf: guiaOficialDetalle?.url_documento_pdf ?? null,
+          autor: detalle?.autor ?? "",
+          fecha: detalle?.fecha ?? "",
+          caracteristicas: detalle?.caracteristicas ?? [],
+          url_documento_pdf: detalle?.url_documento_pdf ?? null,
         },
       };
     });

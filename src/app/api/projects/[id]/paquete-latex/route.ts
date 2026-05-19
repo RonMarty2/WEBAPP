@@ -30,6 +30,17 @@ import {
   buildBibliografiaHeader,
   buildFinDocumento,
 } from "@/lib/latex/preamble-umss";
+import {
+  buildPreambleUCB,
+  buildCaratulaUCB,
+  buildTribunalUCB,
+  buildResumenHeader as buildResumenHeaderUCB,
+  buildAbstractHeader as buildAbstractHeaderUCB,
+  buildIndice as buildIndiceUCB,
+  buildBibliografiaHeader as buildBibliografiaHeaderUCB,
+  buildSeparadorAnexos as buildSeparadorAnexosUCB,
+  buildFinDocumento as buildFinDocumentoUCB,
+} from "@/lib/latex/preamble-ucb";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -338,33 +349,12 @@ export async function GET(_req: Request, { params }: Params) {
     };
 
     // ENSAMBLAR el .tex final de forma determinista (sin IA).
-    // Estructura UMSS oficial garantizada en orden correcto:
-    //   1. Preámbulo (paquetes + config tipográfica)
-    //   2. \begin{document}
-    //   3. Carátula UMSS (logo izq + datos derecha)
-    //   4. Resumen Ejecutivo (con \section*)
-    //   5. Índice general (\tableofcontents)
-    //   6. Capítulos 1-5 (\chapter)
-    //   7. Bibliografía
-    //   8. \end{document}
-    const preamble = buildPreambleUMSS();
-    const caratula = buildCaratulaUMSS({
-      nombre: datos.nombre,
-      titulo: datos.titulo,
-      programa: datos.programa,
-      version: datos.version,
-      modalidad: datos.modalidad,
-      universidad: datos.universidad,
-      facultad: datos.facultad,
-      departamento: datos.departamento,
-      ciudad: datos.ciudad,
-      pais: datos.pais,
-      mes: datos.mes,
-      anio: datos.anio,
-      tutor: datos.tutor || undefined,
-    });
+    // Switch por universidad: UMSS usa preamble-umss.ts; UCB usa
+    // preamble-ucb.ts. Cualquier universidad no mapeada cae al UMSS por
+    // defecto (compatibilidad hacia atrás).
+    const esUCB = proyecto.universidad_id === "ucb-001";
 
-    // Ubicar cada sección por su faseId
+    // Ubicar cada sección por su faseId (igual para UMSS y UCB)
     const resumenLatex = results.find((r) => r.faseId === "ph-resumen")?.latex ?? "";
     const cap1Latex = results.find((r) => r.faseId === "ph-cap1")?.latex ?? "";
     const cap2Latex = results.find((r) => r.faseId === "ph-cap2")?.latex ?? "";
@@ -373,47 +363,125 @@ export async function GET(_req: Request, { params }: Params) {
     const cap5Latex = results.find((r) => r.faseId === "ph-cap5")?.latex ?? "";
     const biblioLatex = results.find((r) => r.faseId === "ph-referencias")?.latex ?? "";
 
-    const partes: string[] = [
-      preamble,
-      caratula,
-    ];
-    if (resumenLatex) {
-      // La IA debería haber generado \section*{RESUMEN EJECUTIVO}, pero por seguridad
-      // agregamos también la cabecera + numeración roman.
-      partes.push(buildResumenHeader());
-      partes.push(resumenLatex);
+    const partes: string[] = [];
+
+    if (esUCB) {
+      // ===== ENSAMBLAJE UCB =====
+      // Orden UCB (Guía 2020 págs. 4-16):
+      //   1. Preámbulo
+      //   2. Carátula UCB (escudo + Departamento + Carrera + Título)
+      //   3. Tribunal Examinador (firma de los 4 miembros)
+      //   4. Resumen (≤200 palabras) en numeración romana
+      //   5. Abstract (traducción inglesa del resumen)
+      //   6. Índice general
+      //   7. Capítulos 1-5
+      //   8. Bibliografía
+      //   9. Separador de anexos
+      //  10. \end{document}
+      partes.push(buildPreambleUCB());
+      partes.push(buildCaratulaUCB({
+        nombre: datos.nombre,
+        titulo: datos.titulo,
+        departamento: datos.departamento,
+        carrera: String(ctxInicial.carrera ?? datos.programa ?? ""),
+        tipo_trabajo: String(ctxInicial.tipo_trabajo ?? "Monografía"),
+        grado_academico: String(ctxInicial.grado_academico ?? "Licenciatura"),
+        universidad: datos.universidad,
+        ciudad: datos.ciudad,
+        pais: datos.pais,
+        mes: datos.mes,
+        anio: datos.anio,
+        tutor: datos.tutor || undefined,
+      }));
+      partes.push(buildTribunalUCB({
+        profesor_guia: String(ctxInicial.profesor_guia ?? datos.tutor ?? ""),
+        profesor_relator: String(ctxInicial.profesor_relator ?? ""),
+        director_carrera: String(ctxInicial.director_carrera ?? ""),
+        rector_regional: String(ctxInicial.rector_regional ?? ""),
+      }));
+      if (resumenLatex) {
+        partes.push(buildResumenHeaderUCB());
+        partes.push(resumenLatex);
+        // UCB exige Abstract en inglés. Si el resumenLatex ya lo trae,
+        // la IA habrá emitido un \section*{ABSTRACT}; si no, queda como
+        // marcador del estudiante (no inventamos traducción).
+        partes.push(buildAbstractHeaderUCB());
+        partes.push("\\textit{[Pendiente: traducción del resumen al inglés + 3 a 8 palabras clave (keywords) — la IA o el estudiante deben completar esta sección.]}");
+      }
+      partes.push(buildIndiceUCB());
+      if (cap1Latex) partes.push(cap1Latex);
+      if (cap2Latex) partes.push(cap2Latex);
+      if (cap3Latex) partes.push(cap3Latex);
+      if (cap4Latex) partes.push(cap4Latex);
+      if (cap5Latex) partes.push(cap5Latex);
+      if (biblioLatex) {
+        partes.push(buildBibliografiaHeaderUCB());
+        partes.push(biblioLatex);
+      }
+      partes.push(buildSeparadorAnexosUCB());
+      partes.push(buildFinDocumentoUCB());
+    } else {
+      // ===== ENSAMBLAJE UMSS (default — comportamiento original intacto) =====
+      // Estructura UMSS oficial garantizada en orden correcto:
+      //   1. Preámbulo (paquetes + config tipográfica)
+      //   2. \begin{document}
+      //   3. Carátula UMSS (logo izq + datos derecha)
+      //   4. Resumen Ejecutivo (con \section*)
+      //   5. Índice general (\tableofcontents)
+      //   6. Capítulos 1-5 (\chapter)
+      //   7. Bibliografía
+      //   8. \end{document}
+      partes.push(buildPreambleUMSS());
+      partes.push(buildCaratulaUMSS({
+        nombre: datos.nombre,
+        titulo: datos.titulo,
+        programa: datos.programa,
+        version: datos.version,
+        modalidad: datos.modalidad,
+        universidad: datos.universidad,
+        facultad: datos.facultad,
+        departamento: datos.departamento,
+        ciudad: datos.ciudad,
+        pais: datos.pais,
+        mes: datos.mes,
+        anio: datos.anio,
+        tutor: datos.tutor || undefined,
+      }));
+      if (resumenLatex) {
+        partes.push(buildResumenHeader());
+        partes.push(resumenLatex);
+      }
+      partes.push(buildIndice());
+      if (cap1Latex) partes.push(cap1Latex);
+      if (cap2Latex) partes.push(cap2Latex);
+      if (cap3Latex) partes.push(cap3Latex);
+      if (cap4Latex) partes.push(cap4Latex);
+      if (cap5Latex) partes.push(cap5Latex);
+      if (biblioLatex) {
+        partes.push(buildBibliografiaHeader());
+        partes.push(biblioLatex);
+      }
+      partes.push(buildFinDocumento());
     }
-    partes.push(buildIndice());
-    if (cap1Latex) partes.push(cap1Latex);
-    if (cap2Latex) partes.push(cap2Latex);
-    if (cap3Latex) partes.push(cap3Latex);
-    if (cap4Latex) partes.push(cap4Latex);
-    if (cap5Latex) partes.push(cap5Latex);
-    if (biblioLatex) {
-      partes.push(buildBibliografiaHeader());
-      partes.push(biblioLatex);
-    }
-    partes.push(buildFinDocumento());
 
     const texConDatos = partes.join("\n\n");
 
     // 3) Cargar el logo de la universidad para incluirlo en el ZIP.
     let logoBuffer: Buffer | null = null;
-    // ⚠️ IMPORTANTE: el prompt LaTeX referencia el logo como `logos/umss.png`
-    //    (carpeta `logos/` dentro del ZIP). Si cambiás este path, también hay
-    //    que cambiar `\IfFileExists{logos/umss.png}` en compilar-latex.ts.
-    let logoFilename = "logos/umss.png";
+    // ⚠️ IMPORTANTE: el preámbulo LaTeX referencia el logo en una ruta fija
+    //    dentro del ZIP (logos/umss.<ext> o logos/ucb.<ext>). Si cambiás este
+    //    path, también hay que actualizar `\IfFileExists{...}` en
+    //    src/lib/latex/preamble-{umss,ucb}.ts.
+    const logoBaseName = esUCB ? "ucb" : "umss";
+    let logoFilename = `logos/${logoBaseName}.png`;
     if (universidad?.logo_url) {
       try {
-        // El logo_url es una ruta relativa como "/logos/umss.png" → leer de public/
         const logoPath = path.join(process.cwd(), "public", universidad.logo_url.replace(/^\//, ""));
         logoBuffer = await fs.readFile(logoPath);
         const ext = path.extname(universidad.logo_url).toLowerCase() || ".png";
-        // Mantener la extensión real del archivo pero conservar la ruta logos/umss.<ext>
-        logoFilename = `logos/umss${ext}`;
+        logoFilename = `logos/${logoBaseName}${ext}`;
       } catch (e) {
         console.warn("[paquete-latex] No se pudo cargar el logo:", (e as Error).message);
-        // Continuamos sin logo — el .tex tiene un comentario explicando
       }
     }
 

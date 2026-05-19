@@ -54,7 +54,10 @@ interface Cap1VariantePublica {
   guia_oficial: {
     id: string;
     nombre: string;
-    formato_umss: "guia_1_posgrado" | "guia_2_cespedes";
+    /** Presente solo si la guía es UMSS. */
+    formato_umss?: "guia_1_posgrado" | "guia_2_cespedes";
+    /** Presente solo si la guía es de otra universidad (UCB hoy). */
+    formato_universidad?: "ucb_2020";
     autor: string;
     fecha: string;
     caracteristicas: string[];
@@ -666,9 +669,26 @@ function NuevoProyectoPageInner() {
             <div className="umss-variant-grid">
               {cap1Variantes.map((v) => {
                 const seleccionada = cap1VarianteId === v.id;
+                const esUcb = v.guia_oficial?.formato_universidad === "ucb_2020";
                 const esGuia1 = v.guia_oficial?.formato_umss === "guia_1_posgrado";
-                const colorGuia = esGuia1 ? "#2563eb" : "#7c3aed";
-                const bgGuia = esGuia1 ? "rgba(37,99,235,0.08)" : "rgba(124,58,237,0.08)";
+                // Esquema de colores por guía: UMSS-Guia1 azul, UMSS-Guia2 violeta,
+                // UCB esmeralda (distintivo institucional UCB San Pablo).
+                const colorGuia = esUcb ? "#0d9488" : esGuia1 ? "#2563eb" : "#7c3aed";
+                const bgGuia = esUcb
+                  ? "rgba(13,148,136,0.08)"
+                  : esGuia1
+                    ? "rgba(37,99,235,0.08)"
+                    : "rgba(124,58,237,0.08)";
+                const etiquetaGuia = esUcb
+                  ? "Guía UCB Cochabamba"
+                  : esGuia1
+                    ? "Guía 1 UMSS"
+                    : "Guía 2 UMSS";
+                const shadowGuia = esUcb
+                  ? "rgba(13,148,136,0.15)"
+                  : esGuia1
+                    ? "rgba(37,99,235,0.15)"
+                    : "rgba(124,58,237,0.15)";
 
                 return (
                   // div clickeable (no button) para permitir <a target=_blank>
@@ -699,7 +719,7 @@ function NuevoProyectoPageInner() {
                       display: "flex",
                       flexDirection: "column",
                       boxShadow: seleccionada
-                        ? `0 8px 24px ${esGuia1 ? "rgba(37,99,235,0.15)" : "rgba(124,58,237,0.15)"}`
+                        ? `0 8px 24px ${shadowGuia}`
                         : "0 1px 3px rgba(0,0,0,0.04)",
                     }}
                   >
@@ -723,7 +743,7 @@ function NuevoProyectoPageInner() {
                               marginBottom: 4,
                             }}
                           >
-                            {esGuia1 ? "Guía 1 UMSS" : "Guía 2 UMSS"} · {v.guia_oficial?.fecha}
+                            {etiquetaGuia} · {v.guia_oficial?.fecha}
                           </div>
                           <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.2 }}>
                             {seleccionada ? "✓ " : ""}Formato {v.nombre}
