@@ -55,6 +55,16 @@ export const DEFAULT_UNIVERSITIES: University[] = [
     is_active: true,
   },
   {
+    id: "unifranz-cba-001",
+    name: "Universidad Privada Franz Tamayo (UNIFRANZ — Cochabamba)",
+    logo_url: "/logos/unifranz/escudo-01.png",
+    latex_prompt: "Formato UNIFRANZ Cochabamba (Guía 2017): Verdana 11pt, interlineado 1.5, 6pt posteriores, sin sangría, márgenes superior/inferior/derecho 2.5cm e izquierdo 3.5cm. Tapa color plomo con letras doradas (escudo UNIFRANZ + Facultad + Carrera + Título entre comillas + Modalidad + Postulante + Tutor + Ciudad/País/Año, fuente Verdana). Preliminares numerados en romanos minúsculos (i, ii, iii) y cuerpo en arábigos iniciando en INTRODUCCIÓN. Numeración en esquina inferior derecha. Redacción impersonal en tercera persona singular, tiempo pasado. Citas APA: cortas (<40 palabras) entre comillas y en cursiva con (Apellido, año, p.X); largas (>40 palabras) sangría 5-6 espacios, sin comillas, en cursiva. Bibliografía APA con apellidos en minúscula. Único color de letra permitido: negro.",
+    campos_portada: ["facultad", "carrera", "modalidad", "tutor"],
+    format: { pageSize: "letter", font: "Verdana", size: 11, lineHeight: 1.5, margins: { top: 2.5, left: 3.5, bottom: 2.5, right: 2.5 }, alineacion: "justify", numero_paginas_posicion: "bottom-right" },
+    modalities: ["Tesis de Grado", "Proyecto de Grado (Pre-Factibilidad)", "Proyecto de Grado (Mejora Organizacional)", "Proyecto de Grado (Diseño de Artefacto)", "Trabajo Dirigido"],
+    is_active: true,
+  },
+  {
     id: "umsa-001",
     name: "Universidad Mayor de San Andrés (UMSA)",
     latex_prompt: "Formato UMSA — La Paz: clase report, Times New Roman 12pt, interlineado doble, márgenes superior 3cm, inferior 2.5cm, izquierdo 3.5cm, derecho 2.5cm. Portada con escudo de la UMSA, carrera, título, autor, tutor y año. Numeración en esquina inferior derecha.",

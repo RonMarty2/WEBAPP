@@ -22,6 +22,7 @@
 import { SISTEMA_SCRIBE_CAP1_CLASICO } from "@/lib/prompts/scribe/cap1-variantes/clasico";
 import { SISTEMA_SCRIBE_CAP1_REDUCIDO } from "@/lib/prompts/scribe/cap1-variantes/reducido";
 import { SISTEMA_SCRIBE_CAP1_UCB_LICENCIATURA } from "@/lib/prompts/scribe/cap1-variantes/ucb-licenciatura";
+import { SISTEMA_SCRIBE_CAP1_UNIFRANZ_TESIS } from "@/lib/prompts/scribe/cap1-variantes/unifranz-tesis";
 
 /**
  * Mapeo de la variante a la guía oficial UMSS que sigue.
@@ -39,12 +40,10 @@ export interface GuiaOficialUmss {
 }
 
 /**
- * Análogo a GuiaOficialUmss pero para universidades que NO son UMSS.
- * Usa `formato_universidad` (genérico) en vez de `formato_umss` para
- * dejar claro que no se debe consumir con los validadores UMSS.
- *
- * Hoy soporta UCB. Cuando llegue otra universidad con guía propia
- * (UMSA, UAGRM, etc.) se amplía la unión de id/formato.
+ * Análogo a GuiaOficialUmss para UCB (Universidad Católica Boliviana
+ * "San Pablo", Cochabamba — Guía 6ª edición Marzo 2020). Usa
+ * `formato_universidad` genérico para dejar claro que no se debe
+ * consumir con los validadores UMSS.
  */
 export interface GuiaOficialOtra {
   id: "ucb_2020_san_pablo";
@@ -52,8 +51,26 @@ export interface GuiaOficialOtra {
   formato_universidad: "ucb_2020";
 }
 
-/** Unión usada por Cap1Variant. Las dos ramas se enriquecen vía validators distintos. */
-export type GuiaOficial = GuiaOficialUmss | GuiaOficialOtra;
+/**
+ * Análogo para UNIFRANZ (Universidad Privada Franz Tamayo, sede
+ * Cochabamba — Guía 2017). El campo `formato_unifranz` permite al
+ * endpoint público discriminar el lookup de metadata sin confundir
+ * con UMSS o UCB.
+ */
+export interface GuiaOficialUnifranz {
+  id: "guia_unifranz_tesis_2017" | "guia_unifranz_proyecto_prefactibilidad_2017";
+  nombre: string;
+  formato_unifranz: "unifranz_tesis_2017" | "unifranz_proyecto_prefactibilidad_2017";
+}
+
+/**
+ * Unión discriminada usada por Cap1Variant.
+ * Discriminadores:
+ *   - `formato_umss`         → UMSS    (validators en umssValidators.ts)
+ *   - `formato_universidad`  → UCB     (validators en ucbValidators.ts)
+ *   - `formato_unifranz`     → UNIFRANZ (validators en unifranzValidators.ts)
+ */
+export type GuiaOficial = GuiaOficialUmss | GuiaOficialOtra | GuiaOficialUnifranz;
 
 const GUIA_1_POSGRADO_FCE: GuiaOficialUmss = {
   id: "guia_1_posgrado_fce",
@@ -71,6 +88,18 @@ const GUIA_UCB_2020: GuiaOficialOtra = {
   id: "ucb_2020_san_pablo",
   nombre: "Guía UCB San Pablo Cochabamba (6ª edición, Marzo 2020)",
   formato_universidad: "ucb_2020",
+};
+
+const GUIA_UNIFRANZ_TESIS: GuiaOficialUnifranz = {
+  id: "guia_unifranz_tesis_2017",
+  nombre: "Guía UNIFRANZ Cochabamba (2017) — Modalidad Tesis de Grado",
+  formato_unifranz: "unifranz_tesis_2017",
+};
+
+const GUIA_UNIFRANZ_PROYECTO_PREFACTIBILIDAD: GuiaOficialUnifranz = {
+  id: "guia_unifranz_proyecto_prefactibilidad_2017",
+  nombre: "Guía UNIFRANZ Cochabamba (2017) — Proyecto de Grado: Pre-Factibilidad",
+  formato_unifranz: "unifranz_proyecto_prefactibilidad_2017",
 };
 
 export interface Cap1Variant {
@@ -92,9 +121,10 @@ export interface Cap1Variant {
    */
   nota?: string;
   /**
-   * Guía oficial a la que corresponde esta variante. Puede ser UMSS
-   * (GuiaOficialUmss) u otra universidad (GuiaOficialOtra, e.g. UCB).
-   * El consumidor debe discriminar por `formato_umss` vs `formato_universidad`.
+   * Guía oficial a la que corresponde esta variante.
+   * Puede ser UMSS (GuiaOficialUmss), UCB (GuiaOficialOtra) o
+   * UNIFRANZ (GuiaOficialUnifranz). El consumidor discrimina por
+   * `formato_umss` vs `formato_universidad` vs `formato_unifranz`.
    */
   guia_oficial: GuiaOficial;
 }
@@ -196,10 +226,62 @@ const UCB_LICENCIATURA: Cap1Variant = {
   guia_oficial: GUIA_UCB_2020,
 };
 
+const UNIFRANZ_TESIS: Cap1Variant = {
+  id: "unifranz_tesis",
+  nombre: "UNIFRANZ — Tesis de Grado",
+  descripcion:
+    "Estructura UNIFRANZ Cochabamba (Guía 2017) para modalidad TESIS DE GRADO. La INTRODUCCIÓN reemplaza al 'Capítulo I' UMSS y contiene 5 secciones obligatorias: Planteamiento del Problema, Justificación (Social/Económica/Práctica/Teórica), Objetivos, Alcances (Temporal/Espacial/Temático) e Hipótesis (Variables Independientes y Dependientes). Redacción impersonal en tercera persona singular, tiempo pasado. Citas APA con cursiva en textuales cortas. Verdana 11, márgenes 3.5/2.5, numeración inferior derecha.",
+  estructura_visible: [
+    "INTRODUCCIÓN",
+    "1. Planteamiento del Problema",
+    "2. Justificación",
+    "    2.1 Justificación Social",
+    "    2.2 Justificación Económica",
+    "    2.3 Justificación Práctica",
+    "    2.4 Justificación Teórica",
+    "3. Objetivos",
+    "    3.1 Objetivo General",
+    "    3.2 Objetivos Específicos",
+    "4. Alcances",
+    "    4.1 Alcance Temporal",
+    "    4.2 Alcance Espacial",
+    "    4.3 Alcance Temático",
+    "5. Hipótesis",
+    "    5.1 Hipótesis General",
+    "    5.2 Variables Independientes",
+    "    5.3 Variables Dependientes",
+  ],
+  prompt: SISTEMA_SCRIBE_CAP1_UNIFRANZ_TESIS,
+  nota:
+    "En UNIFRANZ, lo que UMSS llama 'Capítulo I' se llama 'INTRODUCCIÓN' y contiene las 5 secciones de planteamiento. El Capítulo I del documento físico es el MARCO TEÓRICO.",
+  guia_oficial: GUIA_UNIFRANZ_TESIS,
+};
+
+const UNIFRANZ_PROYECTO_PREFACTIBILIDAD: Cap1Variant = {
+  id: "unifranz_proyecto_prefactibilidad",
+  nombre: "UNIFRANZ — Proyecto de Grado: Pre-Factibilidad",
+  descripcion:
+    "Estructura UNIFRANZ Cochabamba (Guía 2017) para modalidad PROYECTO DE GRADO con finalidad de Estudio de Pre-Factibilidad para Oportunidad de Inversión. Misma INTRODUCCIÓN que la Tesis (Planteamiento + Justificaciones + Objetivos + Alcances + Hipótesis). El cuerpo del proyecto se desarrolla en Cap.II Investigación (macro/microentorno + mercado + producto + marco legal) y Cap.III Plan de Negocios (marketing + operativo + organizacional + financiero).",
+  estructura_visible: [
+    "INTRODUCCIÓN",
+    "1. Planteamiento del Problema",
+    "2. Justificación (Social, Económica, Práctica, Teórica)",
+    "3. Objetivos (General + Específicos)",
+    "4. Alcances (Temporal, Espacial, Temático)",
+    "5. Hipótesis (Variables Dependientes e Independientes)",
+  ],
+  prompt: SISTEMA_SCRIBE_CAP1_UNIFRANZ_TESIS,
+  nota:
+    "La INTRODUCCIÓN comparte el mismo formato que la Tesis. Lo que cambia entre Tesis y Proyecto Pre-Factibilidad es el cuerpo (Capítulos I-III), no la introducción.",
+  guia_oficial: GUIA_UNIFRANZ_PROYECTO_PREFACTIBILIDAD,
+};
+
 const REGISTRY: Record<string, Cap1Variant> = {
   clasico: CLASICO,
   reducido: REDUCIDO,
   ucb_licenciatura: UCB_LICENCIATURA,
+  unifranz_tesis: UNIFRANZ_TESIS,
+  unifranz_proyecto_prefactibilidad: UNIFRANZ_PROYECTO_PREFACTIBILIDAD,
 };
 
 /**
@@ -214,6 +296,8 @@ const VARIANTES_POR_UNIVERSIDAD: Record<string, string[]> = {
   "umss-001": ["clasico", "reducido"],
   // UCB — Universidad Católica Boliviana "San Pablo" (Cochabamba)
   "ucb-001": ["ucb_licenciatura"],
+  // UNIFRANZ — Universidad Privada Franz Tamayo (Cochabamba)
+  "unifranz-cba-001": ["unifranz_tesis", "unifranz_proyecto_prefactibilidad"],
 };
 
 /**
@@ -242,11 +326,21 @@ export function getVariantById(variantId: string | null | undefined): Cap1Varian
 }
 
 /**
- * Type guard para distinguir si una guia_oficial es UMSS u otra (UCB).
+ * Type guard: distingue si una guia_oficial es UMSS.
  * El consumidor (cap1-variants/route.ts, builders) decide qué validator usar.
  */
 export function isGuiaUmss(g: GuiaOficial): g is GuiaOficialUmss {
   return "formato_umss" in g;
+}
+
+/** Type guard: distingue si una guia_oficial es UNIFRANZ. */
+export function isGuiaUnifranz(g: GuiaOficial): g is GuiaOficialUnifranz {
+  return "formato_unifranz" in g;
+}
+
+/** Type guard: distingue si una guia_oficial es UCB (u otra universidad genérica). */
+export function isGuiaOtra(g: GuiaOficial): g is GuiaOficialOtra {
+  return "formato_universidad" in g;
 }
 
 /**

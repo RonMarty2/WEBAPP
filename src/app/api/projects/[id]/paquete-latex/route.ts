@@ -41,6 +41,14 @@ import {
   buildSeparadorAnexos as buildSeparadorAnexosUCB,
   buildFinDocumento as buildFinDocumentoUCB,
 } from "@/lib/latex/preamble-ucb";
+import {
+  buildPreambleUNIFRANZ,
+  buildCaratulaUNIFRANZ,
+  buildResumenHeaderUNIFRANZ,
+  buildIndiceUNIFRANZ,
+  buildBibliografiaHeaderUNIFRANZ,
+  buildFinDocumentoUNIFRANZ,
+} from "@/lib/latex/preamble-unifranz";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -349,12 +357,18 @@ export async function GET(_req: Request, { params }: Params) {
     };
 
     // ENSAMBLAR el .tex final de forma determinista (sin IA).
-    // Switch por universidad: UMSS usa preamble-umss.ts; UCB usa
-    // preamble-ucb.ts. Cualquier universidad no mapeada cae al UMSS por
-    // defecto (compatibilidad hacia atrás).
+    //
+    // Switch por universidad: cada una usa SU PROPIO preámbulo, carátula
+    // y builders, sin solaparse con las demás. UMSS queda como rama
+    // default — proyectos sin universidad mapeada compilan igual que antes.
+    //
+    //   - UCB      → preamble-ucb.ts      (Tribunal + Abstract + Separador Anexos)
+    //   - UNIFRANZ → preamble-unifranz.ts (Verdana 11, márgenes 3.5/2.5)
+    //   - UMSS     → preamble-umss.ts     (default, comportamiento original)
     const esUCB = proyecto.universidad_id === "ucb-001";
+    const esUnifranz = proyecto.universidad_id === "unifranz-cba-001";
 
-    // Ubicar cada sección por su faseId (igual para UMSS y UCB)
+    // Ubicar cada sección por su faseId (igual para todas las universidades)
     const resumenLatex = results.find((r) => r.faseId === "ph-resumen")?.latex ?? "";
     const cap1Latex = results.find((r) => r.faseId === "ph-cap1")?.latex ?? "";
     const cap2Latex = results.find((r) => r.faseId === "ph-cap2")?.latex ?? "";
@@ -420,6 +434,44 @@ export async function GET(_req: Request, { params }: Params) {
       }
       partes.push(buildSeparadorAnexosUCB());
       partes.push(buildFinDocumentoUCB());
+    } else if (esUnifranz) {
+      // ===== ENSAMBLAJE UNIFRANZ (Cochabamba, Guía 2017) =====
+      // Estructura UNIFRANZ:
+      //   1. Preámbulo (Verdana 11, márgenes 3.5/2.5, numeración inf. derecha)
+      //   2. Carátula UNIFRANZ (POSTULANTE + TUTOR + Ciudad-País + Año)
+      //   3. Resumen (250 palabras, preliminares en romanos i, ii, iii)
+      //   4. Índice (\tableofcontents → ÍNDICE)
+      //   5. Capítulos 1-5
+      //   6. Bibliografía (APA, apellidos en minúscula)
+      //   7. \end{document}
+      partes.push(buildPreambleUNIFRANZ());
+      partes.push(buildCaratulaUNIFRANZ({
+        nombre: datos.nombre,
+        titulo: datos.titulo,
+        modalidad: datos.modalidad,
+        carrera: String(ctxInicial.carrera ?? ctxInicial.programa ?? datos.programa ?? "CARRERA"),
+        facultad: datos.facultad,
+        universidad: datos.universidad,
+        ciudad: datos.ciudad,
+        pais: datos.pais,
+        anio: datos.anio,
+        tutor: datos.tutor || undefined,
+      }));
+      if (resumenLatex) {
+        partes.push(buildResumenHeaderUNIFRANZ());
+        partes.push(resumenLatex);
+      }
+      partes.push(buildIndiceUNIFRANZ());
+      if (cap1Latex) partes.push(cap1Latex);
+      if (cap2Latex) partes.push(cap2Latex);
+      if (cap3Latex) partes.push(cap3Latex);
+      if (cap4Latex) partes.push(cap4Latex);
+      if (cap5Latex) partes.push(cap5Latex);
+      if (biblioLatex) {
+        partes.push(buildBibliografiaHeaderUNIFRANZ());
+        partes.push(biblioLatex);
+      }
+      partes.push(buildFinDocumentoUNIFRANZ());
     } else {
       // ===== ENSAMBLAJE UMSS (default — comportamiento original intacto) =====
       // Estructura UMSS oficial garantizada en orden correcto:
@@ -467,18 +519,25 @@ export async function GET(_req: Request, { params }: Params) {
     const texConDatos = partes.join("\n\n");
 
     // 3) Cargar el logo de la universidad para incluirlo en el ZIP.
+    //
+    // Cada universidad usa SU PROPIO nombre de archivo dentro del ZIP, y SU
+    // PROPIO preámbulo apunta a ese nombre. UMSS → `logos/umss.png`,
+    // UNIFRANZ → `logos/unifranz.png`. No se solapan.
     let logoBuffer: Buffer | null = null;
-    // ⚠️ IMPORTANTE: el preámbulo LaTeX referencia el logo en una ruta fija
-    //    dentro del ZIP (logos/umss.<ext> o logos/ucb.<ext>). Si cambiás este
-    //    path, también hay que actualizar `\IfFileExists{...}` en
-    //    src/lib/latex/preamble-{umss,ucb}.ts.
-    const logoBaseName = esUCB ? "ucb" : "umss";
+    // ⚠️ IMPORTANTE: el preámbulo LaTeX de cada universidad referencia el
+    //    logo en una ruta fija dentro del ZIP (logos/<uni>.<ext>). Cada
+    //    universidad usa SU PROPIO nombre — UMSS → `logos/umss.png`,
+    //    UCB → `logos/ucb.png`, UNIFRANZ → `logos/unifranz.png` — para no
+    //    pisarse. Si cambiás esto, actualizá también `\IfFileExists{...}`
+    //    en src/lib/latex/preamble-{umss,ucb,unifranz}.ts.
+    const logoBaseName = esUCB ? "ucb" : esUnifranz ? "unifranz" : "umss";
     let logoFilename = `logos/${logoBaseName}.png`;
     if (universidad?.logo_url) {
       try {
         const logoPath = path.join(process.cwd(), "public", universidad.logo_url.replace(/^\//, ""));
         logoBuffer = await fs.readFile(logoPath);
         const ext = path.extname(universidad.logo_url).toLowerCase() || ".png";
+        // Mantener la extensión real del archivo pero conservar la ruta logos/<uni>.<ext>
         logoFilename = `logos/${logoBaseName}${ext}`;
       } catch (e) {
         console.warn("[paquete-latex] No se pudo cargar el logo:", (e as Error).message);
