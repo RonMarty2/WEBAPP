@@ -363,10 +363,11 @@ export default function UniversityModal({
             </Field>
             <Field label="Numeración de páginas">
               <select className={inputCls} value={form.format.numero_paginas_posicion ?? "top-right"}
-                onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, numero_paginas_posicion: e.target.value as "top-right" | "bottom-center" | "top-center" } }))}>
+                onChange={(e) => setForm((p) => ({ ...p, format: { ...p.format, numero_paginas_posicion: e.target.value as "top-right" | "bottom-center" | "top-center" | "bottom-right" } }))}>
                 <option value="top-right">Superior derecha</option>
                 <option value="top-center">Superior centro</option>
                 <option value="bottom-center">Inferior centro</option>
+                <option value="bottom-right">Inferior derecha</option>
               </select>
             </Field>
           </div>
