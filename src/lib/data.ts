@@ -17,7 +17,7 @@ export interface University {
     lineHeight: number;
     margins: { top: number; left: number; bottom: number; right: number };
     alineacion?: "justify" | "left";
-    numero_paginas_posicion?: "top-right" | "bottom-center" | "top-center";
+    numero_paginas_posicion?: "top-right" | "bottom-center" | "top-center" | "bottom-right";
   };
   modalities: string[];
   is_active: boolean;
