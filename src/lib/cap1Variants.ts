@@ -21,6 +21,7 @@
 
 import { SISTEMA_SCRIBE_CAP1_CLASICO } from "@/lib/prompts/scribe/cap1-variantes/clasico";
 import { SISTEMA_SCRIBE_CAP1_REDUCIDO } from "@/lib/prompts/scribe/cap1-variantes/reducido";
+import { SISTEMA_SCRIBE_CAP1_UCB_LICENCIATURA } from "@/lib/prompts/scribe/cap1-variantes/ucb-licenciatura";
 
 /**
  * Mapeo de la variante a la guía oficial UMSS que sigue.
@@ -37,6 +38,23 @@ export interface GuiaOficialUmss {
   formato_umss: "guia_1_posgrado" | "guia_2_cespedes";
 }
 
+/**
+ * Análogo a GuiaOficialUmss pero para universidades que NO son UMSS.
+ * Usa `formato_universidad` (genérico) en vez de `formato_umss` para
+ * dejar claro que no se debe consumir con los validadores UMSS.
+ *
+ * Hoy soporta UCB. Cuando llegue otra universidad con guía propia
+ * (UMSA, UAGRM, etc.) se amplía la unión de id/formato.
+ */
+export interface GuiaOficialOtra {
+  id: "ucb_2020_san_pablo";
+  nombre: string;
+  formato_universidad: "ucb_2020";
+}
+
+/** Unión usada por Cap1Variant. Las dos ramas se enriquecen vía validators distintos. */
+export type GuiaOficial = GuiaOficialUmss | GuiaOficialOtra;
+
 const GUIA_1_POSGRADO_FCE: GuiaOficialUmss = {
   id: "guia_1_posgrado_fce",
   nombre: "Guía Posgrado FCE UMSS (Sept 2024) — Doble Titulación",
@@ -47,6 +65,12 @@ const GUIA_2_CESPEDES: GuiaOficialUmss = {
   id: "guia_2_cespedes",
   nombre: "Estilo Céspedes Tapia (Guía 2 UMSS — versión extendida)",
   formato_umss: "guia_2_cespedes",
+};
+
+const GUIA_UCB_2020: GuiaOficialOtra = {
+  id: "ucb_2020_san_pablo",
+  nombre: "Guía UCB San Pablo Cochabamba (6ª edición, Marzo 2020)",
+  formato_universidad: "ucb_2020",
 };
 
 export interface Cap1Variant {
@@ -68,9 +92,11 @@ export interface Cap1Variant {
    */
   nota?: string;
   /**
-   * Guía oficial UMSS a la que corresponde esta variante.
+   * Guía oficial a la que corresponde esta variante. Puede ser UMSS
+   * (GuiaOficialUmss) u otra universidad (GuiaOficialOtra, e.g. UCB).
+   * El consumidor debe discriminar por `formato_umss` vs `formato_universidad`.
    */
-  guia_oficial: GuiaOficialUmss;
+  guia_oficial: GuiaOficial;
 }
 
 const CLASICO: Cap1Variant = {
@@ -138,9 +164,42 @@ const REDUCIDO: Cap1Variant = {
   guia_oficial: GUIA_2_CESPEDES,
 };
 
+const UCB_LICENCIATURA: Cap1Variant = {
+  id: "ucb_licenciatura",
+  nombre: "UCB Licenciatura",
+  descripcion:
+    "Estructura UCB San Pablo Cochabamba (Guía 6ª edición, Marzo 2020). Cap. I de Introducción con antecedentes, planteamiento del problema, objetivos, justificación y alcances, siguiendo el sistema autor-fecha propio de UCB (APELLIDO en mayúsculas, dos puntos antes de la página). Redacción en primera persona plural o impersonal (nunca singular), sin sangría inicial, sin uso de & ni mayúsculas decorativas. Cuerpo del texto preparado para integrar Tribunal Examinador, Resumen ≤200 palabras + Abstract en inglés + 3-8 palabras clave, hoja separadora antes de anexos y empastado por color según grado académico.",
+  estructura_visible: [
+    "Capítulo I: Introducción",
+    "1.1 Antecedentes",
+    "    1.1.1 Antecedentes generales",
+    "    1.1.2 Antecedentes específicos",
+    "1.2 Planteamiento del problema",
+    "    1.2.1 Descripción del problema",
+    "    1.2.2 Formulación del problema",
+    "1.3 Objetivos",
+    "    1.3.1 Objetivo general",
+    "    1.3.2 Objetivos específicos",
+    "1.4 Justificación",
+    "    1.4.1 Justificación teórica",
+    "    1.4.2 Justificación metodológica",
+    "    1.4.3 Justificación práctica",
+    "1.5 Alcances de la investigación",
+    "    1.5.1 Alcance temático",
+    "    1.5.2 Alcance temporal",
+    "    1.5.3 Alcance espacial",
+    "1.6 Hipótesis (opcional, según tipo de trabajo)",
+  ],
+  prompt: SISTEMA_SCRIBE_CAP1_UCB_LICENCIATURA,
+  nota:
+    "UCB usa sistema autor-fecha propio (no APA 7): citas como (APELLIDO, año: página). Prohíbe primera persona singular, sangría y símbolo &. La extensión definitiva la fija cada carrera UCB.",
+  guia_oficial: GUIA_UCB_2020,
+};
+
 const REGISTRY: Record<string, Cap1Variant> = {
   clasico: CLASICO,
   reducido: REDUCIDO,
+  ucb_licenciatura: UCB_LICENCIATURA,
 };
 
 /**
@@ -153,6 +212,8 @@ const REGISTRY: Record<string, Cap1Variant> = {
 const VARIANTES_POR_UNIVERSIDAD: Record<string, string[]> = {
   // UMSS — Universidad Mayor de San Simón (Cochabamba)
   "umss-001": ["clasico", "reducido"],
+  // UCB — Universidad Católica Boliviana "San Pablo" (Cochabamba)
+  "ucb-001": ["ucb_licenciatura"],
 };
 
 /**
@@ -178,6 +239,14 @@ export function getDefaultVariantId(universidadId: string | null | undefined): s
 export function getVariantById(variantId: string | null | undefined): Cap1Variant {
   if (variantId && REGISTRY[variantId]) return REGISTRY[variantId];
   return CLASICO;
+}
+
+/**
+ * Type guard para distinguir si una guia_oficial es UMSS u otra (UCB).
+ * El consumidor (cap1-variants/route.ts, builders) decide qué validator usar.
+ */
+export function isGuiaUmss(g: GuiaOficial): g is GuiaOficialUmss {
+  return "formato_umss" in g;
 }
 
 /**
