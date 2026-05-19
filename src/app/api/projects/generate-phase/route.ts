@@ -687,6 +687,56 @@ de variables (la variante "reducido" las omite por diseño). Por lo tanto:
 --- FIN AVISO VARIANTE ---\n`
       : null;
 
+    // 🎯 Override de estilo para proyectos UCB: los megaprompts maestros de
+    // Cap.II-V y resumen están alineados a UMSS/APA 7. Para proyectos UCB
+    // inyectamos un bloque que IGNORA las reglas APA 7 del megaprompt y
+    // aplica el sistema autor-fecha UCB. Esto evita citas APA 7 incorrectas
+    // en Cap.II-V cuando la universidad es UCB.
+    const necesitaOverrideEstiloUCB =
+      esUniversidadUCB &&
+      ["ph-cap2", "ph-cap3", "ph-cap4", "ph-cap5", "ph-resumen"].includes(phase_id);
+    const bloqueUniversidadUCB = necesitaOverrideEstiloUCB
+      ? `\n--- OVERRIDE DE ESTILO INSTITUCIONAL: UCB SAN PABLO ---
+Este proyecto NO usa normas APA 7 ni convenciones UMSS. La universidad
+del estudiante es la Universidad Católica Boliviana "San Pablo" (Guía
+6ª ed., Marzo 2020). DESCARTA las reglas de citación APA 7 del megaprompt
+maestro y APLICA ESTRICTAMENTE las siguientes reglas UCB:
+
+REGLAS DE CITAS UCB (anulan APA 7):
+  • Cita textual corta: "..." (APELLIDO, AÑO: PÁGINA)
+    Apellido SIEMPRE en MAYÚSCULAS, dos puntos antes de la página.
+    Ej.: (RODRÍGUEZ, 1988: 87)
+  • Cita textual larga (>4 líneas): bloque sin comillas, margen izq +2 cm,
+    interlineado simple, cierre con (APELLIDO, AÑO: PÁGINA).
+  • Paráfrasis: prefijo "Cf." → (Cf. APELLIDO, AÑO) o (Cf. APELLIDO, AÑO: PÁGINA).
+  • 2 autores: (APELLIDO1 y APELLIDO2, año: pág)
+  • 3 autores: (APELLIDO1; APELLIDO2 y APELLIDO3, año: pág)
+  • +3 autores: (APELLIDO1 et al, año: pág)  ← "et al" en cursiva
+  • Autor institucional: (INE, 2023: 45) — sigla en mayúsculas.
+  • CITA DE CITA prohibida.
+  • Aporte propio del investigador: SIN cita.
+
+REGLAS DE ESTILO UCB (anulan UMSS):
+  • Prohibido PRIMERA PERSONA SINGULAR (yo, mi, mío, conjugaciones en -o
+    como "concluyo", "analizo", "encontré"). Usar plural ("hemos",
+    "concluimos") o impersonal.
+  • Prohibido el símbolo "&" — reemplazar siempre por "y".
+  • Prohibida la sangría inicial de párrafo (los párrafos se separan
+    por espaciado doble).
+  • Prohibido el subrayado en el cuerpo del texto.
+  • Cursivas reservadas a extranjerismos y títulos de libros/revistas.
+  • Mayúsculas solo en siglas reconocidas, apellidos de citas y títulos
+    de sección.
+  • Tablas y figuras: numeración correlativa GLOBAL ("Tabla 1", "Tabla 2"...
+    "Figura 1", "Figura 2"...). NUNCA uses "Cuadro N".
+  • Título de tabla/figura en parte SUPERIOR CENTRADA, Times NR 12 negrita,
+    fuente al pie.
+
+ESTAS REGLAS UCB TIENEN PRIORIDAD ABSOLUTA sobre cualquier instrucción
+APA 7 / UMSS que aparezca en el resto del prompt.
+--- FIN OVERRIDE UCB ---\n`
+      : null;
+
     const phasePromptBase = typePrompt || adminPrompt || variantePrompt || loadPhasePromptByIdFromDisk(phase_id, tipo, currentPhase.prompt || DEFAULT_PHASES["0"]);
     const baseSystemPrompt = buildSystemPrompt({ phasePrompt: phasePromptBase, perfilEstilo, hilos, hiloConstraints });
 
@@ -741,6 +791,7 @@ de variables (la variante "reducido" las omite por diseño). Por lo tanto:
       proyecto.titulo_provisional ? `TITULO PROVISIONAL: "${proyecto.titulo_provisional}"` : null,
       bloqueContexto,
       bloqueVariante,
+      bloqueUniversidadUCB,
       bloqueFortalecimientoAnalitico,
       antiDuplicacionBlock || null,
       deepSearchBlock || null,
