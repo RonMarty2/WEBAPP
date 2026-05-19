@@ -17,7 +17,7 @@ export interface University {
     lineHeight: number;
     margins: { top: number; left: number; bottom: number; right: number };
     alineacion?: "justify" | "left";
-    numero_paginas_posicion?: "top-right" | "bottom-center" | "top-center";
+    numero_paginas_posicion?: "top-right" | "bottom-center" | "top-center" | "bottom-right";
   };
   modalities: string[];
   is_active: boolean;
@@ -52,6 +52,16 @@ export const DEFAULT_UNIVERSITIES: University[] = [
     campos_portada: ["programa", "version"],
     format: { pageSize: "letter", font: "Times New Roman", size: 12, lineHeight: 2.0, margins: { top: 2.54, left: 2.54, bottom: 2.54, right: 2.54 }, alineacion: "left", numero_paginas_posicion: "top-right" },
     modalities: ["Tesis de Grado", "Monografía", "Proyecto de Grado", "Trabajo Dirigido"],
+    is_active: true,
+  },
+  {
+    id: "unifranz-cba-001",
+    name: "Universidad Privada Franz Tamayo (UNIFRANZ — Cochabamba)",
+    logo_url: "/logos/unifranz/escudo-01.png",
+    latex_prompt: "Formato UNIFRANZ Cochabamba (Guía 2017): Verdana 11pt, interlineado 1.5, 6pt posteriores, sin sangría, márgenes superior/inferior/derecho 2.5cm e izquierdo 3.5cm. Tapa color plomo con letras doradas (escudo UNIFRANZ + Facultad + Carrera + Título entre comillas + Modalidad + Postulante + Tutor + Ciudad/País/Año, fuente Verdana). Preliminares numerados en romanos minúsculos (i, ii, iii) y cuerpo en arábigos iniciando en INTRODUCCIÓN. Numeración en esquina inferior derecha. Redacción impersonal en tercera persona singular, tiempo pasado. Citas APA: cortas (<40 palabras) entre comillas y en cursiva con (Apellido, año, p.X); largas (>40 palabras) sangría 5-6 espacios, sin comillas, en cursiva. Bibliografía APA con apellidos en minúscula. Único color de letra permitido: negro.",
+    campos_portada: ["facultad", "carrera", "modalidad", "tutor"],
+    format: { pageSize: "letter", font: "Verdana", size: 11, lineHeight: 1.5, margins: { top: 2.5, left: 3.5, bottom: 2.5, right: 2.5 }, alineacion: "justify", numero_paginas_posicion: "bottom-right" },
+    modalities: ["Tesis de Grado", "Proyecto de Grado (Pre-Factibilidad)", "Proyecto de Grado (Mejora Organizacional)", "Proyecto de Grado (Diseño de Artefacto)", "Trabajo Dirigido"],
     is_active: true,
   },
   {

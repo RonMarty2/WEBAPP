@@ -21,6 +21,7 @@
 
 import { SISTEMA_SCRIBE_CAP1_CLASICO } from "@/lib/prompts/scribe/cap1-variantes/clasico";
 import { SISTEMA_SCRIBE_CAP1_REDUCIDO } from "@/lib/prompts/scribe/cap1-variantes/reducido";
+import { SISTEMA_SCRIBE_CAP1_UNIFRANZ_TESIS } from "@/lib/prompts/scribe/cap1-variantes/unifranz-tesis";
 
 /**
  * Mapeo de la variante a la guía oficial UMSS que sigue.
@@ -37,6 +38,21 @@ export interface GuiaOficialUmss {
   formato_umss: "guia_1_posgrado" | "guia_2_cespedes";
 }
 
+/**
+ * Mapeo de la variante a la guía oficial UNIFRANZ (Universidad Privada
+ * Franz Tamayo, Cochabamba — Guía 2017). Estructura paralela a
+ * `GuiaOficialUmss` para que el lookup público en /api/cap1-variants
+ * pueda discriminar por el campo `formato_unifranz`.
+ */
+export interface GuiaOficialUnifranz {
+  id: "guia_unifranz_tesis_2017" | "guia_unifranz_proyecto_prefactibilidad_2017";
+  nombre: string;
+  formato_unifranz: "unifranz_tesis_2017" | "unifranz_proyecto_prefactibilidad_2017";
+}
+
+/** Unión discriminada — se distingue por el campo `formato_umss` vs `formato_unifranz`. */
+export type GuiaOficial = GuiaOficialUmss | GuiaOficialUnifranz;
+
 const GUIA_1_POSGRADO_FCE: GuiaOficialUmss = {
   id: "guia_1_posgrado_fce",
   nombre: "Guía Posgrado FCE UMSS (Sept 2024) — Doble Titulación",
@@ -47,6 +63,18 @@ const GUIA_2_CESPEDES: GuiaOficialUmss = {
   id: "guia_2_cespedes",
   nombre: "Estilo Céspedes Tapia (Guía 2 UMSS — versión extendida)",
   formato_umss: "guia_2_cespedes",
+};
+
+const GUIA_UNIFRANZ_TESIS: GuiaOficialUnifranz = {
+  id: "guia_unifranz_tesis_2017",
+  nombre: "Guía UNIFRANZ Cochabamba (2017) — Modalidad Tesis de Grado",
+  formato_unifranz: "unifranz_tesis_2017",
+};
+
+const GUIA_UNIFRANZ_PROYECTO_PREFACTIBILIDAD: GuiaOficialUnifranz = {
+  id: "guia_unifranz_proyecto_prefactibilidad_2017",
+  nombre: "Guía UNIFRANZ Cochabamba (2017) — Proyecto de Grado: Pre-Factibilidad",
+  formato_unifranz: "unifranz_proyecto_prefactibilidad_2017",
 };
 
 export interface Cap1Variant {
@@ -68,9 +96,12 @@ export interface Cap1Variant {
    */
   nota?: string;
   /**
-   * Guía oficial UMSS a la que corresponde esta variante.
+   * Guía oficial a la que corresponde esta variante (UMSS o UNIFRANZ).
+   * El campo discriminador es `formato_umss` vs `formato_unifranz` —
+   * el endpoint público `/api/cap1-variants` usa esto para enriquecer
+   * con la metadata correcta (autor, fecha, características, PDF).
    */
-  guia_oficial: GuiaOficialUmss;
+  guia_oficial: GuiaOficial;
 }
 
 const CLASICO: Cap1Variant = {
@@ -138,9 +169,61 @@ const REDUCIDO: Cap1Variant = {
   guia_oficial: GUIA_2_CESPEDES,
 };
 
+const UNIFRANZ_TESIS: Cap1Variant = {
+  id: "unifranz_tesis",
+  nombre: "UNIFRANZ — Tesis de Grado",
+  descripcion:
+    "Estructura UNIFRANZ Cochabamba (Guía 2017) para modalidad TESIS DE GRADO. La INTRODUCCIÓN reemplaza al 'Capítulo I' UMSS y contiene 5 secciones obligatorias: Planteamiento del Problema, Justificación (Social/Económica/Práctica/Teórica), Objetivos, Alcances (Temporal/Espacial/Temático) e Hipótesis (Variables Independientes y Dependientes). Redacción impersonal en tercera persona singular, tiempo pasado. Citas APA con cursiva en textuales cortas. Verdana 11, márgenes 3.5/2.5, numeración inferior derecha.",
+  estructura_visible: [
+    "INTRODUCCIÓN",
+    "1. Planteamiento del Problema",
+    "2. Justificación",
+    "    2.1 Justificación Social",
+    "    2.2 Justificación Económica",
+    "    2.3 Justificación Práctica",
+    "    2.4 Justificación Teórica",
+    "3. Objetivos",
+    "    3.1 Objetivo General",
+    "    3.2 Objetivos Específicos",
+    "4. Alcances",
+    "    4.1 Alcance Temporal",
+    "    4.2 Alcance Espacial",
+    "    4.3 Alcance Temático",
+    "5. Hipótesis",
+    "    5.1 Hipótesis General",
+    "    5.2 Variables Independientes",
+    "    5.3 Variables Dependientes",
+  ],
+  prompt: SISTEMA_SCRIBE_CAP1_UNIFRANZ_TESIS,
+  nota:
+    "En UNIFRANZ, lo que UMSS llama 'Capítulo I' se llama 'INTRODUCCIÓN' y contiene las 5 secciones de planteamiento. El Capítulo I del documento físico es el MARCO TEÓRICO.",
+  guia_oficial: GUIA_UNIFRANZ_TESIS,
+};
+
+const UNIFRANZ_PROYECTO_PREFACTIBILIDAD: Cap1Variant = {
+  id: "unifranz_proyecto_prefactibilidad",
+  nombre: "UNIFRANZ — Proyecto de Grado: Pre-Factibilidad",
+  descripcion:
+    "Estructura UNIFRANZ Cochabamba (Guía 2017) para modalidad PROYECTO DE GRADO con finalidad de Estudio de Pre-Factibilidad para Oportunidad de Inversión. Misma INTRODUCCIÓN que la Tesis (Planteamiento + Justificaciones + Objetivos + Alcances + Hipótesis). El cuerpo del proyecto se desarrolla en Cap.II Investigación (macro/microentorno + mercado + producto + marco legal) y Cap.III Plan de Negocios (marketing + operativo + organizacional + financiero).",
+  estructura_visible: [
+    "INTRODUCCIÓN",
+    "1. Planteamiento del Problema",
+    "2. Justificación (Social, Económica, Práctica, Teórica)",
+    "3. Objetivos (General + Específicos)",
+    "4. Alcances (Temporal, Espacial, Temático)",
+    "5. Hipótesis (Variables Dependientes e Independientes)",
+  ],
+  prompt: SISTEMA_SCRIBE_CAP1_UNIFRANZ_TESIS,
+  nota:
+    "La INTRODUCCIÓN comparte el mismo formato que la Tesis. Lo que cambia entre Tesis y Proyecto Pre-Factibilidad es el cuerpo (Capítulos I-III), no la introducción.",
+  guia_oficial: GUIA_UNIFRANZ_PROYECTO_PREFACTIBILIDAD,
+};
+
 const REGISTRY: Record<string, Cap1Variant> = {
   clasico: CLASICO,
   reducido: REDUCIDO,
+  unifranz_tesis: UNIFRANZ_TESIS,
+  unifranz_proyecto_prefactibilidad: UNIFRANZ_PROYECTO_PREFACTIBILIDAD,
 };
 
 /**
@@ -153,6 +236,8 @@ const REGISTRY: Record<string, Cap1Variant> = {
 const VARIANTES_POR_UNIVERSIDAD: Record<string, string[]> = {
   // UMSS — Universidad Mayor de San Simón (Cochabamba)
   "umss-001": ["clasico", "reducido"],
+  // UNIFRANZ — Universidad Privada Franz Tamayo (Cochabamba)
+  "unifranz-cba-001": ["unifranz_tesis", "unifranz_proyecto_prefactibilidad"],
 };
 
 /**

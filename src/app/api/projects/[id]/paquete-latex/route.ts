@@ -30,6 +30,14 @@ import {
   buildBibliografiaHeader,
   buildFinDocumento,
 } from "@/lib/latex/preamble-umss";
+import {
+  buildPreambleUNIFRANZ,
+  buildCaratulaUNIFRANZ,
+  buildResumenHeaderUNIFRANZ,
+  buildIndiceUNIFRANZ,
+  buildBibliografiaHeaderUNIFRANZ,
+  buildFinDocumentoUNIFRANZ,
+} from "@/lib/latex/preamble-unifranz";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -338,31 +346,51 @@ export async function GET(_req: Request, { params }: Params) {
     };
 
     // ENSAMBLAR el .tex final de forma determinista (sin IA).
-    // Estructura UMSS oficial garantizada en orden correcto:
-    //   1. Preámbulo (paquetes + config tipográfica)
+    //
+    // Bifurcación por universidad — cada universidad usa SU PROPIO preámbulo
+    // y carátula, sin solaparse con las demás. La rama DEFAULT (UMSS) queda
+    // 100% intacta para no romper proyectos existentes.
+    //
+    // Estructura común (en orden):
+    //   1. Preámbulo (paquetes + config tipográfica de la universidad)
     //   2. \begin{document}
-    //   3. Carátula UMSS (logo izq + datos derecha)
-    //   4. Resumen Ejecutivo (con \section*)
+    //   3. Carátula
+    //   4. Resumen (con \section*)
     //   5. Índice general (\tableofcontents)
     //   6. Capítulos 1-5 (\chapter)
     //   7. Bibliografía
     //   8. \end{document}
-    const preamble = buildPreambleUMSS();
-    const caratula = buildCaratulaUMSS({
-      nombre: datos.nombre,
-      titulo: datos.titulo,
-      programa: datos.programa,
-      version: datos.version,
-      modalidad: datos.modalidad,
-      universidad: datos.universidad,
-      facultad: datos.facultad,
-      departamento: datos.departamento,
-      ciudad: datos.ciudad,
-      pais: datos.pais,
-      mes: datos.mes,
-      anio: datos.anio,
-      tutor: datos.tutor || undefined,
-    });
+    const esUnifranz = universidadId === "unifranz-cba-001";
+
+    const preamble = esUnifranz ? buildPreambleUNIFRANZ() : buildPreambleUMSS();
+    const caratula = esUnifranz
+      ? buildCaratulaUNIFRANZ({
+          nombre: datos.nombre,
+          titulo: datos.titulo,
+          modalidad: datos.modalidad,
+          carrera: String(ctxInicial.carrera ?? ctxInicial.programa ?? datos.programa ?? "CARRERA"),
+          facultad: datos.facultad,
+          universidad: datos.universidad,
+          ciudad: datos.ciudad,
+          pais: datos.pais,
+          anio: datos.anio,
+          tutor: datos.tutor || undefined,
+        })
+      : buildCaratulaUMSS({
+          nombre: datos.nombre,
+          titulo: datos.titulo,
+          programa: datos.programa,
+          version: datos.version,
+          modalidad: datos.modalidad,
+          universidad: datos.universidad,
+          facultad: datos.facultad,
+          departamento: datos.departamento,
+          ciudad: datos.ciudad,
+          pais: datos.pais,
+          mes: datos.mes,
+          anio: datos.anio,
+          tutor: datos.tutor || undefined,
+        });
 
     // Ubicar cada sección por su faseId
     const resumenLatex = results.find((r) => r.faseId === "ph-resumen")?.latex ?? "";
@@ -378,39 +406,41 @@ export async function GET(_req: Request, { params }: Params) {
       caratula,
     ];
     if (resumenLatex) {
-      // La IA debería haber generado \section*{RESUMEN EJECUTIVO}, pero por seguridad
+      // La IA debería haber generado el header de resumen, pero por seguridad
       // agregamos también la cabecera + numeración roman.
-      partes.push(buildResumenHeader());
+      partes.push(esUnifranz ? buildResumenHeaderUNIFRANZ() : buildResumenHeader());
       partes.push(resumenLatex);
     }
-    partes.push(buildIndice());
+    partes.push(esUnifranz ? buildIndiceUNIFRANZ() : buildIndice());
     if (cap1Latex) partes.push(cap1Latex);
     if (cap2Latex) partes.push(cap2Latex);
     if (cap3Latex) partes.push(cap3Latex);
     if (cap4Latex) partes.push(cap4Latex);
     if (cap5Latex) partes.push(cap5Latex);
     if (biblioLatex) {
-      partes.push(buildBibliografiaHeader());
+      partes.push(esUnifranz ? buildBibliografiaHeaderUNIFRANZ() : buildBibliografiaHeader());
       partes.push(biblioLatex);
     }
-    partes.push(buildFinDocumento());
+    partes.push(esUnifranz ? buildFinDocumentoUNIFRANZ() : buildFinDocumento());
 
     const texConDatos = partes.join("\n\n");
 
     // 3) Cargar el logo de la universidad para incluirlo en el ZIP.
+    //
+    // Cada universidad usa SU PROPIO nombre de archivo dentro del ZIP, y SU
+    // PROPIO preámbulo apunta a ese nombre. UMSS → `logos/umss.png`,
+    // UNIFRANZ → `logos/unifranz.png`. No se solapan.
     let logoBuffer: Buffer | null = null;
-    // ⚠️ IMPORTANTE: el prompt LaTeX referencia el logo como `logos/umss.png`
-    //    (carpeta `logos/` dentro del ZIP). Si cambiás este path, también hay
-    //    que cambiar `\IfFileExists{logos/umss.png}` en compilar-latex.ts.
-    let logoFilename = "logos/umss.png";
+    const logoBaseName = esUnifranz ? "unifranz" : "umss";
+    let logoFilename = `logos/${logoBaseName}.png`;
     if (universidad?.logo_url) {
       try {
         // El logo_url es una ruta relativa como "/logos/umss.png" → leer de public/
         const logoPath = path.join(process.cwd(), "public", universidad.logo_url.replace(/^\//, ""));
         logoBuffer = await fs.readFile(logoPath);
         const ext = path.extname(universidad.logo_url).toLowerCase() || ".png";
-        // Mantener la extensión real del archivo pero conservar la ruta logos/umss.<ext>
-        logoFilename = `logos/umss${ext}`;
+        // Mantener la extensión real del archivo pero conservar la ruta logos/<uni>.<ext>
+        logoFilename = `logos/${logoBaseName}${ext}`;
       } catch (e) {
         console.warn("[paquete-latex] No se pudo cargar el logo:", (e as Error).message);
         // Continuamos sin logo — el .tex tiene un comentario explicando
