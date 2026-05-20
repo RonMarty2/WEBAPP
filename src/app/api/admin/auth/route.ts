@@ -7,8 +7,9 @@ const ADMIN_JWT_SECRET = new TextEncoder().encode(
 
 export async function POST(req: Request) {
   try {
-    const { password } = await req.json();
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const body = await req.json();
+    const password = body.password?.trim();
+    const adminPassword = (process.env.ADMIN_PASSWORD || "").trim();
 
     if (!adminPassword) {
       return NextResponse.json(
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     }
 
     if (!password || password !== adminPassword) {
-      return NextResponse.json({ error: "Contraseña incorrecta." }, { status: 401 });
+      return NextResponse.json({ error: "Acceso restringido al panel de administración" }, { status: 401 });
     }
 
     const token = await new SignJWT({ role: "admin" })
