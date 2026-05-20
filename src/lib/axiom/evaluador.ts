@@ -18,7 +18,8 @@ export const axiomEvaluador = {
     });
 
     const respuestas: RespuestaUsuario[] = [];
-    simulador.preguntas_generadas.forEach((pregunta) => {
+    const preguntas = simulador.preguntas_generadas ?? simulador.preguntas ?? [];
+    preguntas.forEach((pregunta) => {
       const respuestaUsuario = simulador.respuestas_usuario[pregunta.id];
       const correcta = respuestaUsuario === pregunta.respuesta_correcta;
 

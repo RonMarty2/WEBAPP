@@ -1,160 +1,377 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import type { Simulador } from "@/lib/axiom/types";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import MathText from "../../../components/MathText";
+import type { PreguntaBanco, Simulador } from "@/lib/axiom/types";
+
+const ETIQUETAS_AREA: Record<string, string> = {
+  matematicas: "Matemáticas",
+  economicas: "Económicas",
+  verbal: "Verbal",
+  razonamiento: "Razonamiento",
+  general: "General",
+};
 
 export default function ResultadosPage() {
   const params = useParams();
   const simId = params.simId as string;
-
   const [simulador, setSimulador] = useState<Simulador | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [verSoloFalladas, setVerSoloFalladas] = useState(true);
 
   useEffect(() => {
     fetch(`/api/axiom/simulador/${simId}`)
-      .then((r) => r.json())
-      .then((d) => {
-        setSimulador(d.simulador);
-        setCargando(false);
-      });
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error ?? "Error");
+        setSimulador(data.simulador);
+      })
+      .catch((e) => setError(e instanceof Error ? e.message : String(e)))
+      .finally(() => setCargando(false));
   }, [simId]);
 
-  if (cargando) return <div style={{ padding: "24px" }}>Cargando resultados...</div>;
-  if (!simulador) return <div style={{ padding: "24px" }}>Error cargando resultados</div>;
+  const preguntas: PreguntaBanco[] = useMemo(
+    () => simulador?.preguntas ?? [],
+    [simulador]
+  );
 
-  const notaFinal = simulador.nota_final || 0;
-  const desglose = simulador.desglose || {};
-  const esBuenaNota = notaFinal >= 80;
+  const falladas = useMemo(() => {
+    if (!simulador) return [];
+    return preguntas.filter((p) => {
+      const r = simulador.respuestas_usuario[p.id];
+      return r !== p.respuesta_correcta;
+    });
+  }, [simulador, preguntas]);
+
+  if (cargando) {
+    return <div className="p-8 text-center text-neutral-500">Cargando resultados…</div>;
+  }
+  if (error || !simulador) {
+    return (
+      <div className="mx-auto max-w-2xl p-8">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+          {error ?? "No se encontró el simulador"}
+        </div>
+      </div>
+    );
+  }
+
+  const nota = simulador.nota_final ?? 0;
+  const desglose = simulador.desglose ?? {};
+  const tiempo = simulador.tiempo_usado_segundos ?? 0;
+  const mins = Math.floor(tiempo / 60);
+  const secs = tiempo % 60;
+
+  const correctas = preguntas.filter(
+    (p) => simulador.respuestas_usuario[p.id] === p.respuesta_correcta
+  ).length;
+  const sinResponder = preguntas.filter(
+    (p) => !simulador.respuestas_usuario[p.id]
+  ).length;
+  const incorrectas = preguntas.length - correctas - sinResponder;
+
+  const nivel = nivelDeNota(nota);
+  const mostrar = verSoloFalladas ? falladas : preguntas;
 
   return (
-    <div style={{ minHeight: "100vh", background: "white" }}>
-      <div
-        style={{
-          background: esBuenaNota
-            ? "rgba(16, 185, 129, 0.06)"
-            : "rgba(139,92,246,0.06)",
-          borderBottom: `1px solid ${
-            esBuenaNota
-              ? "rgba(16, 185, 129, 0.15)"
-              : "rgba(139,92,246,0.15)"
-          }`,
-          padding: "48px 24px",
-          textAlign: "center",
-        }}
+    <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white">
+      {/* Hero con nota */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`border-b ${nivel.fondoClase}`}
       >
-        <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-          <div
-            style={{
-              fontSize: "12px",
-              color: "#6b7280",
-              marginBottom: "16px",
-            }}
+        <div className="mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 sm:py-16">
+          <p className="text-xs font-bold uppercase tracking-widest text-neutral-500">
+            Tu resultado
+          </p>
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, type: "spring" }}
+            className={`my-4 text-7xl font-black sm:text-8xl ${nivel.textoClase}`}
           >
-            TU NOTA
-          </div>
-          <div
-            style={{
-              fontSize: "72px",
-              fontWeight: 800,
-              color: esBuenaNota ? "#10b981" : "rgb(139,92,246)",
-              marginBottom: "16px",
-            }}
-          >
-            {notaFinal}
-          </div>
-          <div
-            style={{
-              fontSize: "16px",
-              color: "#6b7280",
-              marginBottom: "24px",
-            }}
-          >
-            {esBuenaNota
-              ? "¡Excelente! Mejoraste significativamente."
-              : "Siguiente intento mejor preparado. Plan personalizado listo."}
+            {nota}
+            <span className="text-3xl text-neutral-400">/100</span>
+          </motion.div>
+          <p className="mx-auto max-w-xl text-lg text-neutral-700">
+            {nivel.mensaje}
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm">
+            <Badge color="emerald">✓ {correctas} correctas</Badge>
+            {incorrectas > 0 && <Badge color="red">✗ {incorrectas} incorrectas</Badge>}
+            {sinResponder > 0 && <Badge color="neutral">○ {sinResponder} sin responder</Badge>}
+            <Badge color="neutral">⏱ {mins}m {secs}s</Badge>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div style={{ maxWidth: "800px", margin: "0 auto", padding: "48px 24px" }}>
-        <h2 style={{ fontSize: "18px", fontWeight: 700, marginBottom: "24px" }}>
-          Desglose por Área
-        </h2>
+      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
+        {/* Desglose por área */}
+        <section className="mb-10">
+          <h2 className="mb-4 text-xl font-bold text-neutral-900">
+            Desglose por área
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Object.entries(desglose).map(([area, porc]) => (
+              <DesgloseArea key={area} area={area} porcentaje={porc} />
+            ))}
+          </div>
+        </section>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-            marginBottom: "48px",
-          }}
-        >
-          {Object.entries(desglose).map(([area, nota]) => (
-            <div
-              key={area}
-              style={{
-                background: "white",
-                border: "1px solid #e5e7eb",
-                borderRadius: "8px",
-                padding: "20px",
-                textAlign: "center",
-              }}
-            >
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "#6b7280",
-                  marginBottom: "8px",
-                }}
+        {/* CTA */}
+        <section className="mb-10 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <Link
+            href="/axiom/practicar"
+            className="flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-violet-700"
+          >
+            🚀 Practicar de nuevo
+          </Link>
+          <Link
+            href="/axiom"
+            className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white px-6 py-4 font-bold text-neutral-700 hover:bg-neutral-50"
+          >
+            Volver a Axiom
+          </Link>
+        </section>
+
+        {/* Preguntas */}
+        <section>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-bold text-neutral-900">
+              {verSoloFalladas
+                ? `Tus errores (${falladas.length})`
+                : `Todas las preguntas (${preguntas.length})`}
+            </h2>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setVerSoloFalladas(true)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                  verSoloFalladas
+                    ? "bg-neutral-900 text-white"
+                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                }`}
               >
-                {area}
-              </div>
-              <div
-                style={{
-                  fontSize: "36px",
-                  fontWeight: 700,
-                  color: nota >= 80 ? "#10b981" : "#ef4444",
-                }}
+                Solo errores
+              </button>
+              <button
+                type="button"
+                onClick={() => setVerSoloFalladas(false)}
+                className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
+                  !verSoloFalladas
+                    ? "bg-neutral-900 text-white"
+                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                }`}
               >
-                {nota}%
-              </div>
+                Todas
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div style={{ display: "flex", gap: "12px" }}>
-          <button
-            onClick={() => (window.location.href = `/axiom/simulador`)}
-            style={{
-              flex: 1,
-              padding: "12px 24px",
-              border: "1px solid #e5e7eb",
-              background: "white",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
-          >
-            Nuevo Simulador
-          </button>
-          <button
-            onClick={() => (window.location.href = `/axiom/progreso`)}
-            style={{
-              flex: 1,
-              padding: "12px 24px",
-              background: "rgb(139,92,246)",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: 600,
-            }}
-          >
-            Ver Mi Progreso
-          </button>
-        </div>
+          {mostrar.length === 0 ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-10 text-center">
+              <p className="text-2xl font-bold text-emerald-700">
+                🎉 ¡Sin errores!
+              </p>
+              <p className="mt-1 text-emerald-600">
+                Lograste un puntaje perfecto. Sigue así.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {mostrar.map((p, i) => (
+                <PreguntaRevision
+                  key={p.id}
+                  pregunta={p}
+                  indice={preguntas.indexOf(p)}
+                  respuesta={simulador.respuestas_usuario[p.id]}
+                  totalMostrados={i}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
+  );
+}
+
+function nivelDeNota(nota: number): {
+  mensaje: string;
+  fondoClase: string;
+  textoClase: string;
+} {
+  if (nota >= 80) {
+    return {
+      mensaje: "¡Excelente! Estás en el camino correcto. Sigue así.",
+      fondoClase: "bg-emerald-50 border-emerald-100",
+      textoClase: "text-emerald-600",
+    };
+  }
+  if (nota >= 60) {
+    return {
+      mensaje: "Buen trabajo. Identifica las áreas débiles y vuelve a practicar.",
+      fondoClase: "bg-violet-50 border-violet-100",
+      textoClase: "text-violet-600",
+    };
+  }
+  if (nota >= 40) {
+    return {
+      mensaje: "Vas avanzando. Enfócate en los temas que más fallaste.",
+      fondoClase: "bg-amber-50 border-amber-100",
+      textoClase: "text-amber-600",
+    };
+  }
+  return {
+    mensaje: "Cada intento te acerca. Revisa tus errores con calma.",
+    fondoClase: "bg-red-50 border-red-100",
+    textoClase: "text-red-600",
+  };
+}
+
+function Badge({
+  children,
+  color,
+}: {
+  children: React.ReactNode;
+  color: "emerald" | "red" | "neutral";
+}) {
+  const cls = {
+    emerald: "bg-emerald-100 text-emerald-700",
+    red: "bg-red-100 text-red-700",
+    neutral: "bg-neutral-100 text-neutral-700",
+  }[color];
+  return (
+    <span className={`rounded-full px-3 py-1 font-semibold ${cls}`}>
+      {children}
+    </span>
+  );
+}
+
+function DesgloseArea({ area, porcentaje }: { area: string; porcentaje: number }) {
+  const color =
+    porcentaje >= 80
+      ? "from-emerald-500 to-emerald-600"
+      : porcentaje >= 60
+      ? "from-violet-500 to-violet-600"
+      : porcentaje >= 40
+      ? "from-amber-500 to-amber-600"
+      : "from-red-500 to-red-600";
+  return (
+    <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
+      <div className="mb-1 text-xs uppercase tracking-wider text-neutral-500">
+        {ETIQUETAS_AREA[area] ?? area}
+      </div>
+      <div className="text-3xl font-black text-neutral-900">{porcentaje}%</div>
+      <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-100">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${porcentaje}%` }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className={`h-full rounded-full bg-gradient-to-r ${color}`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PreguntaRevision({
+  pregunta,
+  indice,
+  respuesta,
+  totalMostrados,
+}: {
+  pregunta: PreguntaBanco;
+  indice: number;
+  respuesta?: string;
+  totalMostrados: number;
+}) {
+  const correcta = respuesta === pregunta.respuesta_correcta;
+  const sinResponder = !respuesta;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.3, delay: Math.min(totalMostrados * 0.05, 0.5) }}
+      className={`rounded-2xl border bg-white p-5 shadow-sm ${
+        correcta ? "border-emerald-200" : sinResponder ? "border-neutral-300" : "border-red-200"
+      }`}
+    >
+      <div className="mb-3 flex items-center gap-2 text-xs">
+        <span className="rounded bg-neutral-900 px-2 py-0.5 font-bold text-white">
+          {indice + 1}
+        </span>
+        <span className="rounded bg-violet-50 px-2 py-0.5 text-violet-700">
+          {ETIQUETAS_AREA[pregunta.area] ?? pregunta.area}
+        </span>
+        <span className="text-neutral-400">·</span>
+        <span className="text-neutral-600">{pregunta.tema}</span>
+        <span className="ml-auto">
+          {correcta && (
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+              ✓ Correcta
+            </span>
+          )}
+          {sinResponder && (
+            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-bold text-neutral-700">
+              ○ Sin responder
+            </span>
+          )}
+          {!correcta && !sinResponder && (
+            <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-700">
+              ✗ Incorrecta
+            </span>
+          )}
+        </span>
+      </div>
+
+      <div className="mb-4 text-sm leading-relaxed text-neutral-800 sm:text-base">
+        <MathText block>{pregunta.enunciado}</MathText>
+      </div>
+
+      <div className="space-y-2">
+        {pregunta.opciones.map((op) => {
+          const esCorrecta = op.letra === pregunta.respuesta_correcta;
+          const fueElegida = op.letra === respuesta;
+          let cls = "border-neutral-200 bg-white text-neutral-700";
+          if (esCorrecta) cls = "border-emerald-400 bg-emerald-50 text-emerald-900";
+          else if (fueElegida) cls = "border-red-400 bg-red-50 text-red-900";
+          return (
+            <div
+              key={op.letra}
+              className={`flex items-start gap-3 rounded-lg border p-2.5 text-sm ${cls}`}
+            >
+              <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-current text-xs font-bold">
+                {op.letra}
+              </span>
+              <span className="flex-1">
+                <MathText>{op.texto}</MathText>
+              </span>
+              {esCorrecta && <span className="text-emerald-600">✓</span>}
+              {fueElegida && !esCorrecta && <span className="text-red-600">✗</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {pregunta.explicacion && (
+        <div className="mt-4 rounded-xl border border-violet-100 bg-violet-50/50 p-4">
+          <div className="mb-1 text-xs font-bold uppercase tracking-wider text-violet-700">
+            Explicación
+          </div>
+          <div className="text-sm leading-relaxed text-neutral-800">
+            <MathText block>{pregunta.explicacion}</MathText>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }
