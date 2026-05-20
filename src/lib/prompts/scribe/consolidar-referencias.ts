@@ -144,6 +144,41 @@ Si hay dos versiones del mismo documento:
 - Si hay duda razonable de que sean documentos distintos, conserva ambas solo
   si los títulos o años difieren de forma sustantiva.
 
+PASO 2.5 — CRUCE OBLIGATORIO CITAS-TEXTO ↔ LISTA DE REFERENCIAS
+
+🚨 ESTE PASO ES CRÍTICO. Si lo omitís, la bibliografía final tendrá
+referencias huérfanas (en la lista pero nunca citadas) y citas fantasma
+(citadas en el texto pero faltantes en la lista). Ambos errores son
+penalizados en revisión académica UMSS.
+
+Procedimiento exacto:
+
+A) Extraé MENTALMENTE todas las citas inline que aparezcan en el cuerpo
+   de los 5 capítulos. Las citas APA 7 tienen estas formas:
+     • (Apellido, año)               → (López Libreros, 2024)
+     • (Apellido & Apellido, año)    → (Pena & Souza, 2023)
+     • (Apellido et al., año)        → (Giordano et al., 2023)
+     • Apellido (año)                → López Libreros (2024) sostiene...
+     • Apellido et al. (año)         → Giordano et al. (2023) demostraron...
+     • (Institución, año)            → (Aduana Nacional de Bolivia, 2024)
+     • (Institución [Sigla], año)    → (Instituto Boliviano de Comercio Exterior [IBCE], 2023)
+
+B) Comparalo con la lista de trabajo de REFERENCIAS_ETAPA:
+
+   B.1) Si una cita del texto NO tiene entrada en la lista → es una CITA
+        FANTASMA. Buscala en las REFERENCIAS_ETAPA de TODOS los capítulos.
+        Si la encontrás, agregala. Si no, anotala en "Referencias
+        observadas" como faltante — la IA NUNCA debe inventarla.
+
+   B.2) Si una referencia de la lista NO tiene cita en ningún capítulo →
+        es una REFERENCIA HUÉRFANA. ELIMINALA de la lista final.
+        Excepción: si es un texto institucional o normativo central del
+        marco teórico que aparece como cita indirecta (sin paréntesis),
+        conservalo. En duda, eliminá.
+
+C) Reportá en el "Resumen editorial de consolidación" cuántas citas
+   fantasma encontraste y cuántas huérfanas eliminaste.
+
 PASO 3 — Depuración de referencias no usadas
 Conserva únicamente referencias que hayan sido citadas o usadas en los capítulos.
 
@@ -153,6 +188,23 @@ No incluyas:
 - Fuentes mencionadas como ejemplo pero no usadas.
 - Referencias duplicadas.
 - Fuentes incompletas imposibles de identificar.
+
+🚨 REGLA ANTI-FANTASMAS:
+- "Autor desconocido (año)"          → PROHIBIDO. NUNCA en lista final.
+- "Anónimo (año)"                    → PROHIBIDO (excepto obras realmente
+                                       publicadas como anónimas, raras).
+- "Sin autor (año)"                  → PROHIBIDO.
+- "N.D." o "(N.D.)" como autor        → PROHIBIDO.
+- "(Autor, año)" sin apellido real   → PROHIBIDO.
+
+Si una REFERENCIAS_ETAPA contiene "Autor desconocido" o variantes:
+  1. Intentá identificar el autor real desde el contexto del capítulo
+     (a veces es una institución cuyo nombre quedó truncado).
+  2. Si no se puede recuperar el autor → MOVÉ la entrada a "Referencias
+     observadas que requieren verificación" con nota explicativa.
+  3. NUNCA dejes "Autor desconocido" en la lista final.
+  4. Si la cita inline del texto dice "(Autor desconocido, 2017)" →
+     reportala en "Referencias observadas" como cita problemática.
 
 PASO 4 — Normalización APA 7
 Corrige cada referencia según corresponda.
@@ -238,6 +290,12 @@ Antes de emitir la respuesta, verifica internamente:
 8. Que las referencias incompletas se hayan separado en observaciones.
 9. Que la lista final esté lista para copiarse al documento.
 10. Que no existan comentarios internos mezclados con la bibliografía final.
+11. 🚨 Que TODA referencia de la lista final esté citada al menos una vez
+    en el cuerpo de algún capítulo (sin huérfanas).
+12. 🚨 Que TODA cita inline del texto tenga su entrada en la lista final
+    (sin fantasmas), o esté reportada en "Referencias observadas".
+13. 🚨 Que NINGUNA referencia diga "Autor desconocido", "Anónimo" o "N.D."
+    como autor en la lista final.
 
 ═══════════════════════════════════════════════════════════════
 SALIDA OBLIGATORIA
@@ -260,6 +318,9 @@ normalizar sin inventar datos. Si no existe ninguna, omitir esta sección.]
 Incluir un resumen breve con:
 - Número aproximado de referencias recibidas.
 - Número de duplicados eliminados.
+- Número de huérfanas eliminadas (en lista pero no citadas en texto).
+- Número de fantasmas detectadas (citadas en texto pero faltantes).
+- Número de referencias con "Autor desconocido" reubicadas en observaciones.
 - Número de referencias finales.
 - Número de referencias observadas, si existen.
 

@@ -273,6 +273,27 @@ export async function GET(_req: Request, { params }: Params) {
           "",
         );
       }
+
+      // 🛡️ ANTI-AUTOR-DESCONOCIDO (solo en bibliografía consolidada):
+      // Si pese al prompt la IA dejó una entrada con autor inválido en la
+      // lista final, la eliminamos. Cubrimos: "Autor desconocido", "Anónimo",
+      // "Sin autor", "N.D.", "(s. a.)" como primer token de la referencia.
+      // Aplicamos solo en ph-referencias para no tocar texto del cuerpo
+      // (donde "Autor" puede aparecer legítimamente en otro contexto).
+      if (faseId === "ph-referencias") {
+        // Cada referencia APA suele empezar al inicio de una línea.
+        // Detectar líneas que empiezan con un patrón "fantasma" y removerlas.
+        const lineasInvalidas = [
+          /^\s*Autor\s+desconocido\b[^\n]*\n?/gim,
+          /^\s*An[oó]nimo\b[^\n]*\n?/gim,
+          /^\s*Sin\s+autor\b[^\n]*\n?/gim,
+          /^\s*N\.?\s*D\.?\s*\([^)]*\)[^\n]*\n?/gim,
+          /^\s*\(\s*s\.?\s*a\.?\s*\)\b[^\n]*\n?/gim,
+        ];
+        for (const re of lineasInvalidas) {
+          cleaned = cleaned.replace(re, "");
+        }
+      }
       // Sanear bibliografía: escapar `&` sueltos dentro de hangparas/thebibliography
       cleaned = cleaned.replace(
         /(\\begin\{(?:hangparas|thebibliography)\}[\s\S]*?\\end\{(?:hangparas|thebibliography)\})/g,
