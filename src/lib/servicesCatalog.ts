@@ -12,7 +12,7 @@
  * Copy: español neutro con tuteo (mercado boliviano). Nunca voseo.
  */
 
-export type ServicioId = "scribe" | "axiom" | "lumen" | "mentor" | "laboratorio";
+export type ServicioId = "scribe" | "proyecto-grado" | "axiom" | "lumen" | "mentor" | "laboratorio";
 
 export type ServicioPlan = "demo" | "estandar" | "pro" | "elite";
 
@@ -45,6 +45,18 @@ export const SERVICIOS_CATALOGO: ServicioCatalogo[] = [
     plan_minimo: "demo",
     paleta: { accentRgb: "37,99,235", accentLight: "59,130,246" },
     badge: "Módulo Principal",
+  },
+  {
+    id: "proyecto-grado",
+    nombre: "PROYECTO DE GRADO",
+    descripcion:
+      "Plan de negocio completo en 23 fases: PESTEL, Porter, matrices estratégicas, estudio técnico, financiero, branding y evaluación. Apto para defensa ante tribunal.",
+    ruta: "/projects/new?tipo=proy-grado-001",
+    iconId: "proyecto-grado",
+    estado: "disponible",
+    plan_minimo: "estandar",
+    paleta: { accentRgb: "14,165,233", accentLight: "56,189,248" },
+    badge: "23 fases",
   },
   {
     id: "axiom",
