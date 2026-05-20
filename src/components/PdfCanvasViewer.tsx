@@ -18,8 +18,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/AnnotationLayer.css";
-import "react-pdf/dist/Page/TextLayer.css";
+import "@/styles/react-pdf/AnnotationLayer.css";
+import "@/styles/react-pdf/TextLayer.css";
 
 // Worker de PDF.js desde unpkg (CDN público). En producción se puede self-host.
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
