@@ -71,6 +71,20 @@ la tabla. Ejemplo:
 
   NUNCA con \\caption*{} dentro del table que se posicione raro.
 
+🚨 #2-QUATER — SIEMPRE "CUADRO X.Y", NUNCA "TABLA X.Y".
+La universidad UMSS usa la convención académica "Cuadro" para todas las
+tablas. LaTeX inserta automáticamente "Cuadro N.M" antes del caption
+gracias al preámbulo. Tu trabajo:
+
+  ✅ En el caption: NO escribas "Tabla 2.1:" ni "Cuadro 2.1:" al inicio.
+     Solo escribí la descripción.
+  ✅ En el texto del cuerpo cuando hagas referencia inline:
+     "Como muestra el Cuadro 2.1..."  (NO "Como muestra la Tabla 2.1...")
+     "Los datos del Cuadro 4.3 indican..."
+
+Esto vale para TODAS las universidades. Aunque el markdown fuente diga
+"Tabla X.Y" en una referencia, tu LaTeX debe escribir "Cuadro X.Y".
+
 🚨 #3 — LIMPIAR MARCADORES INTERNOS DEL SISTEMA.
 ELIMINAR si aparecen (son artefactos, NO contenido académico):
   - "REFERENCIAS_ETAPA"
@@ -128,13 +142,39 @@ Tablas markdown ( |col1|col2| ):
   MAL:   \\caption{Cuadro 4.2. Comparativa de regímenes...}
   BIEN:  \\caption{Comparativa de regímenes de origen (CAN vs. MERCOSUR)}
 
-  ⚠️ REGLA CRÍTICA — tablas anchas:
-  Si la tabla tiene 4+ columnas o columnas con texto largo, envolvela
-  en \\begin{adjustbox}{width=\\textwidth,center}...\\end{adjustbox}
-  para que se ajuste al ancho de la página.
+  ⚠️ REGLA CRÍTICA — tablas anchas (3 NIVELES según ancho):
 
-  Si la tabla es MUY ancha, considera usar \\footnotesize o \\small dentro
-  del entorno table para reducir el tamaño del texto.
+  NIVEL 1 — Tabla de 2-3 columnas con texto breve:
+    Tabla normal, sin envolturas. Caben sobradas en página vertical.
+
+  NIVEL 2 — Tabla de 4 columnas o 3 con texto medio (~50 chars/celda):
+    Envolvé en \\begin{adjustbox}{width=\\textwidth,center}...\\end{adjustbox}
+    + agregá \\small antes del \\begin{tabular}.
+
+  NIVEL 3 — Tabla de 5+ columnas O cualquier tabla con celdas de texto
+            largo (>80 chars por celda):
+    USÁ MODO LANDSCAPE (página rotada 90°). El paquete \`pdflscape\` ya
+    está cargado en el preámbulo. Estructura:
+
+      \\begin{landscape}
+      \\begin{table}[H]
+      \\centering
+      \\caption{Descripción breve}
+      \\label{tab:nombre}
+      \\small
+      \\begin{tabular}{|p{2cm}|p{4cm}|p{4cm}|p{4cm}|p{4cm}|}
+      \\hline
+      Header 1 & Header 2 & ... \\\\
+      \\hline
+      ...
+      \\end{tabular}
+      \\end{table}
+      \\textit{Nota.} ...
+      \\end{landscape}
+
+  ⚠️ Por qué importa: en el PDF, una tabla NIVEL 3 forzada a vertical
+  sale con texto microscópico ilegible. Landscape la hace legible
+  rotando solo esa página. El resto del documento sigue vertical.
 
   Estructura recomendada:
 

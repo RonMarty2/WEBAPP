@@ -300,6 +300,41 @@ export async function GET(_req: Request, { params }: Params) {
         /(\\chapter\*?\{)\s*(?:Cap[íi]tulo|CAP[ÍI]TULO)\s+(?:[IVX]+|\d+)\s*[.:\-]?\s*/gi,
         "$1",
       );
+
+      // 🛡️ DEFENSA EN PROFUNDIDAD — sustituciones post-IA:
+      //
+      // 1) "Tabla X.Y" → "Cuadro X.Y" en referencias inline del cuerpo.
+      //    El preámbulo ya renombra \tablename a "Cuadro" para captions
+      //    automáticos; pero la IA a veces escribe "como muestra la Tabla 2.1"
+      //    en el texto del párrafo. UMSS exige "Cuadro" en todo el documento.
+      //    Solo cambiamos cuando viene seguido de número (Tabla 2.1, Tabla 4.3),
+      //    NO "tabla periódica" ni "tabla de contenido" sueltos.
+      cleaned = cleaned.replace(
+        /\b(la|el|La|El|al|Al|del|Del)\s+Tabla\s+(\d+(?:\.\d+)?)/g,
+        "$1 Cuadro $2",
+      );
+      cleaned = cleaned.replace(
+        /(?<=^|[\s(,;:.])Tabla\s+(\d+\.\d+)/g,
+        "Cuadro $1",
+      );
+
+      // 2) Saneo de caracteres ordinales/grados que confunden a pdflatex.
+      //    Cuando la IA pega "Nº" (U+00BA, masculine ordinal), babel a veces
+      //    lo renderiza como "N^" (acento circunflejo) si la fuente no tiene
+      //    el glyph. Mismo con "ª" y "°". Reemplazamos por comandos LaTeX
+      //    explícitos que renderizan siempre bien.
+      cleaned = cleaned.replace(/º/g, "\\textordmasculine{}");
+      cleaned = cleaned.replace(/ª/g, "\\textordfeminine{}");
+      cleaned = cleaned.replace(/°/g, "\\textdegree{}");
+
+      // 3) Salvataje específico: si la IA ya escribió "N^" (artefacto de
+      //    una compilación previa o un copy-paste mal), normalizar a "N°".
+      //    Lo hacemos DESPUÉS del paso 2 para no duplicar.
+      cleaned = cleaned.replace(
+        /\bN\^\s*(\d)/g,
+        "N\\textordmasculine{} $1",
+      );
+
       return cleaned;
     };
     results.forEach((r) => { r.latex = limpiarLatexBlock(r.latex, r.faseId); });
