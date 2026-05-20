@@ -44,8 +44,11 @@ export default function RankingSectionNew({
           viewport={{ once: true }}
           className="axiom-section-title mb-10"
         >
-          <div className="mb-4">
-            <span className="text-5xl">🏆</span>
+          <div className="mb-4 flex justify-center">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-violet-500">
+              <path d="M8 21h8M12 17v4M7 4H4a1 1 0 0 0-1 1v3c0 2.21 1.79 4 4 4h.5M17 4h3a1 1 0 0 1 1 1v3c0 2.21-1.79 4-4 4h-.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 4h10v8a5 5 0 0 1-10 0V4Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
           <h2 className="mb-3 text-4xl font-black text-[#171545] sm:text-5xl">
             Top Simuladores

@@ -149,14 +149,14 @@ export const DEFAULT_UNIVERSITIES: University[] = [
 ];
 
 export const SECTION_STEPS = [
-  { key: "titulo", label: "Propuesta de Título", icon: "🎯", credits: 1 },
-  { key: "introduccion", label: "Introducción", icon: "📖", credits: 1 },
-  { key: "justificacion", label: "Justificación", icon: "💡", credits: 1 },
-  { key: "planteamiento", label: "Planteamiento del Problema", icon: "🔍", credits: 1 },
-  { key: "objetivos", label: "Objetivos", icon: "🎪", credits: 1 },
-  { key: "marco_teorico", label: "Marco Teórico", icon: "📚", credits: 2 },
-  { key: "metodologia", label: "Metodología", icon: "🔬", credits: 2 },
-  { key: "cronograma", label: "Cronograma", icon: "📅", credits: 1 },
+  { key: "titulo", label: "Propuesta de Título", icon: "", credits: 1 },
+  { key: "introduccion", label: "Introducción", icon: "", credits: 1 },
+  { key: "justificacion", label: "Justificación", icon: "", credits: 1 },
+  { key: "planteamiento", label: "Planteamiento del Problema", icon: "", credits: 1 },
+  { key: "objetivos", label: "Objetivos", icon: "", credits: 1 },
+  { key: "marco_teorico", label: "Marco Teórico", icon: "", credits: 2 },
+  { key: "metodologia", label: "Metodología", icon: "", credits: 2 },
+  { key: "cronograma", label: "Cronograma", icon: "", credits: 1 },
 ];
 
 export const DEFAULT_PROMPTS: Record<string, MasterPrompt> = {

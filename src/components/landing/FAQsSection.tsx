@@ -17,7 +17,7 @@ const FAQS: FAQ[] = [
   {
     pregunta: "¿Mi universidad va a aceptarlo?",
     respuesta:
-      "Sí, si cumple con su formato. Soportamos el formato oficial de las 8 universidades principales bolivianas (UMSS, UMSA, UAGRM, UTO, USFX, UPB, EMI y formato genérico). Si tu universidad no está en la lista, usa el formato genérico configurable o cuentactanos.",
+      "Sí, si cumple con su formato. Soportamos el formato oficial de las 8 universidades principales bolivianas (UMSS, UMSA, UAGRM, UTO, USFX, UPB, EMI y formato genérico). Si tu universidad no está en la lista, usa el formato genérico configurable o escríbenos.",
   },
   {
     pregunta: "¿Cuánto tiempo toma generar una monografía completa?",
