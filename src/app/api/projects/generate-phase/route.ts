@@ -70,6 +70,7 @@ import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
 import { isPhaseAnalitica } from "@/lib/phaseCategories";
 import { getFortalecimientoAnaliticoBlock } from "@/lib/prompts/fortalecimiento-analitico";
 import { buscarFuentesAcademicas, buildFuentesVerificadasBlock } from "@/lib/deepSearch";
+import { buildOrientacionExtensionBlock, buildOrientacionResumenBlock } from "@/lib/orientacionExtension";
 
 // Palabras clave en el label/prompt de una fase dinámica que activan deep search
 const DEEP_SEARCH_KEYWORDS = /marco\s+te[oó]rico|bibliograf|referencias|fuentes|estado\s+del\s+arte|antecedente/i;
@@ -790,6 +791,23 @@ APA 7 / UMSS que aparezca en el resto del prompt.
       ? getFortalecimientoAnaliticoBlock(phase_id)
       : null;
 
+    // 📏 OLA 1 — Orientación de extensión variable por universidad.
+    //
+    // Inyectamos una nota CORTA y AMABLE que le dice a la IA cuántas páginas
+    // razonablemente apuntar para ESTE capítulo, según el reglamento de la
+    // universidad del proyecto. Las reglas son orientativas, no obligatorias:
+    //   - NO inflar para llegar al máximo.
+    //   - NO cortar una idea para no pasarse del mínimo.
+    //   - Prioridad: calidad de argumento > extensión cumplida.
+    //
+    // Para capítulos (ph-cap1..ph-cap5) usamos bloque por capítulo.
+    // Para ph-resumen usamos bloque específico (se mide en palabras).
+    // Otras fases (ph-referencias, ph-cap0, etc.) no reciben este bloque.
+    const universidadIdProyecto = (proyecto.universidad_id as string | undefined) ?? null;
+    const bloqueOrientacionExtension = phase_id === "ph-resumen"
+      ? buildOrientacionResumenBlock(universidadIdProyecto)
+      : buildOrientacionExtensionBlock(universidadIdProyecto, phase_id);
+
     const userPromptParts = [
       `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlock}\n--- FIN EXPEDIENTE ---`,
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
@@ -798,6 +816,7 @@ APA 7 / UMSS que aparezca en el resto del prompt.
       bloqueVariante,
       bloqueUniversidadUCB,
       bloqueFortalecimientoAnalitico,
+      bloqueOrientacionExtension,
       antiDuplicacionBlock || null,
       deepSearchBlock || null,
       referencesPhase
