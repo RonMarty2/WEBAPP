@@ -66,7 +66,7 @@ function LoginContent() {
   }
 
   const selectStyle = {
-    background: "rgba(255,255,255,0.9)",
+    background: "var(--bg-card)",
     border: "1px solid var(--border-hover)",
     borderRadius: 8,
     color: "var(--fg-primary)",
@@ -76,25 +76,44 @@ function LoginContent() {
     cursor: "pointer",
   } as React.CSSProperties;
 
+  const labelEyebrow: React.CSSProperties = {
+    fontSize: 11,
+    color: "var(--fg-muted)",
+    marginBottom: 10,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  };
+
   return (
     <div
       className="gradient-bg min-h-screen"
       style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24, position: "relative", overflow: "hidden" }}
     >
-      {/* Breathing sphere — ambient glow behind the login card */}
-      <div style={{
-        position: "absolute", top: "50%", left: "50%",
-        transform: "translate(-50%, -50%)",
-        zIndex: 0, pointerEvents: "none", opacity: 0.70,
-      }}>
-        <div className="sphere sphere-lg" style={{ animationDelay: "-3s" }} />
-      </div>
-
-      <div style={{ width: "100%", maxWidth: 420, position: "relative", zIndex: 1 }}>
+      <div style={{ width: "100%", maxWidth: 440, position: "relative", zIndex: 1 }}>
         {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontSize: 44, marginBottom: 10 }}>🧪</div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div
+            style={{
+              width: 52,
+              height: 52,
+              margin: "0 auto 14px",
+              borderRadius: 14,
+              background: "var(--bg-card)",
+              border: "1px solid var(--border)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "var(--shadow-sm)",
+            }}
+            aria-hidden="true"
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="var(--fg-primary)" strokeWidth="1.8" />
+              <path d="M8 12h8M12 8v8" stroke="var(--fg-primary)" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </div>
+          <h1 className="font-crimson" style={{ fontSize: 26, fontWeight: 700, color: "var(--fg-primary)", letterSpacing: "-0.01em" }}>
             Laboratorio Académico
           </h1>
           <p style={{ color: "var(--fg-muted)", marginTop: 6, fontSize: 14 }}>
@@ -104,16 +123,31 @@ function LoginContent() {
 
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           {errorMsg && (
-            <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: 12, color: "#fca5a5", fontSize: 14 }}>
-              ⚠️ {errorMsg}
+            <div
+              role="alert"
+              style={{
+                background: "rgba(239,68,68,0.08)",
+                border: "1px solid rgba(239,68,68,0.30)",
+                borderRadius: 8,
+                padding: "10px 12px",
+                color: "#b91c1c",
+                fontSize: 14,
+                display: "flex",
+                gap: 10,
+                alignItems: "flex-start",
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+              <span>{errorMsg}</span>
             </div>
           )}
 
           {/* Google */}
           <div>
-            <p style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Con cuenta Google
-            </p>
+            <p style={labelEyebrow}>Con cuenta Google</p>
             <a
               href="/api/auth/google"
               style={{
@@ -131,12 +165,12 @@ function LoginContent() {
               Continuar con Google
             </a>
             <p style={{ fontSize: 12, color: "var(--fg-secondary)", marginTop: 8, textAlign: "center" }}>
-              Nuevo usuario → espera activación del admin
+              Nuevo usuario → espera activación del administrador
             </p>
           </div>
 
           {/* Divisor */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }} aria-hidden="true">
             <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
             <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>o</span>
             <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
@@ -144,26 +178,33 @@ function LoginContent() {
 
           {/* Admin login (real, con email + password) */}
           <div>
-            <p style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              🔐 Acceso administrador
-            </p>
+            <p style={labelEyebrow}>Acceso administrador</p>
 
             {!showAdmin ? (
               <button
                 onClick={() => setShowAdmin(true)}
+                aria-expanded={showAdmin}
+                aria-controls="admin-panel"
                 style={{
                   width: "100%", padding: "12px", borderRadius: 10,
                   border: "1px solid rgba(124,58,237,0.3)", background: "rgba(124,58,237,0.06)",
                   color: "#7c3aed", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 }}
               >
-                🛠️ Soy admin (email + contraseña)
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="4" y="11" width="16" height="10" rx="2" stroke="currentColor" strokeWidth="1.7"/>
+                  <path d="M8 11V8a4 4 0 1 1 8 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+                Soy administrador (email y contraseña)
               </button>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div id="admin-panel" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <label htmlFor="admin-email" style={{ position: "absolute", left: -9999 }}>Email administrador</label>
                 <input
+                  id="admin-email"
                   type="email"
-                  placeholder="Tu email admin (ej. tu@email.com)"
+                  placeholder="tu@email.com"
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   autoComplete="email"
@@ -171,14 +212,16 @@ function LoginContent() {
                     padding: "10px 12px",
                     borderRadius: 8,
                     border: "1px solid var(--border-hover)",
-                    background: "rgba(255,255,255,0.9)",
+                    background: "var(--bg-card)",
                     fontSize: 14,
                     color: "var(--fg-primary)",
                   }}
                 />
+                <label htmlFor="admin-password" style={{ position: "absolute", left: -9999 }}>Contraseña administrador</label>
                 <input
+                  id="admin-password"
                   type="password"
-                  placeholder="Contraseña admin"
+                  placeholder="Contraseña"
                   value={adminPassword}
                   onChange={(e) => setAdminPassword(e.target.value)}
                   autoComplete="current-password"
@@ -187,29 +230,33 @@ function LoginContent() {
                     padding: "10px 12px",
                     borderRadius: 8,
                     border: "1px solid var(--border-hover)",
-                    background: "rgba(255,255,255,0.9)",
+                    background: "var(--bg-card)",
                     fontSize: 14,
                     color: "var(--fg-primary)",
                   }}
                 />
                 <div>
-                  <label style={{ fontSize: 11.5, color: "var(--fg-muted)", display: "block", marginBottom: 4 }}>
-                    Entrar como plan: <span style={{ color: "#7c3aed", fontWeight: 600 }}>(podés cambiarlo después sin perder proyectos)</span>
+                  <label htmlFor="admin-plan" style={{ fontSize: 11.5, color: "var(--fg-muted)", display: "block", marginBottom: 4 }}>
+                    Entrar como plan <span style={{ color: "var(--fg-secondary)" }}>(puedes cambiarlo después sin perder proyectos)</span>
                   </label>
                   <select
+                    id="admin-plan"
                     value={adminPlan}
                     onChange={(e) => setAdminPlan(e.target.value as "estandar" | "pro" | "elite")}
                     style={{ ...selectStyle, width: "100%" }}
                   >
-                    <option value="estandar">⭐ Estándar (limitado, sin edición)</option>
-                    <option value="pro">🚀 Pro (recomendado, edición quirúrgica)</option>
-                    <option value="elite">💎 Elite (máximo, 16K tokens)</option>
+                    <option value="estandar">Estándar — limitado, sin edición</option>
+                    <option value="pro">Pro — recomendado, edición quirúrgica</option>
+                    <option value="elite">Elite — máximo, 16K tokens</option>
                   </select>
                 </div>
 
                 {adminError && (
-                  <div style={{ fontSize: 12, color: "#b91c1c", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, padding: "8px 10px" }}>
-                    ❌ {adminError}
+                  <div
+                    role="alert"
+                    style={{ fontSize: 12, color: "#b91c1c", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 6, padding: "8px 10px" }}
+                  >
+                    {adminError}
                   </div>
                 )}
 
@@ -232,7 +279,7 @@ function LoginContent() {
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     }}
                   >
-                    {adminLoading ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Entrando…</> : "Entrar como admin →"}
+                    {adminLoading ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Entrando…</> : "Entrar como administrador →"}
                   </button>
                 </div>
               </div>
@@ -240,7 +287,7 @@ function LoginContent() {
           </div>
 
           {/* Divisor admin/demo */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }} aria-hidden="true">
             <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
             <span style={{ fontSize: 12, color: "var(--fg-muted)" }}>o</span>
             <div style={{ flex: 1, height: 1, background: "var(--bg-subtle)" }} />
@@ -248,53 +295,60 @@ function LoginContent() {
 
           {/* Demo */}
           <div>
-            <p style={{ fontSize: 11, color: "var(--fg-muted)", marginBottom: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-              Modo desarrollo
-            </p>
+            <p style={labelEyebrow}>Modo desarrollo</p>
 
             {!showDemo ? (
               <button
                 onClick={() => setShowDemo(true)}
+                aria-expanded={showDemo}
+                aria-controls="demo-panel"
                 style={{
                   width: "100%", padding: "12px", borderRadius: 10,
                   border: "1px solid rgba(37,99,235,0.3)", background: "rgba(37,99,235,0.06)",
                   color: "var(--accent)", fontWeight: 600, fontSize: 14, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 }}
               >
-                👤 Entrar como usuario de prueba
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.7"/>
+                  <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+                </svg>
+                Entrar como usuario de prueba
               </button>
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div id="demo-panel" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {/* Selectores */}
                 <div style={{ display: "flex", gap: 10 }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: 12, color: "var(--fg-muted)", display: "block", marginBottom: 6 }}>Tipo de usuario</label>
+                    <label htmlFor="demo-role" style={{ fontSize: 12, color: "var(--fg-muted)", display: "block", marginBottom: 6 }}>Tipo de usuario</label>
                     <select
+                      id="demo-role"
                       value={demoRole}
                       onChange={(e) => setDemoRole(e.target.value as "estudiante" | "docente")}
                       style={selectStyle}
                     >
-                      <option value="estudiante">🎓 Estudiante</option>
-                      <option value="docente">👨‍🏫 Docente</option>
+                      <option value="estudiante">Estudiante</option>
+                      <option value="docente">Docente</option>
                     </select>
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: 12, color: "var(--fg-muted)", display: "block", marginBottom: 6 }}>Plan</label>
+                    <label htmlFor="demo-plan" style={{ fontSize: 12, color: "var(--fg-muted)", display: "block", marginBottom: 6 }}>Plan</label>
                     <select
+                      id="demo-plan"
                       value={demoPlan}
                       onChange={(e) => setDemoPlan(e.target.value as "estandar" | "pro")}
                       style={selectStyle}
                     >
-                      <option value="estandar">⭐ Estándar</option>
-                      <option value="pro">🚀 Pro</option>
+                      <option value="estandar">Estándar</option>
+                      <option value="pro">Pro</option>
                     </select>
                   </div>
                 </div>
 
                 {/* Vista previa */}
                 <div style={{ background: "rgba(37,99,235,0.05)", border: "1px solid rgba(37,99,235,0.15)", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "var(--fg-muted)" }}>
-                  Entrando como: <strong style={{ color: "var(--accent)" }}>
-                    {demoRole === "estudiante" ? "🎓 Estudiante" : "👨‍🏫 Docente"}
+                  Entrando como <strong style={{ color: "var(--accent)" }}>
+                    {demoRole === "estudiante" ? "Estudiante" : "Docente"}
                   </strong> · Plan <strong style={{ color: "var(--accent)" }}>
                     {demoPlan === "estandar" ? "Estándar" : "Pro"}
                   </strong>
@@ -318,7 +372,7 @@ function LoginContent() {
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                     }}
                   >
-                    {loading ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Entrando...</> : "Ingresar →"}
+                    {loading ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Entrando…</> : "Ingresar →"}
                   </button>
                 </div>
               </div>

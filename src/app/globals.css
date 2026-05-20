@@ -293,6 +293,26 @@ a { color: inherit; }
 
 
 
+/* ═══ HERO HALO — adaptive a tema ═══════════════════════════════════════════ */
+
+.hero-halo {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(900px, 90vw);
+  height: 560px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse at center, rgba(250, 250, 252, 0.88) 20%, transparent 72%);
+}
+.dark .hero-halo {
+  /* En dark, el halo blanco es contraproducente: hace ilegible el texto gris claro.
+     Lo sustituimos por un glow índigo muy sutil que enmarca pero no quema. */
+  background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.18) 0%, rgba(139, 92, 246, 0.08) 35%, transparent 70%);
+  filter: blur(40px);
+}
+
 /* ═══ NAVBAR ══════════════════════════════════════════════════════════════════ */
 
 .navbar {
@@ -307,6 +327,17 @@ a { color: inherit; }
     background: rgba(255, 255, 255, 0.82);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
+  }
+}
+.dark .navbar {
+  background: rgba(11, 15, 25, 0.94);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+@supports (-webkit-backdrop-filter: blur(16px)) or (backdrop-filter: blur(16px)) {
+  .dark .navbar {
+    background: rgba(11, 15, 25, 0.72);
+    backdrop-filter: blur(16px) saturate(140%);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
   }
 }
 
@@ -329,17 +360,34 @@ a { color: inherit; }
 
 .btn-secondary {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(244, 245, 245, 0.82); color: var(--fg-primary);
-  border: 1px solid var(--border); border-radius: 999px;
+  background: var(--btn-secondary-bg, rgba(244, 245, 245, 0.82));
+  color: var(--btn-secondary-fg, var(--fg-primary));
+  border: 1px solid var(--btn-secondary-border, var(--border));
+  border-radius: 999px;
   padding: 12px 28px; font-size: 14px; font-weight: 500;
   cursor: pointer; text-decoration: none;
-  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease, color 0.18s ease;
   letter-spacing: -0.01em;
 }
 .btn-secondary:hover {
-  border-color: var(--border-hover);
-  background: #ffffff;
+  border-color: var(--btn-secondary-border-hover, var(--border-hover));
+  background: var(--btn-secondary-bg-hover, #ffffff);
   transform: translateY(-1px);
+}
+.dark {
+  --btn-secondary-bg: rgba(30, 41, 59, 0.6);
+  --btn-secondary-fg: #f1f5f9;
+  --btn-secondary-border: rgba(148, 163, 184, 0.28);
+  --btn-secondary-bg-hover: rgba(51, 65, 85, 0.85);
+  --btn-secondary-border-hover: rgba(148, 163, 184, 0.55);
+}
+.dark .btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+.dark .btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.35);
 }
 
 .btn-accent {
@@ -493,28 +541,7 @@ a { color: inherit; }
   }
 }
 
-/* ── Navbar dark mode ───────────────────────────── */
-.dark .navbar {
-  background: rgba(11, 15, 25, 0.98);
-  border-bottom-color: var(--border);
-}
-@supports (-webkit-backdrop-filter: blur(16px)) or (backdrop-filter: blur(16px)) {
-  .dark .navbar {
-    background: rgba(11, 15, 25, 0.80);
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-  }
-}
-
-/* ── btn-secondary dark mode ────────────────────── */
-.dark .btn-secondary {
-  color: var(--fg-primary);
-  border-color: var(--border);
-}
-.dark .btn-secondary:hover {
-  background: var(--bg-subtle);
-  border-color: var(--border-hover);
-}
+/* navbar dark + btn-secondary dark — defined earlier in this file. */
 
 /* ═══ INPUTS ══════════════════════════════════════════════════════════════════ */
 

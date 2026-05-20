@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 
 interface StatCardProps {
   title: string;
@@ -10,7 +11,7 @@ interface StatCardProps {
   unit?: string;
   trend?: "up" | "down";
   trendValue?: string;
-  icon: string;
+  icon: ReactNode;
   color: "violet" | "teal" | "amber";
   delay?: number;
 }
@@ -79,7 +80,7 @@ function StatCard({
       <div className="relative z-10">
         {/* Icon */}
         <motion.div
-          className="text-4xl mb-4"
+          className="mb-4 flex items-center justify-center"
           whileHover={{ rotate: 8, scale: 1.1 }}
           transition={{ duration: 0.3 }}
         >
@@ -164,7 +165,13 @@ export default function StatsSection({ userStats }: StatsSectionProps) {
           <StatCard
             title="Simuladores Completados"
             value={stats.simulaciones}
-            icon="📊"
+            icon={
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-violet-600">
+                <rect x="3" y="12" width="4" height="9" rx="1" stroke="currentColor" strokeWidth="1.8"/>
+                <rect x="10" y="7" width="4" height="14" rx="1" stroke="currentColor" strokeWidth="1.8"/>
+                <rect x="17" y="3" width="4" height="18" rx="1" stroke="currentColor" strokeWidth="1.8"/>
+              </svg>
+            }
             color="violet"
             trend="up"
             trendValue={stats.mejora}
@@ -174,14 +181,27 @@ export default function StatsSection({ userStats }: StatsSectionProps) {
             title="Nota Promedio"
             value={stats.notaPromedio}
             unit="/100"
-            icon="🎯"
+            icon={
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-teal-600">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
+                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+            }
             color="teal"
             delay={0.1}
           />
           <StatCard
             title="Tiempo Estudiado"
             value={stats.tiempoEstudiado}
-            icon="⏱️"
+            icon={
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-amber-600">
+                <circle cx="12" cy="13" r="8" stroke="currentColor" strokeWidth="1.8"/>
+                <path d="M12 9v4l2.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.5 2.5h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M12 2.5V5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            }
             color="amber"
             delay={0.2}
           />

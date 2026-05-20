@@ -146,7 +146,7 @@ function LaboratorioContent() {
     localStorage.setItem(`lab_project_${projectId}`, JSON.stringify(projectData));
     
     // Show toast
-    setToast("✅ Guardado correctamente");
+    setToast("Guardado correctamente");
     setTimeout(() => setToast(""), 3000);
   };
 
@@ -299,7 +299,9 @@ function LaboratorioContent() {
       <aside className="sidebar" style={{ padding: "24px 16px", gap: 8 }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 24, paddingLeft: 8 }}>
-          <span style={{ fontSize: 20 }}>🧪</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ color: "var(--accent)", flexShrink: 0 }}>
+              <path d="M9 3h6M10 3v6l-4 8a1 1 0 0 0 .9 1.5h10.2A1 1 0 0 0 18 17l-4-8V3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           <span style={{ fontWeight: 800, fontSize: 15, color: "var(--fg-primary)" }}>Laboratorio <span style={{ color: "var(--accent)" }}>Académico</span></span>
         </div>
 
@@ -346,7 +348,7 @@ function LaboratorioContent() {
                   <div style={{ fontSize: 13, fontWeight: isActive ? 600 : 400, color: isCompleted ? "#4ade80" : isActive ? "var(--fg-primary)" : "var(--fg-muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {step.icon} {step.label}
                   </div>
-                  {isLocked && <div style={{ fontSize: 10, color: "var(--fg-secondary)" }}>🔒 Completa el paso anterior</div>}
+                  {isLocked && <div style={{ fontSize: 10, color: "var(--fg-secondary)" }}>Completa el paso anterior</div>}
                 </div>
               </div>
             );
@@ -387,16 +389,16 @@ function LaboratorioContent() {
               onClick={() => setShowPreview(!showPreview)}
               style={{ fontSize: 13 }}
             >
-              {showPreview ? "✏️ Editor" : "👁 Vista Previa"}
+              {showPreview ? "Editar" : "Vista previa"}
             </button>
             {totalCompleted > 0 && (
               <button className="btn-cyan" onClick={handleExportPDF} style={{ fontSize: 13 }}>
-                📄 Exportar PDF
+                Exportar PDF
               </button>
             )}
             {totalCompleted > 0 && plan === "pro" && (
                <button className="btn-purple" onClick={handleExportLatex} style={{ fontSize: 13 }}>
-                 TEX LaTeX
+                 LaTeX
                </button>
             )}
           </div>
@@ -407,8 +409,8 @@ function LaboratorioContent() {
           {/* Editor panel */}
           <div className="content-area">
             {error && (
-              <div style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: 16, marginBottom: 20, color: "#fca5a5", fontSize: 14 }}>
-                ⚠️ {error}
+              <div role="alert" style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: 8, padding: 16, marginBottom: 20, color: "#fca5a5", fontSize: 14 }}>
+                {error}
               </div>
             )}
 
@@ -428,7 +430,7 @@ function LaboratorioContent() {
                     style={{ accentColor: "#8b5cf6", width: 16, height: 16 }}
                   />
                   <label htmlFor="surprise" style={{ fontSize: 14, color: "#a78bfa", cursor: "pointer", fontWeight: 500 }}>
-                    ✨ ¡Sorpréndeme! — La IA elige el tema más creativo e innovador
+                    ¡Sorpréndeme! — La IA elige el tema más creativo e innovador
                   </label>
                 </div>
               )}
@@ -445,7 +447,7 @@ function LaboratorioContent() {
                       <div className="spinner" /> Generando...
                     </>
                   ) : (
-                    `⚡ Generar ${currentSection?.label}`
+                    `Generar ${currentSection?.label}`
                   )}
                 </button>
                 {editingText && (
@@ -455,14 +457,14 @@ function LaboratorioContent() {
                     disabled={isGenerating}
                     style={{ fontSize: 13 }}
                   >
-                    🔄 Regenerar
+                    Regenerar
                   </button>
                 )}
               </div>
 
               {plan !== "pro" && credits < (currentSection?.credits || 1) && (
-                <p style={{ fontSize: 12, color: "#f97316", marginTop: 10 }}>
-                  ⚠️ Créditos insuficientes para esta sección. Actualiza tu plan.
+                <p role="alert" style={{ fontSize: 12, color: "#f97316", marginTop: 10 }}>
+                  Créditos insuficientes para esta sección. Actualiza tu plan.
                 </p>
               )}
             </div>
@@ -487,7 +489,7 @@ function LaboratorioContent() {
                     style={{ resize: "vertical", fontFamily: "Inter, sans-serif", lineHeight: 1.7 }}
                   />
                   <div style={{ textAlign: "right", fontSize: 12, color: "var(--fg-muted)", marginTop: 8 }}>
-                    📝 {wordCount} palabras
+                    {wordCount} palabras
                   </div>
                 </>
               )}
@@ -501,7 +503,7 @@ function LaboratorioContent() {
                   onClick={handleSave}
                   style={{ flex: 1, justifyContent: "center" }}
                 >
-                  💾 Guardar borrador
+                  Guardar borrador
                 </button>
                 {currentStep < SECTION_STEPS.length - 1 ? (
                   <button
@@ -518,7 +520,7 @@ function LaboratorioContent() {
                     onClick={() => { handleSave(); handleExportPDF(); }}
                     style={{ flex: 2, justifyContent: "center", padding: "12px 20px" }}
                   >
-                    🎉 ¡Finalizar y Exportar PDF!
+                    Finalizar y Exportar PDF
                   </button>
                 )}
               </div>
@@ -529,7 +531,7 @@ function LaboratorioContent() {
           {showPreview && (
             <div style={{ borderLeft: "1px solid var(--border)", padding: 32, overflowY: "auto", background: "rgba(255,255,255,0.92)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700 }}>📄 Vista Previa del Documento</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700 }}>Vista previa del documento</h3>
                 <span className="badge badge-green">{totalCompleted}/{SECTION_STEPS.length} secciones</span>
               </div>
 

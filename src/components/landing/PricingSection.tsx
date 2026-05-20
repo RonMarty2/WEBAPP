@@ -46,7 +46,7 @@ const PRODUCTOS: Producto[] = [
         tier: "Básico",
         headline: "Tu monografía, lista para entregar",
         subhead: "La redactamos completa por ti. Lista para imprimir y presentar al tutor.",
-        tiempo: "⚡ En menos de 3 horas",
+        tiempo: "En menos de 3 horas",
         precio: "Bs. 150",
         incluye: [
           "El documento completo, capítulo por capítulo",
@@ -65,7 +65,7 @@ const PRODUCTOS: Producto[] = [
         tier: "Plus",
         headline: "Hasta que el tutor diga \"aprobado\"",
         subhead: "La escribimos por ti, y si el tutor observa, también la corregimos sin que tengas que rehacer nada.",
-        tiempo: "⚡ Revisiones en minutos",
+        tiempo: "Revisiones en minutos",
         precio: "Bs. 300",
         recomendado: true,
         incluye: [
@@ -79,10 +79,10 @@ const PRODUCTOS: Producto[] = [
         ctaSlug: "mono-plus",
       },
       {
-        tier: "💎 Premium",
+        tier: "Premium",
         headline: "Te acompañamos hasta la defensa",
         subhead: "Todo el respaldo, desde la primera redacción hasta el día que te pares frente al tribunal.",
-        tiempo: "⚡ Soporte 24/7 hasta la defensa",
+        tiempo: "Soporte 24/7 hasta la defensa",
         precio: "Bs. 500",
         incluye: [
           "Si tienes material propio, lo integramos al documento",
@@ -106,7 +106,7 @@ const PRODUCTOS: Producto[] = [
         tier: "Básico",
         headline: "Tu plan de negocio, terminado",
         subhead: "Armamos las 23 secciones por ti, con análisis y números listos para presentar.",
-        tiempo: "⚡ Listo en menos de 6 horas",
+        tiempo: "Listo en menos de 6 horas",
         precio: "Bs. 350",
         incluye: [
           "Las 23 secciones que tu carrera exige, armadas",
@@ -126,7 +126,7 @@ const PRODUCTOS: Producto[] = [
         tier: "Plus",
         headline: "El que el tutor aprueba sin rehacer",
         subhead: "Si el tutor observa, nosotros corregimos. Tu proyecto avanza sin retroceder.",
-        tiempo: "⚡ Revisiones en minutos",
+        tiempo: "Revisiones en minutos",
         precio: "Bs. 600",
         recomendado: true,
         incluye: [
@@ -140,10 +140,10 @@ const PRODUCTOS: Producto[] = [
         ctaSlug: "pg-plus",
       },
       {
-        tier: "💎 Premium",
+        tier: "Premium",
         headline: "Tu negocio, listo para el mercado",
         subhead: "Para cuando esta defensa decide si tu proyecto sale al mercado real.",
-        tiempo: "⚡ Soporte 24/7 hasta la defensa",
+        tiempo: "Soporte 24/7 hasta la defensa",
         precio: "Bs. 950",
         incluye: [
           "Briefing completo para diseñar tu marca + logos",

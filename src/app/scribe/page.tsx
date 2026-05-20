@@ -2,23 +2,85 @@ import Link from "next/link";
 
 export default function ScribePage() {
   return (
-    <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
-      <div className="max-w-2xl w-full text-center">
-        <div className="bg-white/10 dark:bg-slate-900/40 backdrop-blur-xl border border-gray-200/20 dark:border-white/10 p-12 rounded-[2rem] shadow-2xl">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-indigo-600/20 text-indigo-500 mb-6">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 20h9"></path>
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
-            SCRIBE
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-slate-300 mb-10">
-            Generador avanzado de proyectos de grado, tesis y monografías con estructuración lógica e integración LaTeX.
-          </p>
-          <Link href="/monografia" className="inline-flex items-center justify-center px-8 py-4 text-sm font-semibold text-white transition-all bg-indigo-600 rounded-full hover:bg-indigo-500 hover:scale-105 shadow-[0_0_20px_rgba(79,70,229,0.4)]">
-            Ir a Monografías
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+        position: "relative",
+        zIndex: 10,
+      }}
+    >
+      <div
+        className="card-premium"
+        style={{
+          maxWidth: 560,
+          width: "100%",
+          textAlign: "center",
+          padding: "48px 36px",
+        }}
+      >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 72,
+            height: 72,
+            borderRadius: 18,
+            background: "rgba(99,102,241,0.08)",
+            color: "var(--accent)",
+            marginBottom: 24,
+          }}
+          aria-hidden="true"
+        >
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+          </svg>
+        </div>
+
+        <h1
+          className="font-crimson"
+          style={{
+            fontSize: 36,
+            fontWeight: 700,
+            color: "var(--fg-primary)",
+            letterSpacing: "-0.01em",
+            marginBottom: 12,
+          }}
+        >
+          SCRIBE
+        </h1>
+
+        <p
+          style={{
+            fontSize: 16,
+            color: "var(--fg-secondary)",
+            lineHeight: 1.6,
+            marginBottom: 32,
+          }}
+        >
+          Generador avanzado de proyectos de grado, tesis y monografías con
+          estructuración lógica e integración LaTeX.
+        </p>
+
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <Link
+            href="/dashboard"
+            className="btn-primary"
+            style={{ padding: "12px 24px", fontSize: 14, borderRadius: 999 }}
+          >
+            Ir al panel
+          </Link>
+          <Link
+            href="/nucleo"
+            className="btn-secondary"
+            style={{ padding: "12px 24px", fontSize: 14, borderRadius: 999 }}
+          >
+            ← Volver al núcleo
           </Link>
         </div>
       </div>
