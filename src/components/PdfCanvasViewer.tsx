@@ -15,7 +15,13 @@
  * Luego restaurar este archivo desde git (`git show HEAD~N:.../PdfCanvasViewer.tsx`).
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import "@/styles/react-pdf/AnnotationLayer.css";
+import "@/styles/react-pdf/TextLayer.css";
+
+// Worker de PDF.js desde unpkg (CDN público). En producción se puede self-host.
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface Props {
   url: string;

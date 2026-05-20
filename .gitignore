@@ -48,6 +48,7 @@ next-env.d.ts
 **/__pycache__/
 **/*.pyc
 
-# .env.example es la plantilla publica (sin secretos) — debe estar en git
+# .env.example y .env.vercel.template son plantillas publicas (sin secretos) — deben estar en git
 !.env.example
+!.env.vercel.template
 .superpowers/
