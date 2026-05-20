@@ -70,6 +70,7 @@ import { isReferencesPhase } from "@/lib/phaseClassification.mjs";
 import { isPhaseAnalitica } from "@/lib/phaseCategories";
 import { getFortalecimientoAnaliticoBlock } from "@/lib/prompts/fortalecimiento-analitico";
 import { buscarFuentesAcademicas, buildFuentesVerificadasBlock } from "@/lib/deepSearch";
+import { buildOrientacionExtensionBlock, buildOrientacionResumenBlock } from "@/lib/orientacionExtension";
 
 // Palabras clave en el label/prompt de una fase dinámica que activan deep search
 const DEEP_SEARCH_KEYWORDS = /marco\s+te[oó]rico|bibliograf|referencias|fuentes|estado\s+del\s+arte|antecedente/i;
@@ -570,7 +571,12 @@ async function generarSinSupabase({
   const perfilEstilo = proyecto.perfil_estilo_usuario;
   const esGuiado = proyecto.modalidad_creacion === "guiada";
 
-  const MAX_CHARS_POR_FASE = 1800;
+  // 📚 Cuánto texto de las fases previas pasamos como contexto al generar
+  // la fase actual. 6000 chars ≈ 1000 palabras ≈ 1.5 págs por capítulo previo.
+  // Antes era 1800 (≈ medio párrafo): los capítulos quedaban desconectados
+  // entre sí porque la IA solo "veía" el primer párrafo del cap anterior.
+  // 6000 fortalece el hilo conductor sin saturar el contexto del modelo.
+  const MAX_CHARS_POR_FASE = 6000;
 
   // ── Modo dinámico: phase_id ───────────────────────────────────────────────
   if (phase_id) {
@@ -785,6 +791,23 @@ APA 7 / UMSS que aparezca en el resto del prompt.
       ? getFortalecimientoAnaliticoBlock(phase_id)
       : null;
 
+    // 📏 OLA 1 — Orientación de extensión variable por universidad.
+    //
+    // Inyectamos una nota CORTA y AMABLE que le dice a la IA cuántas páginas
+    // razonablemente apuntar para ESTE capítulo, según el reglamento de la
+    // universidad del proyecto. Las reglas son orientativas, no obligatorias:
+    //   - NO inflar para llegar al máximo.
+    //   - NO cortar una idea para no pasarse del mínimo.
+    //   - Prioridad: calidad de argumento > extensión cumplida.
+    //
+    // Para capítulos (ph-cap1..ph-cap5) usamos bloque por capítulo.
+    // Para ph-resumen usamos bloque específico (se mide en palabras).
+    // Otras fases (ph-referencias, ph-cap0, etc.) no reciben este bloque.
+    const universidadIdProyecto = (proyecto.universidad_id as string | undefined) ?? null;
+    const bloqueOrientacionExtension = phase_id === "ph-resumen"
+      ? buildOrientacionResumenBlock(universidadIdProyecto)
+      : buildOrientacionExtensionBlock(universidadIdProyecto, phase_id);
+
     const userPromptParts = [
       `--- EXPEDIENTE ACADEMICO ESTABLE DEL PROYECTO ---\n${academicBlock}\n--- FIN EXPEDIENTE ---`,
       `TEMA APROBADO: "${proyecto.tema_aprobado ?? "Sin tema definido"}"`,
@@ -793,6 +816,7 @@ APA 7 / UMSS que aparezca en el resto del prompt.
       bloqueVariante,
       bloqueUniversidadUCB,
       bloqueFortalecimientoAnalitico,
+      bloqueOrientacionExtension,
       antiDuplicacionBlock || null,
       deepSearchBlock || null,
       referencesPhase
@@ -845,19 +869,32 @@ APA 7 / UMSS que aparezca en el resto del prompt.
 
     // 📏 maxTokens es TECHO, no objetivo. La IA debe usar lo mínimo necesario
     // para cubrir el tema con calidad; estos números son margen de seguridad.
-    // Suma proyectada al PDF si se llenara cada techo: 16+14+8+15+3+1+5 = ~62 págs.
-    // El auto-continue (más abajo) reanuda si el modelo pega contra el techo.
+    // Suma proyectada al PDF si se llenara cada techo (Scribe):
+    //   Cap1(16) + Cap2(14) + Cap3(12) + Cap4(18) + Cap5(10) + Resumen(1.5) + Biblio(5) ≈ 76 págs.
+    // Encaja en UMSS-Posgrado (rango 50-70) sin inflar y deja aire para
+    // universidades con techos más altos. El auto-continue reanuda si el
+    // modelo pega contra el techo.
     const TOKENS_POR_FASE: Record<string, number> = {
       "ph-cap0":        6000,   // propuestas + JSON (no va al PDF)
       "ph-cap1":       11000,   // techo ~16 págs (5 secciones obligatorias, denso)
       "ph-cap2":        9500,   // techo ~14 págs (rango pedido 12-16)
-      "ph-cap3":        6000,   // techo ~8 págs (rango pedido 6-10)
-      "ph-cap4":       10000,   // techo ~15 págs (rango pedido 15-25, recortado)
-      "ph-cap5":        4000,   // techo ~5 págs (rango pedido 2-4, margen para conclusiones densas)
-      "ph-resumen":     1000,   // 250-400 palabras (1 pág)
+      "ph-cap3":       10000,   // techo ~12 págs. Subido de 6K → 10K: el diseño metodológico
+                                // es denso (enfoque, tipo, métodos, técnicas, instrumentos,
+                                // fuentes, criterios) y a 6K se cortaba a mitad de tablas.
+      "ph-cap4":       12000,   // techo ~18 págs (rango pedido 15-25). Subido de 10K → 12K:
+                                // es el cap más exigido (datos + tablas + gráficos + propuesta).
+      "ph-cap5":        8000,   // techo ~10 págs. Subido de 4K → 8K: conclusiones por objetivo
+                                // específico + cierre integrador + recomendaciones por destinatario.
+      "ph-resumen":     2000,   // 400-600 palabras (1.5 págs). Subido de 1K → 2K: el resumen
+                                // ejecutivo de UMSS pide objetivo + métodos + resultados + conclusión.
       "ph-referencias": 3500,   // ~5 págs de bibliografía APA
-      "ph-latex":      50000,   // documento .tex completo. Necesita espacio para TRANSCRIBIR
-                                // todos los caps sin resumir. Con 24K la IA comprimía a 6K palabras.
+      "ph-latex":        100,   // 🛡️ Fase NO-OP desde el refactor a chunking (commit 61859aa).
+                                // El .tex final se arma en paquete-latex/route.ts llamando a la IA
+                                // por capítulo. Aquí solo se devuelve un placeholder sin tocar IA
+                                // (ver bloque "ph-latex || ph-proy-latex" más abajo). Antes el techo
+                                // era 50K "por si acaso" — desperdicio puro. Lo dejamos en 100 como
+                                // defensa en profundidad: si algo bypaseara el guard y llamara IA,
+                                // el daño es ridículo.
       "ph-calidad":      100,   // 🛡️ Reconvertida en Banco de Preguntas para defensa.
                                 // El endpoint genérico ya la rechaza (ver guard arriba), pero
                                 // dejamos un techo simbólico de 100 tokens como defensa en
@@ -887,7 +924,8 @@ APA 7 / UMSS que aparezca en el resto del prompt.
       "ph-proy-resumen":   1500,   // Resumen ejecutivo (300-450 palabras, 1 página)
       "ph-proy-conclus":   4000,   // Conclusiones + recomendaciones (5-8 págs)
       "ph-proy-referencias": 4000, // Bibliografía consolidada APA 7
-      "ph-proy-latex":    50000,   // Documento LaTeX completo (igual que monografía)
+      "ph-proy-latex":      100,   // 🛡️ NO-OP (igual que ph-latex). El .tex final se arma en
+                                   // paquete-latex/route.ts por chunking. Techo simbólico.
       "ph-proy-defensa":   2500,   // Banco de preguntas (fire-and-forget por capítulo)
     };
     const maxTokensForPhase = TOKENS_POR_FASE[phase_id] ?? 6000;
