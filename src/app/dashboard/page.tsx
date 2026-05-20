@@ -134,8 +134,11 @@ export default function DashboardPage() {
             <Link href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </Link>
-            <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13 }}>
-              ⚡ Admin
+            <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5L12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+              </svg>
+              Admin
             </Link>
             <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)", background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
               Cerrar sesión
@@ -165,7 +168,14 @@ export default function DashboardPage() {
           </div>
         ) : proyectos.length === 0 ? (
           <div className="card" style={{ textAlign: "center", padding: "48px 24px", marginBottom: 32, borderStyle: "dashed", borderColor: "var(--border-hover)" }}>
-            <div style={{ fontSize: 48, marginBottom: 16, opacity: 0.4 }}>📄</div>
+            <div style={{ marginBottom: 16, opacity: 0.5, display: "flex", justifyContent: "center", color: "var(--fg-muted)" }} aria-hidden="true">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="9" y1="13" x2="15" y2="13"/>
+                <line x1="9" y1="17" x2="13" y2="17"/>
+              </svg>
+            </div>
             <div style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-secondary)", marginBottom: 8 }}>Aún no tienes proyectos</div>
             <div style={{ fontSize: 14, color: "var(--fg-muted)", marginBottom: 24 }}>Crea tu primer documento académico con IA</div>
             <Link href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", display: "inline-flex", padding: "10px 24px" }}>
@@ -191,7 +201,7 @@ export default function DashboardPage() {
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>
                   <div style={{ display: "flex", gap: 4 }}>
                     {p.completado && <span className="badge badge-green" style={{ fontSize: 10 }}>✓ Completo</span>}
-                    {p.defensa_lista && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "rgba(16,185,129,0.12)", color: "#10b981", fontWeight: 700, border: "1px solid rgba(16,185,129,0.3)" }}>🎓 Defensa lista</span>}
+                    {p.defensa_lista && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 999, background: "rgba(16,185,129,0.12)", color: "#10b981", fontWeight: 700, border: "1px solid rgba(16,185,129,0.3)" }}>Defensa lista</span>}
                   </div>
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
@@ -222,15 +232,15 @@ export default function DashboardPage() {
           <Link href="/projects/new?tipo=tipo-monografia" className="card card-hover" style={{ textDecoration: "none", display: "flex", gap: 12, alignItems: "center" }}>
             <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(37,99,235,0.08)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent)", fontWeight: 800 }}>M</div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Monografia academica</div>
-              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Documento academico estructurado por fases.</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Monografía académica</div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Documento académico estructurado por fases.</div>
             </div>
           </Link>
 
           <Link href="/projects/new?tipo=tipo-demostracion-competencias" className="card card-hover" style={{ textDecoration: "none", display: "flex", gap: 12, alignItems: "center", borderColor: "rgba(34,197,94,0.28)", background: "rgba(34,197,94,0.05)" }}>
             <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(34,197,94,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#16a34a", fontWeight: 800 }}>DC</div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Demostracion de competencias</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Demostración de competencias</div>
               <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Materia, reto, competencias y evidencias para defensa.</div>
             </div>
           </Link>
@@ -240,16 +250,16 @@ export default function DashboardPage() {
             <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(124,58,237,0.12)", display: "flex", alignItems: "center", justifyContent: "center", color: "#7c3aed", fontWeight: 800 }}>PG</div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>Proyecto de Grado</div>
-              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Proyecto de factibilidad (produccion o servicios). UCATEC.</div>
+              <div style={{ fontSize: 12, color: "var(--fg-muted)", lineHeight: 1.45 }}>Proyecto de factibilidad (producción o servicios). UCATEC.</div>
             </div>
           </Link>
         </div>
 
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Proximamente</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 14 }}>Próximamente</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12 }}>
-          {[{ icon: "🎓", name: "Tesis" }, { icon: "📝", name: "Ensayo académico" }, { icon: "📊", name: "Trabajo final" }].map(pr => (
-            <div key={pr.name} className="card" style={{ opacity: 0.4, display: "flex", gap: 12, alignItems: "center" }}>
-              <div style={{ fontSize: 28 }}>{pr.icon}</div>
+          {[{ initials: "TE", name: "Tesis" }, { initials: "EA", name: "Ensayo académico" }, { initials: "TF", name: "Trabajo final" }].map(pr => (
+            <div key={pr.name} className="card" style={{ opacity: 0.45, display: "flex", gap: 12, alignItems: "center" }}>
+              <div style={{ width: 42, height: 42, borderRadius: 10, background: "rgba(15,23,42,0.06)", color: "var(--fg-muted)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 13 }}>{pr.initials}</div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)" }}>{pr.name}</div>
                 <div style={{ fontSize: 12, color: "var(--fg-muted)" }}>Próximamente</div>
@@ -262,13 +272,16 @@ export default function DashboardPage() {
       {/* Modo Dios — botón flotante solo para admin */}
       {user.role === "admin" && (
         <div style={{ position: "fixed", bottom: 28, right: 28, zIndex: 200 }}>
-          <Link href="/admin" style={{ textDecoration: "none" }}>
+          <Link href="/admin" style={{ textDecoration: "none" }} aria-label="Abrir panel de administrador">
             <button
               className="btn-purple"
-              title="Panel Admin — Modo Dios"
-              style={{ borderRadius: "50%", width: 52, height: 52, padding: 0, fontSize: 22, boxShadow: "0 0 24px rgba(139,92,246,0.5)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(139,92,246,0.4)" }}
+              title="Panel de administrador"
+              style={{ borderRadius: "50%", width: 52, height: 52, padding: 0, boxShadow: "0 0 24px rgba(139,92,246,0.5)", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid rgba(139,92,246,0.4)" }}
             >
-              ⚡
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" strokeWidth="1.6"/>
+              </svg>
             </button>
           </Link>
         </div>

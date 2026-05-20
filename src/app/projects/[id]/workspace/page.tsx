@@ -25,6 +25,7 @@ import SpecialPhaseView from "@/components/scribe/SpecialPhaseView";
 import AdminViewToggle, { useViewMode } from "@/components/scribe/AdminViewToggle";
 import GeneratingState from "@/components/scribe/GeneratingState";
 import AudioFeedback from "@/components/scribe/AudioFeedback";
+import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -607,10 +608,15 @@ export default function WorkspacePage() {
 
   const [phaseDefs, setPhaseDefs] = useState<PhaseDef[]>([]);
   const [isDynamic, setIsDynamic] = useState(false);
+  // Navegación lateral para Proyecto de Grado (23 fases)
+  const [showPhaseNav, setShowPhaseNav] = useState(false);
 
   const displayFases = isDynamic && phaseDefs.length > 0
     ? phaseDefs
     : FASES_STATIC;
+
+  // Proyecto de Grado: más de 6 fases dinámicas
+  const isPGProject = isDynamic && phaseDefs.length > 6;
 
   const [university, setUniversity] = useState<University | null>(null);
   const [pdfData, setPdfData] = useState<StudentCoverData>({
@@ -2075,57 +2081,102 @@ export default function WorkspacePage() {
           </div>
         </div>
 
-        {/* Phase dots */}
-        <div className="flex gap-1 md:gap-1.5 items-center overflow-x-auto no-scrollbar w-full md:w-auto order-last md:order-none py-1 md:py-0 border-t border-[var(--bg-subtle)] md:border-t-0 mt-1 md:mt-0">
-          {(() => {
-            // Buscamos el índice de la PRIMERA fase técnica para insertar un separador visual ⚙
-            const firstTecnicaIdx = displayFases.findIndex(f => isPhaseTecnica(f.id));
-            return displayFases.map((f, idx) => {
-              const fId = f.id;
-              const done = Boolean(getFinalContent(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
-              const hasBorr = Boolean(getBorrador(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
-              const needsUpd = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? fId : String(idx)]);
-              const sel = idx === selectedFase;
-              const esTecnica = isPhaseTecnica(fId);
-              // Insertar un separador antes de la primera fase técnica
-              const showSep = firstTecnicaIdx >= 0 && idx === firstTecnicaIdx && idx > 0;
-              const tituloTooltip = esTecnica
-                ? `${f.label} — ⚙️ Proceso automático (se genera al finalizar)`
-                : f.label + (needsUpd ? " — ⚠️ Desactualizado" : "");
+        {/* Phase dots — ocultos para PG (la navegación está en el sidebar del Col 1) */}
+        {isPGProject ? (
+          /* Proyecto de Grado: indicador compacto de progreso en el header */
+          <div
+            className="flex items-center gap-2 order-last md:order-none py-1 md:py-0 border-t border-[var(--bg-subtle)] md:border-t-0 mt-1 md:mt-0"
+          >
+            {(() => {
+              const totalFases = displayFases.length;
+              const completadas = displayFases.filter((f) =>
+                Boolean(getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))
+              ).length;
+              const enBorrador = displayFases.filter((f) =>
+                !getFinalContent(proyecto, f.id, (f as typeof FASES_STATIC[0]).num) &&
+                Boolean(getBorrador(proyecto, f.id, (f as typeof FASES_STATIC[0]).num))
+              ).length;
+              const pct = Math.round((completadas / totalFases) * 100);
               return (
-                <span key={f.id} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
-                  {showSep && (
-                    <span
-                      title="Procesos finales automáticos (LaTeX, banco de preguntas, bibliografía)"
+                <button
+                  onClick={() => setShowPhaseNav((v) => !v)}
+                  title={showPhaseNav ? "Cerrar navegación de fases" : "Abrir navegación de fases"}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 8,
+                    background: showPhaseNav ? "rgba(37,99,235,0.12)" : "rgba(148,163,184,0.08)",
+                    border: `1px solid ${showPhaseNav ? "rgba(37,99,235,0.35)" : "rgba(148,163,184,0.2)"}`,
+                    borderRadius: 8, padding: "4px 10px", cursor: "pointer",
+                    color: "var(--fg-primary)", fontSize: 11, fontWeight: 600,
+                    transition: "all 0.15s",
+                  }}
+                >
+                  <span style={{ fontSize: 13 }}>{showPhaseNav ? "✕" : "≡"}</span>
+                  <span>
+                    <span style={{ color: "#4ade80", fontWeight: 700 }}>{completadas}</span>
+                    {enBorrador > 0 && <span style={{ color: "#a78bfa" }}>+{enBorrador}</span>}
+                    <span style={{ color: "var(--fg-muted)" }}> / {totalFases} fases</span>
+                  </span>
+                  {/* Mini barra de progreso */}
+                  <span style={{ width: 48, height: 4, borderRadius: 99, background: "rgba(148,163,184,0.2)", overflow: "hidden", display: "inline-block" }}>
+                    <span style={{ display: "block", height: "100%", width: `${pct}%`, background: "linear-gradient(90deg,#2563eb,#4ade80)", borderRadius: 99, transition: "width 0.4s" }} />
+                  </span>
+                </button>
+              );
+            })()}
+          </div>
+        ) : (
+          /* Monografías / otros: dots originales */
+          <div className="flex gap-1 md:gap-1.5 items-center overflow-x-auto no-scrollbar w-full md:w-auto order-last md:order-none py-1 md:py-0 border-t border-[var(--bg-subtle)] md:border-t-0 mt-1 md:mt-0">
+            {(() => {
+              // Buscamos el índice de la PRIMERA fase técnica para insertar un separador visual ⚙
+              const firstTecnicaIdx = displayFases.findIndex(f => isPhaseTecnica(f.id));
+              return displayFases.map((f, idx) => {
+                const fId = f.id;
+                const done = Boolean(getFinalContent(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
+                const hasBorr = Boolean(getBorrador(proyecto, fId, (f as typeof FASES_STATIC[0]).num));
+                const needsUpd = Boolean(proyecto.requiere_actualizacion?.[isDynamic ? fId : String(idx)]);
+                const sel = idx === selectedFase;
+                const esTecnica = isPhaseTecnica(fId);
+                // Insertar un separador antes de la primera fase técnica
+                const showSep = firstTecnicaIdx >= 0 && idx === firstTecnicaIdx && idx > 0;
+                const tituloTooltip = esTecnica
+                  ? `${f.label} — ⚙️ Proceso automático (se genera al finalizar)`
+                  : f.label + (needsUpd ? " — ⚠️ Desactualizado" : "");
+                return (
+                  <span key={f.id} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                    {showSep && (
+                      <span
+                        title="Procesos finales automáticos (LaTeX, banco de preguntas, bibliografía)"
+                        style={{
+                          fontSize: 11, color: "var(--fg-muted)", padding: "0 4px",
+                          opacity: 0.6, fontWeight: 700, letterSpacing: 1,
+                        }}
+                      >
+                        ·⚙·
+                      </span>
+                    )}
+                    <button
+                      onClick={() => setSelectedFase(idx)}
+                      title={tituloTooltip}
+                      className="shrink-0"
                       style={{
-                        fontSize: 11, color: "var(--fg-muted)", padding: "0 4px",
-                        opacity: 0.6, fontWeight: 700, letterSpacing: 1,
+                        width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
+                        border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
+                        background: sel ? "rgba(37,99,235,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
+                        color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "var(--fg-secondary)",
+                        display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s",
+                        // Las fases técnicas se atenúan (queda claro que son "automáticas")
+                        opacity: esTecnica && !sel ? 0.45 : 1,
                       }}
                     >
-                      ·⚙·
-                    </span>
-                  )}
-                  <button
-                    onClick={() => setSelectedFase(idx)}
-                    title={tituloTooltip}
-                    className="shrink-0"
-                    style={{
-                      width:26, height:26, borderRadius:"50%", fontSize:9, fontWeight:700, cursor:"pointer",
-                      border: sel ? "2px solid var(--accent)" : needsUpd ? "2px solid #f59e0b" : done ? "2px solid #22c55e" : hasBorr ? "2px solid #a78bfa" : "2px solid var(--border)",
-                      background: sel ? "rgba(37,99,235,0.2)" : needsUpd ? "rgba(245,158,11,0.1)" : done ? "rgba(34,197,94,0.08)" : "transparent",
-                      color: sel ? "var(--accent)" : needsUpd ? "#f59e0b" : done ? "#4ade80" : hasBorr ? "#a78bfa" : "var(--fg-secondary)",
-                      display:"flex", alignItems:"center", justifyContent:"center", transition:"all 0.15s",
-                      // Las fases técnicas se atenúan (queda claro que son "automáticas")
-                      opacity: esTecnica && !sel ? 0.45 : 1,
-                    }}
-                  >
-                    {needsUpd ? "!" : done ? "✓" : hasBorr ? "~" : esTecnica ? "⚙" : idx}
-                  </button>
-                </span>
-              );
-            });
-          })()}
-        </div>
+                      {needsUpd ? "!" : done ? "✓" : hasBorr ? "~" : esTecnica ? "⚙" : idx}
+                    </button>
+                  </span>
+                );
+              });
+            })()}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center gap-2">
@@ -2273,11 +2324,73 @@ export default function WorkspacePage() {
           {/* UPPER SCROLLABLE AREA */}
           <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
             
-            {/* Phase label */}
-            <div style={{ padding:"14px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
-              <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>{currentFaseDef.short}</div>
-              <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
-            </div>
+            {/* Phase label — para PG es un toggle que abre la navegación de 23 fases */}
+            {isPGProject ? (
+              <button
+                onClick={() => setShowPhaseNav((v) => !v)}
+                title={showPhaseNav ? "Cerrar navegación de fases" : "Ver todas las fases del proyecto"}
+                style={{
+                  padding: "12px 16px",
+                  borderBottom: "1px solid rgba(148,163,184,0.18)",
+                  flexShrink: 0,
+                  background: showPhaseNav ? "rgba(37,99,235,0.08)" : "transparent",
+                  border: "none",
+                  borderLeft: showPhaseNav ? "3px solid var(--accent)" : "3px solid transparent",
+                  cursor: "pointer",
+                  textAlign: "left",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  transition: "background 0.15s, border-color 0.15s",
+                }}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize:10, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:3 }}>{currentFaseDef.short}</div>
+                  <div style={{ fontSize:13.5, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{currentFaseDef.label}</div>
+                </div>
+                <span style={{ fontSize: 14, color: "var(--fg-muted)", flexShrink: 0, fontWeight: 700 }}>
+                  {showPhaseNav ? "▲" : "☰"}
+                </span>
+              </button>
+            ) : (
+              <div style={{ padding:"14px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
+                <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>{currentFaseDef.short}</div>
+                <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
+              </div>
+            )}
+
+            {/* PG — sidebar de navegación: se superpone sobre el contenido del col cuando está abierto */}
+            {isPGProject && showPhaseNav && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 63, // altura del botón phase label
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  zIndex: 50,
+                  background: panelBg,
+                  backdropFilter: panelBlur,
+                  WebkitBackdropFilter: panelBlur,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                  borderTop: "1px solid rgba(148,163,184,0.18)",
+                }}
+              >
+                <PGPhaseSidebar
+                  phases={phaseDefs}
+                  selectedIndex={selectedFase}
+                  phaseContents={proyecto.phase_contents ?? {}}
+                  onSelect={(idx) => {
+                    setSelectedFase(idx);
+                    setShowPhaseNav(false);
+                  }}
+                />
+              </div>
+            )}
 
             {showAIInspector && (
               <div

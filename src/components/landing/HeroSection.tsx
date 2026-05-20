@@ -19,21 +19,8 @@ export default function HeroSection() {
         justifyContent: "center",
       }}
     >
-      {/* Halo central para legibilidad */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "min(900px, 90vw)",
-          height: "560px",
-          background: "radial-gradient(ellipse at center, rgba(250,250,252,0.88) 20%, transparent 72%)",
-          pointerEvents: "none",
-          zIndex: 0,
-          borderRadius: "50%",
-        }}
-      />
+      {/* Halo central — adaptive a tema (claro: crema; oscuro: índigo sutil) */}
+      <div aria-hidden="true" className="hero-halo" />
 
       <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
 
@@ -71,12 +58,12 @@ export default function HeroSection() {
         >
           Termina tu monografía
           <br />
-          <span className="text-gradient">antes de que llegue el lunes</span>
+          <span style={{ color: "var(--accent)" }}>antes de que llegue el lunes</span>
         </h1>
 
-        {/* Subheadline */}
+        {/* Subheadline — usa fg-secondary para mejor contraste en ambos temas */}
         <p style={{
-          color: "var(--fg-muted)",
+          color: "var(--fg-secondary)",
           fontSize: 19,
           maxWidth: 640,
           margin: "0 auto 18px",
@@ -89,14 +76,18 @@ export default function HeroSection() {
 
         {/* Badge de tiempo (impacto rápido) */}
         <div style={{
-          display: "inline-flex", alignItems: "center", gap: 8,
+          display: "inline-flex", alignItems: "center", gap: 10,
           padding: "10px 22px", borderRadius: 999,
           background: "var(--accent)", color: "white",
           fontWeight: 700, fontSize: 14.5,
           boxShadow: "0 8px 20px rgba(99, 102, 241, 0.30)",
           marginBottom: 18,
         }}>
-          ⚡ Primer borrador completo en menos de 3 horas
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2v10l4 2" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.2"/>
+          </svg>
+          Primer borrador completo en menos de 3 horas
         </div>
 
         {/* Tagline */}

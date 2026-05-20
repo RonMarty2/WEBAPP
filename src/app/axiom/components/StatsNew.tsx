@@ -3,9 +3,10 @@
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 interface StatItemProps {
-  icon: string;
+  icon: ReactNode;
   label: string;
   value: number | string;
   unit?: string;
@@ -50,13 +51,13 @@ function StatItem({ icon, label, value, unit, delay = 0 }: StatItemProps) {
       viewport={{ once: true }}
       className="flex min-h-52 flex-col items-center justify-center rounded-2xl border border-neutral-200/80 bg-white/82 p-6 text-center shadow-[0_18px_44px_rgba(24,24,70,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl sm:p-7"
     >
-      <motion.span
-        className="text-5xl mb-4"
-        whileHover={{ scale: 1.2, rotate: 8 }}
+      <motion.div
+        className="mb-4 flex items-center justify-center"
+        whileHover={{ scale: 1.15 }}
         transition={{ duration: 0.3 }}
       >
         {icon}
-      </motion.span>
+      </motion.div>
 
       <motion.div
         className="mb-2"
@@ -113,20 +114,39 @@ export default function StatsNew({ stats }: StatsNewProps) {
       <div className="axiom-container">
         <div className="grid w-full grid-cols-1 gap-8 md:grid-cols-3">
           <StatItem
-            icon="📊"
+            icon={
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-violet-500">
+                <rect x="3" y="12" width="4" height="9" rx="1" stroke="currentColor" strokeWidth="1.8"/>
+                <rect x="10" y="7" width="4" height="14" rx="1" stroke="currentColor" strokeWidth="1.8"/>
+                <rect x="17" y="3" width="4" height="18" rx="1" stroke="currentColor" strokeWidth="1.8"/>
+              </svg>
+            }
             label="Simuladores Completados"
             value={data.simulaciones || 0}
             delay={0}
           />
           <StatItem
-            icon="🎯"
+            icon={
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-teal-500">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/>
+                <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.8"/>
+                <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+            }
             label="Nota Promedio"
             value={data.promedio || 0}
             unit="/100"
             delay={0.1}
           />
           <StatItem
-            icon="⏱️"
+            icon={
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="text-amber-500">
+                <circle cx="12" cy="13" r="8" stroke="currentColor" strokeWidth="1.8"/>
+                <path d="M12 9v4l2.5 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9.5 2.5h5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <path d="M12 2.5V5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            }
             label="Tiempo Estudiado"
             value={data.tiempoEstudiado || "0h"}
             delay={0.2}
