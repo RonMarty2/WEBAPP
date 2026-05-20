@@ -1,24 +1,16 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { createAdminClient, isSupabaseConfigured } from "@/lib/supabase";
-
-const MOCK_SERVICIOS = [
-  {
-    id: "mono-001",
-    nombre: "Monografía Académica",
-    descripcion: "Generador de monografías completas con IA para diplomados y postgrados",
-    activo: true,
-    audiencia_id: "est-001",
-    perfiles_audiencia: { id: "est-001", nombre: "Estudiante" },
-  },
-];
+import { SERVICIOS_CATALOGO, toLegacyServiciosShape } from "@/lib/servicesCatalog";
 
 export async function GET() {
   try {
     await requireAuth();
 
+    const fallback = toLegacyServiciosShape();
+
     if (!isSupabaseConfigured()) {
-      return NextResponse.json({ servicios: MOCK_SERVICIOS });
+      return NextResponse.json({ servicios: fallback, catalogo: SERVICIOS_CATALOGO });
     }
 
     const db = createAdminClient();
@@ -33,10 +25,13 @@ export async function GET() {
       .order("nombre");
 
     if (error) {
-      return NextResponse.json({ servicios: MOCK_SERVICIOS });
+      return NextResponse.json({ servicios: fallback, catalogo: SERVICIOS_CATALOGO });
     }
 
-    return NextResponse.json({ servicios: data?.length ? data : MOCK_SERVICIOS });
+    return NextResponse.json({
+      servicios: data?.length ? data : fallback,
+      catalogo: SERVICIOS_CATALOGO,
+    });
   } catch (e) {
     if (e instanceof AuthError) {
       return NextResponse.json({ error: e.message }, { status: e.status });
