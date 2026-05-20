@@ -127,8 +127,8 @@ const MODULE_NAV: Record<string, Array<{ href: string; label: string; Icon: Reac
     { href: "/admin/prompts", label: "Prompts Maestros", Icon: IconEdit },
   ],
   AXIOM: [
+    { href: "/admin/axiom-banco", label: "Banco de Exámenes", Icon: IconList },
     { href: "/admin/simulaciones", label: "Simulaciones", Icon: IconCpu },
-    { href: "/admin/banco-preguntas", label: "Banco de Preguntas", Icon: IconList },
   ],
   LUMEN: [
     { href: "/admin/material-docente", label: "Material Docente", Icon: IconFolder },

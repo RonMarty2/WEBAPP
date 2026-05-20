@@ -1,91 +1,141 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import type { ExamenMetadata } from "@/lib/axiom/types";
 
-interface Examen {
-  id: string;
-  fecha: string;
-  area: string;
-  cantidad_preguntas: number;
-  resuelto: boolean;
-}
+const ETIQUETAS_AREA: Record<string, string> = {
+  matematicas: "Matemáticas",
+  economicas: "Económicas",
+  verbal: "Verbal",
+  razonamiento: "Razonamiento",
+  general: "General",
+};
 
-interface ExamenesResponse {
-  examenes: Examen[];
-}
+const ETIQUETAS_FACULTAD: Record<string, string> = {
+  economicas: "Económicas",
+  ingenieria: "Ingeniería",
+  medicina: "Medicina",
+  derecho: "Derecho",
+};
 
-export default function ExamenesPage(): ReactNode {
-  const [examenes, setExamenes] = useState<Examen[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+export default function ExamenesPage() {
+  const [examenes, setExamenes] = useState<ExamenMetadata[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchExamenes = async (): Promise<void> => {
-      try {
-        const response = await fetch("/api/axiom/examenes");
-        const data: ExamenesResponse = await response.json();
-        setExamenes(data.examenes);
-      } catch (error) {
-        console.error("Error fetching exámenes:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExamenes();
+    fetch("/api/axiom/examenes")
+      .then(async (r) => {
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error ?? "Error");
+        setExamenes(data.examenes ?? []);
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return <div style={{ padding: "24px" }}>Cargando exámenes...</div>;
-  }
-
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "48px 24px" }}>
-      <h1 style={{ marginBottom: "32px" }}>Base de Exámenes Resueltos</h1>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        {examenes.map((exam) => (
+    <div className="min-h-screen bg-transparent">
+      <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10"
+        >
           <Link
-            key={exam.id}
-            href={`/axiom/examenes/${exam.id}`}
-            style={{
-              background: "white",
-              border: "1px solid #e5e7eb",
-              borderRadius: "8px",
-              padding: "16px",
-              textDecoration: "none",
-              color: "#1f2937",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              transition: "all 200ms ease-out",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "rgb(139,92,246)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#e5e7eb";
-            }}
+            href="/axiom"
+            className="mb-4 inline-flex items-center gap-1 text-sm text-violet-600 hover:underline"
           >
-            <div>
-              <div style={{ fontWeight: 600 }}>Examen {exam.fecha}</div>
-              <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
-                {exam.cantidad_preguntas} preguntas | {exam.area} | Resuelto
-              </div>
-            </div>
-            <div style={{ color: "rgb(139,92,246)", fontWeight: 600 }}>
-              Ver →
-            </div>
+            ← Volver a Axiom
           </Link>
-        ))}
-      </div>
+          <h1 className="text-4xl font-black text-[#171545] sm:text-5xl">
+            Base de exámenes UMSS
+          </h1>
+          <p className="mt-3 max-w-2xl text-base text-neutral-600 sm:text-lg">
+            Practica con exámenes reales de años pasados. Cada uno tiene las
+            preguntas originales con su respuesta y explicación.
+          </p>
+        </motion.div>
 
-      {examenes.length === 0 && (
-        <div style={{ padding: "24px", textAlign: "center", color: "#6b7280" }}>
-          No hay exámenes disponibles aún.
-        </div>
-      )}
+        {loading && (
+          <div className="rounded-2xl border border-neutral-200 bg-white/70 p-8 text-center text-neutral-500 backdrop-blur">
+            Cargando banco de exámenes…
+          </div>
+        )}
+
+        {error && (
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && examenes.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-neutral-300 bg-white/60 p-10 text-center backdrop-blur">
+            <p className="text-lg font-semibold text-neutral-700">
+              No hay exámenes cargados todavía
+            </p>
+            <p className="mt-2 text-sm text-neutral-500">
+              Sube archivos .md a <code className="rounded bg-neutral-100 px-1.5 py-0.5">data/examenes/</code> para
+              que aparezcan aquí.
+            </p>
+          </div>
+        )}
+
+        {!loading && examenes.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {examenes.map((ex, idx) => (
+              <motion.div
+                key={ex.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+              >
+                <Link href={`/axiom/examenes/${ex.id}`}>
+                  <div className="group h-full cursor-pointer rounded-2xl border border-neutral-200/80 bg-white/82 p-6 shadow-[0_14px_36px_rgba(24,24,70,0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:border-violet-300 hover:shadow-xl">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700">
+                        {ex.universidad}
+                      </span>
+                      <span className="text-2xl font-black text-neutral-300">
+                        {ex.anio}
+                      </span>
+                    </div>
+                    <h3 className="mb-1 text-xl font-bold text-[#171545] group-hover:text-violet-600">
+                      {ETIQUETAS_FACULTAD[ex.facultad] ?? ex.facultad}
+                    </h3>
+                    {ex.fecha_examen && (
+                      <p className="mb-4 text-xs text-neutral-500">
+                        Tomado el {ex.fecha_examen}
+                      </p>
+                    )}
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {ex.areas_resumen.map((a) => (
+                        <span
+                          key={a.area}
+                          className="rounded-md bg-neutral-100 px-2 py-1 text-xs text-neutral-700"
+                        >
+                          {ETIQUETAS_AREA[a.area] ?? a.area} · {a.cantidad}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between border-t border-neutral-100 pt-3 text-sm">
+                      <span className="text-neutral-500">
+                        {ex.total_preguntas} preguntas · {ex.duracion_minutos} min
+                      </span>
+                      <span className="font-semibold text-violet-600 group-hover:translate-x-1 transition-transform">
+                        Ver →
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -101,10 +101,10 @@ const actions = [
     borderColor: "border-blue-200/80",
   },
   {
-    href: "/axiom/simulador",
+    href: "/axiom/practicar",
     icon: "▶️",
-    title: "Simulador UMSS",
-    description: "Practica exámenes completos en tiempo real con feedback automático de IA",
+    title: "Practicar ahora",
+    description: "Configura un simulacro: examen real, mixto, por tema o predictivo. Cronómetro y nota al final.",
     colorClass: "bg-white/82 backdrop-blur-xl",
     borderColor: "border-violet-200/80",
   },
