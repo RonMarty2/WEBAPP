@@ -915,10 +915,24 @@ APA 7 / UMSS que aparezca en el resto del prompt.
         const r = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
         aiResult = { text: r.text, provider: r.provider, model: r.model };
       } else if (phase_id === "ph-latex" || phase_id === "ph-proy-latex") {
-        // 🎯 Fase de compilación LaTeX: usa routing premium dedicado
-        // (Claude Opus 4.7 con 16K tokens en plan PRO/ELITE) para evitar que
-        // la IA resuma el documento por falta de budget.
-        aiResult = await llamarCompiladorLaTeX(systemPrompt, userPrompt, planTier);
+        // 🚀 Fase de Compilación LaTeX — YA NO LLAMA IA AQUÍ.
+        //
+        // Desde el refactor a chunking (commit 61859aa), el .tex final se
+        // arma EN EL MOMENTO de descargar el ZIP, llamando a la IA en paralelo
+        // POR CAPÍTULO (1 call por cap) desde el endpoint paquete-latex.
+        //
+        // Generar un .tex monolítico aquí sería desperdicio: 1 llamada IA
+        // grande que NO se usa para nada (paquete-latex re-genera todo).
+        //
+        // Por eso devolvemos un mensaje informativo SIN llamar IA. El campo
+        // phase_contents['ph-latex'] queda como placeholder para que el UI
+        // muestre la fase como "generada" y pueda mostrar el botón
+        // "Paquete .tex + logo" que sí hace el trabajo real.
+        aiResult = {
+          text: "% Esta fase ya no requiere generación de IA directa.\n%\n% El documento .tex final se arma al momento de descargar el paquete,\n% llamando a la IA por capítulo (chunking). Esto preserva el contenido\n% completo y evita resumir.\n%\n% Click en \"Paquete .tex + logo\" abajo para generar y descargar el ZIP.",
+          provider: "system",
+          model: "no-ai-chunking",
+        };
       } else {
         // Route by user's plan and academic phase
         aiResult = await llamarIAPorPlan(systemPrompt, userPrompt, phaseIndex, planTier);
