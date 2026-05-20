@@ -1,122 +1,108 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button, Heading, Text } from "@/components/ui";
+
+function ArrowRight() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default function HeroSection() {
   const router = useRouter();
 
   return (
-    <section
-      className="px-4 md:px-8 pt-[108px] pb-20"
-      style={{
-        position: "relative",
-        textAlign: "center",
-        overflow: "hidden",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      {/* Halo central para legibilidad del texto sobre los blobs */}
+    <section className="relative px-6 md:px-8 min-h-[calc(100vh-62px)] flex flex-col items-center justify-center text-center overflow-hidden py-24">
+      {/* Halo central sutil para legibilidad sobre los blobs */}
       <div
         aria-hidden="true"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(820px,92vw)] h-[480px] rounded-full pointer-events-none z-0"
         style={{
-          position: "absolute",
-          top: "50%", left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "min(760px, 90vw)",
-          height: "460px",
-          background: "radial-gradient(ellipse at center, rgba(250,250,252,0.88) 20%, transparent 72%)",
-          pointerEvents: "none",
-          zIndex: 0,
-          borderRadius: "50%",
+          background:
+            "radial-gradient(ellipse at center, rgba(250,250,252,0.82) 18%, transparent 72%)",
         }}
       />
 
-      <div style={{ position: "relative", zIndex: 1 }}>
-
-        {/* Badge */}
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 8,
-          background: "var(--bg-card)",
-          border: "1px solid var(--border)",
-          borderRadius: 999, padding: "6px 16px",
-          fontSize: 13, color: "var(--fg-primary)",
-          marginBottom: 36,
-          boxShadow: "0 0 0 4px rgba(99,102,241,0.06), var(--shadow-sm)",
-        }}>
-          <span style={{
-            width: 7, height: 7, borderRadius: "50%",
-            background: "#22c55e", display: "inline-block",
-            flexShrink: 0,
-            boxShadow: "0 0 6px rgba(34,197,94,0.5)",
-          }} />
-          Plataforma académica con inteligencia artificial
+      <div className="relative z-10 flex flex-col items-center max-w-3xl mx-auto">
+        {/* Status pill */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-9 rounded-full bg-white/80 border border-[var(--border)] backdrop-blur-sm shadow-[0_0_0_4px_rgba(99,102,241,0.05),0_1px_3px_rgba(20,20,20,0.05)] dark:bg-white/5">
+          <span className="relative inline-flex w-2 h-2">
+            <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-60" />
+            <span className="relative inline-block w-2 h-2 rounded-full bg-emerald-500" />
+          </span>
+          <span className="text-[12.5px] font-medium text-[var(--fg-secondary)]">
+            Plataforma académica con inteligencia artificial
+          </span>
         </div>
 
-        {/* H1 — serif para el peso académico */}
-        <h1
-          className="font-crimson"
-          style={{
-            fontSize: "var(--text-hero)",
-            fontWeight: 700,
-            lineHeight: 1.05,
-            letterSpacing: "-0.02em",
-            color: "var(--fg-primary)",
-            maxWidth: 860,
-            margin: "0 auto 28px",
-          }}
+        {/* H1 */}
+        <Heading
+          level={1}
+          family="serif"
+          className="!text-[clamp(44px,7vw,82px)] !font-bold !leading-[1.02] !tracking-[-0.025em] mb-7"
         >
-          Documentos académicos
-          <br />
-          <span className="text-gradient">de calidad, sin esfuerzo</span>
-        </h1>
+          Documentos académicos{" "}
+          <span className="text-gradient inline-block">de calidad, sin esfuerzo</span>
+        </Heading>
 
         {/* Subheadline */}
-        <p style={{
-          color: "var(--fg-muted)",
-          fontSize: 18,
-          maxWidth: 500,
-          margin: "0 auto 48px",
-          lineHeight: 1.65,
-          fontWeight: 400,
-        }}>
-          Para estudiantes y docentes. Genera monografías, planificaciones
-          y material académico con IA — coherente, preciso y listo para presentar.
-        </p>
+        <Text
+          size="lg"
+          tone="muted"
+          leading="relaxed"
+          className="max-w-[560px] mb-10 !text-[17px]"
+        >
+          Para estudiantes y docentes. Genera monografías, planificaciones y material académico
+          con IA — coherente, preciso y listo para presentar.
+        </Text>
 
-        {/* CTA buttons */}
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <button
+        {/* CTAs — 2 primarios bien jerarquizados */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Button
             id="cta-estudiantes"
+            variant="primary"
+            size="lg"
+            rightIcon={<ArrowRight />}
             onClick={() => router.push("/login")}
-            className="btn-primary"
           >
-            Para Estudiantes
-          </button>
-
-          <button
-            id="cta-docentes"
-            onClick={() => router.push("/login")}
-            className="btn-secondary"
+            Empezar gratis
+          </Button>
+          <Button
+            id="cta-tutorial"
+            variant="secondary"
+            size="lg"
+            onClick={() => router.push("/tutorial")}
           >
-            Para Docentes
-          </button>
-
-          <a href="/tutorial" id="cta-tutorial" className="btn-secondary">
             Cómo funciona
-          </a>
+          </Button>
         </div>
 
-        {/* Social proof */}
-        <p style={{
-          marginTop: 44, fontSize: 13,
-          color: "var(--fg-muted)", letterSpacing: "0.01em",
-        }}>
-          Bs. 150 · Pago único · Sin suscripción
-        </p>
+        {/* Social proof footer */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[13px] text-[var(--fg-muted)]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-[var(--fg-muted)]" />
+            Bs. 150 pago único
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-[var(--fg-muted)]" />
+            Sin suscripción
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-1 h-1 rounded-full bg-[var(--fg-muted)]" />
+            APA 7 automático
+          </span>
+        </div>
+      </div>
+
+      {/* Scroll hint */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 text-[var(--fg-muted)] opacity-70">
+        <span className="text-[10.5px] uppercase tracking-[0.18em] font-semibold">
+          Descubre
+        </span>
+        <span className="w-[1px] h-8 bg-current opacity-50" />
       </div>
     </section>
   );

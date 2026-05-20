@@ -110,7 +110,11 @@
       "Bash(xxd)",
       "Bash(tr -d '\\\\000')",
       "Read(//c//**)",
-      "Bash(npx --yes tsx tmp-test-parser.mjs)"
+      "Bash(npx --yes tsx tmp-test-parser.mjs)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(taskkill /PID 32836 /F)",
+      "PowerShell(Stop-Process -Id 32836 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Process -Id 32836 -ErrorAction SilentlyContinue)"
     ]
   }
 }

@@ -3,16 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import RevealSection from "@/components/ui/RevealSection";
+import { Button, Card, Badge, Tabs, Heading, Text, Kicker } from "@/components/ui";
 
 type Audiencia = "estudiante" | "docente";
 
 const GARANTIAS = [
-  { icono: "✓", texto: "Sin alucinación — solo datos verificables" },
-  { icono: "✓", texto: "Coherencia total entre capítulos" },
-  { icono: "✓", texto: "Formato institucional exacto" },
-  { icono: "✓", texto: "Bibliografía APA 7 automática" },
-  { icono: "✓", texto: "Chat de modificaciones por etapa" },
-  { icono: "✓", texto: "Generación completa en 30 minutos" },
+  "Sin alucinación — solo datos verificables",
+  "Coherencia total entre capítulos",
+  "Formato institucional exacto",
+  "Bibliografía APA 7 automática",
+  "Chat de modificaciones por etapa",
+  "Generación completa en 30 minutos",
 ];
 
 const ESTUDIANTES_PRODUCTOS = [
@@ -56,33 +57,46 @@ const PLANES = {
   ],
 };
 
-function ProductCard({ nombre, desc, etiqueta, onStart }: { nombre: string; desc: string; etiqueta: string; onStart?: () => void }) {
+function CheckIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+      <path d="M4 10.5L8 14.5L16 6" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ArrowRight() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ProductCard({
+  nombre, desc, etiqueta, onStart,
+}: { nombre: string; desc: string; etiqueta: string; onStart?: () => void }) {
   const available = etiqueta === "Disponible";
   return (
-    <div
-      className="card-premium"
-      style={{ display: "flex", flexDirection: "column", gap: 10, opacity: available ? 1 : 0.65 }}
+    <Card
+      variant="default"
+      padding="md"
+      interactive={available}
+      className={["relative h-full flex flex-col gap-3", !available ? "opacity-70" : ""].join(" ")}
     >
-      <div style={{
-        position: "absolute", top: 14, right: 14,
-        fontSize: 11, fontWeight: 600,
-        background: available ? "var(--green-bg)" : "var(--bg-subtle)",
-        border: `1px solid ${available ? "var(--green-border)" : "var(--border)"}`,
-        color: available ? "var(--green)" : "var(--fg-muted)",
-        borderRadius: 6, padding: "2px 8px",
-      }}>{etiqueta}</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)" }}>{nombre}</div>
-      <div style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.65, flex: 1 }}>{desc}</div>
+      <div className="flex items-start justify-between gap-3">
+        <Heading level={5} className="!text-[15px]">{nombre}</Heading>
+        <Badge variant={available ? "success" : "neutral"} size="sm" dot>
+          {etiqueta}
+        </Badge>
+      </div>
+      <Text size="sm" tone="muted" leading="relaxed" className="flex-1">{desc}</Text>
       {available && onStart && (
-        <button
-          onClick={onStart}
-          className="btn-secondary"
-          style={{ marginTop: 6, fontSize: 13, padding: "8px 16px", borderRadius: 8 }}
-        >
-          Empezar →
-        </button>
+        <Button variant="ghost" size="sm" rightIcon={<ArrowRight />} onClick={onStart} className="mt-1 self-start !px-2">
+          Empezar
+        </Button>
       )}
-    </div>
+    </Card>
   );
 }
 
@@ -109,182 +123,171 @@ export default function FeaturesSection() {
   }
 
   return (
-    <div className="w-full px-4 md:px-8" style={{ maxWidth: "min(1300px, 92vw)", margin: "0 auto" }}>
+    <div className="w-full px-6 md:px-8 max-w-[1200px] mx-auto">
 
-      {/* ── Garantías strip ──────────────────────────────────────────── */}
+      {/* ── Garantías ─────────────────────────────────────────── */}
       <RevealSection>
-        <section style={{ marginBottom: 88 }}>
-          <div style={{
-            background: "var(--bg-card)", border: "1px solid var(--border)",
-            borderRadius: 16, padding: "18px 28px",
-            display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "center",
-            boxShadow: "var(--shadow-sm)",
-          }}>
-            {GARANTIAS.map(g => (
-              <div key={g.texto} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "var(--fg-primary)", padding: "4px 10px" }}>
-                <span style={{ color: "var(--accent)", fontWeight: 700 }}>{g.icono}</span>
-                <span>{g.texto}</span>
-              </div>
-            ))}
-          </div>
+        <section className="w-full mb-24 md:mb-32 mt-4">
+          <Card variant="glass" padding="lg" className="!rounded-3xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+              {GARANTIAS.map(g => (
+                <div key={g} className="flex items-start gap-2.5">
+                  <span className="shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400 mt-0.5">
+                    <CheckIcon />
+                  </span>
+                  <Text size="sm" className="!text-[13.5px]">{g}</Text>
+                </div>
+              ))}
+            </div>
+          </Card>
         </section>
       </RevealSection>
 
-      {/* ── Audiencia selector + Productos ──────────────────────────── */}
+      {/* ── Productos ───────────────────────────────────────── */}
       <RevealSection delay={80}>
-        <section id="productos" style={{ marginBottom: 96 }}>
-          {/* Toggle */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 48 }}>
-            <div style={{
-              display: "inline-flex", background: "var(--bg-subtle)",
-              border: "1px solid var(--border)", borderRadius: 12, padding: 4, gap: 4,
-            }}>
-              {(["estudiante", "docente"] as Audiencia[]).map(a => (
-                <button
-                  key={a}
-                  id={`tab-${a}`}
-                  onClick={() => setAudiencia(a)}
-                  style={{
-                    padding: "10px 28px", borderRadius: 8, border: "none",
-                    cursor: "pointer", fontSize: 14, fontWeight: 600,
-                    transition: "all 0.18s ease",
-                    background: audiencia === a ? "var(--fg-primary)" : "transparent",
-                    color: audiencia === a ? "var(--bg-base)" : "var(--fg-muted)",
-                  }}
-                >
-                  {a === "estudiante" ? "Para Estudiantes" : "Para Docentes"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Section title */}
-          <div style={{ marginBottom: 32 }}>
-            <h2 style={{ fontSize: 28, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 6 }}>
-              {audiencia === "estudiante" ? "Para Estudiantes" : "Para Docentes"}
-            </h2>
-            <p style={{ color: "var(--fg-muted)", fontSize: 15 }}>
+        <section id="productos" className="mb-24 md:mb-32">
+          <div className="flex flex-col items-center text-center mb-10">
+            <Kicker className="mb-3">Catálogo</Kicker>
+            <Heading level={2} className="!text-[clamp(28px,4vw,40px)] mb-3">
+              Construido para tu rol
+            </Heading>
+            <Text tone="muted" className="max-w-[520px]">
               {audiencia === "estudiante"
                 ? "Genera tus trabajos académicos con IA — desde monografías hasta tesis de grado."
                 : "Prepara clases, evalúa con rúbricas y crea material didáctico en minutos."}
-            </p>
+            </Text>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 16 }}>
-            {productos.map((p, i) => (
-              <RevealSection key={p.nombre} delay={i * 80}>
-                <ProductCard
-                  {...p}
-                  onStart={p.etiqueta === "Disponible" ? () => router.push("/login") : undefined}
-                />
-              </RevealSection>
+          <div className="flex justify-center mb-10">
+            <Tabs
+              tabs={[
+                { id: "estudiante", label: "Para Estudiantes" },
+                { id: "docente", label: "Para Docentes" },
+              ]}
+              value={audiencia}
+              onChange={(id) => setAudiencia(id as Audiencia)}
+              variant="segmented"
+              size="md"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {productos.map((p) => (
+              <ProductCard
+                key={`${audiencia}-${p.nombre}`}
+                {...p}
+                onStart={p.etiqueta === "Disponible" ? () => router.push("/login") : undefined}
+              />
             ))}
           </div>
         </section>
       </RevealSection>
 
-      {/* ── Planes ──────────────────────────────────────────────────── */}
+      {/* ── Planes ──────────────────────────────────────────── */}
       <RevealSection delay={100}>
-        <section id="planes" style={{ marginBottom: 88 }}>
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <h2 style={{ fontSize: 32, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 8, letterSpacing: 0 }}>
-              Planes y precios
-            </h2>
-            <p style={{ color: "var(--fg-muted)", fontSize: 16 }}>Sin suscripción obligatoria · Pago único o mensual</p>
+        <section id="planes" className="mb-24 md:mb-32">
+          <div className="flex flex-col items-center text-center mb-12">
+            <Kicker className="mb-3">Planes y precios</Kicker>
+            <Heading level={2} className="!text-[clamp(28px,4vw,40px)] mb-3">
+              Simple. Sin suscripciones forzadas.
+            </Heading>
+            <Text tone="muted">Pago único o mensual. Cancela cuando quieras.</Text>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, maxWidth: 680, margin: "0 auto" }}>
-            {planes.map((plan, i) => (
-              <RevealSection key={plan.id} delay={i * 100}>
-                <div
-                  className="card-premium"
-                  style={{
-                    position: "relative",
-                    border: plan.popular ? "2px solid var(--accent)" : undefined,
-                    paddingTop: plan.popular ? 32 : undefined,
-                  }}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-[760px] mx-auto">
+            {planes.map((plan) => (
+                <Card
+                  key={plan.id}
+                  variant={plan.popular ? "premium" : "default"}
+                  padding="lg"
+                  className={[
+                    "relative h-full flex flex-col",
+                    plan.popular ? "!border-[var(--accent)]/40 !shadow-[0_10px_40px_rgba(99,102,241,0.18)]" : "",
+                  ].join(" ")}
                 >
                   {plan.popular && (
-                    <div style={{
-                      position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
-                      background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
-                      color: "white",
-                      borderRadius: 999, padding: "3px 16px",
-                      fontSize: 11, fontWeight: 700, whiteSpace: "nowrap",
-                    }}>
-                      Más popular
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge variant="accent" size="md" className="!bg-gradient-to-r !from-indigo-500 !to-violet-500 !text-white !border-transparent !shadow-md">
+                        Más popular
+                      </Badge>
                     </div>
                   )}
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--fg-primary)", marginBottom: 6 }}>{plan.nombre}</div>
-                  <div style={{ fontSize: 36, fontWeight: 900, color: "var(--fg-primary)", lineHeight: 1, marginBottom: 4 }}>{plan.precio}</div>
-                  <div style={{ fontSize: 13, color: "var(--fg-muted)", marginBottom: 24 }}>{plan.nota}</div>
-                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 9, marginBottom: 28 }}>
+
+                  <Heading level={5} className="!text-base mb-2">{plan.nombre}</Heading>
+
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-4xl font-extrabold tracking-tight text-[var(--fg-primary)]">
+                      {plan.precio}
+                    </span>
+                  </div>
+                  <Text size="sm" tone="muted" className="mb-6">{plan.nota}</Text>
+
+                  <ul className="flex flex-col gap-2.5 mb-7 flex-1">
                     {plan.items.map(item => (
-                      <li key={item} style={{ display: "flex", gap: 9, fontSize: 14, color: "var(--fg-secondary)", alignItems: "flex-start" }}>
-                        <span style={{ color: "var(--accent)", fontWeight: 700, flexShrink: 0 }}>✓</span>
-                        <span>{item}</span>
+                      <li key={item} className="flex items-start gap-2.5">
+                        <span className="shrink-0 inline-flex items-center justify-center w-4.5 h-4.5 mt-0.5 text-[var(--accent)]">
+                          <CheckIcon />
+                        </span>
+                        <Text size="sm" tone="secondary" className="!text-[13.5px]">{item}</Text>
                       </li>
                     ))}
                   </ul>
-                  <button
+
+                  <Button
                     id={`btn-plan-${plan.id}`}
                     onClick={() => handlePlan(plan.id)}
-                    className={plan.popular ? "btn-primary" : "btn-secondary"}
-                    style={{ width: "100%", justifyContent: "center", borderRadius: 9, marginBottom: 8 }}
+                    variant={plan.popular ? "primary" : "secondary"}
+                    size="md"
+                    fullWidth
                   >
                     {plan.cta}
-                  </button>
-                  <div style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                    padding: "7px 10px", borderRadius: 7,
-                    background: "var(--bg-subtle)", border: "1px dashed var(--border)",
-                    fontSize: 11, color: "var(--fg-muted)",
-                  }}>
+                  </Button>
+
+                  <div className="mt-3 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-subtle)] border border-dashed border-[var(--border)] text-[11.5px] text-[var(--fg-muted)]">
+                    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                      <rect x="3" y="6" width="14" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+                      <path d="M3 9h14" stroke="currentColor" strokeWidth="1.4" />
+                    </svg>
                     Pago por QR / Libélula · Activación en 24h
                   </div>
-                </div>
-              </RevealSection>
+                </Card>
             ))}
           </div>
 
-          <p style={{ marginTop: 28, textAlign: "center", fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.8 }}>
+          <Text size="sm" tone="muted" className="text-center mt-8 leading-relaxed">
             El pago se coordina por QR o transferencia bancaria.<br />
             Recibirás acceso en menos de 24 horas tras confirmar el pago.
-          </p>
+          </Text>
         </section>
       </RevealSection>
 
-      {/* ── CTA final premium ────────────────────────────────────────── */}
+      {/* ── CTA final premium ───────────────────────────────── */}
       <RevealSection delay={80}>
-        <section style={{ textAlign: "center", marginBottom: 80 }}>
-          <div className="cta-premium" style={{ padding: "64px 32px" }}>
-            <div style={{ position: "relative", zIndex: 1 }}>
-              <p style={{
-                fontSize: 12, fontWeight: 600, letterSpacing: "0.12em",
-                textTransform: "uppercase", color: "rgba(163,122,250,0.8)",
-                marginBottom: 16,
-              }}>
+        <section className="mb-24">
+          <div className="cta-premium px-6 md:px-12 py-16 md:py-20 text-center">
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <span className="inline-block text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-300/80 mb-5">
                 Empieza hoy
-              </p>
-              <h3 style={{ fontSize: 32, fontWeight: 800, color: "white", marginBottom: 14, letterSpacing: "-0.01em" }}>
+              </span>
+              <h3 className="font-crimson text-[clamp(28px,4.5vw,44px)] font-bold text-white leading-tight mb-5 tracking-tight">
                 ¿Listo para empezar?
               </h3>
-              <p style={{ color: "rgba(255,255,255,0.55)", fontSize: 16, marginBottom: 36, maxWidth: 460, margin: "0 auto 36px" }}>
-                Regístrate con tu cuenta Google y espera la activación. En menos de 24 horas tendrás acceso completo.
+              <p className="text-white/60 text-base leading-relaxed mb-9 max-w-md mx-auto">
+                Regístrate con tu cuenta Google y espera la activación.
+                En menos de 24 horas tendrás acceso completo.
               </p>
-              <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                <a href="/login" id="cta-final-crear" className="btn-accent" style={{ padding: "14px 36px", fontSize: 15 }}>
-                  Crear cuenta →
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <a
+                  href="/login"
+                  id="cta-final-crear"
+                  className="inline-flex items-center justify-center gap-2 px-7 h-12 rounded-xl font-semibold text-[15px] bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] hover:-translate-y-px hover:shadow-[0_10px_30px_rgba(99,102,241,0.45)] transition-all duration-200"
+                >
+                  Crear cuenta
+                  <ArrowRight />
                 </a>
                 <a
                   href="#planes"
-                  className="btn-secondary"
-                  style={{
-                    padding: "14px 28px", fontSize: 14,
-                    color: "rgba(255,255,255,0.75)",
-                    background: "rgba(255,255,255,0.06)",
-                    borderColor: "rgba(255,255,255,0.18)",
-                  }}
+                  className="inline-flex items-center justify-center gap-2 px-6 h-12 rounded-xl font-medium text-[14px] text-white/85 bg-white/5 border border-white/15 hover:bg-white/10 hover:border-white/30 transition-all duration-200"
                 >
                   Ver planes
                 </a>
