@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -8,11 +8,13 @@ function LoginContent() {
   const router = useRouter();
   const params = useSearchParams();
   const error = params.get("error");
+  const isDemoMode = params.get("demo") === "1";
 
-  const [showDemo, setShowDemo] = useState(false);
+  const [showDemo, setShowDemo] = useState(isDemoMode);
   const [demoRole, setDemoRole] = useState<"estudiante" | "docente">("estudiante");
   const [demoPlan, setDemoPlan] = useState<"estandar" | "pro">("estandar");
   const [loading, setLoading] = useState(false);
+  const [autoStarting, setAutoStarting] = useState(isDemoMode);
 
   // ── Admin login (real, con email + password del .env) ─────────────────
   const [showAdmin, setShowAdmin] = useState(false);
@@ -50,19 +52,62 @@ function LoginContent() {
     : error === "profile_failed" ? "No se pudo obtener tu perfil de Google."
     : null;
 
-  async function handleDemo() {
+  async function handleDemo(roleOverride?: "estudiante" | "docente", planOverride?: "estandar" | "pro") {
     setLoading(true);
     const res = await fetch("/api/auth/demo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ role: demoRole, plan: demoPlan }),
+      body: JSON.stringify({
+        role: roleOverride ?? demoRole,
+        plan: planOverride ?? demoPlan,
+      }),
     });
     if (res.ok) {
       router.push("/dashboard");
       router.refresh();
     } else {
       setLoading(false);
+      setAutoStarting(false);
     }
+  }
+
+  useEffect(() => {
+    if (isDemoMode && autoStarting) {
+      handleDemo("estudiante", "pro");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDemoMode]);
+
+  if (autoStarting) {
+    return (
+      <div
+        className="gradient-bg min-h-screen"
+        style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}
+      >
+        <div style={{ textAlign: "center", maxWidth: 420 }}>
+          <div style={{ fontSize: 56, marginBottom: 16 }}>🧪</div>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: "var(--fg-primary)", marginBottom: 12 }}>
+            Preparando tu prueba gratis...
+          </h1>
+          <p style={{ color: "var(--fg-muted)", fontSize: 15, marginBottom: 24, lineHeight: 1.6 }}>
+            Estamos creando tu cuenta de prueba. En segundos vas a poder generar tu primer capítulo gratis, sin tarjeta y sin compromiso.
+          </p>
+          <div
+            className="spinner"
+            style={{
+              width: 36,
+              height: 36,
+              margin: "0 auto",
+              border: "3px solid rgba(99,102,241,0.2)",
+              borderTopColor: "var(--accent)",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    );
   }
 
   const selectStyle = {
@@ -362,7 +407,7 @@ function LoginContent() {
                     Cancelar
                   </button>
                   <button
-                    onClick={handleDemo}
+                    onClick={() => handleDemo()}
                     disabled={loading}
                     style={{
                       flex: 1, padding: "10px", borderRadius: 8,

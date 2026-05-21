@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Crimson_Pro, Atkinson_Hyperlegible } from "next/font/google";
 import ParticleSphere from "@/components/ParticleSphere";
 import NucleoFooter from "@/components/ui/NucleoFooter";
+import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import "./globals.css";
 
 const crimsonPro = Crimson_Pro({ 
@@ -47,6 +48,7 @@ export default function RootLayout({
           {children}
         </div>
         <NucleoFooter />
+        <WhatsAppFloat />
       </body>
     </html>
   );

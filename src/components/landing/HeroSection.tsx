@@ -102,23 +102,42 @@ export default function HeroSection() {
         </p>
 
         {/* CTAs */}
-        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 36 }}>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 14 }}>
+          <button
+            id="cta-probar-gratis"
+            onClick={() => router.push("/login?demo=1")}
+            className="btn-primary"
+            style={{
+              fontSize: 16,
+              padding: "14px 28px",
+              background: "linear-gradient(135deg, var(--accent), #4f46e5)",
+              boxShadow: "0 12px 28px rgba(99, 102, 241, 0.35)",
+            }}
+          >
+            🚀 Probar gratis (sin tarjeta)
+          </button>
+
           <button
             id="cta-empezar"
             onClick={() => router.push("/login")}
-            className="btn-primary"
+            className="btn-secondary"
           >
-            Empezar mi monografía
+            Ya tengo cuenta
           </button>
 
           <a href="#como-funciona" id="cta-como-funciona" className="btn-secondary">
             Ver cómo funciona
           </a>
-
-          <a href="#planes" id="cta-planes" className="btn-secondary">
-            Ver planes
-          </a>
         </div>
+
+        {/* Micro-prueba debajo del CTA */}
+        <p style={{
+          fontSize: 13,
+          color: "var(--fg-muted)",
+          marginBottom: 36,
+        }}>
+          Genera tu <strong style={{ color: "var(--fg-primary)" }}>primer capítulo gratis</strong> en 5 minutos · Sin compromiso · Sin tarjeta
+        </p>
 
         {/* Trust badges */}
         <div style={{

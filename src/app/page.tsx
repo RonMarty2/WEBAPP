@@ -6,6 +6,7 @@ import SolucionesSection from "@/components/landing/SolucionesSection";
 import ComoFuncionaSection from "@/components/landing/ComoFuncionaSection";
 import UniversidadesSection from "@/components/landing/UniversidadesSection";
 import PricingSection from "@/components/landing/PricingSection";
+import PruebaGratisSection from "@/components/landing/PruebaGratisSection";
 import FAQsSection from "@/components/landing/FAQsSection";
 import CTAFinalSection from "@/components/landing/CTAFinalSection";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -32,6 +33,7 @@ export default function HomePage() {
 
             {/* Nav links */}
             <nav className="hidden md:flex items-center gap-5 justify-center" style={{ flex: 1.4 }}>
+              <a href="#prueba-gratis" style={{ fontSize: 14, color: "#15803d", textDecoration: "none", padding: "6px 12px", borderRadius: 999, fontWeight: 700, background: "rgba(34,197,94,0.10)", border: "1px solid rgba(34,197,94,0.25)" }}>Prueba gratis</a>
               <a href="#como-funciona" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Cómo funciona</a>
               <a href="#universidades" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Universidades</a>
               <a href="#planes" style={{ fontSize: 14, color: "var(--fg-muted)", textDecoration: "none", padding: "6px 10px", borderRadius: 999 }}>Precios</a>
@@ -66,6 +68,9 @@ export default function HomePage() {
 
         {/* ── Hero ──────────────────────────────────────────────── */}
         <HeroSection />
+
+        {/* ── Prueba Gratis (gancho fuerte) ─────────────────────── */}
+        <PruebaGratisSection />
 
         {/* ── ¿Te suena? — DOLORES ──────────────────────────────── */}
         <DoloresSection />
