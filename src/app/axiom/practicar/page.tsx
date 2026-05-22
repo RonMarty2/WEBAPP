@@ -10,6 +10,11 @@ import type {
   ConfiguracionSimulacion,
   Dificultad,
 } from "@/lib/axiom/types";
+import {
+  contarErrores,
+  obtenerTemasReforzar,
+  obtenerAreasDebiles,
+} from "@/lib/axiom/errores-storage";
 
 interface BancoInfo {
   facultades: string[];
@@ -41,6 +46,13 @@ const MODOS: Array<{
     emoji: "🤖",
     disponible: true,
     destacado: true,
+  },
+  {
+    valor: "mis_errores",
+    titulo: "Mis errores",
+    desc: "La IA genera preguntas nuevas sobre los temas donde fallaste antes. Requiere haber completado un examen.",
+    emoji: "🎯",
+    disponible: true,
   },
   {
     valor: "examen_real",
@@ -84,6 +96,14 @@ export default function PracticarPage() {
   const [dificultad, setDificultad] = useState<Dificultad>("medio");
   const [creando, setCreando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [erroresGuardados, setErroresGuardados] = useState<number>(0);
+  const [areasDebiles, setAreasDebiles] = useState<{ area: string; cantidad: number }[]>([]);
+
+  // Leer estado de errores guardados (solo cliente)
+  useEffect(() => {
+    setErroresGuardados(contarErrores());
+    setAreasDebiles(obtenerAreasDebiles());
+  }, []);
 
   // Cargar facultades + exámenes al inicio
   useEffect(() => {
@@ -114,6 +134,7 @@ export default function PracticarPage() {
     if (modo === "examen_real") return !!anio;
     if (modo === "por_tema") return !!tema;
     if (modo === "ia_generado") return true;
+    if (modo === "mis_errores") return erroresGuardados > 0;
     return true;
   })();
 
@@ -122,6 +143,9 @@ export default function PracticarPage() {
     setCreando(true);
     setError(null);
     try {
+      const temasReforzar =
+        modo === "mis_errores" ? obtenerTemasReforzar(8) : undefined;
+
       const config: ConfiguracionSimulacion = {
         modo,
         universidad: UNIVERSIDAD,
@@ -129,7 +153,10 @@ export default function PracticarPage() {
         ...(anio ? { anio } : {}),
         ...(tema ? { tema } : {}),
         ...(modo !== "examen_real" ? { cantidad_preguntas: cantidad } : {}),
-        ...(modo === "ia_generado" ? { dificultad } : {}),
+        ...(modo === "ia_generado" || modo === "mis_errores"
+          ? { dificultad }
+          : {}),
+        ...(temasReforzar?.length ? { temas_reforzar: temasReforzar } : {}),
       };
       const r = await fetch("/api/axiom/simulador", {
         method: "POST",
@@ -378,7 +405,7 @@ export default function PracticarPage() {
                 </div>
               )}
 
-              {(modo === "mixto" || modo === "predictivo" || modo === "por_tema" || modo === "ia_generado") && (
+              {(modo === "mixto" || modo === "predictivo" || modo === "por_tema" || modo === "ia_generado" || modo === "mis_errores") && (
                 <div className="mt-5 rounded-2xl border border-neutral-200 bg-white/80 p-5">
                   <div className="mb-2 text-sm font-semibold text-neutral-700">
                     Cantidad de preguntas
@@ -402,7 +429,56 @@ export default function PracticarPage() {
                 </div>
               )}
 
-              {modo === "ia_generado" && (
+              {modo === "mis_errores" && (
+                <div className="mt-5 rounded-2xl border border-violet-200 bg-violet-50/60 p-5">
+                  {erroresGuardados === 0 ? (
+                    <div>
+                      <div className="mb-1 text-sm font-semibold text-violet-900">
+                        Aún no tienes errores guardados
+                      </div>
+                      <p className="text-sm text-violet-700">
+                        Completa al menos un examen primero. Cuando termines,
+                        los temas donde falles se guardan automáticamente y
+                        la IA podrá reforzar justo eso.
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-violet-900">
+                        ✓ Tienes <strong>{erroresGuardados}</strong> errores guardados
+                      </div>
+                      {areasDebiles.length > 0 && (
+                        <div className="text-sm text-violet-700">
+                          Áreas más débiles:{" "}
+                          {areasDebiles.slice(0, 3).map((a, i) => (
+                            <span key={a.area}>
+                              {i > 0 && ", "}
+                              <strong className="capitalize">
+                                {a.area === "matematicas"
+                                  ? "Matemáticas"
+                                  : a.area === "economicas"
+                                  ? "Economía"
+                                  : a.area === "verbal"
+                                  ? "Verbal"
+                                  : a.area === "razonamiento"
+                                  ? "Razonamiento"
+                                  : a.area}
+                              </strong>{" "}
+                              ({a.cantidad})
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="mt-2 text-xs text-violet-600">
+                        La IA generará preguntas <strong>nuevas</strong> sobre estos
+                        temas, no las mismas que ya fallaste.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(modo === "ia_generado" || modo === "mis_errores") && (
                 <div className="mt-5 rounded-2xl border border-neutral-200 bg-white/80 p-5">
                   <div className="mb-2 text-sm font-semibold text-neutral-700">
                     Dificultad
@@ -495,7 +571,7 @@ export default function PracticarPage() {
                   className="rounded-xl bg-emerald-600 px-8 py-3 font-bold text-white shadow-lg transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {creando
-                    ? modo === "ia_generado"
+                    ? modo === "ia_generado" || modo === "mis_errores"
                       ? "La IA está creando tus preguntas..."
                       : "Preparando…"
                     : "Empezar simulacro 🚀"}

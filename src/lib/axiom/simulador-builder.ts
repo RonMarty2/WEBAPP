@@ -17,9 +17,19 @@ export async function construirSimulador(
   config: ConfiguracionSimulacion,
   usuarioId: string
 ): Promise<ResultadoConstruccion> {
-  // Modo "ia_generado": no necesita banco, genera preguntas frescas con IA.
-  // Lo separamos arriba porque no requiere que existan exámenes pasados cargados.
-  if (config.modo === "ia_generado") {
+  // Modos que generan con IA (no requieren banco cargado):
+  //  - "ia_generado": examen fresco siguiendo distribución oficial
+  //  - "mis_errores": examen enfocado en temas que el usuario falló antes
+  //                   (el cliente pasa los temas en config.temas_reforzar)
+  if (config.modo === "ia_generado" || config.modo === "mis_errores") {
+    if (config.modo === "mis_errores") {
+      if (!config.temas_reforzar || config.temas_reforzar.length === 0) {
+        throw new Error(
+          "Aún no tienes errores guardados. Completa al menos un examen para que la IA pueda reforzar los temas que te cuestan."
+        );
+      }
+    }
+
     const cantidad = config.cantidad_preguntas ?? 20;
     const preguntasIA = await generarPreguntasIA({
       universidad: config.universidad,
@@ -117,15 +127,7 @@ export async function construirSimulador(
       break;
     }
 
-    case "mis_errores": {
-      // Por ahora vacío — requiere historial del usuario
-      // TODO: leer respuestas previas y devolver solo las falladas
-      throw new Error(
-        "Modo 'mis_errores' requiere historial. Termina al menos un simulador primero."
-      );
-    }
-
-    // "ia_generado" se resuelve con early-return arriba (no llega al switch)
+    // "ia_generado" y "mis_errores" se resuelven con early-return arriba (no llegan al switch)
 
     default: {
       const _exhaustive: never = config.modo;

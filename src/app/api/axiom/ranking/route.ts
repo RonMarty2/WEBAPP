@@ -1,69 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// In-memory ranking store - in production, this would come from Supabase
-const rankingStore: Array<{
+// Ranking real: empieza vacío. Cuando haya usuarios reales registrando notas
+// via POST, se irán acumulando. Mantenemos in-memory hasta migrar a Supabase.
+// (Nada de datos falsos: mostrar nombres inventados rompe la credibilidad.)
+
+interface RankingEntry {
   id: string;
   usuario_id: string;
   nombre: string;
   email: string;
   nota: number;
   fecha: string;
-}> = [];
-
-// Initialize with some demo data
-function initializeDemoRanking() {
-  if (rankingStore.length === 0) {
-    rankingStore.push(
-      {
-        id: "rank-1",
-        usuario_id: "user-1",
-        nombre: "María González",
-        email: "maria@example.com",
-        nota: 92,
-        fecha: new Date().toISOString(),
-      },
-      {
-        id: "rank-2",
-        usuario_id: "user-2",
-        nombre: "Carlos López",
-        email: "carlos@example.com",
-        nota: 88,
-        fecha: new Date().toISOString(),
-      },
-      {
-        id: "rank-3",
-        usuario_id: "user-3",
-        nombre: "Ana Martínez",
-        email: "ana@example.com",
-        nota: 85,
-        fecha: new Date().toISOString(),
-      },
-      {
-        id: "rank-4",
-        usuario_id: "user-4",
-        nombre: "Roberto Díaz",
-        email: "roberto@example.com",
-        nota: 81,
-        fecha: new Date().toISOString(),
-      },
-      {
-        id: "rank-5",
-        usuario_id: "user-5",
-        nombre: "Laura Fernández",
-        email: "laura@example.com",
-        nota: 79,
-        fecha: new Date().toISOString(),
-      }
-    );
-  }
 }
 
-export async function GET(request: NextRequest) {
-  try {
-    initializeDemoRanking();
+const rankingStore: RankingEntry[] = [];
 
-    // Sort by nota descending and get top 5
-    const topRanking = rankingStore
+export async function GET(_request: NextRequest) {
+  try {
+    const top = rankingStore
+      .slice()
       .sort((a, b) => b.nota - a.nota)
       .slice(0, 5)
       .map((item) => ({
@@ -72,8 +27,7 @@ export async function GET(request: NextRequest) {
         email: item.email,
         nota: item.nota,
       }));
-
-    return NextResponse.json({ ranking: topRanking });
+    return NextResponse.json({ ranking: top });
   } catch (error) {
     console.error("Error fetching ranking:", error);
     return NextResponse.json({ ranking: [], error: "Failed to fetch ranking" });
@@ -92,21 +46,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    initializeDemoRanking();
-
-    // Check if user already has a better score
     const existingIndex = rankingStore.findIndex(
       (r) => r.usuario_id === usuario_id
     );
-
     if (existingIndex >= 0) {
-      // Update if new score is better
       if (nota > rankingStore[existingIndex].nota) {
         rankingStore[existingIndex].nota = nota;
         rankingStore[existingIndex].fecha = new Date().toISOString();
       }
     } else {
-      // Add new entry
       rankingStore.push({
         id: `rank-${Date.now()}-${Math.random()}`,
         usuario_id,

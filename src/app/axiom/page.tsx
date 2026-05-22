@@ -3,18 +3,10 @@
 import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import HeroSectionNew from "./components/HeroSectionNew";
-import RankingSectionNew from "./components/RankingSectionNew";
 import QuickActionsNew from "./components/QuickActionsNew";
 import StatsNew from "./components/StatsNew";
+import PricingSectionAxiom from "./components/PricingSectionAxiom";
 import CTANew from "./components/CTANew";
-
-interface RankingItem {
-  id: string;
-  nombre: string;
-  email: string;
-  nota: number;
-  racha?: number;
-}
 
 interface AuthUser {
   id: string;
@@ -23,32 +15,21 @@ interface AuthUser {
 }
 
 export default function AxiomLandingPage() {
-  const [ranking, setRanking] = useState<RankingItem[]>([]);
   const [user, setUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadUser = async () => {
       try {
-        const [userRes, rankingRes] = await Promise.all([
-          fetch("/api/auth/me"),
-          fetch("/api/axiom/ranking"),
-        ]);
-
-        if (userRes.ok) {
-          const userData = await userRes.json();
-          setUser(userData.user);
+        const r = await fetch("/api/auth/me");
+        if (r.ok) {
+          const data = await r.json();
+          setUser(data.user);
         }
-
-        if (rankingRes.ok) {
-          const rankingData = await rankingRes.json();
-          setRanking(rankingData.ranking || []);
-        }
-      } catch (error) {
-        console.error("Error loading data:", error);
+      } catch (e) {
+        console.error("Error loading user:", e);
       }
     };
-
-    loadData();
+    loadUser();
   }, []);
 
   return (
@@ -57,19 +38,19 @@ export default function AxiomLandingPage() {
         <Header user={user} />
 
         <main className="relative mx-auto flex w-full max-w-none flex-col items-stretch">
-          {/* Hero Section - Premium */}
+          {/* Hero Section */}
           <HeroSectionNew />
 
-          {/* Ranking Section - Visual cards with real data */}
-          <RankingSectionNew ranking={ranking} currentUserId={user?.id} />
-
-          {/* Quick Actions - 2x2 grid with better styling */}
+          {/* Quick Actions - acceso directo a Practicar / Progreso / Examen IA */}
           <QuickActionsNew />
 
-          {/* Stats Section - Large numbers */}
+          {/* Stats - números reales del producto */}
           <StatsNew />
 
-          {/* Final CTA */}
+          {/* Precios - planes Gratis vs Premium */}
+          <PricingSectionAxiom />
+
+          {/* CTA Final */}
           <CTANew />
         </main>
       </div>
