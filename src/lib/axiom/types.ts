@@ -58,7 +58,8 @@ export type ModoSimulacion =
   | "mixto"              // mezcla aleatoria de varios años
   | "predictivo"         // distribución estadística del banco (sin IA)
   | "por_tema"           // solo preguntas de un tema específico
-  | "mis_errores";       // solo las que el usuario falló antes
+  | "mis_errores"        // solo las que el usuario falló antes
+  | "ia_generado";       // preguntas frescas generadas por IA según temario oficial
 
 export interface ConfiguracionSimulacion {
   modo: ModoSimulacion;
@@ -66,7 +67,10 @@ export interface ConfiguracionSimulacion {
   facultad: string;
   anio?: number;                    // requerido para modo "examen_real"
   tema?: string;                    // requerido para modo "por_tema"
-  cantidad_preguntas?: number;      // override opcional para mixto/predictivo
+  cantidad_preguntas?: number;      // override opcional para mixto/predictivo/ia_generado
+  dificultad?: Dificultad;          // override opcional para ia_generado
+  temas_reforzar?: string[];        // para ia_generado: temas a priorizar (debilidades del usuario)
+  temas_evitar?: string[];          // para ia_generado: temas que ya domina
 }
 
 // ─────────────────────────────────────────────────────────────

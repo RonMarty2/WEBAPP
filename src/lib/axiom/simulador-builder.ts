@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { cargarBanco } from "./banco-loader";
+import { generarPreguntasIA } from "./generador-ia";
 import type {
   ConfiguracionSimulacion,
   ExamenBanco,
@@ -16,6 +17,34 @@ export async function construirSimulador(
   config: ConfiguracionSimulacion,
   usuarioId: string
 ): Promise<ResultadoConstruccion> {
+  // Modo "ia_generado": no necesita banco, genera preguntas frescas con IA.
+  // Lo separamos arriba porque no requiere que existan exámenes pasados cargados.
+  if (config.modo === "ia_generado") {
+    const cantidad = config.cantidad_preguntas ?? 20;
+    const preguntasIA = await generarPreguntasIA({
+      universidad: config.universidad,
+      facultad: config.facultad,
+      cantidad,
+      dificultad: config.dificultad,
+      temas_reforzar: config.temas_reforzar,
+      temas_evitar: config.temas_evitar,
+    });
+
+    const duracionIA = Math.max(15, preguntasIA.length * 2);
+    const simuladorIA: Simulador = {
+      id: `sim-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
+      usuario_id: usuarioId,
+      config,
+      preguntas: preguntasIA,
+      respuestas_usuario: {},
+      marcadas: [],
+      estado: "activo",
+      fecha_inicio: new Date().toISOString(),
+      duracion_minutos: duracionIA,
+    };
+    return { simulador: simuladorIA };
+  }
+
   const banco = await cargarBanco();
   const uniL = config.universidad.toLowerCase();
   const facL = config.facultad.toLowerCase();
@@ -95,6 +124,8 @@ export async function construirSimulador(
         "Modo 'mis_errores' requiere historial. Termina al menos un simulador primero."
       );
     }
+
+    // "ia_generado" se resuelve con early-return arriba (no llega al switch)
 
     default: {
       const _exhaustive: never = config.modo;
