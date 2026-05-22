@@ -51,6 +51,9 @@
     "src/app/api/axiom/examenes/route.ts": {
       "maxDuration": 60
     },
+    "src/app/api/axiom/simulador/route.ts": {
+      "maxDuration": 60
+    },
     "src/app/api/admin/projects/[id]/defensa-materiales/route.ts": {
       "maxDuration": 60
     },

@@ -8,6 +8,7 @@ import type {
   ExamenMetadata,
   ModoSimulacion,
   ConfiguracionSimulacion,
+  Dificultad,
 } from "@/lib/axiom/types";
 
 interface BancoInfo {
@@ -31,7 +32,16 @@ const MODOS: Array<{
   desc: string;
   emoji: string;
   disponible: boolean;
+  destacado?: boolean;
 }> = [
+  {
+    valor: "ia_generado",
+    titulo: "IA infinita ⚡",
+    desc: "La IA genera preguntas frescas siguiendo el temario oficial. Cada examen es único.",
+    emoji: "🤖",
+    disponible: true,
+    destacado: true,
+  },
   {
     valor: "examen_real",
     titulo: "Examen real",
@@ -71,6 +81,7 @@ export default function PracticarPage() {
   const [anio, setAnio] = useState<number | null>(null);
   const [tema, setTema] = useState<string | null>(null);
   const [cantidad, setCantidad] = useState<number>(20);
+  const [dificultad, setDificultad] = useState<Dificultad>("medio");
   const [creando, setCreando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -102,6 +113,7 @@ export default function PracticarPage() {
     if (!modo) return false;
     if (modo === "examen_real") return !!anio;
     if (modo === "por_tema") return !!tema;
+    if (modo === "ia_generado") return true;
     return true;
   })();
 
@@ -117,6 +129,7 @@ export default function PracticarPage() {
         ...(anio ? { anio } : {}),
         ...(tema ? { tema } : {}),
         ...(modo !== "examen_real" ? { cantidad_preguntas: cantidad } : {}),
+        ...(modo === "ia_generado" ? { dificultad } : {}),
       };
       const r = await fetch("/api/axiom/simulador", {
         method: "POST",
@@ -284,12 +297,21 @@ export default function PracticarPage() {
                         setTema(null);
                       }}
                       disabled={!m.disponible}
-                      className={`flex flex-col items-start rounded-2xl border p-5 text-left transition-all ${
+                      className={`relative flex flex-col items-start rounded-2xl border p-5 text-left transition-all ${
                         elegido
-                          ? "border-violet-500 bg-violet-50 shadow-md"
+                          ? m.destacado
+                            ? "border-violet-500 bg-gradient-to-br from-violet-50 to-indigo-50 shadow-md"
+                            : "border-violet-500 bg-violet-50 shadow-md"
+                          : m.destacado
+                          ? "border-violet-300 bg-gradient-to-br from-violet-50/50 to-indigo-50/30 hover:border-violet-400 hover:shadow-md"
                           : "border-neutral-200 bg-white/80 hover:border-violet-300"
                       } ${!m.disponible ? "opacity-50" : ""}`}
                     >
+                      {m.destacado && (
+                        <span className="absolute -top-2 right-3 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white shadow">
+                          Recomendado
+                        </span>
+                      )}
                       <span className="text-3xl">{m.emoji}</span>
                       <div className="mt-2 font-bold text-neutral-900">
                         {m.titulo}
@@ -356,7 +378,7 @@ export default function PracticarPage() {
                 </div>
               )}
 
-              {(modo === "mixto" || modo === "predictivo" || modo === "por_tema") && (
+              {(modo === "mixto" || modo === "predictivo" || modo === "por_tema" || modo === "ia_generado") && (
                 <div className="mt-5 rounded-2xl border border-neutral-200 bg-white/80 p-5">
                   <div className="mb-2 text-sm font-semibold text-neutral-700">
                     Cantidad de preguntas
@@ -377,6 +399,33 @@ export default function PracticarPage() {
                       </button>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {modo === "ia_generado" && (
+                <div className="mt-5 rounded-2xl border border-neutral-200 bg-white/80 p-5">
+                  <div className="mb-2 text-sm font-semibold text-neutral-700">
+                    Dificultad
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {(["facil", "medio", "dificil"] as Dificultad[]).map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setDificultad(d)}
+                        className={`rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-all ${
+                          dificultad === d
+                            ? "border-violet-500 bg-violet-50 text-violet-700"
+                            : "border-neutral-200 bg-white text-neutral-700 hover:border-violet-300"
+                        }`}
+                      >
+                        {d === "facil" ? "Fácil" : d === "medio" ? "Medio" : "Difícil"}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5">
+                    ⏳ Generar con IA toma 20-40 segundos. Vas a esperar mientras se crean preguntas únicas para ti.
+                  </p>
                 </div>
               )}
 
@@ -423,6 +472,7 @@ export default function PracticarPage() {
                           ?.total_preguntas
                       : cantidad
                   }
+                  dificultad={modo === "ia_generado" ? dificultad : null}
                 />
                 <div className="mt-6 rounded-xl bg-amber-50 p-4 text-sm text-amber-800 border border-amber-200">
                   ⏱ Una vez que empieces, el cronómetro corre. Podrás marcar preguntas
@@ -444,7 +494,11 @@ export default function PracticarPage() {
                   disabled={creando}
                   className="rounded-xl bg-emerald-600 px-8 py-3 font-bold text-white shadow-lg transition-all hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {creando ? "Preparando…" : "Empezar simulacro 🚀"}
+                  {creando
+                    ? modo === "ia_generado"
+                      ? "La IA está creando tus preguntas..."
+                      : "Preparando…"
+                    : "Empezar simulacro 🚀"}
                 </button>
               </div>
             </motion.div>
@@ -461,12 +515,14 @@ function Resumen({
   anio,
   tema,
   cantidad,
+  dificultad,
 }: {
   facultad: string;
   modo: string;
   anio: number | null;
   tema: string | null;
   cantidad?: number;
+  dificultad?: Dificultad | null;
 }) {
   const items = [
     { label: "Facultad", valor: facultad },
@@ -474,6 +530,19 @@ function Resumen({
     ...(anio ? [{ label: "Año", valor: String(anio) }] : []),
     ...(tema ? [{ label: "Tema", valor: tema }] : []),
     ...(cantidad ? [{ label: "Preguntas", valor: String(cantidad) }] : []),
+    ...(dificultad
+      ? [
+          {
+            label: "Dificultad",
+            valor:
+              dificultad === "facil"
+                ? "Fácil"
+                : dificultad === "medio"
+                ? "Medio"
+                : "Difícil",
+          },
+        ]
+      : []),
   ];
   return (
     <dl className="grid grid-cols-2 gap-x-6 gap-y-3">
