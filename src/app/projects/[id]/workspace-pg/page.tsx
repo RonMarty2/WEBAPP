@@ -24,7 +24,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
-import Cap0TituloSelector from "@/components/scribe-pg/Cap0TituloSelector";
+import Cap0TituloSelector, { removerSeccionPropuestas } from "@/components/scribe-pg/Cap0TituloSelector";
 import Cap3eModoSelector from "@/components/scribe-pg/Cap3eModoSelector";
 import Cap4gConfigSelector from "@/components/scribe-pg/Cap4gConfigSelector";
 import FaseAcciones from "@/components/scribe-pg/FaseAcciones";
@@ -338,7 +338,12 @@ export default function WorkspacePGPage() {
                       whiteSpace: "pre-wrap",
                     }}
                   >
-                    {contenidoActual}
+                    {/* En Cap. 0 ocultamos la sección de "Tres propuestas"
+                        del markdown porque se renderiza interactiva debajo
+                        como cards seleccionables. Evita duplicación visual. */}
+                    {fasaActual.id?.includes("cap0")
+                      ? removerSeccionPropuestas(contenidoActual)
+                      : contenidoActual}
                   </article>
 
                   {/* Selector de título — solo aparece en Cap. 0 cuando el

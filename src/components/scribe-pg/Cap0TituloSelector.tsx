@@ -10,7 +10,35 @@
  * Si el contenido no incluye la sección "## Tres propuestas de título académico",
  * el componente no renderiza nada y deja que el contenedor padre muestre el
  * markdown normal.
+ *
+ * Exporta también `removerSeccionPropuestas()` para que el contenedor padre
+ * pueda renderizar el resto del markdown SIN la sección de propuestas (evita
+ * duplicación visual: las propuestas se muestran solo como cards interactivas).
  */
+
+/**
+ * Devuelve el markdown del Cap. 0 sin la sección "## Tres propuestas...".
+ * Útil para renderizar el contenido principal sin duplicar las opciones
+ * que ya se muestran como cards interactivas en este selector.
+ *
+ * También elimina el párrafo que típicamente sigue ("El título RECOMENDADO
+ * es:...") porque esa explicación queda integrada en el badge de la card.
+ */
+export function removerSeccionPropuestas(markdown: string): string {
+  // Eliminar la sección completa "## Tres propuestas..." hasta el siguiente ## o #
+  let limpio = markdown.replace(
+    /##\s*Tres propuestas de t[íi]tulo[\s\S]*?(?=\n##\s|\n#\s|$)/i,
+    ""
+  );
+  // Eliminar también líneas sueltas tipo "El título RECOMENDADO es: ..."
+  // que algunos modelos generan FUERA de la sección, como párrafo aparte.
+  limpio = limpio.replace(
+    /^.*el\s+t[íi]tulo\s+\*?\*?RECOMENDADO\*?\*?\s+es:?[\s\S]*?(?=\n##\s|\n#\s|$)/gim,
+    ""
+  );
+  // Colapsar saltos de línea múltiples que quedaron por la remoción
+  return limpio.replace(/\n{3,}/g, "\n\n").trim();
+}
 
 import { useMemo, useState } from "react";
 
@@ -126,6 +154,30 @@ function parsearPropuestas(markdown: string): Propuesta[] {
     }
   }
   pushCurrent();
+
+  // Si ninguna propuesta quedó marcada como recomendada, buscar en el
+  // markdown completo una mención tipo "El título RECOMENDADO es: ..."
+  // y matchear contra los títulos extraídos para marcar la coincidente.
+  const algunaReco = propuestas.some((p) => p.recomendado);
+  if (!algunaReco && propuestas.length > 0) {
+    const recoMatch = markdown.match(/el\s+t[íi]tulo\s+\*?\*?RECOMENDADO\*?\*?\s+es:?\s*["«"](.+?)["»"]/i)
+      || markdown.match(/RECOMENDADO[^"«]*?["«"]([^"»"]+)["»"]/i);
+    if (recoMatch && recoMatch[1]) {
+      const recoTituloLimpio = recoMatch[1].replace(/[.,;]\s*$/, "").trim().toLowerCase();
+      propuestas.forEach((p) => {
+        const pLimpio = p.titulo.toLowerCase();
+        // Considerar match si una contiene a la otra en un 60%+
+        if (pLimpio.includes(recoTituloLimpio.slice(0, 40)) || recoTituloLimpio.includes(pLimpio.slice(0, 40))) {
+          p.recomendado = true;
+        }
+      });
+    }
+    // Si SIGUE sin haber recomendada, marcamos la primera como recomendada
+    // por convención (la IA suele listar primero la mejor).
+    if (!propuestas.some((p) => p.recomendado) && propuestas[0]) {
+      propuestas[0].recomendado = true;
+    }
+  }
 
   return propuestas;
 }
