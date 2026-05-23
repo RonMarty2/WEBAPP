@@ -14,14 +14,27 @@
  * está viendo contenido de validación, no contenido real.
  */
 
-export const MOCK_BANNER = `> ⚠️ **MODO DEMOSTRACIÓN — Contenido de validación técnica**
+import {
+  HUB_CAP0,
+  HUB_CAP1,
+  HUB_CAP2,
+  HUB_CAP3_FULL,
+  HUB_CAP4_FULL,
+  HUB_RESUMEN,
+  HUB_CONCLUSIONES,
+  HUB_REFERENCIAS,
+  HUB_DEFENSA,
+  HUB_LATEX_NOTE,
+} from "./aiMockHubAgricola";
+
+export const MOCK_BANNER = `> ⚠️ **MODO DEMOSTRACIÓN — Contenido del proyecto piloto "Hub Agrícola"**
 >
-> Este texto fue generado por el sistema en *modo mock* porque aún no hay
-> ninguna API key configurada (Groq, Anthropic u OpenAI). El flujo técnico
-> ha funcionado correctamente: la solicitud salió del frontend, llegó al
-> backend, fue procesada por el motor y este contenido se persistió en la
-> base de datos. **Cuando se configuren las API keys reales, este texto
-> será reemplazado por contenido académico generado por el modelo.**
+> Este es contenido de demostración generado para un proyecto piloto
+> (VallEnlace S.R.L. — plataforma digital agrícola Cochabamba). Sirve
+> para que veas cómo se ve el output académico completo del sistema sin
+> necesidad de tener una API key configurada. **Cuando se configure una
+> API key real, el sistema generará contenido específico para el proyecto
+> de cada estudiante, no este texto fijo.**
 
 `;
 
@@ -41,7 +54,59 @@ interface MockSpec {
 const MOCK_RESPONSES: MockSpec[] = [
   {
     matcher: /CAP0|cap0|idea.*negocio.*fase\s*0/i,
-    faseLabel: "Cap. 0 — Idea de Negocio",
+    faseLabel: "Cap. 0 — Idea de Negocio (Hub Agrícola)",
+    body: HUB_CAP0,
+  },
+  {
+    matcher: /CAP1|cap1|marco.*referencial|cap[íi]tulo\s*i\b/i,
+    faseLabel: "Cap. I — Marco Referencial (Hub Agrícola)",
+    body: HUB_CAP1,
+  },
+  {
+    matcher: /CAP2|cap2|marco.*te[óo]rico|cap[íi]tulo\s*ii\b/i,
+    faseLabel: "Cap. II — Marco Teórico (Hub Agrícola)",
+    body: HUB_CAP2,
+  },
+  {
+    matcher: /CAP3[A-F]|cap3[a-f]|pestel|porter|matrices|encuesta|demanda|cap[íi]tulo\s*iii\b|marco.*situacional/i,
+    faseLabel: "Cap. III — Marco Situacional (Hub Agrícola)",
+    body: HUB_CAP3_FULL,
+  },
+  {
+    matcher: /CAP4[A-G]|cap4[a-g]|organizacional|rrhh|legal|t[ée]cnico|branding|marketing|financiero|evaluaci[óo]n|cap[íi]tulo\s*iv\b|marco.*propositivo/i,
+    faseLabel: "Cap. IV — Marco Propositivo (Hub Agrícola)",
+    body: HUB_CAP4_FULL,
+  },
+  {
+    matcher: /RESUMEN|resumen.*ejecutivo/i,
+    faseLabel: "Resumen Ejecutivo (Hub Agrícola)",
+    body: HUB_RESUMEN,
+  },
+  {
+    matcher: /CONCLUSIONES|recomendaciones/i,
+    faseLabel: "Conclusiones y Recomendaciones (Hub Agrícola)",
+    body: HUB_CONCLUSIONES,
+  },
+  {
+    matcher: /REFERENCIAS|bibliograf[íi]a/i,
+    faseLabel: "Referencias Bibliográficas (Hub Agrícola)",
+    body: HUB_REFERENCIAS,
+  },
+  {
+    matcher: /DEFENSA|preguntas/i,
+    faseLabel: "Banco de Preguntas para Defensa (Hub Agrícola)",
+    body: HUB_DEFENSA,
+  },
+  {
+    matcher: /LATEX|latex|compilar/i,
+    faseLabel: "Compilación LaTeX (Hub Agrícola)",
+    body: HUB_LATEX_NOTE,
+  },
+  // ── Fallback legado: respuestas cortas si alguno de los matchers anteriores
+  // no captura el prompt (no debería ocurrir en práctica con prompts del PG)
+  {
+    matcher: /__nunca_coincide__/i,
+    faseLabel: "Fase del proyecto",
     body: `## Síntesis de la idea de negocio
 
 El estudiante propone una iniciativa empresarial con potencial de impacto
@@ -548,18 +613,22 @@ export function generateMockResponse(systemPrompt: string, userPrompt: string): 
 /**
  * Detecta si el modo MOCK debe activarse.
  *
- * 🔒 ACTIVACIÓN EXPLÍCITA: el mock SOLO se activa si la variable de entorno
- * `MOCK_AI` está explícitamente en "true". Esto evita que se cuele
- * accidentalmente en producción si por error alguien borra una API key:
- * en ese caso, el sistema debe tirar error claro al usuario, no devolver
- * contenido stub silenciosamente.
+ * Lógica de activación (en orden):
+ * 1. Si MOCK_AI=true está seteado explícitamente, mock activo SIEMPRE
+ *    (incluso si hay API keys reales — útil para demo o ahorro de tokens).
+ * 2. Si MOCK_AI=false está seteado explícitamente, mock NUNCA activo
+ *    (aunque no haya keys — el sistema tira error si no hay keys).
+ * 3. Si MOCK_AI no está definido (default), mock se activa SOLO cuando
+ *    no hay NINGUNA API key real configurada. Esto permite que el sistema
+ *    funcione end-to-end "out of the box" en desarrollo, y se desactive
+ *    automáticamente cuando el usuario agrega una key real en Vercel.
  *
- * Para usar el mock en desarrollo/pruebas: agregar `MOCK_AI=true` a las
- * variables de entorno locales o de Vercel.
- *
- * `providerKeyCache` queda como parámetro reservado para futura lógica
- * de fallback (eg. "activar mock SOLO si MOCK_AI=true Y no hay keys").
+ * `lmstudio` se ignora porque su key por defecto es "lm-studio-local"
+ * (placeholder, no key real).
  */
-export function shouldUseMockMode(_providerKeyCache: Map<string, string>): boolean {
-  return process.env.MOCK_AI === "true";
+export function shouldUseMockMode(providerKeyCache: Map<string, string>): boolean {
+  if (process.env.MOCK_AI === "true") return true;
+  if (process.env.MOCK_AI === "false") return false;
+  const realProviders = ["groq", "anthropic", "openai", "gemini", "mistral", "deepseek", "xai", "cohere", "together", "perplexity"];
+  return realProviders.every((id) => !providerKeyCache.get(id));
 }
