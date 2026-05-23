@@ -1987,7 +1987,7 @@ export default function WorkspacePage() {
             {proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título"}
           </div>
           <div style={{ fontSize:11, color:"var(--fg-secondary)", display:"flex", alignItems:"center", gap:6, flexWrap: "wrap" }}>
-            <span>{proyecto.servicios?.nombre ?? "Monografía"}</span>
+            <span>{isPGProject ? "Proyecto de Grado" : (proyecto.servicios?.nombre ?? "Monografía")}</span>
             <span className="hidden sm:inline">·</span>
             <span className="hidden sm:inline">
               {fasesCompletadasAcademicas === 0
