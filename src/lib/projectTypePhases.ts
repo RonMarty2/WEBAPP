@@ -16,7 +16,16 @@ export function projectTypeIdForService(servicioId?: string | null): string {
 
 export function serviceIdForProjectType(tipoProyectoId?: string | null): string {
   if (tipoProyectoId === "tipo-tesis") return "tesis-001";
-  if (tipoProyectoId === "proy-prod-001" || tipoProyectoId === "proy-serv-001") return "proy-grado-001";
+  // 🎓 Incluimos "proy-grado-001" (PG sin subtipo definido aún) además de
+  // los dos subtipos. Antes caía al fallback "mono-001" que persistía mal
+  // el servicio y rompía el workspace (mostraba vista de Monografía).
+  if (
+    tipoProyectoId === "proy-grado-001"
+    || tipoProyectoId === "proy-prod-001"
+    || tipoProyectoId === "proy-serv-001"
+  ) {
+    return "proy-grado-001";
+  }
   return "mono-001";
 }
 
