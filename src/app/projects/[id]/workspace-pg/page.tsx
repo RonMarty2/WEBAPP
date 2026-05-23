@@ -140,9 +140,9 @@ export default function WorkspacePGPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          projectId: proyecto.id,
-          phaseId: fasaActual.id,
-          modo: "final",
+          proyecto_id: proyecto.id,
+          phase_id: fasaActual.id,
+          tipo: "final",
         }),
       });
       const data = await res.json();
