@@ -615,8 +615,21 @@ export default function WorkspacePage() {
     ? phaseDefs
     : FASES_STATIC;
 
-  // Proyecto de Grado: más de 6 fases dinámicas
-  const isPGProject = isDynamic && phaseDefs.length > 6;
+  // Proyecto de Grado: detectamos por servicio_id o tipo_proyecto_id (criterio
+  // determinista) y, como fallback, por número de fases dinámicas. Antes solo
+  // dependía de phaseDefs.length > 6, lo que fallaba si las phases dinámicas
+  // no cargaban a tiempo y dejaba al PG renderizando como Monografía (header
+  // equivocado + sidebar de monografía + las 23 fases UCATEC ocultas).
+  const isPGProject = (() => {
+    const tipoId = proyecto?.tipo_proyecto_id;
+    if (
+      tipoId === "proy-grado-001"
+      || tipoId === "proy-prod-001"
+      || tipoId === "proy-serv-001"
+    ) return true;
+    if (proyecto?.servicio_id === "proy-grado-001") return true;
+    return isDynamic && phaseDefs.length > 6;
+  })();
 
   const [university, setUniversity] = useState<University | null>(null);
   const [pdfData, setPdfData] = useState<StudentCoverData>({

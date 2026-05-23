@@ -255,8 +255,16 @@ function NuevoProyectoPageInner() {
     const tipoEfectivo = overrideTipoId ?? tipoProyectoId;
     if (tipoEfectivo === "tipo-tesis") return "tesis-001";
     if (tipoEfectivo === "tipo-monografia") return "mono-001";
-    // 🎓 Subtipos de Proyecto de Grado mapean al mismo servicio
-    if (tipoEfectivo === "proy-prod-001" || tipoEfectivo === "proy-serv-001") {
+    // 🎓 Subtipos de Proyecto de Grado mapean al mismo servicio.
+    // Incluimos "proy-grado-001" (sin subtipo) por defensa: aunque el flow
+    // del wizard fuerza la elección antes de crear el proyecto, si algún
+    // path llama directamente sin pasar por subtipo, el servicio debe ser
+    // proy-grado-001 (no caer al fallback mono-001 que rompe el workspace).
+    if (
+      tipoEfectivo === "proy-grado-001"
+      || tipoEfectivo === "proy-prod-001"
+      || tipoEfectivo === "proy-serv-001"
+    ) {
       return "proy-grado-001";
     }
     if (servicioId) return servicioId;
