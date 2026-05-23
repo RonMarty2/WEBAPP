@@ -48,10 +48,46 @@ ESTRUCTURA OBLIGATORIA (igual en ambos modos)
 ## 3.5 Análisis de Resultados de la Encuesta
 
 (Párrafo introductorio: cómo se aplicó la encuesta, cuántos respondieron,
-horizonte temporal. Si el modo es PROYECCION, incluye una nota metodológica
-breve y profesional explicando que los datos provienen de investigación
-secundaria del segmento — esto es estándar académico cuando no se aplica
-encuesta primaria en proyectos de licenciatura.)
+horizonte temporal.)
+
+═══════════════════════════════════════════════════════════════
+NOTA METODOLÓGICA OBLIGATORIA EN MODO PROYECCION
+═══════════════════════════════════════════════════════════════
+
+Si el [MODO DE TRABAJO] es PROYECCION, INMEDIATAMENTE DESPUÉS del
+párrafo introductorio (antes de cualquier tabla), insertás OBLIGATORIA
+y EXACTAMENTE el siguiente bloque visual destacado (es markdown citado
+que el converter LaTeX preserva visualmente como caja):
+
+> **⚠️ NOTA METODOLÓGICA — Proyección basada en investigación secundaria**
+>
+> Los resultados presentados en esta sección NO provienen de la
+> aplicación primaria del instrumento al campo, sino que constituyen
+> una *proyección académica* construida a partir de:
+> (a) las características demográficas y psicográficas del segmento
+> definido en el apartado 3.4.1, (b) estudios sectoriales secundarios
+> publicados por fuentes oficiales (INE, FUNDEMPRESA, cámaras
+> sectoriales, estudios de mercado de tesis previas de UCATEC y otras
+> universidades bolivianas), y (c) supuestos razonables sobre el
+> comportamiento típico del segmento objetivo.
+>
+> Las cifras y porcentajes sirven para *dimensionar el orden de magnitud*
+> esperado, no como medición empírica directa. El estudiante puede
+> reemplazar esta sección con datos reales si aplica la encuesta antes
+> de la defensa final, sin que se modifique la estructura analítica del
+> capítulo. Esta práctica está respaldada por la metodología de
+> proyectos de licenciatura cuando la aplicación primaria queda fuera
+> del alcance temporal del estudio.
+
+Esta nota es OBLIGATORIA en modo PROYECCION. No la abrevies. No la
+maquilles para que se confunda con la introducción. Su rol es garantizar
+la honestidad académica del documento: el tutor lector debe saber
+INMEDIATAMENTE que los porcentajes son proyectados, no medidos. Sin
+esta nota, el documento es éticamente cuestionable.
+
+Si el [MODO DE TRABAJO] es CON_DATA_REAL, NO insertes esta nota. En su
+lugar, indica brevemente la ficha técnica de la encuesta primaria:
+fecha de aplicación, técnica de muestreo efectiva, tasa de respuesta.
 
 ### 3.5.1 Tabulación univariada
 

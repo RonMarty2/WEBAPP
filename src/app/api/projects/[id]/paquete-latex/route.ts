@@ -49,6 +49,14 @@ import {
   buildBibliografiaHeaderUNIFRANZ,
   buildFinDocumentoUNIFRANZ,
 } from "@/lib/latex/preamble-unifranz";
+import {
+  buildPreambleUCATEC,
+  buildCaratulaUCATEC,
+  buildResumenHeaderUCATEC,
+  buildIndiceUCATEC,
+  buildBibliografiaHeaderUCATEC,
+  buildFinDocumentoUCATEC,
+} from "@/lib/latex/preamble-ucatec";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -420,9 +428,11 @@ export async function GET(_req: Request, { params }: Params) {
     //
     //   - UCB      → preamble-ucb.ts      (Tribunal + Abstract + Separador Anexos)
     //   - UNIFRANZ → preamble-unifranz.ts (Verdana 11, márgenes 3.5/2.5)
+    //   - UCATEC   → preamble-ucatec.ts   (Times NR 12 / 1.5 / márgenes 3+2.5, caps romanos)
     //   - UMSS     → preamble-umss.ts     (default, comportamiento original)
     const esUCB = proyecto.universidad_id === "ucb-001";
     const esUnifranz = proyecto.universidad_id === "unifranz-cba-001";
+    const esUCATEC = proyecto.universidad_id === "ucatec-001";
 
     // Ubicar cada sección por su faseId (igual para todas las universidades)
     const resumenLatex = results.find((r) => r.faseId === "ph-resumen")?.latex ?? "";
@@ -528,6 +538,49 @@ export async function GET(_req: Request, { params }: Params) {
         partes.push(biblioLatex);
       }
       partes.push(buildFinDocumentoUNIFRANZ());
+    } else if (esUCATEC) {
+      // ===== ENSAMBLAJE UCATEC (Cochabamba) =====
+      // Estructura UCATEC para Proyecto de Grado (Lic / Téc Sup):
+      //   1. Preámbulo (Times NR 12, interlineado 1.5, márgenes 3+2.5cm,
+      //      numeración inf. derecha, capítulos en romanos I-IV)
+      //   2. Carátula UCATEC (logo + facultad + carrera + modalidad +
+      //      título + postulante + tutor + ciudad-país + año)
+      //   3. Resumen Ejecutivo (preliminares en romanos)
+      //   4. Índice general
+      //   5. Capítulos I-IV (Marco Referencial / Teórico / Situacional /
+      //      Propositivo) + Cap. V si existe (conclusiones formales)
+      //   6. Bibliografía (APA 7)
+      //   7. \end{document}
+      partes.push(buildPreambleUCATEC());
+      partes.push(buildCaratulaUCATEC({
+        nombre: datos.nombre,
+        titulo: datos.titulo,
+        carrera: String(ctxInicial.carrera ?? datos.programa ?? "CARRERA"),
+        facultad: String(ctxInicial.facultad ?? datos.facultad ?? "Facultad de Ciencias Empresariales"),
+        modalidad: datos.modalidad || "PROYECTO DE GRADO",
+        grado: String(ctxInicial.programa ?? ctxInicial.grado_academico ?? "LICENCIATURA"),
+        universidad: datos.universidad,
+        ciudad: datos.ciudad,
+        pais: datos.pais,
+        mes: datos.mes,
+        anio: datos.anio,
+        tutor: datos.tutor || undefined,
+      }));
+      if (resumenLatex) {
+        partes.push(buildResumenHeaderUCATEC());
+        partes.push(resumenLatex);
+      }
+      partes.push(buildIndiceUCATEC());
+      if (cap1Latex) partes.push(cap1Latex);
+      if (cap2Latex) partes.push(cap2Latex);
+      if (cap3Latex) partes.push(cap3Latex);
+      if (cap4Latex) partes.push(cap4Latex);
+      if (cap5Latex) partes.push(cap5Latex);
+      if (biblioLatex) {
+        partes.push(buildBibliografiaHeaderUCATEC());
+        partes.push(biblioLatex);
+      }
+      partes.push(buildFinDocumentoUCATEC());
     } else {
       // ===== ENSAMBLAJE UMSS (default — comportamiento original intacto) =====
       // Estructura UMSS oficial garantizada en orden correcto:
