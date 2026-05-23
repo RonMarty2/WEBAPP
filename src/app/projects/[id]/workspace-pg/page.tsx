@@ -24,6 +24,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
+import Cap0TituloSelector from "@/components/scribe-pg/Cap0TituloSelector";
 import type { SessionUser } from "@/lib/auth";
 
 interface Proyecto {
@@ -303,20 +304,35 @@ export default function WorkspacePGPage() {
                   </button>
                 </div>
               ) : (
-                <article
-                  style={{
-                    padding: 24,
-                    borderRadius: 12,
-                    background: "var(--bg-card)",
-                    border: "1px solid var(--border)",
-                    color: "var(--fg-primary)",
-                    fontSize: 14,
-                    lineHeight: 1.7,
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {contenidoActual}
-                </article>
+                <>
+                  <article
+                    style={{
+                      padding: 24,
+                      borderRadius: 12,
+                      background: "var(--bg-card)",
+                      border: "1px solid var(--border)",
+                      color: "var(--fg-primary)",
+                      fontSize: 14,
+                      lineHeight: 1.7,
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {contenidoActual}
+                  </article>
+
+                  {/* Selector de título — solo aparece en Cap. 0 cuando el
+                      output incluye las 3 propuestas */}
+                  {fasaActual.id?.includes("cap0") && (
+                    <Cap0TituloSelector
+                      contenidoCap0={contenidoActual}
+                      proyectoId={proyecto.id}
+                      tituloActual={proyecto.tema_aprobado}
+                      onTituloSelected={(titulo) => {
+                        setProyecto((p) => p ? { ...p, tema_aprobado: titulo, titulo_provisional: titulo } : p);
+                      }}
+                    />
+                  )}
+                </>
               )}
             </>
           )}
