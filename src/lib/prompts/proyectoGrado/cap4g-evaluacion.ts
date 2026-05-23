@@ -178,22 +178,52 @@ Decisión:
 - Payback < horizonte del proyecto (5 años): ACEPTABLE.
 - Payback > horizonte: el proyecto NO se recupera, RECHAZAR.
 
-### 4.8.7 Resumen de indicadores y conclusión
+### 4.8.7 Análisis de sensibilidad — escenarios alternativos
+
+🚨 OBLIGATORIO: cuando los flujos del escenario base resulten negativos
+o el VAN sea negativo, NO es aceptable cerrar el capítulo con un
+"proyecto inviable, fin". Debes generar SIEMPRE un análisis de
+sensibilidad con al menos TRES escenarios alternativos en una tabla,
+modificando variables críticas una a una y luego combinadas.
+
+Esto refleja el rol académico real del estudio: identificar las
+PALANCAS que vuelven viable el proyecto si la configuración base falla.
+Un proyecto inviable en escenario base puede ser viable bajo
+recalibración razonable — esa recalibración es valor académico real.
+
+**Tabla N. Análisis de sensibilidad — escenarios alternativos**
+
+| # | Variable modificada | Cambio aplicado | VAN resultante (Bs) | Conclusión |
+|:-:|---|---|:-:|---|
+| 1 | Precio promedio / comisión efectiva | +X% / –X% | XX.XXX | (positivo/negativo/cercano) |
+| 2 | Volumen de operación (cuota mercado) | +X% / –X% | XX.XXX | (idem) |
+| 3 | Costos operativos (planta o logística) | –X% / +X% | XX.XXX | (idem) |
+| 4 | **Combinación recalibrada** | (combinación de 2-3 anteriores) | **XX.XXX** | **(escenario recomendado si aplica)** |
+
+Al menos UNA de las filas debe representar una combinación realista de
+variables que VUELVA POSITIVO EL VAN, si el escenario base era
+negativo. Las modificaciones deben ser razonables (no inflar precios
+50% para forzar viabilidad — debe poder defenderse ante tribunal).
+
+### 4.8.8 Resumen de indicadores y conclusión
 
 **Tabla N. Resumen de indicadores financieros**
 
-| Indicador | Valor | Criterio | Decisión |
-|---|:-:|---|:-:|
-| WACC | X.XX% | Tasa de descuento aplicada | — |
-| VAN | XX.XXX Bs | > 0 = aceptar | ✓ / ✗ |
-| TIR | XX.XX% | > WACC = aceptar | ✓ / ✗ |
-| Punto de equilibrio | X.XXX unidades / XXX.XXX Bs | < demanda año 1 | ✓ / ✗ |
-| Payback descontado | X.XX años | < 5 años | ✓ / ✗ |
+| Indicador | Valor base | Valor recalibrado (si aplica) | Decisión |
+|---|:-:|:-:|:-:|
+| WACC | X.XX% | — | — |
+| VAN | XX.XXX Bs | XX.XXX Bs | ✓ / ✗ |
+| TIR | XX.XX% | XX.XX% | ✓ / ✗ |
+| Punto de equilibrio | X.XXX | X.XXX | ✓ / ✗ |
+| Payback descontado | X.XX años | X.XX años | ✓ / ✗ |
 
 Cierra con un párrafo de cierre de TODO el Cap. IV. Síntesis de:
-- Es el proyecto VIABLE técnica, legal, comercial y financieramente.
+- ¿Es el proyecto VIABLE técnica, legal, comercial y financieramente
+  EN SU CONFIGURACIÓN BASE? Si no, ¿es viable bajo la configuración
+  recalibrada propuesta en 4.8.7?
 - ¿Cuál es el indicador más sensible (el que más impactaría si cambiara)?
-- ¿Qué recomendaría al inversionista — invertir, esperar, redirigir?
+- ¿Qué recomendaría al inversionista — invertir bajo qué configuración,
+  esperar más datos, redirigir el proyecto, descartar?
 
 ═══════════════════════════════════════════════════════════════
 EXTENSIÓN Y CALIDAD

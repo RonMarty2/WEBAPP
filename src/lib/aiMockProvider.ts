@@ -546,11 +546,20 @@ export function generateMockResponse(systemPrompt: string, userPrompt: string): 
 }
 
 /**
- * Detecta si NO hay ninguna API key real configurada en el entorno.
- * Se ignora `lmstudio` porque su key por defecto es siempre "lm-studio-local"
- * (no es una key real, es un placeholder que LM Studio ignora).
+ * Detecta si el modo MOCK debe activarse.
+ *
+ * 🔒 ACTIVACIÓN EXPLÍCITA: el mock SOLO se activa si la variable de entorno
+ * `MOCK_AI` está explícitamente en "true". Esto evita que se cuele
+ * accidentalmente en producción si por error alguien borra una API key:
+ * en ese caso, el sistema debe tirar error claro al usuario, no devolver
+ * contenido stub silenciosamente.
+ *
+ * Para usar el mock en desarrollo/pruebas: agregar `MOCK_AI=true` a las
+ * variables de entorno locales o de Vercel.
+ *
+ * `providerKeyCache` queda como parámetro reservado para futura lógica
+ * de fallback (eg. "activar mock SOLO si MOCK_AI=true Y no hay keys").
  */
-export function shouldUseMockMode(providerKeyCache: Map<string, string>): boolean {
-  const realProviders = ["groq", "anthropic", "openai", "gemini", "mistral", "deepseek", "xai", "cohere", "together", "perplexity"];
-  return realProviders.every((id) => !providerKeyCache.get(id));
+export function shouldUseMockMode(_providerKeyCache: Map<string, string>): boolean {
+  return process.env.MOCK_AI === "true";
 }

@@ -107,6 +107,17 @@ TRABAJO ACADÉMICO (no como negocio real — eso es otra cosa). Valida:
 - ¿Hay marco teórico académico suficiente sobre el rubro?
 - ¿La idea no choca con limitaciones legales obvias?
 
+Cobertura específica adicional según rubro (incluí si aplica):
+- Alimentos / bebidas / restauración: mencioná explícitamente que el
+  proyecto requerirá registro SENASAG (Servicio Nacional de Sanidad
+  Agropecuaria e Inocuidad Alimentaria) y que esto se profundiza en Cap. IVb.
+- Servicios financieros / fintech: mención de regulación ASFI (Autoridad
+  de Supervisión del Sistema Financiero).
+- Telecomunicaciones / app / plataforma: mención de regulación ATT
+  (Autoridad de Regulación y Fiscalización de Telecomunicaciones) si aplica.
+- Salud / farmacia: mención de regulación AGEMED o SEDES departamental.
+- Educación: mención de regulación del Ministerio de Educación.
+
 Si encuentras banderas rojas, MARCALAS pero sugerí cómo redirigir la idea
 para que sí funcione académicamente. NO bloquees — orientás.
 
