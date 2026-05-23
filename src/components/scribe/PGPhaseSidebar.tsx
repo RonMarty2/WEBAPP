@@ -40,13 +40,21 @@ function getGroupKey(phaseId: string): string {
   return "final";
 }
 
-const GROUP_META: Record<string, { label: string; color: string }> = {
-  cap0:  { label: "Planteamiento",          color: "#60a5fa" },
-  cap1:  { label: "Cap. I — Marco Ref.",    color: "#a78bfa" },
-  cap2:  { label: "Cap. II — Marco Teórico",color: "#a78bfa" },
-  cap3:  { label: "Cap. III — Análisis ext.",color: "#34d399" },
-  cap4:  { label: "Cap. IV — Diseño",       color: "#fb923c" },
-  final: { label: "Finales",                color: "#94a3b8" },
+type Section = "prep" | "doc" | "cierre";
+
+const GROUP_META: Record<string, { label: string; color: string; section: Section }> = {
+  cap0:  { label: "Idea de negocio",              color: "#60a5fa", section: "prep"   },
+  cap1:  { label: "Cap. I — Marco Referencial",   color: "#a78bfa", section: "doc"    },
+  cap2:  { label: "Cap. II — Marco Teórico",      color: "#a78bfa", section: "doc"    },
+  cap3:  { label: "Cap. III — Marco Situacional", color: "#34d399", section: "doc"    },
+  cap4:  { label: "Cap. IV — Marco Propositivo",  color: "#fb923c", section: "doc"    },
+  final: { label: "Cierre y exportación",         color: "#94a3b8", section: "cierre" },
+};
+
+const SECTION_META: Record<Section, { label: string; sublabel: string }> = {
+  prep:   { label: "PREPARACIÓN",                 sublabel: "Validación interna · no va al documento" },
+  doc:    { label: "DOCUMENTO — 4 CAPÍTULOS",     sublabel: "Estructura oficial UCATEC" },
+  cierre: { label: "CIERRE",                      sublabel: "Resumen ejecutivo, conclusiones, bibliografía, defensa, export" },
 };
 
 function groupPhases(phases: PGPhaseItem[]): PhaseGroup[] {
@@ -149,8 +157,29 @@ export default function PGPhaseSidebar({
 
       {/* Lista de grupos */}
       <div style={{ flex: 1, overflowY: "auto", padding: "4px 0" }}>
-        {groups.map((group) => (
+        {groups.map((group, gi) => {
+          const meta = GROUP_META[group.key] ?? GROUP_META.final;
+          const prevMeta = gi > 0 ? GROUP_META[groups[gi - 1].key] ?? GROUP_META.final : null;
+          const isNewSection = !prevMeta || prevMeta.section !== meta.section;
+          const section = SECTION_META[meta.section];
+          return (
           <div key={group.key} style={{ marginBottom: 2 }}>
+            {isNewSection && (
+              <div
+                style={{
+                  margin: "12px 14px 6px",
+                  paddingBottom: 4,
+                  borderBottom: "1px solid rgba(148,163,184,0.18)",
+                }}
+              >
+                <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.12em", color: "var(--fg-secondary)" }}>
+                  {section.label}
+                </div>
+                <div style={{ fontSize: 9, color: "var(--fg-muted)", marginTop: 1, lineHeight: 1.3 }}>
+                  {section.sublabel}
+                </div>
+              </div>
+            )}
             {/* Cabecera del grupo */}
             <div
               style={{
@@ -236,7 +265,8 @@ export default function PGPhaseSidebar({
               );
             })}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Leyenda */}

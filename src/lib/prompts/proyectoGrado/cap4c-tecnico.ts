@@ -95,8 +95,53 @@ terminado. Mínimo 6 etapas:
 
 #### Diagrama de flujo de producción
 
-Representación textual del flujo, indicando entradas y salidas de cada
-etapa. En LaTeX se convierte a diagrama TikZ en Fase 8.
+Genera el flujograma con DOS REPRESENTACIONES, en este orden:
+
+**(A) Bloque TikZ embebido** — para el PDF final renderizado.
+
+Envuelve el flujograma en un bloque LaTeX que el sistema preserva tal
+cual. Estructura típica de cadena lineal (adaptá según el rubro):
+
+\`\`\`tikz
+\\begin{center}
+\\begin{tikzpicture}[
+  node distance=10mm,
+  every node/.style={font=\\small, align=center},
+  inicio/.style={draw, ellipse, fill=green!15, minimum width=22mm, minimum height=9mm},
+  proceso/.style={draw, rectangle, rounded corners=2pt, fill=blue!10, minimum width=32mm, minimum height=10mm, inner sep=2pt},
+  control/.style={draw, diamond, aspect=2, fill=orange!15, minimum width=28mm, inner sep=1pt},
+  fin/.style={draw, ellipse, fill=red!15, minimum width=22mm, minimum height=9mm},
+  flecha/.style={-{Stealth[length=2mm]}, thick}
+]
+\\node[inicio] (a) {Materia prima\\\\recibida};
+\\node[proceso, right=of a] (b) {Lavado /\\\\selección};
+\\node[proceso, right=of b] (c) {Procesamiento\\\\(etapa rubro)};
+\\node[control, below=of c] (d) {Control de\\\\calidad};
+\\node[proceso, left=of d] (e) {Empaque};
+\\node[fin, left=of e] (f) {Distribución};
+\\draw[flecha] (a) -- (b);
+\\draw[flecha] (b) -- (c);
+\\draw[flecha] (c) -- (d);
+\\draw[flecha] (d) -- (e);
+\\draw[flecha] (e) -- (f);
+\\end{tikzpicture}
+\\end{center}
+\`\`\`
+
+Reglas obligatorias:
+- Inicio (verde) → procesos (azul) → control de calidad (rombo naranja) →
+  empaque (azul) → fin (rojo). Adaptá los nombres al rubro real.
+- Cada nodo con texto corto (3-5 palabras, salto de línea \\\\\\\\ si hace falta).
+- Nada de \\\\usepackage — los paquetes ya están en el preamble.
+- Si el flujo es de SERVICIOS (no producción), usá nodos: solicitud →
+  validación → atención → entrega del servicio → seguimiento.
+
+**(B) Tabla de entradas y salidas** — listá cada etapa con su entrada
+y su salida, para complementar el diagrama:
+
+| Etapa | Entrada | Salida | Tiempo estimado |
+|---|---|---|:-:|
+| (una fila por etapa) | | | XX min |
 
 ### 4.4.4 Maquinaria y equipos
 

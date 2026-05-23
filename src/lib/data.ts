@@ -139,6 +139,33 @@ export const DEFAULT_UNIVERSITIES: University[] = [
     is_active: true,
   },
   {
+    // ⚠️ Universidad por la que está diseñado TODO el motor de Proyecto de
+    // Grado (prompts cap0-cap4g + latex.ts). Sin esta entrada, los estudiantes
+    // UCATEC no podían seleccionarla en el wizard y quedaban forzados a usar
+    // otra universidad con formato incorrecto. Specs base estándar bolivianas
+    // (Times NR 12, interlineado 1.5, APA 7) — confirmar con guía oficial
+    // UCATEC y ajustar si difiere.
+    id: "ucatec-001",
+    name: "Universidad Privada de Ciencias Administrativas y Tecnológicas (UCATEC)",
+    latex_prompt: "Formato UCATEC — Cochabamba: clase report, Times New Roman 12pt, interlineado 1.5, márgenes superior/inferior 2.5cm, izquierdo 3cm, derecho 2.5cm. Portada con escudo UCATEC, facultad, carrera (Administración / Ingeniería Comercial), modalidad (Proyecto de Grado), título entre comillas, postulante, tutor, ciudad y año. Numeración correlativa en parte inferior derecha, preliminares en romanos minúsculos y cuerpo en arábigos. Citas APA 7. Numeración de capítulos en romanos (I, II, III, IV) con marco referencial / teórico / situacional / propositivo. Idioma español neutro (sin voseo).",
+    campos_portada: ["facultad", "carrera", "modalidad", "tutor"],
+    format: {
+      pageSize: "letter",
+      font: "Times New Roman",
+      size: 12,
+      lineHeight: 1.5,
+      margins: { top: 2.5, left: 3, bottom: 2.5, right: 2.5 },
+      alineacion: "justify",
+      numero_paginas_posicion: "bottom-right",
+    },
+    modalities: [
+      "Proyecto de Grado (Licenciatura)",
+      "Proyecto de Grado (Técnico Superior)",
+      "Monografía",
+    ],
+    is_active: true,
+  },
+  {
     id: "otro-001",
     name: "Otra institución / Formato personalizado",
     latex_prompt: "Formato académico estándar: clase report, Times New Roman 12pt, interlineado 1.5, márgenes 3cm izquierdo/superior y 2.5cm derecho/inferior. Portada con nombre de la institución, programa, título, autor y año. Bibliografía en formato APA 7.",

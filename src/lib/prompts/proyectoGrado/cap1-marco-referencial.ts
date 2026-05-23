@@ -81,21 +81,55 @@ Largo: 3-5 párrafos.
 
 ### 1.3.2 Árbol de problemas
 
-Genera un árbol de problemas en formato textual con esta estructura
-JERÁRQUICA visual:
+Genera un árbol de problemas con DOS REPRESENTACIONES, en este orden exacto:
 
-  [TRONCO — Problema central]
-       ↑                ↑
-  [CAUSA 1]        [CAUSA 2]        [CAUSA 3]
-       ↑                ↑                ↑
-  [Sub-causa]     [Sub-causa]      [Sub-causa]
+**(A) Bloque TikZ embebido** — para el PDF final renderizado.
 
-       ↓                ↓                ↓
-  [EFECTO 1]       [EFECTO 2]       [EFECTO 3]
+Envuelve la representación visual en un bloque LaTeX que el sistema
+preserva tal cual y compila como diagrama real. Estructura mínima:
 
-Si el sistema renderiza Markdown puro, usa una representación textual con
-indentación. Si es LaTeX (en fase posterior), se convertirá a TikZ
-automáticamente. Aquí genera el contenido textual de las causas y efectos.
+\`\`\`tikz
+\\begin{center}
+\\begin{tikzpicture}[
+  node distance=12mm and 8mm,
+  every node/.style={font=\\small, align=center},
+  causa/.style={draw, rectangle, rounded corners=2pt, fill=blue!10, minimum width=28mm, minimum height=10mm, inner sep=2pt},
+  efecto/.style={draw, rectangle, rounded corners=2pt, fill=red!10, minimum width=28mm, minimum height=10mm, inner sep=2pt},
+  central/.style={draw, rectangle, thick, fill=yellow!20, minimum width=60mm, minimum height=12mm, inner sep=3pt, font=\\small\\bfseries},
+  flecha/.style={-{Stealth[length=2mm]}, thick}
+]
+% — Causas (abajo) → suben al problema central
+\\node[causa] (c1) at (-4.5,-2) {Causa 1};
+\\node[causa] (c2) at ( 0,  -2) {Causa 2};
+\\node[causa] (c3) at ( 4.5,-2) {Causa 3};
+% — Problema central
+\\node[central] (p) at (0,0) {Problema central};
+% — Efectos (arriba) ← bajan del problema central
+\\node[efecto] (e1) at (-4.5, 2) {Efecto 1};
+\\node[efecto] (e2) at ( 0,   2) {Efecto 2};
+\\node[efecto] (e3) at ( 4.5, 2) {Efecto 3};
+% — Flechas
+\\draw[flecha] (c1) -- (p);
+\\draw[flecha] (c2) -- (p);
+\\draw[flecha] (c3) -- (p);
+\\draw[flecha] (p) -- (e1);
+\\draw[flecha] (p) -- (e2);
+\\draw[flecha] (p) -- (e3);
+\\end{tikzpicture}
+\\end{center}
+\`\`\`
+
+Reglas obligatorias del TikZ:
+- 3 causas + 1 problema central + 3 efectos, mínimo. Si hay sub-causas
+  agregalas como nodos extra DEBAJO de cada causa, conectadas con flechas
+  hacia arriba.
+- Los textos de las cajas son cortos (3-7 palabras). El detalle va en (B).
+- Usa coordenadas absolutas (x,y) en cm. Mantené simetría.
+- Nada de \\\\usepackage — los paquetes ya están en el preamble.
+
+**(B) Detalle textual narrativo** — para explicar el diagrama al lector
+con 2-4 párrafos: por qué cada causa lleva al problema, por qué cada
+efecto deriva del problema. NO uses bullets — prosa académica.
 
 ### 1.3.3 Formulación del problema
 

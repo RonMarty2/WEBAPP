@@ -35,43 +35,81 @@ import { SISTEMA_SCRIBE_LATEX } from "@/lib/prompts/scribe/compilar-latex";
  */
 export const SISTEMA_PROY_LATEX = SISTEMA_SCRIBE_LATEX;
 
+export interface UniversidadLatexFormato {
+  /** Nombre completo (ej: "Universidad Privada de Ciencias Administrativas y Tecnológicas (UCATEC)"). */
+  nombre: string;
+  /** Tamaño de papel (default "Letter"). */
+  pageSize?: string;
+  /** Tipografía base (ej: "Times New Roman"). */
+  font?: string;
+  /** Tamaño en pt. */
+  fontSize?: number;
+  /** Interlineado (1.0, 1.5, 2.0...). Acepta string "doble" o número. */
+  lineHeight?: number | string;
+  /** Márgenes en cm. */
+  margins?: { top: number; left: number; bottom: number; right: number };
+  /** Posición de los números de página. */
+  numeroPaginasPosicion?: string;
+  /** Estilo de citas (default "APA 7"). */
+  estiloCitas?: string;
+  /** latex_prompt completo de la universidad — se prepende como guía. */
+  latexPrompt?: string;
+}
+
 export function buildContextoLatex(datos: {
   documentoCompleto: string;
   tituloAprobado: string;
   subtipo: "produccion" | "servicios";
+  programa?: string;
+  modalidad?: string;
+  universidad: UniversidadLatexFormato;
 }): string {
   const subtipoLegible = datos.subtipo === "produccion"
     ? "Proyecto de Factibilidad — Producción y comercialización"
     : "Proyecto de Factibilidad — Servicios";
 
-  return [
+  const u = datos.universidad;
+  const margins = u.margins;
+  const marginsLegible = margins
+    ? `superior ${margins.top}cm · inferior ${margins.bottom}cm · izquierdo ${margins.left}cm · derecho ${margins.right}cm`
+    : "estándar (2.5 cm uniforme)";
+  const lineHeightLegible = typeof u.lineHeight === "number"
+    ? (u.lineHeight === 2.0 ? "doble" : u.lineHeight.toString())
+    : (u.lineHeight ?? "1.5");
+
+  const lines = [
     "═══════════════════════════════════════════════════════════════",
     "[DATOS DE CARÁTULA]",
     "═══════════════════════════════════════════════════════════════",
     `- Tipo de documento: ${subtipoLegible}`,
     `- Título: ${datos.tituloAprobado}`,
-    "- Universidad: UCATEC (Universidad Privada de Ciencias Administrativas y Tecnológicas)",
-    "- Programa: Licenciatura en Ingeniería Comercial / Administración de Empresas",
-    "- Modalidad: Proyecto de Grado",
+    `- Universidad: ${u.nombre}`,
+    datos.programa ? `- Programa: ${datos.programa}` : "",
+    `- Modalidad: ${datos.modalidad ?? "Proyecto de Grado"}`,
     "",
     "═══════════════════════════════════════════════════════════════",
     "[DECISIONES TIPOGRÁFICAS Y DE COMPILACIÓN]",
     "═══════════════════════════════════════════════════════════════",
     "- Motor LaTeX: pdfLaTeX",
-    "- Tamaño de papel: Letter",
-    "- Márgenes: 2.54 cm en los 4 lados",
-    "- Tipografía: Times New Roman 12 pt",
-    "- Interlineado: doble",
+    `- Tamaño de papel: ${u.pageSize ?? "Letter"}`,
+    `- Márgenes: ${marginsLegible}`,
+    `- Tipografía: ${u.font ?? "Times New Roman"} ${u.fontSize ?? 12} pt`,
+    `- Interlineado: ${lineHeightLegible}`,
     "- Numeración de capítulos: ROMANA (I, II, III, IV)",
-    "- Numeración de páginas: ARÁBIGA en esquina superior derecha",
+    `- Numeración de páginas: ARÁBIGA en ${u.numeroPaginasPosicion ?? "esquina inferior derecha"}`,
     "- Sin carátula automática",
-    "- Estilo de citas: APA 7",
+    `- Estilo de citas: ${u.estiloCitas ?? "APA 7"}`,
     "- Idioma: Español (Bolivia)",
+    u.latexPrompt ? "" : "",
+    u.latexPrompt ? "[GUÍA OFICIAL DE LA UNIVERSIDAD]" : "",
+    u.latexPrompt ? u.latexPrompt : "",
     "",
     "═══════════════════════════════════════════════════════════════",
     "[DOCUMENTO COMPLETO APROBADO]",
     "═══════════════════════════════════════════════════════════════",
     datos.documentoCompleto.trim(),
     "",
-  ].join("\n");
+  ];
+
+  return lines.filter((l) => l !== "" || true).join("\n");
 }

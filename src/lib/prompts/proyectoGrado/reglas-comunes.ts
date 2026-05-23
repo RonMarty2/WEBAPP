@@ -203,5 +203,78 @@ FORMATO DE SALIDA
 - Tablas en formato Markdown estándar: | encabezado | encabezado |
 - Listas: con guion para no ordenadas, con número para ordenadas.
 - Negrita con **texto**, cursiva con *texto* (uso medido).
-- NO uses bloques de código triple-backtick salvo que se pida explícitamente.
+- Los bloques de código triple-backtick NO se usan para código fuente
+  ordinario. Se usan SOLO para los lenguajes técnicos del preamble LaTeX:
+  \`\`\`latex / \`\`\`tex / \`\`\`tikz / \`\`\`pgfplots
+  Estos bloques el sistema los preserva tal cual y los compila como
+  contenido vectorial real en el PDF (ver reglas de fórmulas y diagramas
+  más abajo).
+
+═══════════════════════════════════════════════════════════════
+FÓRMULAS MATEMÁTICAS — OBLIGATORIO USAR BLOQUE LaTeX
+═══════════════════════════════════════════════════════════════
+
+Toda fórmula matemática NO trivial (cálculo de muestra, demanda, VAN,
+TIR, payback, punto de equilibrio, depreciación, WACC, etc.) DEBE
+emitirse en un bloque LaTeX para renderizar tipográficamente. Sintaxis
+markdown con \$...\$ NO renderiza — el converter escapa los dólares.
+
+Patrón obligatorio:
+
+  Anuncio en prosa académica describiendo la fórmula.
+
+  \`\`\`latex
+  \\begin{equation}
+  n = \\frac{Z^{2} \\cdot p \\cdot q \\cdot N}{e^{2}\\,(N - 1) + Z^{2} \\cdot p \\cdot q}
+  \\end{equation}
+  \`\`\`
+
+  Donde:
+  - n = tamaño de la muestra
+  - Z = 1.96 (95% confianza)
+  - p = 0.5, q = 0.5
+  - e = 0.05 (margen de error)
+  - N = tamaño de la población
+
+  Aplicación al proyecto (con valores reales): cálculo paso a paso en
+  texto, y resultado final en una segunda \`\\begin{equation}\` si se
+  quiere destacar visualmente.
+
+NUNCA uses \$x = y\$ ni \$\$...\$\$ ni códigos LaTeX sueltos fuera del
+bloque \`\`\`latex. El converter solo respeta lo que está dentro de
+\`\`\`latex / \`\`\`tex / \`\`\`tikz / \`\`\`pgfplots.
+
+═══════════════════════════════════════════════════════════════
+DIAGRAMAS (ÁRBOLES, FLUJOGRAMAS, ORGANIGRAMAS) — USAR TikZ
+═══════════════════════════════════════════════════════════════
+
+Cuando una fase pide un diagrama (árbol de problemas, flujograma de
+procesos, organigrama, mapa de procesos), generá DOS representaciones:
+
+1. Bloque \`\`\`tikz con código TikZ funcional (preamble ya tiene tikz +
+   librerías shapes.geometric, arrows.meta, positioning, calc, fit).
+2. Detalle textual narrativo o tabular que complementa el diagrama.
+
+El TikZ del diagrama se renderiza como SVG real en el PDF. El texto
+explica al lector lo que ve. Esto satisface al tutor sin depender de
+herramientas externas.
+
+NO uses pseudo-ASCII (cajas con guiones, flechas con ↑↓) para
+diagramas: queda como bloque de código feo en el PDF. Usa TikZ.
+
+═══════════════════════════════════════════════════════════════
+GRÁFICOS ESTADÍSTICOS (BARRAS, PIE, LÍNEAS) — USAR pgfplots / pgf-pie
+═══════════════════════════════════════════════════════════════
+
+Cuando una fase pide un gráfico cuantitativo (distribución de respuestas,
+proyección de ingresos, punto de equilibrio, flujo de caja, etc.):
+
+- Si es un gráfico de barras o líneas: bloque \`\`\`pgfplots con
+  \\begin{axis} y \\addplot.
+- Si es un pie chart: bloque \`\`\`tikz con \\pie{...} (pgf-pie carga
+  desde el preamble cuando está disponible).
+- En ambos casos: complementar con TABLA Markdown con los datos exactos.
+
+Si el gráfico es muy complejo o pgfplots no alcanza, generá la tabla
+como fuente primaria y el gráfico como complemento.
 `.trim();
