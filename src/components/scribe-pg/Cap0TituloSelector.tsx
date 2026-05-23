@@ -64,21 +64,59 @@ function parsearPropuestas(markdown: string): Propuesta[] {
   }
 
   for (const linea of lineas) {
-    // Detectar inicio de propuesta numerada: "**1." o "1." o "1)"
-    const inicio = linea.match(/^\*?\*?(\d+)[.\)]\s*\*?\*?\s*(.*)/);
+    // Detectar inicio de propuesta numerada: "**1." / "1." / "1)" / "**1.**"
+    // El número viene precedido opcionalmente por asteriscos, comillas o ⭐.
+    const inicio = linea.match(/^(?:\*\*?|⭐\s*)*\s*(\d+)[.\)]\s*(.*)$/);
     if (inicio) {
       pushCurrent();
       currentNum = parseInt(inicio[1], 10);
-      const resto = inicio[2];
-      // Detectar marcador RECOMENDADO con estrella o texto
+      let resto = inicio[2];
+
+      // Detectar marcador RECOMENDADO antes de limpiar
       currentReco = /⭐|RECOMENDADO|Recomendado/i.test(resto);
-      // Extraer título entre asteriscos o entre comillas
-      const tituloMatch = resto.match(/[*"](.*?)["*]/) || resto.match(/—\s*(.+)$/) || resto.match(/:\s*(.+)$/);
-      if (tituloMatch) {
-        currentTitulo = tituloMatch[1].replace(/^[*"]+|[*"]+$/g, "").trim();
-      } else {
-        currentTitulo = resto.replace(/[⭐*]/g, "").replace(/RECOMENDADO/gi, "").trim();
+
+      // Limpiar marcadores de formato pero conservar el título.
+      // Estrategia: el título suele estar entre comillas tipográficas, comillas
+      // normales o entre asteriscos pares. Probamos en orden de preferencia.
+      let titulo = "";
+
+      // 1) Comillas tipográficas: "..."
+      const compTip = resto.match(/[«"„]([^"«»„"]+)[»"""]/);
+      if (compTip && compTip[1].length > 15) {
+        titulo = compTip[1];
       }
+
+      // 2) Comillas normales: "..."
+      if (!titulo) {
+        const compNormal = resto.match(/"([^"]{15,})"/);
+        if (compNormal) titulo = compNormal[1];
+      }
+
+      // 3) Italic: *... ...* (con al menos 15 chars, evita capturar separadores)
+      if (!titulo) {
+        const italic = resto.match(/\*([^*]{15,})\*/);
+        if (italic) titulo = italic[1];
+      }
+
+      // 4) Fallback: todo el texto después del último separador (— o :)
+      if (!titulo) {
+        const tras = resto.split(/[—:]/).pop();
+        if (tras) titulo = tras.trim();
+      }
+
+      // 5) Último recurso: el resto entero limpio
+      if (!titulo) {
+        titulo = resto;
+      }
+
+      // Limpieza final: quitar marcadores y comillas
+      currentTitulo = titulo
+        .replace(/⭐/g, "")
+        .replace(/\*+/g, "")
+        .replace(/RECOMENDADO/gi, "")
+        .replace(/^[\s—:,.;"«»„""]+|[\s"«»„""]+$/g, "")
+        .trim();
+
     } else if (currentNum > 0) {
       // Línea de descripción de la propuesta actual
       const limpia = linea.replace(/^[*_]+|[*_]+$/g, "").trim();
