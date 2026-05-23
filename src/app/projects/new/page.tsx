@@ -114,6 +114,25 @@ function NuevoProyectoPageInner() {
   const [materias, setMaterias] = useState("");               // OBLIGATORIO
   const [interesesYContexto, setInteresesYContexto] = useState(""); // opcional, combinado
   const [archivos, setArchivos] = useState<ArchivoSubido[]>([]);
+  // Carrera (solo UCATEC u otras universidades que lo requieran en el futuro)
+  const [carrera, setCarrera] = useState("");                 // OBLIGATORIO si UCATEC
+
+  // Opciones específicas UCATEC: solo Licenciatura y Técnico Superior se
+  // titulan con Proyecto de Grado en esa universidad. Sin esta restricción,
+  // los estudiantes escribían texto libre (ej: "diplomado") que el motor de
+  // PG no entiende.
+  const ES_UCATEC = universidadId === "ucatec-001";
+  const PROGRAMAS_UCATEC = [
+    "Licenciatura",
+    "Técnico Superior",
+  ];
+  const CARRERAS_UCATEC = [
+    "Administración de Empresas",
+    "Ingeniería Comercial",
+    "Marketing",
+    "Comercio Internacional",
+    "Otra (especificar en intereses)",
+  ];
 
   const createInFlightRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -168,10 +187,14 @@ function NuevoProyectoPageInner() {
         const tipoQuery = searchParams.get("tipo") ?? "";
         let initialStep: Step = "seleccionar-universidad";
         if (tipoQuery === "proy-grado-001") {
-          // El estudiante apuntó al servicio nuevo sin elegir subtipo:
-          // mostramos el step de elección antes de la universidad.
-          // No seteamos tipoProyectoId todavía (lo elige en el step nuevo).
-          initialStep = "seleccionar-subtipo-grado";
+          // El estudiante apuntó al servicio nuevo sin elegir subtipo.
+          // CAMBIO UX: la elección Producción/Servicios se hace DESPUÉS de
+          // capturar la idea (al final del wizard), no antes — el estudiante
+          // suele tener su idea más clara una vez que la describió. Hasta
+          // entonces, dejamos tipoProyectoId como "proy-grado-001" como
+          // marcador de "es PG, subtipo pendiente".
+          setTipoProyectoId("proy-grado-001");
+          initialStep = "seleccionar-universidad";
         } else if (tipoQuery === "proy-prod-001" || tipoQuery === "proy-serv-001") {
           // Vino del dashboard con subtipo ya elegido — saltamos directo.
           setTipoProyectoId(tipoQuery);
@@ -222,11 +245,12 @@ function NuevoProyectoPageInner() {
     }
   }
 
-  async function resolverServicioId(): Promise<string> {
-    if (tipoProyectoId === "tipo-tesis") return "tesis-001";
-    if (tipoProyectoId === "tipo-monografia") return "mono-001";
+  async function resolverServicioId(overrideTipoId?: string): Promise<string> {
+    const tipoEfectivo = overrideTipoId ?? tipoProyectoId;
+    if (tipoEfectivo === "tipo-tesis") return "tesis-001";
+    if (tipoEfectivo === "tipo-monografia") return "mono-001";
     // 🎓 Subtipos de Proyecto de Grado mapean al mismo servicio
-    if (tipoProyectoId === "proy-prod-001" || tipoProyectoId === "proy-serv-001") {
+    if (tipoEfectivo === "proy-prod-001" || tipoEfectivo === "proy-serv-001") {
       return "proy-grado-001";
     }
     if (servicioId) return servicioId;
@@ -274,17 +298,42 @@ function NuevoProyectoPageInner() {
     }
   }
 
-  async function crearProyectoYDirigirAlWorkspace() {
-    if (!programa.trim()) { setError("El diplomado/curso/taller es obligatorio."); return; }
+  /**
+   * Valida los datos del wizard y decide el siguiente paso:
+   *   - Si es Proyecto de Grado pero aún no se eligió el subtipo
+   *     (Producción / Servicios), dirige al step "seleccionar-subtipo-grado".
+   *     Esto reemplaza el orden previo donde la elección se hacía antes de
+   *     conocer la idea — el estudiante ahora elige el subtipo SABIENDO ya
+   *     qué quiere hacer.
+   *   - Si tiene todo, crea el proyecto y va al workspace.
+   */
+  async function validarYContinuar() {
+    if (!programa.trim()) { setError(ES_UCATEC ? "Selecciona tu nivel de titulación." : "El diplomado/curso/taller es obligatorio."); return; }
+    if (ES_UCATEC && !carrera.trim()) { setError("Selecciona tu carrera."); return; }
     if (!materias.trim()) { setError("Los módulos/temas/materias son obligatorios."); return; }
 
+    // Si es Proyecto de Grado sin subtipo definido, vamos primero a elegirlo.
+    if (tipoProyectoId === "proy-grado-001") {
+      setError("");
+      setStep("seleccionar-subtipo-grado");
+      return;
+    }
+
+    await crearProyectoYDirigirAlWorkspace();
+  }
+
+  async function crearProyectoYDirigirAlWorkspace(overrideTipoId?: string) {
     if (createInFlightRef.current) return;
     createInFlightRef.current = true;
     setError("");
     setStep("creando");
 
+    // El subtipo recién elegido viene como parámetro porque setTipoProyectoId
+    // todavía no se ha propagado al closure (React state update asíncrono).
+    const tipoEfectivo = overrideTipoId ?? tipoProyectoId;
+
     try {
-      const sid = await resolverServicioId();
+      const sid = await resolverServicioId(tipoEfectivo);
       if (!sid) throw new Error("No hay servicios configurados. Avisa al administrador.");
 
       const temaBase = tema.trim() || "(Por definir — Cap 0 propondrá temas)";
@@ -293,11 +342,15 @@ function NuevoProyectoPageInner() {
         programa: programa.trim(),
         modulos: materias.trim(),
         intereses_y_contexto: interesesYContexto.trim(),
+        // Campo nuevo: la carrera del estudiante. Solo se llena cuando la
+        // universidad lo requiere (UCATEC hoy). Los prompts pueden usarlo
+        // para ajustar tono y profundidad de algunos capítulos.
+        carrera: carrera.trim() || undefined,
       };
 
       const payload = {
         servicio_id: sid,
-        tipo_proyecto_id: tipoProyectoId,
+        tipo_proyecto_id: tipoEfectivo,
         universidad_id: universidadId || undefined,
         modalidad_creacion: "guiada",
         tema_aprobado: temaBase,
@@ -421,14 +474,16 @@ function NuevoProyectoPageInner() {
                   marginBottom: 6,
                 }}
               >
-                Paso 1 — Tipo de proyecto
+                Paso final — Tipo de proyecto
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
-                ¿Qué tipo de proyecto vas a desarrollar?
+                ¿Tu idea es de producción o de servicios?
               </h1>
               <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
-                Esta elección define las fases del flujo y el enfoque del Marco
-                Propositivo. No se puede cambiar después de creado el proyecto.
+                Ya nos contaste tu idea. Ahora confirma el tipo para que el motor
+                arme el Cap. IV (Marco Propositivo) correctamente. Si tu idea es
+                una plataforma digital o marketplace, encaja como Servicios.
+                No se puede cambiar después de creado el proyecto.
               </p>
             </div>
 
@@ -438,7 +493,9 @@ function NuevoProyectoPageInner() {
                 type="button"
                 onClick={() => {
                   setTipoProyectoId("proy-prod-001");
-                  setStep("seleccionar-universidad");
+                  // Pasamos el subtipo explícito para evitar el race condition
+                  // de React state (el setState aún no se propaga al closure).
+                  crearProyectoYDirigirAlWorkspace("proy-prod-001");
                 }}
                 className="card card-hover"
                 style={{
@@ -470,7 +527,7 @@ function NuevoProyectoPageInner() {
                 type="button"
                 onClick={() => {
                   setTipoProyectoId("proy-serv-001");
-                  setStep("seleccionar-universidad");
+                  crearProyectoYDirigirAlWorkspace("proy-serv-001");
                 }}
                 className="card card-hover"
                 style={{
@@ -1015,19 +1072,59 @@ function NuevoProyectoPageInner() {
                 )}
               </div>
 
-              {/* DIPLOMADO (obligatorio) */}
+              {/* PROGRAMA (obligatorio) — selector si UCATEC, libre si otra */}
               <div>
                 <label className="label">
-                  Diplomado / curso / taller / programa{" "}
+                  {ES_UCATEC ? "Nivel de titulación" : "Diplomado / curso / taller / programa"}{" "}
                   <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
                 </label>
-                <input
-                  className="input-dark"
-                  value={programa}
-                  onChange={e => setPrograma(e.target.value)}
-                  placeholder="Ej: Diplomado en Educación Superior Tecnológica"
-                />
+                {ES_UCATEC ? (
+                  <select
+                    className="input-dark"
+                    value={programa}
+                    onChange={e => setPrograma(e.target.value)}
+                    style={{ width: "100%" }}
+                  >
+                    <option value="">— Selecciona tu nivel —</option>
+                    {PROGRAMAS_UCATEC.map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    className="input-dark"
+                    value={programa}
+                    onChange={e => setPrograma(e.target.value)}
+                    placeholder="Ej: Diplomado en Educación Superior Tecnológica"
+                  />
+                )}
+                {ES_UCATEC && (
+                  <p style={{ fontSize: 11, color: "var(--fg-muted)", marginTop: 4 }}>
+                    En UCATEC, ambos niveles se titulan con Proyecto de Grado.
+                  </p>
+                )}
               </div>
+
+              {/* CARRERA (obligatorio solo si UCATEC) */}
+              {ES_UCATEC && (
+                <div>
+                  <label className="label">
+                    Carrera{" "}
+                    <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                  </label>
+                  <select
+                    className="input-dark"
+                    value={carrera}
+                    onChange={e => setCarrera(e.target.value)}
+                    style={{ width: "100%" }}
+                  >
+                    <option value="">— Selecciona tu carrera —</option>
+                    {CARRERAS_UCATEC.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* MÓDULOS (obligatorio) */}
               <div>
@@ -1127,12 +1224,21 @@ function NuevoProyectoPageInner() {
               </div>
 
               <button
-                onClick={crearProyectoYDirigirAlWorkspace}
-                disabled={!programa.trim() || !materias.trim()}
+                onClick={validarYContinuar}
+                disabled={!programa.trim() || !materias.trim() || (ES_UCATEC && !carrera.trim())}
                 className="btn-cyan"
-                style={{ width: "100%", justifyContent: "center", padding: "14px", opacity: (!programa.trim() || !materias.trim()) ? 0.5 : 1, fontSize: 14, fontWeight: 700 }}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  padding: "14px",
+                  opacity: (!programa.trim() || !materias.trim() || (ES_UCATEC && !carrera.trim())) ? 0.5 : 1,
+                  fontSize: 14,
+                  fontWeight: 700,
+                }}
               >
-                Crear proyecto y empezar →
+                {tipoProyectoId === "proy-grado-001"
+                  ? "Continuar → elegir tipo de proyecto"
+                  : "Crear proyecto y empezar →"}
               </button>
             </div>
           </div>
