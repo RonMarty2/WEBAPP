@@ -25,6 +25,9 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
 import Cap0TituloSelector from "@/components/scribe-pg/Cap0TituloSelector";
+import Cap3eModoSelector from "@/components/scribe-pg/Cap3eModoSelector";
+import Cap4gConfigSelector from "@/components/scribe-pg/Cap4gConfigSelector";
+import FaseAcciones from "@/components/scribe-pg/FaseAcciones";
 import type { SessionUser } from "@/lib/auth";
 
 interface Proyecto {
@@ -61,6 +64,8 @@ export default function WorkspacePGPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
+  // Modo de generación elegido por el estudiante para cap3e
+  const [cap3eModo, setCap3eModo] = useState<"PROYECCION" | "DATOS_REALES" | null>(null);
 
   // ── Cargar proyecto + fases ───────────────────────────────────────────
   useEffect(() => {
@@ -282,27 +287,43 @@ export default function WorkspacePGPage() {
               )}
 
               {!contenidoActual ? (
-                <div style={{ padding: 32, borderRadius: 12, background: "var(--bg-card)", border: "1px dashed var(--border)", textAlign: "center" }}>
-                  <div style={{ fontSize: 14, color: "var(--fg-secondary)", marginBottom: 16 }}>
-                    Esta fase aún no se ha generado.
+                <>
+                  {/* Selector pre-generación para cap3e (modo encuesta) */}
+                  {fasaActual.id?.includes("cap3e") && (
+                    <Cap3eModoSelector
+                      modoActual={cap3eModo}
+                      onModoSelected={setCap3eModo}
+                    />
+                  )}
+                  <div style={{ padding: 32, borderRadius: 12, background: "var(--bg-card)", border: "1px dashed var(--border)", textAlign: "center" }}>
+                    <div style={{ fontSize: 14, color: "var(--fg-secondary)", marginBottom: 16 }}>
+                      Esta fase aún no se ha generado.
+                    </div>
+                    <button
+                      onClick={generarFase}
+                      disabled={generating || (fasaActual.id?.includes("cap3e") && !cap3eModo)}
+                      style={{
+                        padding: "12px 28px",
+                        borderRadius: 8,
+                        background: (generating || (fasaActual.id?.includes("cap3e") && !cap3eModo)) ? "var(--fg-muted)" : "var(--accent)",
+                        color: "white",
+                        border: "none",
+                        fontWeight: 700,
+                        fontSize: 14,
+                        cursor: generating ? "wait" : "pointer",
+                        opacity: (generating || (fasaActual.id?.includes("cap3e") && !cap3eModo)) ? 0.6 : 1,
+                      }}
+                      title={fasaActual.id?.includes("cap3e") && !cap3eModo ? "Primero elegí el modo de generación arriba" : ""}
+                    >
+                      {generating ? "Generando…" : `🚀 Generar ${fasaActual.label}`}
+                    </button>
+                    {fasaActual.id?.includes("cap3e") && !cap3eModo && (
+                      <div style={{ marginTop: 12, fontSize: 12, color: "var(--fg-muted)" }}>
+                        ↑ Elegí primero el modo de generación arriba
+                      </div>
+                    )}
                   </div>
-                  <button
-                    onClick={generarFase}
-                    disabled={generating}
-                    style={{
-                      padding: "12px 28px",
-                      borderRadius: 8,
-                      background: generating ? "var(--fg-muted)" : "var(--accent)",
-                      color: "white",
-                      border: "none",
-                      fontWeight: 700,
-                      fontSize: 14,
-                      cursor: generating ? "wait" : "pointer",
-                    }}
-                  >
-                    {generating ? "Generando…" : `🚀 Generar ${fasaActual.label}`}
-                  </button>
-                </div>
+                </>
               ) : (
                 <>
                   <article
@@ -332,6 +353,23 @@ export default function WorkspacePGPage() {
                       }}
                     />
                   )}
+
+                  {/* Selector de configuración final — solo cap4g cuando hay
+                      escenarios viables en el análisis de sensibilidad */}
+                  {fasaActual.id?.includes("cap4g") && (
+                    <Cap4gConfigSelector
+                      contenidoCap4g={contenidoActual}
+                    />
+                  )}
+
+                  {/* Acciones universales para CADA fase generada:
+                      Aprobar (avanza) + Regenerar (con feedback opcional) */}
+                  <FaseAcciones
+                    faseLabel={fasaActual.label}
+                    esUltimaFase={selectedIndex >= phaseDefs.length - 1}
+                    onAprobar={() => setSelectedIndex((i) => Math.min(i + 1, phaseDefs.length - 1))}
+                    onRegenerar={async () => { await generarFase(); }}
+                  />
                 </>
               )}
             </>
