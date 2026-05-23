@@ -25,6 +25,7 @@ import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
 import Cap0TituloSelector, { removerSeccionPropuestas } from "@/components/scribe-pg/Cap0TituloSelector";
+import Cap0RichRender from "@/components/scribe-pg/Cap0RichRender";
 import Cap3eModoSelector from "@/components/scribe-pg/Cap3eModoSelector";
 import Cap4gConfigSelector from "@/components/scribe-pg/Cap4gConfigSelector";
 import FaseAcciones from "@/components/scribe-pg/FaseAcciones";
@@ -326,25 +327,26 @@ export default function WorkspacePGPage() {
                 </>
               ) : (
                 <>
-                  <article
-                    style={{
-                      padding: 24,
-                      borderRadius: 12,
-                      background: "var(--bg-card)",
-                      border: "1px solid var(--border)",
-                      color: "var(--fg-primary)",
-                      fontSize: 14,
-                      lineHeight: 1.7,
-                      whiteSpace: "pre-wrap",
-                    }}
-                  >
-                    {/* En Cap. 0 ocultamos la sección de "Tres propuestas"
-                        del markdown porque se renderiza interactiva debajo
-                        como cards seleccionables. Evita duplicación visual. */}
-                    {fasaActual.id?.includes("cap0")
-                      ? removerSeccionPropuestas(contenidoActual)
-                      : contenidoActual}
-                  </article>
+                  {/* Render rico para Cap. 0: cada sección como tarjeta visual
+                      con icono y header. Resto de fases: markdown plano. */}
+                  {fasaActual.id?.includes("cap0") ? (
+                    <Cap0RichRender markdown={removerSeccionPropuestas(contenidoActual)} />
+                  ) : (
+                    <article
+                      style={{
+                        padding: 24,
+                        borderRadius: 12,
+                        background: "var(--bg-card)",
+                        border: "1px solid var(--border)",
+                        color: "var(--fg-primary)",
+                        fontSize: 14,
+                        lineHeight: 1.7,
+                        whiteSpace: "pre-wrap",
+                      }}
+                    >
+                      {contenidoActual}
+                    </article>
+                  )}
 
                   {/* Selector de título — solo aparece en Cap. 0 cuando el
                       output incluye las 3 propuestas */}
