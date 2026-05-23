@@ -122,6 +122,12 @@ function NuevoProyectoPageInner() {
   // los estudiantes escribían texto libre (ej: "diplomado") que el motor de
   // PG no entiende.
   const ES_UCATEC = universidadId === "ucatec-001";
+  // Detecta si estamos creando un Proyecto de Grado (en cualquier subtipo).
+  // Los campos del wizard heredados de Monografía no encajan: PG es para
+  // emprendedores, no para estudiantes que listan materias cursadas.
+  const ES_PG = tipoProyectoId === "proy-grado-001"
+    || tipoProyectoId === "proy-prod-001"
+    || tipoProyectoId === "proy-serv-001";
   const PROGRAMAS_UCATEC = [
     "Licenciatura",
     "Técnico Superior",
@@ -310,7 +316,10 @@ function NuevoProyectoPageInner() {
   async function validarYContinuar() {
     if (!programa.trim()) { setError(ES_UCATEC ? "Selecciona tu nivel de titulación." : "El diplomado/curso/taller es obligatorio."); return; }
     if (ES_UCATEC && !carrera.trim()) { setError("Selecciona tu carrera."); return; }
-    if (!materias.trim()) { setError("Los módulos/temas/materias son obligatorios."); return; }
+    // Módulos solo obligatorio para Monografía. Para PG es opcional porque
+    // el motor de PG trabaja con la IDEA DE NEGOCIO (cap0), no con
+    // materias académicas cursadas.
+    if (!ES_PG && !materias.trim()) { setError("Los módulos/temas/materias son obligatorios."); return; }
 
     // Si es Proyecto de Grado sin subtipo definido, vamos primero a elegirlo.
     if (tipoProyectoId === "proy-grado-001") {
@@ -577,7 +586,7 @@ function NuevoProyectoPageInner() {
                   marginBottom: 6,
                 }}
               >
-                Paso 1 de 2 — Universidad
+                Paso 1 de {ES_PG ? 3 : 2} — Universidad
               </div>
               <h1
                 style={{
@@ -1038,7 +1047,7 @@ function NuevoProyectoPageInner() {
             >← Atrás</button>
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, color: "var(--accent)", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>
-                Paso 2 de 2 — Datos del proyecto
+                Paso 2 de {ES_PG ? 3 : 2} — Datos del proyecto
               </div>
               <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>Cuéntanos sobre tu trabajo</h1>
               <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
@@ -1126,18 +1135,28 @@ function NuevoProyectoPageInner() {
                 </div>
               )}
 
-              {/* MÓDULOS (obligatorio) */}
+              {/* MÓDULOS / EXPERIENCIA — obligatorio en Monografía, opcional en PG */}
               <div>
                 <label className="label">
-                  Módulos / temas / materias que llevaste{" "}
-                  <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                  {ES_PG
+                    ? "Experiencia o conocimientos relevantes para tu emprendimiento"
+                    : "Módulos / temas / materias que llevaste"}{" "}
+                  {ES_PG ? (
+                    <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span>
+                  ) : (
+                    <span style={{ color: "#ef4444", fontWeight: 700 }}>*</span>
+                  )}
                 </label>
                 <textarea
                   className="input-dark"
                   value={materias}
                   onChange={e => setMaterias(e.target.value)}
                   rows={4}
-                  placeholder={"Lista los módulos/temas, uno por línea. Ej:\nMetodología de la investigación\nTecnologías educativas\nEvaluación por competencias"}
+                  placeholder={
+                    ES_PG
+                      ? "Si ya tienes algo de experiencia útil, cuéntanos brevemente. Ej:\nVendo ropa los sábados en La Cancha desde hace 2 años\nAyudo a mi familia en su tienda de barrio\nCursé un taller de Excel y manejo de redes sociales"
+                      : "Lista los módulos/temas, uno por línea. Ej:\nMetodología de la investigación\nTecnologías educativas\nEvaluación por competencias"
+                  }
                   style={{ resize: "vertical" }}
                 />
               </div>
@@ -1145,7 +1164,9 @@ function NuevoProyectoPageInner() {
               {/* INTERESES + LUGAR DE TRABAJO (combinado, opcional) */}
               <div>
                 <label className="label">
-                  Intereses personales y lugar de trabajo / contexto{" "}
+                  {ES_PG
+                    ? "Tu situación actual y de dónde nace la idea"
+                    : "Intereses personales y lugar de trabajo / contexto"}{" "}
                   <span style={{ color: "var(--fg-secondary)", fontWeight: 400, textTransform: "none" }}>(opcional)</span>
                 </label>
                 <textarea
@@ -1153,7 +1174,11 @@ function NuevoProyectoPageInner() {
                   value={interesesYContexto}
                   onChange={e => setInteresesYContexto(e.target.value)}
                   rows={3}
-                  placeholder={"Cuéntanos en qué trabajas, sectores o áreas que te interesan, ciudad donde trabajas, etc.\nEj: Trabajo en la Universidad Mayor de San Andrés, Facultad de Humanidades. Me interesa la innovación pedagógica y el uso de tecnología en el aula."}
+                  placeholder={
+                    ES_PG
+                      ? "Cuéntanos a qué te dedicas, qué problema viste, qué te motiva a emprender.\nEj: Trabajo medio tiempo en un call center y los fines de semana ayudo a mi mamá vendiendo salteñas. Vi que muchos vecinos pagan delivery caro por comida casera y quiero armar un sistema de pedidos por WhatsApp con cocina propia."
+                      : "Cuéntanos en qué trabajas, sectores o áreas que te interesan, ciudad donde trabajas, etc.\nEj: Trabajo en la Universidad Mayor de San Andrés, Facultad de Humanidades. Me interesa la innovación pedagógica y el uso de tecnología en el aula."
+                  }
                   style={{ resize: "vertical" }}
                 />
               </div>
@@ -1225,13 +1250,13 @@ function NuevoProyectoPageInner() {
 
               <button
                 onClick={validarYContinuar}
-                disabled={!programa.trim() || !materias.trim() || (ES_UCATEC && !carrera.trim())}
+                disabled={!programa.trim() || (!ES_PG && !materias.trim()) || (ES_UCATEC && !carrera.trim())}
                 className="btn-cyan"
                 style={{
                   width: "100%",
                   justifyContent: "center",
                   padding: "14px",
-                  opacity: (!programa.trim() || !materias.trim() || (ES_UCATEC && !carrera.trim())) ? 0.5 : 1,
+                  opacity: (!programa.trim() || (!ES_PG && !materias.trim()) || (ES_UCATEC && !carrera.trim())) ? 0.5 : 1,
                   fontSize: 14,
                   fontWeight: 700,
                 }}
