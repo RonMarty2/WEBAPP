@@ -785,6 +785,20 @@ export default function WorkspacePage() {
         setUser(meData.user);
         if (!projRes.ok) { router.replace("/dashboard"); return; }
         const proj: Proyecto = (await projRes.json()).proyecto;
+
+        // 🎓 Separación arquitectónica: si es Proyecto de Grado, redirigir
+        // al workspace dedicado /workspace-pg. Este workspace queda
+        // EXCLUSIVAMENTE para Monografía y Tesis.
+        const tipoId = proj.tipo_proyecto_id;
+        const esPG = tipoId === "proy-grado-001"
+          || tipoId === "proy-prod-001"
+          || tipoId === "proy-serv-001"
+          || proj.servicio_id === "proy-grado-001";
+        if (esPG) {
+          router.replace(`/projects/${proj.id}/workspace-pg`);
+          return;
+        }
+
         setProyecto(proj);
 
         // 🎚️ Calibración de estilo: desactivada para monografías por decisión de producto.
