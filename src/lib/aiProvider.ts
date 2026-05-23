@@ -9,6 +9,7 @@ import {
 } from "@/lib/aiTokenPolicy.mjs";
 import { logError } from "@/lib/memoryStore";
 import { loadFromDisk } from "@/lib/persistence";
+import { generateMockResponse, shouldUseMockMode } from "@/lib/aiMockProvider";
 
 export interface AICallResult {
   text: string;
@@ -611,6 +612,17 @@ export async function llamarIA(
   maxTokens = 7000,
   servicioId?: string
 ): Promise<AICallResult> {
+  // 🧪 MODO MOCK AUTOMÁTICO — se activa SOLO si NO hay NINGUNA api key real
+  // configurada en el entorno. Permite validar el flujo end-to-end sin
+  // gastar tokens. Cuando el usuario agrega al menos una key real (Groq,
+  // Anthropic, OpenAI, Gemini, etc.) este check pasa de largo y el sistema
+  // usa el proveedor real con la cascada normal.
+  if (shouldUseMockMode(providerKeyCache)) {
+    console.log("[aiProvider] 🧪 MOCK MODE activo — no hay API keys configuradas. Devolviendo respuesta stub.");
+    const text = generateMockResponse(system, user);
+    return { text, provider: "mock", model: "mock-validator-v1" };
+  }
+
   if (servicioId) {
     const cfg = getServiceAIConfig(servicioId);
     if (cfg && cfg.api_key) {
