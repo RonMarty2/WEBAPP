@@ -212,7 +212,7 @@ Muestras efectivas ajustadas a $n_A = 180$ y $n_B = 200$ por restricciones opera
 
 export const HUB_CAP2 = `# Capítulo II — Marco Teórico
 
-El presente capítulo construye el marco conceptual, contextual y referencial sobre el cual se sustenta la evaluación de factibilidad del proyecto. Se organiza en once bloques: seis bloques conceptuales que desarrollan los fundamentos teóricos de la formulación de proyectos, el análisis estratégico, el estudio de mercado, la evaluación financiera, el marketing de servicios y la economía de plataformas digitales; cuatro bloques contextuales que sitúan el proyecto en su realidad boliviana específica —antecedentes históricos del sector agroalimentario, marco normativo aplicable, marco institucional del ecosistema y estado del arte de experiencias comparables—; y un bloque referencial final con el glosario de términos técnicos del rubro. Los bloques conceptuales incluyen los modelos matemáticos formales que sustentan los métodos analíticos, los esquemas conceptuales que ilustran los modelos clásicos del campo y la articulación con el caso del proyecto.
+El presente capítulo construye el marco conceptual y contextual sobre el cual se sustenta la evaluación de factibilidad del proyecto. Se organiza en diez bloques: seis bloques conceptuales que desarrollan los fundamentos teóricos de la formulación de proyectos, el análisis estratégico, el estudio de mercado, la evaluación financiera, el marketing de servicios y la economía de plataformas digitales; y cuatro bloques contextuales que sitúan el proyecto en su realidad boliviana específica —antecedentes históricos del sector agroalimentario, marco normativo aplicable, marco institucional del ecosistema y estado del arte de experiencias comparables—. Los bloques conceptuales incluyen los modelos matemáticos formales que sustentan los métodos analíticos, los esquemas conceptuales que ilustran los modelos clásicos del campo y la articulación con el caso del proyecto. El glosario de términos técnicos se presenta como Anexo A al final del documento, después de las referencias bibliográficas.
 
 ## 2.1 Fundamentos teóricos de la formulación de proyectos de inversión
 
@@ -581,9 +581,24 @@ La propuesta del proyecto no es original a nivel mundial. En diversos países se
 
 **Mercados de Comercio Justo (Bolivia y región).** Iniciativas no plataformizadas pero conceptualmente afines, como las ferias agroecológicas dominicales del Valle Bajo, las redes de Comercio Justo asociadas a CIOEC y las cooperativas de productores con punto de venta urbano. Estas iniciativas, aunque limitadas en escala por su naturaleza presencial, han construido durante décadas la legitimidad cultural del consumo directo del productor que el proyecto puede capitalizar.
 
-El bloque cierra con una síntesis de aprendizajes transversales: las plataformas exitosas combinan concentración geográfica inicial, operación logística propia durante los primeros años, partnership con organizaciones gremiales del lado productor, segmento HoReCa como primer activador de demanda y modelo de comisión variable según categoría. La configuración propuesta para el proyecto presente, desarrollada en el Capítulo IV, adopta los cinco aprendizajes y los adapta al contexto específico del Valle de Cochabamba.
+El bloque cierra con una síntesis de aprendizajes transversales: las plataformas exitosas combinan concentración geográfica inicial, operación logística propia durante los primeros años, partnership con organizaciones gremiales del lado productor, segmento HoReCa como primer activador de demanda y modelo de comisión variable según categoría. La configuración propuesta para el proyecto presente, desarrollada en el Capítulo IV, adopta los cinco aprendizajes y los adapta al contexto específico del Valle de Cochabamba.`;
 
-## 2.11 Glosario de términos técnicos
+/**
+ * Glosario de términos técnicos del proyecto.
+ *
+ * Va como ANEXO A al final del documento (después de la bibliografía),
+ * NO dentro del Capítulo II. Es una convención académica de Licenciatura:
+ * el Marco Teórico desarrolla conceptos en prosa con autores; el glosario
+ * lista términos del sector en orden alfabético para referencia rápida del
+ * lector no especialista.
+ *
+ * PENDIENTE: el sistema de fases aún no contempla una fase "anexos" — el
+ * glosario está disponible aquí pero no se inyecta automáticamente en el
+ * paquete LaTeX. Cuando se cablée el anexo (tarea #55), esta constante se
+ * exporta al endpoint paquete-latex-pg para incluirse después de la
+ * bibliografía como "Anexo A: Glosario de términos técnicos".
+ */
+export const HUB_GLOSARIO = `# Anexo A — Glosario de términos técnicos
 
 **Acopio.** Proceso de concentración física de la producción de varios productores en un punto único para su consolidación, control de calidad y distribución posterior.
 
@@ -617,9 +632,9 @@ El bloque cierra con una síntesis de aprendizajes transversales: las plataforma
 
 **Margen de contribución.** Diferencia entre el precio de venta unitario y el costo variable unitario de un producto o servicio; aporte unitario a la cobertura de los costos fijos.
 
-**Marketplace.** Plataforma digital donde múltiples vendedores ofrecen productos o servicios a múltiples compradores bajo reglas de operación definidas por el operador de la plataforma.
-
 **Margen de comercialización.** Diferencia entre el precio pagado por el consumidor final y el precio percibido por el productor primario; suma de los márgenes capturados por todos los eslabones intermedios.
+
+**Marketplace.** Plataforma digital donde múltiples vendedores ofrecen productos o servicios a múltiples compradores bajo reglas de operación definidas por el operador de la plataforma.
 
 **Minifundio.** Unidad productiva agrícola de tamaño reducido —típicamente menor a 5 hectáreas en valles— operada generalmente como agricultura familiar.
 

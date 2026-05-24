@@ -17,8 +17,9 @@
  *
  * Max tokens recomendado: 16000.
  *
- * Estructura: 10-12 bloques (6 conceptuales + 4 contextuales + glosario).
- * Extensión esperada: 15000-25000 palabras (40-70 páginas).
+ * Estructura: 9-10 bloques (6 conceptuales + 4 contextuales).
+ * Extensión esperada: 14000-22000 palabras (35-60 páginas).
+ * El glosario va como ANEXO al final del documento, NO en el Cap. II.
  */
 
 import { REGLAS_BASE_PROYECTO_GRADO } from "./reglas-comunes";
@@ -172,9 +173,8 @@ manufacturing"), AGREGALOS hasta llegar al máximo de 35.
 ESTRUCTURA OBLIGATORIA — BLOQUES TEMÁTICOS (NO LISTAS)
 ═══════════════════════════════════════════════════════════════
 
-Un Marco Teórico de Licenciatura tiene entre 10 y 14 bloques. Los
-6 primeros son CONCEPTUALES, los 4-5 siguientes son CONTEXTUALES, y
-el último es REFERENCIAL (glosario).
+Un Marco Teórico de Licenciatura tiene entre 9 y 12 bloques. Los
+6 primeros son CONCEPTUALES y los 4 siguientes son CONTEXTUALES.
 
 BLOQUES CONCEPTUALES (obligatorios, en este orden aproximado):
 
@@ -219,18 +219,17 @@ queda flotando sin amarre histórico, normativo ni institucional):
        plataforma agrícola, mencionar Farmcrowdy (Nigeria), Twiga
        Foods (Kenia), Agrofy (Argentina), Olivos (Bolivia), etc.
 
-BLOQUE REFERENCIAL (al final):
+El último bloque del Marco Teórico es 2.10 (estado del arte). El
+Capítulo cierra ahí.
 
-  ## 2.11 Glosario de términos técnicos
-       Lista alfabética y CONCISA (1-3 líneas por entrada) de los
-       términos técnicos del rubro que el lector no especialista
-       necesita entender. SOLO términos específicos del sector
-       (ej: agroecología, rescatista, manejo postcosecha) — NO los
-       conceptos académicos ya desarrollados en los bloques 2.1-2.6.
-
-NO incluyas un bloque "Síntesis del marco teórico" ni "Conclusión
-del Capítulo II". Eso es texto de cierre tipo IA que NO va en un
-Marco Teórico real. El último bloque es el glosario y punto.
+NO incluyas:
+  - Un bloque "Síntesis del marco teórico", "Conclusión del Capítulo II"
+    ni equivalente. Eso es texto AUTOEXPLICATIVO de IA que no va en
+    proyectos académicos reales.
+  - Un bloque "Glosario de términos técnicos" dentro del Capítulo II.
+    El glosario, cuando se incluye, va como ANEXO al final del
+    documento (después de la bibliografía), NO dentro del Marco
+    Teórico. Es una convención académica de Licenciatura.
 
 ESTRUCTURA INTERNA DE CADA BLOQUE TEMÁTICO (no de cada concepto):
 
@@ -410,9 +409,8 @@ TONO Y EXTENSIÓN
 
 - Mínimo 6 a 9 PÁRRAFOS POR BLOQUE CONCEPTUAL (2.1 a 2.6).
 - Mínimo 5 a 8 PÁRRAFOS POR BLOQUE CONTEXTUAL (2.7 a 2.10).
-- Glosario (2.11): mínimo 20 entradas, máximo 35.
 - Cada párrafo: 5 a 9 oraciones de prosa académica conectada.
-- 10 a 12 bloques temáticos en total (NO cerrar antes).
+- 9 a 10 bloques temáticos en total (NO cerrar antes).
 - 4 a 6 citas APA distintas por bloque conceptual (al menos 1 textual
   con página).
 - Bloques contextuales: citar fuentes institucionales bolivianas (INE,
