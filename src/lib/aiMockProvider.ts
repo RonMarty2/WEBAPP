@@ -622,9 +622,13 @@ Zeithaml, V. A., Bitner, M. J., & Gremler, D. D. (2018). *Servicios: marketing i
  */
 export function generateMockResponse(systemPrompt: string, _userPrompt: string): string {
   const match = MOCK_RESPONSES.find((spec) => spec.matcher.test(systemPrompt));
-  const faseLabel = match?.faseLabel ?? "Fase del proyecto";
-  const body = match?.body ?? `Contenido de la fase ${faseLabel}. El sistema generará texto académico completo cuando se configuren las API keys reales.`;
-  return `${MOCK_BANNER}**Fase detectada por el mock:** ${faseLabel}\n\n${body}`;
+  const body = match?.body ?? `Contenido de la fase. El sistema generará texto académico completo cuando se configuren las API keys reales.`;
+  // 🎯 IMPORTANTE: NO incluimos el MOCK_BANNER en el contenido devuelto
+  // porque ese contenido se persiste en BD y termina yendo al LaTeX/PDF.
+  // El banner es solo UI: el frontend lo agrega visualmente cuando
+  // detecta que el provider del proyecto es "mock". El contenido en sí
+  // debe ser tal cual saldría de la IA real, sin metadata de UI.
+  return body;
 }
 
 /**

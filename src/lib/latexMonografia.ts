@@ -57,7 +57,18 @@ function sanearUnicodeParaLatex(text: string): string {
     // Soft hyphen → vacío
     .replace(/­/g, "")
     // Zero-width joiners y similares → vacío
-    .replace(/[‌‍⁠﻿]/g, "");
+    .replace(/[‌‍⁠﻿]/g, "")
+    // ── Emojis comunes en el output de la IA — reemplazar por marker ASCII
+    // o eliminar. pdflatex con inputenc utf8 los rechaza si no están en
+    // un paquete tipo fontspec/emoji. Reemplazamos por equivalente textual
+    // que conserva el sentido sin romper la compilación.
+    .replace(/⚠️?|⚠/g, "[!]")                  // warning
+    .replace(/✅|✓/g, "[OK]")                       // check
+    .replace(/❌|✗/g, "[X]")                        // cross
+    .replace(/⭐|★|☆/g, "*")                       // star
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")          // emojis Unicode 13+ (📊📈📉📄📋📌🗺💡🎯🚀🔄✏💬🏭☕🌾...)
+    .replace(/[\u{2600}-\u{27BF}]/gu, "")            // miscellaneous symbols
+    .replace(/[\u{FE00}-\u{FE0F}]/gu, "");           // variation selectors
 }
 
 /**
@@ -205,6 +216,28 @@ export function mdALatex(text: string): string {
       else if (h2) out.push(`\\subsection{${title}}`);
       else if (h3) out.push(`\\subsubsection{${title}}`);
       else out.push(`\\paragraph{${title}}`);
+      continue;
+    }
+
+    // Markdown blockquote (> texto): convertir a quote environment LaTeX
+    // en vez de dejar que el > se escape a \textgreater{}
+    if (/^>\s?/.test(line)) {
+      closeList();
+      const buf: string[] = [];
+      // Empezamos consumiendo la línea actual y seguimos mientras haya >
+      while (i < lines.length && /^>\s?/.test(lines[i].trim())) {
+        const contenido = lines[i].trim().replace(/^>\s?/, "").trim();
+        if (contenido) buf.push(escaparLatexPlain(contenido));
+        i++;
+      }
+      // Compensar el i++ del for principal: el while ya nos dejó en la
+      // primera línea NO-blockquote, queremos que el for la procese.
+      i--;
+      if (buf.length > 0) {
+        out.push("\\begin{quote}");
+        out.push(buf.join(" "));
+        out.push("\\end{quote}");
+      }
       continue;
     }
 
