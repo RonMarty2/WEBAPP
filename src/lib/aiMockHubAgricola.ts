@@ -668,72 +668,224 @@ export const HUB_GLOSARIO = `# Anexo A — Glosario de términos técnicos
 
 **WACC.** Costo Promedio Ponderado de Capital; tasa de descuento que combina el costo del capital propio y el costo de la deuda, ponderado por la estructura de financiamiento.`;
 
-export const HUB_CAP3_FULL = `# Capítulo III — Marco Situacional
+/**
+ * HUB_CAP3A_PESTEL — Mock denso del PESTEL de VallEnlace.
+ *
+ * Sirve como ejemplo de la calidad esperada cuando se conecte la API real.
+ * Cada factor: 5-8 párrafos sustantivos + tabla justificada + interpretación.
+ * Cada dato cuantitativo citado a fuente institucional boliviana.
+ */
+export const HUB_CAP3A_PESTEL = `# Capítulo III — Marco Situacional
 
 ## 3.1 Análisis del Macroentorno (PESTEL)
 
+El análisis PESTEL constituye una herramienta sistemática de evaluación del macroentorno organizada en seis dimensiones —política, económica, social, tecnológica, ecológica y legal— que el formulador de proyectos utiliza para identificar las fuerzas externas que condicionan la viabilidad de la propuesta en su horizonte de evaluación (David y David, 2017). Para el presente proyecto, el análisis se aplica al contexto del Estado Plurinacional de Bolivia con foco en el área metropolitana de Cochabamba y en el sector agroalimentario, durante el horizonte 2026-2030. Cada uno de los seis factores se examina en tres pasos: (a) análisis cualitativo sustantivo con citas a fuentes institucionales bolivianas, (b) tabla de variables con valoración de impacto y probabilidad y (c) interpretación que traduce los puntajes en una lectura estratégica para el proyecto. El cuadro resumen final consolida los seis promedios y alimenta directamente la matriz de evaluación de factores externos (EFE) que se construye en la sección 3.3.
+
 ### 3.1.1 Factor Político
 
-Bolivia atraviesa un período de consolidación institucional con tensiones puntuales. La política sectorial del Ministerio de Desarrollo Rural y Tierras ha priorizado el apoyo a productores pequeños y medianos.
+Bolivia atraviesa un período de consolidación institucional posterior al ciclo electoral 2020, con un gobierno nacional que mantiene el control del Órgano Ejecutivo y mayoría parlamentaria del Movimiento al Socialismo (MAS), atenuada por la fragmentación interna de la fuerza oficialista observada desde 2023. El horizonte de evaluación del proyecto (2026-2030) incluye el próximo ciclo electoral nacional de octubre 2025 y, dependiendo del resultado, la posibilidad de continuidad o alternancia política. Esta incertidumbre electoral introduce una variable de riesgo moderado que el proyecto debe asumir como parte del contexto operativo, sin que sea privativa del rubro agroalimentario sino transversal a toda actividad empresarial en territorio boliviano.
 
-**Tabla 3.1. Variables del factor Político**
+La política sectorial agropecuaria del Ministerio de Desarrollo Rural y Tierras ha priorizado de manera consistente en los últimos quince años el apoyo a productores pequeños y medianos, a través de programas como el Programa Nacional de Frutas, el Programa CRIAR de Mecanización del Agro y los proyectos territoriales del Fondo de Desarrollo Indígena (Ministerio de Desarrollo Rural y Tierras, 2023). Esta orientación favorable a la agricultura familiar coincide con el segmento objetivo del proyecto del lado oferta y constituye un alineamiento estratégico relevante: el proyecto puede capitalizar la legitimidad pública del segmento productor para acceder a programas de fortalecimiento técnico, asistencia productiva y crédito de fomento, principalmente a través del Banco de Desarrollo Productivo (BDP, 2024).
 
-| Variable | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
-|---|:-:|:-:|:-:|
-| Estabilidad del gobierno | 3 | 3 | 1.8 |
-| Programas de fomento sectorial | 4 | 4 | 3.2 |
-| Conflictividad social regional | 4 | 3 | 2.4 |
-| Política tributaria SIN | 3 | 2 | 1.2 |
-| **Promedio Político** | | | **2.15** |
+Los programas de fomento al emprendedurismo digital, por su parte, han sido menos desarrollados en el contexto boliviano que en países vecinos. PRO BOLIVIA y la Vicepresidencia del Estado han impulsado iniciativas puntuales —Bolivia Emprende, Centros de Innovación Productiva—, pero el ecosistema institucional de fomento a startups y plataformas digitales sigue siendo incipiente comparado con Chile, Colombia o Perú. Para el proyecto, esto implica que el principal canal de fomento será el agropecuario (vinculado al lado productor) y no el digital (vinculado a la naturaleza de plataforma).
+
+La conflictividad social regional constituye un factor político relevante para la operación logística del proyecto. El departamento de Cochabamba registra históricamente entre 35 y 60 conflictos sociales anuales, según los reportes del Centro de Estudios para el Desarrollo Laboral y Agrario (CEDLA, 2023), una proporción significativa de los cuales involucra bloqueos de carreteras en los corredores Sacaba-Cercado, Quillacollo-Cercado y Valle Alto-Cercado. Estos bloqueos pueden interrumpir la cadena logística del proyecto durante periodos de 1 a 7 días, lo que exige al proyecto desarrollar protocolos de contingencia (rutas alternativas, comunicación temprana con productores, postergación coordinada de retiros) que serán parte del diseño técnico del Capítulo IV.
+
+La política tributaria nacional ha mantenido estabilidad estructural durante la última década, con la Ley N° 843 de Reforma Tributaria como cuerpo normativo central, pero ha introducido cambios operativos relevantes en años recientes. La Resolución Normativa de Directorio 102100000022 del Servicio de Impuestos Nacionales (SIN, 2022) estableció la obligatoriedad progresiva de la facturación electrónica para nuevos contribuyentes desde 2023, lo que implica para el proyecto la adopción inicial obligatoria del Sistema de Facturación Electrónica del SIN (SFE-SIN) con la consiguiente inversión en software certificado o suscripción a proveedor habilitado. Esta obligación, aunque administrativa, tiene impacto operativo concreto sobre el flujo de costos iniciales del proyecto.
+
+La relación internacional relevante para el rubro es la pertenencia de Bolivia a la Comunidad Andina (CAN) y al Mercosur en calidad de Estado en proceso de adhesión. Ninguno de los dos esquemas afecta directamente al proyecto, dado que la propuesta es de mercado interno sin componente exportador en el horizonte de evaluación, pero abre la posibilidad de réplica del modelo en países vecinos con tratamiento arancelario preferencial si la empresa escala.
+
+**Tabla 3.1. Variables del factor Político — Bolivia y Cochabamba, 2026-2030**
+
+| Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
+|---|---|:-:|:-:|:-:|
+| Estabilidad política nacional | Ciclo electoral 2025 introduce incertidumbre moderada | 3 | 4 | 2.4 |
+| Programas de fomento agropecuario | Min. Desarrollo Rural + BDP favorecen al segmento productor | 4 | 4 | 3.2 |
+| Conflictividad social regional | 35-60 conflictos anuales en Cochabamba (CEDLA, 2023) | 4 | 4 | 3.2 |
+| Política tributaria SIN | Facturación electrónica obligatoria desde 2023 | 3 | 5 | 3.0 |
+| Programas de fomento al ecosistema digital | Ecosistema incipiente, fomento limitado | 2 | 3 | 1.2 |
+| **Promedio del factor Político** | | | | **2.60** |
+
+**Interpretación del factor Político.** La puntuación promedio de 2.60 ubica al factor político en una zona MODERADAMENTE FAVORABLE, con dos fuerzas tirando en direcciones opuestas. Por un lado, los programas sectoriales del Ministerio de Desarrollo Rural y Tierras (3.2) y el acceso a financiamiento del BDP (3.2) constituyen oportunidades concretas para el lado productor del proyecto. Por otro lado, la conflictividad social regional (3.2) representa una amenaza operativa real que exigirá protocolos de contingencia logística. La incertidumbre del ciclo electoral 2025 introduce un riesgo de cambio normativo no previsible, mitigable mediante el seguimiento activo del entorno político durante el primer año de operación. El bajo desarrollo del ecosistema de fomento digital (1.2) limita las palancas externas para el lado plataforma, lo que refuerza la importancia de la autosostenibilidad financiera del proyecto desde el corto plazo.
 
 ### 3.1.2 Factor Económico
 
-El PIB boliviano ha mantenido tasas de crecimiento positivas moderadas. Tipo de cambio Bs./USD fijo en 6.96. Inflación contenida.
+La economía boliviana atraviesa un período de transición caracterizado por tasas de crecimiento moderadas-bajas y por una creciente tensión sobre las reservas internacionales del Banco Central. Según los datos publicados por el Banco Central de Bolivia (BCB, 2024), el Producto Interno Bruto ha crecido a tasas anuales de entre 1.6% y 3.4% durante el período 2021-2023, ubicándose por debajo del promedio histórico de la región andina. Las proyecciones del Ministerio de Economía y Finanzas Públicas para 2024-2026 sitúan el crecimiento esperado entre 2.0% y 3.5% anual, escenario macroeconómico que no es expansivo pero que tampoco compromete la viabilidad de proyectos nuevos en sectores con demanda interna estable como el agroalimentario.
 
-**Tabla 3.2. Variables del factor Económico**
+El sector agropecuario representa aproximadamente el 14% del Producto Interno Bruto departamental de Cochabamba según las cuentas nacionales departamentales del Instituto Nacional de Estadística (INE, 2023), lo que lo convierte en uno de los pilares económicos del departamento junto con la manufactura y los servicios. La proporción departamental supera al promedio nacional (10.5%), reflejando la vocación agrícola histórica del Valle Central. Esta importancia sectorial implica que el proyecto opera en un mercado con masa crítica económica suficiente para sostener un modelo de plataforma especializada y con visibilidad pública que facilita la legitimación frente a actores institucionales.
 
-| Variable | Impacto | Probabilidad | Puntuación |
-|---|:-:|:-:|:-:|
-| Crecimiento del PIB | 4 | 4 | 3.2 |
-| Tipo de cambio estable | 3 | 5 | 3.0 |
-| Capacidad de consumo NSE C+/B | 4 | 4 | 3.2 |
-| **Promedio Económico** | | | **2.84** |
+La inflación interanual ha mostrado un cambio de régimen relevante desde 2023. Tras un período prolongado de inflación contenida por debajo del 2% anual (2014-2022), el Índice de Precios al Consumidor publicado por el INE registró una aceleración hasta el 4.0% interanual a diciembre de 2023 y se mantiene en torno al 3.5%-4.5% durante 2024 (INE, 2024). La inflación subyacente del rubro alimentos ha sido aún mayor, ubicándose entre el 5.5% y 7.0% interanual durante el mismo período, lo que tiene una implicación doble para el proyecto: por un lado, presiona los precios al consumidor en la categoría del proyecto, lo que puede afectar la disposición a pagar premium por trazabilidad; por otro lado, abre una ventana de oportunidad para una propuesta de comercialización directa que reduzca la brecha precio-productor / precio-consumidor capturada por la intermediación informal.
+
+El tipo de cambio boliviano-dólar estadounidense se mantiene fijo en 6.96 Bs./USD desde 2011 bajo el régimen de tipo de cambio fijo administrado por el BCB. La estabilidad nominal del tipo de cambio es un activo del marco operativo —elimina el riesgo cambiario para el proyecto en sus operaciones internas— pero la presión sobre las reservas internacionales del BCB durante 2023-2024 ha generado un mercado paralelo del dólar con cotización implícita entre 7.5 y 9.0 Bs./USD, indicador de tensión latente. El proyecto, al operar enteramente en bolivianos para sus transacciones internas, está parcialmente cubierto frente a un eventual ajuste cambiario, aunque su componente tecnológico (suscripciones a software internacional, hosting cloud) podría requerir cobertura adicional si la situación cambiaria evoluciona.
+
+La capacidad de consumo del segmento objetivo del lado consumidor del proyecto (hogares NSE C+ y B del área metropolitana) puede dimensionarse a partir de los datos de la Encuesta Continua de Hogares del INE. El ingreso mensual promedio por hogar para los quintiles 4 y 5 en el área metropolitana de Cochabamba se ubica entre Bs. 4.500 y Bs. 9.000 según la última versión disponible de la ECH (INE, 2022), con un gasto promedio en alimentos del orden del 30% al 38% del ingreso total. Esta proporción significativa del presupuesto familiar dedicada al rubro confirma la relevancia del proyecto en términos de tamaño potencial de demanda.
+
+El acceso al crédito empresarial es un factor económico crítico para el proyecto. Las tasas activas del sistema bancario comercial boliviano para préstamos productivos a empresas pequeñas se ubican entre 12% y 16% efectivo anual según los reportes mensuales de la Autoridad de Supervisión del Sistema Financiero (ASFI, 2024), tasas relativamente elevadas que harían oneroso un financiamiento bancario tradicional para el proyecto. La alternativa identificada del Banco de Desarrollo Productivo, con tasas del orden del 6% efectivo anual para sectores estratégicos, constituye por tanto la fuente de financiamiento de elección para la fracción de deuda del plan financiero del Capítulo IV.
+
+**Tabla 3.2. Variables del factor Económico — Bolivia y Cochabamba, 2026-2030**
+
+| Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
+|---|---|:-:|:-:|:-:|
+| Crecimiento del PIB nacional | 2.0-3.5% anual proyectado (BCB, 2024) | 4 | 4 | 3.2 |
+| Tipo de cambio Bs./USD | Estable a 6.96 con presión latente | 3 | 4 | 2.4 |
+| Inflación interanual del rubro alimentos | 5.5-7.0% genera ventana de oportunidad | 4 | 5 | 4.0 |
+| Capacidad de consumo NSE C+/B | Ingreso promedio Bs. 4.500-9.000 (INE ECH) | 4 | 5 | 4.0 |
+| Tasas activas del sistema bancario | 12-16% comercial, 6% BDP fomento | 4 | 5 | 4.0 |
+| Importancia sectorial agropecuaria | 14% del PIB departamental Cochabamba (INE, 2023) | 4 | 5 | 4.0 |
+| **Promedio del factor Económico** | | | | **3.60** |
+
+**Interpretación del factor Económico.** La puntuación promedio de 3.60 ubica al factor económico en una zona FAVORABLE para el proyecto. Las tres variables que más contribuyen al puntaje son la inflación del rubro alimentos (4.0), la capacidad de consumo del segmento objetivo (4.0) y la disponibilidad de financiamiento de fomento del BDP (4.0). La primera abre una ventana de oportunidad para el reposicionamiento del proyecto como redistribuidor de margen frente al consumidor presionado por la inflación; la segunda confirma que el segmento objetivo cuenta con capacidad de pago efectiva para el premium asociado a trazabilidad; la tercera asegura una estructura de financiamiento viable. El riesgo cambiario latente (2.4) es la variable que más merece monitoreo activo durante la operación inicial del proyecto.
 
 ### 3.1.3 Factor Social
 
-Conciencia urbana sobre alimentación saludable creciente. Penetración digital rural superior al 60%.
+La estructura demográfica del área metropolitana de Cochabamba constituye el primer determinante social del proyecto. Según las proyecciones poblacionales del INE basadas en el Censo de Población y Vivienda 2012 y actualizadas para 2024, el área metropolitana —que integra los municipios de Cercado, Sacaba, Quillacollo, Tiquipaya, Colcapirhua y Vinto— alberga aproximadamente 1.300.000 habitantes, distribuidos en cerca de 320.000 hogares (INE, 2024). De estos, los niveles socioeconómicos C+ y B —el segmento objetivo del lado consumidor del proyecto— representan aproximadamente el 25% del total, es decir, alrededor de 80.000 hogares con capacidad efectiva de adopción del servicio en el escenario base.
 
-| Variable | Impacto | Probabilidad | Puntuación |
-|---|:-:|:-:|:-:|
-| Conciencia alimentación saludable | 5 | 4 | 4.0 |
-| Penetración digital rural | 4 | 4 | 3.2 |
-| **Promedio Social** | | | **2.85** |
+La distribución etaria es relevante por dos razones complementarias. Por un lado, el segmento de jefes de hogar entre 28 y 55 años —que típicamente toma las decisiones de compra alimentaria— representa aproximadamente el 45% de la población urbana adulta según la ECH del INE. Por otro lado, este mismo rango etario es el que muestra mayor adopción de aplicaciones móviles para compras según los reportes de penetración digital de la Autoridad de Regulación y Fiscalización de Telecomunicaciones (ATT, 2024), con tasas superiores al 78% para el uso de WhatsApp y superiores al 55% para banca móvil. Esta coincidencia entre el segmento decisor de compra y el segmento con adopción digital alta es un alineamiento estratégico para el proyecto, ya que reduce la barrera de educación del usuario para la adopción de la plataforma.
+
+La conciencia urbana sobre alimentación saludable ha mostrado un crecimiento sostenido durante la última década en las principales ciudades bolivianas. Los estudios de hábitos alimentarios coordinados por la Organización Panamericana de la Salud (OPS, 2023) documentan un incremento del 18% entre 2015 y 2022 en la proporción de hogares urbanos del eje central que declaran "consumir frutas y verduras frescas más de cuatro días por semana", asociado a un cambio cultural que valora la trazabilidad del origen del producto, la frescura como atributo diferencial y la conexión directa con el productor primario como signo de autenticidad. Esta tendencia cultural sostiene la disposición a pagar prima por productos frescos diferenciados que el proyecto monetiza en su propuesta de valor del lado consumidor.
+
+La penetración digital en el segmento rural de productores ha experimentado una transformación silenciosa durante los últimos cinco años. La penetración de internet móvil en zonas rurales del Valle de Cochabamba pasó del 22% en 2018 al 76% en 2023 según los reportes consolidados de la ATT (2023), con cobertura efectiva de 4G en los principales corredores productivos —Punata, Cliza, Sacaba, Vinto, Quillacollo— y adopción de smartphones que supera el 65% en el segmento de jefes de unidad productiva familiar entre 30 y 55 años. Esta penetración digital es el habilitador silencioso del proyecto: una propuesta de plataforma agroalimentaria habría sido inviable diez años atrás por la ausencia de infraestructura de comunicación; hoy es operativamente factible.
+
+La migración rural-urbana intra-departamental sigue siendo significativa pero a tasas decrecientes en Cochabamba, con una desaceleración progresiva desde el pico de los años 2005-2010 (Ministerio de Desarrollo Productivo y Economía Plural, 2022). El factor relevante para el proyecto no es tanto la migración masiva sino el patrón de movilidad de los productores: los censos agropecuarios muestran una creciente proporción de unidades familiares productoras que combinan actividad agrícola en el valle con actividad económica urbana complementaria, lo que les confiere mayor familiaridad con códigos urbanos, mayor acceso a smartphones y mayor disposición a adoptar herramientas digitales que las generaciones anteriores.
+
+Finalmente, la valoración cultural del comercio local y de la conexión directa con el productor constituye un activo intangible para el proyecto. Las ferias agroecológicas dominicales, las redes de Comercio Justo y las cooperativas de productores con punto de venta urbano han construido durante las últimas dos décadas la legitimidad social del consumo "del productor a la mesa", incluso entre segmentos urbanos de mayor poder adquisitivo. El proyecto se inscribe naturalmente en esa narrativa y se beneficia de un terreno cultural preparado por iniciativas anteriores que demostraron al consumidor cochabambino el valor de la conexión directa con el origen.
+
+**Tabla 3.3. Variables del factor Social — Cochabamba metropolitana, 2026-2030**
+
+| Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
+|---|---|:-:|:-:|:-:|
+| Tamaño del segmento C+/B | ~80.000 hogares (25% del total) (INE, 2024) | 5 | 5 | 5.0 |
+| Conciencia alimentación saludable creciente | +18% 2015-2022 (OPS, 2023) | 5 | 5 | 5.0 |
+| Penetración digital rural | 76% en zonas rurales del valle (ATT, 2023) | 5 | 5 | 5.0 |
+| Adopción WhatsApp como canal | >78% en segmento decisor de compra (ATT, 2024) | 4 | 5 | 4.0 |
+| Valoración cultural del comercio directo | Legitimidad acumulada desde ferias y cooperativas | 4 | 4 | 3.2 |
+| Movilidad rural-urbana de productores | Familiaridad creciente con códigos urbanos digitales | 3 | 4 | 2.4 |
+| **Promedio del factor Social** | | | | **4.10** |
+
+**Interpretación del factor Social.** La puntuación promedio de 4.10 ubica al factor social en una zona MUY FAVORABLE para el proyecto, la más alta del análisis PESTEL completo junto con el factor tecnológico. Las tres variables que aportan puntaje máximo (5.0) son el tamaño del segmento objetivo, la conciencia urbana sobre alimentación saludable y la penetración digital rural. El alineamiento simultáneo de estas tres variables es lo que hace que el proyecto sea viable hoy y no lo habría sido cinco años atrás. La adopción de WhatsApp como canal de mensajería universal en el segmento decisor de compra (4.0) reduce significativamente la barrera de adopción del producto. La valoración cultural del comercio directo (3.2) es un activo intangible que el proyecto puede capitalizar desde su comunicación de marca.
 
 ### 3.1.4 Factor Tecnológico
 
-Internet móvil >80%, cobertura 4G amplia. WhatsApp universal.
+El ecosistema tecnológico boliviano ha alcanzado en los últimos cinco años un nivel de maduración que habilita por primera vez la viabilidad operativa de propuestas de plataforma digital en sectores tradicionales como el agroalimentario. Tres tecnologías habilitadoras coinciden en su disponibilidad masiva y costo accesible: la conectividad móvil de alta velocidad, las aplicaciones de mensajería estructurada y las pasarelas de pago digital nacionales. El análisis de cada una sustenta la viabilidad técnica del proyecto sin requerir desarrollo de infraestructura propietaria.
 
-| Variable | Impacto | Probabilidad | Puntuación |
-|---|:-:|:-:|:-:|
-| Penetración internet móvil | 5 | 5 | 5.0 |
-| Adopción WhatsApp | 5 | 5 | 5.0 |
-| Pasarelas de pago QR Bolivia | 4 | 4 | 3.2 |
-| **Promedio Tecnológico** | | | **4.10** |
+La penetración de internet móvil en Bolivia ha superado el 80% de la población según los reportes consolidados de la Autoridad de Regulación y Fiscalización de Telecomunicaciones (ATT, 2024). Esta penetración se descompone en cobertura urbana superior al 95% y cobertura rural en el rango del 70%-80%, con las zonas rurales del Valle de Cochabamba específicamente entre las mejor servidas del país. La cobertura efectiva de 4G abarca los principales corredores productivos del departamento. Para el proyecto, esto implica que no existe limitación técnica de conectividad para la operación del lado productor ni del lado consumidor; la infraestructura habilitadora está presente.
 
-### 3.1.5 Factor Ecológico
+La adopción de smartphones ha seguido una curva paralela. Los reportes del Ministerio de Obras Públicas, Servicios y Vivienda estiman para 2023 una tasa de adopción de smartphones del 75% sobre la población mayor de 15 años a nivel nacional, con valores ligeramente superiores en áreas urbanas (82%) y ligeramente inferiores en áreas rurales (62%). En el segmento específico de productores del Valle de Cochabamba —jefes de unidad productiva familiar entre 30 y 55 años— la adopción supera el 65% según los estudios de penetración digital del sector agropecuario coordinados por el Ministerio de Desarrollo Rural y Tierras (2023). Estos valores son suficientes para sostener un modelo operativo basado en aplicación móvil simple sin requerir cobertura del 100%.
 
-| Variable | Impacto | Probabilidad | Puntuación |
-|---|:-:|:-:|:-:|
-| Reducción de mermas | 4 | 4 | 3.2 |
-| Conciencia ambiental urbana | 4 | 4 | 3.2 |
-| Estacionalidad climática | 4 | 5 | 4.0 |
-| **Promedio Ecológico** | | | **3.47** |
+Las aplicaciones de mensajería estructurada han alcanzado adopción prácticamente universal en el ecosistema digital boliviano. WhatsApp es la aplicación líder con tasas de uso que superan el 90% sobre la base de usuarios de smartphones, y la variante WhatsApp Business permite la implementación de flujos de pedidos estructurados, catálogos de producto y respuestas automatizadas sin requerir desarrollo de aplicación propia. El proyecto puede capitalizar esta infraestructura existente para la operación del producto mínimo viable durante los primeros 12 a 18 meses, lo que reduce significativamente la inversión inicial requerida y acelera el tiempo a mercado.
+
+Las pasarelas de pago digital nacionales han experimentado un salto cualitativo desde la implementación del sistema interoperable QR Bolivia regulado por la Autoridad de Supervisión del Sistema Financiero (ASFI, 2023). El sistema permite el cobro mediante código QR único interoperable entre todos los bancos del sistema, con tarifas de procesamiento típicamente entre 0.5% y 1.5% del valor transado según el segmento y el volumen. Esta funcionalidad elimina la fricción del cobro contra entrega y abre la posibilidad de pago anticipado por preventa, modelo que el proyecto adopta en su diseño operativo del Capítulo IV.
+
+Los costos de infraestructura tecnológica para una propuesta del tipo proyecto son hoy accesibles para emprendimientos nuevos. La suscripción mensual a herramientas de gestión —Google Workspace, herramientas de CRM básicas, hosting de sitios web responsivos, suscripciones a plataformas de bajo código como Airtable o Glide— se ubica en el rango de USD 100 a USD 500 mensuales durante los primeros 18 meses, valor compatible con la estructura de inversión inicial del proyecto. La inversión en desarrollo propietario de aplicación nativa se posterga hasta el año 2-3 cuando los volúmenes operativos justifiquen la inversión.
+
+El estado del arte internacional confirma la viabilidad técnica de la propuesta. Plataformas comparables como Twiga Foods (Kenia), Frubana (Colombia y México) y Agrofy (Argentina) han demostrado que el modelo es operativamente factible en mercados emergentes con condiciones técnicas similares a las bolivianas, escalando desde productos mínimos viables sobre infraestructura digital existente hasta plataformas propietarias en horizontes de tres a cinco años.
+
+**Tabla 3.4. Variables del factor Tecnológico — Bolivia y Cochabamba, 2026-2030**
+
+| Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
+|---|---|:-:|:-:|:-:|
+| Penetración internet móvil | >80% nacional, 76% rural Valle Cocha (ATT, 2024) | 5 | 5 | 5.0 |
+| Adopción de smartphones segmento productor | >65% jefes UPF 30-55 años (MDRyT, 2023) | 5 | 5 | 5.0 |
+| Adopción de WhatsApp como canal | >90% sobre base smartphones | 5 | 5 | 5.0 |
+| Pasarela QR Bolivia interoperable | Tarifas 0.5-1.5%, regulada por ASFI | 5 | 5 | 5.0 |
+| Disponibilidad de plataformas de bajo código | USD 100-500/mes para MVP | 4 | 5 | 4.0 |
+| Validación de modelo internacional comparable | Twiga, Frubana, Agrofy demuestran viabilidad | 4 | 4 | 3.2 |
+| **Promedio del factor Tecnológico** | | | | **4.53** |
+
+**Interpretación del factor Tecnológico.** La puntuación promedio de 4.53 hace del factor tecnológico el habilitador principal del proyecto en el análisis PESTEL completo. Cuatro de seis variables alcanzan el puntaje máximo (5.0) y reflejan que la infraestructura tecnológica nacional ofrece todos los componentes necesarios para la operación del proyecto sin requerir inversión en infraestructura propietaria durante los primeros años. La combinación de penetración móvil universal, adopción de WhatsApp transversal a ambos lados del mercado, pasarela QR interoperable y plataformas de bajo código accesibles permite un producto mínimo viable de bajo costo y rápida puesta en marcha. La validación internacional del modelo (3.2) reduce el riesgo conceptual del proyecto al confirmar que la propuesta tiene precedentes exitosos en mercados emergentes comparables.
+
+### 3.1.5 Factor Ecológico y Ambiental
+
+El factor ecológico cobra densidad específica en el proyecto por dos razones complementarias: la naturaleza agropecuaria del lado oferta y la sensibilidad ambiental creciente del segmento consumidor del lado demanda. La normativa ambiental boliviana relevante para el proyecto se articula en torno a la Ley N° 1333 del Medio Ambiente de 1992 y sus reglamentos sectoriales, particularmente el Reglamento de Gestión de Residuos Sólidos (Decreto Supremo N° 24176) y el Reglamento de Prevención y Control Ambiental. Estos cuerpos normativos no imponen al proyecto cargas operativas significativas en su escala inicial, pero establecen el marco general dentro del cual la operación debe inscribirse.
+
+La estacionalidad climática del rubro hortofrutícola del Valle de Cochabamba presenta variabilidad significativa que el proyecto debe gestionar operativamente. La temporada principal de cosecha de hortalizas de hoja se concentra entre marzo y septiembre, mientras que las frutas de pepita y carozo (manzana, durazno, pera) tienen ventana de cosecha entre diciembre y marzo. Esta estacionalidad genera ciclos predecibles de oferta agregada por categoría que el proyecto debe reflejar en sus proyecciones de demanda potencial mensual del Capítulo III sección 3.6. Los fenómenos climáticos extremos —heladas tempranas en julio-agosto, granizadas en noviembre-diciembre, sequías prolongadas asociadas a ciclos El Niño— pueden generar disrupciones puntuales de oferta del 15% al 40% para categorías específicas en años extremos según los reportes del Servicio Nacional de Meteorología e Hidrología (SENAMHI, 2023).
+
+La conciencia ambiental del segmento consumidor objetivo ha mostrado un crecimiento sostenido en los hogares NSE C+ y B del área metropolitana. Los estudios de hábitos de consumo de la Cámara Nacional de Comercio (CNC, 2023) documentan que el 38% de los consumidores urbanos del eje central declara estar dispuesto a pagar entre 10% y 20% adicional por productos con trazabilidad declarada, certificación de origen local o producción agroecológica. Esta disposición a pagar prima por atributos ambientales sostiene la propuesta de valor del proyecto del lado consumidor y abre la posibilidad de líneas de producto premium con margen superior al mix base.
+
+La gestión de mermas constituye otro componente ambiental relevante. La cadena agroalimentaria tradicional boliviana presenta tasas de merma post-cosecha del 20% al 35% según los reportes de la Organización de las Naciones Unidas para la Alimentación y la Agricultura (FAO, 2023) para América Latina, principalmente concentradas en los eslabones de transporte, almacenamiento mayorista y exposición minorista. Una propuesta de plataforma de preventa programada puede reducir estas mermas significativamente al permitir el retiro just-in-time y la consolidación logística sin almacenamiento intermedio prolongado. Esta reducción tiene impacto económico directo —margen recuperado— y ambiental indirecto —menor desperdicio de alimentos—.
+
+La huella de carbono del modelo operativo del proyecto es comparativamente menor que la del canal tradicional. La consolidación logística por zona reduce el número total de viajes en la red, comparado con el modelo tradicional donde cada productor traslada individualmente su producción al mercado mayorista. Una estimación preliminar basada en factores de emisión del sector transporte boliviano (Ministerio de Hidrocarburos y Energía, 2022) sugiere una reducción del 25% al 40% en emisiones por kilogramo transportado al pasar del modelo tradicional al modelo consolidado. Esta ventaja ambiental, aunque no monetizable directamente en el contexto regulatorio boliviano actual, puede integrarse a la narrativa de marca del proyecto.
+
+Las certificaciones ambientales relevantes para el rubro incluyen la certificación orgánica del Sistema Plurinacional de Certificación de Productos Ecológicos coordinado por el SENASAG y las certificaciones de Comercio Justo internacionales. Estas certificaciones son optativas para el proyecto en su fase inicial, pero pueden constituir línea de producto premium en el horizonte de tres a cinco años.
+
+**Tabla 3.5. Variables del factor Ecológico — Bolivia y Cochabamba, 2026-2030**
+
+| Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
+|---|---|:-:|:-:|:-:|
+| Estacionalidad climática del rubro | Ciclos predecibles + eventos extremos puntuales | 4 | 5 | 4.0 |
+| Conciencia ambiental segmento consumidor | 38% dispuesto a premium 10-20% (CNC, 2023) | 4 | 4 | 3.2 |
+| Reducción de mermas vs. canal tradicional | 20-35% mermas en cadena tradicional (FAO, 2023) | 4 | 4 | 3.2 |
+| Huella de carbono del modelo consolidado | 25-40% reducción vs. modelo tradicional | 3 | 4 | 2.4 |
+| Normativa ambiental Ley 1333 | Marco general, sin cargas significativas iniciales | 2 | 5 | 2.0 |
+| Disponibilidad de certificaciones premium | SENASAG orgánico + Comercio Justo (futuro) | 3 | 3 | 1.8 |
+| **Promedio del factor Ecológico** | | | | **2.77** |
+
+**Interpretación del factor Ecológico.** La puntuación promedio de 2.77 ubica al factor ecológico en una zona FAVORABLE-MODERADA para el proyecto, con la estacionalidad climática (4.0) como variable de mayor impacto. La estacionalidad debe gestionarse operativamente mediante proyecciones de oferta diferenciadas por categoría y por temporada, y mediante protocolos de contingencia ante eventos climáticos extremos. La conciencia ambiental del consumidor (3.2) sostiene la propuesta de valor premium del proyecto. La reducción de mermas vs. canal tradicional (3.2) representa una ventaja competitiva tangible que se traduce en margen recuperable. Las certificaciones premium son una palanca futura, no inicial.
 
 ### 3.1.6 Factor Legal
 
-Código de Comercio, Ley General del Trabajo, Ley N° 843 Reforma Tributaria, SENASAG, SEPREC, SIN.
+El marco legal aplicable al proyecto se articula en seis cuerpos normativos centrales que regulan respectivamente la constitución y operación societaria, las obligaciones tributarias, las relaciones laborales, la inocuidad alimentaria, los servicios digitales y los derechos del consumidor. Cada cuerpo normativo se desarrolló en detalle en la sección 2.8 del Capítulo II; aquí se discute específicamente su impacto sobre el horizonte temporal y el contexto operativo del proyecto.
 
-**Síntesis PESTEL.** Entorno **moderadamente favorable** con factor tecnológico (4.10) como habilitador principal.
+El Código de Comercio (Decreto Ley N° 14379 de 1977) regula la constitución del proyecto como Sociedad de Responsabilidad Limitada. Los trámites administrativos asociados —matrícula en SEPREC, registro tributario, libros contables— tienen plazos administrativos estimados entre 30 y 60 días calendario para una constitución estándar, según los datos publicados por el SEPREC (2024). Estos plazos son razonables y no constituyen barrera al ingreso del proyecto al mercado.
+
+La Ley N° 843 de Reforma Tributaria y sus normas complementarias del SIN establecen el régimen tributario al que se inscribe el proyecto: régimen general con alícuotas del 13% para el IVA, 3% para el IT y 25% para el IUE sobre la utilidad neta. La carga tributaria combinada efectiva, calculada sobre el modelo de comisión por transacción que adopta el proyecto, se ubica en el rango del 18% al 22% sobre los ingresos brutos. Esta carga es la misma para todos los actores formales del rubro, lo que no constituye desventaja relativa, pero sí impone disciplina financiera al diseño de la estructura tarifaria del Capítulo IV.
+
+La Ley General del Trabajo y sus modificatorias regulan las relaciones laborales del proyecto con sus colaboradores. Los costos laborales totales —salario nominal + aportes patronales (10% Caja Nacional de Salud, ~1.71% sistema integral de pensiones, ~2% riesgos profesionales) + aguinaldo anual (1/12 del salario)— equivalen aproximadamente al 130-135% del salario nominal. Esta proporción debe considerarse en el cálculo de la planilla salarial del Capítulo IV. La estabilidad laboral establecida por la legislación boliviana limita la flexibilidad de ajuste de planta del proyecto en escenarios adversos, lo que refuerza la importancia de un diseño organizacional inicialmente conservador.
+
+La Ley N° 830 del SENASAG y el Decreto Supremo N° 26167 imponen obligaciones específicas de inocuidad alimentaria que aplican al proyecto por su naturaleza agroalimentaria. El registro sanitario del centro de acopio, la trazabilidad documental de lotes y las inspecciones periódicas son requerimientos no opcionales. Los plazos típicos para el otorgamiento del registro sanitario inicial oscilan entre 45 y 90 días calendario, lapso que debe contemplarse en el cronograma de fase de inversión.
+
+La Ley N° 164 de Telecomunicaciones, TIC y sus reglamentos específicos sobre datos personales impactan directamente al proyecto en su componente de plataforma digital. La gestión de datos personales de usuarios (productores y consumidores), las políticas de privacidad, los términos y condiciones del servicio y los mecanismos de reclamación accesibles son requerimientos no opcionales del despliegue. La implementación adecuada de estos requerimientos es, además, una buena práctica de gestión de riesgo reputacional para la operación.
+
+La Ley N° 453 General de los Derechos de las Usuarias y los Usuarios y de las Consumidoras y los Consumidores impone al proyecto la obligación de transparencia plena sobre el origen, peso y calidad de los productos comercializados, sistemas de devolución funcionales y políticas de no discriminación tanto entre productores adheridos como entre consumidores compradores. Estos requerimientos son consistentes con la propuesta de valor del proyecto y no constituyen carga adicional sustancial.
+
+**Tabla 3.6. Variables del factor Legal — Bolivia, 2026-2030**
+
+| Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
+|---|---|:-:|:-:|:-:|
+| Carga tributaria régimen general | 18-22% efectivo sobre ingresos brutos | 4 | 5 | 4.0 |
+| Plazos de constitución SEPREC | 30-60 días para SRL estándar (SEPREC, 2024) | 2 | 5 | 2.0 |
+| Costos laborales totales | 130-135% del salario nominal | 4 | 5 | 4.0 |
+| Obligaciones SENASAG y plazos | 45-90 días registro sanitario inicial | 4 | 5 | 4.0 |
+| Ley 164 protección de datos | Implementación obligatoria de políticas | 3 | 5 | 3.0 |
+| Estabilidad laboral LGT | Limita flexibilidad de ajuste de planta | 3 | 5 | 3.0 |
+| **Promedio del factor Legal** | | | | **3.33** |
+
+**Interpretación del factor Legal.** La puntuación promedio de 3.33 ubica al factor legal en una zona NEUTRO-MODERADAMENTE favorable. El marco normativo boliviano es sólido y previsible, lo que reduce la incertidumbre regulatoria, pero impone cargas operativas significativas en términos de carga tributaria efectiva (4.0) y costo laboral total (4.0). Las obligaciones sectoriales del SENASAG (4.0) son no opcionales pero gestionables con planificación adecuada. La estabilidad laboral establecida por la LGT (3.0) refuerza la importancia de un diseño organizacional inicialmente conservador con incorporación de planta a medida que se valida la operación. La Ley 164 (3.0) introduce requerimientos de protección de datos que son consistentes con buenas prácticas internacionales y no representan barrera específica.
+
+### 3.1.7 Cuadro resumen del análisis PESTEL
+
+**Tabla 3.7. Resumen general del análisis PESTEL — Proyecto en Cochabamba, 2026-2030**
+
+| Factor | Promedio | Naturaleza para el proyecto | Magnitud |
+|---|:-:|---|---|
+| Político | 2.60 | Mixta: fomento agropecuario vs. conflictividad | Media |
+| Económico | 3.60 | Favorable: inflación abre ventana, financiamiento BDP disponible | Alta |
+| Social | 4.10 | Muy favorable: segmento + conciencia + digitalización alineados | Alta |
+| Tecnológico | 4.53 | Muy favorable: habilitador principal del proyecto | Alta |
+| Ecológico | 2.77 | Favorable-moderada: gestión de estacionalidad clave | Media |
+| Legal | 3.33 | Neutro-favorable: marco sólido con cargas operativas | Media |
+| **Promedio general PESTEL** | **3.49** | **Favorable agregado** | **Media-Alta** |
+
+**Síntesis del análisis PESTEL.** El entorno macro del proyecto es AGREGADAMENTE FAVORABLE con un promedio general de 3.49 sobre 5.0. Los dos factores que actúan como habilitadores principales son el Tecnológico (4.53) y el Social (4.10): la coincidencia entre madurez de infraestructura digital, conciencia urbana sobre alimentación saludable y tamaño efectivo del segmento objetivo es precisamente lo que hace que el proyecto sea viable hoy y no lo habría sido cinco años atrás. El factor Económico (3.60) confirma la viabilidad financiera mediante la disponibilidad de financiamiento de fomento del BDP a tasas accesibles y la capacidad de pago efectiva del segmento consumidor. Los factores Legal (3.33) y Ecológico (2.77) introducen cargas operativas gestionables que se reflejan en el diseño organizacional, técnico y financiero del Capítulo IV. El factor Político (2.60) constituye la principal fuente de riesgo del análisis, dominado por la conflictividad social regional y el ciclo electoral 2025, riesgos que el proyecto mitiga mediante protocolos de contingencia logística y mediante monitoreo activo del entorno político durante el primer año de operación. Este análisis alimenta directamente la matriz de evaluación de factores externos (EFE) que se construye en la sección 3.3, donde las variables identificadas como oportunidades y amenazas se ponderarán según su importancia relativa para el proyecto.`;
+
+/**
+ * HUB_CAP3_FULL — Mantiene compatibilidad con el mapping previo para 3b-3f.
+ * Las subfases 3b, 3c, 3d, 3e, 3f siguen apuntando aquí mientras se
+ * reescriben con la calidad densa de HUB_CAP3A_PESTEL.
+ *
+ * Pendiente registrado #57 sub-tareas:
+ *   - HUB_CAP3B_PORTER
+ *   - HUB_CAP3C_MATRICES
+ *   - HUB_CAP3D_ENCUESTA
+ *   - HUB_CAP3E_RESULTADOS
+ *   - HUB_CAP3F_DEMANDA
+ */
+export const HUB_CAP3_FULL = `# Capítulo III — Marco Situacional (versión resumida)
+
+> **NOTA:** Esta es la versión resumida del Cap. III usada como mock para las
+> subfases 3b a 3f mientras se reescriben los mocks específicos con la
+> calidad densa de HUB_CAP3A_PESTEL. Cuando estén los mocks específicos, esta
+> constante se retira.
 
 ## 3.2 Análisis del Microentorno (Cinco Fuerzas de Porter)
 
@@ -770,69 +922,18 @@ Código de Comercio, Ley General del Trabajo, Ley N° 843 Reforma Tributaria, SE
 | **Total** | **1.00** | **3.87** | **3.03** | **3.88** |
 
 ## 3.4 Diseño del Instrumento de Investigación
-
-### 3.4.1 Definición del segmento
-Encuesta A: 180 productores del Valle. Encuesta B: 200 hogares NSE C+/B Cochabamba.
-
-### 3.4.2 Cálculo de muestra: nA=372, nB=383 (ajustadas a 180/200 operativas)
-
-### 3.4.3 Tipo: no probabilístico por conveniencia con cuotas
-
-### 3.4.4 Cuestionario A (Productores): 4 bloques — demográficos, hábitos comercialización, percepción canal actual, intención propuesta
-### 3.4.5 Cuestionario B (Consumidores): 4 bloques — demográficos, hábitos consumo, percepción oferta actual, intención propuesta
+Encuesta A: 180 productores. Encuesta B: 200 hogares NSE C+/B Cochabamba. nA=372, nB=383 ajustadas. Muestreo no probabilístico por conveniencia con cuotas. 4 bloques por cuestionario.
 
 ## 3.5 Análisis de Resultados de la Encuesta
 
-> **⚠️ NOTA METODOLÓGICA — Proyección basada en investigación secundaria**
+> **NOTA METODOLÓGICA — Proyección basada en investigación secundaria**
 >
 > Los resultados NO provienen de aplicación primaria del instrumento. Constituyen proyección académica basada en características del segmento y estudios sectoriales secundarios.
 
-### 3.5.1 Encuesta A (Productores, n=180)
-
-**Tabla 3.8. Satisfacción con precio actual**
-
-| Categoría | Frecuencia | % |
-|---|:-:|:-:|
-| Muy insatisfecho | 47 | 26.1% |
-| Insatisfecho | 73 | 40.6% |
-| Neutro | 38 | 21.1% |
-| Satisfecho | 18 | 10.0% |
-| Muy satisfecho | 4 | 2.2% |
-
-**66.7%** insatisfecho con precio actual.
-
-**Tabla 3.9. Disposición a usar plataforma digital**
-
-| Categoría | % |
-|---|:-:|
-| Muy dispuesto / Dispuesto | **60.0%** |
-| Lo evaluaría | 26.1% |
-| Poco / Nada dispuesto | 13.9% |
-
-### 3.5.2 Encuesta B (Consumidores, n=200)
-
-**Interés en plataforma de compra directa**: 72% positivo.
-**Prima máxima sobre supermercado**: 71% acepta entre 1-20% adicional.
-
-### 3.5.3 Análisis bivariado
-
-| Provincia | % Disposición |
-|---|:-:|
-| Punata | 73.3% |
-| Cliza | 67.9% |
-| Sacaba | 71.4% |
-| Tiquipaya | 56.3% |
-| Quillacollo | 46.7% |
-| Vinto | 40.0% |
-
-Valle Alto > Valle Bajo en disposición.
+Productores: 66.7% insatisfecho con precio actual, 60.0% dispuestos a usar plataforma.
+Consumidores: 72% positivo, 71% acepta prima 1-20%.
 
 ## 3.6 Determinación de la Demanda y Cuota de Mercado
-
-### 3.6.1 Demanda potencial: 57.600 hogares (72% del universo)
-### 3.6.2 Demanda real esperada: 20.160 hogares activos × 2.5 pedidos/mes
-
-### 3.6.3 Proyección de cuota a 5 años
 
 | Año | Cuota | Hogares activos | Pedidos anuales |
 |:-:|:-:|:-:|:-:|

@@ -18,6 +18,7 @@ import {
   HUB_CAP0,
   HUB_CAP1,
   HUB_CAP2,
+  HUB_CAP3A_PESTEL,
   HUB_CAP3_FULL,
   HUB_CAP4_FULL,
   HUB_RESUMEN,
@@ -113,8 +114,8 @@ const MOCK_RESPONSES: MockSpec[] = [
   // ── Cap. III — Marco Situacional (sub-fases muy específicas)
   {
     matcher: /An[áa]lisis\s+del\s+Macroentorno.*PESTEL|6\s+factores.*Pol[íi]tico|impacto.*probabilidad.*puntuaci[óo]n/i,
-    faseLabel: "Cap. III — Marco Situacional (Hub Agrícola)",
-    body: HUB_CAP3_FULL,
+    faseLabel: "Cap. III §3.1 — PESTEL (Hub Agrícola)",
+    body: HUB_CAP3A_PESTEL,
   },
   {
     matcher: /5\s+Fuerzas\s+de\s+Porter|cinco\s+fuerzas\s+competitivas|amenaza\s+de\s+nuevos\s+entrantes|rivalidad\s+entre\s+competidores/i,
@@ -256,7 +257,7 @@ const MOCK_BY_PHASE_ID: Record<string, string> = {
   "ph-proy-cap0":       HUB_CAP0,
   "ph-proy-cap1":       HUB_CAP1,
   "ph-proy-cap2":       HUB_CAP2,
-  "ph-proy-cap3a":      HUB_CAP3_FULL,
+  "ph-proy-cap3a":      HUB_CAP3A_PESTEL,
   "ph-proy-cap3b":      HUB_CAP3_FULL,
   "ph-proy-cap3c":      HUB_CAP3_FULL,
   "ph-proy-cap3d":      HUB_CAP3_FULL,
