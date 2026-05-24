@@ -258,7 +258,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
   useEffect(() => {
     let interval: number;
     if (pathname === "/nucleo") {
-      const children = ["scribe", "axiom", "lumen", "mentor"];
+      const children = ["scribe", "lumen", "mentor"];
       let currentIndex = -1;
       
       interval = window.setInterval(() => {
@@ -267,7 +267,6 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         
         const DEFAULTS: Record<string, ParticleConfigInput> = {
           scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
-          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
           mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 600 }
         };
@@ -314,14 +313,12 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         const currentPath = typeof overridePathname === "string" ? overridePathname : pathname;
         let targetModule = "scribe";
         if (currentPath.startsWith("/admin")) targetModule = "admin";
-        else if (currentPath.startsWith("/axiom")) targetModule = "axiom";
         else if (currentPath.startsWith("/lumen")) targetModule = "lumen";
         else if (currentPath.startsWith("/mentor")) targetModule = "mentor";
         else if (currentPath.startsWith("/nucleo")) targetModule = "nucleo";
 
         const DEFAULTS: Record<string, ParticleConfigInput> = {
           scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
-          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
           mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 600 },
           nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 900 },
