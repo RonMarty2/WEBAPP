@@ -232,10 +232,30 @@ export default function WorkspacePGPage() {
             textDecoration: "none",
             border: "1px solid rgba(37,99,235,0.25)",
           }}
-          title="Abrir vista previa del documento como PDF"
+          title="Abrir vista previa del documento"
         >
-          📄 Ver como PDF
+          📄 Ver preview
         </Link>
+        <a
+          href={`/api/projects/${proyectoId}/paquete-latex`}
+          download
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            borderRadius: 7,
+            background: "rgba(22,163,74,0.12)",
+            color: "#16a34a",
+            fontSize: 12,
+            fontWeight: 700,
+            textDecoration: "none",
+            border: "1px solid rgba(22,163,74,0.3)",
+          }}
+          title="Descargar ZIP con el archivo .tex listo para Overleaf o pdflatex local"
+        >
+          📦 Descargar LaTeX (.zip)
+        </a>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {titulo}

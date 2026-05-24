@@ -188,13 +188,13 @@ export default function PreviewPgPage() {
         <div style={{ color: "#94a3b8", fontSize: 12 }}>
           Estimado: <strong style={{ color: "white" }}>{totalPaginasEstimadas}</strong> páginas
         </div>
-        <button
-          type="button"
-          onClick={() => window.print()}
+        <a
+          href={`/api/projects/${proyectoId}/paquete-latex`}
+          download
           style={{
             padding: "8px 16px",
             borderRadius: 7,
-            background: "#3b82f6",
+            background: "#16a34a",
             color: "white",
             border: "none",
             fontWeight: 700,
@@ -203,11 +203,12 @@ export default function PreviewPgPage() {
             display: "inline-flex",
             alignItems: "center",
             gap: 6,
+            textDecoration: "none",
           }}
-          title="Abre el diálogo de impresión. Elegí 'Guardar como PDF' como impresora para descargar el documento."
+          title="Descarga un ZIP con el archivo .tex listo para compilar en tu PC (pdflatex) o subir a Overleaf"
         >
-          📥 Descargar PDF
-        </button>
+          📦 Descargar LaTeX (.zip)
+        </a>
       </div>
 
       {/* ───── CARÁTULA SIMULADA ───── */}
@@ -335,15 +336,15 @@ export default function PreviewPgPage() {
         color: "#94a3b8",
         fontSize: 12,
         padding: "30px 20px 10px",
-        maxWidth: 640,
+        maxWidth: 700,
         margin: "0 auto",
-        lineHeight: 1.6,
+        lineHeight: 1.7,
       }}>
-        Esta es una <strong>vista previa</strong> simulando el formato del PDF final.
-        El documento real se compila con pdfLaTeX usando el preámbulo UCATEC oficial
-        (diagramas TikZ, fórmulas matemáticas y tablas renderizadas vectorialmente).
-        Para descargar como PDF, apretá el botón <strong>📥 Descargar PDF</strong> arriba —
-        en el diálogo de impresión, elegí <strong>&quot;Guardar como PDF&quot;</strong> como destino.
+        Esta es una <strong>vista previa</strong> simulando el formato del documento.
+        Para obtener el archivo final, apretá <strong>📦 Descargar LaTeX (.zip)</strong> arriba.
+        El ZIP contiene el archivo <code style={{ background: "rgba(255,255,255,0.1)", padding: "1px 6px", borderRadius: 3, color: "#cbd5e1" }}>.tex</code> con el preámbulo UCATEC oficial,
+        listo para compilar localmente con <code style={{ background: "rgba(255,255,255,0.1)", padding: "1px 6px", borderRadius: 3, color: "#cbd5e1" }}>pdflatex</code> o subir directo a <a href="https://overleaf.com" target="_blank" rel="noopener noreferrer" style={{ color: "#3b82f6" }}>Overleaf</a>.
+        Los diagramas TikZ, fórmulas matemáticas y tablas se renderizan vectorialmente al compilar.
       </div>
     </div>
   );
