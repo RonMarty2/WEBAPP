@@ -130,6 +130,18 @@ export async function llamarIAPorPlan(
   phase: PhaseIndex,
   plan: PlanTier,
 ): Promise<AIRouteResult> {
+  // 🧪 MOCK MODE — antes de cualquier llamada a IA real, chequear si el
+  // sistema debe operar en modo demostración. Esto cubre el caso de
+  // endpoints que usan llamarIAPorPlan en lugar de llamarIA (donde el
+  // mock estaba originalmente). Lectura defensiva del env var: si
+  // MOCK_AI=true, devolvemos respuesta stub sin tocar APIs reales.
+  if (process.env.MOCK_AI === "true") {
+    const { generateMockResponse } = await import("@/lib/aiMockProvider");
+    console.log("[modelRouter] 🧪 MOCK MODE activo (MOCK_AI=true) — devolviendo stub para plan", plan, "fase", phase);
+    const text = generateMockResponse(system, user);
+    return { text, provider: "mock", model: "mock-validator-v1" };
+  }
+
   const cfg = getModelConfig(phase, normalizePlan(plan));
   const apiKey = getProviderKey(cfg.provider);
 
