@@ -246,15 +246,63 @@ antes de avanzar a la formulación formal del Capítulo I.
  * Si ningún matcher coincide, devuelve un stub genérico que igualmente
  * permite validar el flujo (el contenido se persiste y se renderiza).
  */
+/**
+ * Mapa de phase_id → contenido mock. 100% confiable (sin regex).
+ * Cada fase del Proyecto de Grado tiene su contenido específico.
+ * Las subfases de Cap. III y Cap. IV comparten un mismo bloque que
+ * incluye la fase relevante.
+ */
+const MOCK_BY_PHASE_ID: Record<string, string> = {
+  "ph-proy-cap0":       HUB_CAP0,
+  "ph-proy-cap1":       HUB_CAP1,
+  "ph-proy-cap2":       HUB_CAP2,
+  "ph-proy-cap3a":      HUB_CAP3_FULL,
+  "ph-proy-cap3b":      HUB_CAP3_FULL,
+  "ph-proy-cap3c":      HUB_CAP3_FULL,
+  "ph-proy-cap3d":      HUB_CAP3_FULL,
+  "ph-proy-cap3e":      HUB_CAP3_FULL,
+  "ph-proy-cap3f":      HUB_CAP3_FULL,
+  "ph-proy-cap4a":      HUB_CAP4_FULL,
+  "ph-proy-cap4abis":   HUB_CAP4_FULL,
+  "ph-proy-cap4b":      HUB_CAP4_FULL,
+  "ph-proy-cap4c":      HUB_CAP4_FULL,
+  "ph-proy-cap4d":      HUB_CAP4_FULL,
+  "ph-proy-cap4e":      HUB_CAP4_FULL,
+  "ph-proy-cap4f":      HUB_CAP4_FULL,
+  "ph-proy-cap4g":      HUB_CAP4_FULL,
+  "ph-proy-resumen":    HUB_RESUMEN,
+  "ph-proy-conclus":    HUB_CONCLUSIONES,
+  "ph-proy-referencias":HUB_REFERENCIAS,
+  "ph-proy-defensa":    HUB_DEFENSA,
+  "ph-proy-latex":      HUB_LATEX_NOTE,
+};
+
+/**
+ * Genera una respuesta mock representativa.
+ *
+ * Estrategia de selección (en orden):
+ * 1. Si el system prompt contiene marker [[MOCK_PHASE_ID:xxx]] (inyectado
+ *    explícitamente por el endpoint generate-phase), selecciona por
+ *    phase_id directo. 100% confiable.
+ * 2. Si no hay marker, hace fallback a regex sobre system prompt (menos
+ *    confiable pero útil para llamadas legacy sin contexto).
+ *
+ * Devuelve el contenido SIN banner (el banner es solo UI, no contamina
+ * el contenido persistido).
+ */
 export function generateMockResponse(systemPrompt: string, _userPrompt: string): string {
+  // 1) Estrategia primaria: marker phase_id
+  const markerMatch = systemPrompt.match(/\[\[MOCK_PHASE_ID:([^\]]+)\]\]/);
+  if (markerMatch) {
+    const phaseId = markerMatch[1].trim();
+    const body = MOCK_BY_PHASE_ID[phaseId];
+    if (body) return body;
+    // Si el phase_id no está en el mapa, fallback al regex
+  }
+
+  // 2) Fallback regex (para llamadas legacy)
   const match = MOCK_RESPONSES.find((spec) => spec.matcher.test(systemPrompt));
-  const body = match?.body ?? `Contenido de la fase. El sistema generará texto académico completo cuando se configuren las API keys reales.`;
-  // 🎯 IMPORTANTE: NO incluimos el MOCK_BANNER en el contenido devuelto
-  // porque ese contenido se persiste en BD y termina yendo al LaTeX/PDF.
-  // El banner es solo UI: el frontend lo agrega visualmente cuando
-  // detecta que el provider del proyecto es "mock". El contenido en sí
-  // debe ser tal cual saldría de la IA real, sin metadata de UI.
-  return body;
+  return match?.body ?? `Contenido de la fase. El sistema generará texto académico completo cuando se configuren las API keys reales.`;
 }
 
 /**

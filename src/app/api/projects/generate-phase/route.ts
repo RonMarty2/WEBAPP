@@ -946,13 +946,23 @@ APA 7 / UMSS que aparezca en el resto del prompt.
     let traceError: string | null = null;
     let autoContinuado = false;
     try {
+      // 🧪 MOCK MODE: inyectar marker phase_id al system prompt para que
+      // el mock seleccione el contenido correcto por phase_id directo
+      // (sin depender de regex que falla cuando los prompts comparten
+      // palabras académicas comunes como 'VAN', 'organigrama', etc.).
+      // El marker solo se agrega cuando MOCK_AI=true; en producción real
+      // el system prompt llega tal cual a la IA.
+      const systemPromptWithMockMarker = process.env.MOCK_AI === "true"
+        ? `[[MOCK_PHASE_ID:${phase_id}]]\n${systemPrompt}`
+        : systemPrompt;
+
       // Admin override takes priority (set via Admin → Modelos & APIs panel)
       const adminCfg = getServiceAIConfig(proyecto.servicio_id);
 
       let aiResult: { text: string; provider: string; model: string };
       if (adminCfg?.api_key) {
         // Use admin-configured provider for this service
-        const r = await llamarIA(systemPrompt, userPrompt, maxTokensForPhase, proyecto.servicio_id);
+        const r = await llamarIA(systemPromptWithMockMarker, userPrompt, maxTokensForPhase, proyecto.servicio_id);
         aiResult = { text: r.text, provider: r.provider, model: r.model };
       } else if (phase_id === "ph-latex" || phase_id === "ph-proy-latex") {
         // 🚀 Fase de Compilación LaTeX — YA NO LLAMA IA AQUÍ.
@@ -975,7 +985,7 @@ APA 7 / UMSS que aparezca en el resto del prompt.
         };
       } else {
         // Route by user's plan and academic phase
-        aiResult = await llamarIAPorPlan(systemPrompt, userPrompt, phaseIndex, planTier);
+        aiResult = await llamarIAPorPlan(systemPromptWithMockMarker, userPrompt, phaseIndex, planTier);
       }
 
       textoGenerado = aiResult.text;
