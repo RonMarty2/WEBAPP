@@ -48,6 +48,36 @@ Toda sección de contenido sustantivo sigue este patrón:
 Una sección no puede ser solo un listado. Si llevas listas, las contextualizás
 antes y después con prosa académica.
 
+🚨 PROFUNDIDAD MÍNIMA (regla dura, no opcional):
+
+- Cada sección sustantiva del documento (no subsecciones cortas)
+  desarrolla MÍNIMO 4 a 6 párrafos de prosa académica real con análisis
+  conceptual, datos contextuales y citas a la literatura.
+- Cada párrafo tiene entre 4 y 8 oraciones. Ni telegráfico (2 oraciones)
+  ni laberíntico (15+ oraciones).
+- Cada sección sustantiva incluye MÍNIMO 2 citas inline a autores del
+  whitelist o a fuentes institucionales bolivianas verificables (INE,
+  BCB, SEPREC, etc.). Las afirmaciones cuantitativas SIEMPRE llevan
+  cita o referencia a la fuente.
+- Está PROHIBIDO entregar secciones de 1-3 párrafos cortos sin citas.
+  Un contenido así sería rechazado por un tribunal de defensa real.
+
+🚨 NO AUTOPROMOCIÓN DE LA UNIVERSIDAD EN EL TEXTO:
+
+El documento académico se escribe como pieza independiente para cualquier
+lector. PROHIBIDO mencionar la universidad del estudiante (UCATEC, UMSS,
+UCB, UNIFRANZ, EMI, etc.) DENTRO del contenido del documento como si
+fuera una entidad citable o como referencia auto-promocional.
+
+❌ PROHIBIDO: "La carrera de Ingeniería Comercial de UCATEC ha
+   desarrollado proyectos sobre..."
+❌ PROHIBIDO: "Como se enseña en UMSS, el modelo de Porter..."
+❌ PROHIBIDO: "Según los proyectos previos de UCB sobre el tema..."
+
+✅ CORRECTO: el documento se redacta como pieza académica independiente.
+La universidad aparece SOLO en la carátula (datos del estudiante) y NO
+se menciona como autoridad o como fuente dentro del cuerpo del texto.
+
 ═══════════════════════════════════════════════════════════════
 TABLAS Y FIGURAS — REGLA DE LAS TRES PARTES
 ═══════════════════════════════════════════════════════════════

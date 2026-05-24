@@ -55,11 +55,25 @@ numeración. NO inventes secciones extra. NO omitas ninguna.
 ## 1.1 Antecedentes del trabajo académico
 
 Contextualizá el origen del proyecto. Por qué surge esta idea, qué la
-hace relevante en el momento actual de Bolivia / Cochabamba. Si hay
-proyectos previos similares (universitarios o empresariales), mencionalos
-con datos verificables — sino no.
+hace relevante en el momento actual de Bolivia / Cochabamba. Construye
+el background conceptual del proyecto integrando:
 
-Largo: 2-4 párrafos. Termina con una oración puente al objeto de estudio.
+- Caracterización del sector o rubro al que pertenece el proyecto
+  (referenciada a fuentes institucionales bolivianas como INE, BCB,
+  Cámara Nacional de Comercio o ministerios sectoriales).
+- Marco conceptual relevante del problema u oportunidad, citando al
+  menos 2-3 autores del whitelist autorizado (Porter, Tapscott, Parker
+  et al, Sapag Chain, Kotler, etc. — los que apliquen al rubro).
+- Brecha o oportunidad de mercado que el proyecto pretende atender.
+
+Largo OBLIGATORIO: **5 a 6 párrafos** de 4 a 8 oraciones cada uno.
+NO 2 párrafos cortos. NO bullets sueltos. PROSA ACADÉMICA real.
+Mínimo 3-4 citas APA inline distribuidas en la sección.
+
+PROHIBIDO mencionar la universidad del estudiante (UCATEC, UMSS, etc.)
+en el contenido — solo aparece en la carátula del documento.
+
+Termina con una oración puente al objeto de estudio.
 
 ## 1.2 Objeto de estudio
 
@@ -73,11 +87,25 @@ Largo: 1-2 párrafos.
 
 ### 1.3.1 Identificación del problema
 
-Describe el problema o oportunidad que el proyecto va a resolver. NO uses
-fórmula "no existe X" si no es verdad — busca el ángulo real (oferta
-limitada, calidad insuficiente, mercado desatendido, etc.).
+Describe el problema o oportunidad que el proyecto va a resolver con
+profundidad analítica suficiente para sostener todo el documento
+posterior. NO uses fórmula "no existe X" si no es verdad — busca el
+ángulo real (oferta limitada, calidad insuficiente, mercado desatendido,
+asimetría informativa, ineficiencia estructural, costo desproporcionado,
+brecha de innovación, etc.).
 
-Largo: 3-5 párrafos.
+Estructura interna sugerida (no rígida):
+- Anuncio del problema central en una oración clara.
+- Caracterización de las causas estructurales con datos contextuales.
+- Cuantificación del problema cuando haya datos disponibles (cifras,
+  porcentajes, magnitudes), citando fuentes verificables.
+- Análisis del estado actual de la oferta (qué soluciones existen, por
+  qué no resuelven completamente).
+- Identificación de la brecha que el proyecto va a atender.
+
+Largo OBLIGATORIO: **4 a 6 párrafos** de 4 a 8 oraciones cada uno.
+Mínimo 2-3 citas APA inline a autores del whitelist o fuentes
+institucionales bolivianas.
 
 ### 1.3.2 Árbol de problemas
 
@@ -163,20 +191,31 @@ Listalos numerados. NO repitas verbos entre objetivos.
 
 ### 1.5.1 Justificación técnica
 
-¿Por qué este proyecto es factible/relevante desde lo técnico u
-operativo? Recursos disponibles, tecnología accesible, know-how
-necesario. 1-2 párrafos.
+¿Por qué este proyecto es factible y relevante desde lo técnico u
+operativo? Desarrollar los recursos disponibles, la tecnología accesible
+en el contexto boliviano y el know-how requerido para la operación.
+**Mínimo 2 párrafos de 4-6 oraciones cada uno**. Incluir al menos una
+cita inline a autor del whitelist que sustente el argumento técnico
+(ej: Sapag Chain sobre proyectos de inversión, Heizer y Render sobre
+operaciones, Lovelock y Wirtz para servicios, etc.).
 
 ### 1.5.2 Justificación económica
 
-¿Por qué tiene sentido económico? Tamaño de mercado estimado, beneficios
-esperados, oportunidad de inversión. 1-2 párrafos. SIN inventar cifras
-si no las tienes — habla en términos cualitativos.
+¿Por qué tiene sentido económico? Desarrollar el tamaño de mercado
+estimado, los beneficios económicos esperados, el efecto multiplicador
+sobre la economía local y la coherencia con la oportunidad de inversión.
+**Mínimo 2 párrafos de 4-6 oraciones cada uno**. Datos de fuentes
+institucionales bolivianas (INE, BCB, FUNDEMPRESA, CNC). SIN inventar
+cifras puntuales si no las tienes — habla en términos cualitativos o
+con rangos plausibles enmarcados como tales. Mínimo 1 cita inline.
 
 ### 1.5.3 Justificación social
 
-¿Qué beneficio aporta al entorno? Empleo, acceso a productos/servicios,
-inclusión, sostenibilidad. 1-2 párrafos. Real, no decorativo.
+¿Qué beneficio aporta al entorno? Empleo formal, acceso a productos o
+servicios, inclusión económica, formalización de la cadena, reducción
+de inequidad estructural, sostenibilidad ambiental, etc. **Mínimo 2
+párrafos de 4-6 oraciones cada uno**. Real, no decorativo. Alinear con
+prioridades documentadas de política pública boliviana cuando aplique.
 
 ## 1.6 Alcance
 
