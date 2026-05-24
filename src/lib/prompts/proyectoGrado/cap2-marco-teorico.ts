@@ -17,8 +17,9 @@
  *
  * Max tokens recomendado: 16000.
  *
- * Estructura: 9-10 bloques (6 conceptuales + 4 contextuales).
- * Extensión esperada: 14000-22000 palabras (35-60 páginas).
+ * Estructura ADAPTATIVA: 6 a 14 bloques según el caso. La IA elige
+ * qué bloques contextuales y especializados incluir según el rubro.
+ * Extensión adaptativa: 8000 a 32000 palabras según densidad del caso.
  * El glosario va como ANEXO al final del documento, NO en el Cap. II.
  */
 
@@ -173,54 +174,143 @@ manufacturing"), AGREGALOS hasta llegar al máximo de 35.
 ESTRUCTURA OBLIGATORIA — BLOQUES TEMÁTICOS (NO LISTAS)
 ═══════════════════════════════════════════════════════════════
 
-Un Marco Teórico de Licenciatura tiene entre 9 y 12 bloques. Los
-6 primeros son CONCEPTUALES y los 4 siguientes son CONTEXTUALES.
+PRINCIPIO RECTOR: la cantidad y composición de bloques depende del
+RUBRO ESPECÍFICO del proyecto. No hay número fijo. Un proyecto en
+sector altamente regulado (fintech, salud, energía) tendrá marco
+normativo muy denso; un proyecto en sector emergente sin precedentes
+locales tendrá estado del arte muy denso; un proyecto industrial
+tradicional tendrá bloque de operaciones extenso; un proyecto de
+servicios B2B puede no necesitar antecedentes históricos del sector.
 
-BLOQUES CONCEPTUALES (obligatorios, en este orden aproximado):
+Tu trabajo es ELEGIR qué bloques incluir según el caso y CUÁN
+PROFUNDO desarrollar cada uno. La estructura final puede tener entre
+6 y 14 bloques. Solo los bloques marcados ESENCIAL son obligatorios
+en todos los casos.
 
-  ## 2.1 Fundamentos de la formulación y evaluación de proyectos
-  ## 2.2 Análisis estratégico de industrias y entornos
-  ## 2.3 Análisis del mercado y comportamiento del consumidor
-  ## 2.4 Fundamentos de evaluación financiera
-  ## 2.5 [BLOQUE ESPECÍFICO DEL SUBTIPO]
-       (servicios → Marketing de servicios y experiencia del cliente)
-       (producción → Gestión de operaciones y procesos productivos)
-  ## 2.6 [BLOQUE OPCIONAL específico al rubro]
-       (ej: Economía de plataformas digitales si el proyecto es marketplace)
+═══════════════════════════════════════════════════════════════
+BLOQUES DISPONIBLES — ELEGIR Y ADAPTAR SEGÚN EL CASO
+═══════════════════════════════════════════════════════════════
 
-BLOQUES CONTEXTUALES (obligatorios — sin estos el Marco Teórico
-queda flotando sin amarre histórico, normativo ni institucional):
+CONCEPTUALES (los primeros 4 son ESENCIALES — siempre van):
 
-  ## 2.7 Antecedentes históricos del sector / industria
-       Cómo evolucionó el sector en Bolivia hasta hoy. Cifras
-       sectoriales históricas. Hitos relevantes. Por qué el problema
-       que el proyecto ataca tiene la forma actual.
+  [ESENCIAL] Fundamentos de la formulación y evaluación de proyectos
+       Base metodológica universal (Sapag Chain, Baca Urbina).
 
-  ## 2.8 Marco normativo aplicable al proyecto
-       Toda la legislación boliviana relevante: Código de Comercio,
-       Ley 843 (tributaria), Ley General del Trabajo, normas
-       sectoriales específicas (SENASAG, ATT, ASFI, etc. según rubro),
-       Ley 164 (telecomunicaciones) si aplica, Ley del Consumidor.
-       NO una lista — desarrollo de cada cuerpo normativo, sus
-       artículos clave y su implicación para el proyecto.
+  [ESENCIAL] Análisis estratégico de industrias y entornos
+       PESTEL, Porter, FODA, matrices (David, Porter). Densidad mayor
+       si el sector es competitivo; menor si es nicho.
 
-  ## 2.9 Marco institucional del ecosistema
-       Las instituciones públicas y privadas que el proyecto debe
-       interlocutar: INE, SEPREC, SIN, FUNDEMPRESA, BCB, ministerios
-       sectoriales, gremios (cámaras, asociaciones), entidades
-       financieras de fomento (BDP, BNB), organismos de cooperación
-       internacional con presencia en el sector.
+  [ESENCIAL] Análisis del mercado y comportamiento del consumidor
+       Estudio de mercado, segmentación, demanda (Kotler, Hernández
+       Sampieri). Más extenso si la propuesta depende de
+       comportamiento del consumidor; más breve si es B2B.
 
-  ## 2.10 Estado del arte / experiencias comparables
-       Casos relevantes nacionales, regionales o internacionales de
-       propuestas similares al proyecto. NO listado de empresas —
-       análisis de qué hicieron, qué resultados obtuvieron, qué
-       aprendizajes son aplicables. Ejemplos: si el proyecto es una
-       plataforma agrícola, mencionar Farmcrowdy (Nigeria), Twiga
-       Foods (Kenia), Agrofy (Argentina), Olivos (Bolivia), etc.
+  [ESENCIAL] Fundamentos de evaluación financiera
+       VAN, TIR, WACC, PE (Brealey). Densidad uniforme; las fórmulas
+       son universales.
 
-El último bloque del Marco Teórico es 2.10 (estado del arte). El
-Capítulo cierra ahí.
+  [ESENCIAL si servicios] Marketing de servicios y experiencia del
+       cliente (Lovelock, Zeithaml). Solo subtipo servicios.
+
+  [ESENCIAL si producción] Gestión de operaciones y procesos
+       productivos (Heizer & Render). Solo subtipo producción.
+
+  [OPCIONAL según rubro] Bloques de teoría especializada que el caso
+       amerite. Ejemplos por rubro:
+         - Marketplace / plataforma digital → Economía de plataformas
+           bilaterales (Parker, Van Alstyne, Choudary; Tapscott)
+         - Fintech / servicios financieros → Inclusión financiera,
+           banca digital, regulación bancaria
+         - Salud / wellness → Gestión de servicios sanitarios
+         - Educación → Pedagogía aplicada al producto, edtech
+         - Turismo → Gestión del destino turístico, hotelería
+         - Inmobiliario → Valuación inmobiliaria, urbanismo
+         - Industrial / cadena → Supply chain management, lean
+         - Construcción → Gestión de proyectos PMI, BIM
+         - Energía / sostenibilidad → ESG, normas ISO 14001
+         - Logística → Distribución, transporte multimodal
+       Puede haber UNO o DOS bloques opcionales si el caso lo
+       amerita; o ninguno si el caso encaja completamente en los
+       bloques esenciales.
+
+CONTEXTUALES (incluir solo los que el caso AMERITA — no todos siempre):
+
+  [INCLUIR si el sector tiene historia relevante para entender el
+   problema actual] Antecedentes históricos del sector / industria
+       Cómo evolucionó el sector hasta hoy. Cifras sectoriales
+       históricas. Hitos. Por qué el problema tiene la forma actual.
+       NO INCLUIR si: el sector es emergente sin historia local
+       documentada, o si los antecedentes ya están suficientemente
+       cubiertos en el Cap. I.
+
+  [INCLUIR si la operación está regulada por más de 2 cuerpos
+   normativos relevantes] Marco normativo aplicable al proyecto
+       Desarrollo de cada cuerpo normativo, sus artículos clave y
+       su implicación. Densidad ALTA si fintech/salud/energía/
+       telecom; densidad MEDIA si comercio/servicios genéricos;
+       densidad BAJA o omitir si el cuadro normativo es solo
+       Código de Comercio + Ley 843 + LGT (cubiertos en Cap. IV).
+
+  [INCLUIR si el proyecto interlocuta con 4 o más instituciones
+   públicas y privadas relevantes] Marco institucional del ecosistema
+       Las instituciones del ecosistema: SEPREC, SIN, INE, BCB,
+       ministerios sectoriales, gremios, entidades de fomento.
+       Densidad ALTA si rubro regulado o si el sector tiene gremios
+       activos; densidad BAJA si el ecosistema es genérico y no
+       agrega información sobre la viabilidad del proyecto.
+
+  [INCLUIR si existen experiencias comparables documentadas a nivel
+   nacional, regional o internacional] Estado del arte / experiencias
+   comparables
+       Análisis de casos relevantes (NO listado de empresas). Qué
+       hicieron, qué resultados obtuvieron, qué aprendizajes son
+       aplicables. Densidad ALTA si el modelo es replicable de
+       experiencias internacionales; densidad MEDIA si solo hay
+       referencias locales; OMITIR si es propuesta sin precedente
+       comparable razonable (raro pero posible).
+
+  [OPCIONAL según rubro] Otros bloques contextuales que el caso
+   amerite:
+         - Marco geográfico / territorial (si el proyecto depende
+           críticamente de la geografía: turismo, agropecuario,
+           transporte)
+         - Marco sociocultural (si el proyecto interactúa con
+           comunidades específicas: rural, indígena, etc.)
+         - Marco económico-sectorial (si el sector tiene
+           comportamiento macroeconómico relevante)
+
+═══════════════════════════════════════════════════════════════
+DECISIÓN DE QUÉ BLOQUES INCLUIR
+═══════════════════════════════════════════════════════════════
+
+Antes de redactar, ELIGE explícitamente:
+
+1. Los 4 conceptuales esenciales (siempre van) + el conceptual del
+   subtipo (servicios o producción).
+2. ¿Hay 1-2 bloques de teoría especializada que el rubro amerite?
+   Si sí, agregalos. Si no, queda en 5 conceptuales.
+3. De los 4 contextuales (antecedentes, normativo, institucional,
+   estado del arte), ¿cuáles son relevantes para este caso?
+   Pueden ser 0, 1, 2, 3 o 4. La decisión depende del rubro.
+4. ¿Hay 1-2 bloques contextuales adicionales que el caso amerite
+   (geográfico, sociocultural, económico-sectorial)? Si sí,
+   agregalos.
+
+Total típico:
+  - Caso simple (consultoría B2B genérica): 5-6 bloques.
+  - Caso medio (servicios al consumidor con regulación moderada):
+    7-9 bloques.
+  - Caso denso (plataforma digital, sector regulado, alta
+    institucionalidad como Hub Agrícola o fintech): 9-12 bloques.
+  - Caso muy denso (industrial complejo o multi-sectorial): 12-14
+    bloques.
+
+NO fuerces más bloques de los que el caso amerita; NO recortes
+bloques que el caso necesita.
+
+═══════════════════════════════════════════════════════════════
+PROHIBICIONES ESTRUCTURALES
+═══════════════════════════════════════════════════════════════
 
 NO incluyas:
   - Un bloque "Síntesis del marco teórico", "Conclusión del Capítulo II"
@@ -407,26 +497,56 @@ Estas tablas son densas y sintéticas, NO listas decorativas.
 TONO Y EXTENSIÓN
 ═══════════════════════════════════════════════════════════════
 
-- Mínimo 6 a 9 PÁRRAFOS POR BLOQUE CONCEPTUAL (2.1 a 2.6).
-- Mínimo 5 a 8 PÁRRAFOS POR BLOQUE CONTEXTUAL (2.7 a 2.10).
+- Mínimo 6 a 9 PÁRRAFOS POR BLOQUE CONCEPTUAL.
+- Mínimo 5 a 8 PÁRRAFOS POR BLOQUE CONTEXTUAL.
 - Cada párrafo: 5 a 9 oraciones de prosa académica conectada.
-- 9 a 10 bloques temáticos en total (NO cerrar antes).
 - 4 a 6 citas APA distintas por bloque conceptual (al menos 1 textual
   con página).
 - Bloques contextuales: citar fuentes institucionales bolivianas (INE,
   BCB, SEPREC, SIN, FUNDEMPRESA, ministerios, gacetas oficiales) Y
   literatura académica donde corresponda.
-- Al menos 5 ecuaciones en total a lo largo del Capítulo.
-- Al menos 4 diagramas TikZ en total a lo largo del Capítulo.
-- Al menos 3 tablas comparativas a lo largo del Capítulo (sin contar
-  el glosario).
+
+Conteos mínimos de ecuaciones, diagramas y tablas (adaptativos al
+caso — son MÍNIMOS, podés agregar más si el caso lo amerita):
+
+  Por bloque CONCEPTUAL incluido:
+    - Si el bloque trata métodos cuantitativos (financiero, muestreo,
+      operaciones): mínimo 1 ecuación formal con párrafo "donde".
+    - Si el bloque trata un modelo visual clásico (Porter, SERVQUAL,
+      cadena de valor, plataforma bilateral): mínimo 1 diagrama TikZ.
+    - Si el bloque presenta múltiples elementos comparables (4i,
+      6 dimensiones, 5 fuerzas): mínimo 1 tabla resumen.
+
+  Por bloque CONTEXTUAL incluido:
+    - Marco normativo: mínimo 1 tabla resumen si hay 4 o más cuerpos
+      normativos relevantes.
+    - Estado del arte: mínimo 1 tabla comparativa si hay 4 o más
+      experiencias comparables analizadas.
+
+  Totales aproximados según densidad del caso:
+    Caso simple: 2-3 ecuaciones, 1-2 diagramas, 1-2 tablas.
+    Caso medio: 3-4 ecuaciones, 2-3 diagramas, 2-3 tablas.
+    Caso denso: 4-6 ecuaciones, 3-5 diagramas, 3-5 tablas.
+    Caso muy denso: 5-7 ecuaciones, 4-6 diagramas, 4-6 tablas.
+
 - Aplicación al caso del proyecto: una vez por bloque conceptual,
   breve, en el cierre del bloque (no contaminar el desarrollo teórico).
 
-Extensión total esperada del Cap. II: 40 a 70 páginas equivalentes
-(15000 a 25000 palabras). Un Marco Teórico de Licenciatura es DENSO
-y COMPLETO. Si el output queda corto, FALTA contenido — no cierres
-prematuro.
+EXTENSIÓN TOTAL — depende del caso:
+
+  Caso simple (consultoría B2B genérica, sin regulación específica):
+    20 a 30 páginas (8000 a 12000 palabras).
+  Caso medio (servicios al consumidor con regulación moderada):
+    30 a 45 páginas (12000 a 18000 palabras).
+  Caso denso (plataforma digital, sector regulado, alta
+   institucionalidad):
+    45 a 65 páginas (18000 a 26000 palabras).
+  Caso muy denso (industrial complejo o multi-sectorial):
+    60 a 80 páginas (24000 a 32000 palabras).
+
+NO satures un caso simple con bloques innecesarios; NO recortes un
+caso denso para ahorrar tokens. La extensión debe responder a la
+densidad real del caso, no a un objetivo fijo del prompt.
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS DE ESTA FASE
@@ -490,12 +610,18 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
   cita textual breve con número de página (formato APA: "texto"
   (Autor, año, p. XX)).
 
-- ❌ Generar bloques de menos de 6 párrafos. Un bloque corto es señal
-  de superficialidad y compromete la calidad del trabajo de
-  titulación.
+- ❌ Generar bloques conceptuales de menos de 6 párrafos o bloques
+  contextuales de menos de 5. Un bloque corto es señal de
+  superficialidad y compromete la calidad del trabajo de titulación.
 
-- ❌ Cerrar el Capítulo con un total menor a 9000 palabras. Un Marco
-  Teórico de Licenciatura tiene esa densidad mínima.
+- ❌ Incluir un bloque solo "porque toca". Si el caso no amerita un
+  marco normativo extenso o un estado del arte detallado, omitilos
+  o redúcelos. NUNCA inventes contenido para llenar un bloque que
+  no aplica al rubro.
+
+- ❌ Forzar la misma estructura para todos los casos. Un proyecto de
+  consultoría B2B no necesita la misma extensión que un fintech
+  regulado. Adaptá.
 `.trim();
 }
 
