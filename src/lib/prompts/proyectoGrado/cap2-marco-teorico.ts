@@ -126,10 +126,24 @@ ROL ESPECÍFICO DE ESTA FASE
 Estás generando el CAPÍTULO II — MARCO TEÓRICO CONCEPTUAL de un Proyecto
 de Grado UCATEC del subtipo ${subtipoLegible}.
 
-Tu trabajo es producir un glosario académico de 25 a 35 conceptos clave
-que el lector necesita conocer para entender el resto del documento.
-Cada concepto se define en 1 a 3 párrafos con cita APA 7 de un autor
-reconocido de administración, marketing o evaluación de proyectos.
+🚨 ESTO NO ES UN GLOSARIO DE DEFINICIONES — ES UN MARCO TEÓRICO REAL.
+
+Un glosario es una lista alfabética de términos con UNA definición corta.
+Un Marco Teórico es un CUERPO ARGUMENTATIVO organizado por bloques
+conceptuales, donde cada bloque desarrolla el fundamento teórico que
+sostendrá el análisis del resto del documento. La diferencia es enorme
+en profundidad, organización y rigor académico esperado para un
+trabajo de titulación.
+
+Tu trabajo es construir 5 a 7 BLOQUES TEMÁTICOS donde cada bloque:
+
+  1. Tiene una introducción al área conceptual.
+  2. Desarrolla 4 a 8 conceptos relacionados de manera CONECTADA
+     (no como lista plana — los conceptos se referencian entre sí).
+  3. Discute cómo los autores principales del área dialogan entre sí
+     (complementarios, en evolución, en debate).
+  4. Aplica brevemente los conceptos al CASO ESPECÍFICO del proyecto.
+  5. Cierra con una oración puente al siguiente bloque o al Cap. III.
 
 Recibes:
 1. [CONTEXTO DEL PROYECTO] — Idea aprobada, subtipo, título.
@@ -152,19 +166,46 @@ estas listas (ej: "marketing digital", "inbound marketing", "lean
 manufacturing"), AGREGALOS hasta llegar al máximo de 35.
 
 ═══════════════════════════════════════════════════════════════
-ESTRUCTURA DE CADA ENTRADA
+ESTRUCTURA OBLIGATORIA — BLOQUES TEMÁTICOS (NO LISTAS)
 ═══════════════════════════════════════════════════════════════
 
-Numeración correlativa 2.1, 2.2, 2.3, ... 2.N en orden temático
-(estratégicos, comerciales, financieros, específicos del subtipo).
+Bloques sugeridos (adaptá los nombres al rubro del proyecto):
 
-Cada entrada:
+  ## 2.1 Fundamentos de la formulación y evaluación de proyectos
+  ## 2.2 Análisis estratégico de industrias y entornos
+  ## 2.3 Análisis del mercado y comportamiento del consumidor
+  ## 2.4 Fundamentos de evaluación financiera
+  ## 2.5 [BLOQUE ESPECÍFICO DEL SUBTIPO]
+       (servicios → Marketing de servicios y experiencia del cliente)
+       (producción → Gestión de operaciones y procesos productivos)
+  ## 2.6 [BLOQUE OPCIONAL específico al rubro]
+       (ej: Economía de plataformas digitales si el proyecto es marketplace)
+  ## 2.7 Síntesis del marco teórico
 
-## 2.X Nombre del concepto
+ESTRUCTURA INTERNA DE CADA BLOQUE TEMÁTICO (no de cada concepto):
 
-Definición en 1 a 3 párrafos. Empieza con la definición técnica del
-autor citado, después aclara en lenguaje propio cómo aplica al
-proyecto. NO copies literal — parafraseá con rigor.
+  ### Anuncio del bloque (1 párrafo)
+  Qué área conceptual cubre y por qué es relevante para el proyecto.
+
+  ### Desarrollo conceptual (4 a 8 párrafos)
+  Desarrolla los conceptos del bloque de forma CONECTADA, no como
+  bullets ni como entradas separadas tipo diccionario. Cada concepto
+  aparece naturalmente en la prosa, definido en su contexto, con cita
+  inline al autor del whitelist. Los conceptos del bloque se referencian
+  entre sí ('el análisis PESTEL discutido más arriba complementa el
+  modelo de cinco fuerzas de Porter...').
+
+  Patrón aceptable de párrafo (NO el único, variá la forma):
+  'Sapag Chain et al. (2014) definen el [concepto] como [...]. Esta
+  definición se complementa con la perspectiva de [otro autor del
+  bloque], quien añade que [...]. En el contexto del presente proyecto,
+  el concepto se aplica de la siguiente manera: [...]'
+
+  ### Cierre del bloque (1 párrafo)
+  Síntesis breve + puente al siguiente bloque o al Cap. III.
+
+NO uses ## 2.X NombreConcepto como subsección. Las subsecciones son
+los BLOQUES TEMÁTICOS, no los conceptos individuales.
 
 Cita UN autor reconocido por concepto. Autores legítimos para esta
 materia (NO inventes otros):
@@ -188,31 +229,51 @@ Formato APA: (Apellido, año).
 TONO Y EXTENSIÓN
 ═══════════════════════════════════════════════════════════════
 
-- NO definas un concepto en una sola oración telegráfica. Mínimo
-  4-6 oraciones por concepto.
-- NO infles con palabras vacías. Si una definición se puede dar en 2
-  párrafos, no hagas 4.
-- Conectá los conceptos entre sí cuando sea natural: "El estudio de
-  mercado, definido en el apartado anterior, se complementa con el
-  análisis de la competencia que se desarrolla a continuación."
+- Mínimo 4-8 párrafos POR BLOQUE TEMÁTICO (5-7 bloques en total).
+- Cada párrafo: 4-8 oraciones de prosa académica conectada.
+- Conectá los conceptos entre sí — el lector debe seguir un HILO
+  argumentativo, no leer entradas separadas.
+- Aplicá los conceptos al CASO ESPECÍFICO del proyecto (mencionar el
+  rubro, el segmento, la naturaleza de la propuesta).
 
-Extensión total esperada del Cap. II: 12 a 18 páginas equivalentes
-(4500 a 7000 palabras).
+Extensión total esperada del Cap. II: 15 a 22 páginas equivalentes
+(5500 a 8000 palabras). MÁS LARGO que la versión vieja porque la
+estructura por bloques desarrolla más profundo cada área.
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
-- NO incluyas análisis PESTEL real, Porter real, FODA real con datos
-  del proyecto (eso es Cap. III — aquí solo se DEFINEN los conceptos).
-- NO cites autores inventados. Si dudás de un autor, no lo cites.
-- NO uses bullets sueltos como definición ("PESTEL: Político,
-  Económico, Social, Tecnológico, Ecológico, Legal."). Las definiciones
-  son párrafos con prosa académica.
-- NO termines el capítulo con conclusiones generales — el Cap. II solo
-  define, no concluye.
-- NO repitas el mismo verbo introductorio en concepto tras concepto
-  ("se define como" 30 veces). Variá la forma.
+🚨 PROHIBIDO ABSOLUTAMENTE — estos son los errores que convierten
+   un Marco Teórico en un glosario inservible:
+
+- ❌ Listar conceptos uno tras otro como entradas de diccionario
+  ('**Estudio de factibilidad.** Etapa de... (Cita).
+    **Análisis PESTEL.** Herramienta de... (Cita).
+    **Cinco fuerzas de Porter.** Modelo de... (Cita).')
+  Esto NO es Marco Teórico. Es un GLOSARIO.
+
+- ❌ Usar subsecciones tipo '## 2.X NombreDelConcepto' o '**Nombre.**
+  Definición.' como estructura principal. Las subsecciones son los
+  BLOQUES TEMÁTICOS (formulación de proyectos, análisis estratégico,
+  etc.), no los conceptos individuales.
+
+- ❌ Usar UNA sola oración o un párrafo telegráfico para definir un
+  concepto importante. Cada concepto clave del bloque amerita
+  desarrollo en su párrafo o pasaje, no en una línea.
+
+- ❌ Incluir análisis PESTEL real, Porter real, FODA real con datos
+  del proyecto (eso es Cap. III — aquí solo se desarrolla el MARCO
+  TEÓRICO, no la aplicación).
+
+- ❌ Citar autores fuera del whitelist autorizado de reglas-comunes.
+
+- ❌ Terminar con conclusiones generales del documento — el cierre del
+  Cap. II es una síntesis del marco teórico construido, no una
+  evaluación del proyecto.
+
+- ❌ Repetir el mismo verbo introductorio en concepto tras concepto
+  ('se define como' 30 veces). Variá la forma.
 `.trim();
 }
 
