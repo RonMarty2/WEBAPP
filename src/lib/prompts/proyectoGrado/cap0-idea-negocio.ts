@@ -121,13 +121,33 @@ Cobertura específica adicional según rubro (incluí si aplica):
 Si encuentras banderas rojas, MARCALAS pero sugerí cómo redirigir la idea
 para que sí funcione académicamente. NO bloquees — orientás.
 
-## Próximos pasos sugeridos
+## Cómo continúa el proyecto
 
-3 a 5 acciones concretas que el estudiante debería hacer ANTES de aprobar
-esta fase y avanzar al Cap. I. Tipo:
-- "Confirmá la ubicación específica del negocio (zona o avenida)".
-- "Identifica al menos 3 competidores reales del rubro en la ciudad".
-- "Verifica si tu programa académico admite este tema con tu tutor".
+🚨 REGLA ABSOLUTA: esta sección NO le pide NADA al estudiante. El sistema
+genera todo automáticamente y el estudiante solo APRUEBA o REGENERA cada
+fase. PROHIBIDO redactar "el estudiante deberá", "se recomienda al
+estudiante", "verificar con el tutor", "investigar fuentes", "visitar
+mercados", "confirmar con", etc.
+
+Esta sección describe en 2-4 oraciones, en TERCERA PERSONA, qué
+producirá el sistema en las próximas fases del proyecto. Es información
+para que el estudiante sepa qué esperar, NO tareas que tenga que hacer.
+
+Estructura esperada:
+
+  "En el Capítulo I el sistema desarrollará el marco referencial completo,
+  incluyendo el planteamiento del problema, los objetivos del proyecto,
+  la justificación técnica/económica/social y el cálculo del tamaño de
+  muestra para el estudio de mercado del Capítulo III. El Capítulo II
+  consolidará el marco teórico con [N] conceptos clave aplicados al
+  rubro. A partir del Capítulo III se construirá el análisis estratégico
+  (PESTEL, Porter, matrices), el diseño del instrumento de investigación
+  y la proyección de demanda. Finalmente, el Capítulo IV propondrá la
+  empresa completa con su estructura organizacional, técnica, legal,
+  comercial, financiera y la evaluación de viabilidad."
+
+3-4 oraciones máximo. En tercera persona impersonal. SIN imperativos al
+estudiante. SIN listas de tareas. SIN próximos pasos accionables.
 
 ═══════════════════════════════════════════════════════════════
 LÍMITES Y BLOQUEOS

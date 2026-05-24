@@ -63,17 +63,9 @@ Enfoque premium con orientación hacia productos certificados o de origen verifi
 | 5 | Disponibilidad de marco teórico académico | ✅ | Literatura abundante en plataformas, desintermediación y marketing de servicios. |
 | 6 | Cumplimiento de limitaciones legales | ✅ | NIT, SIN y registro SENASAG para alimentos perecibles. |
 
-## Próximos pasos sugeridos
+## Cómo continúa el proyecto
 
-1. **Realizar observación de campo durante dos jornadas matutinas** en un mercado mayorista (La Cancha los martes y sábados, o Quillacollo cualquier mañana entre 5:00 y 10:00) para registrar la interacción entre productor y rescatista.
-
-2. **Sostener conversaciones informales con tres a cinco productores reales** sobre su disposición a utilizar una plataforma digital, sin presentar mockups todavía.
-
-3. **Definir el alcance del MVP a evaluar financieramente** en el Capítulo IV. Se recomienda iniciar con WhatsApp Business como canal de pedidos, un sitio web informativo simple, una planilla compartida de inventario.
-
-4. **Validar con el tutor académico de UCATEC** que el tema de plataforma digital sea aceptado por la carrera.
-
-5. **Confirmar la ubicación operativa del proyecto** que figurará en el documento. Se recomienda Cochabamba — Cercado como sede oficial.`;
+En el Capítulo I el sistema desarrollará el marco referencial completo del proyecto, incluyendo el planteamiento del problema con su árbol de causas y efectos, los objetivos general y específicos, la justificación técnica, económica y social, el alcance temático/geográfico/temporal y el cálculo del tamaño de muestra para el estudio de mercado del Capítulo III. El Capítulo II consolidará el marco teórico con aproximadamente treinta y dos conceptos clave aplicados al rubro de plataformas digitales y servicios. A partir del Capítulo III se construirá el análisis estratégico completo (PESTEL, Porter, matrices FODA/EFE/EFI/MPC), el diseño del instrumento de investigación y la proyección de demanda a cinco años. Finalmente, el Capítulo IV propondrá la empresa completa con su estructura organizacional, técnica, legal, comercial, financiera y la evaluación de viabilidad con análisis de sensibilidad.`;
 
 export const HUB_CAP1 = `# Capítulo I — Marco Referencial
 

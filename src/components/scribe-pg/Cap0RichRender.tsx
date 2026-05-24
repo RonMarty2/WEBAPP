@@ -37,7 +37,7 @@ const META: Record<Seccion["key"], { icono: string; color: string; titulo: strin
   sintesis:   { icono: "💡", color: "#8b5cf6", titulo: "Síntesis de tu idea" },
   segmento:   { icono: "🎯", color: "#3b82f6", titulo: "Segmento objetivo" },
   validacion: { icono: "✅", color: "#16a34a", titulo: "Validación de viabilidad académica" },
-  pasos:      { icono: "📋", color: "#f59e0b", titulo: "Próximos pasos sugeridos" },
+  pasos:      { icono: "🗺️", color: "#0ea5e9", titulo: "Cómo continúa el proyecto" },
   otro:       { icono: "📄", color: "#6b7280", titulo: "Contenido adicional" },
 };
 
@@ -49,7 +49,10 @@ function clasificarSeccion(header: string): Seccion["key"] {
   if (h.includes("síntesis") || h.includes("sintesis")) return "sintesis";
   if (h.includes("segmento") || h.includes("mercado objetivo")) return "segmento";
   if (h.includes("validación") || h.includes("validacion") || h.includes("viabilidad")) return "validacion";
-  if (h.includes("próximos") || h.includes("proximos") || h.includes("pasos")) return "pasos";
+  if (
+    h.includes("próximos") || h.includes("proximos") || h.includes("pasos")
+    || h.includes("cómo continúa") || h.includes("como continua") || h.includes("siguientes fases")
+  ) return "pasos";
   return "otro";
 }
 
@@ -258,7 +261,11 @@ function SeccionInterna({ seccion, esPrimera }: { seccion: Seccion; esPrimera: b
       </div>
 
       {seccion.key === "pasos" ? (
-        <ChecklistPasos contenido={seccion.contenido} />
+        // NO es checklist marcable — es información para el estudiante sobre
+        // qué hará el sistema en las próximas fases. NO le pedimos nada.
+        <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.65, color: "var(--fg-primary)" }}>
+          {seccion.contenido}
+        </div>
       ) : seccion.key === "validacion" && hasTabla ? (
         <>
           {(() => {
