@@ -62,32 +62,11 @@ interface MockSpec {
 // Ej: "8 secciones obligatorias" solo aparece en cap1-marco-referencial.ts,
 // "25 a 35 conceptos" solo en cap2-marco-teorico.ts, etc.
 const MOCK_RESPONSES: MockSpec[] = [
-  // ── Cierre (van primero porque son las fases más cortas y específicas)
-  {
-    matcher: /BIBLIOGRAF[ÍI]A\s+FINAL\s+APA|consolida\s+todas\s+las\s+citas|whitelist.*autores|AUTORES\s+AUTORIZADOS/i,
-    faseLabel: "Referencias Bibliográficas (Hub Agrícola)",
-    body: HUB_REFERENCIAS,
-  },
-  {
-    matcher: /CONCLUSIONES.*PROYECTO\s+DE\s+GRADO|conclusiones\s+por\s+objetivo\s+espec[íi]fico|recomendaciones\s+finales/i,
-    faseLabel: "Conclusiones (Hub Agrícola)",
-    body: HUB_CONCLUSIONES,
-  },
-  {
-    matcher: /RESUMEN\s+EJECUTIVO.*PROY|300\s+a\s+500\s+palabras.*resumen|abstract\s+ejecutivo/i,
-    faseLabel: "Resumen Ejecutivo (Hub Agrícola)",
-    body: HUB_RESUMEN,
-  },
-  {
-    matcher: /BANCO\s+DE\s+PREGUNTAS|preguntas\s+para\s+la\s+defensa|tribunal\s+examinador/i,
-    faseLabel: "Banco de Preguntas Defensa (Hub Agrícola)",
-    body: HUB_DEFENSA,
-  },
-  {
-    matcher: /COMPILAR\s+LATEX|SISTEMA_SCRIBE_LATEX|pdfLaTeX.*compilaci[óo]n|car[áa]tula\s+autom[áa]tica/i,
-    faseLabel: "Compilación LaTeX (Hub Agrícola)",
-    body: HUB_LATEX_NOTE,
-  },
+  // 🎯 NOTA: matchers usan frases que SOLO aparecen en el prompt
+  // específico de cada fase, NO en reglas-comunes.ts (que las importan
+  // todos los prompts). Frases como 'AUTORES AUTORIZADOS' o 'whitelist'
+  // están prohibidas en matchers porque ahora aparecen en reglas-comunes
+  // y matchearían cualquier fase.
 
   // ── Cap. IV — Marco Propositivo (sub-fases muy específicas)
   {
@@ -183,10 +162,38 @@ const MOCK_RESPONSES: MockSpec[] = [
     faseLabel: "Cap. 0 — Idea de Negocio (Hub Agrícola)",
     body: HUB_CAP0,
   },
-  // ── Fallback legado: respuestas cortas si alguno de los matchers anteriores
-  // no captura el prompt (no debería ocurrir en práctica con prompts del PG)
+
+  // ── Cierre del documento (van DESPUÉS de Cap. 0 porque sus frases
+  //    distintivas no aparecen en los prompts de los capítulos)
   {
-    matcher: /__nunca_coincide__/i,
+    matcher: /BIBLIOGRAF[ÍI]A\s+FINAL\s+APA\s*7|consolida\s+todas\s+las\s+citas|ordenar\s+alfab[ée]ticamente\s+por\s+apellido/i,
+    faseLabel: "Referencias Bibliográficas (Hub Agrícola)",
+    body: HUB_REFERENCIAS,
+  },
+  {
+    matcher: /conclusiones\s+por\s+objetivo\s+espec[íi]fico|conclusi[óo]n\s+general\s+del\s+proyecto|recomendaciones\s+al\s+inversionista/i,
+    faseLabel: "Conclusiones (Hub Agrícola)",
+    body: HUB_CONCLUSIONES,
+  },
+  {
+    matcher: /Resumen\s+Ejecutivo.*350\s+palabras|abstract\s+ejecutivo|Resumen\s+Ejecutivo.*450\s+palabras|Resumen\s+Ejecutivo.*500\s+palabras/i,
+    faseLabel: "Resumen Ejecutivo (Hub Agrícola)",
+    body: HUB_RESUMEN,
+  },
+  {
+    matcher: /banco\s+de\s+preguntas\s+para\s+defensa|tribunal\s+examinador|preguntas\s+de\s+defensa/i,
+    faseLabel: "Banco de Preguntas Defensa (Hub Agrícola)",
+    body: HUB_DEFENSA,
+  },
+  {
+    matcher: /SISTEMA_SCRIBE_LATEX|compilar.*\.tex\s+final|carátula\s+autom[áa]tica.*LaTeX/i,
+    faseLabel: "Compilación LaTeX (Hub Agrícola)",
+    body: HUB_LATEX_NOTE,
+  },
+
+  // ── Fallback: nunca matchea, solo para compatibilidad con el array
+  {
+    matcher: /__nunca_coincide__xyz999__/i,
     faseLabel: "Fase del proyecto",
     body: `## Síntesis de la idea de negocio
 
@@ -224,457 +231,6 @@ antes de avanzar a la formulación formal del Capítulo I.
 4. Validar el tema con el tutor académico UCATEC.`,
   },
 
-  {
-    matcher: /CAP1|cap1|marco.*referencial|cap[íi]tulo\s*i\b/i,
-    faseLabel: "Cap. I — Marco Referencial",
-    body: `# Capítulo I — Marco Referencial
-
-## 1.1 Antecedentes del trabajo académico
-
-El presente proyecto surge en un contexto de oportunidad sectorial
-identificable en el departamento de Cochabamba.
-
-## 1.2 Objeto de estudio
-
-El objeto de estudio del proyecto es la factibilidad de creación y
-operación de la empresa propuesta.
-
-## 1.3 Problema
-
-### 1.3.1 Identificación del problema
-
-Se identifica un problema central que afecta al segmento objetivo del
-proyecto en condiciones documentables.
-
-### 1.3.2 Árbol de problemas
-
-\`\`\`tikz
-\\begin{center}
-\\begin{tikzpicture}[node distance=12mm]
-\\node[draw, rectangle, fill=yellow!20] (p) {Problema central};
-\\node[draw, rectangle, fill=blue!10, below left=of p] (c1) {Causa 1};
-\\node[draw, rectangle, fill=blue!10, below right=of p] (c2) {Causa 2};
-\\node[draw, rectangle, fill=red!10, above left=of p] (e1) {Efecto 1};
-\\node[draw, rectangle, fill=red!10, above right=of p] (e2) {Efecto 2};
-\\draw[->] (c1) -- (p); \\draw[->] (c2) -- (p);
-\\draw[->] (p) -- (e1); \\draw[->] (p) -- (e2);
-\\end{tikzpicture}
-\\end{center}
-\`\`\`
-
-### 1.3.3 Formulación del problema
-
-¿Es factible la creación de la empresa propuesta en Cochabamba durante el
-horizonte 2026 a 2030?
-
-## 1.4 Objetivos
-
-**General.** Determinar la factibilidad académica, comercial, técnica,
-organizacional, legal y financiera del proyecto.
-
-**Específicos.** (1) Analizar entorno general y competitivo. (2)
-Caracterizar el segmento objetivo. (3) Diseñar la propuesta de servicio.
-(4) Estructurar el diseño técnico-legal-organizacional. (5) Evaluar la
-viabilidad financiera.
-
-## 1.5 Justificación
-Técnica, económica y social — desarrolladas en el documento final.
-
-## 1.6 Alcance
-Temático, geográfico y temporal — definidos en el documento final.
-
-## 1.7 Metodología
-Enfoque mixto, descriptivo-propositivo, deductivo (Hernández Sampieri et
-al., 2014).
-
-## 1.8 Muestreo
-
-\`\`\`latex
-\\begin{equation}
-n = \\frac{Z^{2} \\cdot p \\cdot q \\cdot N}{e^{2}\\,(N - 1) + Z^{2} \\cdot p \\cdot q}
-\\end{equation}
-\`\`\``,
-  },
-
-  {
-    matcher: /CAP2|cap2|marco.*te[óo]rico|cap[íi]tulo\s*ii\b/i,
-    faseLabel: "Cap. II — Marco Teórico",
-    body: `# Capítulo II — Marco Teórico
-
-Se desarrollan a continuación los conceptos clave que sostienen el
-análisis del proyecto.
-
-**Proyecto de inversión.** Conjunto coherente de actividades orientadas a
-la creación de una unidad productiva nueva (Sapag Chain et al., 2014).
-
-**Estudio de factibilidad.** Etapa de formulación que examina la
-viabilidad integral de una propuesta de inversión (Baca Urbina, 2016).
-
-**Análisis PESTEL.** Herramienta de análisis del macroentorno en seis
-dimensiones (David y David, 2017).
-
-**Cinco fuerzas de Porter.** Modelo de análisis del entorno competitivo
-de una industria (Porter, 2008).
-
-**Marketing de servicios.** Rama del marketing especializada en
-prestaciones intangibles (Lovelock y Wirtz, 2015).
-
-**Mix de marketing 7P.** Producto, Precio, Plaza, Promoción, Personas,
-Procesos, Evidencia Física (Zeithaml et al., 2018).
-
-**Valor Actual Neto (VAN).** Indicador de rentabilidad que descuenta los
-flujos futuros a una tasa de costo de capital (Brealey et al., 2020).
-
-[Marco teórico completo con 25-35 conceptos en el documento final.]`,
-  },
-
-  {
-    matcher: /CAP3A|cap3a|pestel|macroentorno/i,
-    faseLabel: "Cap. III.1 — PESTEL",
-    body: `## 3.1 Análisis del Macroentorno (PESTEL)
-
-### 3.1.1 Factor Político
-Análisis del entorno político boliviano relevante para el proyecto.
-
-**Tabla 3.1. Variables del factor Político**
-
-| Variable | Impacto | Probabilidad | Puntuación |
-|---|:-:|:-:|:-:|
-| Estabilidad institucional | 3 | 3 | 1.8 |
-| Programas de fomento | 4 | 4 | 3.2 |
-| **Promedio Político** | | | **2.50** |
-
-### 3.1.2 a 3.1.6 — Factores Económico, Social, Tecnológico, Ecológico, Legal
-(Misma estructura: análisis + tabla + interpretación)
-
-**Síntesis PESTEL.** Entorno moderadamente favorable para el proyecto.`,
-  },
-
-  {
-    matcher: /CAP3B|cap3b|porter|fuerzas/i,
-    faseLabel: "Cap. III.2 — Porter",
-    body: `## 3.2 Análisis del Microentorno (Cinco Fuerzas de Porter)
-
-| Fuerza | Intensidad | Implicación estratégica |
-|---|:-:|---|
-| Rivalidad existente | 2.5/5 | Ventana de oportunidad |
-| Poder proveedores | 2/5 | Fidelización temprana |
-| Poder compradores | 4/5 | Diferenciación clara |
-| Sustitutos | 3/5 | Énfasis en propuesta única |
-| Nuevos entrantes | 3.5/5 | Barreras operativas en 18 meses |
-| **Atractivo agregado** | **3.0/5** | **Mercado moderadamente atractivo** |`,
-  },
-
-  {
-    matcher: /CAP3C|cap3c|matrices|foda|efe|efi|mpc/i,
-    faseLabel: "Cap. III.3 — Matrices Estratégicas",
-    body: `## 3.3 Matrices Estratégicas
-
-### 3.3.1 Matriz FODA
-Fortalezas, oportunidades, debilidades y amenazas identificadas.
-
-### 3.3.2 Matriz EFE: **2.86** (posición ligeramente superior al promedio)
-### 3.3.3 Matriz EFI: **3.00** (posición interna sólida)
-### 3.3.4 Matriz MPC: proyecto **3.87**, mejor competidor 3.88 (empate técnico)`,
-  },
-
-  {
-    matcher: /CAP3D|cap3d|dise[ñn]o.*encuesta|instrumento/i,
-    faseLabel: "Cap. III.4 — Diseño de Encuesta",
-    body: `## 3.4 Diseño del Instrumento de Investigación
-
-### 3.4.1 Segmento objetivo
-Definido en el apartado 3.4.1 del documento final.
-
-### 3.4.2 Cálculo del tamaño de muestra
-
-\`\`\`latex
-\\begin{equation}
-n = \\frac{Z^{2} \\cdot p \\cdot q \\cdot N}{e^{2}\\,(N - 1) + Z^{2} \\cdot p \\cdot q} \\approx 383
-\\end{equation}
-\`\`\`
-
-### 3.4.3 Tipo de muestreo
-No probabilístico por conveniencia con cuotas.
-
-### 3.4.4 Cuestionario
-Cuatro bloques: demográficos, hábitos de consumo, percepción oferta
-actual, intención hacia la propuesta.`,
-  },
-
-  {
-    matcher: /CAP3E|cap3e|an[áa]lisis.*encuesta|resultados.*encuesta/i,
-    faseLabel: "Cap. III.5 — Análisis de Resultados",
-    body: `## 3.5 Análisis de Resultados de la Encuesta
-
-> **⚠️ NOTA METODOLÓGICA — Proyección basada en investigación secundaria**
->
-> Los resultados presentados constituyen una proyección académica
-> construida a partir de las características del segmento. Las cifras
-> sirven para dimensionar el orden de magnitud esperado.
-
-### 3.5.1 Tabulación univariada — Bloque clave
-
-| Categoría | Frecuencia | Porcentaje |
-|---|:-:|:-:|
-| Muy interesado | 58 | 29.0% |
-| Interesado | 86 | 43.0% |
-| Indiferente | 36 | 18.0% |
-| Poco interesado | 16 | 8.0% |
-| Nada interesado | 4 | 2.0% |
-| **Total** | **200** | **100%** |
-
-El **72%** del segmento expresa interés positivo en la propuesta.`,
-  },
-
-  {
-    matcher: /CAP3F|cap3f|demanda|cuota/i,
-    faseLabel: "Cap. III.6 — Demanda y Cuota",
-    body: `## 3.6 Determinación de la Demanda y Cuota de Mercado
-
-### 3.6.1 Demanda potencial
-57.600 hogares del área metropolitana.
-
-### 3.6.2 Demanda real esperada
-20.160 hogares activos con frecuencia de 2.5 pedidos mensuales.
-
-### 3.6.3 Proyección de cuota a 5 años
-
-| Año | Cuota | Hogares activos | Pedidos anuales |
-|:-:|:-:|:-:|:-:|
-| 1 | 0.8% | 161 | 4.836 |
-| 3 | 5.0% | 1.008 | 30.240 |
-| 5 | 12.0% | 2.419 | 72.576 |`,
-  },
-
-  {
-    matcher: /CAP4A|cap4a|organizacional|organigrama/i,
-    faseLabel: "Cap. IV.1 — Diseño Organizacional",
-    body: `## 4.1 Diseño Organizacional
-
-### 4.1.1 Razón social
-Empresa propuesta como Sociedad de Responsabilidad Limitada (S.R.L.).
-
-### 4.1.2 Misión, visión y valores
-Definidos en el documento final.
-
-### 4.1.3 Organigrama
-
-\`\`\`tikz
-\\begin{center}
-\\begin{tikzpicture}[node distance=8mm]
-\\node[draw, fill=blue!20] (g) {Gerencia General};
-\\node[draw, fill=blue!10, below left=of g] (com) {Comercial};
-\\node[draw, fill=blue!10, below=of g] (ope) {Operaciones};
-\\node[draw, fill=blue!10, below right=of g] (tec) {Tecnología};
-\\draw (g) -- (com); \\draw (g) -- (ope); \\draw (g) -- (tec);
-\\end{tikzpicture}
-\\end{center}
-\`\`\`
-
-### 4.1.4 Manual de funciones
-Una sección por cargo del organigrama.`,
-  },
-
-  {
-    matcher: /CAP4ABIS|cap4abis|cap4a-bis|rrhh|recursos humanos/i,
-    faseLabel: "Cap. IV.2 — RRHH",
-    body: `## 4.2 Política de Recursos Humanos
-
-### 4.2.1 Plantilla proyectada: 6.5 → 21 FTE (años 1-5)
-### 4.2.2 Estructura salarial alineada con mercado Cochabamba
-### 4.2.3 Procesos de selección, capacitación y evaluación semestral`,
-  },
-
-  {
-    matcher: /CAP4B|cap4b|legal|jur[íi]dico/i,
-    faseLabel: "Cap. IV.3 — Marco Legal",
-    body: `## 4.3 Marco Legal
-
-### 4.3.1 Tipo societario: S.R.L. (Código de Comercio de Bolivia)
-### 4.3.2 Trámites de constitución: ~60-75 días calendario
-### 4.3.3 Régimen tributario: Régimen General IVA-IT-IUE
-### 4.3.4 Cumplimiento SENASAG, SEPREC, SIN`,
-  },
-
-  {
-    matcher: /CAP4C|cap4c|t[ée]cnico|flujograma/i,
-    faseLabel: "Cap. IV.4 — Estudio Técnico",
-    body: `## 4.4 Estudio Técnico
-
-### 4.4.1 Localización: Cochabamba — Cercado
-### 4.4.2 Capacidad operativa proyectada a 5 años
-### 4.4.3 Flujograma de procesos
-
-\`\`\`tikz
-\\begin{center}
-\\begin{tikzpicture}[node distance=10mm]
-\\node[draw, ellipse, fill=green!15] (a) {Inicio};
-\\node[draw, fill=blue!10, right=of a] (b) {Procesar};
-\\node[draw, diamond, aspect=2, fill=orange!15, right=of b] (c) {QC};
-\\node[draw, ellipse, fill=red!15, right=of c] (d) {Fin};
-\\draw[->] (a) -- (b); \\draw[->] (b) -- (c); \\draw[->] (c) -- (d);
-\\end{tikzpicture}
-\\end{center}
-\`\`\`
-
-### 4.4.4 Inversión técnica: ~Bs. 96.800`,
-  },
-
-  {
-    matcher: /CAP4D|cap4d|branding|marca|logo/i,
-    faseLabel: "Cap. IV.5 — Branding",
-    body: `## 4.5 Branding
-
-### 4.5.1 Identidad de marca
-Nombre, propuesta de valor y personalidad definidos.
-
-### 4.5.2 Manual de marca
-Tipografía, paleta cromática (verde, tierra, crema, carbón), aplicaciones.
-
-### 4.5.3 Briefs de logotipo
-Tres conceptos para generación con IA de imágenes (Gemini Imagen,
-Ideogram). **NOTA:** la generación efectiva requiere integración del
-endpoint correspondiente (pendiente en el backlog #13).`,
-  },
-
-  {
-    matcher: /CAP4E|cap4e|marketing|promoci[óo]n/i,
-    faseLabel: "Cap. IV.6 — Marketing",
-    body: `## 4.6 Plan de Marketing
-
-### 4.6.1 Mix de marketing 7P
-Producto, Precio, Plaza, Promoción, Personas, Procesos, Evidencia Física.
-
-### 4.6.2 Presupuesto promocional
-Entre 7% y 9% de los ingresos proyectados. Total 5 años: Bs. 796.000.`,
-  },
-
-  {
-    matcher: /CAP4F|cap4f|financiero|inversi[óo]n inicial/i,
-    faseLabel: "Cap. IV.7 — Estudio Financiero",
-    body: `## 4.7 Estudio Financiero
-
-### 4.7.1 Inversión inicial: **Bs. 230.000**
-(60% capital propio + 40% préstamo bancario BDP 6% TEA)
-
-### 4.7.2 Proyección de ingresos por comisión a 5 años
-
-| Concepto | Año 1 | Año 3 | Año 5 |
-|---|:-:|:-:|:-:|
-| Comisión empresa (12%) | 43.524 | 293.933 | 757.693 |
-
-### 4.7.3 Punto de equilibrio
-
-\`\`\`latex
-\\begin{equation}
-\\text{PE}_{\\text{mensual}} = \\frac{\\text{Costos fijos}}{\\text{Margen unitario}}
-\\end{equation}
-\`\`\``,
-  },
-
-  {
-    matcher: /CAP4G|cap4g|evaluaci[óo]n|VAN|TIR/i,
-    faseLabel: "Cap. IV.8 — Evaluación del Proyecto",
-    body: `## 4.8 Evaluación del Proyecto
-
-### 4.8.1 VAN (escenario base): **-2.290.000 Bs.** ❌
-### 4.8.2 TIR: indefinida (flujos negativos)
-### 4.8.3 Análisis de sensibilidad
-
-| Variable | Cambio | VAN |
-|---|---|:-:|
-| Comisión efectiva 12% → 22% | +servicios B2B | -180.000 |
-| **Combinación recalibrada** | 22% + planta -30% | **+340.000** ✅ |
-
-**Conclusión:** proyecto NO viable en escenario base; **viable bajo
-configuración recalibrada** (comisión 22% + contención de planta).`,
-  },
-
-  {
-    matcher: /RESUMEN|resumen.*ejecutivo/i,
-    faseLabel: "Resumen Ejecutivo",
-    body: `# Resumen Ejecutivo
-
-El proyecto evalúa la factibilidad de creación de la empresa propuesta en
-el área metropolitana de Cochabamba para el horizonte 2026-2030. El
-análisis PESTEL identifica un escenario moderadamente favorable; el
-análisis Porter revela un mercado moderadamente atractivo. El estudio de
-mercado proyectado muestra interés positivo del 72% del segmento. La
-evaluación financiera bajo la configuración recalibrada arroja VAN
-positivo de +340.000 Bs., confirmando la viabilidad del proyecto.`,
-  },
-
-  {
-    matcher: /CONCLUSIONES/i,
-    faseLabel: "Conclusiones",
-    body: `# Conclusiones
-
-Una conclusión por cada objetivo específico (5) + conclusión general.
-
-**Conclusión general.** El proyecto **es factible bajo la configuración
-recalibrada** propuesta en el análisis de sensibilidad. Se recomienda
-adoptar dicha configuración como propuesta final.`,
-  },
-
-  {
-    matcher: /REFERENCIAS|bibliograf[íi]a/i,
-    faseLabel: "Referencias Bibliográficas",
-    body: `# Referencias Bibliográficas
-
-Baca Urbina, G. (2016). *Evaluación de proyectos* (8.ª ed.). McGraw-Hill.
-
-Brealey, R. A., Myers, S. C., & Allen, F. (2020). *Principios de finanzas corporativas* (13.ª ed.). McGraw-Hill.
-
-David, F. R., & David, F. R. (2017). *Conceptos de administración estratégica* (15.ª ed.). Pearson.
-
-Hernández Sampieri, R., Fernández Collado, C., & Baptista Lucio, P. (2014). *Metodología de la investigación* (6.ª ed.). McGraw-Hill.
-
-Instituto Nacional de Estadística. (s.f.). *Datos demográficos y económicos de Bolivia*. https://www.ine.gob.bo
-
-Kotler, P., & Armstrong, G. (2017). *Fundamentos de marketing* (13.ª ed.). Pearson.
-
-Lovelock, C., & Wirtz, J. (2015). *Marketing de servicios* (7.ª ed.). Pearson.
-
-Porter, M. E. (2008). *Estrategia competitiva* (2.ª ed.). Pirámide.
-
-Sapag Chain, N., Sapag Chain, R., & Sapag Puelma, J. M. (2014). *Preparación y evaluación de proyectos* (6.ª ed.). McGraw-Hill.
-
-Zeithaml, V. A., Bitner, M. J., & Gremler, D. D. (2018). *Servicios: marketing integrado en el cliente* (6.ª ed.). McGraw-Hill.
-
-[Bibliografía completa en el documento final.]`,
-  },
-
-  {
-    matcher: /DEFENSA|preguntas/i,
-    faseLabel: "Banco de Preguntas — Defensa",
-    body: `# Banco de Preguntas para Defensa
-
-1. ¿Qué evidencia primaria sostiene el problema central?
-2. ¿Por qué el factor tecnológico obtiene la puntuación más alta del PESTEL?
-3. ¿Cómo se justifica académicamente el muestreo no probabilístico?
-4. ¿Por qué el VAN base es negativo y qué patrón estructural lo explica?
-5. ¿Qué hace que la configuración recalibrada sea la recomendada?
-
-[Banco completo de 20 preguntas en el documento final.]`,
-  },
-
-  {
-    matcher: /LATEX|latex|compilar/i,
-    faseLabel: "Compilación LaTeX",
-    body: `\\documentclass[12pt,letterpaper]{report}
-\\usepackage[utf8]{inputenc}
-\\usepackage[spanish]{babel}
-\\usepackage{geometry}
-\\geometry{letterpaper, left=3cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
-\\usepackage{tikz}
-\\usepackage{pgfplots}
-\\begin{document}
-% Carátula UCATEC generada por buildCaratulaUCATEC()
-% Capítulos I a IV insertados automáticamente
-% Referencias APA 7 al final
-\\end{document}`,
-  },
 ];
 
 /**
