@@ -15,7 +15,10 @@
  * El sistema elige el prompt correcto en runtime según el `tipo_proyecto_id`
  * del proyecto.
  *
- * Max tokens recomendado: 9000.
+ * Max tokens recomendado: 16000.
+ *
+ * Estructura: 10-12 bloques (6 conceptuales + 4 contextuales + glosario).
+ * Extensión esperada: 15000-25000 palabras (40-70 páginas).
  */
 
 import { REGLAS_BASE_PROYECTO_GRADO } from "./reglas-comunes";
@@ -169,7 +172,11 @@ manufacturing"), AGREGALOS hasta llegar al máximo de 35.
 ESTRUCTURA OBLIGATORIA — BLOQUES TEMÁTICOS (NO LISTAS)
 ═══════════════════════════════════════════════════════════════
 
-Bloques sugeridos (adaptá los nombres al rubro del proyecto):
+Un Marco Teórico de Licenciatura tiene entre 10 y 14 bloques. Los
+6 primeros son CONCEPTUALES, los 4-5 siguientes son CONTEXTUALES, y
+el último es REFERENCIAL (glosario).
+
+BLOQUES CONCEPTUALES (obligatorios, en este orden aproximado):
 
   ## 2.1 Fundamentos de la formulación y evaluación de proyectos
   ## 2.2 Análisis estratégico de industrias y entornos
@@ -180,7 +187,50 @@ Bloques sugeridos (adaptá los nombres al rubro del proyecto):
        (producción → Gestión de operaciones y procesos productivos)
   ## 2.6 [BLOQUE OPCIONAL específico al rubro]
        (ej: Economía de plataformas digitales si el proyecto es marketplace)
-  ## 2.7 Síntesis del marco teórico
+
+BLOQUES CONTEXTUALES (obligatorios — sin estos el Marco Teórico
+queda flotando sin amarre histórico, normativo ni institucional):
+
+  ## 2.7 Antecedentes históricos del sector / industria
+       Cómo evolucionó el sector en Bolivia hasta hoy. Cifras
+       sectoriales históricas. Hitos relevantes. Por qué el problema
+       que el proyecto ataca tiene la forma actual.
+
+  ## 2.8 Marco normativo aplicable al proyecto
+       Toda la legislación boliviana relevante: Código de Comercio,
+       Ley 843 (tributaria), Ley General del Trabajo, normas
+       sectoriales específicas (SENASAG, ATT, ASFI, etc. según rubro),
+       Ley 164 (telecomunicaciones) si aplica, Ley del Consumidor.
+       NO una lista — desarrollo de cada cuerpo normativo, sus
+       artículos clave y su implicación para el proyecto.
+
+  ## 2.9 Marco institucional del ecosistema
+       Las instituciones públicas y privadas que el proyecto debe
+       interlocutar: INE, SEPREC, SIN, FUNDEMPRESA, BCB, ministerios
+       sectoriales, gremios (cámaras, asociaciones), entidades
+       financieras de fomento (BDP, BNB), organismos de cooperación
+       internacional con presencia en el sector.
+
+  ## 2.10 Estado del arte / experiencias comparables
+       Casos relevantes nacionales, regionales o internacionales de
+       propuestas similares al proyecto. NO listado de empresas —
+       análisis de qué hicieron, qué resultados obtuvieron, qué
+       aprendizajes son aplicables. Ejemplos: si el proyecto es una
+       plataforma agrícola, mencionar Farmcrowdy (Nigeria), Twiga
+       Foods (Kenia), Agrofy (Argentina), Olivos (Bolivia), etc.
+
+BLOQUE REFERENCIAL (al final):
+
+  ## 2.11 Glosario de términos técnicos
+       Lista alfabética y CONCISA (1-3 líneas por entrada) de los
+       términos técnicos del rubro que el lector no especialista
+       necesita entender. SOLO términos específicos del sector
+       (ej: agroecología, rescatista, manejo postcosecha) — NO los
+       conceptos académicos ya desarrollados en los bloques 2.1-2.6.
+
+NO incluyas un bloque "Síntesis del marco teórico" ni "Conclusión
+del Capítulo II". Eso es texto de cierre tipo IA que NO va en un
+Marco Teórico real. El último bloque es el glosario y punto.
 
 ESTRUCTURA INTERNA DE CADA BLOQUE TEMÁTICO (no de cada concepto):
 
@@ -358,19 +408,27 @@ Estas tablas son densas y sintéticas, NO listas decorativas.
 TONO Y EXTENSIÓN
 ═══════════════════════════════════════════════════════════════
 
-- Mínimo 6 a 9 PÁRRAFOS POR BLOQUE TEMÁTICO (no 4).
+- Mínimo 6 a 9 PÁRRAFOS POR BLOQUE CONCEPTUAL (2.1 a 2.6).
+- Mínimo 5 a 8 PÁRRAFOS POR BLOQUE CONTEXTUAL (2.7 a 2.10).
+- Glosario (2.11): mínimo 20 entradas, máximo 35.
 - Cada párrafo: 5 a 9 oraciones de prosa académica conectada.
-- 5 a 7 bloques temáticos en total + bloque de síntesis final.
-- 4 a 6 citas APA distintas por bloque (al menos 1 textual con página).
-- Al menos 4 ecuaciones en total a lo largo del Capítulo.
-- Al menos 3 diagramas TikZ en total a lo largo del Capítulo.
-- Al menos 2 tablas comparativas a lo largo del Capítulo.
-- Aplicación al caso del proyecto: una vez por bloque, breve, en el
-  cierre del bloque (no contaminar el desarrollo teórico).
+- 10 a 12 bloques temáticos en total (NO cerrar antes).
+- 4 a 6 citas APA distintas por bloque conceptual (al menos 1 textual
+  con página).
+- Bloques contextuales: citar fuentes institucionales bolivianas (INE,
+  BCB, SEPREC, SIN, FUNDEMPRESA, ministerios, gacetas oficiales) Y
+  literatura académica donde corresponda.
+- Al menos 5 ecuaciones en total a lo largo del Capítulo.
+- Al menos 4 diagramas TikZ en total a lo largo del Capítulo.
+- Al menos 3 tablas comparativas a lo largo del Capítulo (sin contar
+  el glosario).
+- Aplicación al caso del proyecto: una vez por bloque conceptual,
+  breve, en el cierre del bloque (no contaminar el desarrollo teórico).
 
-Extensión total esperada del Cap. II: 25 a 40 páginas equivalentes
-(9000 a 14000 palabras). Un Marco Teórico de Licenciatura es DENSO.
-Si el output queda corto, FALTA contenido — no cierres prematuro.
+Extensión total esperada del Cap. II: 40 a 70 páginas equivalentes
+(15000 a 25000 palabras). Un Marco Teórico de Licenciatura es DENSO
+y COMPLETO. Si el output queda corto, FALTA contenido — no cierres
+prematuro.
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS DE ESTA FASE
@@ -400,9 +458,22 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
 
 - ❌ Citar autores fuera del whitelist autorizado de reglas-comunes.
 
-- ❌ Terminar con conclusiones generales del documento — el cierre del
-  Cap. II es una síntesis del marco teórico construido, no una
-  evaluación del proyecto.
+- ❌ Incluir un bloque "## 2.X Síntesis del marco teórico" o "Cierre
+  del Capítulo II" o "Conclusión del marco teórico". Eso es texto
+  AUTOEXPLICATIVO de IA — los Marcos Teóricos reales NO se resumen
+  a sí mismos. El Capítulo cierra con el GLOSARIO (último bloque) y
+  PUNTO. No agregues un párrafo meta tipo "los bloques anteriores
+  confluyen en...".
+
+- ❌ Omitir los bloques contextuales (antecedentes históricos, marco
+  normativo, marco institucional, estado del arte). Sin estos cuatro,
+  el Marco Teórico queda flotando sin amarre al contexto boliviano.
+
+- ❌ Omitir el glosario final. Es el bloque referencial obligatorio.
+
+- ❌ Confundir el desarrollo conceptual (bloques 2.1-2.6) con el
+  desarrollo contextual (bloques 2.7-2.10). Los primeros sustentan
+  el METODO; los segundos sustentan el CONTEXTO REAL del proyecto.
 
 - ❌ Repetir el mismo verbo introductorio en concepto tras concepto
   ('se define como' 30 veces). Variá la forma.

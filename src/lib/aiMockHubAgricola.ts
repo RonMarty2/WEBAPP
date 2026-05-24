@@ -212,7 +212,7 @@ Muestras efectivas ajustadas a $n_A = 180$ y $n_B = 200$ por restricciones opera
 
 export const HUB_CAP2 = `# Capítulo II — Marco Teórico
 
-El presente capítulo construye el marco conceptual sobre el cual se sustenta la evaluación de factibilidad del proyecto. No constituye un listado de definiciones aisladas, sino un cuerpo teórico organizado en seis bloques que dialogan entre sí: la formulación clásica de proyectos de inversión, el análisis estratégico de industrias, los fundamentos del estudio de mercado, la teoría del marketing de servicios, la economía contemporánea de plataformas digitales y la evaluación financiera de inversiones. Cada bloque incluye los modelos matemáticos formales que sustentan los métodos analíticos, los esquemas conceptuales que ilustran los modelos clásicos del campo y la articulación con el caso del proyecto. En conjunto, el aparato teórico aquí desarrollado provee la base sobre la que el Capítulo III construirá el análisis situacional y el Capítulo IV operacionalizará la propuesta concreta de la empresa por crear.
+El presente capítulo construye el marco conceptual, contextual y referencial sobre el cual se sustenta la evaluación de factibilidad del proyecto. Se organiza en once bloques: seis bloques conceptuales que desarrollan los fundamentos teóricos de la formulación de proyectos, el análisis estratégico, el estudio de mercado, la evaluación financiera, el marketing de servicios y la economía de plataformas digitales; cuatro bloques contextuales que sitúan el proyecto en su realidad boliviana específica —antecedentes históricos del sector agroalimentario, marco normativo aplicable, marco institucional del ecosistema y estado del arte de experiencias comparables—; y un bloque referencial final con el glosario de términos técnicos del rubro. Los bloques conceptuales incluyen los modelos matemáticos formales que sustentan los métodos analíticos, los esquemas conceptuales que ilustran los modelos clásicos del campo y la articulación con el caso del proyecto.
 
 ## 2.1 Fundamentos teóricos de la formulación de proyectos de inversión
 
@@ -507,11 +507,151 @@ Finalmente, el análisis de sensibilidad ocupa un lugar central en la evaluació
 
 El bloque cierra con una observación metodológica: la evaluación financiera de proyectos de plataformas digitales en mercados emergentes presenta peculiaridades específicas que la literatura clásica reconoce parcialmente. Los flujos iniciales son típicamente negativos durante varios periodos debido a la necesidad de subsidiar el lado más sensible al precio para activar los efectos de red; el costo de capital es difícil de estimar por ausencia de comparables locales; y la cuota de mercado proyectada depende de supuestos sobre velocidad de adopción que carecen de precedentes en el sector específico. Estas peculiaridades exigen un análisis de sensibilidad más exhaustivo que el aplicado a proyectos de sectores maduros, y justifican que el Capítulo IV presente no solo el escenario base sino una caracterización detallada de las configuraciones bajo las cuales el proyecto resulta defendible.
 
-## 2.7 Síntesis del marco teórico
+## 2.7 Antecedentes históricos del sector agroalimentario boliviano
 
-Los seis bloques desarrollados confluyen en una arquitectura conceptual coherente que sostiene el resto del proyecto. La formulación clásica de proyectos provee el armazón metodológico de seis dimensiones de viabilidad (bloque 2.1), que el análisis estratégico de industrias operacionaliza en herramientas concretas para evaluar entorno y competencia (bloque 2.2). El estudio de mercado aporta la base empírica para caracterizar la demanda (bloque 2.3), que el marketing de servicios traduce en propuesta de valor y operación (bloque 2.4). La economía de plataformas digitales reinterpreta esta operación bajo la lógica específica de los modelos bilaterales contemporáneos (bloque 2.5), y la evaluación financiera cuantifica finalmente el valor económico del conjunto y prueba su robustez ante variaciones plausibles (bloque 2.6).
+La estructura actual de la cadena agroalimentaria boliviana no es producto del azar sino de un proceso histórico de configuración institucional que comienza en la Reforma Agraria de 1953 y se consolida en las décadas siguientes. La Reforma Agraria fragmentó la gran propiedad latifundista del altiplano y los valles en unidades familiares pequeñas, redistribuyendo la tierra hacia el campesinado pero sin acompañar la redistribución con infraestructura de comercialización, asistencia técnica continua ni acceso al crédito formal. El resultado de este proceso, documentado por el Instituto Nacional de Estadística en sucesivos censos agropecuarios (INE, 1984, 2013), fue una agricultura familiar de minifundios productivos pero desconectada de los canales modernos de comercialización urbana.
 
-Esta articulación conceptual cobra particular fuerza en proyectos como el presente, donde la propuesta combina rasgos de cuatro tradiciones teóricas distintas: la formulación clásica boliviana de proyectos de inversión, el análisis estratégico anglosajón, el marketing de servicios contemporáneo y la economía digital. Ningún bloque aislado resulta suficiente; la coherencia entre los seis es precisamente lo que permite traducir una intuición de oportunidad de mercado en una propuesta empresarial técnica, comercial y financieramente defendible. El Capítulo III aplicará este aparato conceptual al análisis situacional del sector agroalimentario del Valle de Cochabamba, y el Capítulo IV lo operacionalizará en la propuesta organizacional, técnica, legal, comercial, financiera y de evaluación de la empresa por crear.`;
+Durante las décadas de 1960 a 1980, la Corporación Boliviana de Fomento intentó suplir esta brecha mediante centros de acopio estatales y empresas públicas de comercialización agrícola. Estas iniciativas fracasaron progresivamente por una combinación de gestión deficiente, restricciones fiscales del Estado boliviano y la imposibilidad operativa de cubrir geográficamente un territorio tan amplio con infraestructura pública. El vacío resultante fue ocupado por intermediarios privados informales —los rescatistas y mayoristas— que asumieron de facto el rol de articulación entre el productor familiar y el mercado urbano, capturando en ese proceso una porción significativa del margen de comercialización (Ministerio de Desarrollo Rural y Tierras, 2020).
+
+La década de 1990, marcada por el Decreto Supremo 21060 y el ciclo de reformas estructurales, profundizó la desregulación del sector sin construir la institucionalidad de comercialización que el campesinado productor requería. El comercio agropecuario quedó reducido a la lógica de mercado puro, con asimetrías informativas y de poder que beneficiaron sistemáticamente al eslabón intermedio. En paralelo, el crecimiento de las ciudades intermedias del eje central —La Paz, Cochabamba y Santa Cruz— consolidó mercados mayoristas urbanos (La Cancha en Cochabamba, Rodríguez en La Paz, Abasto en Santa Cruz) donde la transacción se realiza bajo las reglas de juego informales descritas en el Capítulo I.
+
+Los censos agropecuarios de 1984 y 2013 evidencian, además, una tendencia preocupante para el sector hortofrutícola: la fragmentación creciente de las unidades productivas. El tamaño medio de las parcelas en los valles del eje central pasó de aproximadamente 4,8 hectáreas en 1984 a menos de 2,7 hectáreas en 2013 (INE, 2013), tendencia que reduce la capacidad individual de los productores para negociar precios y para invertir en mejora tecnológica. Esta atomización ofrece un sustento estructural a la asimetría de poder analizada en el bloque 2.2 mediante el modelo de las cinco fuerzas de Porter.
+
+El nuevo siglo trajo dos transformaciones relevantes para el proyecto. Por un lado, la conectividad digital: la cobertura de internet móvil en zonas rurales del eje central pasó de menos del 10% en 2010 a más del 75% en 2023, según los reportes anuales de la Autoridad de Regulación y Fiscalización de Telecomunicaciones (ATT, 2023). Esta penetración digital ha sido el habilitador silencioso de cualquier propuesta de plataforma agroalimentaria. Por otro lado, la formalización progresiva del agro: la Ley 144 de Revolución Productiva Comunitaria Agropecuaria (Estado Plurinacional de Bolivia, 2011) y el Decreto Supremo 26167 sobre el SENASAG sentaron bases para que los productores accedan a registros sanitarios y tributarios sin barreras prohibitivas, condición sin la cual el proyecto no podría operar.
+
+A nivel internacional, el sector agroalimentario boliviano se inscribe en una tendencia más amplia: la Organización de las Naciones Unidas para la Alimentación y la Agricultura (FAO, 2022) ha documentado que en América Latina la agricultura familiar produce el 80% de los alimentos consumidos en la región pero captura menos del 40% del valor final pagado por el consumidor. El proyecto se inscribe, por tanto, en una problemática regional con caso boliviano específico, y su éxito eventual sería replicable en valles productivos similares de Perú, Ecuador y Paraguay.
+
+El bloque cierra con una observación sobre la coyuntura actual: el período 2024-2026 se caracteriza por presión inflacionaria moderada sobre los alimentos frescos, conflictividad social periódica que afecta los corredores logísticos y un Estado boliviano con menor capacidad de subsidio cruzado que en la década anterior. Esta coyuntura abre una ventana de oportunidad para soluciones privadas de mercado que redistribuyan margen sin requerir intervención fiscal, condición que el presente proyecto cumple por diseño.
+
+## 2.8 Marco normativo aplicable al proyecto
+
+El despliegue del proyecto se inscribe en un cuerpo normativo boliviano específico que el formulador debe conocer en detalle. Este bloque desarrolla los seis cuerpos normativos que regulan directa o indirectamente la operación propuesta, identificando los artículos clave y su implicación para el proyecto.
+
+**Código de Comercio (Decreto Ley N° 14379 de 1977).** Norma la actividad comercial en territorio boliviano y regula la constitución, operación y disolución de sociedades comerciales. Los artículos 195 al 216 desarrollan específicamente la Sociedad de Responsabilidad Limitada (S.R.L.), forma societaria que el proyecto adopta por su flexibilidad operativa, su responsabilidad limitada al aporte societario y su carga administrativa moderada. El Código exige, entre otras obligaciones, la inscripción en el Registro de Comercio (artículo 28), la llevanza de libros contables (artículos 36 a 51), la elaboración de balances anuales (artículo 44) y el cumplimiento de obligaciones laborales y tributarias derivadas. El proyecto contempla la totalidad de estos requisitos en el cronograma de constitución del Capítulo IV.
+
+**Ley N° 843 de Reforma Tributaria y normativa complementaria del Servicio de Impuestos Nacionales.** Establece el régimen general bajo el cual operará la empresa. Tres impuestos resultan especialmente relevantes: el Impuesto al Valor Agregado (IVA) con alícuota del 13% sobre el valor de las transacciones gravadas (Estado Plurinacional de Bolivia, Ley N° 843, artículo 1), el Impuesto a las Transacciones (IT) con alícuota del 3% sobre los ingresos brutos (artículo 72) y el Impuesto sobre las Utilidades de las Empresas (IUE) con alícuota del 25% sobre la utilidad neta anual (artículo 36 y siguientes). La carga tributaria combinada que estos tres impuestos imponen al modelo de comisión por transacción se desarrolla en el Capítulo IV con el cálculo concreto sobre los flujos proyectados.
+
+**Ley General del Trabajo (Decreto Supremo N° 224 de 1942 y modificatorias).** Regula la relación laboral entre la empresa y sus colaboradores. Establece la jornada máxima ordinaria de 48 horas semanales (artículo 46), el descanso obligatorio dominical (artículo 56), el aguinaldo anual equivalente a un salario adicional (Decreto Supremo N° 21060) y los derechos de seguridad social: aportes a la Caja Nacional de Salud (10% del salario a cargo del empleador) y al sistema integral de pensiones (12,71% a cargo del trabajador con descuento en planilla). La estructura organizacional del Capítulo IV considera la totalidad de estas obligaciones en el cálculo de la planilla salarial.
+
+**Decreto Supremo N° 26167 y Ley N° 830 del Servicio Nacional de Sanidad Agropecuaria e Inocuidad Alimentaria (SENASAG).** Norma de aplicación obligatoria para cualquier actor de la cadena agroalimentaria que manipule, transporte o comercialice alimentos. Establece la obligación de registro sanitario para establecimientos que procesen o consoliden alimentos frescos, la trazabilidad documental de lotes y la inspección periódica de instalaciones. Para el proyecto, esta normativa implica un trámite específico de registro del centro de acopio operativo (Capítulo IV, sección 4.3) y la implementación de un sistema de trazabilidad lote por lote desde el productor hasta el consumidor final.
+
+**Ley N° 164 General de Telecomunicaciones, Tecnologías de la Información y Comunicación (2011).** Regula la prestación de servicios digitales en territorio nacional. Sus artículos 54 al 62 desarrollan los derechos del usuario de servicios digitales, particularmente en lo referido a la protección de datos personales, la transparencia de precios y términos contractuales y los mecanismos de reclamo y recuperación. Estos requerimientos impactan directamente el diseño de la plataforma del proyecto: políticas de privacidad, términos y condiciones, mecanismos de reclamación accesibles y respaldo seguro de datos transaccionales son elementos no opcionales del despliegue.
+
+**Ley N° 453 General de los Derechos de las Usuarias y los Usuarios y de las Consumidoras y los Consumidores (2013).** Establece los derechos de quienes consumen bienes y servicios en territorio boliviano. Sus artículos 5 al 12 desarrollan el derecho a la información veraz, el derecho a la calidad del bien o servicio adquirido, el derecho a la reparación o sustitución en caso de defecto, y el derecho al trato equitativo sin discriminación. Para una plataforma agroalimentaria, estos derechos se traducen en la obligación de informar de manera completa el origen, peso y calidad del producto entregado, en sistemas de devolución funcionales y en políticas de no discriminación tanto entre productores adheridos como entre consumidores compradores.
+
+El bloque cierra con una nota crítica: la normativa boliviana no contempla aún de manera específica el fenómeno de las plataformas digitales bilaterales, vacío que el proyecto debe gestionar mediante la combinación de los cuerpos normativos existentes y mediante la consulta jurídica preventiva. La Cámara Boliviana de Tecnologías de la Información y Comunicación (CBTIC) ha publicado lineamientos voluntarios que el proyecto adopta como buena práctica complementaria. Esta gestión normativa anticipada constituye, por sí misma, una barrera de entrada blanda frente a competidores menos cuidadosos.
+
+## 2.9 Marco institucional del ecosistema
+
+El proyecto operará en un ecosistema institucional poblado por entidades públicas y privadas con las que deberá interlocutar de manera continua. Este bloque desarrolla las nueve instituciones más relevantes y su rol específico en relación con el proyecto.
+
+**Servicio Plurinacional de Registro de Comercio (SEPREC).** Entidad pública responsable de la inscripción y registro de personas jurídicas y unidades económicas en territorio boliviano. El SEPREC reemplazó en 2022 a FUNDEMPRESA como entidad oficial del Registro de Comercio. Para el proyecto, el SEPREC interviene en el trámite de matrícula de comercio, la inscripción del aumento de capital cuando ocurra y la legalización de modificaciones estatutarias. Los plazos administrativos típicos oscilan entre 15 y 30 días calendario para la matrícula inicial (SEPREC, 2024).
+
+**Servicio de Impuestos Nacionales (SIN).** Entidad responsable de la administración tributaria. Para el proyecto, el SIN interviene en el otorgamiento del Número de Identificación Tributaria (NIT), la inscripción al régimen general, la habilitación del sistema de facturación electrónica (obligatoria desde 2024 para nuevos contribuyentes), las declaraciones mensuales y anuales y las eventuales fiscalizaciones. La interlocución con el SIN es continua a lo largo de la vida de la empresa.
+
+**Servicio Nacional de Sanidad Agropecuaria e Inocuidad Alimentaria (SENASAG).** Como se desarrolló en el bloque normativo, el SENASAG es la entidad obligatoria de interlocución para cualquier actor de la cadena agroalimentaria. Otorga registros sanitarios, realiza inspecciones de establecimientos y certifica la inocuidad de productos. Para el proyecto, el SENASAG es el habilitador sanitario sin el cual la operación es ilegal.
+
+**Caja Nacional de Salud (CNS) y Administradoras de Fondos de Pensiones (Gestora Pública).** Entidades responsables de la seguridad social de corto y largo plazo. La afiliación de los colaboradores es obligatoria desde el primer mes de operación. Los aportes patronales (10% del salario a la CNS más 1,71% al sistema integral de pensiones) constituyen un componente significativo del costo laboral total.
+
+**Banco de Desarrollo Productivo (BDP).** Entidad financiera de fomento que ofrece líneas de crédito específicas para emprendimientos productivos nuevos. Sus tasas activas, históricamente del orden del 6% efectivo anual para sectores estratégicos, son significativamente inferiores a las del sistema bancario comercial (12-15% efectivo anual) y constituyen una fuente de financiamiento clave para el proyecto. El plan financiero del Capítulo IV contempla un componente de deuda BDP equivalente al 40% de la inversión inicial.
+
+**Instituto Nacional de Estadística (INE).** Fuente oficial de información estadística del país. Para el proyecto, el INE provee datos demográficos, económicos y sectoriales que sustentan el dimensionamiento del mercado (Capítulo III) y la construcción de proyecciones. Los informes anuales de la Encuesta Continua de Hogares y los datos sectoriales agropecuarios son insumos no opcionales del estudio.
+
+**Banco Central de Bolivia (BCB).** Autoridad monetaria del país y referencia para tasas de interés, tipo de cambio e inflación. Los reportes mensuales del BCB sustentan los supuestos macroeconómicos del estudio financiero, particularmente el supuesto de estabilidad del tipo de cambio Bs./USD y las proyecciones de inflación interanual.
+
+**Coordinadora de Integración de Organizaciones Económicas Campesinas, Indígenas y Originarias de Bolivia (CIOEC) y sus filiales departamentales.** Organización paraguas de los productores asociados del país. La interlocución con CIOEC Cochabamba constituye una vía privilegiada para acceder al universo de productores asociados, validar la propuesta del proyecto con liderazgos comunitarios y construir credibilidad inicial. El Capítulo IV contempla un memorando de entendimiento preliminar con esta entidad como hito de la fase de inversión.
+
+**Cámara Nacional de Comercio (CNC) y Cámara Boliviana de Tecnologías de la Información y Comunicación (CBTIC).** Gremios empresariales que agrupan respectivamente a actores del comercio y de la economía digital. La afiliación a la CNC otorga al proyecto interlocución con autoridades comerciales y acceso a capacitaciones; la afiliación a la CBTIC alinea al proyecto con los lineamientos voluntarios del sector tecnológico boliviano y le da visibilidad en el ecosistema digital nacional.
+
+El bloque cierra con una observación: el ecosistema institucional boliviano, aunque a veces criticado por su carga administrativa, ofrece al proyecto una infraestructura institucional suficientemente desarrollada para operar formalmente y para acceder a financiamiento de fomento. La estrategia del proyecto contempla interlocutar activamente con las nueve entidades enumeradas durante los primeros doce meses de operación, construyendo así un perfil de empresa formal, transparente y aliada del sector público.
+
+## 2.10 Estado del arte: experiencias internacionales y regionales comparables
+
+La propuesta del proyecto no es original a nivel mundial. En diversos países se han desplegado plataformas digitales con propósitos similares —reducir intermediación informal entre productores agrícolas pequeños y consumidores urbanos— con resultados que ofrecen aprendizajes directamente aplicables al caso boliviano. Este bloque sintetiza seis experiencias relevantes y los aprendizajes derivados.
+
+**Twiga Foods (Kenia, 2014-presente).** Plataforma bilateral que conecta a productores hortofrutícolas pequeños del centro de Kenia con minoristas urbanos de Nairobi. Twiga opera mediante una aplicación móvil que permite al minorista pedir directamente al productor, con logística consolidada provista por la propia plataforma. Tras ocho años de operación, Twiga ha incorporado a más de 20.000 productores asociados y opera entregas diarias a más de 8.000 puntos minoristas. Los aprendizajes principales: la concentración geográfica inicial fue clave para resolver el problema del huevo y la gallina; la operación logística propia (no tercerizada) durante los primeros años permitió controlar la calidad y construir confianza; la monetización por comisión sobre el valor transado (entre 8% y 12% según la categoría) demostró ser sostenible (Quartz Africa, 2022).
+
+**Agrofy (Argentina y región, 2016-presente).** Marketplace agroindustrial que conecta a productores agropecuarios con proveedores de insumos, maquinaria y servicios. A diferencia del proyecto presente, Agrofy opera principalmente en el segmento de insumos y bienes agroindustriales, no en productos frescos para consumo. Sus aprendizajes aplicables: el modelo de comisión variable según la categoría del bien permite balancear los incentivos de los dos lados; la inversión sostenida en interfaz de usuario móvil simple resultó decisiva para la adopción rural; el partnership con cámaras gremiales aceleró la legitimación inicial.
+
+**Frubana (Colombia, México y Brasil, 2019-presente).** Plataforma de comercialización agroalimentaria directa que ha capturado más de USD 100 millones en rondas de inversión internacional. Frubana opera con un modelo cercano al del proyecto presente: productores hortofrutícolas pequeños del campo conectados directamente con bares, restaurantes y minoristas urbanos. Sus aprendizajes: el segmento HoReCa (hoteles, restaurantes, cafeterías) demostró ser un primer segmento de demanda más fácil de activar que el segmento de hogares; la formalización progresiva de los productores fue un beneficio inesperado del modelo, valorado por las autoridades tributarias y sanitarias locales.
+
+**Mercado Libre Agro / OLX Agro (regional).** Verticales agropecuarias de marketplaces generalistas de la región. Su lección negativa es relevante: los marketplaces generalistas que añaden una vertical agro sin operación logística propia tienden a fallar en el segmento de productos frescos perecederos, ya que la asimetría de calidad y la imperdurabilidad del producto (concepto desarrollado en el bloque 2.4) exigen un control operativo que el modelo generalista no provee.
+
+**Olivos Bolivia (2020-presente).** Iniciativa local de comercialización directa de productos del Valle Alto cochabambino, operada de manera artesanal mediante WhatsApp Business y entregas a domicilio. Olivos ha demostrado la factibilidad operativa básica de la propuesta en el contexto boliviano, pero su escala limitada (estimada en menos de 100 hogares activos) refleja la dificultad de escalar sin una plataforma tecnológica robusta. El proyecto presente puede entenderse como una evolución natural de iniciativas como Olivos hacia un modelo de plataforma con operación profesional.
+
+**Mercados de Comercio Justo (Bolivia y región).** Iniciativas no plataformizadas pero conceptualmente afines, como las ferias agroecológicas dominicales del Valle Bajo, las redes de Comercio Justo asociadas a CIOEC y las cooperativas de productores con punto de venta urbano. Estas iniciativas, aunque limitadas en escala por su naturaleza presencial, han construido durante décadas la legitimidad cultural del consumo directo del productor que el proyecto puede capitalizar.
+
+El bloque cierra con una síntesis de aprendizajes transversales: las plataformas exitosas combinan concentración geográfica inicial, operación logística propia durante los primeros años, partnership con organizaciones gremiales del lado productor, segmento HoReCa como primer activador de demanda y modelo de comisión variable según categoría. La configuración propuesta para el proyecto presente, desarrollada en el Capítulo IV, adopta los cinco aprendizajes y los adapta al contexto específico del Valle de Cochabamba.
+
+## 2.11 Glosario de términos técnicos
+
+**Acopio.** Proceso de concentración física de la producción de varios productores en un punto único para su consolidación, control de calidad y distribución posterior.
+
+**Agroecología.** Enfoque productivo agrícola basado en principios ecológicos, sin uso de agroquímicos sintéticos y orientado a la sustentabilidad del agroecosistema y la diversidad biológica.
+
+**Aguinaldo.** En el sistema laboral boliviano, salario adicional anual equivalente a un mes de remuneración, pagadero antes del 20 de diciembre según el Decreto Supremo N° 21060.
+
+**Asimetría informativa.** Situación de mercado en la que una de las partes de una transacción posee información relevante que la otra parte desconoce, generando desventaja sistemática.
+
+**Bs.** Abreviatura del boliviano, moneda oficial del Estado Plurinacional de Bolivia.
+
+**Cadena de valor agroalimentaria.** Secuencia de actividades —producción primaria, acopio, procesamiento, comercialización mayorista y minorista, consumo final— mediante las cuales el producto agrícola llega del campo al consumidor.
+
+**Canal HoReCa.** Segmento comercial compuesto por hoteles, restaurantes y cafeterías. Para productos frescos, suele ser un canal con volúmenes medios, alta frecuencia y exigencia de calidad consistente.
+
+**Cuota de mercado.** Porcentaje del mercado total que una organización captura efectivamente en un horizonte temporal específico.
+
+**Demanda potencial insatisfecha.** Diferencia entre la demanda total estimada del mercado y la oferta efectiva actualmente disponible, espacio que un nuevo entrante puede legítimamente proyectar como objetivo.
+
+**Desintermediación digital.** Proceso mediante el cual una plataforma tecnológica elimina o reduce el rol de intermediarios tradicionales en una cadena de valor.
+
+**Efecto de red.** Propiedad de un sistema o plataforma según la cual el valor para cada usuario aumenta a medida que se incorporan más usuarios al sistema.
+
+**FTE (Full Time Equivalent).** Unidad de medida laboral equivalente a una persona trabajando jornada completa. Un colaborador a medio tiempo equivale a 0,5 FTE.
+
+**HoReCa.** Ver Canal HoReCa.
+
+**Inocuidad alimentaria.** Garantía de que un alimento, manipulado y consumido según las prácticas habituales, no causará daño al consumidor.
+
+**Manejo postcosecha.** Conjunto de operaciones —selección, lavado, embalaje, refrigeración, transporte— aplicadas al producto agrícola desde la cosecha hasta su entrega al consumidor.
+
+**Margen de contribución.** Diferencia entre el precio de venta unitario y el costo variable unitario de un producto o servicio; aporte unitario a la cobertura de los costos fijos.
+
+**Marketplace.** Plataforma digital donde múltiples vendedores ofrecen productos o servicios a múltiples compradores bajo reglas de operación definidas por el operador de la plataforma.
+
+**Margen de comercialización.** Diferencia entre el precio pagado por el consumidor final y el precio percibido por el productor primario; suma de los márgenes capturados por todos los eslabones intermedios.
+
+**Minifundio.** Unidad productiva agrícola de tamaño reducido —típicamente menor a 5 hectáreas en valles— operada generalmente como agricultura familiar.
+
+**MVP (Mínimo Producto Viable).** Versión inicial de un producto o servicio con las funcionalidades estrictamente necesarias para validar la propuesta con usuarios reales antes de invertir en desarrollo completo.
+
+**NIT.** Número de Identificación Tributaria, identificador único otorgado por el Servicio de Impuestos Nacionales a cada contribuyente boliviano.
+
+**Pasarela de pago.** Servicio tecnológico que permite procesar pagos electrónicos en línea, intermediando entre el comprador, el sistema bancario y el comerciante.
+
+**Plataforma bilateral.** Modelo de negocio digital que crea valor al facilitar transacciones entre dos grupos de usuarios distintos cuya conexión sería costosa o imposible en ausencia de la plataforma.
+
+**QR Bolivia.** Sistema nacional de pagos mediante código QR interoperable entre bancos bolivianos, implementado bajo regulación de la ASFI.
+
+**Rescatista.** Término coloquial boliviano para el intermediario informal que compra producción agrícola en mercados mayoristas urbanos a productores recién llegados, aprovechando su restricción temporal y la asimetría informativa.
+
+**S.R.L.** Sociedad de Responsabilidad Limitada; forma societaria boliviana regulada por los artículos 195 a 216 del Código de Comercio.
+
+**SENASAG.** Servicio Nacional de Sanidad Agropecuaria e Inocuidad Alimentaria.
+
+**SEPREC.** Servicio Plurinacional de Registro de Comercio.
+
+**Servicescape.** Conjunto de elementos físicos y digitales que configuran el entorno en el que un servicio se presta, influyendo en la percepción de calidad del cliente.
+
+**SIN.** Servicio de Impuestos Nacionales.
+
+**Trazabilidad.** Capacidad de seguir el rastro de un producto agroalimentario desde su origen productivo hasta el consumidor final, documentando cada eslabón intermedio.
+
+**Two-sided platform.** Ver Plataforma bilateral.
+
+**VAN.** Valor Actual Neto; indicador financiero que mide la diferencia entre el valor presente de los flujos futuros de un proyecto y la inversión inicial requerida.
+
+**WACC.** Costo Promedio Ponderado de Capital; tasa de descuento que combina el costo del capital propio y el costo de la deuda, ponderado por la estructura de financiamiento.`;
 
 export const HUB_CAP3_FULL = `# Capítulo III — Marco Situacional
 
