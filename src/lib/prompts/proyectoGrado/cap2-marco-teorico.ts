@@ -226,19 +226,151 @@ Año de la cita: usar ediciones recientes (2017-2024). NO inventes años.
 Formato APA: (Apellido, año).
 
 ═══════════════════════════════════════════════════════════════
+FORMATO APA 7 ESTRICTO (OBLIGATORIO)
+═══════════════════════════════════════════════════════════════
+
+Este Capítulo es académicamente evaluado contra normas APA 7. Reglas:
+
+**Citas de paráfrasis** (idea propia con sustento):
+  → (Apellido, año)
+  → (Sapag Chain et al., 2014)
+  → (Porter, 2008)
+
+**Citas textuales cortas** (menos de 40 palabras, integradas al párrafo):
+  → "texto literal entre comillas" (Apellido, año, p. XX).
+  → Como sostiene Porter (2008), "las cinco fuerzas que conforman
+    la estructura competitiva [...] determinan el atractivo final
+    de la industria" (p. 45).
+
+**Citas textuales en bloque** (40 o más palabras): párrafo aparte,
+sangría 1.27 cm, sin comillas, cita al final.
+
+**Tres autores o más en la primera cita**: usar todos los nombres una
+vez y después abreviar.
+  → Primera vez: (Sapag Chain, Sapag Chain y Sapag Puelma, 2014)
+  → Después: (Sapag Chain et al., 2014)
+
+**OBLIGATORIO**: cada bloque temático debe incluir AL MENOS UNA cita
+textual breve con número de página, para evidenciar lectura directa
+de la fuente y no solo paráfrasis general.
+
+**Mínimo 4-6 citas APA distintas por bloque temático** (entre paráfrasis
+y textuales). Variá los autores; no satures con uno solo.
+
+═══════════════════════════════════════════════════════════════
+ECUACIONES FORMALES (CUANDO EL CONTENIDO LO AMERITE)
+═══════════════════════════════════════════════════════════════
+
+Un Marco Teórico de Proyecto de Grado DEBE presentar las fórmulas
+matemáticas que sustentan los métodos analíticos cuando los aborda.
+NO basta con mencionar "se calcula el VAN" — hay que escribir la
+ecuación. NO basta con decir "fórmula de tamaño muestral" — hay que
+escribirla.
+
+Las ecuaciones se escriben en bloques de código \`\`\`latex con el
+entorno \\begin{equation}...\\end{equation}, así:
+
+\`\`\`latex
+\\begin{equation}
+\\text{VAN} = -I_{0} + \\sum_{t=1}^{n} \\frac{FCN_{t}}{(1 + k)^{t}}
+\\end{equation}
+\`\`\`
+
+Después de la ecuación, OBLIGATORIO: un párrafo "donde:" que explique
+cada variable conceptualmente (no aplicada al caso — eso es Cap. IV).
+
+Ecuaciones que el Cap. II debe presentar SIEMPRE en su bloque
+correspondiente (esto NO es opcional, es exigencia académica):
+
+  EN EL BLOQUE DE EVALUACIÓN FINANCIERA:
+  - VAN (Valor Actual Neto)
+  - TIR (Tasa Interna de Retorno) — fórmula de la condición VAN=0
+  - WACC (Costo Promedio Ponderado de Capital)
+  - Punto de equilibrio en unidades
+
+  EN EL BLOQUE DE ESTUDIO DE MERCADO:
+  - Tamaño muestral para población finita
+    (la misma de Cap. I pero presentada teóricamente, no aplicada)
+
+  EN EL BLOQUE DE MARKETING DE SERVICIOS (solo subtipo servicios):
+  - Modelo de brechas SERVQUAL (Gap = Percepción − Expectativa)
+    o cualquier expresión cuantitativa relevante.
+
+  EN EL BLOQUE DE GESTIÓN DE OPERACIONES (solo subtipo producción):
+  - Capacidad efectiva = Capacidad de diseño × eficiencia
+  - Tiempo de ciclo, takt time o fórmula relevante de operaciones.
+
+═══════════════════════════════════════════════════════════════
+DIAGRAMAS CONCEPTUALES (TikZ — CUANDO EL CONTENIDO LO AMERITE)
+═══════════════════════════════════════════════════════════════
+
+Un Marco Teórico riguroso ilustra los modelos conceptuales clave con
+diagramas. Los modelos siguientes DEBEN ir acompañados de diagrama
+TikZ embebido en el bloque correspondiente:
+
+  EN EL BLOQUE DE ANÁLISIS ESTRATÉGICO:
+  - Modelo de las 5 Fuerzas de Porter (las 5 cajas alrededor de la
+    central "Rivalidad existente" con flechas).
+  - Cadena de valor de Porter (actividades primarias en franja
+    horizontal + actividades de apoyo arriba).
+
+  EN EL BLOQUE DE FORMULACIÓN DE PROYECTOS:
+  - Ciclo de vida del proyecto (pre-inversión → inversión → operación)
+    o esquema de las 6 dimensiones de viabilidad.
+
+  EN EL BLOQUE DE MARKETING DE SERVICIOS (solo subtipo servicios):
+  - Modelo de brechas SERVQUAL (las 5 brechas con flechas).
+  - O modelo de las 4i de los servicios.
+
+  EN EL BLOQUE DE ECONOMÍA DE PLATAFORMAS (si aplica al rubro):
+  - Plataforma bilateral con efectos de red cruzados (productores
+    a la izquierda, plataforma central, consumidores a la derecha,
+    flechas curvas mostrando efectos cruzados).
+
+  EN EL BLOQUE DE GESTIÓN DE OPERACIONES (solo subtipo producción):
+  - Esquema de proceso productivo genérico o layout conceptual.
+
+Sintaxis TikZ: ver reglas-comunes (siempre dentro de \`\`\`tikz...\`\`\`,
+con \\begin{center}, todos los caracteres dobles escapados \\\\, sin
+acentos en código TikZ — solo en etiquetas con texto entre llaves).
+
+Cada diagrama va seguido de un párrafo que explica qué representa
+el modelo (no descriptivo del dibujo — explicación conceptual).
+
+═══════════════════════════════════════════════════════════════
+TABLAS COMPARATIVAS (CUANDO AYUDEN A SINTETIZAR)
+═══════════════════════════════════════════════════════════════
+
+Cuando un bloque presenta múltiples enfoques o múltiples elementos
+de un mismo modelo, OBLIGATORIO cerrar el bloque con una tabla
+resumen markdown:
+
+  Ejemplo en bloque de marketing de servicios:
+
+  | Característica | Implicación operativa | Estrategia de gestión |
+  |---|---|---|
+  | Intangibilidad | El cliente no evalúa antes... | Construir evidencia... |
+  | Inseparabilidad | Producción y consumo... | Formar al personal... |
+
+Estas tablas son densas y sintéticas, NO listas decorativas.
+
+═══════════════════════════════════════════════════════════════
 TONO Y EXTENSIÓN
 ═══════════════════════════════════════════════════════════════
 
-- Mínimo 4-8 párrafos POR BLOQUE TEMÁTICO (5-7 bloques en total).
-- Cada párrafo: 4-8 oraciones de prosa académica conectada.
-- Conectá los conceptos entre sí — el lector debe seguir un HILO
-  argumentativo, no leer entradas separadas.
-- Aplicá los conceptos al CASO ESPECÍFICO del proyecto (mencionar el
-  rubro, el segmento, la naturaleza de la propuesta).
+- Mínimo 6 a 9 PÁRRAFOS POR BLOQUE TEMÁTICO (no 4).
+- Cada párrafo: 5 a 9 oraciones de prosa académica conectada.
+- 5 a 7 bloques temáticos en total + bloque de síntesis final.
+- 4 a 6 citas APA distintas por bloque (al menos 1 textual con página).
+- Al menos 4 ecuaciones en total a lo largo del Capítulo.
+- Al menos 3 diagramas TikZ en total a lo largo del Capítulo.
+- Al menos 2 tablas comparativas a lo largo del Capítulo.
+- Aplicación al caso del proyecto: una vez por bloque, breve, en el
+  cierre del bloque (no contaminar el desarrollo teórico).
 
-Extensión total esperada del Cap. II: 15 a 22 páginas equivalentes
-(5500 a 8000 palabras). MÁS LARGO que la versión vieja porque la
-estructura por bloques desarrolla más profundo cada área.
+Extensión total esperada del Cap. II: 25 a 40 páginas equivalentes
+(9000 a 14000 palabras). Un Marco Teórico de Licenciatura es DENSO.
+Si el output queda corto, FALTA contenido — no cierres prematuro.
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS DE ESTA FASE
@@ -274,6 +406,27 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
 
 - ❌ Repetir el mismo verbo introductorio en concepto tras concepto
   ('se define como' 30 veces). Variá la forma.
+
+- ❌ Omitir ecuaciones cuando se discuten métodos cuantitativos:
+  hablar de VAN sin escribir su fórmula es ERROR ACADÉMICO. Hablar
+  de tamaño muestral sin escribir la fórmula es ERROR ACADÉMICO.
+  Hablar de punto de equilibrio sin escribir la fórmula es ERROR.
+
+- ❌ Omitir diagramas cuando se discuten modelos visuales clásicos:
+  hablar de las 5 fuerzas de Porter sin diagrama es ERROR. Hablar de
+  la cadena de valor sin diagrama es ERROR. Hablar de SERVQUAL sin
+  el modelo de brechas es ERROR.
+
+- ❌ Citar solo en paráfrasis. CADA BLOQUE debe incluir al menos UNA
+  cita textual breve con número de página (formato APA: "texto"
+  (Autor, año, p. XX)).
+
+- ❌ Generar bloques de menos de 6 párrafos. Un bloque corto es señal
+  de superficialidad y compromete la calidad del trabajo de
+  titulación.
+
+- ❌ Cerrar el Capítulo con un total menor a 9000 palabras. Un Marco
+  Teórico de Licenciatura tiene esa densidad mínima.
 `.trim();
 }
 
