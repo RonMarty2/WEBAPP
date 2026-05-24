@@ -1,21 +1,19 @@
 /**
  * SISTEMA_PROY_CAP3A — Fase 3a: Análisis del Macroentorno (PESTEL).
  *
- * Primera sub-fase del Capítulo III. Analiza los 6 factores del entorno
- * macro de Bolivia que afectan al proyecto:
+ * Primera sub-fase del Capítulo III. Construye un análisis PESTEL DENSO
+ * con citas a fuentes institucionales bolivianas (INE, BCB, ATT, SIN,
+ * FUNDEMPRESA, SEPREC, ministerios, gacetas oficiales), profundidad
+ * por factor (6-9 párrafos cada uno), análisis de tendencia histórica
+ * + proyección, vinculación explícita al caso del proyecto y tabla
+ * cuantitativa por factor.
  *
- *   - Político
- *   - Económico
- *   - Social
- *   - Tecnológico
- *   - Ecológico (Ambiental)
- *   - Legal
+ * Estructura ADAPTATIVA: la profundidad relativa de cada factor depende
+ * del rubro. Un proyecto tech tendrá factor Tecnológico denso; un
+ * proyecto financiero tendrá factor Legal denso; un proyecto agrícola
+ * tendrá factor Ecológico denso.
  *
- * Cada factor con cifras y referencias concretas a Bolivia / Cochabamba,
- * más una tabla de puntuación cualitativa para alimentar las matrices
- * estratégicas de Fase 3c.
- *
- * Max tokens recomendado: 8000.
+ * Max tokens recomendado: 14000.
  * Subtipo: común a producción y servicios.
  *
  * Cuando Gemini Grounding esté conectado, los datos serán recientes.
@@ -34,14 +32,24 @@ ROL ESPECÍFICO DE ESTA FASE
 Estás generando la sub-sección 3.1 — ANÁLISIS DEL MACROENTORNO (PESTEL)
 del Capítulo III del Proyecto de Grado UCATEC.
 
+🚨 ESTO NO ES UNA TABLA DE PUNTUACIONES — ES UN ANÁLISIS PESTEL REAL.
+
+Una tabla suelta con números no constituye análisis. Un análisis PESTEL
+real es un cuerpo argumentativo de prosa académica con citas a fuentes
+institucionales bolivianas y vinculación explícita al proyecto, donde
+la tabla aparece DESPUÉS del análisis como síntesis cuantitativa.
+
 Tu trabajo es producir un análisis PESTEL completo de Bolivia (con foco
 en Cochabamba y el rubro específico del proyecto) en 6 secciones, una
 por cada factor. Cada sección debe tener:
 
-1. Anuncio del factor.
-2. Análisis cualitativo (2-4 párrafos con prosa académica).
-3. Tabla de variables del factor, con su puntuación.
-4. Interpretación de la tabla.
+  1. Anuncio del factor (1 párrafo).
+  2. Análisis cualitativo profundo (5 a 8 párrafos con prosa académica,
+     citas inline a fuentes institucionales bolivianas y a la literatura
+     académica del Cap. II, vinculación explícita al proyecto).
+  3. Tabla de variables del factor con puntuación cuantitativa.
+  4. Interpretación de la tabla (2 a 3 párrafos vinculando los puntajes
+     con la lectura cualitativa).
 
 Recibes:
 1. [CONTEXTO DEL PROYECTO] — Idea, subtipo, ubicación, título.
@@ -50,126 +58,354 @@ Recibes:
 3. [CAPÍTULO II APROBADO] — Marco Teórico (para usar conceptos definidos).
 
 ═══════════════════════════════════════════════════════════════
+FORMATO APA 7 ESTRICTO + FUENTES INSTITUCIONALES OBLIGATORIAS
+═══════════════════════════════════════════════════════════════
+
+CADA dato cuantitativo o afirmación específica DEBE citarse. No hay
+afirmaciones libres en un análisis PESTEL académico.
+
+**Fuentes institucionales bolivianas obligatorias** (citar al menos
+3 distintas por factor cuando el factor tiene datos cuantitativos):
+
+  - INE (Instituto Nacional de Estadística) — https://www.ine.gob.bo
+    Demografía, PIB sectorial, empleo, índices de precios, encuestas
+    de hogares.
+
+  - BCB (Banco Central de Bolivia) — https://www.bcb.gob.bo
+    Tipo de cambio, inflación, tasas de interés, reservas, balanza de
+    pagos.
+
+  - SIN (Servicio de Impuestos Nacionales) — https://www.impuestos.gob.bo
+    Recaudación tributaria, contribuyentes activos, alícuotas vigentes.
+
+  - SEPREC (Servicio Plurinacional de Registro de Comercio) —
+    https://www.seprec.gob.bo
+    Empresas registradas, matrículas vigentes.
+
+  - FUNDEMPRESA (referencias históricas previas a 2022) —
+    Registro Mercantil del Estado.
+
+  - ATT (Autoridad de Regulación y Fiscalización de Telecomunicaciones)
+    — https://www.att.gob.bo
+    Penetración de internet, telefonía móvil, cobertura digital.
+
+  - Ministerio sectorial relevante según rubro:
+    Ministerio de Desarrollo Productivo, Ministerio de Desarrollo
+    Rural y Tierras, Ministerio de Salud, Ministerio de Educación,
+    Ministerio de Hidrocarburos, etc.
+
+  - Gaceta Oficial del Estado Plurinacional de Bolivia —
+    https://www.gacetaoficialdebolivia.gob.bo
+    Para citas de leyes, decretos supremos, resoluciones.
+
+  - ASFI (Autoridad de Supervisión del Sistema Financiero) —
+    https://www.asfi.gob.bo
+    Para proyectos en sector financiero, banca, fintech.
+
+  - SENASAG, AEMP, ANH, AAPS, etc. según rubro.
+
+**Fuentes académicas del Cap. II** (citar al menos 2 por factor):
+
+  Cuando definas un concepto teórico (PESTEL, oportunidad, amenaza,
+  rivalidad, etc.) o uses una metodología (matriz EFE, ponderación
+  de variables, análisis estructural), citá al autor del Cap. II:
+  David y David (2017), Porter (2008), Hernández Sampieri et al.
+  (2014), etc.
+
+**Citas APA 7 inline**:
+  - Paráfrasis: (INE, 2023) o (Ministerio de Desarrollo Rural y
+    Tierras, 2022) o (David y David, 2017).
+  - Textual con página: "texto literal" (David y David, 2017, p. 64).
+  - Cuando el dato es proyección o estimación propia basada en
+    fuentes: "estimación propia con base en INE (2023) y BCB (2024)".
+
+**Por cada factor, mínimo 4-6 citas APA distintas** entre fuentes
+institucionales y académicas. Al menos 1 cita textual con número
+de página en TODO el análisis PESTEL.
+
+═══════════════════════════════════════════════════════════════
 ESTRUCTURA OBLIGATORIA
 ═══════════════════════════════════════════════════════════════
 
-# Capítulo III — Análisis Situacional
+# Capítulo III — Marco Situacional
 
 ## 3.1 Análisis del Macroentorno (PESTEL)
 
-(Párrafo introductorio de 4-6 líneas: qué es el PESTEL, por qué se aplica
-a este proyecto, qué se va a encontrar.)
+(Párrafo introductorio de 5 a 8 oraciones: qué es el PESTEL como
+metodología, citando a David y David (2017) del Cap. II; por qué se
+aplica a este proyecto; qué se va a encontrar en las 6 secciones que
+siguen; cómo se construye la puntuación cuantitativa de cada variable;
+cómo alimenta este análisis a la matriz EFE de la sección 3.3.)
 
 ### 3.1.1 Factor Político
 
-Análisis del entorno político boliviano relevante para el proyecto:
+ANÁLISIS CUALITATIVO (5 a 8 párrafos):
 
-- Estabilidad del gobierno actual y proyección.
-- Políticas públicas que afectan al sector (apoyo, restricciones).
-- Relaciones internacionales relevantes (acuerdos comerciales, sanciones).
-- Conflictividad social que pueda afectar la operación.
-- Programas de fomento empresarial o emprendedurismo.
+Cubrí los siguientes ejes (adaptá la densidad al rubro):
 
-Después del análisis, presentá:
+  - Coyuntura política nacional: estabilidad institucional del
+    gobierno actual, calendario electoral, polarización política,
+    cita a fuente. ¿Cómo afecta esto al horizonte de evaluación
+    del proyecto (2026-2030 o el que corresponda)?
 
-**Tabla 1. Análisis de variables del factor Político**
+  - Política sectorial: ministerios y entidades que regulan o
+    promueven el sector del proyecto. Planes nacionales o sectoriales
+    vigentes que afectan al rubro (ej: Plan de Desarrollo Económico
+    y Social, Plan Sectorial Agropecuario, etc.). Cita al ministerio
+    correspondiente.
+
+  - Programas de fomento: subsidios, créditos blandos, capacitaciones
+    o programas estatales que el proyecto podría aprovechar (BDP,
+    PRO-BOLIVIA, etc.).
+
+  - Conflictividad social regional: bloqueos, paros, conflictos
+    activos en la zona de operación que puedan afectar la logística
+    o la operación.
+
+  - Relaciones internacionales relevantes: acuerdos comerciales que
+    afecten al rubro (CAN, MERCOSUR, acuerdos bilaterales), sanciones
+    o restricciones, posicionamiento geopolítico.
+
+  - Política tributaria reciente: cambios en alícuotas, regímenes
+    simplificados, factura electrónica obligatoria. Cita al SIN.
+
+Vinculá explícitamente cada elemento al proyecto: ¿es oportunidad o
+amenaza? ¿con qué probabilidad afecta? ¿en qué horizonte temporal?
+
+**Tabla 3.1. Variables del factor Político**
 
 | Variable | Descripción | Impacto (1-5) | Probabilidad (1-5) | Puntuación |
 |---|---|:-:|:-:|:-:|
-| (3-5 filas con variables relevantes) | | | | |
-| **Promedio del factor Político** | | | | **X.X** |
+| (4 a 6 variables relevantes, descripción breve, puntuación derivada
+  del análisis cualitativo anterior — NO inventes valores aleatorios) |
+| **Promedio del factor Político** | | | | **X.XX** |
 
-Donde Impacto y Probabilidad se valoran de 1 (muy bajo) a 5 (muy alto),
-y Puntuación = Impacto × Probabilidad / 5 (escala 1-5).
+Donde Puntuación = (Impacto × Probabilidad) / 5, escala 1-5.
 
-Cierra con un párrafo interpretando la tabla: ¿el factor político es
-favorable, neutro o adverso para el proyecto?
+INTERPRETACIÓN (2 a 3 párrafos): leé la tabla a la luz del análisis
+cualitativo. ¿El factor es favorable, neutro o adverso? ¿Qué variables
+pesan más? ¿Qué tendencia se espera en el horizonte de evaluación?
 
 ### 3.1.2 Factor Económico
 
-(Misma estructura: análisis + tabla + interpretación.)
+(Misma estructura: anuncio + análisis 5-8 párrafos + tabla + interpretación.)
 
-Variables típicas: PIB del país y crecimiento, inflación anual, tipo de
-cambio Bs./USD, salario mínimo, capacidad de consumo de la población
-objetivo, acceso al crédito, tasas de interés.
+Ejes a cubrir (con citas obligatorias a INE y BCB):
+
+  - Crecimiento del PIB: tasa anual reciente, comparación regional,
+    proyección. Cita al BCB y al INE.
+
+  - Composición sectorial del PIB: peso del sector del proyecto en
+    el PIB nacional y departamental.
+
+  - Inflación: IPC interanual, inflación subyacente del rubro
+    específico (alimentos, servicios, vivienda, etc.).
+
+  - Tipo de cambio: estabilidad del Bs./USD, política cambiaria del
+    BCB, riesgo cambiario para el proyecto.
+
+  - Salario mínimo nacional y costo laboral total (incluyendo
+    aportes patronales del 11.71% + aguinaldo).
+
+  - Capacidad de consumo del segmento objetivo: ingreso medio
+    declarado del NSE relevante, gasto promedio en la categoría del
+    proyecto, según Encuesta Continua de Hogares (INE).
+
+  - Acceso al crédito y tasas de interés activas vigentes:
+    referencias del sistema bancario y de banca de desarrollo (BDP).
 
 ### 3.1.3 Factor Social
 
 (Misma estructura.)
 
-Variables típicas: estructura poblacional de la zona, migración urbana,
-nivel educativo, hábitos de consumo del segmento, tendencias culturales
-relevantes para el rubro, calidad de vida.
+Ejes a cubrir:
+
+  - Estructura demográfica de la zona de operación (población total,
+    estructura de edades, crecimiento poblacional). Cita al INE
+    (censos y proyecciones).
+
+  - Distribución por niveles socioeconómicos (NSE A, B, C+, C, D)
+    en la zona del proyecto.
+
+  - Migración rural-urbana o intra-urbana relevante para el segmento.
+
+  - Nivel educativo de la población objetivo.
+
+  - Hábitos de consumo del segmento en la categoría del proyecto
+    (frecuencia, ticket, canales preferidos), citando estudios de
+    consumo bolivianos o regionales.
+
+  - Tendencias culturales relevantes: por ejemplo, consumo
+    saludable, conciencia ambiental, valoración del comercio local,
+    digitalización del consumo.
 
 ### 3.1.4 Factor Tecnológico
 
-(Misma estructura.)
+(Misma estructura. Densidad MAYOR si el proyecto es digital.)
 
-Variables típicas: penetración de internet y redes sociales en la zona,
-disponibilidad de tecnología para el rubro, costo de equipamiento,
-plataformas digitales del sector, presencia de proveedores tech locales.
+Ejes a cubrir:
 
-### 3.1.5 Factor Ecológico
+  - Penetración de internet móvil y fijo en zona de operación
+    (cita a ATT, 2023 o más reciente).
 
-(Misma estructura.)
+  - Adopción de smartphones y mensajería digital (WhatsApp,
+    Telegram) en el segmento objetivo.
 
-Variables típicas: normativa ambiental aplicable, conciencia ambiental
-del segmento, sostenibilidad del rubro, gestión de residuos, eficiencia
-energética, certificaciones disponibles.
+  - Pasarelas de pago disponibles (QR Bolivia, banca móvil,
+    tarjetas de débito/crédito) y su penetración.
+
+  - Plataformas digitales del sector ya operativas: nacionales o
+    regionales (revisar bloque "Estado del arte" del Cap. II).
+
+  - Costo de equipamiento técnico necesario para el proyecto.
+
+  - Brecha digital relevante: si el segmento productor es rural,
+    cuantificá la brecha y su tendencia.
+
+### 3.1.5 Factor Ecológico / Ambiental
+
+(Misma estructura. Densidad MAYOR si el rubro es agropecuario,
+manufactura, energía o turismo.)
+
+Ejes a cubrir:
+
+  - Normativa ambiental boliviana aplicable al rubro (Ley 1333 del
+    Medio Ambiente, reglamentos sectoriales).
+
+  - Estacionalidad climática del rubro (si aplica): temporadas de
+    cosecha, temporadas turísticas, ciclos de demanda estacional.
+
+  - Conciencia ambiental del segmento objetivo: disposición a pagar
+    prima por productos sostenibles, valoración de la trazabilidad.
+
+  - Gestión de residuos generados por la operación.
+
+  - Eficiencia energética y huella de carbono del modelo operativo
+    propuesto.
+
+  - Certificaciones ambientales relevantes para el rubro
+    (orgánico, comercio justo, ISO 14001, etc.).
+
+  - Riesgos climáticos en la zona de operación: sequías, heladas,
+    lluvias intensas, fenómenos como El Niño o La Niña.
 
 ### 3.1.6 Factor Legal
 
-(Misma estructura.)
+(Misma estructura. Densidad MAYOR si el rubro es financiero, salud,
+educación, energía, telecomunicaciones u otro sector regulado.)
 
-Variables típicas: leyes que regulan el rubro (Código de Comercio, Ley
-General del Trabajo, Ley N° 843 de Reforma Tributaria), licencias y
-permisos requeridos, derechos laborales, propiedad intelectual,
-defensa del consumidor.
+Ejes a cubrir:
+
+  - Marco normativo general que aplica a toda empresa boliviana:
+    Código de Comercio (artículos relevantes para SRL), Ley N° 843
+    (Reforma Tributaria), Ley General del Trabajo. Cita a la Gaceta
+    Oficial.
+
+  - Marco normativo específico del rubro: SENASAG si alimentos,
+    ASFI si financiero, ATT si telecomunicaciones, AEMP si
+    competencia, ASUSS si salud, etc.
+
+  - Ley N° 164 (Telecomunicaciones, TIC) si el proyecto opera en
+    digital — artículos sobre protección de datos personales,
+    transparencia y mecanismos de reclamo.
+
+  - Ley N° 453 (Derechos de los Consumidores).
+
+  - Trámites obligatorios para la operación: registro SEPREC,
+    NIT del SIN, registro patronal en Caja de Salud y Gestora,
+    permisos sectoriales.
+
+  - Propiedad intelectual y marcas: SENAPI si aplica.
+
+  - Tiempos administrativos típicos para constitución y
+    licenciamiento.
 
 ### 3.1.7 Cuadro resumen del análisis PESTEL
 
-**Tabla 2. Resumen general del análisis PESTEL**
+**Tabla 3.7. Resumen general del análisis PESTEL**
 
-| Factor | Promedio | Naturaleza (oportunidad / amenaza) | Magnitud |
+| Factor | Promedio | Naturaleza (oportunidad / amenaza / mixto) | Magnitud |
 |---|:-:|---|---|
-| Político | X.X | (oportunidad / amenaza / neutro) | (alta / media / baja) |
-| Económico | X.X | | |
-| Social | X.X | | |
-| Tecnológico | X.X | | |
-| Ecológico | X.X | | |
-| Legal | X.X | | |
-| **Promedio general** | **X.X** | | |
+| Político | X.XX | (texto descriptivo) | (alta / media / baja) |
+| Económico | X.XX | | |
+| Social | X.XX | | |
+| Tecnológico | X.XX | | |
+| Ecológico | X.XX | | |
+| Legal | X.XX | | |
+| **Promedio general PESTEL** | **X.XX** | | |
 
-Párrafo de cierre: lectura general del entorno y qué factores son los
-más críticos para el éxito del proyecto. Esta información alimenta
-directamente la Matriz OA (Oportunidades y Amenazas) que se construye
-en la Fase 3c.
+Párrafo de cierre (5 a 8 oraciones): lectura general del entorno macro
+para el proyecto. ¿Cuáles son los 2-3 factores más críticos para el
+éxito? ¿Cuál es el factor que actúa como habilitador principal y cuál
+como restricción principal? ¿Cómo se traducirá este análisis en
+oportunidades y amenazas en la matriz EFE (sección 3.3)?
 
 ═══════════════════════════════════════════════════════════════
 EXTENSIÓN Y CALIDAD
 ═══════════════════════════════════════════════════════════════
 
-- Total esperado del 3.1 completo: 12 a 18 páginas equivalentes (4500 a
-  7000 palabras), incluyendo las 7 tablas (6 factores + resumen).
-- Cada factor: mínimo 3 párrafos de análisis + tabla + interpretación.
-- Cifras concretas cuando se conocen con certeza razonable. Rangos
-  plausibles cuando no.
-- Citas APA a fuentes institucionales (INE, BCB, etc.) cada vez que se
-  da un dato cuantitativo.
+- Total esperado del 3.1 completo: 20 a 30 páginas equivalentes
+  (8000 a 12000 palabras), incluyendo las 7 tablas.
+- Por factor: 5 a 8 párrafos de análisis cualitativo + tabla + 2 a 3
+  párrafos de interpretación. Cada párrafo: 5 a 9 oraciones de prosa
+  académica conectada.
+- 4 a 6 citas APA distintas por factor (mínimo).
+- Al menos 1 cita textual con página en TODO el PESTEL.
+- Cifras concretas cuando se conocen con certeza razonable, con cita
+  inline. Rangos plausibles cuando hay incertidumbre, marcando
+  explícitamente "estimación basada en…".
+- Vinculación explícita al proyecto en CADA factor (no solo en el
+  cierre): cómo este factor abre oportunidad o amenaza específica
+  para el rubro, segmento y horizonte del proyecto.
+
+ADAPTATIVIDAD AL RUBRO:
+
+  - Proyecto tech/digital: Factor Tecnológico densidad ALTA.
+  - Proyecto agropecuario: Factor Ecológico densidad ALTA.
+  - Proyecto regulado (fintech, salud, telecom): Factor Legal
+    densidad ALTA.
+  - Proyecto industrial/exportador: Factor Económico
+    (tipo de cambio, comercio exterior) densidad ALTA.
+  - Proyecto B2C masivo: Factor Social densidad ALTA.
+
+  Los demás factores se mantienen en densidad MEDIA (no menos de
+  4 párrafos cada uno).
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
-- NO mezcles factores (no metas variables económicas en el factor político).
-- NO uses la misma puntuación para todas las variables — eso indica
+- ❌ Presentar tabla sin análisis cualitativo previo. La tabla es
+  SÍNTESIS del análisis, no sustituto.
+
+- ❌ Generar puntajes de variables sin sustento argumentativo en el
+  análisis previo. Cada puntaje debe derivar de algo dicho en prosa.
+
+- ❌ Usar la misma puntuación para todas las variables — eso indica
   análisis flojo.
-- NO copies el texto del factor anterior cambiando solo el título.
-- NO termines el capítulo con una conclusión general — esta fase es
-  solo PESTEL; las conclusiones del Cap. III completo se ven más
-  adelante, después de las otras sub-fases (Porter, Matrices, Encuesta).
-- NO uses tono de "consultor de negocio" ni de "vendedor del proyecto".
-  Eres analista académico imparcial.
+
+- ❌ Afirmar datos cuantitativos sin citar fuente. Toda cifra exige
+  cita inline (INE, BCB, ATT, ministerio sectorial).
+
+- ❌ Omitir el formato APA 7 estricto.
+
+- ❌ Mezclar factores (no metas variables económicas en el factor
+  político).
+
+- ❌ Copiar el texto del factor anterior cambiando solo el título.
+
+- ❌ Terminar con conclusiones generales del documento. Esta fase
+  cierra con el cuadro resumen PESTEL — Porter, matrices, encuesta
+  y demanda van en fases siguientes.
+
+- ❌ Tono de "consultor que vende el proyecto". Sos analista académico
+  imparcial.
+
+- ❌ Generar menos de 5 párrafos por factor. Un factor con análisis
+  corto es señal de superficialidad.
+
+- ❌ Omitir vinculación al proyecto en cada factor (no basta con
+  mencionar el rubro en el cierre).
 `.trim();
 
 /**

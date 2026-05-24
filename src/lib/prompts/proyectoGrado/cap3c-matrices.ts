@@ -11,7 +11,10 @@
  *   - Matriz FODA — síntesis interna + externa.
  *   - (Matriz EFI viene después de la encuesta porque requiere data interna.)
  *
- * Max tokens recomendado: 5000.
+ * Cada matriz va PRECEDIDA de su sustento argumentativo y SEGUIDA de
+ * una interpretación con vinculación al proyecto. NO son tablas sueltas.
+ *
+ * Max tokens recomendado: 10000.
  * Subtipo: común a producción y servicios.
  */
 
@@ -24,14 +27,46 @@ ROL ESPECÍFICO DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
 Estás generando la sub-sección 3.3 — MATRICES ESTRATÉGICAS del Cap. III.
-Sintetizas el análisis externo (PESTEL + Porter ya aprobados) en
-matrices canónicas de UCATEC.
+
+🚨 ESTO NO ES UN CONJUNTO DE TABLAS SUELTAS — ES UNA SÍNTESIS ESTRATÉGICA.
+
+Cada matriz debe ir acompañada de:
+  - Sustento metodológico breve citando a David y David (2017) u otro
+    autor del whitelist de matrices.
+  - Selección argumentada de los factores que entran a la matriz (los
+    factores deben provenir DEMOSTRADAMENTE del PESTEL y Porter ya
+    aprobados — no inventes factores nuevos).
+  - Tabla cuantitativa con pesos, calificaciones y puntuaciones
+    coherentes.
+  - Interpretación profunda (3-5 párrafos) que lea los resultados,
+    discuta implicaciones para el proyecto y vincule con la matriz
+    siguiente.
 
 Recibes:
 1. [CONTEXTO DEL PROYECTO].
 2. [FASE 3a APROBADA — PESTEL].
 3. [FASE 3b APROBADA — Porter].
 4. [CAP I APROBADO] — para conocer objetivos y alcance.
+5. [CAP II APROBADO] — para definiciones de las matrices.
+
+═══════════════════════════════════════════════════════════════
+FORMATO APA 7 + COHERENCIA OBLIGATORIA
+═══════════════════════════════════════════════════════════════
+
+  - Cada matriz cita a su autor metodológico al introducirla:
+    (David y David, 2017) para EFE, EFI, MPC y FODA.
+
+  - Al menos 1 cita textual con página en TODO el bloque de matrices,
+    por ejemplo: "el propósito de la matriz EFE es resumir y evaluar
+    la información económica, social, cultural [...] del entorno
+    externo" (David y David, 2017, p. 110).
+
+  - Los factores que entran a cada matriz deben tener TRAZABILIDAD
+    explícita al PESTEL o Porter. No introduzcas oportunidades o
+    amenazas que no aparecieron antes.
+
+  - Los pesos y calificaciones deben tener sustento argumentativo,
+    no aparecer como números mágicos.
 
 ═══════════════════════════════════════════════════════════════
 ESTRUCTURA OBLIGATORIA
@@ -39,112 +74,205 @@ ESTRUCTURA OBLIGATORIA
 
 ## 3.3 Matrices Estratégicas
 
-(Párrafo introductorio: explicación breve de qué se va a construir y por qué.)
+(Párrafo introductorio de 5-8 oraciones: explicación de qué son las
+matrices estratégicas en la metodología de formulación de proyectos
+—citar a David y David (2017)—; cuáles se construyen en esta
+sub-sección; cómo sintetizan los análisis previos; cómo alimentan al
+diseño organizacional y financiero del Capítulo IV. Cita textual
+breve del autor recomendada aquí.)
 
 ### 3.3.1 Matriz OA (Oportunidades y Amenazas)
 
-Extraída directamente del análisis PESTEL. Cada variable del PESTEL se
-clasifica como Oportunidad (O) o Amenaza (A).
+ANUNCIO METODOLÓGICO (1-2 párrafos): qué es la matriz OA, cómo se
+construye, qué relación tiene con el PESTEL anterior. Cita a David y
+David (2017) para sustento.
 
-**Tabla 11. Matriz OA del proyecto**
+SELECCIÓN ARGUMENTADA (2-3 párrafos): de las variables analizadas en
+el PESTEL (Fase 3a), explicá cuáles seleccionas como oportunidades
+clave y cuáles como amenazas clave, justificando la elección. Mínimo
+6 oportunidades y 4 amenazas (balance razonable según el caso).
 
-| Variable | Origen (factor PESTEL) | O / A | Justificación breve |
-|---|---|:-:|---|
-| (mínimo 8 filas, balance razonable entre O y A) | | | |
+**Tabla 3.15. Matriz OA del proyecto**
 
-Cierre: ¿qué tipo de entorno tiene el proyecto — mayoría de
-oportunidades, mayoría de amenazas, balance?
+| # | Variable | Origen (factor PESTEL) | O / A | Justificación |
+|:-:|---|---|:-:|---|
+| 1 | (variable) | (factor) | O | (2-3 líneas) |
+| ... | | | | |
+| **TOTAL** | | | (X O / Y A) | |
+
+INTERPRETACIÓN (3-4 párrafos): ¿qué tipo de entorno tiene el proyecto?
+¿Predominan oportunidades o amenazas? ¿Cuáles son las 2-3 oportunidades
+más valiosas y las 2-3 amenazas más críticas? ¿Cómo se traduce esto en
+la estrategia genérica que el proyecto debería adoptar?
 
 ### 3.3.2 Matriz EFE (Evaluación de Factores Externos)
 
-Matriz cuantitativa que combina las oportunidades y amenazas más
-importantes con peso, calificación y puntuación.
+ANUNCIO METODOLÓGICO (1-2 párrafos): qué es la EFE en David y David
+(2017), cómo se calculan los pesos y calificaciones, cómo se interpreta
+el puntaje total respecto del umbral 2.50.
 
-**Tabla 12. Matriz EFE**
+SELECCIÓN ARGUMENTADA (2-3 párrafos): cuáles oportunidades y amenazas
+de la OA anterior entran a la EFE (las MÁS críticas y de mayor impacto).
+Cómo se asignan los pesos (importancia relativa) y las calificaciones
+(qué tan bien responde el proyecto a cada factor).
 
-| Factor externo | Peso (0.00-1.00) | Calificación (1-4) | Puntuación |
+**Tabla 3.16. Matriz EFE**
+
+| Factor externo | Peso | Calificación | Puntuación |
 |---|:-:|:-:|:-:|
 | **Oportunidades** | | | |
-| (4-6 oportunidades clave) | | | |
+| O1: (descripción) | 0.XX | X | X.XX |
+| O2: (descripción) | 0.XX | X | X.XX |
+| O3-6: (4-6 oportunidades) | ... | ... | ... |
 | **Amenazas** | | | |
-| (4-6 amenazas clave) | | | |
+| A1: (descripción) | 0.XX | X | X.XX |
+| A2: (descripción) | 0.XX | X | X.XX |
+| A3-6: (4-6 amenazas) | ... | ... | ... |
 | **Suma de pesos** | **1.00** | — | **X.XX** |
 
-Reglas:
-- Los pesos suman EXACTAMENTE 1.00.
-- Calificación: 1 (respuesta deficiente), 2 (respuesta promedio),
-  3 (respuesta superior al promedio), 4 (respuesta superior).
+Reglas estrictas:
+- Pesos suman EXACTAMENTE 1.00 (verificar suma).
+- Calificación 1 = respuesta deficiente; 2 = promedio; 3 = superior
+  al promedio; 4 = excelente.
 - Puntuación = peso × calificación.
-- Suma total ≥ 2.50 → el proyecto responde bien al entorno externo.
-- Suma total < 2.50 → el proyecto NO está aprovechando el entorno.
+- Total ≥ 2.50 → el proyecto responde bien al entorno externo.
+- Total < 2.50 → el proyecto NO está aprovechando el entorno.
 
-Cierra con interpretación: ¿el proyecto responde bien al entorno?
+INTERPRETACIÓN (3-4 párrafos): traduce el puntaje total a una
+afirmación sobre la posición estratégica del proyecto frente al
+entorno. ¿Qué factores pesan más? ¿Qué factores tienen calificación
+baja y por qué? ¿Cómo se traduce este puntaje en decisiones del
+Capítulo IV?
 
-### 3.3.3 Matriz MPC (Perfil Competitivo)
+### 3.3.3 Matriz MPC (Matriz de Perfil Competitivo)
 
-Compara al proyecto con 2-3 competidores existentes en factores clave
-de éxito.
+ANUNCIO METODOLÓGICO (1-2 párrafos): qué es la MPC en David y David
+(2017), por qué es útil para evaluar la posición competitiva del
+proyecto contra competidores específicos.
 
-**Tabla 13. Matriz del Perfil Competitivo (MPC)**
+SELECCIÓN ARGUMENTADA (2-3 párrafos): cuáles factores críticos de
+éxito del rubro entran a la matriz (deben provenir del análisis de
+Porter — Fase 3b — particularmente de la fuerza "Rivalidad entre
+competidores existentes"). Cuáles competidores se seleccionan para
+la comparación (mínimo 2, máximo 4, descripción tipológica
+coherente con Porter — NO inventes nombres falsos).
 
-| Factor crítico de éxito | Peso | Proyecto | Competidor A | Competidor B |
-|---|:-:|:-:|:-:|:-:|
-| (6-8 factores: precio, calidad, atención, ubicación, marca, etc.) | | Cal | Pt | Cal | Pt | Cal | Pt |
+**Tabla 3.17. Matriz del Perfil Competitivo (MPC)**
+
+| Factor crítico de éxito | Peso | Proyecto | | Competidor A | | Competidor B | |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| | | Cal | Pt | Cal | Pt | Cal | Pt |
+| Precio competitivo | 0.XX | X | X.XX | X | X.XX | X | X.XX |
+| (5-7 factores adicionales) | ... | ... | ... | ... | ... | ... | ... |
 | **Total** | **1.00** | | **X.XX** | | **X.XX** | | **X.XX** |
 
-Donde para cada competidor: Cal = calificación (1-4), Pt = puntuación
-(peso × cal).
+INTERPRETACIÓN (3-4 párrafos): ¿el proyecto se posiciona por encima o
+por debajo de la competencia? ¿En qué factores supera y en cuáles está
+rezagado? ¿Qué decisiones estratégicas debería tomar el proyecto para
+cerrar las brechas detectadas?
 
-Si no recuerdas nombres reales de competidores en Cochabamba, usa
-descriptores genéricos coherentes con lo que dijiste en la fase Porter
-(p. ej. "Cadena local con presencia consolidada", "Competidor informal
-de barrio").
+### 3.3.4 Matriz FODA (síntesis cruzada)
 
-Cierra con interpretación: ¿el proyecto está por encima o por debajo
-de la competencia? ¿en qué factores supera y en cuáles está rezagado?
+ANUNCIO METODOLÓGICO (1-2 párrafos): qué es el análisis FODA cruzado
+en David y David (2017), cómo se generan las estrategias FO, FA, DO y
+DA, por qué es la matriz central de síntesis estratégica.
 
-### 3.3.4 Matriz FODA (síntesis)
+FORTALEZAS Y DEBILIDADES PROYECTADAS (3-5 párrafos): dado que la
+empresa aún no existe, las Fortalezas son atributos que el proyecto
+APUNTA a tener y las Debilidades son limitaciones realistas del
+proyecto como propuesta nueva. Identificá mínimo 5 F y 5 D, con
+justificación argumentativa para cada una. Las Oportunidades y
+Amenazas vienen directamente de la EFE.
 
-Cruzá fortalezas y debilidades internas (proyectadas — todavía no
-hay empresa real, así que son las fortalezas que el proyecto APUNTA a
-tener) con oportunidades y amenazas del entorno.
+**Tabla 3.18. Matriz FODA cruzada**
 
-**Tabla 14. Matriz FODA**
+|  | **Oportunidades (O)** | **Amenazas (A)** |
+|---|---|---|
+| **Fortalezas (F)** | **Estrategias FO** (maxi-maxi) | **Estrategias FA** (maxi-mini) |
+|  | 1. (verbo en infinitivo + acción concreta) | 1. ... |
+|  | 2. ... | 2. ... |
+|  | 3. ... | 3. ... |
+| **Debilidades (D)** | **Estrategias DO** (mini-maxi) | **Estrategias DA** (mini-mini) |
+|  | 1. ... | 1. ... |
+|  | 2. ... | 2. ... |
+|  | 3. ... | 3. ... |
 
-|              | **Oportunidades (O)**     | **Amenazas (A)**          |
-|---           |---                        |---                        |
-| **Fortalezas (F)** | **FO (maxi-maxi)** Estrategias ofensivas | **FA (maxi-mini)** Estrategias defensivas |
-| **Debilidades (D)** | **DO (mini-maxi)** Estrategias adaptativas | **DA (mini-mini)** Estrategias de supervivencia |
+Cada estrategia debe ser ACCIONABLE: empezar con verbo en infinitivo,
+mencionar la acción concreta y vincular explícitamente con la F/D y
+O/A que la origina. Ejemplos:
 
-Para cada cuadrante listá 2-3 estrategias concretas. NO frases huecas
-("aprovechar las oportunidades", "minimizar las amenazas") — estrategias
-ACCIONABLES con verbo en infinitivo.
+  ✓ "Apalancar la diferenciación tecnológica (F2) para capturar la
+     oportunidad de demanda urbana creciente (O1) mediante una
+     campaña de adopción temprana focalizada en zona Cala Cala."
 
-Cierra con: ¿cuál cuadrante tiene más peso? ¿hacia qué tipo de estrategia
-debería inclinarse el proyecto?
+  ✗ "Aprovechar las oportunidades" (genérico, no accionable).
+
+INTERPRETACIÓN (3-4 párrafos): ¿cuál cuadrante tiene más peso? ¿hacia
+qué tipo de estrategia genérica (ofensiva, defensiva, adaptativa,
+supervivencia) debería inclinarse el proyecto? ¿Cómo se traducen las
+estrategias prioritarias en decisiones operativas del Capítulo IV?
 
 ═══════════════════════════════════════════════════════════════
 EXTENSIÓN Y CALIDAD
 ═══════════════════════════════════════════════════════════════
 
-- Total esperado: 6 a 10 páginas (2500 a 4000 palabras) con las 4 matrices.
-- Coherencia OBLIGATORIA con PESTEL y Porter: las oportunidades en EFE
-  deben aparecer en el factor PESTEL correspondiente; las amenazas deben
-  alinear con las fuerzas Porter más adversas.
-- Pesos en EFE y MPC: suman exactamente 1.00. Si te da 0.99 o 1.01, ajustá.
+- Total esperado: 15 a 22 páginas equivalentes (6000 a 9000 palabras),
+  incluyendo las 4 tablas con argumentación previa y posterior.
+- Cada matriz: anuncio + selección argumentada + tabla + interpretación.
+  Mínimo 8-12 párrafos sustantivos por matriz (sin contar la tabla).
+- Cada párrafo: 5 a 9 oraciones de prosa académica conectada.
+- 2-4 citas APA distintas por matriz (mínimo).
+- Al menos 1 cita textual con página en TODO el bloque.
+
+COHERENCIA OBLIGATORIA:
+- Oportunidades y amenazas en EFE: deben aparecer en el factor PESTEL
+  correspondiente (Fase 3a).
+- Factores críticos de éxito en MPC: deben emerger del análisis de
+  Rivalidad (Fase 3b).
+- Estrategias FO/FA/DO/DA: deben referenciar F, D, O o A específicas
+  por número.
+
+ADAPTATIVIDAD AL CASO:
+- Proyecto con muchas oportunidades y pocas amenazas: estrategia
+  ofensiva, foco en FO.
+- Proyecto con muchas amenazas: estrategia defensiva, foco en FA/DA.
+- Proyecto con muchas debilidades en entorno favorable: estrategia
+  adaptativa, foco en DO.
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS
 ═══════════════════════════════════════════════════════════════
 
-- NO listes 20 oportunidades y 1 amenaza (balance razonable).
-- NO uses pesos iguales para todos los factores en EFE (eso indica
-  análisis flojo — usa pesos que reflejen importancia real).
-- NO termines el Cap. III completo todavía — esta fase solo cierra
-  las matrices; quedan Encuesta y Demanda por venir.
-- NO inventes competidores con nombres falsos en MPC. Genéricos
-  coherentes con Porter.
-- NO repitas frases entre cuadrantes del FODA.
+- ❌ Presentar tabla sin anuncio metodológico previo ni interpretación
+  posterior. Las matrices SIN análisis son inservibles.
+
+- ❌ Introducir oportunidades, amenazas o competidores que no
+  aparecieron en PESTEL o Porter. La trazabilidad es obligatoria.
+
+- ❌ Listar 15 oportunidades y 1 amenaza (balance razonable
+  ajustado al caso).
+
+- ❌ Usar pesos iguales para todos los factores en EFE — eso indica
+  análisis flojo. Usar pesos que reflejen importancia real
+  argumentada en la selección.
+
+- ❌ Inventar nombres de competidores en MPC. Usar descripción
+  tipológica coherente con Porter (Fase 3b).
+
+- ❌ Estrategias FODA huecas ("aprovechar oportunidades", "minimizar
+  amenazas"). Cada estrategia debe ser accionable con verbo en
+  infinitivo y vinculación explícita.
+
+- ❌ Repetir frases entre cuadrantes del FODA.
+
+- ❌ Pesos que no sumen exactamente 1.00. Si suma 0.99 o 1.01,
+  ajustar antes de presentar.
+
+- ❌ Generar matrices con menos de 8 párrafos de análisis sustantivo
+  (sin contar tablas).
+
+- ❌ Terminar con conclusión del Cap. III completo — solo cerrás
+  matrices. Encuesta y demanda van después.
 `.trim();
 
 /**
@@ -152,6 +280,7 @@ PROHIBICIONES ESPECÍFICAS
  */
 export function buildContextoCap3c(datos: {
   cap1Aprobado: string;
+  cap2Aprobado: string;
   cap3aAprobado: string;
   cap3bAprobado: string;
   tituloAprobado: string;
@@ -174,12 +303,17 @@ export function buildContextoCap3c(datos: {
     datos.cap1Aprobado.trim(),
     "",
     "═══════════════════════════════════════════════════════════════",
+    "[CAPÍTULO II APROBADO]",
+    "═══════════════════════════════════════════════════════════════",
+    datos.cap2Aprobado.trim(),
+    "",
+    "═══════════════════════════════════════════════════════════════",
     "[FASE 3a APROBADA — PESTEL]",
     "═══════════════════════════════════════════════════════════════",
     datos.cap3aAprobado.trim(),
     "",
     "═══════════════════════════════════════════════════════════════",
-    "[FASE 3b APROBADA — 5 FUERZAS DE PORTER]",
+    "[FASE 3b APROBADA — 7 FUERZAS DE PORTER]",
     "═══════════════════════════════════════════════════════════════",
     datos.cap3bAprobado.trim(),
     "",
