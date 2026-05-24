@@ -198,14 +198,47 @@ function renderInline(texto: string): React.ReactNode {
   return <>{partes}</>;
 }
 
+/** Palabras reservadas de LaTeX/TikZ que NO sirven como título descriptivo. */
+const PALABRAS_RESERVADAS_LATEX = new Set([
+  "center", "tikzpicture", "equation", "align", "figure", "table",
+  "minipage", "scope", "axis", "document", "itemize", "enumerate",
+  "tabular", "array", "matrix", "pmatrix", "bmatrix", "vmatrix",
+  "node", "draw", "fill", "thick", "thin", "small", "tiny", "large",
+  "bfseries", "itshape", "centering", "raggedright", "raggedleft",
+  "fontsize", "selectfont", "vspace", "hspace", "vfill", "hfill",
+  "begin", "end", "left", "right", "frac", "sum", "int", "lim",
+  "Stealth", "Latex", "to", "stealth",
+]);
+
 function PlaceholderDiagrama({ tipo, contenido }: { tipo: "tikz" | "latex" | "pgfplots"; contenido: string }) {
   const meta = {
     tikz: { icono: "📊", label: "Diagrama vectorial (TikZ)", color: "#0ea5e9" },
     latex: { icono: "🔢", label: "Fórmula matemática (LaTeX)", color: "#8b5cf6" },
     pgfplots: { icono: "📈", label: "Gráfico estadístico (pgfplots)", color: "#16a34a" },
   }[tipo];
-  // Extraer un identificador visible del diagrama (primer texto entre llaves)
-  const titulo = (contenido.match(/\{([^{}]{4,60})\}/)?.[1] ?? "").trim() || "contenido visual";
+
+  // Buscar el primer texto descriptivo que NO sea palabra reservada de LaTeX
+  // ni un comando. Estrategia: extraer TODOS los textos entre llaves y quedarnos
+  // con el primero que parece prosa real (tiene espacios o es largo y no es
+  // palabra reservada).
+  const matches = Array.from(contenido.matchAll(/\{([^{}]{2,80})\}/g));
+  let titulo = "";
+  for (const m of matches) {
+    const t = m[1].trim();
+    const primeraPalabra = t.split(/\s/)[0].toLowerCase();
+    if (PALABRAS_RESERVADAS_LATEX.has(primeraPalabra)) continue;
+    if (t.length < 4) continue;
+    // Saltar si parece código (empieza con \, contiene =, contiene puntos
+    // tipo coordenadas, etc.)
+    if (/^[\\=\-+*]/.test(t)) continue;
+    if (/^-?\d+([.,]\d+)?\s*(,|cm|mm|pt|em)/.test(t)) continue;
+    // Tiene espacios o es palabra real → buen candidato
+    if (/\s/.test(t) || t.length > 6) {
+      titulo = t.replace(/\\\\/g, " ").replace(/\s+/g, " ").trim();
+      break;
+    }
+  }
+  if (!titulo) titulo = tipo === "latex" ? "expresión matemática" : tipo === "pgfplots" ? "gráfico de datos" : "diagrama visual";
 
   return (
     <div
