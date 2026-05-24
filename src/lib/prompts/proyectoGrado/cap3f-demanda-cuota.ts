@@ -77,25 +77,47 @@ alimenta el estudio financiero del Cap. IV donde se traduce en ingresos
 proyectados, qué supuestos críticos se explicitan en el cálculo. Cita
 textual breve de Baca Urbina recomendada aquí.)
 
-### 3.6.1 Definición del universo poblacional
+### 3.6.1 Definición del universo
 
-JUSTIFICACIÓN METODOLÓGICA (2-3 párrafos): citar a INE para el dato
-poblacional total de la zona geográfica definida en 1.6.2 del Cap. I.
-Sustentar la elección del universo (¿es población total, hogares,
-empresas, o unidades productivas según el tipo de segmento?).
+JUSTIFICACIÓN METODOLÓGICA (2-3 párrafos): citar fuente institucional
+boliviana apropiada al tipo de universo del proyecto. Sustentar la
+elección de la unidad de análisis según el segmento:
 
-**Tabla 3.30. Universo poblacional del proyecto**
+  - B2C masivo (consumo, retail, alimentos): hogares o personas →
+    fuente INE Censo o Encuesta Continua de Hogares.
+  - B2C nicho (un perfil específico: madres jóvenes, profesionales
+    25-35, etc.): personas con el perfil → fuente INE + estudios
+    sectoriales.
+  - B2B: empresas según tamaño y rubro → fuente SEPREC, FUNDEMPRESA,
+    Cámara Nacional de Industria o Cámara sectorial específica.
+  - B2G: entidades públicas según tipo → fuente Ministerio o
+    entidad sectorial.
+  - Servicios profesionales especializados: profesionales del rubro
+    → fuente colegio profesional, gremio sectorial.
+  - Plataformas bilaterales: dos universos (oferta + demanda) con
+    fuentes diferenciadas.
+  - Educación: estudiantes según nivel → fuente Min. Educación,
+    universidades.
+  - Salud: pacientes según condición → fuente Min. Salud, ASUSS,
+    estudios epidemiológicos.
+  - Agropecuario: unidades productivas familiares según rubro →
+    fuente Censo Agropecuario INE, MDRyT.
+  - Otros casos: aplicá el criterio análogo y citá fuente
+    institucional pertinente.
+
+**Tabla 3.30. Universo del proyecto** (estructura adaptable al tipo
+de unidad de análisis)
 
 | Concepto | Valor | Fuente |
 |---|:-:|---|
-| Población total de la zona | X.XXX.XXX (cita INE año) | INE, Censo o ECH año |
-| Segmento etario relevante | XXX.XXX (X% del total) | INE, distribución etaria |
-| NSE objetivo (cita criterios) | XXX.XXX | Cita Encuesta Continua de Hogares |
+| Población o universo total de la zona | X.XXX.XXX (cita fuente, año) | (fuente apropiada al tipo) |
+| Filtro de segmento principal | XXX.XXX (X% del total) | (fuente apropiada al criterio) |
+| Filtro adicional según rubro (NSE, tamaño empresa, perfil profesional, etc.) | XXX.XXX | (fuente apropiada) |
 | **Universo del proyecto** | **XXX.XXX** | (síntesis) |
 
 INTERPRETACIÓN (1-2 párrafos): ¿el universo es suficientemente grande
 para sostener un proyecto del tipo propuesto? Comparación con
-benchmarks sectoriales.
+benchmarks sectoriales relevantes al rubro.
 
 ### 3.6.2 Cálculo de la demanda potencial
 

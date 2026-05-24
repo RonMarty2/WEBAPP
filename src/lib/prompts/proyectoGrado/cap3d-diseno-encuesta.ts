@@ -89,23 +89,45 @@ multidimensional, citando a Kotler y Keller (2016) sobre los cuatro
 criterios principales (geográfico, demográfico, psicográfico,
 conductual).
 
-SEGMENTO A (oferta o lado productor, si aplica al rubro):
+PRIMERO determiná cuántos segmentos requiere el proyecto. La gran
+mayoría de proyectos requiere UN SOLO segmento de cliente final;
+algunos modelos específicos requieren DOS o más. Casos típicos:
 
-  - Variables geográficas: zona exacta, área de cobertura, distancia
-    al centro urbano.
-  - Variables demográficas: edad, género, nivel educativo, ocupación.
-  - Variables psicográficas: estilo de vida, valores, intereses.
-  - Variables conductuales: frecuencia, motivación, momento.
-  - Tamaño aproximado del universo: cita a INE u otra fuente
-    institucional.
+  - Un segmento (la mayoría de proyectos): B2C clásico (clientes
+    finales), B2B clásico (empresas cliente), B2G (entidades del
+    Estado), productos de consumo masivo, servicios profesionales,
+    retail, manufactura tradicional, salud, educación, etc.
 
-SEGMENTO B (demanda o lado consumidor):
+  - Dos o más segmentos: plataformas bilaterales (productores +
+    consumidores), marketplaces de servicios (oferentes +
+    demandantes), proyectos con cadena de suministro crítica
+    (clientes + proveedores estratégicos), proyectos B2B2C
+    (empresa intermediaria + consumidor final), etc.
 
-  - Mismas dimensiones, especificadas para el otro lado del mercado.
-  - Tamaño aproximado del universo: cita a INE u otra fuente.
+Aplicá DOS segmentos solo si el modelo de negocio lo justifica;
+en caso contrario, aplicá UNO.
 
-Si el proyecto es de un solo lado (no plataforma bilateral), aplicá
-solo el segmento relevante.
+SEGMENTO PRINCIPAL (cliente final del proyecto):
+
+  - Variables geográficas: zona exacta, área de cobertura.
+  - Variables demográficas (si B2C): edad, género, NSE, ocupación,
+    nivel educativo. Variables organizacionales (si B2B): tamaño
+    de empresa, sector, antigüedad, ubicación, decisor de compra.
+  - Variables psicográficas: estilo de vida, valores, intereses
+    (B2C); cultura organizacional, prioridades estratégicas (B2B).
+  - Variables conductuales: frecuencia de uso/compra, motivación,
+    momento de decisión, canales preferidos.
+  - Tamaño aproximado del universo: cita a INE, FUNDEMPRESA u otra
+    fuente institucional según el tipo de segmento.
+
+SEGMENTO SECUNDARIO (solo si el modelo lo requiere):
+
+  - Si el proyecto es una plataforma bilateral: caracterizá también
+    el lado opuesto del mercado con las mismas dimensiones.
+  - Si el proyecto depende críticamente de un grupo de proveedores
+    o aliados específicos cuya disposición a participar es
+    pre-condición de la operación: caracterizalos también.
+  - En todos los demás casos: omitir este segmento.
 
 Cada variable concreta y cuantificable. 3-5 párrafos sustantivos por
 segmento.
@@ -174,36 +196,41 @@ JUSTIFICACIÓN METODOLÓGICA (3-4 párrafos):
   - Plan de cuotas concreto: cuántos casos por subregión/zona, por
     NSE, por edad, etc.
 
-### 3.4.4 Diseño del cuestionario (instrumento A — productor / oferta)
+### 3.4.4 Diseño del cuestionario (instrumento principal)
 
-Solo si aplica (plataformas bilaterales, proyectos B2B con dos
-lados, etc.).
+Cuestionario aplicado al segmento principal del proyecto.
 
 JUSTIFICACIÓN POR BLOQUE (1 párrafo por bloque): por qué cada bloque
 del cuestionario es relevante para los objetivos específicos del
 Cap. I y para qué matriz alimenta (EFI, demanda, etc.).
 
-**Tabla 3.19. Instrumento A — Cuestionario al segmento productor**
+**Tabla 3.19. Instrumento — Cuestionario al segmento principal**
 
 | # | Pregunta | Tipo | Bloque | Objetivo |
 |:-:|---|---|---|---|
-| 1 | (texto exacto de la pregunta) | (cerrada / abierta / Likert 1-5 / múltiple) | Demográfico | (qué mide) |
+| 1 | (texto exacto de la pregunta) | (cerrada / abierta / Likert 1-5 / múltiple) | Demográfico/Organizacional | (qué mide) |
 | ... | | | | |
 
 BLOQUES OBLIGATORIOS (mínimo 10, máximo 20 preguntas en total):
 
-  - Bloque 1 — Demográficos (3-5 preguntas)
-  - Bloque 2 — Hábitos / Operación actual del segmento (3-5 preguntas)
-  - Bloque 3 — Percepción del canal actual / oferta existente
-    (3-5 preguntas, Likert recomendado)
-  - Bloque 4 — Intención hacia la propuesta del proyecto
-    (3-5 preguntas: interés, disposición a participar, frecuencia
-    esperada, factores decisivos)
-  - Bloque 5 — Preguntas abiertas (1-2 para sugerencias)
+  - Bloque 1 — Caracterización del respondiente (3-5 preguntas):
+    demográfico si B2C, organizacional si B2B.
+  - Bloque 2 — Hábitos / Uso actual de la categoría (3-5 preguntas):
+    cómo resuelve hoy el problema/necesidad que el proyecto aborda.
+  - Bloque 3 — Percepción de la oferta existente (3-5 preguntas,
+    Likert recomendado).
+  - Bloque 4 — Intención hacia la propuesta del proyecto (3-5
+    preguntas: interés, disposición a probar/comprar, frecuencia
+    esperada, disposición a pagar, factores decisivos).
+  - Bloque 5 — Preguntas abiertas (1-2 para sugerencias).
 
-### 3.4.5 Diseño del cuestionario (instrumento B — consumidor / demanda)
+### 3.4.5 Diseño del cuestionario (instrumento secundario, si aplica)
 
-Si aplica. Misma estructura que 3.4.4 pero adaptada al lado consumidor.
+Solo si el modelo requiere caracterizar un segundo segmento
+(plataforma bilateral, dependencia crítica de proveedores
+estratégicos, etc.). Misma estructura que 3.4.4 adaptada al segundo
+segmento. OMITIR esta sub-sección si el proyecto tiene un solo
+segmento.
 
 ### 3.4.6 Plan de aplicación
 
@@ -241,16 +268,23 @@ EXTENSIÓN Y CALIDAD
 - NO incluir preguntas no respondibles de buena fe (por ejemplo
   pedir cifras exactas — usar rangos).
 
-ADAPTATIVIDAD AL RUBRO:
+ADAPTATIVIDAD AL CASO (la mayoría de proyectos usa UN solo instrumento):
 
-  - Proyecto plataforma bilateral: 2 instrumentos (A productores,
-    B consumidores).
-  - Proyecto B2C masivo: 1 instrumento al consumidor.
-  - Proyecto B2B nicho: 1 instrumento al cliente empresarial con
-    bloques específicos (perfil de empresa, decisor de compra,
+  - Proyecto B2C masivo (retail, alimentos al consumidor, servicios
+    al consumidor): 1 instrumento al consumidor final.
+  - Proyecto B2B nicho (software empresarial, consultoría,
+    proveedores industriales): 1 instrumento al cliente empresarial
+    con bloques específicos (perfil de empresa, decisor de compra,
     proceso de adopción).
-  - Proyecto industrial / cadena de suministro: instrumento puede
-    requerir bloques de proveedores y/o distribuidores.
+  - Proyecto B2G (servicios al sector público): 1 instrumento al
+    funcionario decisor o área usuaria.
+  - Proyecto de servicio profesional (salud, educación, consultoría
+    individual): 1 instrumento al usuario final del servicio.
+  - Proyecto plataforma bilateral o marketplace: 2 instrumentos
+    (lado oferta + lado demanda).
+  - Proyecto industrial con cadena de suministro crítica:
+    instrumento principal al cliente + instrumento secundario al
+    proveedor clave si aplica.
 
 ═══════════════════════════════════════════════════════════════
 PROHIBICIONES ESPECÍFICAS

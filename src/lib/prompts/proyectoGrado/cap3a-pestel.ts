@@ -141,33 +141,45 @@ cómo alimenta este análisis a la matriz EFE de la sección 3.3.)
 
 ANÁLISIS CUALITATIVO (5 a 8 párrafos):
 
-Cubrí los siguientes ejes (adaptá la densidad al rubro):
+Cubrí los siguientes ejes (adaptá la densidad al rubro y la lista
+de subtemas a la naturaleza específica del proyecto):
 
   - Coyuntura política nacional: estabilidad institucional del
     gobierno actual, calendario electoral, polarización política,
     cita a fuente. ¿Cómo afecta esto al horizonte de evaluación
-    del proyecto (2026-2030 o el que corresponda)?
+    del proyecto?
 
   - Política sectorial: ministerios y entidades que regulan o
-    promueven el sector del proyecto. Planes nacionales o sectoriales
-    vigentes que afectan al rubro (ej: Plan de Desarrollo Económico
-    y Social, Plan Sectorial Agropecuario, etc.). Cita al ministerio
-    correspondiente.
+    promueven el sector específico del proyecto. Planes nacionales
+    o sectoriales vigentes. Ejemplos según rubro:
+      * fintech/banca → Plan Nacional de Inclusión Financiera, ASFI.
+      * salud → Plan Sectorial de Desarrollo del Ministerio de Salud.
+      * educación → Plan Sectorial del Min. de Educación, currícula.
+      * agropecuario → Plan Sectorial Agropecuario, Min. Desarrollo
+        Rural.
+      * energía → Plan Eléctrico Plurinacional, ANH, AETN.
+      * turismo → Plan Maestro de Turismo, Min. Culturas y Turismo.
+      * construcción/inmobiliario → Plan Vivienda, Min. Obras
+        Públicas.
+      * industrial/manufactura → PRO BOLIVIA, planes sectoriales.
+    Citá al ministerio o entidad correspondiente al rubro.
 
-  - Programas de fomento: subsidios, créditos blandos, capacitaciones
-    o programas estatales que el proyecto podría aprovechar (BDP,
-    PRO-BOLIVIA, etc.).
+  - Programas de fomento aplicables al proyecto: subsidios, créditos
+    blandos, capacitaciones, incubadoras (BDP, PRO BOLIVIA, FIE
+    Productivo, programas departamentales, según corresponda).
 
   - Conflictividad social regional: bloqueos, paros, conflictos
-    activos en la zona de operación que puedan afectar la logística
-    o la operación.
+    activos en la zona de operación que puedan afectar la logística,
+    el acceso al cliente o la cadena de suministro del proyecto.
 
-  - Relaciones internacionales relevantes: acuerdos comerciales que
-    afecten al rubro (CAN, MERCOSUR, acuerdos bilaterales), sanciones
-    o restricciones, posicionamiento geopolítico.
+  - Relaciones internacionales relevantes para el rubro: acuerdos
+    comerciales (CAN, MERCOSUR, acuerdos bilaterales) si el proyecto
+    importa insumos, exporta producción, depende de tecnología
+    extranjera o compite con importaciones; sanciones o restricciones
+    a divisas; posicionamiento geopolítico relevante.
 
   - Política tributaria reciente: cambios en alícuotas, regímenes
-    simplificados, factura electrónica obligatoria. Cita al SIN.
+    simplificados, facturación electrónica obligatoria. Cita al SIN.
 
 Vinculá explícitamente cada elemento al proyecto: ¿es oportunidad o
 amenaza? ¿con qué probabilidad afecta? ¿en qué horizonte temporal?
@@ -218,107 +230,161 @@ Ejes a cubrir (con citas obligatorias a INE y BCB):
 
 (Misma estructura.)
 
-Ejes a cubrir:
+Ejes a cubrir (adaptá los subtemas al segmento específico del proyecto):
 
   - Estructura demográfica de la zona de operación (población total,
     estructura de edades, crecimiento poblacional). Cita al INE
     (censos y proyecciones).
 
   - Distribución por niveles socioeconómicos (NSE A, B, C+, C, D)
-    en la zona del proyecto.
+    en la zona del proyecto, si el segmento es B2C o mixto.
 
-  - Migración rural-urbana o intra-urbana relevante para el segmento.
+  - Composición empresarial de la zona (número de empresas por tamaño,
+    rubros dominantes, gremios activos), si el segmento es B2B.
+
+  - Migración o flujos poblacionales relevantes para el segmento.
 
   - Nivel educativo de la población objetivo.
 
-  - Hábitos de consumo del segmento en la categoría del proyecto
-    (frecuencia, ticket, canales preferidos), citando estudios de
-    consumo bolivianos o regionales.
+  - Hábitos del segmento en la categoría del proyecto (frecuencia
+    de uso/compra, ticket promedio, canales preferidos, decisor de
+    compra), citando estudios de consumo o sectoriales bolivianos
+    o regionales.
 
-  - Tendencias culturales relevantes: por ejemplo, consumo
-    saludable, conciencia ambiental, valoración del comercio local,
-    digitalización del consumo.
+  - Tendencias culturales relevantes para el rubro. Ejemplos:
+      * salud/wellness → tendencias de autocuidado y prevención.
+      * alimentación → consumo saludable, conciencia ambiental.
+      * educación → demanda de capacitación continua.
+      * fintech → adopción de banca digital, desconfianza histórica.
+      * turismo → preferencias de destino interno vs externo.
+      * construcción → preferencias de vivienda, tendencia urbana.
+      * tecnología → adopción de SaaS, suscripciones digitales.
 
 ### 3.1.4 Factor Tecnológico
 
-(Misma estructura. Densidad MAYOR si el proyecto es digital.)
+(Misma estructura. Densidad MAYOR si el proyecto es digital, depende
+de infraestructura técnica o compite con sustitutos tecnológicos.)
 
-Ejes a cubrir:
+Ejes a cubrir (adaptá según naturaleza tecnológica del proyecto):
 
   - Penetración de internet móvil y fijo en zona de operación
-    (cita a ATT, 2023 o más reciente).
+    (cita a ATT, año reciente).
 
-  - Adopción de smartphones y mensajería digital (WhatsApp,
-    Telegram) en el segmento objetivo.
+  - Adopción de smartphones y de canales digitales relevantes
+    (mensajería estructurada, redes sociales, plataformas
+    específicas del rubro) en el segmento objetivo.
 
   - Pasarelas de pago disponibles (QR Bolivia, banca móvil,
-    tarjetas de débito/crédito) y su penetración.
+    tarjetas) y su penetración, si el proyecto monetiza
+    transaccionalmente.
 
-  - Plataformas digitales del sector ya operativas: nacionales o
-    regionales (revisar bloque "Estado del arte" del Cap. II).
+  - Plataformas digitales o tecnologías del sector ya operativas:
+    nacionales o regionales (revisar bloque "Estado del arte"
+    del Cap. II).
 
-  - Costo de equipamiento técnico necesario para el proyecto.
+  - Costo de equipamiento o infraestructura técnica necesaria
+    para el proyecto.
 
-  - Brecha digital relevante: si el segmento productor es rural,
-    cuantificá la brecha y su tendencia.
+  - Brecha digital relevante: si algún segmento (cliente, proveedor,
+    colaborador, comunidad de práctica) presenta limitaciones de
+    acceso o adopción tecnológica, cuantificá la brecha y la
+    tendencia de cierre.
+
+  - Madurez de tecnologías clave del rubro: por ejemplo, si fintech
+    → APIs bancarias abiertas y open banking; si salud → telemedicina
+    y expediente electrónico; si educación → LMS y certificaciones
+    digitales; si manufactura → automatización industrial 4.0; si
+    construcción → BIM y prefabricación; si energía → renovables y
+    redes inteligentes.
 
 ### 3.1.5 Factor Ecológico / Ambiental
 
-(Misma estructura. Densidad MAYOR si el rubro es agropecuario,
-manufactura, energía o turismo.)
+(Densidad VARIABLE: ALTA si el rubro es agropecuario, manufactura,
+energía, construcción, turismo o cualquier sector con impacto
+ambiental directo. MEDIA si servicios profesionales, fintech,
+educación, tech B2B; en estos casos abordar conciencia ambiental
+del segmento + huella de carbono de la operación y poco más.
+Omitir variables que no apliquen al rubro.)
 
-Ejes a cubrir:
+Ejes a cubrir (seleccionar los relevantes al rubro):
 
   - Normativa ambiental boliviana aplicable al rubro (Ley 1333 del
-    Medio Ambiente, reglamentos sectoriales).
+    Medio Ambiente y reglamentos sectoriales específicos según
+    el caso).
 
-  - Estacionalidad climática del rubro (si aplica): temporadas de
-    cosecha, temporadas turísticas, ciclos de demanda estacional.
+  - Estacionalidad climática del rubro, si aplica: temporadas de
+    cosecha, temporadas turísticas, ciclos de demanda estacional,
+    fenómenos climáticos extremos.
 
   - Conciencia ambiental del segmento objetivo: disposición a pagar
-    prima por productos sostenibles, valoración de la trazabilidad.
+    prima por sostenibilidad, valoración de trazabilidad o
+    certificación; si el rubro no se relaciona con consumo material,
+    abordar sensibilidad ESG del segmento empresarial.
 
-  - Gestión de residuos generados por la operación.
+  - Gestión de residuos generados por la operación, si los hay.
 
   - Eficiencia energética y huella de carbono del modelo operativo
     propuesto.
 
-  - Certificaciones ambientales relevantes para el rubro
-    (orgánico, comercio justo, ISO 14001, etc.).
+  - Certificaciones ambientales relevantes según rubro:
+      * agro/alimentos → orgánico SENASAG, comercio justo.
+      * manufactura → ISO 14001, ISO 50001.
+      * construcción → LEED, EDGE.
+      * turismo → Rainforest Alliance, certificaciones de turismo
+        sostenible.
+      * fintech/banca → criterios ESG, Principios de Banca
+        Responsable.
+      * energía → IRENA, certificación de renovables.
 
-  - Riesgos climáticos en la zona de operación: sequías, heladas,
-    lluvias intensas, fenómenos como El Niño o La Niña.
+  - Riesgos climáticos en la zona de operación según relevancia
+    para el rubro (sequías, heladas, lluvias intensas, eventos
+    extremos asociados a El Niño / La Niña).
 
 ### 3.1.6 Factor Legal
 
-(Misma estructura. Densidad MAYOR si el rubro es financiero, salud,
-educación, energía, telecomunicaciones u otro sector regulado.)
+(Densidad VARIABLE: ALTA si el rubro es financiero, salud,
+educación, energía, telecomunicaciones, transporte u otro sector
+con cuerpo normativo específico extenso. MEDIA si servicios
+profesionales, retail, B2B sin regulación particular; en estos
+casos el factor cubre solo el marco general aplicable a cualquier
+empresa boliviana.)
 
-Ejes a cubrir:
+Ejes a cubrir (seleccionar los relevantes según rubro):
 
-  - Marco normativo general que aplica a toda empresa boliviana:
-    Código de Comercio (artículos relevantes para SRL), Ley N° 843
-    (Reforma Tributaria), Ley General del Trabajo. Cita a la Gaceta
-    Oficial.
+  - Marco normativo general aplicable a toda empresa boliviana:
+    Código de Comercio (artículos relevantes para la forma societaria
+    elegida), Ley N° 843 (Reforma Tributaria), Ley General del
+    Trabajo. Cita a la Gaceta Oficial. SIEMPRE aplica.
 
-  - Marco normativo específico del rubro: SENASAG si alimentos,
-    ASFI si financiero, ATT si telecomunicaciones, AEMP si
-    competencia, ASUSS si salud, etc.
+  - Marco normativo sectorial específico según rubro:
+      * alimentos → SENASAG (Ley 830, DS 26167).
+      * salud/medicamentos → AGEMED, ASUSS, Min. Salud.
+      * financiero/fintech → ASFI, Ley 393 de Servicios Financieros,
+        Ley 1488, normativa BCB sobre medios de pago.
+      * telecomunicaciones/tech → ATT (Ley 164).
+      * energía/hidrocarburos → ANH, AETN.
+      * educación → Min. Educación, Ley 070 ASEP.
+      * transporte → ATT (transporte terrestre), DGAC (aéreo).
+      * construcción → Min. Obras Públicas, normas sismorresistentes,
+        ordenanzas municipales de uso de suelo.
+      * comercio/retail → AEMP (defensa de la competencia).
+      * minería → AJAM, Min. Minería.
 
   - Ley N° 164 (Telecomunicaciones, TIC) si el proyecto opera en
-    digital — artículos sobre protección de datos personales,
-    transparencia y mecanismos de reclamo.
+    digital — protección de datos personales, transparencia y
+    mecanismos de reclamo del usuario digital.
 
-  - Ley N° 453 (Derechos de los Consumidores).
+  - Ley N° 453 (Derechos de los Consumidores) si el segmento es B2C.
 
-  - Trámites obligatorios para la operación: registro SEPREC,
-    NIT del SIN, registro patronal en Caja de Salud y Gestora,
-    permisos sectoriales.
+  - Trámites obligatorios para la operación: registro SEPREC, NIT
+    del SIN, registro patronal en CNS y Gestora, permisos sectoriales
+    específicos del rubro.
 
-  - Propiedad intelectual y marcas: SENAPI si aplica.
+  - Propiedad intelectual y marcas: SENAPI si el proyecto desarrolla
+    marca propia, patentes o derechos de autor.
 
   - Tiempos administrativos típicos para constitución y
-    licenciamiento.
+    licenciamiento del rubro.
 
 ### 3.1.7 Cuadro resumen del análisis PESTEL
 

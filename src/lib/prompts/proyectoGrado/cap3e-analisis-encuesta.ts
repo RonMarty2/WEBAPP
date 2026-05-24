@@ -124,7 +124,7 @@ aplicación, técnica de muestreo efectiva, tasa de respuesta, criterios
 de depuración aplicados, software estadístico utilizado, decisiones
 metodológicas relevantes tomadas durante el procesamiento.
 
-### 3.5.1 Tabulación univariada del instrumento A (productor/oferta, si aplica)
+### 3.5.1 Tabulación univariada del instrumento principal
 
 PRESENTACIÓN GENERAL (1-2 párrafos): qué bloques del cuestionario se
 analizan, cómo se organiza la tabulación, qué tipo de variables hay.
@@ -163,9 +163,11 @@ Para preguntas con escala Likert 1-5, agregar:
     2.1-2.7 negativo, 2.8-3.2 neutro, 3.3-4.0 positivo, 4.1-5.0
     muy positivo).
 
-### 3.5.2 Tabulación univariada del instrumento B (consumidor/demanda, si aplica)
+### 3.5.2 Tabulación univariada del instrumento secundario (solo si aplica)
 
-Si el proyecto es bilateral. Misma estructura que 3.5.1.
+Solo si el proyecto requiere un segundo segmento (plataforma bilateral,
+proveedor estratégico, etc.). Misma estructura que 3.5.1. OMITIR
+sub-sección si el proyecto tiene un solo segmento.
 
 ### 3.5.3 Análisis bivariado
 
