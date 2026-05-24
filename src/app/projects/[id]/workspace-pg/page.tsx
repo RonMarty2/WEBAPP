@@ -215,6 +215,27 @@ export default function WorkspacePGPage() {
         <Link href="/dashboard" style={{ color: "var(--fg-secondary)", fontSize: 13, textDecoration: "none" }}>
           ← Dashboard
         </Link>
+        <Link
+          href={`/projects/${proyectoId}/preview-pg`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            borderRadius: 7,
+            background: "rgba(37,99,235,0.10)",
+            color: "var(--accent)",
+            fontSize: 12,
+            fontWeight: 700,
+            textDecoration: "none",
+            border: "1px solid rgba(37,99,235,0.25)",
+          }}
+          title="Abrir vista previa del documento como PDF"
+        >
+          📄 Ver como PDF
+        </Link>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {titulo}
