@@ -26,6 +26,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
 import Cap0TituloSelector, { removerSeccionPropuestas } from "@/components/scribe-pg/Cap0TituloSelector";
 import Cap0RichRender from "@/components/scribe-pg/Cap0RichRender";
+import MarkdownAcademico from "@/components/scribe-pg/MarkdownAcademico";
 import Cap3eModoSelector from "@/components/scribe-pg/Cap3eModoSelector";
 import Cap4gConfigSelector from "@/components/scribe-pg/Cap4gConfigSelector";
 import FaseAcciones from "@/components/scribe-pg/FaseAcciones";
@@ -347,20 +348,11 @@ export default function WorkspacePGPage() {
                       </div>
                     </>
                   ) : (
-                    <article
-                      style={{
-                        padding: 24,
-                        borderRadius: 12,
-                        background: "var(--bg-card)",
-                        border: "1px solid var(--border)",
-                        color: "var(--fg-primary)",
-                        fontSize: 14,
-                        lineHeight: 1.7,
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {contenidoActual}
-                    </article>
+                    // Render académico tipo documento para Cap. I a IV y
+                    // cierre: títulos con jerarquía visual, tablas
+                    // estilizadas, bloques TikZ/LaTeX como placeholders
+                    // elegantes (no como código crudo).
+                    <MarkdownAcademico markdown={contenidoActual} />
                   )}
 
                   {/* Selector de configuración final — solo cap4g cuando hay
