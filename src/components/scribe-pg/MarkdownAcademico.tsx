@@ -228,10 +228,13 @@ function PlaceholderDiagrama({ tipo, contenido }: { tipo: "tikz" | "latex" | "pg
     const primeraPalabra = t.split(/\s/)[0].toLowerCase();
     if (PALABRAS_RESERVADAS_LATEX.has(primeraPalabra)) continue;
     if (t.length < 4) continue;
-    // Saltar si parece código (empieza con \, contiene =, contiene puntos
-    // tipo coordenadas, etc.)
+    // Saltar si parece código (empieza con \, contiene = de asignación,
+    // backslash dentro, contiene coordenadas, etc.)
     if (/^[\\=\-+*]/.test(t)) continue;
+    if (/=/.test(t)) continue;                         // 'font=\small, align=center'
+    if (/\\/.test(t)) continue;                        // '\small'
     if (/^-?\d+([.,]\d+)?\s*(,|cm|mm|pt|em)/.test(t)) continue;
+    if (/^[\d\s.,;:|+\-*\/()]+$/.test(t)) continue;    // solo dígitos/operadores
     // Tiene espacios o es palabra real → buen candidato
     if (/\s/.test(t) || t.length > 6) {
       titulo = t.replace(/\\\\/g, " ").replace(/\s+/g, " ").trim();

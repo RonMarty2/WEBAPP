@@ -902,8 +902,10 @@ APA 7 / UMSS que aparezca en el resto del prompt.
 
       // ── Fases del nuevo servicio Proyecto de Grado (UCATEC) ──────────────
       "ph-proy-cap0":     3000,   // Idea de negocio (800-1500 palabras)
-      "ph-proy-cap1":    15000,   // Marco Referencial (8-14 págs) — aumentado de 12k tras observar cortes con auto-continue
-      "ph-proy-cap2":    11000,   // Marco Teórico (25-35 conceptos) — aumentado de 9k
+      "ph-proy-cap1":     8000,   // Marco Referencial (8-14 págs) — TOPE SEGURO para
+                                  // Groq Llama 3.3 70B que rechaza pedidos >8k. El
+                                  // auto-continue rescata el final si se corta.
+      "ph-proy-cap2":     8000,   // Marco Teórico — mismo tope que cap1
       // Fases 3a-9 todavía con prompts placeholder — se irán completando
       // según el plan PATRON_PROYECTO_GRADO.md. Tope simbólico de 100 hasta
       // entonces para que un placeholder no gaste mucho si se ejecuta por error.

@@ -62,17 +62,64 @@ Toda tabla o figura cumple las TRES reglas. Sin las tres, NO se incluye:
    favorable para el proyecto."
 
 ═══════════════════════════════════════════════════════════════
-CITAS — APA 7 ESTRICTO
+CITAS — APA 7 ESTRICTO + WHITELIST OBLIGATORIO
 ═══════════════════════════════════════════════════════════════
 
-- Toda afirmación con dato, cifra o teoría debe estar citada.
-- Formato APA 7:
-    "(Apellido, año)" cuando la cita es indirecta.
-    "Apellido (año) afirma que..." cuando la cita es directa o introductoria.
-    "(Apellido, año, p. XX)" cuando se cita textualmente.
-- Cada cita en el texto DEBE tener su entrada correspondiente en la
-  bibliografía. Cada entrada de bibliografía DEBE estar citada en el texto
-  (excepción: bibliografía consultada general).
+🚨 REGLA DE INTEGRIDAD ACADÉMICA — APLICA A TODAS LAS FASES DEL DOCUMENTO
+
+Solo se permiten citas a los siguientes autores. CUALQUIER otra cita
+inline (ej: "según Velásquez Álvarez, 2016" o "Kodaka Yagi destaca")
+es ALUCINACIÓN PROHIBIDA y se considera infracción descalificatoria
+para todo el documento.
+
+AUTORES AUTORIZADOS:
+- Sapag Chain (proyectos)        - Kotler (marketing)
+- Baca Urbina (proyectos)        - Lovelock y Wirtz (servicios)
+- Porter (estrategia)            - Zeithaml, Bitner y Gremler (servicios)
+- David (administración)         - Brealey, Myers y Allen (finanzas)
+- Thompson, Peteraf, Gamble      - Ross, Westerfield y Jordan (finanzas)
+- Chiavenato (RRHH/admin)        - Heizer y Render (operaciones)
+- Robbins y Judge (org)          - Chase y Jacobs (operaciones)
+- Mintzberg (estructura org)     - Parker, Van Alstyne y Choudary (plataformas)
+- Drucker (gerencia)             - Tapscott (economía digital)
+- Hernández Sampieri (metodología)
+- Bernal (metodología)
+- Schiffman y Wisenblit (consumidor)
+- Grönroos (servicios)
+- Van Horne y Wachowicz (finanzas)
+
+FUENTES INSTITUCIONALES BOLIVIANAS también autorizadas:
+- INE (Instituto Nacional de Estadística — www.ine.gob.bo)
+- BCB (Banco Central de Bolivia — www.bcb.gob.bo)
+- SEPREC (Servicio Plurinacional de Registro de Comercio)
+- SIN (Servicio de Impuestos Nacionales)
+- FUNDEMPRESA (www.fundempresa.org.bo)
+- CNC (Cámara Nacional de Comercio)
+- Gaceta Oficial del Estado Plurinacional de Bolivia
+- Ministerio de Desarrollo Rural y Tierras
+- SENASAG, ANAPO, CIOEC, ATT (cuando aplica al sector)
+
+PROHIBIDO ABSOLUTAMENTE:
+- Citar autores latinoamericanos o bolivianos genéricos no listados
+  arriba ("Velásquez Álvarez", "Gamboa Jaime", "Kodaka Yagi",
+  "Mogrovejo Rengel", "Pérez García", etc.). Si querés mencionar
+  contexto local, usá las fuentes institucionales bolivianas.
+- Citar tesis previas de UMSS, UCATEC, UCB, etc. salvo que sea
+  conocimiento público con autor verificable.
+- Inventar años, ediciones, editoriales o títulos.
+
+REGLA OPERATIVA:
+Si una afirmación necesita respaldo y no podés respaldarla con un
+autor del whitelist o una fuente institucional, REFORMULALA como
+observación propia del análisis ("se observa", "el análisis muestra",
+"según el comportamiento esperado del segmento") en lugar de inventar
+un autor.
+
+FORMATO APA 7 ESTRICTO:
+- "(Apellido, año)" cuando la cita es indirecta.
+- "Apellido (año) afirma que..." cuando la cita es directa.
+- "(Apellido, año, p. XX)" cuando se cita textualmente.
+- Cada cita en el texto DEBE tener entrada en la bibliografía final.
 
 ═══════════════════════════════════════════════════════════════
 COMPLETITUD Y CALIDAD FACTUAL — REGLAS DE ORO
