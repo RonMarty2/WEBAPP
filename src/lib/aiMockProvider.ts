@@ -51,54 +51,65 @@ interface MockSpec {
  * bloques tikz/latex) para que el render del workspace muestre todo lo que
  * mostrará en producción.
  */
+// 🎯 ORDEN CRÍTICO: los matchers se evalúan en orden, el primero que
+// matche gana. Por eso los matchers MÁS ESPECÍFICOS van PRIMERO.
+// Usamos fingerprints únicos del system prompt de cada fase (textos
+// específicos que SOLO aparecen en ese prompt y no en los demás).
 const MOCK_RESPONSES: MockSpec[] = [
   {
-    matcher: /CAP0|cap0|idea.*negocio.*fase\s*0/i,
+    // Cap. 0 — fingerprints únicos: "FASE 0", "IDEA DE NEGOCIO" + "TUTOR
+    // ACADÉMICO", "Tres propuestas de título académico", "Validación de
+    // viabilidad académica". Específico para no confundirse con Cap. I.
+    matcher: /SISTEMA_PROY_CAP0|FASE\s*0\s*[—\-]+\s*IDEA\s+DE\s+NEGOCIO|Tres\s+propuestas\s+de\s+t[íi]tulo|tutor\s+acad[ée]mico\s+experimentado/i,
     faseLabel: "Cap. 0 — Idea de Negocio (Hub Agrícola)",
     body: HUB_CAP0,
   },
   {
-    matcher: /CAP1|cap1|marco.*referencial|cap[íi]tulo\s*i\b/i,
+    // Cap. I — fingerprints: estructura 1.1 a 1.8, "árbol de problemas",
+    // "muestreo no probabilístico" + tope explícito "Marco Referencial".
+    matcher: /SISTEMA_PROY_CAP1|CAP[ÍI]TULO\s+I\s*[—\-]+\s*MARCO\s+REFERENCIAL|1\.1\s+Antecedentes\s+del\s+trabajo\s+acad[ée]mico|árbol\s+de\s+problemas/i,
     faseLabel: "Cap. I — Marco Referencial (Hub Agrícola)",
     body: HUB_CAP1,
   },
   {
-    matcher: /CAP2|cap2|marco.*te[óo]rico|cap[íi]tulo\s*ii\b/i,
+    // Cap. II — fingerprints: glosario de 25-35 conceptos, "Marco Teórico
+    // Conceptual", conceptos como VAN/TIR/Porter en formato definición.
+    matcher: /SISTEMA_PROY_CAP2|CAP[ÍI]TULO\s+II\s*[—\-]+\s*MARCO\s+TE[ÓO]RICO|25.*35\s+conceptos|Marco\s+Te[óo]rico\s+Conceptual/i,
     faseLabel: "Cap. II — Marco Teórico (Hub Agrícola)",
     body: HUB_CAP2,
   },
   {
-    matcher: /CAP3[A-F]|cap3[a-f]|pestel|porter|matrices|encuesta|demanda|cap[íi]tulo\s*iii\b|marco.*situacional/i,
+    matcher: /SISTEMA_PROY_CAP3[A-F]|PESTEL|Porter|5\s+Fuerzas|FODA|EFE|EFI|MPC|matrices\s+estrat[ée]gicas|cuestionario|chi.*cuadrado|cuota\s+de\s+mercado|CAP[ÍI]TULO\s+III/i,
     faseLabel: "Cap. III — Marco Situacional (Hub Agrícola)",
     body: HUB_CAP3_FULL,
   },
   {
-    matcher: /CAP4[A-G]|cap4[a-g]|organizacional|rrhh|legal|t[ée]cnico|branding|marketing|financiero|evaluaci[óo]n|cap[íi]tulo\s*iv\b|marco.*propositivo/i,
+    matcher: /SISTEMA_PROY_CAP4[A-G]|organigrama|flujograma|RRHH|marco\s+legal|estudio\s+t[ée]cnico|branding|mix\s+de\s+marketing|estudio\s+financiero|VAN|TIR|WACC|payback|CAP[ÍI]TULO\s+IV/i,
     faseLabel: "Cap. IV — Marco Propositivo (Hub Agrícola)",
     body: HUB_CAP4_FULL,
   },
   {
-    matcher: /RESUMEN|resumen.*ejecutivo/i,
+    matcher: /SISTEMA_PROY_RESUMEN|resumen\s+ejecutivo|FASE\s+6/i,
     faseLabel: "Resumen Ejecutivo (Hub Agrícola)",
     body: HUB_RESUMEN,
   },
   {
-    matcher: /CONCLUSIONES|recomendaciones/i,
+    matcher: /SISTEMA_PROY_CONCLUSIONES|conclusiones\s+por\s+objetivo|recomendaciones\s+finales/i,
     faseLabel: "Conclusiones y Recomendaciones (Hub Agrícola)",
     body: HUB_CONCLUSIONES,
   },
   {
-    matcher: /REFERENCIAS|bibliograf[íi]a/i,
+    matcher: /SISTEMA_PROY_REFERENCIAS|bibliograf[íi]a\s+consolidada|APA\s*7|whitelist/i,
     faseLabel: "Referencias Bibliográficas (Hub Agrícola)",
     body: HUB_REFERENCIAS,
   },
   {
-    matcher: /DEFENSA|preguntas/i,
+    matcher: /SISTEMA_PROY_DEFENSA|banco\s+de\s+preguntas|preguntas\s+para\s+defensa|tribunal\s+examinador/i,
     faseLabel: "Banco de Preguntas para Defensa (Hub Agrícola)",
     body: HUB_DEFENSA,
   },
   {
-    matcher: /LATEX|latex|compilar/i,
+    matcher: /SISTEMA_PROY_LATEX|compilar\s+LaTeX|preamble|carátula\s+UCATEC/i,
     faseLabel: "Compilación LaTeX (Hub Agrícola)",
     body: HUB_LATEX_NOTE,
   },
