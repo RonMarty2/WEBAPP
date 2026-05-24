@@ -129,14 +129,41 @@ export default function PreviewPgPage() {
   const anio = new Date().getFullYear();
 
   return (
-    <div style={{
+    <div className="preview-pdf-root" style={{
       minHeight: "100vh",
       background: "#525659", // gris oscuro tipo lector PDF
       paddingTop: 24,
       paddingBottom: 60,
     }}>
+      {/* Estilos de impresión: cuando el usuario hace Ctrl+P o aprieta
+          "Descargar PDF", la página se imprime SIN la barra superior,
+          SIN el fondo gris, con cada hoja como página A4 real. */}
+      <style jsx global>{`
+        @media print {
+          @page { size: A4; margin: 0; }
+          html, body { background: white !important; }
+          .preview-pdf-toolbar, .preview-pdf-footer { display: none !important; }
+          .preview-pdf-root {
+            background: white !important;
+            padding: 0 !important;
+          }
+          .preview-pdf-hoja {
+            box-shadow: none !important;
+            margin: 0 !important;
+            page-break-after: always;
+            break-after: page;
+            width: 100% !important;
+            min-height: auto !important;
+            max-width: none !important;
+          }
+          .preview-pdf-hoja:last-child {
+            page-break-after: auto;
+          }
+        }
+      `}</style>
+
       {/* Barra superior pegajosa */}
-      <div style={{
+      <div className="preview-pdf-toolbar" style={{
         position: "sticky",
         top: 0,
         zIndex: 10,
@@ -156,11 +183,31 @@ export default function PreviewPgPage() {
           ← Volver al workspace
         </Link>
         <div style={{ flex: 1, color: "white", fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          📄 Vista previa tipo PDF
+          📄 Vista previa del documento
         </div>
         <div style={{ color: "#94a3b8", fontSize: 12 }}>
           Estimado: <strong style={{ color: "white" }}>{totalPaginasEstimadas}</strong> páginas
         </div>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          style={{
+            padding: "8px 16px",
+            borderRadius: 7,
+            background: "#3b82f6",
+            color: "white",
+            border: "none",
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+          }}
+          title="Abre el diálogo de impresión. Elegí 'Guardar como PDF' como impresora para descargar el documento."
+        >
+          📥 Descargar PDF
+        </button>
       </div>
 
       {/* ───── CARÁTULA SIMULADA ───── */}
@@ -283,7 +330,7 @@ export default function PreviewPgPage() {
       })}
 
       {/* Footer informativo */}
-      <div style={{
+      <div className="preview-pdf-footer" style={{
         textAlign: "center",
         color: "#94a3b8",
         fontSize: 12,
@@ -295,7 +342,8 @@ export default function PreviewPgPage() {
         Esta es una <strong>vista previa</strong> simulando el formato del PDF final.
         El documento real se compila con pdfLaTeX usando el preámbulo UCATEC oficial
         (diagramas TikZ, fórmulas matemáticas y tablas renderizadas vectorialmente).
-        Para exportar el documento, volvé al workspace y andá a la fase &quot;LaTeX&quot;.
+        Para descargar como PDF, apretá el botón <strong>📥 Descargar PDF</strong> arriba —
+        en el diálogo de impresión, elegí <strong>&quot;Guardar como PDF&quot;</strong> como destino.
       </div>
     </div>
   );
@@ -305,7 +353,7 @@ export default function PreviewPgPage() {
 
 function Hoja({ numero, titulo, children }: { numero: number; titulo?: string; children: React.ReactNode }) {
   return (
-    <div style={{
+    <div className="preview-pdf-hoja" style={{
       width: 794,                // ≈A4 a 96dpi (210mm)
       minHeight: 1123,           // ≈A4 a 96dpi (297mm)
       maxWidth: "calc(100vw - 32px)",
@@ -356,7 +404,7 @@ function Hoja({ numero, titulo, children }: { numero: number; titulo?: string; c
 // requeriría medir alturas exactas).
 function HojaContenido({ numero, titulo, children }: { numero: number; titulo: string; children: React.ReactNode }) {
   return (
-    <div style={{
+    <div className="preview-pdf-hoja" style={{
       width: 794,
       maxWidth: "calc(100vw - 32px)",
       margin: "0 auto 24px",
