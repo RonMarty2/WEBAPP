@@ -222,21 +222,18 @@ function ChecklistPasos({ contenido }: { contenido: string }) {
 }
 
 /**
- * Card visual genérica por sección.
+ * Bloque interno por sección — sin borde, sin card propia. Va dentro de
+ * una sola card contenedora con divisores horizontales entre bloques.
  */
-function SeccionCard({ seccion }: { seccion: Seccion }) {
+function SeccionInterna({ seccion, esPrimera }: { seccion: Seccion; esPrimera: boolean }) {
   const meta = META[seccion.key];
   const hasTabla = /\n\|.*\|/.test(seccion.contenido) && /\|[\s\-:|]+\|/.test(seccion.contenido);
 
   return (
     <div
       style={{
-        background: "var(--bg-card)",
-        border: "1px solid var(--border)",
-        borderLeft: `4px solid ${meta.color}`,
-        borderRadius: 12,
-        padding: 20,
-        marginBottom: 16,
+        padding: "18px 0",
+        borderTop: esPrimera ? "none" : "1px solid var(--border)",
       }}
     >
       <div
@@ -244,13 +241,18 @@ function SeccionCard({ seccion }: { seccion: Seccion }) {
           display: "flex",
           alignItems: "center",
           gap: 10,
-          marginBottom: 14,
-          paddingBottom: 10,
-          borderBottom: "1px solid var(--border)",
+          marginBottom: 10,
         }}
       >
-        <span style={{ fontSize: 22 }}>{meta.icono}</span>
-        <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: "var(--fg-primary)" }}>
+        <span style={{ fontSize: 18 }}>{meta.icono}</span>
+        <h3 style={{
+          fontSize: 13,
+          fontWeight: 800,
+          margin: 0,
+          color: meta.color,
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+        }}>
           {meta.titulo}
         </h3>
       </div>
@@ -260,7 +262,6 @@ function SeccionCard({ seccion }: { seccion: Seccion }) {
       ) : seccion.key === "validacion" && hasTabla ? (
         <>
           {(() => {
-            // Renderizar prosa antes de la tabla + tabla + prosa después
             const lineas = seccion.contenido.split("\n");
             const tablaInicio = lineas.findIndex((l) => l.trim().startsWith("|"));
             const proseAntes = tablaInicio > 0 ? lineas.slice(0, tablaInicio).join("\n").trim() : "";
@@ -268,7 +269,7 @@ function SeccionCard({ seccion }: { seccion: Seccion }) {
             return (
               <>
                 {proseAntes && (
-                  <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.7, marginBottom: 12, color: "var(--fg-secondary)" }}>
+                  <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.65, marginBottom: 10, color: "var(--fg-secondary)" }}>
                     {proseAntes}
                   </div>
                 )}
@@ -278,7 +279,7 @@ function SeccionCard({ seccion }: { seccion: Seccion }) {
           })()}
         </>
       ) : (
-        <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.7, color: "var(--fg-primary)" }}>
+        <div style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.65, color: "var(--fg-primary)" }}>
           {seccion.contenido}
         </div>
       )}
@@ -289,7 +290,6 @@ function SeccionCard({ seccion }: { seccion: Seccion }) {
 export default function Cap0RichRender({ markdown }: Cap0RichRenderProps) {
   const secciones = useMemo(() => parsearSecciones(markdown), [markdown]);
 
-  // Si no detectamos ninguna sección, fallback al render plano.
   if (secciones.length === 0) {
     return (
       <article
@@ -309,10 +309,31 @@ export default function Cap0RichRender({ markdown }: Cap0RichRenderProps) {
     );
   }
 
+  // Render compacto: UNA SOLA tarjeta contenedora con secciones internas
+  // separadas por divisores horizontales. Más limpio que 4 cards separadas.
   return (
-    <div>
+    <div
+      style={{
+        background: "var(--bg-card)",
+        border: "1px solid var(--border)",
+        borderRadius: 12,
+        padding: "4px 22px 18px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          fontWeight: 800,
+          color: "var(--fg-muted)",
+          textTransform: "uppercase",
+          letterSpacing: "0.12em",
+          padding: "14px 0 2px",
+        }}
+      >
+        Contexto de tu idea
+      </div>
       {secciones.map((s, i) => (
-        <SeccionCard key={i} seccion={s} />
+        <SeccionInterna key={i} seccion={s} esPrimera={i === 0} />
       ))}
     </div>
   );

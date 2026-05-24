@@ -327,10 +327,25 @@ export default function WorkspacePGPage() {
                 </>
               ) : (
                 <>
-                  {/* Render rico para Cap. 0: cada sección como tarjeta visual
-                      con icono y header. Resto de fases: markdown plano. */}
                   {fasaActual.id?.includes("cap0") ? (
-                    <Cap0RichRender markdown={removerSeccionPropuestas(contenidoActual)} />
+                    <>
+                      {/* CAP. 0 reorganizado: la DECISIÓN del estudiante va
+                          ARRIBA (selector de título). El contexto (síntesis,
+                          segmento, viabilidad, próximos pasos) va en UN solo
+                          bloque compacto DEBAJO, no fragmentado en 4 cards
+                          separadas que confundían al usuario. */}
+                      <Cap0TituloSelector
+                        contenidoCap0={contenidoActual}
+                        proyectoId={proyecto.id}
+                        tituloActual={proyecto.tema_aprobado}
+                        onTituloSelected={(titulo) => {
+                          setProyecto((p) => p ? { ...p, tema_aprobado: titulo, titulo_provisional: titulo } : p);
+                        }}
+                      />
+                      <div style={{ marginTop: 18 }}>
+                        <Cap0RichRender markdown={removerSeccionPropuestas(contenidoActual)} />
+                      </div>
+                    </>
                   ) : (
                     <article
                       style={{
@@ -346,19 +361,6 @@ export default function WorkspacePGPage() {
                     >
                       {contenidoActual}
                     </article>
-                  )}
-
-                  {/* Selector de título — solo aparece en Cap. 0 cuando el
-                      output incluye las 3 propuestas */}
-                  {fasaActual.id?.includes("cap0") && (
-                    <Cap0TituloSelector
-                      contenidoCap0={contenidoActual}
-                      proyectoId={proyecto.id}
-                      tituloActual={proyecto.tema_aprobado}
-                      onTituloSelected={(titulo) => {
-                        setProyecto((p) => p ? { ...p, tema_aprobado: titulo, titulo_provisional: titulo } : p);
-                      }}
-                    />
                   )}
 
                   {/* Selector de configuración final — solo cap4g cuando hay
