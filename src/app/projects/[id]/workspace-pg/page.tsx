@@ -236,9 +236,32 @@ export default function WorkspacePGPage() {
         >
           📄 Ver preview
         </Link>
-        <a
-          href={`/api/projects/${proyectoId}/paquete-latex`}
-          download
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              const res = await fetch(`/api/projects/${proyectoId}/paquete-latex-pg`);
+              if (!res.ok) {
+                const data = await res.json().catch(() => ({ error: "Error desconocido" }));
+                alert("No se pudo generar el LaTeX:\n\n" + (data.error || "Error desconocido"));
+                return;
+              }
+              // Descarga real del ZIP via blob
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              const titulo = proyecto?.tema_aprobado || "proyecto-grado";
+              const slug = titulo.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 60);
+              a.download = `${slug}-pg-latex.zip`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+            } catch (e) {
+              alert("Error al descargar: " + (e as Error).message);
+            }
+          }}
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -249,13 +272,13 @@ export default function WorkspacePGPage() {
             color: "#16a34a",
             fontSize: 12,
             fontWeight: 700,
-            textDecoration: "none",
             border: "1px solid rgba(22,163,74,0.3)",
+            cursor: "pointer",
           }}
           title="Descargar ZIP con el archivo .tex listo para Overleaf o pdflatex local"
         >
           📦 Descargar LaTeX (.zip)
-        </a>
+        </button>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {titulo}

@@ -189,7 +189,7 @@ export default function PreviewPgPage() {
           Estimado: <strong style={{ color: "white" }}>{totalPaginasEstimadas}</strong> páginas
         </div>
         <a
-          href={`/api/projects/${proyectoId}/paquete-latex`}
+          href={`/api/projects/${proyectoId}/paquete-latex-pg`}
           download
           style={{
             padding: "8px 16px",
