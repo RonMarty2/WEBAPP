@@ -610,12 +610,18 @@ Zeithaml, V. A., Bitner, M. J., & Gremler, D. D. (2018). *Servicios: marketing i
 /**
  * Genera una respuesta mock representativa según el system prompt.
  *
+ * 🎯 IMPORTANTE: matcheamos SOLAMENTE contra el systemPrompt, NO contra
+ * el userPrompt. El system prompt define la fase (es estático por fase),
+ * el user prompt incluye el contexto del estudiante + fases aprobadas
+ * anteriores. Si matcheamos contra ambos, al pedir Cap. I el user prompt
+ * incluye el output del Cap. 0 aprobado (con frases como "tres propuestas
+ * de título") y eso disparaba erróneamente el matcher de Cap. 0.
+ *
  * Si ningún matcher coincide, devuelve un stub genérico que igualmente
  * permite validar el flujo (el contenido se persiste y se renderiza).
  */
-export function generateMockResponse(systemPrompt: string, userPrompt: string): string {
-  const blob = `${systemPrompt}\n${userPrompt}`;
-  const match = MOCK_RESPONSES.find((spec) => spec.matcher.test(blob));
+export function generateMockResponse(systemPrompt: string, _userPrompt: string): string {
+  const match = MOCK_RESPONSES.find((spec) => spec.matcher.test(systemPrompt));
   const faseLabel = match?.faseLabel ?? "Fase del proyecto";
   const body = match?.body ?? `Contenido de la fase ${faseLabel}. El sistema generará texto académico completo cuando se configuren las API keys reales.`;
   return `${MOCK_BANNER}**Fase detectada por el mock:** ${faseLabel}\n\n${body}`;
