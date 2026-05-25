@@ -64,8 +64,13 @@ export async function GET(req: NextRequest) {
     user_id: string;
     titulo: string | null;
     tipo: string | null;
-    estado: string | null;
+    estado_fase: number | null;
+    completado: boolean;
+    phases_with_content: number;
+    last_phase_filled: string | null;
+    total_chars: number;
     created_at: string | null;
+    updated_at: string | null;
   }> | null = null;
   let usersError: string | null = null;
   let projectsError: string | null = null;
@@ -106,15 +111,30 @@ export async function GET(req: NextRequest) {
     if (detail) {
       allProjectsList = projects.map((p) => {
         const pAny = p as unknown as Record<string, unknown>;
+        const phaseContents = (pAny.phase_contents ?? {}) as Record<string, unknown>;
+        const phasesWithContent = Object.entries(phaseContents)
+          .filter(([, v]) => typeof v === "string" && (v as string).trim().length > 50)
+          .map(([k]) => k);
+        const totalChars = Object.values(phaseContents)
+          .filter((v) => typeof v === "string")
+          .reduce((sum, v) => sum + (v as string).length, 0);
+        const lastPhase = phasesWithContent[phasesWithContent.length - 1] ?? null;
         return {
           id: String(pAny.id ?? ""),
-          user_id: String(pAny.user_id ?? ""),
-          titulo: (pAny.titulo as string | null) ?? (pAny.title as string | null) ?? null,
+          user_id: String(pAny.usuario_id ?? pAny.user_id ?? ""),
+          titulo: (pAny.titulo_provisional as string | null)
+            ?? (pAny.tema_aprobado as string | null)
+            ?? null,
           tipo: (pAny.tipo_proyecto_id as string | null)
             ?? (pAny.servicio_id as string | null)
             ?? null,
-          estado: (pAny.estado as string | null) ?? null,
+          estado_fase: (pAny.estado_fase as number | null) ?? null,
+          completado: Boolean(pAny.completado),
+          phases_with_content: phasesWithContent.length,
+          last_phase_filled: lastPhase,
+          total_chars: totalChars,
           created_at: (pAny.created_at as string | null) ?? null,
+          updated_at: (pAny.updated_at as string | null) ?? null,
         };
       });
     }
