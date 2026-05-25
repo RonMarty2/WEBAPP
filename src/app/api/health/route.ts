@@ -26,6 +26,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const emailQuery = url.searchParams.get("email")?.toLowerCase().trim() ?? null;
+  const detail = url.searchParams.get("detail") === "full";
 
   const backend = dbBackend();
   const supabaseConfigured = isSupabaseConfigured();
@@ -51,30 +52,75 @@ export async function GET(req: NextRequest) {
 
   let usersCount: number | string = "unknown";
   let projectsCount: number | string = "unknown";
-  let userFound: { exists: boolean; projectCount: number } | null = null;
+  let userFound: {
+    exists: boolean;
+    projectCount: number;
+    id?: string;
+    role?: string;
+  } | null = null;
+  let allUsersList: Array<{ id: string; email: string; role?: string }> | null = null;
+  let allProjectsList: Array<{
+    id: string;
+    user_id: string;
+    titulo: string | null;
+    tipo: string | null;
+    estado: string | null;
+    created_at: string | null;
+  }> | null = null;
+  let usersError: string | null = null;
+  let projectsError: string | null = null;
 
+  let users: Awaited<ReturnType<typeof dbListUsers>> = [];
   try {
-    const users = await dbListUsers();
+    users = await dbListUsers();
     usersCount = users.length;
-
+    if (detail) {
+      allUsersList = users.map((u) => ({
+        id: u.id,
+        email: u.email ?? "(sin email)",
+        role: (u as { role?: string }).role,
+      }));
+    }
     if (emailQuery) {
       const user = users.find((u) => u.email?.toLowerCase() === emailQuery);
       if (user) {
         const userProjects = await dbListProyectos(user.id);
-        userFound = { exists: true, projectCount: userProjects.length };
+        userFound = {
+          exists: true,
+          projectCount: userProjects.length,
+          id: user.id,
+          role: (user as { role?: string }).role,
+        };
       } else {
         userFound = { exists: false, projectCount: 0 };
       }
     }
   } catch (e) {
-    usersCount = `error: ${(e as Error).message}`;
+    usersError = (e as Error).message;
+    usersCount = `error: ${usersError}`;
   }
 
   try {
     const projects = await dbListAllProyectos();
     projectsCount = projects.length;
+    if (detail) {
+      allProjectsList = projects.map((p) => {
+        const pAny = p as unknown as Record<string, unknown>;
+        return {
+          id: String(pAny.id ?? ""),
+          user_id: String(pAny.user_id ?? ""),
+          titulo: (pAny.titulo as string | null) ?? (pAny.title as string | null) ?? null,
+          tipo: (pAny.tipo_proyecto_id as string | null)
+            ?? (pAny.servicio_id as string | null)
+            ?? null,
+          estado: (pAny.estado as string | null) ?? null,
+          created_at: (pAny.created_at as string | null) ?? null,
+        };
+      });
+    }
   } catch (e) {
-    projectsCount = `error: ${(e as Error).message}`;
+    projectsError = (e as Error).message;
+    projectsCount = `error: ${projectsError}`;
   }
 
   return NextResponse.json({
@@ -89,6 +135,7 @@ export async function GET(req: NextRequest) {
       usersCount,
       projectsCount,
       userFound,
+      ...(detail ? { allUsers: allUsersList, allProjects: allProjectsList } : {}),
     },
     note: "Si backend = 'local' los datos NO persisten entre cold starts ni deploys. Conectar Supabase resuelve esto.",
   });
