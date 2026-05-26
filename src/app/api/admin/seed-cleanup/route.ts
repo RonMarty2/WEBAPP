@@ -32,8 +32,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const ADMIN_EMAIL = "ronaldmartinezjimenes@gmail.com";
-const ADMIN_ID = "seed-admin-ronaldmartinezjimenes"; // id estable, identificable
 const ADMIN_NAME = "Ronald Martínez Jiménez";
+const ADMIN_ID_FALLBACK = "seed-admin-ronaldmartinezjimenes"; // solo si OAuth no lo creó aún
 
 const ESTUDIANTE_EMAIL = "rnd261190@gmail.com";
 
@@ -88,31 +88,51 @@ export async function POST(req: NextRequest) {
   const steps = report.steps as Array<Record<string, unknown>>;
   const errors = report.errors as Array<Record<string, unknown>>;
 
-  // ── 1. Crear/asegurar admin nuevo ───────────────────────────────────────
+  // ── 1. Resolver id real del admin (OAuth pudo haberlo creado ya) ───────
+  let adminId: string = ADMIN_ID_FALLBACK;
   try {
-    const adminUser = await dbUpsertUser({
-      id: ADMIN_ID,
-      email: ADMIN_EMAIL,
-      name: ADMIN_NAME,
-      role: "admin",
-      plan: "pro",
-      active: true,
-      activated_at: new Date().toISOString(),
-    });
-    steps.push({ step: "upsert-admin", ok: true, user: adminUser });
+    const existingAdmin = await dbGetUserByEmail(ADMIN_EMAIL);
+    if (existingAdmin) {
+      adminId = existingAdmin.id;
+      steps.push({
+        step: "resolve-admin-id",
+        ok: true,
+        source: "existing-oauth-user",
+        adminId,
+      });
+    } else {
+      // Crear desde cero con id estable
+      const created = await dbUpsertUser({
+        id: ADMIN_ID_FALLBACK,
+        email: ADMIN_EMAIL,
+        name: ADMIN_NAME,
+        role: "admin",
+        plan: "pro",
+        active: true,
+        activated_at: new Date().toISOString(),
+      });
+      adminId = created.id;
+      steps.push({
+        step: "resolve-admin-id",
+        ok: true,
+        source: "created-from-seed",
+        adminId,
+        user: created,
+      });
+    }
   } catch (e) {
-    errors.push({ step: "upsert-admin", error: (e as Error).message });
+    errors.push({ step: "resolve-admin-id", error: (e as Error).message });
   }
 
-  // Asegurar role + active explícitos (dbUpsertUser puede preservar registered_at)
+  // ── 2. Activar admin con role=admin, plan=pro (sobre el id real) ───────
   try {
-    const updated = await dbActivateUser(ADMIN_ID, "admin", "pro");
+    const updated = await dbActivateUser(adminId, "admin", "pro");
     steps.push({ step: "activate-admin", ok: Boolean(updated), user: updated });
   } catch (e) {
     errors.push({ step: "activate-admin", error: (e as Error).message });
   }
 
-  // ── 2. Cambiar rol del usuario actual de admin → estudiante ─────────────
+  // ── 3. Cambiar rol del usuario actual de admin → estudiante ─────────────
   try {
     const existing = await dbGetUserByEmail(ESTUDIANTE_EMAIL);
     if (!existing) {
@@ -132,11 +152,11 @@ export async function POST(req: NextRequest) {
     errors.push({ step: "downgrade-student", error: (e as Error).message });
   }
 
-  // ── 3. Reasignar proyectos a conservar al admin nuevo ───────────────────
+  // ── 4. Reasignar proyectos a conservar al id real del admin ─────────────
   for (const projectId of PROJECTS_TO_KEEP) {
     try {
       const updated = await dbUpdateProyecto(projectId, {
-        usuario_id: ADMIN_ID,
+        usuario_id: adminId,
       });
       steps.push({
         step: "reassign-project",
@@ -156,7 +176,7 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // ── 4. Borrar proyectos huérfanos ───────────────────────────────────────
+  // ── 5. Borrar proyectos huérfanos ───────────────────────────────────────
   for (const projectId of PROJECTS_TO_DELETE) {
     try {
       const deleted = await dbDeleteProyecto(projectId);
