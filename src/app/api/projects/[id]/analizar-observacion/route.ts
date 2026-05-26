@@ -17,7 +17,12 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
-import { llamarIA, hydrateAIConfigAsync } from "@/lib/aiProvider";
+import {
+  llamarIA,
+  llamarIAConGrounding,
+  hydrateAIConfigAsync,
+  type GroundingSource,
+} from "@/lib/aiProvider";
 import {
   SISTEMA_ANALIZADOR_PERTINENCIA,
   buildAnalizadorUserPrompt,
@@ -111,16 +116,46 @@ export async function POST(req: Request, { params }: Params) {
 
     console.log(`[analizador] llamando IA para proyecto=${proyectoId} fase=${phaseId} obs="${observacion.slice(0, 80)}"`);
 
-    // Llamar a la IA con budget ajustado. Antes era 8000 (devolvía el doc
-    // entero reformulado). Ahora devuelve solo bloque_original+bloque_nuevo
-    // que son pedazos chicos. 4000 alcanza con margen para justificación y
-    // bloques medianos.
-    const aiResult = await llamarIA(
-      SISTEMA_ANALIZADOR_PERTINENCIA,
-      userPrompt,
-      4000,
-      proyecto.servicio_id ?? "mono-001",
-    );
+    // 🌐 Usar Gemini con Grounding (búsqueda web real) si hay GEMINI_API_KEY.
+    // Eso permite a la IA citar fuentes reales (papers, INE, BCB, sitios
+    // oficiales, etc.) con URLs verificables, en lugar de quedarse limitada
+    // a su conocimiento de entrenamiento.
+    //
+    // Si Grounding falla o no hay GEMINI_API_KEY, fallback a llamarIA normal
+    // (cascada multi-proveedor sin búsqueda web).
+    let aiResult: { text: string; provider: string; model: string };
+    let groundingSources: GroundingSource[] = [];
+    let groundingQueries: string[] = [];
+
+    const useGrounding = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 10);
+    if (useGrounding) {
+      try {
+        const grounded = await llamarIAConGrounding(
+          SISTEMA_ANALIZADOR_PERTINENCIA,
+          userPrompt,
+          6000,
+        );
+        aiResult = { text: grounded.text, provider: grounded.provider, model: grounded.model };
+        groundingSources = grounded.sources;
+        groundingQueries = grounded.searchQueries;
+        console.log(`[analizador] Grounding: ${groundingQueries.length} búsquedas, ${groundingSources.length} fuentes`);
+      } catch (groundingErr) {
+        console.warn(`[analizador] Grounding falló (${(groundingErr as Error).message}), usando llamada normal sin búsqueda web`);
+        aiResult = await llamarIA(
+          SISTEMA_ANALIZADOR_PERTINENCIA,
+          userPrompt,
+          4000,
+          proyecto.servicio_id ?? "mono-001",
+        );
+      }
+    } else {
+      aiResult = await llamarIA(
+        SISTEMA_ANALIZADOR_PERTINENCIA,
+        userPrompt,
+        4000,
+        proyecto.servicio_id ?? "mono-001",
+      );
+    }
 
     console.log(`[analizador] IA respondió: provider=${aiResult.provider} model=${aiResult.model} length=${aiResult.text.length} preview="${aiResult.text.slice(0, 200)}"`);
 
@@ -228,6 +263,11 @@ export async function POST(req: Request, { params }: Params) {
       fase_id: phaseId,
       fase_label: phase.label ?? phaseId,
       proveedor: `${aiResult.provider} / ${aiResult.model}`,
+      // Fuentes citadas por Gemini Grounding (URLs verificables que la IA
+      // consultó al construir la propuesta). Solo presente cuando Grounding
+      // estuvo activo y devolvió citas.
+      grounding_sources: groundingSources,
+      grounding_queries: groundingQueries,
       duracion_ms: duracionMs,
     });
   } catch (e) {

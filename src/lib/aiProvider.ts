@@ -558,6 +558,158 @@ async function callGemini(
   return text;
 }
 
+// ─── Gemini con Grounding (búsqueda web real) ────────────────────────────────
+
+/** Source citada por Gemini Grounding. */
+export interface GroundingSource {
+  /** URL canónica (cuando viene). */
+  uri?: string;
+  /** Título del documento/página. */
+  title?: string;
+  /** Snippet del contenido que se citó. */
+  snippet?: string;
+}
+
+export interface GroundingResult {
+  text: string;
+  sources: GroundingSource[];
+  searchQueries: string[];
+}
+
+/**
+ * Llama a Gemini con la herramienta google_search activada.
+ *
+ * Permite que la IA busque en internet información actualizada y cite
+ * fuentes reales con URL. Útil para:
+ *   - Investigaciones académicas específicas (ej. estudios locales)
+ *   - Datos cuantitativos actualizados (cifras INE, BCB, etc.)
+ *   - Cualquier observación que requiera información que el modelo no
+ *     tiene en su entrenamiento.
+ *
+ * Solo funciona con Gemini 2.5 (Pro o Flash). Si no hay GEMINI_API_KEY
+ * configurada, lanza error inmediatamente — el caller debe hacer
+ * fallback a llamarIA normal.
+ */
+async function callGeminiWithGrounding(
+  apiKey: string,
+  model: string,
+  system: string,
+  user: string,
+  maxTokens: number,
+): Promise<GroundingResult> {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const isPro = /gemini-2\.5-pro/.test(model);
+  const proBuffer = isPro ? Math.min(15000, Math.max(3000, Math.floor(maxTokens * 0.2))) : 0;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system_instruction: { parts: [{ text: system }] },
+      contents: [{ role: "user", parts: [{ text: user }] }],
+      // 🌐 Habilitar búsqueda en Google como herramienta del modelo
+      tools: [{ google_search: {} }],
+      generationConfig: {
+        maxOutputTokens: maxTokens + proBuffer,
+        temperature: 0.35,
+      },
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(JSON.stringify(err) || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json() as {
+    candidates?: Array<{
+      content?: { parts?: Array<{ text?: string }> };
+      finishReason?: string;
+      groundingMetadata?: {
+        webSearchQueries?: string[];
+        groundingChunks?: Array<{
+          web?: { uri?: string; title?: string };
+        }>;
+        groundingSupports?: Array<{
+          segment?: { text?: string };
+          groundingChunkIndices?: number[];
+        }>;
+      };
+    }>;
+    promptFeedback?: { blockReason?: string };
+  };
+
+  if (data.promptFeedback?.blockReason) {
+    throw new Error(`Gemini bloqueó el prompt: ${data.promptFeedback.blockReason}`);
+  }
+
+  const candidate = data.candidates?.[0];
+  if (!candidate) {
+    throw new Error(`Gemini Grounding no devolvió respuesta. Detalle: ${JSON.stringify(data).slice(0, 250)}`);
+  }
+
+  const reason = candidate.finishReason;
+  if (reason === "SAFETY") throw new Error("Gemini bloqueó la respuesta por filtros de seguridad.");
+  if (reason === "RECITATION") throw new Error("Gemini bloqueó la respuesta por posible copia de fuente.");
+  if (reason === "PROHIBITED_CONTENT") throw new Error("Gemini detectó contenido prohibido en la respuesta.");
+
+  const text = candidate.content?.parts?.[0]?.text;
+  if (typeof text !== "string" || text.length === 0) {
+    const reasonMsg = reason ? ` (finishReason: ${reason})` : "";
+    throw new Error(`Gemini Grounding devolvió respuesta vacía${reasonMsg}.`);
+  }
+
+  // Extraer fuentes citadas
+  const meta = candidate.groundingMetadata;
+  const sources: GroundingSource[] = [];
+  const chunks = meta?.groundingChunks ?? [];
+  const supports = meta?.groundingSupports ?? [];
+
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
+    if (!chunk.web) continue;
+    // Buscar snippet asociado a este chunk en groundingSupports
+    const snippet = supports.find((s) => s.groundingChunkIndices?.includes(i))?.segment?.text;
+    sources.push({
+      uri: chunk.web.uri,
+      title: chunk.web.title,
+      snippet: snippet ? snippet.slice(0, 300) : undefined,
+    });
+  }
+
+  return {
+    text,
+    sources,
+    searchQueries: meta?.webSearchQueries ?? [],
+  };
+}
+
+/**
+ * Llama al modelo con búsqueda web (Gemini Grounding).
+ *
+ * Fuerza el uso de Gemini 2.5 Pro porque grounding solo está
+ * disponible en Gemini. Si no hay GEMINI_API_KEY configurada, lanza
+ * error — el caller debe hacer fallback a llamarIA normal sin
+ * grounding.
+ *
+ * @param system Prompt de sistema
+ * @param user Prompt de usuario
+ * @param maxTokens Máximo de tokens de salida
+ * @returns { text, sources, searchQueries } con fuentes citadas
+ */
+export async function llamarIAConGrounding(
+  system: string,
+  user: string,
+  maxTokens = 6000,
+): Promise<GroundingResult & { provider: string; model: string }> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey.length < 10) {
+    throw new Error("GEMINI_API_KEY no configurada. Grounding requiere Gemini.");
+  }
+  const model = "gemini-2.5-pro";
+  const result = await callGeminiWithGrounding(apiKey, model, system, user, maxTokens);
+  return { ...result, provider: "gemini", model };
+}
+
 // ── Main caller — uses provider config ───────────────────────────────────────
 
 export async function llamarIAConConfig(
