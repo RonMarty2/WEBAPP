@@ -24,6 +24,9 @@
     "src/app/api/projects/[id]/qa/route.ts": {
       "maxDuration": 60
     },
+    "src/app/api/projects/[id]/analizar-observacion/route.ts": {
+      "maxDuration": 60
+    },
     "src/app/api/projects/[id]/defensa/route.ts": {
       "maxDuration": 60
     },

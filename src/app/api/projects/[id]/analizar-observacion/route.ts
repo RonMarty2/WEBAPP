@@ -133,7 +133,7 @@ export async function POST(req: Request, { params }: Params) {
         const grounded = await llamarIAConGrounding(
           SISTEMA_ANALIZADOR_PERTINENCIA,
           userPrompt,
-          10000, // margen amplio para devolver 4-6 estudios con análisis
+          6000, // ajustado para no exceder timeout 60s de Vercel (10000 tardaba demasiado)
         );
         aiResult = { text: grounded.text, provider: grounded.provider, model: grounded.model };
         groundingSources = grounded.sources;

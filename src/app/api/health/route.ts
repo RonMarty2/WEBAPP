@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     GROQ_API_KEY: Boolean(process.env.GROQ_API_KEY),
     ANTHROPIC_API_KEY: Boolean(process.env.ANTHROPIC_API_KEY),
     OPENAI_API_KEY: Boolean(process.env.OPENAI_API_KEY),
+    GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY),
     MOCK_AI: process.env.MOCK_AI ?? null,
     JWT_SECRET: Boolean(process.env.JWT_SECRET),
     GOOGLE_CLIENT_ID: Boolean(process.env.GOOGLE_CLIENT_ID),
