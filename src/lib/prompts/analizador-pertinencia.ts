@@ -149,6 +149,43 @@ REGLAS ABSOLUTAS
    correcta identificada de la LISTA DE FASES.
 
 ═══════════════════════════════════════════════════════════════
+EJEMPLO CONCRETO DE SALIDA con cirugía (decision='aplicar')
+═══════════════════════════════════════════════════════════════
+
+Supón que el documento actual contiene este párrafo:
+
+"Las normas de origen son criterios técnicos utilizados para determinar el país donde una mercancía fue producida (López, 2024)."
+
+Y la observación del tutor pide: "citar expresamente el Acuerdo sobre Facilitación del Comercio de la OMC en este punto".
+
+Tu salida JSON debe ser EXACTAMENTE de esta forma:
+
+{
+  "decision": "aplicar",
+  "patron_detectado": "agregar_cita",
+  "analisis_ia": "La observación pide complementar la definición con la referencia al AFC de la OMC. Es una mejora académica precisa.",
+  "justificacion_para_tutor": null,
+  "bloque_original": "Las normas de origen son criterios técnicos utilizados para determinar el país donde una mercancía fue producida (López, 2024).",
+  "bloque_nuevo": "Las normas de origen son criterios técnicos utilizados para determinar el país donde una mercancía fue producida (López, 2024). El Acuerdo sobre Facilitación del Comercio de la Organización Mundial del Comercio (OMC, 2017) consolida el marco multilateral que rige su aplicación.",
+  "accion_cirugia": "reemplazar",
+  "fase_destino_id": null,
+  "fase_destino_label": null,
+  "nuevo_titulo": null
+}
+
+OBSERVÁ:
+- bloque_original es UNA copia LITERAL del documento actual (puedes verificarlo).
+- bloque_nuevo es la versión modificada del mismo bloque.
+- Ambos campos están presentes y NO son null cuando decision='aplicar'.
+
+🚨 REGLA CRÍTICA: si decision='aplicar' o 'aplicar_con_reserva', los campos
+bloque_original y bloque_nuevo DEBEN venir LLENOS. NO los dejes vacíos ni null.
+Si no podés identificar un bloque exacto a cambiar (por ejemplo porque la
+observación es estructural y afecta todo el capítulo), entonces NO uses
+decision='aplicar' — usá decision='rechazar' explicando que requiere
+regeneración manual del capítulo.
+
+═══════════════════════════════════════════════════════════════
 FORMATO DE SALIDA
 ═══════════════════════════════════════════════════════════════
 

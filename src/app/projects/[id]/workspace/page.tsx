@@ -4105,56 +4105,93 @@ export default function WorkspacePage() {
                     />
                   </>
                 ) : (
-                  <div style={{ padding: 24, textAlign: "center", color: "var(--fg-muted)" }}>
-                    Sin propuesta de cambio disponible.
+                  // Caso: decision=aplicar/aplicar_con_reserva pero NO hay propuesta.
+                  // Esto pasa cuando la IA decidió aplicar pero no devolvió un
+                  // bloque_original válido, o el bloque_original no se encontró
+                  // byte-por-byte en el documento (errorCirugia presente).
+                  <div style={{ padding: "20px 24px" }}>
+                    <div style={{
+                      padding: 16,
+                      background: "rgba(245,158,11,0.10)",
+                      border: "1.5px solid rgba(245,158,11,0.4)",
+                      borderRadius: 10,
+                      fontSize: 13.5,
+                      lineHeight: 1.55,
+                      color: "var(--fg-primary)",
+                      marginBottom: 12,
+                    }}>
+                      <div style={{ fontWeight: 700, marginBottom: 8, color: "#92400e", fontSize: 14 }}>
+                        ⚠️ No se pudo aplicar la observación
+                      </div>
+                      {revisionPreview.errorCirugia ? (
+                        <div style={{ marginBottom: 10 }}>
+                          {revisionPreview.errorCirugia}
+                        </div>
+                      ) : (
+                        <div style={{ marginBottom: 10 }}>
+                          La IA decidió que la observación es válida para este capítulo, pero no identificó con precisión el bloque del documento que hay que modificar.
+                        </div>
+                      )}
+                      <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", paddingTop: 8, borderTop: "1px solid rgba(245,158,11,0.25)" }}>
+                        <strong>Sugerencia:</strong> reformulá la observación indicando con más precisión qué párrafo o sección querés cambiar. Por ejemplo: <em>&ldquo;En la sección 2.1.2 sobre normas de origen, agregar un párrafo que cite expresamente el Acuerdo sobre Facilitación del Comercio de la OMC.&rdquo;</em>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Footer SOLO si rechazo (DiffPreview ya tiene sus propios botones) */}
-              {isRechazar && (
-                <div style={{
-                  padding: "14px 20px",
-                  borderTop: "1px solid rgba(0,0,0,0.08)",
-                  display: "flex",
-                  gap: 10,
-                  justifyContent: "flex-end",
-                  background: "var(--bg-base)",
-                }}>
-                  <button
-                    type="button"
-                    onClick={cancelarRevision}
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 600,
-                      padding: "10px 18px",
-                      borderRadius: 8,
-                      background: "white",
-                      border: "1px solid rgba(15,23,42,0.22)",
-                      color: "var(--fg-secondary)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Cerrar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={aplicarRevision}
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      padding: "10px 20px",
-                      borderRadius: 8,
-                      background: decisionColor,
-                      color: "white",
-                      border: "none",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {ctaLabel}
-                  </button>
-                </div>
-              )}
+              {/* Footer si rechazo O si no hay propuesta (DiffPreview tiene sus propios botones) */}
+              {(isRechazar || (!revisionPreview.contenidoPropuesto && !isRechazar)) && (() => {
+                // Si no hay contenidoPropuesto y no fue rechazo, fue fallo de cirugía:
+                // solo dejamos cerrar para que el usuario reformule (NO mostramos
+                // botón Aplicar — no hay nada que aplicar).
+                const sinPropuesta = !revisionPreview.contenidoPropuesto && !isRechazar;
+                return (
+                  <div style={{
+                    padding: "14px 20px",
+                    borderTop: "1px solid rgba(0,0,0,0.08)",
+                    display: "flex",
+                    gap: 10,
+                    justifyContent: "flex-end",
+                    background: "var(--bg-base)",
+                  }}>
+                    <button
+                      type="button"
+                      onClick={cancelarRevision}
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 600,
+                        padding: "10px 18px",
+                        borderRadius: 8,
+                        background: "white",
+                        border: "1px solid rgba(15,23,42,0.22)",
+                        color: "var(--fg-secondary)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {sinPropuesta ? "Cerrar y reformular" : "Cerrar"}
+                    </button>
+                    {!sinPropuesta && (
+                      <button
+                        type="button"
+                        onClick={aplicarRevision}
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 700,
+                          padding: "10px 20px",
+                          borderRadius: 8,
+                          background: decisionColor,
+                          color: "white",
+                          border: "none",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {ctaLabel}
+                      </button>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         );
