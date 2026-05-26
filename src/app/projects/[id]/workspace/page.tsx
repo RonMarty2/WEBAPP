@@ -2515,7 +2515,9 @@ export default function WorkspacePage() {
               </div>
             )}
 
-            {/* PG — sidebar de navegación: se superpone sobre el contenido del col cuando está abierto */}
+            {/* PG — sidebar de navegación: se superpone sobre el contenido del col cuando está abierto.
+                IMPORTANTE: fondo OPACO (var(--bg-base)) para tapar el chat de observaciones que
+                está detrás. Antes usaba panelBg (alpha 0.55) y se veía el chat translucido a través. */}
             {isPGProject && showPhaseNav && (
               <div
                 style={{
@@ -2525,13 +2527,12 @@ export default function WorkspacePage() {
                   right: 0,
                   bottom: 0,
                   zIndex: 50,
-                  background: panelBg,
-                  backdropFilter: panelBlur,
-                  WebkitBackdropFilter: panelBlur,
+                  background: "var(--bg-base)",
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
                   borderTop: "1px solid rgba(148,163,184,0.18)",
+                  boxShadow: "0 8px 24px rgba(15,23,42,0.10)",
                 }}
               >
                 <PGPhaseSidebar
