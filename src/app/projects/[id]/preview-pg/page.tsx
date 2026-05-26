@@ -209,6 +209,28 @@ export default function PreviewPgPage() {
         >
           📦 Descargar LaTeX (.zip)
         </a>
+        <a
+          href={`/api/projects/${proyectoId}/bitacora/imprimible`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: "8px 16px",
+            borderRadius: 7,
+            background: "#6366f1",
+            color: "white",
+            border: "none",
+            fontWeight: 700,
+            fontSize: 13,
+            cursor: "pointer",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            textDecoration: "none",
+          }}
+          title="Abre la Bitácora del Tutor (todas las observaciones aplicadas y rechazadas con justificación). Ctrl+P para guardarla como PDF."
+        >
+          📋 Descargar Bitácora
+        </a>
       </div>
 
       {/* ───── CARÁTULA SIMULADA ───── */}

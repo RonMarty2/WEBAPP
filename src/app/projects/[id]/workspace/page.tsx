@@ -1288,6 +1288,49 @@ export default function WorkspacePage() {
         return;
       }
 
+      // ⚡ CASO ESPECIAL: la IA detectó que la observación corresponde a OTRA
+      // fase del documento. NO abrir modal — redirigir directo al capítulo
+      // correcto con la observación precargada en el chat, y mostrar el
+      // análisis IA en el hilo de mensajes para que el usuario entienda
+      // por qué se movió. Esto evita el bug del modal mostrando "NO APLICAR"
+      // cuando en realidad la decisión fue "moverlo".
+      if (decision === "mover_a_otra_fase") {
+        const faseDestinoId = (data.fase_destino_id as string | null) ?? null;
+        const faseDestinoLabel = (data.fase_destino_label as string | null) ?? null;
+        const analisisIa = (data.analisis_ia as string | undefined) ?? "";
+
+        if (faseDestinoId) {
+          const idxDestino = displayFases.findIndex((f) => f.id === faseDestinoId);
+          if (idxDestino >= 0) {
+            setSelectedFase(idxDestino);
+            setChatInput(mensaje);
+            setChatMsgs((prev) => [
+              ...prev,
+              { role: "user", text: mensaje, ts: Date.now() },
+              {
+                role: "assistant",
+                text: `📍 Esta observación corresponde al capítulo **${faseDestinoLabel}**, no a ${faseDef.label}.\n\n_${analisisIa}_\n\nTe llevé directo al capítulo correcto y dejé tu observación lista en el cuadro de chat. Revisala y dale a la flecha para aplicarla acá.`,
+                ts: Date.now(),
+              },
+            ]);
+            setRevisionStatus("idle");
+            return;
+          }
+        }
+        // Fallback: no logramos resolver el id de la fase destino
+        setChatMsgs((prev) => [
+          ...prev,
+          { role: "user", text: mensaje, ts: Date.now() },
+          {
+            role: "assistant",
+            text: `⚠️ Esta observación parece pertenecer al capítulo "${faseDestinoLabel ?? "otro"}" pero no logré localizarlo automáticamente. Cambiá manualmente al capítulo correcto y pegá la observación.\n\n_${analisisIa}_`,
+            ts: Date.now(),
+          },
+        ]);
+        setRevisionStatus("idle");
+        return;
+      }
+
       setRevisionPreview({
         observacionId: (data.observacion_id as string | null) ?? null,
         phaseId: faseDef.id,
@@ -2354,6 +2397,18 @@ export default function WorkspacePage() {
             <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
               {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
             </button>
+          )}
+          {fasesCompletadas > 0 && (
+            <a
+              href={`/api/projects/${proyectoId}/bitacora/imprimible`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost"
+              style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4, textDecoration:"none", color:"#6366f1", borderColor:"rgba(99,102,241,0.4)" }}
+              title="Bitácora del Tutor: todas las observaciones aplicadas y rechazadas con su justificación. Ctrl+P para guardar como PDF."
+            >
+              📋 <span>Bitácora</span>
+            </a>
           )}
           {fasesCompletadas >= 2 && (
             <Link href={`/projects/${proyectoId}/defensa`} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4, textDecoration:"none" }} title="Simula tu defensa oral con IA">
@@ -3946,16 +4001,21 @@ export default function WorkspacePage() {
         const isAplicar = revisionPreview.decision === "aplicar";
         const isReserva = revisionPreview.decision === "aplicar_con_reserva";
         const isRechazar = revisionPreview.decision === "rechazar";
+        const isMover = revisionPreview.decision === "mover_a_otra_fase";
         const decisionColor = isAplicar ? "#16a34a"  // verde
                             : isReserva ? "#d97706"  // ámbar
-                            : "#dc2626";              // rojo
+                            : isMover    ? "#2563eb"  // azul
+                            : "#dc2626";              // rojo (rechazar)
         const decisionBg = isAplicar ? "rgba(22,163,74,0.08)"
                          : isReserva ? "rgba(217,119,6,0.08)"
+                         : isMover    ? "rgba(37,99,235,0.08)"
                          : "rgba(220,38,38,0.08)";
         const decisionLabel = isAplicar ? "✅ APLICAR"
                             : isReserva ? "⚠️ APLICAR CON RESERVA"
+                            : isMover    ? `📍 LLEVAR A: ${revisionPreview.faseDestinoLabel ?? "otra fase"}`
                             : "🛡️ NO APLICAR — Justificación lista para el tutor";
         const ctaLabel = isRechazar ? "Guardar en Bitácora del Tutor"
+                       : isMover    ? `Ir a ${revisionPreview.faseDestinoLabel ?? "el capítulo correcto"}`
                        : isReserva ? "Aplicar con reserva"
                        : "Aplicar cambio";
 

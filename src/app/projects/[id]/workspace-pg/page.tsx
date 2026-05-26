@@ -279,6 +279,28 @@ export default function WorkspacePGPage() {
         >
           📦 Descargar LaTeX (.zip)
         </button>
+        <a
+          href={`/api/projects/${proyectoId}/bitacora/imprimible`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            borderRadius: 7,
+            background: "rgba(99,102,241,0.12)",
+            color: "#6366f1",
+            fontSize: 12,
+            fontWeight: 700,
+            border: "1px solid rgba(99,102,241,0.3)",
+            cursor: "pointer",
+            textDecoration: "none",
+          }}
+          title="Abre la Bitácora del Tutor (todas las observaciones aplicadas y rechazadas con justificación). Ctrl+P para guardarla como PDF."
+        >
+          📋 Descargar Bitácora
+        </a>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {titulo}
