@@ -19,7 +19,6 @@ import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import {
   llamarIA,
-  llamarIAConGrounding,
   hydrateAIConfigAsync,
   type GroundingSource,
 } from "@/lib/aiProvider";
@@ -116,46 +115,34 @@ export async function POST(req: Request, { params }: Params) {
 
     console.log(`[analizador] llamando IA para proyecto=${proyectoId} fase=${phaseId} obs="${observacion.slice(0, 80)}"`);
 
-    // 🌐 Usar Gemini con Grounding (búsqueda web real) si hay GEMINI_API_KEY.
-    // Eso permite a la IA citar fuentes reales (papers, INE, BCB, sitios
-    // oficiales, etc.) con URLs verificables, en lugar de quedarse limitada
-    // a su conocimiento de entrenamiento.
+    // 🧠 Usar Gemini normal (sin búsqueda web Grounding).
     //
-    // Si Grounding falla o no hay GEMINI_API_KEY, fallback a llamarIA normal
-    // (cascada multi-proveedor sin búsqueda web).
-    let aiResult: { text: string; provider: string; model: string };
-    let groundingSources: GroundingSource[] = [];
-    let groundingQueries: string[] = [];
-
-    const useGrounding = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY.length > 10);
-    if (useGrounding) {
-      try {
-        const grounded = await llamarIAConGrounding(
-          SISTEMA_ANALIZADOR_PERTINENCIA,
-          userPrompt,
-          6000, // ajustado para no exceder timeout 60s de Vercel (10000 tardaba demasiado)
-        );
-        aiResult = { text: grounded.text, provider: grounded.provider, model: grounded.model };
-        groundingSources = grounded.sources;
-        groundingQueries = grounded.searchQueries;
-        console.log(`[analizador] Grounding: ${groundingQueries.length} búsquedas, ${groundingSources.length} fuentes`);
-      } catch (groundingErr) {
-        console.warn(`[analizador] Grounding falló (${(groundingErr as Error).message}), usando llamada normal sin búsqueda web`);
-        aiResult = await llamarIA(
-          SISTEMA_ANALIZADOR_PERTINENCIA,
-          userPrompt,
-          4000,
-          proyecto.servicio_id ?? "mono-001",
-        );
-      }
-    } else {
-      aiResult = await llamarIA(
-        SISTEMA_ANALIZADOR_PERTINENCIA,
-        userPrompt,
-        4000,
-        proyecto.servicio_id ?? "mono-001",
-      );
-    }
+    // Decisión arquitectural: Grounding (búsqueda web) tarda 1-3 minutos por
+    // observación pesada, lo que excede el timeout de 60s de Vercel (plan
+    // Hobby) y dispara FUNCTION_INVOCATION_TIMEOUT. Cuando eso pasa, el
+    // estudiante no recibe nada — peor UX que tener una respuesta sin URLs
+    // pero rápida.
+    //
+    // Gemini normal (sin Grounding) tarda 10-15s incluso para observaciones
+    // densas. Sigue respetando la regla anti-alucinación del prompt: si la
+    // IA no está segura de un autor/fuente, debe rechazar la observación
+    // (decision='rechazar') en lugar de inventarlo.
+    //
+    // Las leyes bolivianas (Ley General de Aduanas, DS 25870, normativas
+    // OMC/CAN, etc.) están en el conocimiento de entrenamiento de Gemini
+    // 2.5 Pro, así que cita estas fuentes correctamente sin necesidad de
+    // buscarlas en internet.
+    //
+    // Si en el futuro el usuario pasa a Vercel Pro (maxDuration=300s),
+    // podemos reactivar Grounding sin riesgo de timeout.
+    const aiResult = await llamarIA(
+      SISTEMA_ANALIZADOR_PERTINENCIA,
+      userPrompt,
+      4000,
+      proyecto.servicio_id ?? "mono-001",
+    );
+    const groundingSources: GroundingSource[] = [];
+    const groundingQueries: string[] = [];
 
     console.log(`[analizador] IA respondió: provider=${aiResult.provider} model=${aiResult.model} length=${aiResult.text.length} preview="${aiResult.text.slice(0, 200)}"`);
 
