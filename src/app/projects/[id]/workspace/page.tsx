@@ -678,6 +678,11 @@ export default function WorkspacePage() {
     /** Si la cirugía falló (bloque_original no matcheó), mensaje de error
      *  para mostrar al usuario y NO ofrecer "Aplicar". */
     errorCirugia: string | null;
+    /** Fuentes que la IA consultó en internet (cuando Grounding está activo).
+     *  Permite al usuario verificar que las citas no son inventadas. */
+    groundingSources: Array<{ uri?: string; title?: string; snippet?: string }>;
+    /** Queries que la IA hizo en Google (cuando Grounding está activo). */
+    groundingQueries: string[];
   }
   const [revisionStatus, setRevisionStatus] = useState<RevisionStatus>("idle");
   const [revisionPreview, setRevisionPreview] = useState<RevisionPreviewData | null>(null);
@@ -1299,6 +1304,12 @@ export default function WorkspacePage() {
         faseDestinoId: (data.fase_destino_id as string | null) ?? null,
         faseDestinoLabel: (data.fase_destino_label as string | null) ?? null,
         errorCirugia: (data.error_cirugia as string | null) ?? null,
+        groundingSources: Array.isArray(data.grounding_sources)
+          ? (data.grounding_sources as Array<{ uri?: string; title?: string; snippet?: string }>)
+          : [],
+        groundingQueries: Array.isArray(data.grounding_queries)
+          ? (data.grounding_queries as string[])
+          : [],
       });
       setRevisionStatus("preview");
     } catch (e) {
@@ -4095,6 +4106,112 @@ export default function WorkspacePage() {
                         IA detectó que tiene caveats. Revisa el análisis arriba antes de aprobar.
                       </div>
                     )}
+
+                    {/* Panel de fuentes consultadas (Gemini Grounding).
+                        Permite VERIFICAR que las citas no son inventadas. */}
+                    {revisionPreview.groundingSources.length > 0 && (
+                      <div style={{
+                        margin: "16px 20px 0",
+                        padding: 14,
+                        background: "rgba(14,165,233,0.06)",
+                        border: "1px solid rgba(14,165,233,0.30)",
+                        borderRadius: 8,
+                      }}>
+                        <div style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: "#0369a1",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.08em",
+                          marginBottom: 8,
+                        }}>
+                          🌐 Fuentes consultadas por la IA ({revisionPreview.groundingSources.length})
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--fg-secondary)", marginBottom: 10, lineHeight: 1.5 }}>
+                          La IA buscó en internet y consultó estas fuentes reales. <strong>Verifica que las citas del texto provienen de aquí</strong> (si una cita del bloque nuevo no aparece en esta lista, es señal de alucinación).
+                        </div>
+                        {revisionPreview.groundingQueries.length > 0 && (
+                          <div style={{
+                            fontSize: 11,
+                            color: "var(--fg-muted)",
+                            marginBottom: 10,
+                            paddingBottom: 8,
+                            borderBottom: "1px dashed rgba(14,165,233,0.25)",
+                          }}>
+                            <strong>Búsquedas realizadas:</strong>{" "}
+                            {revisionPreview.groundingQueries.map((q, i) => (
+                              <span key={i} style={{
+                                display: "inline-block",
+                                background: "rgba(14,165,233,0.10)",
+                                padding: "2px 8px",
+                                borderRadius: 999,
+                                marginRight: 6,
+                                marginTop: 4,
+                                fontSize: 10.5,
+                                color: "#075985",
+                              }}>
+                                {q}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                          {revisionPreview.groundingSources.map((src, i) => (
+                            <li key={i} style={{
+                              padding: "8px 0",
+                              borderBottom: i < revisionPreview.groundingSources.length - 1
+                                ? "1px solid rgba(14,165,233,0.12)"
+                                : "none",
+                              fontSize: 12,
+                              lineHeight: 1.5,
+                            }}>
+                              <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
+                                <span style={{
+                                  flexShrink: 0,
+                                  color: "#0369a1",
+                                  fontWeight: 700,
+                                  minWidth: 22,
+                                }}>
+                                  [{i + 1}]
+                                </span>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  {src.uri ? (
+                                    <a
+                                      href={src.uri}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{
+                                        color: "#0369a1",
+                                        fontWeight: 600,
+                                        wordBreak: "break-all",
+                                        textDecoration: "underline",
+                                      }}
+                                    >
+                                      {src.title || src.uri}
+                                    </a>
+                                  ) : (
+                                    <span style={{ color: "var(--fg-primary)", fontWeight: 600 }}>
+                                      {src.title || "(sin título)"}
+                                    </span>
+                                  )}
+                                  {src.snippet && (
+                                    <div style={{
+                                      marginTop: 4,
+                                      fontSize: 11.5,
+                                      color: "var(--fg-secondary)",
+                                      fontStyle: "italic",
+                                    }}>
+                                      &ldquo;{src.snippet}&rdquo;
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+                    )}
+
                     <DiffPreview
                       contenidoActual={revisionPreview.contenidoActual}
                       contenidoPropuesto={revisionPreview.contenidoPropuesto}

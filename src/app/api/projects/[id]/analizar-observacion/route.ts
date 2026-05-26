@@ -133,7 +133,7 @@ export async function POST(req: Request, { params }: Params) {
         const grounded = await llamarIAConGrounding(
           SISTEMA_ANALIZADOR_PERTINENCIA,
           userPrompt,
-          6000,
+          10000, // margen amplio para devolver 4-6 estudios con análisis
         );
         aiResult = { text: grounded.text, provider: grounded.provider, model: grounded.model };
         groundingSources = grounded.sources;

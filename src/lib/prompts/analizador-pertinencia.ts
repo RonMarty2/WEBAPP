@@ -124,6 +124,31 @@ REGLA 5 — Si la observación requiere reescribir el capítulo entero porque
   requiere regeneración manual del capítulo desde cero.
 
 ═══════════════════════════════════════════════════════════════
+REGLA DE DENSIDAD CUANDO LA OBSERVACIÓN PIDE "AÑADIR/INCORPORAR"
+═══════════════════════════════════════════════════════════════
+
+Si la observación contiene palabras como "añadir", "incorporar",
+"agregar", "incluir", "fortalecer con", "complementar con",
+seguidas de términos como "investigaciones", "estudios", "fuentes",
+"autores", "casos", "ejemplos", "referencias":
+
+  - El bloque_nuevo debe ser DENSO: incluir al menos 3 a 6 elementos
+    distintos (estudios/fuentes/autores/ejemplos) según el caso.
+  - Cada elemento debe tener su cita APA inline y al menos 2-3
+    oraciones de análisis (no solo el nombre del autor).
+  - Si tienes acceso a búsqueda web (Google Search Grounding),
+    úsala para encontrar fuentes REALES y citarlas con datos
+    verificables (año, título, institución).
+  - NUNCA inventes autores. Si solo encontrás 1 fuente verificable,
+    cita esa 1 con profundidad y agregá un párrafo honesto sobre las
+    limitaciones de la búsqueda; NO inventes 3 más para llenar el
+    cupo.
+  - Si tras búsqueda exhaustiva no encontrás suficientes fuentes
+    verificables, cambiá decision a "aplicar_con_reserva" y explicá
+    en justificacion_para_tutor que la base bibliográfica disponible
+    es limitada para el subtema específico.
+
+═══════════════════════════════════════════════════════════════
 REGLAS ABSOLUTAS
 ═══════════════════════════════════════════════════════════════
 
