@@ -3378,8 +3378,24 @@ export default function WorkspacePage() {
 
               <div style={{ display:"flex", gap:8, alignItems:"flex-end", opacity: revisionStatus !== "idle" ? 0.55 : 1 }}>
                 <textarea
+                  ref={(el) => {
+                    // Auto-resize: ajustamos la altura al contenido en cada render
+                    // (incluido al limpiar el input). max-height limita a ~12 líneas;
+                    // arriba de eso aparece scroll interno.
+                    if (el) {
+                      el.style.height = "auto";
+                      const next = Math.min(el.scrollHeight, 220); // ~12 líneas a fontSize 12 lineHeight 1.5
+                      el.style.height = `${Math.max(38, next)}px`;
+                    }
+                  }}
                   value={chatInput}
-                  onChange={e => setChatInput(e.target.value)}
+                  onChange={(e) => {
+                    setChatInput(e.target.value);
+                    // Auto-resize inmediato al escribir
+                    e.target.style.height = "auto";
+                    const next = Math.min(e.target.scrollHeight, 220);
+                    e.target.style.height = `${Math.max(38, next)}px`;
+                  }}
                   onKeyDown={e => {
                     if (e.key==="Enter" && (e.ctrlKey||e.metaKey) && chatInput.trim() && revisionStatus === "idle") {
                       pedirRevisionConPreview(chatInput.trim());
@@ -3390,7 +3406,7 @@ export default function WorkspacePage() {
                       ? "Ej: El tutor pide reforzar el marco teórico con 2 autores latinoamericanos…"
                       : "Bloqueado mientras hay una revisión en curso"
                   }
-                  rows={2}
+                  rows={1}
                   disabled={isGenerating || revisionStatus !== "idle"}
                   style={{
                     flex:1,
@@ -3401,7 +3417,10 @@ export default function WorkspacePage() {
                     outline:"none",
                     background:"transparent",
                     color:"var(--fg-primary)",
-                    padding:"4px 2px",
+                    padding:"6px 2px",
+                    minHeight: 38,
+                    maxHeight: 220, // ~12 líneas; arriba de eso scroll interno
+                    overflowY: "auto",
                     cursor: revisionStatus !== "idle" ? "not-allowed" : "text",
                   }}
                 />
