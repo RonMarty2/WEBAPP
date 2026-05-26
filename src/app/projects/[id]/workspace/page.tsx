@@ -662,7 +662,7 @@ export default function WorkspacePage() {
     phaseId: string;
     phaseLabel: string;
     mensajeUsuario: string;
-    decision: "aplicar" | "aplicar_con_reserva" | "rechazar";
+    decision: "aplicar" | "aplicar_con_reserva" | "rechazar" | "mover_a_otra_fase";
     patronDetectado: string;
     analisisIa: string;
     justificacionParaTutor: string | null;
@@ -671,6 +671,13 @@ export default function WorkspacePage() {
     /** Si el cambio modifica el TÍTULO OFICIAL del proyecto, viene aquí. */
     nuevoTitulo: string | null;
     tituloActual: string | null;
+    /** Si decision='mover_a_otra_fase', el id de la fase destino correcta. */
+    faseDestinoId: string | null;
+    /** Si decision='mover_a_otra_fase', el label legible de la fase destino. */
+    faseDestinoLabel: string | null;
+    /** Si la cirugía falló (bloque_original no matcheó), mensaje de error
+     *  para mostrar al usuario y NO ofrecer "Aplicar". */
+    errorCirugia: string | null;
   }
   const [revisionStatus, setRevisionStatus] = useState<RevisionStatus>("idle");
   const [revisionPreview, setRevisionPreview] = useState<RevisionPreviewData | null>(null);
@@ -1268,7 +1275,7 @@ export default function WorkspacePage() {
 
       // Validación defensiva: la decisión debe estar presente
       const decision = data.decision as string | undefined;
-      if (!decision || !["aplicar", "aplicar_con_reserva", "rechazar"].includes(decision)) {
+      if (!decision || !["aplicar", "aplicar_con_reserva", "rechazar", "mover_a_otra_fase"].includes(decision)) {
         const errorMsg = `La IA no devolvió una decisión válida (recibido: ${decision ?? "vacío"}). Posible problema con el proveedor IA.`;
         setRevisionError(errorMsg);
         setRevisionStatus("idle");
@@ -1281,7 +1288,7 @@ export default function WorkspacePage() {
         phaseId: faseDef.id,
         phaseLabel: (data.fase_label as string | undefined) ?? faseDef.label ?? faseDef.id,
         mensajeUsuario: mensaje,
-        decision: decision as "aplicar" | "aplicar_con_reserva" | "rechazar",
+        decision: decision as "aplicar" | "aplicar_con_reserva" | "rechazar" | "mover_a_otra_fase",
         patronDetectado: (data.patron_detectado as string | undefined) ?? "",
         analisisIa: (data.analisis_ia as string | undefined) ?? "",
         justificacionParaTutor: (data.justificacion_para_tutor as string | null) ?? null,
@@ -1289,6 +1296,9 @@ export default function WorkspacePage() {
         contenidoPropuesto: (data.contenido_propuesto as string | null) ?? null,
         nuevoTitulo: (data.nuevo_titulo as string | null) ?? null,
         tituloActual: (data.titulo_actual as string | null) ?? null,
+        faseDestinoId: (data.fase_destino_id as string | null) ?? null,
+        faseDestinoLabel: (data.fase_destino_label as string | null) ?? null,
+        errorCirugia: (data.error_cirugia as string | null) ?? null,
       });
       setRevisionStatus("preview");
     } catch (e) {
@@ -1302,6 +1312,57 @@ export default function WorkspacePage() {
 
   const aplicarRevision = useCallback(async () => {
     if (!proyecto || !revisionPreview || revisionStatus !== "preview") return;
+
+    // Caso especial: decision='mover_a_otra_fase'. No es aplicar — es saltar
+    // a la fase correcta con el mensaje pre-cargado en el chat de allá.
+    if (revisionPreview.decision === "mover_a_otra_fase" && revisionPreview.faseDestinoId) {
+      const idxDestino = displayFases.findIndex((f) => f.id === revisionPreview.faseDestinoId);
+      if (idxDestino >= 0) {
+        setSelectedFase(idxDestino);
+        setChatInput(revisionPreview.mensajeUsuario);
+        setChatMsgs((prev) => [
+          ...prev,
+          { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
+          {
+            role: "assistant",
+            text: `📍 Cambié al capítulo **${revisionPreview.faseDestinoLabel}** y dejé tu observación lista en el cuadro de chat. Revisala y dale a la flecha para procesarla acá.`,
+            ts: Date.now(),
+          },
+        ]);
+      } else {
+        setChatMsgs((prev) => [
+          ...prev,
+          { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
+          {
+            role: "assistant",
+            text: `⚠️ La observación parece pertenecer al capítulo "${revisionPreview.faseDestinoLabel}" pero no logré localizarlo en este proyecto. Cambiá manualmente al capítulo correcto y pegá la observación.`,
+            ts: Date.now(),
+          },
+        ]);
+      }
+      setRevisionPreview(null);
+      setRevisionStatus("idle");
+      setChatInput((prev) => prev || revisionPreview.mensajeUsuario);
+      return;
+    }
+
+    // Si hubo error de cirugía, no podemos aplicar — solo cerrar con aviso
+    if (revisionPreview.errorCirugia) {
+      setChatMsgs((prev) => [
+        ...prev,
+        { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
+        {
+          role: "assistant",
+          text: `⚠️ ${revisionPreview.errorCirugia}`,
+          ts: Date.now(),
+        },
+      ]);
+      setRevisionPreview(null);
+      setRevisionStatus("idle");
+      setChatInput("");
+      return;
+    }
+
     // Si la decisión fue rechazar, "aplicar" no tiene sentido (no hay cambio
     // que ejecutar). En ese caso solo cerramos el modal y la observación
     // queda registrada en el banco con la justificación para defender ante
@@ -1384,7 +1445,7 @@ export default function WorkspacePage() {
       setRevisionError(e instanceof Error ? e.message : "Error de red");
       setRevisionStatus("preview");
     }
-  }, [proyecto, revisionPreview, revisionStatus]);
+  }, [proyecto, revisionPreview, revisionStatus, displayFases]);
 
   const cancelarRevision = useCallback(() => {
     // El input mantiene su texto para que el usuario pueda editarlo y reintentar.

@@ -17,7 +17,7 @@ export interface ObservacionBancoRow {
   servicio_id?: string | null;
   observacion_textual: string;
   patron_detectado?: string | null;
-  decision: "aplicar" | "aplicar_con_reserva" | "rechazar";
+  decision: "aplicar" | "aplicar_con_reserva" | "rechazar" | "mover_a_otra_fase";
   analisis_ia: string;
   justificacion_para_tutor?: string | null;
   contenido_antes?: string | null;

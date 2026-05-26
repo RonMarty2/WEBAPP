@@ -89,6 +89,13 @@ export async function POST(req: Request, { params }: Params) {
     const cap1Variante = typeof academicCtx.cap1_variante_id === "string"
       ? academicCtx.cap1_variante_id : undefined;
 
+    // Lista de fases del proyecto para que el analizador pueda detectar si
+    // la observación pertenece a OTRA fase (decision='mover_a_otra_fase').
+    const listaFases = phaseDefs.map((p) => ({
+      id: p.id,
+      label: p.label ?? p.id,
+    }));
+
     const userPrompt = buildAnalizadorUserPrompt({
       proyectoId,
       faseId: phaseId,
@@ -99,16 +106,19 @@ export async function POST(req: Request, { params }: Params) {
       variante: cap1Variante,
       contenidoActual,
       observacionTutor: observacion,
+      listaFases,
     });
 
     console.log(`[analizador] llamando IA para proyecto=${proyectoId} fase=${phaseId} obs="${observacion.slice(0, 80)}"`);
 
-    // Llamar a la IA con budget generoso (puede devolver el documento completo
-    // si decide aplicar, además de la justificación).
+    // Llamar a la IA con budget ajustado. Antes era 8000 (devolvía el doc
+    // entero reformulado). Ahora devuelve solo bloque_original+bloque_nuevo
+    // que son pedazos chicos. 4000 alcanza con margen para justificación y
+    // bloques medianos.
     const aiResult = await llamarIA(
       SISTEMA_ANALIZADOR_PERTINENCIA,
       userPrompt,
-      8000,
+      4000,
       proyecto.servicio_id ?? "mono-001",
     );
 
@@ -131,6 +141,46 @@ export async function POST(req: Request, { params }: Params) {
 
     const duracionMs = Date.now() - t0;
 
+    // ── Aplicar la cirugía si decision='aplicar' o 'aplicar_con_reserva'
+    //    El servidor hace find&replace usando bloque_original como llave.
+    //    Si falla la coincidencia exacta, intenta normalizando espacios
+    //    (regex tolerante). Si tampoco matchea, devuelve error claro al
+    //    cliente SIN tocar el documento.
+    let contenidoPropuesto: string | null = null;
+    let errorCirugia: string | null = null;
+
+    if (analizado.decision === "aplicar" || analizado.decision === "aplicar_con_reserva") {
+      const accion = analizado.accion_cirugia ?? "reemplazar";
+      if (accion === "agregar_al_final") {
+        if (!analizado.bloque_nuevo?.trim()) {
+          errorCirugia = "La IA indicó 'agregar_al_final' pero bloque_nuevo está vacío.";
+        } else {
+          contenidoPropuesto = `${contenidoActual.trimEnd()}\n\n${analizado.bloque_nuevo.trim()}\n`;
+        }
+      } else {
+        // accion === 'reemplazar' (caso normal de cirugía)
+        if (!analizado.bloque_original?.trim() || analizado.bloque_nuevo === null) {
+          errorCirugia = "La IA decidió aplicar pero no devolvió bloque_original o bloque_nuevo.";
+        } else if (contenidoActual.includes(analizado.bloque_original)) {
+          // Match exacto byte-por-byte
+          contenidoPropuesto = contenidoActual.replace(
+            analizado.bloque_original,
+            analizado.bloque_nuevo,
+          );
+        } else {
+          // Intento con espacios normalizados (saltos de línea, tabs, espacios múltiples)
+          const normOriginal = analizado.bloque_original.replace(/\s+/g, " ").trim();
+          const escapado = normOriginal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const regex = new RegExp(escapado.replace(/\s+/g, "\\s+"));
+          if (regex.test(contenidoActual)) {
+            contenidoPropuesto = contenidoActual.replace(regex, analizado.bloque_nuevo);
+          } else {
+            errorCirugia = "La IA devolvió un bloque_original que no se encuentra en el documento (ni con normalización de espacios). Reformulá la observación de forma más precisa o pegá el fragmento exacto del documento que querés cambiar.";
+          }
+        }
+      }
+    }
+
     // Guardar en el banco (acumulando conocimiento)
     const { id: bankRowId } = await dbInsertObservacionBanco({
       proyecto_id: proyectoId,
@@ -142,13 +192,18 @@ export async function POST(req: Request, { params }: Params) {
       analisis_ia: analizado.analisis_ia,
       justificacion_para_tutor: analizado.justificacion_para_tutor,
       contenido_antes:
-        analizado.decision === "rechazar" ? null : contenidoActual,
+        analizado.decision === "rechazar" || analizado.decision === "mover_a_otra_fase"
+          ? null
+          : contenidoActual,
       contenido_despues: null, // se llena cuando el usuario aplica
       aplicado_at: null,
       modelo_ia_usado: `${aiResult.provider} / ${aiResult.model}`,
       duracion_analisis_ms: duracionMs,
     });
 
+    // Si la cirugía falló pero la decisión era aplicar, lo reportamos al
+    // cliente como aviso especial — el modal puede mostrar el error y NO
+    // ofrecer el botón aplicar.
     return NextResponse.json({
       ok: true,
       observacion_id: bankRowId,
@@ -157,9 +212,17 @@ export async function POST(req: Request, { params }: Params) {
       analisis_ia: analizado.analisis_ia,
       justificacion_para_tutor: analizado.justificacion_para_tutor,
       contenido_actual: contenidoActual,
-      contenido_propuesto: analizado.propuesta_de_cambio,
-      // Nuevo: si el cambio afecta el título oficial del proyecto,
-      // el frontend lo usa para actualizar también `tema_aprobado`.
+      contenido_propuesto: contenidoPropuesto,
+      // Detalles de la cirugía (útiles para mostrar diff localizado en UI)
+      bloque_original: analizado.bloque_original,
+      bloque_nuevo: analizado.bloque_nuevo,
+      accion_cirugia: analizado.accion_cirugia,
+      // Error de cirugía si lo hubo (cuando bloque_original no matchea)
+      error_cirugia: errorCirugia,
+      // Si la decisión es 'mover_a_otra_fase', estos campos dicen a qué fase
+      fase_destino_id: analizado.fase_destino_id,
+      fase_destino_label: analizado.fase_destino_label,
+      // Si el cambio afecta el título oficial del proyecto
       nuevo_titulo: analizado.nuevo_titulo,
       titulo_actual: proyecto.tema_aprobado ?? proyecto.titulo_provisional ?? null,
       fase_id: phaseId,
