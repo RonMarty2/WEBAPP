@@ -18,6 +18,7 @@ import { dbGetProyecto } from "@/lib/db";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
 import { sanitizeOrphanIncludes } from "@/lib/latex/sanitize";
 import { llamarIA, hydrateAIConfigAsync } from "@/lib/aiProvider";
+import { mdALatex, escaparLatexPlain } from "@/lib/latexMonografia";
 import {
   SISTEMA_COMPILAR_CAPITULO,
   buildCompilarCapituloUserPrompt,
@@ -221,46 +222,107 @@ export async function GET(_req: Request, { params }: Params) {
     const servicioId = (proyecto.servicio_id as string) || "mono-001";
     console.log(`[paquete-latex] chunking: compilando ${fasesConContenido.length} secciones en paralelo (svc=${servicioId})`);
 
-    // Compilar TODAS las secciones en paralelo. Cada call es chica (4-8K palabras),
-    // dentro del sweet-spot del modelo. Si una falla, captura el error pero
-    // las otras siguen — al final reportamos cuáles fallaron.
-    const results = await Promise.all(
-      fasesConContenido.map(async (f) => {
+    // 🛡️ BLINDAJE EN 3 CAPAS contra fallos de IA al compilar capítulos.
+    //
+    // ANTES: si la IA fallaba al convertir markdown→LaTeX para un capítulo,
+    // ese capítulo se reemplazaba con un comentario LaTeX (% ⚠️ ERROR...),
+    // que es invisible al compilar. Resultado: el PDF salía sin esos
+    // capítulos y el usuario no se enteraba hasta abrirlo en TeXStudio.
+    //
+    // AHORA, para cada capítulo:
+    //   1) Intentamos con IA hasta 3 veces (con backoff 1.5s, 3s).
+    //   2) Si los 3 intentos fallan, usamos conversión determinista
+    //      mdALatex() (sin IA, código puro TS). Calidad tipográfica un poco
+    //      menor pero NUNCA pierde contenido.
+    //   3) Si por algún motivo extremo también el fallback falla, marcamos
+    //      el capítulo con latex=null y abortamos la descarga con error
+    //      claro al usuario — NUNCA entregamos un ZIP con capítulos
+    //      invisibles.
+    async function compilarConBlindaje(
+      f: { faseId: string; numero: number | "RESUMEN" | "BIBLIOGRAFIA"; titulo: string; contenidoMd: string },
+    ): Promise<{ faseId: string; numero: number | "RESUMEN" | "BIBLIOGRAFIA"; latex: string | null; error: string | null; usedFallback: boolean }> {
+      const userPrompt = buildCompilarCapituloUserPrompt({
+        numero: f.numero,
+        titulo: f.titulo,
+        contenidoMd: f.contenidoMd,
+      });
+
+      // Capa 1: IA con 3 intentos
+      let lastError: Error | null = null;
+      for (let intento = 1; intento <= 3; intento++) {
         try {
-          const userPrompt = buildCompilarCapituloUserPrompt({
-            numero: f.numero,
-            titulo: f.titulo,
-            contenidoMd: f.contenidoMd,
-          });
           const result = await llamarIA(
             SISTEMA_COMPILAR_CAPITULO,
             userPrompt,
-            12000, // suficiente para un cap de 4-6K palabras
+            12000,
             servicioId,
           );
-          return { faseId: f.faseId, numero: f.numero, latex: result.text.trim(), error: null };
+          if (intento > 1) {
+            console.log(`[paquete-latex] ${f.faseId} compiló en intento ${intento}/3`);
+          }
+          return { faseId: f.faseId, numero: f.numero, latex: result.text.trim(), error: null, usedFallback: false };
         } catch (e) {
-          console.error(`[paquete-latex] error compilando ${f.faseId}:`, (e as Error).message);
-          return {
-            faseId: f.faseId,
-            numero: f.numero,
-            latex: `% ⚠️ ERROR al compilar este capítulo: ${(e as Error).message}\n% El contenido original está en markdown, no se pudo convertir.\n`,
-            error: (e as Error).message,
-          };
+          lastError = e as Error;
+          console.warn(`[paquete-latex] intento ${intento}/3 falló para ${f.faseId}: ${lastError.message}`);
+          if (intento < 3) {
+            await new Promise((r) => setTimeout(r, 1500 * intento));
+          }
         }
-      }),
+      }
+
+      // Capa 2: fallback determinista (markdown → LaTeX sin IA)
+      console.warn(`[paquete-latex] ${f.faseId}: IA falló 3 veces, usando fallback determinista mdALatex()`);
+      try {
+        const latexBody = mdALatex(f.contenidoMd);
+        // Para capítulos numerados (1-5), agregar \chapter{} ya que la IA
+        // normalmente lo agrega. Para RESUMEN y BIBLIOGRAFIA, el ensamblador
+        // agrega los headers separadamente (buildResumenHeader, etc.), así
+        // que aquí solo devolvemos el body.
+        const conChapter = typeof f.numero === "number"
+          ? `\\chapter{${escaparLatexPlain(f.titulo)}}\n\n${latexBody}\n`
+          : `${latexBody}\n`;
+        return {
+          faseId: f.faseId,
+          numero: f.numero,
+          latex: conChapter,
+          error: `IA falló 3 veces (${lastError?.message ?? "sin detalle"}); se usó conversión determinista de respaldo.`,
+          usedFallback: true,
+        };
+      } catch (deterministicErr) {
+        // Capa 3: el fallback también falló. Marcamos latex=null para abortar.
+        console.error(`[paquete-latex] ${f.faseId}: FALLBACK DETERMINISTA TAMBIÉN FALLÓ: ${(deterministicErr as Error).message}`);
+        return {
+          faseId: f.faseId,
+          numero: f.numero,
+          latex: null,
+          error: `IA falló 3 veces y el fallback determinista también falló: ${(deterministicErr as Error).message}`,
+          usedFallback: false,
+        };
+      }
+    }
+
+    const results = await Promise.all(
+      fasesConContenido.map((f) => compilarConBlindaje(f)),
     );
 
-    // Si ALL fallaron, reportar error
-    const failed = results.filter((r) => r.error !== null);
-    if (failed.length === results.length) {
+    // 🛡️ Validación final: si ALGÚN capítulo terminó con latex=null
+    // (ni IA ni fallback funcionaron), abortar la descarga. NO entregar
+    // un ZIP incompleto — preferimos un error claro al usuario que un
+    // documento con capítulos faltantes que ni se note hasta compilar.
+    const sinContenido = results.filter((r) => r.latex === null);
+    if (sinContenido.length > 0) {
+      const ids = sinContenido.map((r) => r.faseId).join(", ");
       return NextResponse.json(
-        { error: "No se pudo compilar ninguna sección. Verificá que la IA esté configurada y disponible." },
+        {
+          error: `No se pudo generar el LaTeX para: ${ids}. Tanto la IA como el fallback de respaldo fallaron. Probá de nuevo en unos minutos — los proveedores de IA pueden estar saturados temporalmente.`,
+        },
         { status: 502 },
       );
     }
-    if (failed.length > 0) {
-      console.warn(`[paquete-latex] ${failed.length}/${results.length} secciones fallaron.`);
+
+    const usadoFallback = results.filter((r) => r.usedFallback);
+    if (usadoFallback.length > 0) {
+      console.warn(`[paquete-latex] ${usadoFallback.length}/${results.length} secciones usaron fallback determinista (IA falló): ${usadoFallback.map((r) => r.faseId).join(", ")}`);
     }
 
     // Helper: limpiar bloques code fence ```latex que la IA pudo dejar
