@@ -15,7 +15,41 @@ export interface AICallResult {
   text: string;
   provider: string;
   model: string;
+  /** True si la respuesta vino de un proveedor de fallback (NO el preferido
+   *  o el configurado por admin). El frontend puede mostrar un aviso al
+   *  usuario cuando esto pase. */
+  isFallback?: boolean;
+  /** Si isFallback=true, el id del proveedor preferido que falló. */
+  preferredProviderFailed?: string;
+  /** True si el proveedor usado es Groq como ÚLTIMO RECURSO (después de
+   *  intentar Anthropic/Gemini/OpenAI sin éxito). Groq con llama-3.3 es
+   *  rápido y gratis pero NO está pensado para generación académica densa
+   *  — el frontend debe mostrar aviso de calidad limitada. */
+  isLastResortGroq?: boolean;
 }
+
+/**
+ * Cascada PREFERIDA de fallback, ordenada de MEJOR a ÚLTIMO RECURSO para
+ * tareas académicas densas (generación de capítulos, análisis riguroso,
+ * JSON estructurado).
+ *
+ * Posición 1: Anthropic Claude — mejor razonamiento académico, JSON,
+ *             texto denso en español neutro.
+ * Posición 2: Gemini 2.5 Pro/Flash — contexto largo (1M), único con
+ *             Grounding (búsqueda web).
+ * Posición 3: OpenAI GPT-4o — sólido y confiable.
+ * Posición 4 (ÚLTIMO RECURSO): Groq llama-3.3 — modelo open-source en
+ *             infraestructura ultra rápida y gratuita. Excelente para
+ *             chat liviano y tareas cortas, NO recomendado para
+ *             generación académica densa. Cuando se usa como fallback
+ *             final, isLastResortGroq=true para que el frontend avise.
+ */
+const FALLBACK_CHAIN: { id: string; model: string }[] = [
+  { id: "anthropic", model: "claude-haiku-4-5-20251001" },
+  { id: "gemini",    model: "gemini-2.5-flash" },
+  { id: "openai",    model: "gpt-4o-mini" },
+  { id: "groq",      model: "llama-3.3-70b-versatile" }, // último recurso
+];
 
 // ── Provider catalog ──────────────────────────────────────────────────────────
 
@@ -785,57 +819,68 @@ export async function llamarIA(
       } catch (e) {
         const errMsg = (e as Error).message;
         setServiceIncident(servicioId, cfg, errMsg);
-        // ⚠️ FALLBACK AUTOMÁTICO: si el proveedor configurado falla (saturación,
-        // rate limit, timeout, etc.), reintentamos con la cascada de proveedores
-        // disponibles en env vars. El usuario nunca ve el error si hay backup.
-        console.warn(`[aiProvider] ${cfg.provider_id}/${cfg.model} falló: ${errMsg.slice(0, 200)}. Intentando cascada de fallback...`);
-        const fallbackChain: { id: string; model: string }[] = [
-          { id: "anthropic", model: "claude-haiku-4-5-20251001" },
-          { id: "groq",      model: "llama-3.3-70b-versatile" },
-          { id: "openai",    model: "gpt-4o-mini" },
-          { id: "gemini",    model: "gemini-2.5-flash" },
-        ].filter(p => p.id !== cfg.provider_id); // no reintentar con el mismo que falló
-
-        for (const { id, model } of fallbackChain) {
-          const key = getProviderKey(id);
-          if (!key) continue;
-          try {
-            console.log(`[aiProvider] Fallback intentando ${id}/${model}...`);
-            const text = await llamarIAConConfig(id, model, key, system, user, maxTokens);
-            console.log(`[aiProvider] ✓ Fallback ${id}/${model} OK.`);
-            return { text, provider: id, model };
-          } catch (fbErr) {
-            console.warn(`[aiProvider] Fallback ${id} también falló: ${(fbErr as Error).message.slice(0, 200)}`);
-          }
-        }
-        // Si todos los fallbacks fallaron también, lanzar error amigable.
-        throw new Error(`Estamos teniendo problemas temporales con los proveedores de IA. Por favor intentá de nuevo en unos minutos. Si el problema persiste contactá al equipo.`);
+        console.warn(`[aiProvider] ${cfg.provider_id}/${cfg.model} falló: ${errMsg.slice(0, 200)}. Intentando cascada Anthropic→Gemini→OpenAI→Groq...`);
+        return await runFallbackChain({
+          system, user, maxTokens,
+          skipProviderId: cfg.provider_id,
+          preferredProviderFailed: cfg.provider_id,
+        });
       }
     }
-    throw new Error(`La inteligencia artificial no está configurada para este servicio. Si sos admin, configurala en Admin → Modelos & APIs.`);
+    // Si no hay config admin pero hay env vars de proveedores, usar cascada normal
+    // SIN marcar como fallback (es la primera vez que se intenta).
+    return await runFallbackChain({ system, user, maxTokens });
   }
 
-  // Legacy endpoints without service context keep the environment chain.
-  const chain: { id: string; model: string }[] = [
-    { id: "groq",      model: "llama-3.3-70b-versatile" },
-    { id: "anthropic", model: "claude-haiku-4-5-20251001" },
-    { id: "openai",    model: "gpt-4o-mini" },
-  ];
+  // Endpoints legacy sin servicio: cascada directa (mismo orden Anthropic → Gemini → OpenAI → Groq).
+  return await runFallbackChain({ system, user, maxTokens });
+}
 
+/**
+ * Recorre la cascada FALLBACK_CHAIN respetando el orden de mejor→último
+ * recurso. Marca isFallback=true y isLastResortGroq=true cuando la respuesta
+ * efectiva viene de Groq (para que el UI muestre aviso de calidad limitada).
+ */
+async function runFallbackChain(opts: {
+  system: string;
+  user: string;
+  maxTokens: number;
+  skipProviderId?: string;
+  preferredProviderFailed?: string;
+}): Promise<AICallResult> {
+  const { system, user, maxTokens, skipProviderId, preferredProviderFailed } = opts;
+  const chain = FALLBACK_CHAIN.filter((p) => p.id !== skipProviderId);
   const errors: string[] = [];
+
   for (const { id, model } of chain) {
     const key = getProviderKey(id);
     if (!key) continue;
     try {
+      console.log(`[aiProvider] Intentando ${id}/${model}...`);
       const text = await llamarIAConConfig(id, model, key, system, user, maxTokens);
-      return { text, provider: id, model };
+      console.log(`[aiProvider] ✓ ${id}/${model} OK.`);
+      return {
+        text,
+        provider: id,
+        model,
+        isFallback: Boolean(preferredProviderFailed),
+        preferredProviderFailed,
+        // ⚠️ Si la respuesta vino de Groq, marcarla como "último recurso"
+        // para que el frontend muestre aviso de calidad limitada.
+        isLastResortGroq: id === "groq",
+      };
     } catch (e) {
-      errors.push(`${id}: ${(e as Error).message}`);
+      const msg = (e as Error).message.slice(0, 200);
+      errors.push(`${id}: ${msg}`);
+      console.warn(`[aiProvider] ${id} también falló: ${msg}`);
     }
   }
 
+  if (preferredProviderFailed) {
+    throw new Error(`Estamos teniendo problemas temporales con los proveedores de IA. Por favor intentá de nuevo en unos minutos. Si el problema persiste contactá al equipo.`);
+  }
   throw new Error(
-    `Ningún proveedor de IA disponible. Configura al menos una API key en el panel Admin → Modelos & APIs.\n${errors.join(" | ")}`
+    `Ningún proveedor de IA disponible. Configurá al menos una API key (Anthropic, Gemini, OpenAI o Groq) en las variables de entorno de Vercel.\n${errors.join(" | ")}`
   );
 }
 

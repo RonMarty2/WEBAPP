@@ -16,6 +16,13 @@ export interface AIRouteResult {
   text: string;
   provider: string;
   model: string;
+  /** True si la respuesta vino de un proveedor de fallback (NO el preferido). */
+  isFallback?: boolean;
+  /** Si isFallback=true, id del proveedor preferido que no se pudo usar. */
+  preferredProviderFailed?: string;
+  /** True si el proveedor usado es Groq como ÚLTIMO RECURSO. Frontend
+   *  debe mostrar aviso de calidad limitada para generación académica densa. */
+  isLastResortGroq?: boolean;
 }
 
 // Fases 0-5 corresponden a las etapas del documento académico:
@@ -150,12 +157,21 @@ export async function llamarIAPorPlan(
     return { text, provider: cfg.provider, model: cfg.model };
   }
 
-  // Fallback a cadena clásica si el proveedor preferido no tiene key
+  // Fallback ordenado de MEJOR a ÚLTIMO RECURSO:
+  //   1. Anthropic Claude (mejor razonamiento académico)
+  //   2. Gemini 2.5 Flash (contexto largo, búsqueda web)
+  //   3. OpenAI GPT-4o (sólido y confiable)
+  //   4. Groq llama-3.3 (ÚLTIMO RECURSO — modelo gratuito,
+  //      apto para chat liviano, NO recomendado para
+  //      generación académica densa)
+  // Si la respuesta termina viniendo de Groq, marcamos
+  // isLastResortGroq=true para que el frontend muestre aviso.
   const fallback: { id: string; model: string }[] = [
-    { id: "groq",      model: "llama-3.3-70b-versatile"   },
     { id: "anthropic", model: "claude-haiku-4-5-20251001" },
+    { id: "gemini",    model: "gemini-2.5-flash"          },
     { id: "openai",    model: "gpt-4o-mini"               },
-  ];
+    { id: "groq",      model: "llama-3.3-70b-versatile"   },
+  ].filter((p) => p.id !== cfg.provider); // no reintentar el mismo
 
   const errors: string[] = [`${cfg.provider}: API key no configurada`];
   for (const { id, model } of fallback) {
@@ -163,7 +179,14 @@ export async function llamarIAPorPlan(
     if (!key) continue;
     try {
       const text = await llamarIAConConfig(id, model, key, system, user, cfg.maxTokens);
-      return { text, provider: id, model };
+      return {
+        text,
+        provider: id,
+        model,
+        isFallback: true,
+        preferredProviderFailed: cfg.provider,
+        isLastResortGroq: id === "groq",
+      };
     } catch (e) {
       errors.push(`${id}: ${(e as Error).message}`);
     }
