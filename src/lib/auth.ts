@@ -59,11 +59,21 @@ export interface SessionUser {
   active: boolean;
 }
 
+/**
+ * Emails que SIEMPRE son admin, independiente de la env var ADMIN_EMAILS.
+ * Son los dueños del producto, hardcoded para evitar lockout por config.
+ */
+const HARDCODED_ADMIN_EMAILS = [
+  "ronaldmartinezjimenes@gmail.com",
+];
+
 export function getAdminEmails(): string[] {
-  return (process.env.ADMIN_EMAILS ?? "")
+  const fromEnv = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
+  const hardcoded = HARDCODED_ADMIN_EMAILS.map((e) => e.toLowerCase());
+  return Array.from(new Set([...hardcoded, ...fromEnv]));
 }
 
 export function isAdmin(email: string): boolean {
