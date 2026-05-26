@@ -26,7 +26,7 @@ import {
   dbDeleteProyecto,
   dbGetUserByEmail,
 } from "@/lib/db";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { isSupabaseConfigured, createAdminClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -132,7 +132,10 @@ export async function POST(req: NextRequest) {
     errors.push({ step: "activate-admin", error: (e as Error).message });
   }
 
-  // ── 3. Cambiar rol del usuario actual de admin → estudiante ─────────────
+  // ── 3. Cambiar rol del usuario actual de admin → user (estudiante) ──────
+  // OJO: el schema de Supabase tiene CHECK (role IN ('admin', 'user', 'demo'))
+  // por lo que NO acepta 'estudiante'. Usamos 'user' que es el equivalente
+  // en el schema actual. El mapping a 'estudiante' en UI se hace en cliente.
   try {
     const existing = await dbGetUserByEmail(ESTUDIANTE_EMAIL);
     if (!existing) {
@@ -141,12 +144,34 @@ export async function POST(req: NextRequest) {
         error: `Usuario ${ESTUDIANTE_EMAIL} no encontrado`,
       });
     } else {
-      const updated = await dbActivateUser(existing.id, "estudiante", "estandar");
-      steps.push({
-        step: "downgrade-student",
-        ok: Boolean(updated),
-        user: updated,
-      });
+      // Usar cliente directo de Supabase con role válido del schema
+      const sb = createAdminClient();
+      const { data, error } = await sb
+        .from("usuarios")
+        .update({
+          role: "user",
+          plan: "estandar",
+          active: true,
+          activated_at: new Date().toISOString(),
+        })
+        .eq("id", existing.id)
+        .select("*")
+        .single();
+
+      if (error) {
+        errors.push({
+          step: "downgrade-student",
+          error: `Supabase error: ${error.message}`,
+          code: error.code,
+        });
+      } else {
+        steps.push({
+          step: "downgrade-student",
+          ok: true,
+          user: data,
+          note: "role cambiado a 'user' (estudiante en UI)",
+        });
+      }
     }
   } catch (e) {
     errors.push({ step: "downgrade-student", error: (e as Error).message });

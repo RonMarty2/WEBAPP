@@ -166,21 +166,37 @@ export default function CleanupPage() {
                   Pasos ejecutados
                 </h3>
                 <ul className="space-y-2">
-                  {report.steps.map((s, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-sm bg-gray-50 dark:bg-gray-700/50 p-2 rounded"
-                    >
-                      <span className="text-green-600 dark:text-green-400">OK</span>
-                      <span className="text-gray-800 dark:text-gray-200 break-all">
-                        <strong>{s.step}</strong>:{" "}
-                        {s.projectId ? `proyecto ${s.projectId}` : ""}{" "}
-                        {s.titulo ? `(${String(s.titulo).slice(0, 80)}...)` : ""}{" "}
-                        {s.source ? `[${s.source}]` : ""}{" "}
-                        {s.adminId ? `→ ${s.adminId}` : ""}
-                      </span>
-                    </li>
-                  ))}
+                  {report.steps.map((s, i) => {
+                    const ok = s.ok !== false; // si no viene "ok", asumimos true
+                    return (
+                      <li
+                        key={i}
+                        className={`flex items-start gap-2 text-sm p-2 rounded ${
+                          ok
+                            ? "bg-gray-50 dark:bg-gray-700/50"
+                            : "bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700"
+                        }`}
+                      >
+                        <span
+                          className={`font-bold shrink-0 ${
+                            ok
+                              ? "text-green-600 dark:text-green-400"
+                              : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {ok ? "OK" : "FAIL"}
+                        </span>
+                        <span className="text-gray-800 dark:text-gray-200 break-all">
+                          <strong>{s.step}</strong>:{" "}
+                          {s.projectId ? `proyecto ${s.projectId}` : ""}{" "}
+                          {s.titulo ? `(${String(s.titulo).slice(0, 80)}...)` : ""}{" "}
+                          {s.source ? `[${s.source}]` : ""}{" "}
+                          {s.adminId ? `→ ${s.adminId}` : ""}{" "}
+                          {s.note ? `· ${s.note}` : ""}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
