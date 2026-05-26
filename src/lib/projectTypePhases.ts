@@ -1,5 +1,11 @@
 import { loadFromDisk, type FaseTipoProyecto, type PhaseDefinition } from "@/lib/persistence";
 import { resolvePhases } from "@/lib/scribePhases";
+import {
+  UNIFRANZ_UNIVERSITY_ID,
+  getModalidadUnifranz,
+  type ModalidadUnifranz,
+} from "@/lib/proyectoGrado/unifranz/modalidades";
+import { getUnifranzPhases } from "@/lib/proyectoGrado/unifranz/fases";
 
 const SERVICE_TO_PROJECT_TYPE: Record<string, string> = {
   "mono-001": "tipo-monografia",
@@ -82,10 +88,30 @@ export function phaseDefinitionsFromProjectType(
 export function phaseDefinitionsForProject({
   servicioId,
   tipoProyectoId,
+  universidadId,
+  modalidadTitulacion,
 }: {
   servicioId?: string | null;
   tipoProyectoId?: string | null;
+  /** ID de la universidad. Si es UNIFRANZ y hay modalidad válida → fases UNIFRANZ. */
+  universidadId?: string | null;
+  /** ID de la modalidad UNIFRANZ. Ignorado si la universidad no es UNIFRANZ. */
+  modalidadTitulacion?: string | null;
 }): PhaseDefinition[] {
+  // ── ENRUTAMIENTO UNIFRANZ ───────────────────────────────────────────────
+  // Si el proyecto es UNIFRANZ Cochabamba + Proyecto de Grado + tiene una
+  // modalidad de titulación válida, usamos las fases UNIFRANZ por modalidad.
+  // Esto coexiste con el motor de PG genérico (plan de negocio) que sigue
+  // funcionando para UCATEC y otras universidades sin modalidades específicas.
+  if (
+    universidadId === UNIFRANZ_UNIVERSITY_ID
+    && servicioId === "proy-grado-001"
+    && getModalidadUnifranz(modalidadTitulacion) !== null
+  ) {
+    return getUnifranzPhases(modalidadTitulacion as ModalidadUnifranz);
+  }
+
+  // ── FALLBACK: resolver clásico (Scribe / PG genérico) ───────────────────
   const resolvedType = tipoProyectoId || projectTypeIdForService(servicioId);
   return phaseDefinitionsFromProjectType(resolvedType, servicioId || serviceIdForProjectType(resolvedType));
 }
@@ -93,6 +119,8 @@ export function phaseDefinitionsForProject({
 export function completedPhaseIndexForProject(project: {
   servicio_id?: string | null;
   tipo_proyecto_id?: string | null;
+  universidad_id?: string | null;
+  modalidad_titulacion?: string | null;
   phase_contents?: Record<string, string | null | undefined>;
   estado_fase?: number;
 }) {
@@ -100,6 +128,8 @@ export function completedPhaseIndexForProject(project: {
   const phaseDefs = phaseDefinitionsForProject({
     servicioId: project.servicio_id,
     tipoProyectoId: project.tipo_proyecto_id,
+    universidadId: project.universidad_id,
+    modalidadTitulacion: project.modalidad_titulacion,
   });
 
   if (phaseDefs.length === 0) {

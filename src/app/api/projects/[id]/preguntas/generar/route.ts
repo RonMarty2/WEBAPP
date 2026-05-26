@@ -81,7 +81,14 @@ export async function POST(req: Request, { params }: Params) {
     // Metadatos para el prompt
     const servicioId = (proyecto.servicio_id as string) || "mono-001";
     const tipoProyectoId = proyecto.tipo_proyecto_id as string | undefined;
-    const phaseDefs = phaseDefinitionsForProject({ servicioId, tipoProyectoId });
+    const universidadIdPg = (proyecto.universidad_id as string | undefined) ?? undefined;
+    const modalidadTitulacionPg = (proyecto.modalidad_titulacion as string | undefined) ?? undefined;
+    const phaseDefs = phaseDefinitionsForProject({
+      servicioId,
+      tipoProyectoId,
+      universidadId: universidadIdPg,
+      modalidadTitulacion: modalidadTitulacionPg,
+    });
     const faseDef = phaseDefs.find(p => p.id === phaseId);
     const faseLabel = faseDef?.label || phaseId;
 

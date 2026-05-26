@@ -123,6 +123,17 @@ export interface ProyectoRecord {
   servicio_id: string;
   tipo_proyecto_id?: string;
   universidad_id?: string;
+  /**
+   * Modalidad de titulación universidad-específica.
+   *
+   * Hoy solo lo usa UNIFRANZ Cochabamba para distinguir entre sus 5 modalidades
+   * oficiales (Tesis, PG Pre-Factibilidad, PG Mejora Organizacional,
+   * PG Diseño de Artefacto, Trabajo Dirigido).
+   *
+   * IDs válidos están en `src/lib/proyectoGrado/unifranz/modalidades.ts`.
+   * Otros proyectos (UMSS, UCB, UCATEC, etc.) lo dejan vacío.
+   */
+  modalidad_titulacion?: string | null;
   tema_aprobado: string | null;
   titulo_provisional: string | null;
   estado_fase: number;

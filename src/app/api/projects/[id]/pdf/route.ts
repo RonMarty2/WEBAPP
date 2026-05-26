@@ -105,7 +105,14 @@ export async function GET(req: Request, { params }: Params) {
     const phaseContentsAll = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
     const servicioId = (proyecto.servicio_id as string) || "mono-001";
     const tipoProyectoId = proyecto.tipo_proyecto_id as string | undefined;
-    const phaseDefs = phaseDefinitionsForProject({ servicioId, tipoProyectoId });
+    const universidadIdPg = (proyecto.universidad_id as string | undefined) ?? undefined;
+    const modalidadTitulacionPg = (proyecto.modalidad_titulacion as string | undefined) ?? undefined;
+    const phaseDefs = phaseDefinitionsForProject({
+      servicioId,
+      tipoProyectoId,
+      universidadId: universidadIdPg,
+      modalidadTitulacion: modalidadTitulacionPg,
+    });
 
     // 2) Universidad
     const universidadId = (proyecto.universidad_id as string) || "umss-001";

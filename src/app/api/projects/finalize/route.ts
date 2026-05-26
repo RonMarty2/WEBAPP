@@ -43,7 +43,9 @@ function collectPhaseContents(proyecto: Record<string, unknown>) {
   const phaseContents = asRecord(proyecto.phase_contents);
   const servicioId = typeof proyecto.servicio_id === "string" ? proyecto.servicio_id : "mono-001";
   const tipoProyectoId = typeof proyecto.tipo_proyecto_id === "string" ? proyecto.tipo_proyecto_id : undefined;
-  const phaseDefs = phaseDefinitionsForProject({ servicioId, tipoProyectoId });
+  const universidadId = typeof proyecto.universidad_id === "string" ? proyecto.universidad_id : undefined;
+  const modalidadTitulacion = typeof proyecto.modalidad_titulacion === "string" ? proyecto.modalidad_titulacion : undefined;
+  const phaseDefs = phaseDefinitionsForProject({ servicioId, tipoProyectoId, universidadId, modalidadTitulacion });
 
   if (phaseDefs.length > 0) {
     return [...phaseDefs]

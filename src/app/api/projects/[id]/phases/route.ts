@@ -16,7 +16,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
-import { resolvePhases } from "@/lib/scribePhases";
+import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
 
 export async function GET(
   req: Request,
@@ -35,14 +35,17 @@ export async function GET(
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
-    // Resuelve servicio_id del proyecto (default mono-001)
+    // Resolución universal de fases (Scribe / PG genérico / PG UNIFRANZ por
+    // modalidad). El resolver se encarga de elegir el camino correcto según
+    // universidad_id + modalidad_titulacion + servicio_id del proyecto.
     const url = new URL(req.url);
-    const servicioId =
-      url.searchParams.get("servicio_id") ||
-      (proyecto as unknown as { servicio_id?: string }).servicio_id ||
-      "mono-001";
-
-    const { phases } = resolvePhases(servicioId);
+    const servicioOverride = url.searchParams.get("servicio_id");
+    const phases = phaseDefinitionsForProject({
+      servicioId: servicioOverride || proyecto.servicio_id || "mono-001",
+      tipoProyectoId: proyecto.tipo_proyecto_id,
+      universidadId: proyecto.universidad_id,
+      modalidadTitulacion: proyecto.modalidad_titulacion,
+    });
 
     // ⚠️ STRIP del prompt — NUNCA lo enviamos al cliente
     const phasesPublic = phases.map((p) => ({

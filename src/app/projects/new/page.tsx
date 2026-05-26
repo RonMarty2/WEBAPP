@@ -4,6 +4,11 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import UmssDuplicidadCheck from "@/components/UmssDuplicidadCheck";
 import dynamic from "next/dynamic";
+import {
+  MODALIDADES_UNIFRANZ,
+  UNIFRANZ_UNIVERSITY_ID,
+  type ModalidadUnifranz,
+} from "@/lib/proyectoGrado/unifranz/modalidades";
 
 // PdfCanvasViewer es client-only (react-pdf necesita browser APIs).
 const PdfCanvasViewer = dynamic(() => import("@/components/PdfCanvasViewer"), {
@@ -39,7 +44,8 @@ interface TipoProyecto {
 
 type Step =
   | "loading"
-  | "seleccionar-subtipo-grado"   // 🎓 nuevo: solo aparece si el servicio es Proyecto de Grado y el subtipo no viene predefinido
+  | "seleccionar-subtipo-grado"   // 🎓 PG genérico (UCATEC y otras): elige producción/servicios
+  | "seleccionar-modalidad-unifranz" // 🎓 PG UNIFRANZ: elige entre las 5 modalidades oficiales
   | "seleccionar-universidad"
   | "seleccionar-variante-cap1"
   | "datos-completos"
@@ -107,6 +113,11 @@ function NuevoProyectoPageInner() {
   const [cap1Variantes, setCap1Variantes] = useState<Cap1VariantePublica[]>([]);
   const [cap1VarianteId, setCap1VarianteId] = useState("");
   const [cargandoVariantes, setCargandoVariantes] = useState(false);
+
+  // 🎓 UNIFRANZ: modalidad de titulación elegida (Tesis / PG-PreFact / etc.).
+  // Solo se usa cuando universidadId === UNIFRANZ_UNIVERSITY_ID y servicio === PG.
+  // Para otras universidades queda como cadena vacía y el flujo sigue siendo el clásico.
+  const [modalidadUnifranzId, setModalidadUnifranzId] = useState<ModalidadUnifranz | "">("");
 
   // Datos del proyecto (un solo formulario)
   const [tema, setTema] = useState("");                       // opcional
@@ -226,6 +237,17 @@ function NuevoProyectoPageInner() {
       return;
     }
     setError("");
+
+    // 🎓 INTERCEPTOR UNIFRANZ + PG ─────────────────────────────────────────
+    // Si el estudiante eligió UNIFRANZ + Proyecto de Grado, NO cargamos
+    // variantes de Cap. I (eso es para monografías). En su lugar, lo
+    // mandamos al selector de modalidad de titulación (5 modalidades
+    // oficiales según la guía UNIFRANZ 2017).
+    if (universidadId === UNIFRANZ_UNIVERSITY_ID && ES_PG) {
+      setStep("seleccionar-modalidad-unifranz");
+      return;
+    }
+
     setCargandoVariantes(true);
     try {
       const res = await fetch(`/api/cap1-variants?universidad_id=${encodeURIComponent(universidadId)}`);
@@ -332,6 +354,13 @@ function NuevoProyectoPageInner() {
     // Si es Proyecto de Grado sin subtipo definido, vamos primero a elegirlo.
     if (tipoProyectoId === "proy-grado-001") {
       setError("");
+      // 🎓 UNIFRANZ con modalidad ya elegida: NO preguntamos producción/servicios
+      // (esa pregunta es para el motor PG genérico). El motor UNIFRANZ usa
+      // modalidades oficiales: Tesis, Pre-Factibilidad, Mejora Org, Artefacto, TD.
+      if (universidadId === UNIFRANZ_UNIVERSITY_ID && modalidadUnifranzId) {
+        await crearProyectoYDirigirAlWorkspace();
+        return;
+      }
       setStep("seleccionar-subtipo-grado");
       return;
     }
@@ -369,6 +398,10 @@ function NuevoProyectoPageInner() {
         servicio_id: sid,
         tipo_proyecto_id: tipoEfectivo,
         universidad_id: universidadId || undefined,
+        // 🎓 Modalidad de titulación UNIFRANZ. Solo se envía si fue elegida
+        // (universidadId === UNIFRANZ + ES_PG). Otras universidades lo dejan
+        // vacío y el resolver de fases cae al motor genérico clásico.
+        modalidad_titulacion: modalidadUnifranzId || undefined,
         modalidad_creacion: "guiada",
         tema_aprobado: temaBase,
         titulo_provisional: temaBase,
@@ -377,6 +410,8 @@ function NuevoProyectoPageInner() {
           // Persistimos la variante elegida del Cap. I. Si no hay valor,
           // se resolverá como "clasico" en /api/projects/generate-phase.
           cap1_variante_id: cap1VarianteId || "clasico",
+          // Snapshot de modalidad UNIFRANZ (redundante pero útil para auditoría).
+          modalidad_unifranz_id: modalidadUnifranzId || undefined,
         },
       };
 
@@ -576,6 +611,138 @@ function NuevoProyectoPageInner() {
             <div style={{ marginTop: 18, fontSize: 11.5, color: "var(--fg-muted)", textAlign: "center" }}>
               ¿No estás seguro? Si vendes un producto que tú mismo fabricas, elige <strong>Producción</strong>.
               Si lo principal es la experiencia que entregas (atención, ambiente, tiempo de tu equipo), elige <strong>Servicios</strong>.
+            </div>
+          </div>
+        )}
+
+        {/* ── PASO 1.5 (solo UNIFRANZ + PG): ELEGIR MODALIDAD DE TITULACIÓN ────────── */}
+        {step === "seleccionar-modalidad-unifranz" && (
+          <div className="card fade-in" style={{ padding: 32 }}>
+            <button
+              onClick={() => setStep("seleccionar-universidad")}
+              style={{ background: "none", border: "none", color: "var(--fg-muted)", cursor: "pointer", marginBottom: 16, padding: 0, fontSize: 13 }}
+            >
+              ← Cambiar universidad
+            </button>
+            <div style={{ marginBottom: 24 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--accent)",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  marginBottom: 6,
+                }}
+              >
+                Paso 2 de 3 — Modalidad de titulación UNIFRANZ
+              </div>
+              <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 8 }}>
+                ¿Bajo qué modalidad te vas a titular?
+              </h1>
+              <p style={{ color: "var(--fg-muted)", fontSize: 13, lineHeight: 1.6 }}>
+                Estas son las 5 modalidades oficiales que la guía UNIFRANZ Cochabamba 2017
+                reconoce. Cada una tiene una estructura de capítulos distinta — elige la
+                que coincide con tu carrera y tipo de trabajo. No se puede cambiar después.
+              </p>
+            </div>
+
+            <div style={{ display: "grid", gap: 12 }}>
+              {MODALIDADES_UNIFRANZ.map((m) => {
+                const seleccionada = modalidadUnifranzId === m.id;
+                return (
+                  <button
+                    key={m.id}
+                    type="button"
+                    onClick={() => setModalidadUnifranzId(m.id)}
+                    style={{
+                      textAlign: "left",
+                      padding: "16px 18px",
+                      borderRadius: 10,
+                      background: seleccionada ? "rgba(37,99,235,0.10)" : "var(--bg-card)",
+                      border: seleccionada ? "2px solid var(--accent)" : "1.5px solid var(--border)",
+                      cursor: "pointer",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      transition: "all 0.15s",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                      <div style={{ fontSize: 14, fontWeight: 800, color: "var(--fg-primary)" }}>
+                        {m.nombre}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: seleccionada ? "var(--accent)" : "var(--fg-muted)",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.06em",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {seleccionada ? "✓ Elegida" : `Sección ${m.guia_oficial.seccion_referencia}`}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.55 }}>
+                      {m.descripcion}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--fg-muted)", lineHeight: 1.5 }}>
+                      <strong>Para quién:</strong> {m.pensada_para}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 4,
+                        padding: "8px 10px",
+                        background: "rgba(255,255,255,0.4)",
+                        borderRadius: 6,
+                        border: "1px solid var(--border)",
+                        fontSize: 11,
+                        color: "var(--fg-secondary)",
+                        lineHeight: 1.6,
+                      }}
+                    >
+                      <strong style={{ color: "var(--fg-primary)" }}>Estructura:</strong>
+                      <ul style={{ margin: "4px 0 0 0", paddingLeft: 18 }}>
+                        {m.capitulos.map((cap) => (
+                          <li key={cap} style={{ marginBottom: 2 }}>{cap}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => {
+                if (!modalidadUnifranzId) {
+                  setError("Elige una modalidad para continuar.");
+                  return;
+                }
+                setError("");
+                setStep("datos-completos");
+              }}
+              className="btn-cyan"
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                padding: "12px",
+                marginTop: 18,
+                opacity: modalidadUnifranzId ? 1 : 0.6,
+              }}
+            >
+              Continuar →
+            </button>
+
+            <div style={{ marginTop: 12, fontSize: 11.5, color: "var(--fg-muted)", textAlign: "center" }}>
+              Basado en la <a
+                href="/guias-unifranz/unifranz-cba-guia-2017.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "var(--accent)", textDecoration: "underline" }}
+              >Guía de Organización y Presentación de Trabajos de Grado — UNIFRANZ Cochabamba 2017</a> (oficial).
             </div>
           </div>
         )}

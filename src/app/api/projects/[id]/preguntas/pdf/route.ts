@@ -207,7 +207,14 @@ export async function GET(_req: Request, { params }: Params) {
     const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null | undefined>;
     const servicioId = (proyecto.servicio_id as string) || "mono-001";
     const tipoProyectoId = proyecto.tipo_proyecto_id as string | undefined;
-    const phaseDefs = phaseDefinitionsForProject({ servicioId, tipoProyectoId });
+    const universidadIdPp = (proyecto.universidad_id as string | undefined) ?? undefined;
+    const modalidadTitulacionPp = (proyecto.modalidad_titulacion as string | undefined) ?? undefined;
+    const phaseDefs = phaseDefinitionsForProject({
+      servicioId,
+      tipoProyectoId,
+      universidadId: universidadIdPp,
+      modalidadTitulacion: modalidadTitulacionPp,
+    });
     const labelById: Record<string, string> = {};
     phaseDefs.forEach(p => { labelById[p.id] = p.label; });
 

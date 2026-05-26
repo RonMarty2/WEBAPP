@@ -59,6 +59,8 @@ export async function POST(_req: Request, { params }: Params) {
     const phaseDefs = phaseDefinitionsForProject({
       servicioId: proyecto.servicio_id ?? "mono-001",
       tipoProyectoId: proyecto.tipo_proyecto_id ?? undefined,
+      universidadId: (proyecto as { universidad_id?: string | null }).universidad_id ?? undefined,
+      modalidadTitulacion: (proyecto as { modalidad_titulacion?: string | null }).modalidad_titulacion ?? undefined,
     });
     const phase = phaseDefs.find(p => p.id === faseId);
     if (!phase) {

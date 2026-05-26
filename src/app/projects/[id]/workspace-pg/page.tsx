@@ -24,6 +24,12 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
+import UnifranzPhaseSidebar from "@/components/scribe/UnifranzPhaseSidebar";
+import {
+  UNIFRANZ_UNIVERSITY_ID,
+  getModalidadUnifranz,
+  type ModalidadUnifranz,
+} from "@/lib/proyectoGrado/unifranz/modalidades";
 import Cap0TituloSelector, { removerSeccionPropuestas } from "@/components/scribe-pg/Cap0TituloSelector";
 import Cap0RichRender from "@/components/scribe-pg/Cap0RichRender";
 import MarkdownAcademico from "@/components/scribe-pg/MarkdownAcademico";
@@ -40,6 +46,8 @@ interface Proyecto {
   servicio_id: string;
   tipo_proyecto_id?: string;
   universidad_id?: string;
+  /** 🎓 Modalidad UNIFRANZ (Tesis, PG-PreFact, etc.). Solo para UNIFRANZ. */
+  modalidad_titulacion?: string | null;
   phase_contents?: Record<string, string | null>;
   academic_context?: Record<string, unknown>;
   servicios: { id: string; nombre: string } | null;
@@ -336,12 +344,34 @@ export default function WorkspacePGPage() {
             overflow: "hidden",
           }}
         >
-          <PGPhaseSidebar
-            phases={sidebarItems}
-            selectedIndex={selectedIndex}
-            phaseContents={phaseContents}
-            onSelect={setSelectedIndex}
-          />
+          {(() => {
+            // 🎓 Si el proyecto es UNIFRANZ + tiene modalidad válida,
+            // usamos el sidebar UNIFRANZ con grupos oficiales de la guía 2017.
+            // En caso contrario, sidebar PG genérico (UCATEC y compatibles).
+            const esUnifranz =
+              proyecto.universidad_id === UNIFRANZ_UNIVERSITY_ID
+              && getModalidadUnifranz(proyecto.modalidad_titulacion) !== null;
+
+            if (esUnifranz) {
+              return (
+                <UnifranzPhaseSidebar
+                  phases={sidebarItems}
+                  modalidad={proyecto.modalidad_titulacion as ModalidadUnifranz}
+                  selectedIndex={selectedIndex}
+                  phaseContents={phaseContents}
+                  onSelect={setSelectedIndex}
+                />
+              );
+            }
+            return (
+              <PGPhaseSidebar
+                phases={sidebarItems}
+                selectedIndex={selectedIndex}
+                phaseContents={phaseContents}
+                onSelect={setSelectedIndex}
+              />
+            );
+          })()}
         </aside>
 
         {/* Main: fase actual */}

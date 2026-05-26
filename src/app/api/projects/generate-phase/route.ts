@@ -584,6 +584,10 @@ async function generarSinSupabase({
     const phaseDefs = phaseDefinitionsForProject({
       servicioId: servicio_id,
       tipoProyectoId: (proyecto as { tipo_proyecto_id?: string }).tipo_proyecto_id,
+      // 🎓 UNIFRANZ — pasamos universidad + modalidad para que el resolver
+      // enrute a las fases UNIFRANZ por modalidad de titulación cuando aplique.
+      universidadId: (proyecto as { universidad_id?: string }).universidad_id,
+      modalidadTitulacion: (proyecto as { modalidad_titulacion?: string | null }).modalidad_titulacion,
     });
 
     if (!phaseDefs?.length) {

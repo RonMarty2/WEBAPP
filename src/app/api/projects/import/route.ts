@@ -92,10 +92,15 @@ export async function POST(req: Request) {
       },
     };
 
-    // Resolver fases válidas para este tipo de proyecto, ignorar phase_ids desconocidos
+    // Resolver fases válidas para este tipo de proyecto, ignorar phase_ids desconocidos.
+    // 🎓 Si el import declara universidad UNIFRANZ + modalidad, se enrutará a
+    // las fases UNIFRANZ por modalidad. Si no, fallback al motor clásico.
+    const modalidadImport = (body as { modalidad_titulacion?: string }).modalidad_titulacion?.trim();
     const phaseDefs = phaseDefinitionsForProject({
       servicioId,
       tipoProyectoId: resolvedTipoProyectoId,
+      universidadId,
+      modalidadTitulacion: modalidadImport || undefined,
     });
     const validPhaseIds = new Set(phaseDefs.map((p) => p.id));
 

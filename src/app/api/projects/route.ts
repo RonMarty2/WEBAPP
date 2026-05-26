@@ -41,7 +41,18 @@ export async function POST(req: Request) {
     const { user } = await requireAuth();
     const body = await req.json();
 
-    const { tipo_proyecto_id, universidad_id, tema_aprobado, titulo_provisional, modalidad_creacion } = body;
+    const {
+      tipo_proyecto_id,
+      universidad_id,
+      tema_aprobado,
+      titulo_provisional,
+      modalidad_creacion,
+      // 🎓 Modalidad de titulación universidad-específica.
+      // Hoy solo lo usa UNIFRANZ Cochabamba para distinguir entre sus
+      // 5 modalidades oficiales (Tesis, PG-PreFact, PG-MejoraOrg,
+      // PG-Artefacto, Trabajo Dirigido). Otras universidades lo dejan vacío.
+      modalidad_titulacion,
+    } = body;
     const academic_context = body.academic_context && typeof body.academic_context === "object"
       ? body.academic_context as Record<string, unknown>
       : {};
@@ -57,6 +68,9 @@ export async function POST(req: Request) {
       servicio_id,
       tipo_proyecto_id: resolvedTipoProyectoId,
       universidad_id: universidad_id ?? undefined,
+      modalidad_titulacion: typeof modalidad_titulacion === "string" && modalidad_titulacion.trim()
+        ? modalidad_titulacion.trim()
+        : null,
       modalidad_creacion: modalidad_creacion ?? "directa",
       tema_aprobado: tema_aprobado ?? null,
       titulo_provisional: titulo_provisional ?? null,
