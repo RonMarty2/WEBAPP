@@ -428,7 +428,11 @@ export async function GET(_req: Request, { params }: Params) {
 
       return cleaned;
     };
-    results.forEach((r) => { r.latex = limpiarLatexBlock(r.latex, r.faseId); });
+    // Type narrowing: arriba ya abortamos si algún `latex` quedó en null,
+    // así que en este punto todos son strings. TS no lo infiere por el filter.
+    results.forEach((r) => {
+      if (r.latex !== null) r.latex = limpiarLatexBlock(r.latex, r.faseId);
+    });
 
     // 2) Datos para inyectar en la carátula
     //
