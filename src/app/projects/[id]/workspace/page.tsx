@@ -76,22 +76,7 @@ interface AITraceEntry {
   error?: string | null;
 }
 
-interface ChatMsgRedirectAction {
-  /** Índice de la fase destino en displayFases. */
-  faseIndex: number;
-  /** Label legible de la fase destino. */
-  faseLabel: string;
-  /** Texto original de la observación que el usuario escribió, para repegar. */
-  observacionOriginal: string;
-}
-interface ChatMsg {
-  role: "user" | "assistant";
-  text: string;
-  ts?: number;
-  /** Si presente, el mensaje del asistente incluye un botón clickeable para
-   *  llevar la observación a otra fase (caso de respuesta 422 fase_incorrecta). */
-  redirectAction?: ChatMsgRedirectAction;
-}
+interface ChatMsg { role: "user" | "assistant"; text: string; ts?: number; }
 interface PhaseDef { id: string; label: string; short: string; orden: number; }
 interface CalibracionPregunta {
   id: string; pregunta: string; descripcion?: string;
@@ -1028,42 +1013,6 @@ export default function WorkspacePage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        // Caso especial: 422 con tipo "fase_incorrecta" — la observación pertenece a otra fase
-        if (
-          res.status === 422
-          && data.tipo === "fase_incorrecta"
-          && data.fase_correcta_id
-          && data.fase_correcta_label
-        ) {
-          // Buscar el índice de la fase correcta para poder redirigir
-          const idxFaseCorrecta = displayFases.findIndex(f => f.id === data.fase_correcta_id);
-          setChatMsgs(prev => [...prev, {
-            role: "assistant",
-            text: `⚠️ Esta observación parece pertenecer a otra sección: **${data.fase_correcta_label}**.\n\n_${data.razon ?? "El sistema detectó que el contenido no corresponde a este capítulo."}_\n\n${
-              idxFaseCorrecta >= 0
-                ? `Hacé clic acá para llevar tu observación a **${data.fase_correcta_label}** automáticamente:`
-                : "Cambiá manualmente al capítulo correspondiente y pegá tu observación allí."
-            }`,
-            ts: Date.now(),
-            redirectAction: idxFaseCorrecta >= 0
-              ? {
-                  faseIndex: idxFaseCorrecta,
-                  faseLabel: data.fase_correcta_label,
-                  observacionOriginal: data.observacion_original ?? userMsg,
-                }
-              : undefined,
-          } as ChatMsg]);
-          return;
-        }
-        // Caso especial: 422 con tipo "no_academica" — observación inválida
-        if (res.status === 422 && data.tipo === "no_academica") {
-          setChatMsgs(prev => [...prev, {
-            role: "assistant",
-            text: `⚠️ ${data.error}\n\n_${data.razon ?? ""}_`,
-            ts: Date.now(),
-          }]);
-          return;
-        }
         setChatMsgs(prev => [...prev, { role: "assistant", text: `⚠️ ${data.error || "Error al generar."}`, ts: Date.now() }]);
         return;
       }
@@ -2849,37 +2798,7 @@ export default function WorkspacePage() {
             {chatMsgs.map((msg, i) => (
               <div key={i} style={{ padding:"9px 11px", borderRadius:10, fontSize:12, background: msg.role==="user"?"rgba(79,70,229,0.14)":"rgba(37,99,235,0.07)", border: msg.role==="user"?"1px solid rgba(79,70,229,0.22)":"1px solid rgba(37,99,235,0.12)", alignSelf: msg.role==="user"?"flex-end":"flex-start", maxWidth:"94%" }}>
                 <div style={{ fontWeight:700, fontSize:10, color: msg.role==="user"?"var(--accent)":"var(--accent)", marginBottom:4 }}>{msg.role==="user"?"Tú":"IA"}</div>
-                <div style={{ color:"var(--fg-primary)", lineHeight:1.5, whiteSpace:"pre-wrap" }}>{msg.text}</div>
-                {msg.redirectAction && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const action = msg.redirectAction;
-                      if (!action) return;
-                      setSelectedFase(action.faseIndex);
-                      setChatInput(action.observacionOriginal);
-                      setChatMsgs(prev => [...prev, {
-                        role: "assistant",
-                        text: `📍 Cambié al capítulo **${action.faseLabel}** y dejé tu observación en el cuadro de chat. Revisala y dale a la flecha para aplicarla acá.`,
-                        ts: Date.now(),
-                      }]);
-                    }}
-                    style={{
-                      marginTop: 10,
-                      padding: "7px 13px",
-                      borderRadius: 8,
-                      background: "linear-gradient(135deg, #f59e0b, #ea580c)",
-                      color: "white",
-                      border: "none",
-                      fontWeight: 700,
-                      fontSize: 11.5,
-                      cursor: "pointer",
-                      boxShadow: "0 2px 8px rgba(234, 88, 12, 0.3)",
-                    }}
-                  >
-                    → Llevar al capítulo &ldquo;{msg.redirectAction.faseLabel}&rdquo;
-                  </button>
-                )}
+                <div style={{ color:"var(--fg-primary)", lineHeight:1.5 }}>{msg.text}</div>
               </div>
             ))}
             {isGenerating && (
