@@ -30,6 +30,20 @@ import {
   buildBibliografiaHeaderUCATEC,
   buildFinDocumentoUCATEC,
 } from "@/lib/latex/preamble-ucatec";
+import {
+  buildPreambleUNIFRANZ,
+  buildCaratulaUNIFRANZ,
+  buildResumenHeaderUNIFRANZ,
+  buildIndiceUNIFRANZ,
+  buildBibliografiaHeaderUNIFRANZ,
+  buildFinDocumentoUNIFRANZ,
+} from "@/lib/latex/preamble-unifranz";
+import {
+  UNIFRANZ_UNIVERSITY_ID,
+  getModalidadUnifranz,
+  type ModalidadUnifranz,
+} from "@/lib/proyectoGrado/unifranz/modalidades";
+import { getUnifranzPhases } from "@/lib/proyectoGrado/unifranz/fases";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -88,6 +102,229 @@ const FASES_CIERRE = {
   bibliografia: "ph-proy-referencias",
 };
 
+/**
+ * Construye el .tex y el ZIP para proyectos UNIFRANZ por modalidad.
+ *
+ * Las fases UNIFRANZ tienen IDs `ph-unifranz-{modalidad}-{slug}`. El slug
+ * determina su posición estructural en el documento:
+ *   resumen → Resumen Ejecutivo (preliminares, romanos)
+ *   introduccion → Capítulo "INTRODUCCIÓN"
+ *   cap1 → Capítulo I — Marco Teórico
+ *   cap2 / cap2-* → Capítulo II (con sub-secciones)
+ *   cap3 / cap3-* → Capítulo III (con sub-secciones)
+ *   conclusiones / recomendaciones → secciones de cierre
+ *   bibliografia → bibliografía final
+ *   compilacion / defensa → no van al PDF (son utilidades del workspace)
+ */
+async function buildUnifranzZip(
+  proyecto: NonNullable<Awaited<ReturnType<typeof dbGetProyecto>>>,
+  user: { id: string; email?: string },
+): Promise<Response> {
+  const modalidadId = proyecto.modalidad_titulacion as ModalidadUnifranz;
+  const modalidadInfo = getModalidadUnifranz(modalidadId);
+  if (!modalidadInfo) {
+    return NextResponse.json(
+      { error: "Modalidad UNIFRANZ inválida en el proyecto" },
+      { status: 400 },
+    );
+  }
+
+  const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null>;
+  const getContent = (faseId: string) => (phaseContents[faseId] ?? "").trim();
+
+  // Resolver las fases UNIFRANZ de esta modalidad (ordenadas por `orden`).
+  const fasesModalidad = getUnifranzPhases(modalidadId).sort((a, b) => a.orden - b.orden);
+
+  // Verificar que al menos una fase del documento esté generada.
+  const algunaConContenido = fasesModalidad.some((f) => {
+    const slug = f.id.replace(/^ph-unifranz-[^-]+(?:-[^-]+)*-/, "");
+    // Excluir compilacion y defensa que no van al PDF.
+    if (slug === "compilacion" || slug === "defensa") return false;
+    return getContent(f.id).length > 0;
+  });
+  if (!algunaConContenido) {
+    return NextResponse.json(
+      {
+        error: "Aún no hay capítulos generados. Genera al menos uno (por ejemplo, el Capítulo I — Marco Teórico) antes de descargar el LaTeX.",
+      },
+      { status: 400 },
+    );
+  }
+
+  // Datos para la carátula UNIFRANZ.
+  const ctxInicial = (proyecto.academic_context as Record<string, unknown> | undefined)?.contexto_inicial as Record<string, string> | undefined;
+  const titulo = (proyecto.tema_aprobado || proyecto.titulo_provisional || "Trabajo Final de Grado").trim();
+  const carrera = (ctxInicial?.carrera || "Ingeniería").trim();
+  const nombre = (user.email || "Estudiante").split("@")[0];
+  const tutor = (ctxInicial?.tutor || "").trim() || undefined;
+
+  // Slug helper: extrae el slug de la fase ("cap1", "cap2-investigacion", etc.).
+  const slugDe = (faseId: string) => faseId.replace(/^ph-unifranz-[^-]+(?:-[^-]+)*-/, "");
+
+  // Clasificar fases por sección estructural.
+  const resumen = fasesModalidad.find((f) => slugDe(f.id) === "resumen");
+  const intro = fasesModalidad.find((f) => slugDe(f.id) === "introduccion");
+  const conclusiones = fasesModalidad.find((f) => slugDe(f.id) === "conclusiones");
+  const recomendaciones = fasesModalidad.find((f) => slugDe(f.id) === "recomendaciones");
+  const bibliografia = fasesModalidad.find((f) => slugDe(f.id) === "bibliografia");
+
+  // Capítulo I (puede ser solo "cap1" o tener sub-fases).
+  const cap1Fases = fasesModalidad.filter((f) => /^cap1(?:[-]|$)/.test(slugDe(f.id)));
+  // Capítulo II (cap2, cap2-investigacion, cap2a-*, cap2b-*, etc.).
+  const cap2Fases = fasesModalidad.filter((f) => /^cap2(?:[-a-z0-9]|$)/.test(slugDe(f.id)));
+  // Capítulo III (cap3, cap3-*, cap3a-*, etc.).
+  const cap3Fases = fasesModalidad.filter((f) => /^cap3(?:[-a-z0-9]|$)/.test(slugDe(f.id)));
+
+  // Ensamblar el .tex.
+  const partes: string[] = [];
+
+  partes.push(buildPreambleUNIFRANZ());
+  partes.push(
+    buildCaratulaUNIFRANZ({
+      nombre,
+      titulo,
+      modalidad: modalidadInfo.nombre_portada,
+      carrera,
+      facultad: "Facultad de Ciencias Económicas y Empresariales",
+      universidad: "UNIVERSIDAD PRIVADA FRANZ TAMAYO",
+      ciudad: "Cochabamba",
+      pais: "Bolivia",
+      anio: String(new Date().getFullYear()),
+      tutor,
+    }),
+  );
+
+  // Resumen ejecutivo (preliminares en romanos).
+  if (resumen && getContent(resumen.id)) {
+    partes.push(buildResumenHeaderUNIFRANZ());
+    partes.push(mdALatex(getContent(resumen.id)));
+  }
+
+  // Índice (transición a arábigos).
+  partes.push(buildIndiceUNIFRANZ());
+
+  // Introducción (capítulo \chapter*, va antes del Cap. I).
+  if (intro && getContent(intro.id)) {
+    partes.push("\n\\chapter*{INTRODUCCIÓN}\n");
+    partes.push("\\addcontentsline{toc}{chapter}{INTRODUCCIÓN}\n");
+    partes.push(mdALatex(getContent(intro.id)));
+    partes.push("\n");
+  }
+
+  // Helper: renderizar un grupo de fases bajo un \chapter común.
+  const renderCapitulo = (
+    fases: typeof fasesModalidad,
+    nombreCap: string,
+    nombreCorto: string,
+  ) => {
+    const conContenido = fases.filter((f) => getContent(f.id));
+    if (conContenido.length === 0) return;
+    partes.push(`\n\\chapter{${escaparLatex(nombreCap)}}\n`);
+    void nombreCorto; // por si en el futuro queremos cabecera corta
+    for (const fase of conContenido) {
+      partes.push(mdALatex(getContent(fase.id)));
+      partes.push("\n");
+    }
+  };
+
+  // Capítulos del cuerpo según la modalidad.
+  // Tesis: I Marco Teórico, II Marco Práctico, III Resultados y Discusión.
+  // PG/TD: I Marco Teórico, II Investigación, III Propuesta/Plan/Diseño.
+  // Los labels de cada modalidad ya vienen en `modalidadInfo.capitulos` (3 strings).
+  const labelsCap = modalidadInfo.capitulos;
+  const nombreCap1 = labelsCap[0]?.replace(/^Capítulo\s+I\s+—\s+/, "") ?? "Marco Teórico";
+  const nombreCap2 = labelsCap[1]?.replace(/^Capítulo\s+II\s+—\s+/, "").replace(/\s+\(.*$/, "") ?? "Investigación";
+  const nombreCap3 = labelsCap[2]?.replace(/^Capítulo\s+III\s+—\s+/, "").replace(/\s+\(.*$/, "") ?? "Propuesta";
+
+  renderCapitulo(cap1Fases, nombreCap1, "Cap. I");
+  renderCapitulo(cap2Fases, nombreCap2, "Cap. II");
+  renderCapitulo(cap3Fases, nombreCap3, "Cap. III");
+
+  // Conclusiones + Recomendaciones (capítulo combinado, sin numerar).
+  const tieneConclus = conclusiones && getContent(conclusiones.id);
+  const tieneRecom = recomendaciones && getContent(recomendaciones.id);
+  if (tieneConclus || tieneRecom) {
+    partes.push("\n\\chapter*{CONCLUSIONES Y RECOMENDACIONES}\n");
+    partes.push("\\addcontentsline{toc}{chapter}{Conclusiones y Recomendaciones}\n");
+    if (tieneConclus) {
+      partes.push("\n\\section*{Conclusiones}\n");
+      partes.push(mdALatex(getContent(conclusiones!.id)));
+    }
+    if (tieneRecom) {
+      partes.push("\n\\section*{Recomendaciones}\n");
+      partes.push(mdALatex(getContent(recomendaciones!.id)));
+    }
+  }
+
+  // Bibliografía.
+  if (bibliografia && getContent(bibliografia.id)) {
+    partes.push(buildBibliografiaHeaderUNIFRANZ());
+    partes.push(mdALatex(getContent(bibliografia.id)));
+  }
+
+  partes.push(buildFinDocumentoUNIFRANZ());
+
+  const texContent = partes.join("\n");
+
+  // Armar ZIP.
+  const zip = new JSZip();
+  zip.file("trabajo-final-grado.tex", texContent);
+  zip.file(
+    "README.txt",
+    `Trabajo Final de Grado — UNIFRANZ Cochabamba
+================================================
+
+Modalidad: ${modalidadInfo.nombre}
+Guía oficial: ${modalidadInfo.guia_oficial.nombre} (${modalidadInfo.guia_oficial.fecha})
+Sección de referencia: ${modalidadInfo.guia_oficial.seccion_referencia}
+
+Archivo principal: trabajo-final-grado.tex
+
+Para compilar en tu PC:
+  1. Instala una distribución LaTeX (TeX Live, MiKTeX o MacTeX).
+  2. Abre el .tex en tu editor (TeXstudio, VSCode con LaTeX Workshop, etc.).
+  3. Compila dos veces con pdflatex (la segunda actualiza el índice):
+       pdflatex trabajo-final-grado.tex
+       pdflatex trabajo-final-grado.tex
+
+Para compilar en Overleaf:
+  1. Entra a https://www.overleaf.com
+  2. New Project → Upload Project → selecciona este ZIP completo.
+  3. Overleaf detecta trabajo-final-grado.tex y lo compila automáticamente.
+
+Formato oficial UNIFRANZ 2017:
+  - Tipografía: Verdana 10pt (sustituida por Helvetica en LaTeX por
+    compatibilidad; puede usarse Verdana real con XeLaTeX/LuaLaTeX + fontspec).
+  - Márgenes: superior 2.5 / izquierdo 3.5 / inferior 2.5 / derecho 2.5 cm.
+  - Interlineado: 1.5 con 6 puntos posteriores.
+  - Numeración: inferior derecha. Preliminares en romanos minúsculos;
+    cuerpo en arábigos desde INTRODUCCIÓN.
+  - Citas APA con apellidos en minúscula (sello UNIFRANZ).
+
+Fases incluidas en este paquete:
+${fasesModalidad
+  .filter((f) => {
+    const s = slugDe(f.id);
+    if (s === "compilacion" || s === "defensa") return false;
+    return getContent(f.id).length > 0;
+  })
+  .map((f) => `  ✓ ${f.id} — ${f.label}`)
+  .join("\n")}
+`,
+  );
+
+  const zipBuffer = await zip.generateAsync({ type: "uint8array" });
+  const baseName = slugify(titulo);
+
+  return new NextResponse(zipBuffer as unknown as BodyInit, {
+    status: 200,
+    headers: {
+      "Content-Type": "application/zip",
+      "Content-Disposition": `attachment; filename="${baseName}-unifranz-${modalidadId}.zip"`,
+    },
+  });
+}
+
 export async function GET(_req: Request, { params }: Params) {
   try {
     const { user } = await requireAuth();
@@ -99,6 +336,18 @@ export async function GET(_req: Request, { params }: Params) {
     }
     if (proyecto.usuario_id !== user.id) {
       return NextResponse.json({ error: "Sin acceso" }, { status: 403 });
+    }
+
+    // 🎓 DISPATCH UNIFRANZ ────────────────────────────────────────────────
+    // Si el proyecto es UNIFRANZ + Proyecto de Grado + tiene modalidad,
+    // usamos el builder UNIFRANZ. Si no, sigue al builder UCATEC genérico
+    // (no rompemos la regresión de los proyectos PG existentes).
+    if (
+      proyecto.universidad_id === UNIFRANZ_UNIVERSITY_ID
+      && proyecto.servicio_id === "proy-grado-001"
+      && getModalidadUnifranz(proyecto.modalidad_titulacion) !== null
+    ) {
+      return buildUnifranzZip(proyecto, user);
     }
 
     const phaseContents = (proyecto.phase_contents ?? {}) as Record<string, string | null>;

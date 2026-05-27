@@ -6,7 +6,7 @@
  * Reglas extraídas de la "Guía de Organización y Presentación de Trabajos
  * de Grado" (UNIFRANZ Cochabamba, 2017, páginas 4, 12, 14, 21, 22):
  *
- *   ✓ Fuente: Verdana 11pt en todo el cuerpo (único color permitido: negro)
+ *   ✓ Fuente: Verdana 10pt en todo el cuerpo (único color permitido: negro)
  *   ✓ Papel: Carta 215.9 × 279.4 mm (US Letter)
  *   ✓ Márgenes: superior 2.5 / izquierdo 3.5 / inferior 2.5 / derecho 2.5 cm
  *   ✓ Interlineado: 1.5 · 6pt posteriores · sin sangría (parindent 0)
@@ -70,7 +70,7 @@ function escLatex(s: string): string {
  */
 export function buildPreambleUNIFRANZ(): string {
   return [
-    "\\documentclass[11pt,letterpaper]{report}",
+    "\\documentclass[10pt,letterpaper]{report}",
     "",
     "% --- Paquetes base ---",
     "\\usepackage[utf8]{inputenc}",
