@@ -254,55 +254,7 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
     }
   }, [isPreview, previewConfig]);
 
-  // ── Nucleus Morphing Cycle ────────────────────────────────────────────────
-  useEffect(() => {
-    let interval: number;
-    if (pathname === "/nucleo") {
-      const children = ["scribe", "lumen", "mentor"];
-      let currentIndex = -1;
-      
-      interval = window.setInterval(() => {
-        currentIndex = (currentIndex + 1) % children.length;
-        const targetModule = children[currentIndex];
-        
-        const DEFAULTS: Record<string, ParticleConfigInput> = {
-          scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
-          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
-          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 600 }
-        };
-
-        const storageKey = `ui_particle_config_${targetModule}`;
-        const stored = localStorage.getItem(storageKey);
-        let parsed = DEFAULTS[targetModule];
-        if (stored) {
-          try { parsed = { ...parsed, ...JSON.parse(stored) }; } catch(e){}
-        }
-
-        const oldShape = uiConfigRef.current.shape;
-        const oldDensity = uiConfigRef.current.density;
-        
-        uiConfigRef.current = {
-          shape: parsed.shape ?? "sphere",
-          palette: parsed.palette ?? "antigravity",
-          wave: parsed.wave ?? "magnetic",
-          speed: typeof parsed.speed === "number" ? parsed.speed : 1.0,
-          particleSize: typeof parsed.particleSize === "number" ? parsed.particleSize : 1.0,
-          particleLength: typeof parsed.particleLength === "number" ? parsed.particleLength : 1.0,
-          swarmSize: typeof parsed.swarmSize === "number" ? parsed.swarmSize : 1.0,
-          density: typeof parsed.density === "number" ? parsed.density : 700
-        };
-
-        if (oldShape !== uiConfigRef.current.shape || oldDensity !== uiConfigRef.current.density) {
-          const newTargets = buildParticles(uiConfigRef.current.shape, scaledCount(uiConfigRef.current.density, densityScaleRef.current));
-          parts.current = newTargets.map((t, i) => {
-            if (parts.current[i]) return { ...parts.current[i], tnx: t.nx, tny: t.ny, tnz: t.nz };
-            return { ...t, nx: 0, ny: 0, nz: 0, tnx: t.nx, tny: t.ny, tnz: t.nz }; // New particles grow from center
-          });
-        }
-      }, 8000); // Morph every 8 seconds
-    }
-    return () => { if (interval) window.clearInterval(interval); };
-  }, [pathname, isPreview]);
+  // ── Nucleus Morphing Cycle (eliminado: /nucleo abandonado) ───────────────
 
   useEffect(() => {
     // Respetar accesibilidad: si reducedMotion, no inicializar canvas ni RAF.
@@ -313,15 +265,11 @@ export default function ParticleSphere({ isPreview = false, previewConfig }: { i
         const currentPath = typeof overridePathname === "string" ? overridePathname : pathname;
         let targetModule = "scribe";
         if (currentPath.startsWith("/admin")) targetModule = "admin";
-        else if (currentPath.startsWith("/lumen")) targetModule = "lumen";
-        else if (currentPath.startsWith("/mentor")) targetModule = "mentor";
-        else if (currentPath.startsWith("/nucleo")) targetModule = "nucleo";
+        else if (currentPath.startsWith("/axiom")) targetModule = "axiom";
 
         const DEFAULTS: Record<string, ParticleConfigInput> = {
           scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
-          lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
-          mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 600 },
-          nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 900 },
+          axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 700 },
           admin: { shape: "blackhole", palette: "plasma", wave: "magnetic", speed: 0.8, particleSize: 1.2, particleLength: 1.5, swarmSize: 1.1, density: 1000 }
         };
 

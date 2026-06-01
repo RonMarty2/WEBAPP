@@ -3,7 +3,6 @@
  *
  * Consumido por:
  *   - /api/services (para clientes externos)
- *   - /nucleo (hub principal)
  *   - Futuras pantallas que necesiten listar productos
  *
  * Para agregar un servicio nuevo: añadir un objeto aquí y mapear el `iconId`
@@ -12,7 +11,7 @@
  * Copy: español neutro con tuteo (mercado boliviano). Nunca voseo.
  */
 
-export type ServicioId = "scribe" | "proyecto-grado" | "lumen" | "mentor" | "laboratorio";
+export type ServicioId = "scribe" | "proyecto-grado" | "axiom";
 
 export type ServicioPlan = "demo" | "estandar" | "pro" | "elite";
 
@@ -58,39 +57,15 @@ export const SERVICIOS_CATALOGO: ServicioCatalogo[] = [
     paleta: { accentRgb: "14,165,233", accentLight: "56,189,248" },
     badge: "23 fases",
   },
-  {
-    id: "lumen",
-    nombre: "LUMEN",
+    id: "axiom",
+    nombre: "AXIOM",
     descripcion:
-      "Generador avanzado de material de Contenido Docente. Planeación curricular y desarrollo de clases en minutos.",
-    ruta: "/lumen",
-    iconId: "lumen",
-    estado: "beta",
-    plan_minimo: "estandar",
-    paleta: { accentRgb: "245,158,11", accentLight: "251,191,36" },
-  },
-  {
-    id: "mentor",
-    nombre: "MENTOR",
-    descripcion:
-      "Herramienta de tutoría automatizada con feedback continuo para la validación experta de proyectos.",
-    ruta: "/mentor",
-    iconId: "mentor",
-    estado: "beta",
-    plan_minimo: "estandar",
-    paleta: { accentRgb: "16,185,129", accentLight: "52,211,153" },
-  },
-  {
-    id: "laboratorio",
-    nombre: "LABORATORIO",
-    descripcion:
-      "Espacio experimental para probar funcionalidades antes de pasarlas a producción. Acceso para usuarios avanzados.",
-    ruta: "/laboratorio",
-    iconId: "laboratorio",
-    estado: "beta",
-    plan_minimo: "pro",
-    paleta: { accentRgb: "236,72,153", accentLight: "244,114,182" },
-    badge: "Sandbox",
+      "Simulador paramétrico de Exámenes de Alta Precisión. Entrena y evalúa competencias bajo métricas exactas.",
+    ruta: "/axiom",
+    iconId: "axiom",
+    estado: "disponible",
+    plan_minimo: "demo",
+    paleta: { accentRgb: "139,92,246", accentLight: "167,139,250" },
   },
 ];
 

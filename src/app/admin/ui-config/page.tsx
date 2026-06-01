@@ -17,18 +17,14 @@ type ParticleConfig = {
 
 const DEFAULT_CONFIGS: Record<string, ParticleConfig> = {
   scribe: { shape: "sphere", palette: "antigravity", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
-  lumen: { shape: "dna", palette: "gold", wave: "ocean", speed: 0.8, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1200 },
-  mentor: { shape: "torus", palette: "matrix", wave: "ocean", speed: 1.2, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 800 },
-  nucleo: { shape: "blackhole", palette: "antigravity", wave: "none", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1500 },
+  axiom: { shape: "cube", palette: "synthwave", wave: "magnetic", speed: 1.0, particleSize: 1.0, particleLength: 1.0, swarmSize: 1.0, density: 1000 },
   admin: { shape: "blackhole", palette: "plasma", wave: "magnetic", speed: 0.8, particleSize: 1.2, particleLength: 1.5, swarmSize: 1.1, density: 1800 }
 };
 
 const MODULES = [
   { id: "admin",  name: "⚡ ADMIN (Panel de Administrador)" },
   { id: "scribe", name: "📝 SCRIBE (Proyectos y Lógica)" },
-  { id: "lumen",  name: "📚 LUMEN (Generador Docente)" },
-  { id: "mentor", name: "🤝 MENTOR (Tutoría y Feedback)" },
-  { id: "nucleo", name: "🌐 NŪCLEO (Hub Padre)" },
+  { id: "axiom",  name: "📊 AXIOM (Simulador de Exámenes)" },
 ];
 
 const SHAPES = [
