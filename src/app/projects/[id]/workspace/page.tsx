@@ -2593,6 +2593,7 @@ export default function WorkspacePage() {
                 está detrás. Antes usaba panelBg (alpha 0.55) y se veía el chat translucido a través. */}
             {isPGProject && showPhaseNav && (
               <div
+                className="pg-sidebar-overlay"
                 style={{
                   position: "absolute",
                   top: 63, // altura del botón phase label
