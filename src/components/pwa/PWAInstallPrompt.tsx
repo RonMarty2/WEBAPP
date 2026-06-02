@@ -46,6 +46,10 @@ export default function PWAInstallPrompt() {
     const currentPlatform = detectPlatform();
     setPlatform(currentPlatform);
 
+    // Solo mostrar el banner en móvil. En desktop la PWA no tiene sentido
+    // (queda como ventana suelta sin tabs) y molesta al usuario.
+    if (currentPlatform === 'desktop') return;
+
     const handleBeforeInstall = (event: Event) => {
       event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
