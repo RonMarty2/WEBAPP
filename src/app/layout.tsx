@@ -4,6 +4,8 @@ import { Crimson_Pro, Atkinson_Hyperlegible } from "next/font/google";
 import ParticleSphere from "@/components/ParticleSphere";
 import NucleoFooter from "@/components/ui/NucleoFooter";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
+import PWAServiceWorker from "@/components/pwa/PWAServiceWorker";
+import PWAInstallPrompt from "@/components/pwa/PWAInstallPrompt";
 import "./globals.css";
 
 const crimsonPro = Crimson_Pro({ 
@@ -21,6 +23,24 @@ const atkinson = Atkinson_Hyperlegible({
 export const metadata: Metadata = {
   title: "Laboratorio Académico — Generador de Monografías con IA",
   description: "Plataforma SaaS para generar monografías y trabajos académicos con IA para Bolivia y Latinoamérica. Sin alucinaciones, APA 7 real, exportación LaTeX.",
+  applicationName: "Laboratorio Académico",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Lab Académico",
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    shortcut: ["/favicon.ico"],
+  },
 };
 
 export const viewport: Viewport = {
@@ -28,6 +48,11 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0a0a14" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a14" },
+  ],
 };
 
 export default function RootLayout({
@@ -38,6 +63,14 @@ export default function RootLayout({
   return (
     <html lang="es" className="h-full" suppressHydrationWarning>
       <head>
+        {/* PWA — fuerza vista app móvil en standalone (Android Chrome + iOS Safari) */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Lab Académico" />
+        <meta name="application-name" content="Laboratorio Académico" />
+        <meta name="msapplication-TileColor" content="#0a0a14" />
+        <meta name="msapplication-tap-highlight" content="no" />
         {/* Anti-flash theme script removed temporarily to prevent React 19 script tag errors */}
       </head>
       <body className={`${atkinson.variable} ${crimsonPro.variable} min-h-full font-atkinson flex flex-col`} suppressHydrationWarning>
@@ -49,6 +82,8 @@ export default function RootLayout({
         </div>
         <NucleoFooter />
         <WhatsAppFloat />
+        <PWAServiceWorker />
+        <PWAInstallPrompt />
       </body>
     </html>
   );
