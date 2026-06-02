@@ -567,6 +567,22 @@ export default function WorkspacePage() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
+  // Detección de móvil por UA y/o viewport ≤ 1023px. Necesaria porque algunos
+  // PWAs standalone reportan viewport raro y el grid de 3 columnas se activa
+  // cuando no debería, comprimiendo el contenido del documento.
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => {
+      const ua = window.navigator.userAgent;
+      const isMobileUA = /Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua);
+      const isNarrow = window.matchMedia("(max-width: 1023px)").matches;
+      setIsMobileDevice(isMobileUA || isNarrow);
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   const [selectedFase, setSelectedFase] = useState(0);
   const [col1Tab, setCol1Tab] = useState<"generacion" | "fuentes" | "tribunal" | "bitacora" | "cuadernillo" | "defensa">("generacion");
 
@@ -2443,10 +2459,7 @@ export default function WorkspacePage() {
           max-width: 920px;
           margin: 0 auto;
         }
-        /* ── Móvil/tablet: garantiza stack vertical de las 3 columnas ──
-           Algunos dispositivos (PWA standalone, ciertos WebView) reportan un
-           viewport que confunde al grid de >=1280. Aquí lo forzamos para que
-           el texto del contenido no quede comprimido a una palabra por línea. */
+        /* ── Móvil/tablet (CSS): apila las columnas en viewport pequeño ── */
         @media (max-width: 1279.98px) {
           .workspace-three-pane {
             display: flex !important;
@@ -2461,11 +2474,47 @@ export default function WorkspacePage() {
             padding-left: 16px;
             padding-right: 16px;
           }
-          /* Romper palabras largas (URLs, términos científicos) si excede el ancho */
           .md-p, .md-li, .md-h1, .md-h2, .md-h3, .md-h4, .md-blockquote {
             overflow-wrap: anywhere;
             word-break: normal;
           }
+        }
+        /* ── Móvil detectado por JS (UA): override TOTAL, independiente del viewport.
+           Necesario porque PWA standalone en algunos Android reporta viewport
+           ≥1280 lógico aunque la pantalla física sea de teléfono, y entonces
+           el grid de 3 columnas se activa y comprime el contenido a ~80px. */
+        .workspace-three-pane.is-mobile-device,
+        .workspace-three-pane.is-mobile-device * {
+          /* Forzar viewport útil */
+        }
+        .workspace-three-pane.is-mobile-device {
+          display: flex !important;
+          flex-direction: column !important;
+          grid-template-columns: none !important;
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+        }
+        .workspace-three-pane.is-mobile-device > div {
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: 0 !important;
+          flex-basis: auto !important;
+        }
+        .workspace-three-pane.is-mobile-device .workspace-editor-inner {
+          padding-left: 16px !important;
+          padding-right: 16px !important;
+          max-width: 100% !important;
+        }
+        .workspace-three-pane.is-mobile-device .md-p,
+        .workspace-three-pane.is-mobile-device .md-li,
+        .workspace-three-pane.is-mobile-device .md-h1,
+        .workspace-three-pane.is-mobile-device .md-h2,
+        .workspace-three-pane.is-mobile-device .md-h3,
+        .workspace-three-pane.is-mobile-device .md-h4,
+        .workspace-three-pane.is-mobile-device .md-blockquote {
+          overflow-wrap: anywhere !important;
+          word-break: normal !important;
+          hyphens: auto;
         }
         @media (min-width: 1280px) {
           .workspace-three-pane {
@@ -2492,7 +2541,7 @@ export default function WorkspacePage() {
         }
       `}</style>
 
-      <div className="workspace-three-pane flex-1 overflow-y-auto xl:overflow-hidden relative w-full">
+      <div className={`workspace-three-pane flex-1 overflow-y-auto xl:overflow-hidden relative w-full ${isMobileDevice ? "is-mobile-device" : ""}`}>
 
         {/* ── COL 1: CHAT & GENERATION (fixed 360px on desktop) ── */}
         <div
