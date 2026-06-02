@@ -69,6 +69,15 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Lab Académico" />
         <meta name="application-name" content="Laboratorio Académico" />
+        {/* Detección de dispositivo móvil ANTES de la hidratación de React.
+            Marca <html class="is-mobile-ua"> si el UA es móvil, el viewport es
+            angosto, o el puntero es táctil. Cualquier CSS global puede luego
+            aplicar overrides con .is-mobile-ua sin race conditions de React. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;var u=navigator.userAgent||'';var isUA=/Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(u);var isNarrow=window.matchMedia&&window.matchMedia('(max-width:1023px)').matches;var isCoarse=window.matchMedia&&window.matchMedia('(pointer:coarse)').matches;if(isUA||isNarrow||isCoarse){d.classList.add('is-mobile-ua');}}catch(e){}})();`,
+          }}
+        />
         <meta name="msapplication-TileColor" content="#0a0a14" />
         <meta name="msapplication-tap-highlight" content="no" />
         {/* Anti-flash theme script removed temporarily to prevent React 19 script tag errors */}

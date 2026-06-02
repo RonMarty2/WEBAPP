@@ -1048,3 +1048,45 @@ button:focus-visible, a:focus-visible {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+
+/* ═══ MOBILE OVERRIDE — Workspace 3-column layout ═════════════════════════ */
+/* Cuando <html> tiene .is-mobile-ua (detectado por UA, viewport o pointer
+   táctil), forzamos el workspace a stack vertical, sin depender del
+   media query de ancho (algunos PWAs en Android reportan viewport ≥1280
+   aunque la pantalla física sea de teléfono). */
+
+html.is-mobile-ua .workspace-three-pane {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+html.is-mobile-ua .workspace-three-pane > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  flex-basis: auto !important;
+}
+html.is-mobile-ua .workspace-editor-inner {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  max-width: 100% !important;
+}
+html.is-mobile-ua .md-p,
+html.is-mobile-ua .md-li,
+html.is-mobile-ua .md-h1,
+html.is-mobile-ua .md-h2,
+html.is-mobile-ua .md-h3,
+html.is-mobile-ua .md-h4,
+html.is-mobile-ua .md-blockquote {
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  hyphens: auto;
+}
+/* COL 3 — panel derecho (insights/PDF preview): oculto en móvil porque
+   no aporta y le come ancho al contenido principal. El usuario puede
+   abrirlo desde el botón "Ver preview" en el header si lo quiere. */
+html.is-mobile-ua .workspace-three-pane .hidden.xl\:flex {
+  display: none !important;
+}
