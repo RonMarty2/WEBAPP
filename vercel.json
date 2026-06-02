@@ -57,6 +57,9 @@
     "src/app/api/axiom/simulador/route.ts": {
       "maxDuration": 60
     },
+    "src/app/api/admin/test-prompt-unifranz/route.ts": {
+      "maxDuration": 90
+    },
     "src/app/api/admin/projects/[id]/defensa-materiales/route.ts": {
       "maxDuration": 60
     },
