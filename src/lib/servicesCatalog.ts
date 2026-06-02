@@ -57,6 +57,7 @@ export const SERVICIOS_CATALOGO: ServicioCatalogo[] = [
     paleta: { accentRgb: "14,165,233", accentLight: "56,189,248" },
     badge: "23 fases",
   },
+  {
     id: "axiom",
     nombre: "AXIOM",
     descripcion:
