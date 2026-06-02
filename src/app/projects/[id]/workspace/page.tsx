@@ -2443,6 +2443,30 @@ export default function WorkspacePage() {
           max-width: 920px;
           margin: 0 auto;
         }
+        /* ── Móvil/tablet: garantiza stack vertical de las 3 columnas ──
+           Algunos dispositivos (PWA standalone, ciertos WebView) reportan un
+           viewport que confunde al grid de >=1280. Aquí lo forzamos para que
+           el texto del contenido no quede comprimido a una palabra por línea. */
+        @media (max-width: 1279.98px) {
+          .workspace-three-pane {
+            display: flex !important;
+            flex-direction: column !important;
+          }
+          .workspace-three-pane > div {
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0;
+          }
+          .workspace-editor-inner {
+            padding-left: 16px;
+            padding-right: 16px;
+          }
+          /* Romper palabras largas (URLs, términos científicos) si excede el ancho */
+          .md-p, .md-li, .md-h1, .md-h2, .md-h3, .md-h4, .md-blockquote {
+            overflow-wrap: anywhere;
+            word-break: normal;
+          }
+        }
         @media (min-width: 1280px) {
           .workspace-three-pane {
             display: grid;
