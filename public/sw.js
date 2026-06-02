@@ -2,7 +2,7 @@
 // Estrategia: network-first para HTML/API, cache-first para estáticos.
 // Necesario para que el navegador considere la app "instalable".
 
-const CACHE_VERSION = 'lab-academico-v1';
+const CACHE_VERSION = 'lab-academico-v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -90,9 +90,10 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
-// Permite forzar actualización desde el cliente
+// Permite forzar actualización desde el cliente (OTA).
+// Acepta el mensaje como string "SKIP_WAITING" o como objeto { type }.
 self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') {
+  if (event.data === 'SKIP_WAITING' || event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
