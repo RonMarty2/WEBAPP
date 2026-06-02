@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [loadingProyectos, setLoadingProyectos] = useState(true);
   const [proyectoToDelete, setProyectoToDelete] = useState<string | null>(null);
+  const [seedingDemo, setSeedingDemo] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -88,6 +89,26 @@ export default function DashboardPage() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
     router.refresh();
+  }
+
+  // Carga el proyecto de demostración AgroHub (UNIFRANZ · Pre-Factibilidad) en
+  // la cuenta del admin, con el contenido ya poblado, y abre su workspace.
+  async function cargarDemoAgrohub() {
+    if (seedingDemo) return;
+    setSeedingDemo(true);
+    try {
+      const res = await fetch("/api/admin/seed-demo", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url_workspace) {
+        router.push(data.url_workspace);
+      } else {
+        alert((data as { error?: string }).error || "No se pudo cargar el proyecto de demostración.");
+        setSeedingDemo(false);
+      }
+    } catch {
+      alert("Error de conexión al cargar el proyecto de demostración.");
+      setSeedingDemo(false);
+    }
   }
 
   if (loading) {
@@ -157,9 +178,25 @@ export default function DashboardPage() {
         {/* Mis Proyectos */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-muted)" }}>Mis proyectos</h2>
-          <Link href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
-            + Nuevo proyecto
-          </Link>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            {user.role === "admin" && (
+              <button
+                onClick={cargarDemoAgrohub}
+                disabled={seedingDemo}
+                title="Carga un Proyecto de Grado UNIFRANZ (AgroHub) ya poblado para ver cómo se llena la plataforma"
+                style={{
+                  fontSize: 13, padding: "8px 16px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
+                  border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.08)", color: "#a78bfa",
+                  fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6, opacity: seedingDemo ? 0.6 : 1,
+                }}
+              >
+                {seedingDemo ? "Cargando…" : "⚡ Cargar demo AgroHub"}
+              </button>
+            )}
+            <Link href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
+              + Nuevo proyecto
+            </Link>
+          </div>
         </div>
 
         {loadingProyectos ? (
