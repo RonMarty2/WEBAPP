@@ -1,0 +1,54 @@
+{
+  "name": "Laboratorio Académico PRO",
+  "short_name": "Lab Académico",
+  "description": "Genera monografías, proyectos de grado y prepárate para exámenes con IA. Sin alucinaciones, APA 7 real.",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "id": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0a0a14",
+  "theme_color": "#0a0a14",
+  "lang": "es-BO",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "books"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Nueva monografía",
+      "short_name": "Monografía",
+      "description": "Iniciar una nueva monografía con IA",
+      "url": "/scribe?source=pwa-shortcut",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Proyecto de grado",
+      "short_name": "Proyecto",
+      "description": "Iniciar un nuevo proyecto de grado",
+      "url": "/projects?source=pwa-shortcut",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Simulador Axiom",
+      "short_name": "Axiom",
+      "description": "Prepárate para exámenes",
+      "url": "/axiom?source=pwa-shortcut",
+      "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}
