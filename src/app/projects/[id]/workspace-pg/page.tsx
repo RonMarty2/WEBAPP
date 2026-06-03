@@ -21,6 +21,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useIsMobileDevice } from "@/lib/hooks/useIsMobileDevice";
 import Link from "next/link";
 import ThemeToggle from "@/components/ThemeToggle";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
@@ -74,32 +75,10 @@ export default function WorkspacePGPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
-  // Detección de móvil — lee la clase .is-mobile-ua que el script inline en
-  // layout.tsx puso en <html> antes de cualquier render, fallback a UA y
-  // viewport. Sin race conditions de hidratación.
-  const [isMobileDevice, setIsMobileDevice] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    if (typeof document !== "undefined" && document.documentElement.classList.contains("is-mobile-ua")) return true;
-    const ua = window.navigator.userAgent;
-    if (/Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua)) return true;
-    return window.matchMedia("(max-width: 1023px)").matches;
-  });
+  const isMobileDevice = useIsMobileDevice();
   // Sidebar colapsable en móvil — cuando seleccionan una fase, se cierra solo
   // para que el contenido use todo el ancho.
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const check = () => {
-      const ua = window.navigator.userAgent;
-      const isUA = /Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua);
-      const isNarrow = window.matchMedia("(max-width: 1023px)").matches;
-      const isCoarse = window.matchMedia("(pointer:coarse)").matches;
-      setIsMobileDevice(isUA || isNarrow || isCoarse);
-    };
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
   // Modo de generación elegido por el estudiante para cap3e
   const [cap3eModo, setCap3eModo] = useState<"PROYECCION" | "DATOS_REALES" | null>(null);
 

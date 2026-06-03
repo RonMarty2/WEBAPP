@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import UmssDuplicidadCheck from "@/components/UmssDuplicidadCheck";
+import { useIsMobileDevice } from "@/lib/hooks/useIsMobileDevice";
 import dynamic from "next/dynamic";
 import {
   MODALIDADES_UNIFRANZ,
@@ -95,6 +96,7 @@ export default function NuevoProyectoPage() {
 function NuevoProyectoPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobileDevice();
   const [step, setStep] = useState<Step>("loading");
   const [error, setError] = useState("");
   const [servicioId, setServicioId] = useState("");
@@ -539,7 +541,7 @@ function NuevoProyectoPageInner() {
               </p>
             </div>
 
-            <div style={{ display: "grid", gap: 14, gridTemplateColumns: "1fr 1fr" }}>
+            <div style={{ display: "grid", gap: 14, gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr" }}>
               {/* PRODUCCIÓN */}
               <button
                 type="button"
@@ -787,7 +789,7 @@ function NuevoProyectoPageInner() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                 gap: 10,
                 marginBottom: 20,
               }}

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useIsMobileDevice } from "@/lib/hooks/useIsMobileDevice";
 
 interface TurnMsg {
   rol: "tribunal" | "estudiante";
@@ -37,6 +38,7 @@ function extractScore(texto: string): number | null {
 }
 
 export default function DefensaPage() {
+  const isMobile = useIsMobileDevice();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -174,14 +176,14 @@ export default function DefensaPage() {
               </p>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%", maxWidth: 340 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 8 }}>
                 {["Marco teórico", "Metodología", "Resultados"].map(t => (
                   <div key={t} style={{ padding: "8px 6px", borderRadius: 8, border: "1px solid rgba(148,163,184,0.2)", fontSize: 11, color: "var(--fg-muted)", textAlign: "center" }}>
                     {t}
                   </div>
                 ))}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 8 }}>
                 {["Justificación", "Coherencia"].map(t => (
                   <div key={t} style={{ padding: "8px 6px", borderRadius: 8, border: "1px solid rgba(148,163,184,0.2)", fontSize: 11, color: "var(--fg-muted)", textAlign: "center" }}>
                     {t}

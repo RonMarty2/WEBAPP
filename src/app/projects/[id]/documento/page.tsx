@@ -16,6 +16,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { generatePdfHtml } from "@/lib/pdfTemplate";
+import { useIsMobileDevice } from "@/lib/hooks/useIsMobileDevice";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
 import { useViewMode } from "@/components/scribe/AdminViewToggle";
 
@@ -38,6 +39,7 @@ type PhaseDef = { id: string; label: string; short_label: string; orden: number 
 type QAMsg = { role: "user" | "ia"; text: string; ts: number };
 
 export default function DocumentoPage() {
+  const isMobile = useIsMobileDevice();
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -353,9 +355,9 @@ export default function DocumentoPage() {
       )}
 
       {/* Layout: preview centro + sidebar derecho */}
-      <div style={{ flex:1, display:"flex", minHeight:0 }}>
+      <div style={{ flex:1, display:"flex", minHeight:0, ...(isMobile ? { flexDirection: "column" as const } : {}) }}>
         {/* Preview */}
-        <main style={{ flex:1, overflow:"auto", padding:"24px 16px 24px 24px", background:"rgba(241,245,249,0.5)", display:"flex", justifyContent:"center" }}>
+        <main style={{ flex:1, overflow:"auto", padding: isMobile ? "16px 12px" : "24px 16px 24px 24px", background:"rgba(241,245,249,0.5)", display:"flex", justifyContent:"center", minWidth: 0, width: isMobile ? "100%" : undefined }}>
           {docHtml ? (
             <div style={{ width:"100%", maxWidth: 1100, height:"100%", background:"white", borderRadius:8, overflow:"auto", boxShadow:"0 4px 24px rgba(0,0,0,0.08)" }}>
               <iframe
@@ -384,7 +386,7 @@ export default function DocumentoPage() {
         </main>
 
         {/* Sidebar derecho */}
-        <aside style={{ width: 360, borderLeft:"1px solid var(--border)", display:"flex", flexDirection:"column", background:"var(--bg-card)", flexShrink:0 }}>
+        <aside style={{ width: isMobile ? "100%" : 360, borderLeft: isMobile ? "none" : "1px solid var(--border)", borderTop: isMobile ? "1px solid var(--border)" : "none", display:"flex", flexDirection:"column", background:"var(--bg-card)", flexShrink:0 }}>
           {/* Estado del documento */}
           <section style={{ padding:"16px 18px", borderBottom:"1px solid var(--border)" }}>
             <div style={{ fontSize:10.5, fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase", color:"var(--fg-muted)", marginBottom:8 }}>Estado</div>

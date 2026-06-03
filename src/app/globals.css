@@ -1130,7 +1130,7 @@ html.is-mobile-ua * {
    Si lo ves arriba a la izquierda, mi fix está cargando. Si no, sigues con
    cache viejo y hay que limpiar (desinstalar PWA / borrar datos del sitio). */
 html.is-mobile-ua body::before {
-  content: "📱 v9 PG-FIX";
+  content: "📱 v10 ALL";
   position: fixed;
   top: max(8px, env(safe-area-inset-top, 8px));
   left: 8px;
@@ -1145,4 +1145,62 @@ html.is-mobile-ua body::before {
   pointer-events: none;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   font-family: ui-monospace, monospace;
+}
+
+/* ═══ MOBILE OVERRIDE v4 — protección global para toda la app ════════════ */
+
+/* Cualquier grid que use auto-fill con minmax ≥ 280px se reduce a 1 columna
+   en móvil (caso típico: dashboard, listas de proyectos, tarjetas). */
+html.is-mobile-ua [style*="repeat(auto-fill"],
+html.is-mobile-ua [style*="repeat(auto-fit"] {
+  grid-template-columns: 1fr !important;
+}
+
+/* Tablas con overflow horizontal en móvil — para que no rompan el layout
+   del padre. El contenido se desplaza horizontalmente dentro de su contenedor. */
+html.is-mobile-ua table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Reducir padding grande en cards/contenedores principales. */
+html.is-mobile-ua .card,
+html.is-mobile-ua main,
+html.is-mobile-ua section[style*="padding: 40px"],
+html.is-mobile-ua section[style*="padding: 32px"] {
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+}
+
+/* Forzar que ninguna imagen, iframe o video desborde el viewport. */
+html.is-mobile-ua img,
+html.is-mobile-ua iframe,
+html.is-mobile-ua video,
+html.is-mobile-ua canvas,
+html.is-mobile-ua svg {
+  max-width: 100% !important;
+  height: auto;
+}
+
+/* Botones y links de descarga: no fuerzan ancho mínimo de su contenido.
+   En móvil suelen quedar comprimidos por su contenido (texto largo). */
+html.is-mobile-ua button,
+html.is-mobile-ua a {
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Header de páginas: que el contenido pueda envolver con flex-wrap. */
+html.is-mobile-ua header[style*="display"][style*="flex"] {
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+/* Modales / overlays: asegurarse que no excedan el viewport. */
+html.is-mobile-ua [role="dialog"],
+html.is-mobile-ua [aria-modal="true"] {
+  max-width: 100vw !important;
+  max-height: 100vh !important;
 }
