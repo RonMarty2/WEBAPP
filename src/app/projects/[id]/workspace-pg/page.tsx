@@ -63,6 +63,27 @@ interface PhaseDef {
   prompt?: string;
 }
 
+/**
+ * Devuelve el nombre corto visible de la universidad para mostrar en el
+ * header del workspace. Mapea los IDs de la BD a sus siglas conocidas.
+ * Si el ID es desconocido, devuelve la cadena vacía (no mostrar nada
+ * en lugar de "UCATEC" hardcodeado que era un bug).
+ */
+function universidadNombreCorto(universidadId: string | null | undefined): string {
+  if (!universidadId) return "";
+  if (universidadId.startsWith("unifranz")) return "UNIFRANZ";
+  if (universidadId.startsWith("ucatec")) return "UCATEC";
+  if (universidadId.startsWith("umss")) return "UMSS";
+  if (universidadId.startsWith("ucb")) return "UCB";
+  if (universidadId.startsWith("uagrm")) return "UAGRM";
+  if (universidadId.startsWith("uto")) return "UTO";
+  if (universidadId.startsWith("usfx")) return "USFX";
+  if (universidadId.startsWith("upb")) return "UPB";
+  if (universidadId.startsWith("emi")) return "EMI";
+  if (universidadId.startsWith("umsa")) return "UMSA";
+  return "";
+}
+
 export default function WorkspacePGPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -321,7 +342,7 @@ export default function WorkspacePGPage() {
           <div style={{ fontSize: 11, color: "var(--fg-secondary)", display: "flex", alignItems: "center", gap: 6 }}>
             <span style={{ fontWeight: 700, color: "var(--accent)" }}>Proyecto de Grado</span>
             <span>·</span>
-            <span>UCATEC</span>
+            <span>{universidadNombreCorto(proyecto.universidad_id)}</span>
             {user?.role === "admin" && (
               <>
                 <span>·</span>
