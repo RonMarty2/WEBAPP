@@ -39,7 +39,10 @@ function LoginContent() {
         setAdminLoading(false);
         return;
       }
-      router.push("/dashboard");
+      // El servidor indica a dónde redirigir según el rol REAL del usuario
+      // (admin → /admin, estudiante → /dashboard, etc). Antes redirigía
+      // siempre a /dashboard y luego algún flujo lateral subía al user a admin.
+      router.push(data?.redirectTo ?? "/dashboard");
       router.refresh();
     } catch (e) {
       setAdminError(e instanceof Error ? e.message : "Error de red");

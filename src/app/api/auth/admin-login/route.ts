@@ -16,7 +16,8 @@
 
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE, getAdminEmails, type UserPlan } from "@/lib/auth";
+import { createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE, getAdminEmails, type UserPlan, type UserRole } from "@/lib/auth";
+import { dbGetUserByEmail } from "@/lib/db";
 
 const VALID_PLANS: UserPlan[] = ["estandar", "pro", "elite"];
 
@@ -72,13 +73,31 @@ export async function POST(req: Request) {
 
   const userId = adminUserIdFromEmail(email);
 
+  // ── Resolver rol final con la misma jerarquía que el callback de Google ──
+  // Si el usuario ya existe en BD → respetar el rol de BD. La env var
+  // ADMIN_EMAILS / la contraseña admin solo prueban que el solicitante
+  // CONOCE las credenciales del SaaS, pero NO promueven a admin
+  // automáticamente si en la BD se le bajó manualmente.
+  //
+  // Esto evita que un usuario degradado con SQL siga entrando como admin
+  // solo porque tiene la password del SaaS.
+  let finalRole: UserRole = "admin";
+  let finalActive = true;
+  try {
+    const existing = await dbGetUserByEmail(email);
+    if (existing) {
+      finalRole = (existing.role as UserRole | undefined) ?? "estudiante";
+      finalActive = existing.active ?? false;
+    }
+  } catch { /* si la BD falla, mantenemos admin (compatibilidad con dev local) */ }
+
   const token = await createSessionToken({
     id: userId,
     email,
-    name: `Admin (${email})`,
-    role: "admin",
+    name: finalRole === "admin" ? `Admin (${email})` : email,
+    role: finalRole,
     plan,
-    active: true,
+    active: finalActive,
   });
 
   const cookieStore = await cookies();
@@ -98,8 +117,12 @@ export async function POST(req: Request) {
     user: {
       id: userId,
       email,
-      role: "admin",
+      role: finalRole,
       plan,
+      active: finalActive,
     },
+    // Si la BD bajó el rol, decirle al cliente que NO redirija a /admin.
+    // Es responsabilidad del cliente decidir basado en role.
+    redirectTo: finalRole === "admin" ? "/admin" : (finalActive ? "/dashboard" : "/pendiente"),
   });
 }

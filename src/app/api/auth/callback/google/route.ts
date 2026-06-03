@@ -8,7 +8,7 @@ import {
   isAdmin,
   type UserRole,
 } from "@/lib/auth";
-import { dbUpsertUser, dbGetUser } from "@/lib/db";
+import { dbUpsertUser, dbGetUser, dbGetUserByEmail } from "@/lib/db";
 
 export async function GET(req: Request) {
   const { searchParams, origin } = new URL(req.url);
@@ -45,7 +45,16 @@ export async function GET(req: Request) {
   // → si el email estaba en ADMIN_EMAILS, el callback forzaba role=admin
   // en CADA login, pisando lo que tuviera la BD.
   const isWhitelistedAdmin = isAdmin(profile.email);
-  const existing = await dbGetUser(profile.id);
+
+  // Buscar el usuario en BD por ID Y por email — algunos usuarios tienen el
+  // registro con id != profile.id (por ej. usuarios creados manualmente con
+  // SQL antes de loguearse). Sin este doble lookup, el callback caía al
+  // fallback "primer login" y la env var ADMIN_EMAILS lo subía a admin
+  // aunque la BD tuviera role=user/estudiante.
+  let existing = await dbGetUser(profile.id);
+  if (!existing) {
+    existing = await dbGetUserByEmail(profile.email);
+  }
 
   let finalRole: UserRole;
   let finalActive: boolean;
@@ -57,6 +66,10 @@ export async function GET(req: Request) {
     finalRole = isWhitelistedAdmin ? "admin" : "estudiante";
     finalActive = isWhitelistedAdmin ? true : false;
   }
+
+  // Log visible en Vercel logs para debug rápido si vuelve a fallar.
+  console.log("[oauth/callback] email=%s isWhitelistedAdmin=%s existing.role=%s → finalRole=%s",
+    profile.email, isWhitelistedAdmin, existing?.role, finalRole);
 
   const userRecord = await dbUpsertUser({
     id: profile.id,
