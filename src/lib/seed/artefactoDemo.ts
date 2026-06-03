@@ -187,6 +187,176 @@ Existen plataformas IoT que proveen el componente servidor y la interfaz de visu
 El proyecto se desarrolló en el campus de UNIFRANZ Cochabamba. La validación empírica del prototipo se realizó en un aula de la Facultad de Ingeniería con capacidad nominal de 35 estudiantes, dimensiones aproximadas de 7 × 6 metros, ventilación natural por dos ventanas laterales y una puerta. El aula tiene cobertura WiFi institucional estable y conexión eléctrica disponible para alimentar el dispositivo por USB.
 `;
 
+// ── Fase 4: Cap II — Header ─────────────────────────────────────────────────
+const CAP2_HEADER = `# CAPÍTULO II — INVESTIGACIÓN
+
+El presente capítulo desarrolla el análisis del entorno tecnológico y de mercado del artefacto IoT propuesto, así como la investigación de campo realizada para fundamentar las decisiones de diseño. La estructura sigue la guía UNIFRANZ 2017 sección 4.2.3 y se organiza en cinco bloques: análisis del macroentorno mediante PESTEL aplicado al sector tecnológico-educativo (sección 2.1), análisis del microentorno con el modelo de las cinco fuerzas de Porter sobre el mercado IoT educativo (sección 2.2), análisis matricial con MEFE-MEFI-FODA (sección 2.3), metodología de investigación aplicada (sección 2.4) y resultados del estudio de mercado dirigido a instituciones educativas medianas (sección 2.5).
+`;
+
+// ── Fase 5: 2.1 PESTEL ──────────────────────────────────────────────────────
+const CAP2A_MACROENTORNO = `# 2.1. Análisis del Macroentorno
+
+## 2.1.1. Factores Políticos
+
+El Estado Plurinacional de Bolivia ha priorizado en los últimos años la incorporación de tecnología en el sector educativo a través de programas del Ministerio de Educación y de la Agencia para el Desarrollo de la Sociedad de la Información en Bolivia (ADSIB). Aunque estos programas se han enfocado más en conectividad y dispositivos que en monitoreo ambiental, configuran un marco institucional receptivo. La estabilidad regulatoria del sector tecnológico se considera moderadamente favorable.
+
+## 2.1.2. Factores Económicos
+
+El acceso al hardware electrónico de gama IoT (ESP32, sensores Sensirion y NovaFitness) en Bolivia se hace principalmente por importación. Los precios CIF son competitivos en lotes superiores a 50 unidades, con tiempos de entrega de 3 a 5 semanas. El tipo de cambio estable de los últimos años favorece la planificación de costos. La principal restricción económica del mercado objetivo (instituciones educativas medianas) es el presupuesto destinado a infraestructura ambiental, históricamente bajo.
+
+## 2.1.3. Factores Sociales
+
+La pandemia de COVID-19 incrementó significativamente la conciencia social sobre la calidad del aire interior en espacios cerrados. Estudiantes y docentes valoran hoy la transparencia sobre la ventilación de las aulas. Las instituciones educativas privadas, en particular, pueden convertir el monitoreo de calidad del aire en un diferenciador competitivo frente a otras instituciones que no lo realizan.
+
+## 2.1.4. Factores Tecnológicos
+
+La maduración del ecosistema IoT en los últimos cinco años ha sido el factor habilitador central del proyecto. La disponibilidad de microcontroladores con conectividad integrada, sensores ambientales calibrados y plataformas en la nube con planes asequibles ha bajado las barreras técnicas y económicas para soluciones IoT educativas. La cobertura WiFi en aulas universitarias es generalmente estable. El factor tecnológico es claramente favorable.
+
+## 2.1.5. Factores Ecológicos
+
+El artefacto contribuye directamente a la dimensión ecológica del entorno educativo al permitir gestionar la ventilación con datos en lugar de intuición, lo que reduce el consumo energético innecesario de aire acondicionado en climas templados como Cochabamba. La huella ambiental del propio artefacto es baja: consumo eléctrico bajo (5V por USB), componentes con vida útil superior a cinco años y diseño modular que facilita la reparación.
+
+## 2.1.6. Factores Legales
+
+Las disposiciones legales aplicables incluyen las regulaciones de la Autoridad de Fiscalización y Control Social de Telecomunicaciones (ATT) sobre potencia de transmisión inalámbrica (WiFi 2,4 GHz dentro de los límites permitidos), la Ley N.° 453 de Defensa del Consumidor para la comercialización futura del artefacto y las normativas institucionales internas de cada universidad sobre instalación de dispositivos en aulas. Ninguna de estas regulaciones bloquea el proyecto; todas son cumplibles con diseño adecuado.
+
+## 2.1.7. Síntesis del Análisis PESTEL
+
+El balance del macroentorno es **favorable** al proyecto. Los factores tecnológicos y sociales son las palancas más fuertes; los factores económicos son moderadamente favorables con la principal restricción en el presupuesto del mercado objetivo. Esta restricción es precisamente lo que el proyecto aborda con un diseño de bajo costo unitario.
+`;
+
+// ── Fase 6: 2.2 Microentorno (Porter sobre mercado IoT educativo) ──────────
+const CAP2B_MICROENTORNO = `# 2.2. Análisis del Microentorno
+
+El análisis del microentorno aplicó el modelo de las cinco fuerzas de porter al mercado del IoT educativo en Bolivia.
+
+## 2.2.1. Poder de Negociación de los Proveedores
+
+Los proveedores son los fabricantes y distribuidores de componentes electrónicos. Su poder se evaluó como **moderado a alto**: la cadena de importación impone tiempos de entrega y costos logísticos que el proyecto debe absorber. Se mitiga mediante compras en lotes y selección de componentes de marcas con presencia confirmada en distribuidores latinoamericanos.
+
+## 2.2.2. Poder de Negociación de los Clientes
+
+Los clientes son instituciones educativas medianas. Su poder es **alto**: pueden optar por no comprar, postergar la decisión, comprar productos importados existentes (a 6 veces el precio) o construir soluciones internas. El argumento de venta debe ser claro: costo accesible, soporte local, replicabilidad institucional.
+
+## 2.2.3. Amenaza de Nuevos Entrantes
+
+La amenaza es **moderada**. Las barreras de entrada al diseño IoT son bajas (la tecnología está documentada), pero las barreras a la profesionalización del producto (soporte, documentación, capacitación, garantía) son altas. La ventaja competitiva no proviene del hardware sino de la propuesta de valor consolidada y de la red de instituciones cliente.
+
+## 2.2.4. Amenaza de Productos Sustitutos
+
+Los sustitutos directos son los sistemas comerciales importados (más caros pero con marca y soporte de fabricante). Los sustitutos indirectos son medidores manuales o mediciones puntuales sin monitoreo continuo. La amenaza se evaluó como **moderada**: la brecha de precio del proyecto frente a los importados es significativa, lo que sostiene su atractivo.
+
+## 2.2.5. Rivalidad entre Competidores Existentes
+
+La rivalidad entre soluciones IoT educativas hechas localmente es **baja**: el mercado es incipiente, con muy pocos proyectos comerciales activos. La rivalidad con cadenas de venta de productos importados es indirecta y se compite por precio + soporte local.
+
+## 2.2.6. Síntesis del Análisis Porter
+
+El sector presenta condiciones **favorables a moderadas** para la entrada del proyecto: baja rivalidad local, brecha de precio significativa frente a sustitutos importados, mercado con potencial de crecimiento sostenido por la conciencia post-pandemia sobre la calidad del aire interior.
+`;
+
+// ── Fase 7: 2.3 Análisis Matricial ──────────────────────────────────────────
+const CAP2C_MATRICIAL = `# 2.3. Análisis Matricial
+
+## 2.3.1. Matriz MEFE
+
+| Factor externo | Peso | Calificación | Puntuación |
+|---|---:|---:|---:|
+| Maduración del ecosistema IoT (sensores accesibles) | 0,15 | 4 | 0,60 |
+| Conciencia post-pandemia sobre calidad del aire interior | 0,13 | 4 | 0,52 |
+| Tipo de cambio estable favorable a importación | 0,08 | 3 | 0,24 |
+| Cobertura WiFi institucional creciente | 0,10 | 3 | 0,30 |
+| Marca de sustitutos comerciales importados | 0,11 | 2 | 0,22 |
+| Cadena de importación con tiempos de entrega largos | 0,10 | 2 | 0,20 |
+| Bajo presupuesto institucional para sensores ambientales | 0,12 | 1 | 0,12 |
+| Disponibilidad de plataformas en la nube con planes free/low-cost | 0,09 | 3 | 0,27 |
+| Posibilidad de alianzas con facultades de Ingeniería | 0,08 | 3 | 0,24 |
+| Regulación ATT cumplible | 0,04 | 3 | 0,12 |
+| **Total** | **1,00** | | **2,83** |
+
+## 2.3.2. Matriz MEFI
+
+| Factor interno | Peso | Calificación | Puntuación |
+|---|---:|---:|---:|
+| Costo unitario 80% inferior a sustitutos importados | 0,18 | 4 | 0,72 |
+| Diseño modular replicable | 0,12 | 4 | 0,48 |
+| Validación empírica en aula real | 0,10 | 3 | 0,30 |
+| Equipo con formación de ingeniería | 0,08 | 3 | 0,24 |
+| Sin canal de distribución consolidado | 0,12 | 1 | 0,12 |
+| Sin red de soporte post-venta | 0,11 | 1 | 0,11 |
+| Sin marca reconocida en el sector educativo | 0,09 | 2 | 0,18 |
+| Sin capital inicial de fabricación a escala | 0,11 | 2 | 0,22 |
+| Documentación técnica completa del prototipo | 0,09 | 3 | 0,27 |
+| **Total** | **1,00** | | **2,64** |
+
+## 2.3.3. FODA Estratégico
+
+| | **Oportunidades (O)** | **Amenazas (A)** |
+|---|---|---|
+| **Fortalezas (F)** | **FO:** Aprovechar la ventaja de costo para penetrar el mercado de instituciones medianas. Apalancar la validación empírica como caso documentado. | **FA:** Diferenciarse de los importados por soporte local y replicabilidad. Mitigar tiempos de importación con stock de seguridad de componentes. |
+| **Debilidades (D)** | **DO:** Construir red de distribución a través de alianzas con facultades de Ingeniería. Aprovechar plataformas en la nube de bajo costo para reducir inversión inicial. | **DA:** Iniciar con pilotos en 3-5 instituciones aliadas antes de escalar. Construir marca y reputación con casos documentados antes de invertir en marketing masivo. |
+
+MEFE 2,83 y MEFI 2,64 ubican al proyecto en posición "crecer y construir" en la matriz IE, lo que sustenta una estrategia ofensiva con base en las fortalezas internas (costo, modularidad) y aprovechamiento de las oportunidades del entorno tecnológico-social.
+`;
+
+// ── Fase 8: 2.4 Metodología ──────────────────────────────────────────────────
+const CAP2D_METODOLOGIA = `# 2.4. Metodología de Investigación
+
+## 2.4.1. Tipo y Diseño
+
+La investigación realizada fue de tipo **aplicada** con enfoque **mixto** (revisión técnica documental + estudio empírico cualitativo y cuantitativo). El alcance es **descriptivo y experimental**: descriptivo en la caracterización del mercado y de las opciones técnicas, experimental en la fase de construcción y validación del prototipo. El diseño fue **no experimental para el estudio de mercado** y **experimental para la validación del prototipo**.
+
+## 2.4.2. Métodos
+
+- **Método deductivo** para la selección de componentes (de los principios técnicos a los componentes concretos).
+- **Método experimental** para la validación del prototipo en aula real.
+- **Método analítico-sintético** para la integración de hallazgos en el diseño final.
+
+## 2.4.3. Fuentes y Técnicas
+
+### Revisión Técnica Documental
+
+Se revisaron fichas técnicas (datasheets) de microcontroladores y sensores candidatos, normativa OMS y ASHRAE sobre calidad del aire interior, y literatura técnica sobre arquitecturas IoT educativas. Variables extraídas: exactitud declarada, rango de medición, costo CIF Bolivia, disponibilidad en distribuidores latinoamericanos.
+
+### Entrevistas a Responsables IT Institucionales
+
+Se entrevistó a 7 responsables del área de Tecnologías de la Información de instituciones educativas medianas del área urbana de Cochabamba (5 universidades privadas + 2 colegios secundarios privados con bachillerato técnico). La entrevista cubrió: presupuesto disponible para iniciativas de monitoreo ambiental, capacidad técnica del personal IT para mantener un sistema IoT, expectativas sobre precio y soporte, disposición a probar un piloto.
+
+### Validación Empírica del Prototipo
+
+Se instaló el prototipo en un aula de la Facultad de Ingeniería de UNIFRANZ Cochabamba durante 4 semanas (marzo-abril 2025), cubriendo 12 sesiones de clase y 6 sesiones sin clase como control. Variables medidas: CO2, PM2,5, temperatura, humedad cada 30 segundos. Variables comparadas contra patrón de referencia: lectura del SCD30 contrastada con un medidor calibrado de referencia prestado por el laboratorio de Ingeniería Ambiental.
+
+## 2.4.4. Procesamiento
+
+Los datos de validación se procesaron con Python y la librería pandas. Se calculó error relativo medio del prototipo contra patrón, latencia promedio de la alerta y disponibilidad operativa (% del tiempo en línea). Los datos de las entrevistas se analizaron con codificación temática.
+`;
+
+// ── Fase 9: 2.5 Mercado ──────────────────────────────────────────────────────
+const CAP2E_MERCADO = `# 2.5. Estudio de Mercado
+
+## 2.5.1. Resultados de las Entrevistas a Responsables IT
+
+De los 7 responsables IT entrevistados:
+
+- **Presupuesto disponible:** 5 de 7 reportaron tener presupuesto anual entre Bs. 8.000 y Bs. 25.000 destinable a iniciativas tecnológicas no críticas. El rango cubre con holgura la adquisición de 10 a 30 unidades del artefacto.
+- **Capacidad técnica:** 7 de 7 cuentan con personal capaz de instalar el dispositivo siguiendo manual; 4 de 7 cuentan con personal capaz de configurar y mantener la plataforma de visualización.
+- **Expectativa de precio:** rango aceptado entre Bs. 600 y Bs. 1.200 por unidad. El precio objetivo del proyecto (Bs. 720) cae dentro del rango aceptado.
+- **Soporte esperado:** 6 de 7 valoran "muy importante" o "imprescindible" el soporte técnico local con tiempo de respuesta inferior a 48 horas.
+- **Disposición a piloto:** 5 de 7 manifestaron disposición favorable a recibir un piloto sin compromiso de compra durante 30 días.
+
+## 2.5.2. Tamaño del Mercado Potencial
+
+El área urbana de Cochabamba cuenta con aproximadamente 28 universidades e institutos de educación superior con un total estimado de 1.150 aulas activas. Considerando un escenario inicial de 1 dispositivo por cada 4 aulas (cobertura selectiva por sector más concurrido), el mercado potencial inmediato se estima en 280 unidades. Ampliando al sector secundario privado y a otras ciudades del eje (La Paz, Santa Cruz), el mercado potencial expandido supera las 1.500 unidades.
+
+## 2.5.3. Cuota de Mercado Objetivo
+
+La proyección comercial considera una cuota de mercado objetivo de 200 unidades en 3 años: 40 unidades el primer año (instituciones aliadas iniciales), 70 el segundo y 90 el tercero. Esta proyección se utilizó en la evaluación financiera del Capítulo III.
+
+## 2.5.4. Síntesis del Diagnóstico
+
+El mercado presenta condiciones favorables: precio objetivo dentro del rango aceptado, capacidad técnica institucional suficiente, disposición a piloto, presupuesto disponible. La principal palanca de adopción es construir 3 a 5 casos exitosos en instituciones aliadas durante el primer año.
+`;
+
 export const ARTEFACTO_DEMO_SEED: DemoSeed = {
   seed_id: "artefacto-iot-aire-v1",
   universidad_id: "unifranz-cba-001",
@@ -210,6 +380,12 @@ export const ARTEFACTO_DEMO_SEED: DemoSeed = {
     "ph-unifranz-pg-artefacto-resumen": RESUMEN,
     "ph-unifranz-pg-artefacto-introduccion": INTRODUCCION,
     "ph-unifranz-pg-artefacto-cap1": CAP1_MARCO_TEORICO,
-    // Cap II y Cap III en commits subsiguientes.
+    "ph-unifranz-pg-artefacto-cap2-investigacion": CAP2_HEADER,
+    "ph-unifranz-pg-artefacto-cap2a-macroentorno": CAP2A_MACROENTORNO,
+    "ph-unifranz-pg-artefacto-cap2b-microentorno": CAP2B_MICROENTORNO,
+    "ph-unifranz-pg-artefacto-cap2c-matricial": CAP2C_MATRICIAL,
+    "ph-unifranz-pg-artefacto-cap2d-metodologia": CAP2D_METODOLOGIA,
+    "ph-unifranz-pg-artefacto-cap2e-mercado": CAP2E_MERCADO,
+    // Cap III (Diseño del Artefacto) y cierre en commits subsiguientes.
   },
 };
