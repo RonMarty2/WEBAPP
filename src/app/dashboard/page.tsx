@@ -131,31 +131,7 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-transparent" style={{ minHeight: "100vh", position: "relative", zIndex: 10, padding: 24 }}>
-      {/* DIAGNÓSTICO TEMPORAL — muestra el rol real para confirmar si el
-          cookie/BD están alineados. Si dice "ROL: admin" pero NO sos admin,
-          el JWT cookie está stale. Si dice "ROL: user/estudiante" pero igual
-          ves botones de admin, los componentes no están leyendo bien. */}
-      <div style={{
-        position: "fixed",
-        top: "max(8px, env(safe-area-inset-top, 8px))",
-        left: 8,
-        right: 8,
-        zIndex: 99999,
-        background: user.role === "admin" ? "#dc2626" : "#16a34a",
-        color: "#fff",
-        padding: "6px 10px",
-        fontSize: 11,
-        fontWeight: 700,
-        borderRadius: 6,
-        fontFamily: "ui-monospace, monospace",
-        letterSpacing: "0.04em",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-        pointerEvents: "none",
-        textAlign: "center",
-      }}>
-        ROL: {user.role ?? "?"} | EMAIL: {user.email ?? "?"} | v20-DIAG
-      </div>
-      <div style={{ maxWidth: 900, margin: "0 auto", paddingTop: 32 }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
@@ -187,12 +163,14 @@ export default function DashboardPage() {
             <Link href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </Link>
-            <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5L12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
-              </svg>
-              Admin
-            </Link>
+            {user.role === "admin" && (
+              <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 2l2.5 6.5L21 9l-5 4.5L17.5 21 12 17l-5.5 4L8 13.5 3 9l6.5-.5L12 2z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+                </svg>
+                Admin
+              </Link>
+            )}
             <button onClick={handleLogout} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(248,113,113,0.3)", background: "transparent", color: "#f87171", fontSize: 13, cursor: "pointer" }}>
               Cerrar sesión
             </button>
