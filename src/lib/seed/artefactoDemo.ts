@@ -694,6 +694,113 @@ El proyecto mantiene viabilidad si las unidades vendidas en el año 3 caen hasta
 Los indicadores financieros sustentan la viabilidad económica del proyecto bajo los supuestos. El margen es menor al observado en proyectos de Pre-Factibilidad típicos porque se trata de un producto técnico nuevo en un mercado emergente. La validación empírica del prototipo y la disposición a piloto documentada en el Cap II reducen significativamente el riesgo de no cumplimiento de la proyección comercial.
 `;
 
+const CONCLUSIONES = `# CONCLUSIONES
+
+**Primera.** El diseño propuesto, que combina microcontrolador ESP32, sensores SCD30 (CO2) y SDS011 (PM2,5), pantalla OLED, LED RGB y carcasa impresa en 3D, permite construir un sistema IoT de monitoreo de calidad del aire con costo unitario real de Bs. 680, inferior al objetivo de Bs. 1.000 planteado en la hipótesis general.
+
+**Segunda.** La validación empírica del prototipo durante 4 semanas en un aula de UNIFRANZ Cochabamba demostró un error medio de medición del 2,8% para CO2 y del 11,4% para PM2,5 frente a un medidor de referencia calibrado, exactitudes compatibles con el caso de uso (alertar sobre umbrales OMS) y comparables a sistemas comerciales de mayor costo.
+
+**Tercera.** La disponibilidad operativa del 99,4% y la latencia de alerta promedio de 7,8 segundos cumplen los requerimientos no funcionales RNF4 y RNF5 establecidos en el Capítulo III sección 3.1. El módulo de buffer offline operó correctamente, sincronizando todas las mediciones tras cada reconexión WiFi.
+
+**Cuarta.** El estudio de mercado a 7 responsables IT institucionales confirmó que el precio objetivo de Bs. 720 está dentro del rango aceptado (Bs. 600 a Bs. 1.200), que la capacidad técnica institucional es suficiente para instalación y operación, y que 5 de 7 instituciones manifestaron disposición favorable a recibir un piloto. Esto sustenta la viabilidad comercial del artefacto.
+
+**Quinta.** La evaluación financiera con horizonte de tres años, tasa de descuento del 14% e inversión inicial de Bs. 68.500, arrojó un VAN positivo de Bs. 56.480, una TIR del 17,4% y una relación B/C de 1,12, con período de recuperación de 2,1 años. El análisis de sensibilidad identificó que el factor crítico es la cuota comercial del año 3 (umbral mínimo 65 unidades).
+
+**Sexta.** Las observaciones del aula durante el período de validación documentaron concentraciones de CO2 superiores a 1.000 ppm en el 100% de las sesiones de 2 horas o más con ocupación superior al 75%, y respuesta efectiva del docente al abrir ventanas tras la alerta (caída del 35% del CO2 en menos de 4 minutos). Esto evidencia la utilidad concreta del sistema para gestionar la ventilación con datos en lugar de intuición.
+
+**Séptima.** En conjunto, los resultados sustentan la viabilidad técnica, operativa y económica del artefacto propuesto. El proyecto demuestra que es posible construir soluciones IoT educativas de calidad técnica comparable a sistemas comerciales importados a un costo significativamente inferior, aprovechando la maduración del ecosistema de componentes accesibles.
+`;
+
+const RECOMENDACIONES = `# RECOMENDACIONES
+
+**Primera.** Iniciar la fase comercial con 3 a 5 instituciones aliadas que reciban piloto durante 30 días sin compromiso de compra. La construcción de casos exitosos documentados es el primer activo comercial del proyecto.
+
+**Segunda.** Estandarizar el procedimiento de ensamble en un manual ilustrado paso a paso, lo que permite delegar la fabricación a personal sin formación técnica avanzada y reduce el cuello de botella del proyecto.
+
+**Tercera.** Negociar acuerdo de compra en lote con un distribuidor regional de componentes electrónicos para garantizar abastecimiento estable y reducir el costo unitario en aproximadamente 12% en órdenes superiores a 100 unidades.
+
+**Cuarta.** Desarrollar una versión 2 del firmware que incorpore calibración automática del SDS011 contra el SCD30 cuando ambos están en línea, lo que mejoraría la exactitud de PM2,5 a niveles cercanos al 8%.
+
+**Quinta.** Documentar el caso de implementación en UNIFRANZ como caso académico publicable. Una solución IoT educativa con validación empírica de 4 semanas y costo inferior a Bs. 700 constituye una contribución relevante para la literatura local sobre tecnología aplicada a educación.
+
+**Sexta.** Liberar el código del firmware bajo licencia abierta (MIT o GPL) para fomentar adopción institucional y construir comunidad alrededor del proyecto. La carcasa STL ya está disponible para descarga libre.
+
+**Séptima.** Diseñar al cierre del año 2 una versión expandida del sistema que incorpore medición de COVs (compuestos orgánicos volátiles) y nivel sonoro, ampliando el caso de uso a entornos educativos más exigentes (laboratorios, salas de música).
+
+**Octava.** Mantener el servidor backend con respaldo diario automatizado y monitoreo de disponibilidad, dado que la confianza institucional en el sistema depende de la continuidad operativa del componente en la nube.
+`;
+
+const BIBLIOGRAFIA = `# BIBLIOGRAFÍA
+
+american society of heating, refrigerating and air-conditioning engineers. (2019). *ASHRAE Standard 62.1-2019: Ventilation for acceptable indoor air quality*. Atlanta: ASHRAE.
+
+autoridad de fiscalización y control social de telecomunicaciones y transportes. (2022). *Reglamento técnico de emisiones radioeléctricas para dispositivos de uso libre*. La Paz: ATT.
+
+estado plurinacional de bolivia. (2013). *Ley N.° 453 de Defensa del Consumidor*. Gaceta Oficial del Estado Plurinacional de Bolivia.
+
+oms. (2021). *WHO global air quality guidelines: particulate matter, ozone, nitrogen dioxide, sulfur dioxide and carbon monoxide*. Ginebra: Organización Mundial de la Salud.
+
+rajkumar, r., lee, i., sha, l., & stankovic, j. (2010). Cyber-physical systems: the next computing revolution. *Proceedings of the 47th Design Automation Conference*, 731–736.
+
+sapag chain, n. (2011). *Proyectos de inversión: formulación y evaluación* (2.ª ed.). Santiago de Chile: Pearson Educación.
+
+sensirion. (2023). *Datasheet Sensirion SCD30 — CO2 and RH/T sensor module*. Stäfa: Sensirion AG.
+
+novafitness. (2022). *Datasheet NovaFitness SDS011 — Laser PM2.5 sensor*. Jinan: NovaFitness.
+`;
+
+const COMPILACION = `# COMPILACIÓN FINAL
+
+El documento se consolidó en formato LaTeX siguiendo la guía oficial UNIFRANZ Cochabamba (edición 2017). El paquete final incluye:
+
+- Documento principal \`.tex\` con todos los capítulos integrados.
+- Bibliografía APA con apellidos en minúscula (norma UNIFRANZ).
+- Carátula con datos del estudiante, tutor, programa, gestión y mes-año.
+- Resumen del trabajo (250 palabras) en preliminares.
+- Anexos: archivos STL de la carcasa, código fuente del firmware (685 líneas), código fuente del backend Node.js, código fuente del frontend React, dataset de las 1.840 mediciones pareadas de la validación.
+
+El paquete está listo para compilarse en Overleaf o distribución LaTeX local. Los anexos técnicos se entregan en repositorio Git público.
+`;
+
+const DEFENSA = `# BANCO DE PREGUNTAS — DEFENSA
+
+## Bloque 1 — Diseño Técnico
+
+**Pregunta:** ¿Por qué no usar un sensor MQ-135 que cuesta una décima parte del SCD30?
+
+*Respuesta orientativa:* El MQ-135 es un sensor genérico de gases que no diferencia CO2 de otros gases reductores y requiere calibración periódica manual con valor conocido. Su exactitud es del orden de ±200 ppm en el mejor caso. El SCD30 es un sensor NDIR específico para CO2 con exactitud ±30 ppm y calibración automática por algoritmo del fabricante. Para un sistema que dispara alertas educativas basadas en umbrales, la exactitud del SCD30 es necesaria. La diferencia de costo se justifica por la confiabilidad del dato.
+
+## Bloque 2 — Validación
+
+**Pregunta:** ¿Cuatro semanas es tiempo suficiente para validar un dispositivo IoT?
+
+*Respuesta orientativa:* Para validar exactitud de medición y confiabilidad operativa en un caso de uso definido, 4 semanas y 1.840 mediciones pareadas son una base estadística robusta. Lo que 4 semanas no permiten validar es el comportamiento a largo plazo (degradación de sensores tras 12-24 meses), que requeriría un estudio longitudinal. Este límite se reconoce en las recomendaciones del proyecto como línea de trabajo futuro.
+
+## Bloque 3 — Comercialización
+
+**Pregunta:** ¿La proyección de vender 200 unidades en 3 años no es muy optimista?
+
+*Respuesta orientativa:* El mercado potencial inmediato estimado en el Cap II sección 2.5.2 es de 280 unidades solo en el área urbana de Cochabamba. La cuota objetivo de 200 unidades representa el 71% de ese mercado inmediato, lo cual es ambicioso pero alcanzable considerando: ausencia de competencia local directa, brecha de precio del 80% frente a importados, y disposición a piloto documentada en 5 de 7 instituciones entrevistadas. El análisis de sensibilidad reconoce que por debajo de 65 unidades en el año 3 el proyecto pierde viabilidad, lo que delimita el riesgo.
+
+## Bloque 4 — Mantenimiento y Soporte
+
+**Pregunta:** ¿Quién mantiene el servidor backend si el estudiante autor termina su carrera?
+
+*Respuesta orientativa:* El plan comercial contempla profesionalizar el soporte al cierre del año 1: contratación a tiempo parcial de un técnico de mantenimiento, documentación operativa completa del servidor, y eventualmente migración del servidor a una empresa de hospedaje administrado. El servidor está diseñado con bajo acoplamiento al desarrollador original; cualquier ingeniero con experiencia Node.js puede asumir el mantenimiento con la documentación entregada.
+
+## Bloque 5 — Replicabilidad
+
+**Pregunta:** ¿Cómo se garantiza la replicabilidad por otras instituciones que quieran construir su propio sistema?
+
+*Respuesta orientativa:* El proyecto entrega: archivos STL de la carcasa, código fuente del firmware bajo licencia abierta, código fuente del backend y del frontend, manual de ensamble paso a paso, manual de operación y manual de mantenimiento. Cualquier institución con una impresora 3D básica y acceso a los componentes electrónicos puede replicar el sistema. La estandarización del procedimiento es justamente lo que diferencia el proyecto de soluciones cerradas comerciales.
+
+## Bloque 6 — Limitaciones
+
+**Pregunta:** ¿Cuáles son las principales limitaciones reconocidas del proyecto?
+
+*Respuesta orientativa:* Tres limitaciones reconocidas: primera, la exactitud del sensor PM2,5 (error del 11,4%) es inferior a la de equipos profesionales y no resulta adecuada para estudios epidemiológicos formales, solo para alertas operativas; segunda, la validación se hizo en un único tipo de aula, por lo que el comportamiento en otros entornos (laboratorios, salas grandes, ambientes industriales) requiere validación adicional; tercera, la dependencia del WiFi institucional implica que en redes inestables la experiencia se degrada, situación que el módulo offline mitiga pero no elimina.
+`;
+
 export const ARTEFACTO_DEMO_SEED: DemoSeed = {
   seed_id: "artefacto-iot-aire-v1",
   universidad_id: "unifranz-cba-001",
@@ -729,7 +836,10 @@ export const ARTEFACTO_DEMO_SEED: DemoSeed = {
     "ph-unifranz-pg-artefacto-cap3c-prototipo": CAP3C_PROTOTIPO,
     "ph-unifranz-pg-artefacto-cap3d-validacion": CAP3D_VALIDACION,
     "ph-unifranz-pg-artefacto-cap3e-financiera": CAP3E_FINANCIERA,
-    // Cierre (conclusiones, recomendaciones, bibliografía, compilación,
-    // defensa) en el próximo commit.
+    "ph-unifranz-pg-artefacto-conclusiones": CONCLUSIONES,
+    "ph-unifranz-pg-artefacto-recomendaciones": RECOMENDACIONES,
+    "ph-unifranz-pg-artefacto-bibliografia": BIBLIOGRAFIA,
+    "ph-unifranz-pg-artefacto-compilacion": COMPILACION,
+    "ph-unifranz-pg-artefacto-defensa": DEFENSA,
   },
 };
