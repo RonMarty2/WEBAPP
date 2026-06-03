@@ -1216,8 +1216,9 @@ html.is-mobile-ua header > div[style*="flex: 1"] {
 }
 
 /* AdminViewToggle (botón flotante "Vista admin → estudiante"): en móvil lo
-   subimos 76px más arriba para no chocar con el botón verde de WhatsApp. */
+   subimos sobre el botón verde de WhatsApp (que ocupa ~28-80px desde abajo).
+   bottom:110 lo deja con margen visible arriba del WhatsApp. */
 html.is-mobile-ua .admin-view-toggle-fab {
-  bottom: 94px !important;
+  bottom: 110px !important;
   right: 16px !important;
 }
