@@ -32,20 +32,6 @@ export async function POST() {
 
     const seed = AGROHUB_DEMO_SEED;
 
-    // ── De-duplicación: ¿el usuario ya tiene este demo cargado? ──────────────
-    const existentes = await dbListProyectos(user.id);
-    const yaCargado = existentes.find(
-      (p) => (p.academic_context as Record<string, unknown> | undefined)?.demo_seed_id === seed.seed_id,
-    );
-    if (yaCargado) {
-      return NextResponse.json({
-        ok: true,
-        ya_existia: true,
-        proyecto_id: yaCargado.id,
-        url_workspace: `/projects/${yaCargado.id}/workspace`,
-      });
-    }
-
     // ── Resolver las fases UNIFRANZ para validar IDs y calcular estado_fase ──
     const phaseDefs = phaseDefinitionsForProject({
       servicioId: seed.servicio_id,
@@ -72,6 +58,54 @@ export async function POST() {
     phaseDefs.forEach((p, idx) => {
       if (phaseContents[p.id]) estadoFase = Math.max(estadoFase, idx);
     });
+
+    // ── Si el usuario ya tiene un demo AgroHub cargado, hacemos UPDATE de las
+    //    fases en lugar de retornar early. Esto permite "re-cargar" el demo
+    //    cuando se agregan nuevas fases generadas al seed (ej. al pasar de
+    //    v1 con solo Introducción a v2 con las 20 fases). El seed_id se
+    //    actualiza al nuevo valor para indicar la versión aplicada.
+    const existentes = await dbListProyectos(user.id);
+    const previo = existentes.find((p) => {
+      const ctx = p.academic_context as Record<string, unknown> | undefined;
+      const sid = ctx?.demo_seed_id as string | undefined;
+      // Match cualquier versión del demo AgroHub (v1, v2, etc.)
+      return typeof sid === "string" && sid.startsWith("agrohub-prefactibilidad");
+    });
+
+    if (previo) {
+      // Mergeamos contenidos nuevos con los existentes (los nuevos prevalecen).
+      const mergedPhaseContents = {
+        ...(previo.phase_contents ?? {}),
+        ...phaseContents,
+      };
+      const updatedCtx: Record<string, unknown> = {
+        ...(previo.academic_context as Record<string, unknown> | undefined ?? {}),
+        ...seed.academic_context_extra,
+        demo_seed_id: seed.seed_id,
+        importado: true,
+        import_meta: {
+          importado_at: new Date().toISOString(),
+          importado_por: user.id,
+          origen: "seed-demo AgroHub (update v" + seed.seed_id + ")",
+        },
+      };
+      await dbUpdateProyecto(previo.id, {
+        phase_contents: mergedPhaseContents,
+        academic_context: updatedCtx,
+        estado_fase: Math.max(previo.estado_fase ?? 0, estadoFase),
+        tema_aprobado: seed.tema,
+        titulo_provisional: seed.tema,
+      });
+      return NextResponse.json({
+        ok: true,
+        actualizado: true,
+        proyecto_id: previo.id,
+        fases_cargadas: Object.keys(phaseContents),
+        fases_ignoradas: ignoradas,
+        estado_fase: estadoFase,
+        url_workspace: `/projects/${previo.id}/workspace`,
+      });
+    }
 
     const academic_context: Record<string, unknown> = {
       ...seed.academic_context_extra,
