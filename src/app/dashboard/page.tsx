@@ -131,7 +131,31 @@ export default function DashboardPage() {
 
   return (
     <div className="bg-transparent" style={{ minHeight: "100vh", position: "relative", zIndex: 10, padding: 24 }}>
-      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      {/* DIAGNÓSTICO TEMPORAL — muestra el rol real para confirmar si el
+          cookie/BD están alineados. Si dice "ROL: admin" pero NO sos admin,
+          el JWT cookie está stale. Si dice "ROL: user/estudiante" pero igual
+          ves botones de admin, los componentes no están leyendo bien. */}
+      <div style={{
+        position: "fixed",
+        top: "max(8px, env(safe-area-inset-top, 8px))",
+        left: 8,
+        right: 8,
+        zIndex: 99999,
+        background: user.role === "admin" ? "#dc2626" : "#16a34a",
+        color: "#fff",
+        padding: "6px 10px",
+        fontSize: 11,
+        fontWeight: 700,
+        borderRadius: 6,
+        fontFamily: "ui-monospace, monospace",
+        letterSpacing: "0.04em",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+        pointerEvents: "none",
+        textAlign: "center",
+      }}>
+        ROL: {user.role ?? "?"} | EMAIL: {user.email ?? "?"} | v20-DIAG
+      </div>
+      <div style={{ maxWidth: 900, margin: "0 auto", paddingTop: 32 }}>
 
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32, flexWrap: "wrap", gap: 12 }}>
