@@ -50,10 +50,18 @@ export default function DashboardPage() {
   const [seedingDemo, setSeedingDemo] = useState(false);
 
   useEffect(() => {
-    fetch("/api/auth/me")
+    // cache:"no-store" + Date.now() — evita cache del navegador / SW.
+    fetch(`/api/auth/me?t=${Date.now()}`, { cache: "no-store", credentials: "include" })
       .then(r => r.json())
       .then(d => {
         if (!d.user) { router.replace("/login"); return; }
+        // Si el servidor regeneró el cookie (rol/plan cambió en BD), recargamos
+        // la página para que TODOS los componentes vean el state nuevo.
+        // El cookie ya fue actualizado por el servidor; solo hace falta refrescar.
+        if (d.__refreshed) {
+          window.location.reload();
+          return;
+        }
         setUser(d.user);
         setLoading(false);
       })
