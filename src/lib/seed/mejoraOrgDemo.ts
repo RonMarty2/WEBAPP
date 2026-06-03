@@ -702,6 +702,135 @@ El proyecto mantiene viabilidad financiera ante variaciones razonables de las va
 
 Los indicadores VAN, TIR, B/C y Payback sustentan la viabilidad financiera de la propuesta bajo los supuestos definidos. La sensibilidad muestra robustez ante variaciones moderadas. El principal riesgo financiero identificado es el ritmo de adopción del nuevo sistema por parte del personal, que el plan de implementación aborda con el programa de capacitación y el piloto previo al despliegue.
 `;
+// ── Fase 16: Conclusiones ───────────────────────────────────────────────────
+// Contexto: documento completo. Las conclusiones sintetizan los hallazgos
+// principales de Caps I, II y III en proposiciones cerradas y numeradas.
+const CONCLUSIONES = `# CONCLUSIONES
+
+A partir del análisis desarrollado en los capítulos I, II y III del presente Proyecto de Grado, se formularon las siguientes conclusiones:
+
+**Primera.** El diagnóstico institucional de BoliFarma S.R.L. evidenció una tasa de rotura de stock del 12,4% mensual durante el último semestre de 2024, con pérdida de venta estimada en Bs. 38.500 mensuales y un deterioro de la confianza del cliente medido por la caída del 18% interanual en visitas repetidas. La rotura se concentra en medicamentos de venta libre de alta rotación y en medicamentos de uso crónico.
+
+**Segunda.** El diagnóstico identificó tres causas estructurales del problema: ausencia de clasificación ABC del inventario, ausencia de modelo formal de cálculo del punto de reorden y de la cantidad económica de pedido, y ausencia de visibilidad cruzada en tiempo real entre las cuatro sucursales de la cadena.
+
+**Tercera.** El análisis matricial arrojó MEFE 2,86 (entorno externo moderadamente favorable) y MEFI 2,19 (debilidades internas significativas), lo que confirma que el espacio de mejora se concentra en la operación interna y resulta abordable con los recursos actuales de la empresa más una inversión incremental acotada.
+
+**Cuarta.** La propuesta de mejora articula seis estrategias en un sistema integrado: clasificación ABC del catálogo, modelo de revisión periódica con EOQ adaptado, sistema de información integrado entre sucursales, programa de capacitación del personal, acuerdo marco con tres distribuidores principales y protocolo de transferencia entre sucursales. Ninguna estrategia funciona aislada; la implementación coordinada es lo que permite alcanzar el objetivo.
+
+**Quinta.** La evaluación financiera con horizonte de tres años, tasa de descuento del 14% e inversión inicial de Bs. 95.000, arrojó un VAN de Bs. 184.620, una TIR del 31,4% y una relación Beneficio-Costo de 1,87. El período de recuperación de la inversión se sitúa en 14 meses. El análisis de sensibilidad demostró robustez del proyecto ante variaciones razonables de las variables críticas.
+
+**Sexta.** Tanto el personal operativo (14 de 16 colaboradores expresaron disposición favorable) como los distribuidores principales (los tres mostraron disposición a firmar acuerdo marco) presentan condiciones favorables para la adopción de la propuesta. El principal factor de éxito identificado es el ritmo de adopción del nuevo sistema, abordado en el plan de implementación con el programa de capacitación y el piloto previo al despliegue completo.
+
+**Séptima.** En conjunto, los resultados sustentan que la propuesta de mejora del sistema de gestión de inventarios de BoliFarma S.R.L. es viable en sus dimensiones operativa, organizacional, financiera y de adopción del personal. Su implementación durante la gestión 2025 presenta condiciones favorables para alcanzar el objetivo de rotura de stock inferior al 4% mensual.
+`;
+
+// ── Fase 17: Recomendaciones ────────────────────────────────────────────────
+const RECOMENDACIONES = `# RECOMENDACIONES
+
+**Primera.** Iniciar la implementación de la propuesta durante el primer trimestre de 2025, aprovechando la disposición favorable del personal y de los distribuidores documentada en el diagnóstico, antes de que cadenas competidoras consoliden ventaja competitiva sobre la dimensión operativa.
+
+**Segunda.** Priorizar la firma de los acuerdos marco con los tres distribuidores principales como primer hito de la implementación. Estos acuerdos reducen la variabilidad externa del sistema y son condición necesaria para que el modelo EOQ funcione con los parámetros calculados.
+
+**Tercera.** Realizar el piloto del sistema en la sucursal de mayor volumen (sucursal 1 del distrito central) antes del despliegue completo, ejecutando la operación paralela (planilla antigua + sistema nuevo) durante 30 días para validar la operación y ajustar reglas antes de escalar.
+
+**Cuarta.** Contratar un consultor externo de gestión de inventarios para acompañar la fase de implementación durante los primeros tres meses. La inversión está prevista en el presupuesto (Bs. 24.000) y mitiga el riesgo de implementación deficiente del nuevo sistema.
+
+**Quinta.** Asignar un responsable interno (preferentemente uno de los farmacéuticos titulados con experiencia operativa) como líder del proyecto durante los seis meses de la implementación, con dedicación parcial pero formalizada. La continuidad de un responsable interno garantiza la apropiación del proyecto por parte de la empresa.
+
+**Sexta.** Mantener la revisión mensual de indicadores aún después del cierre formal del proyecto, integrándola al gobierno operativo regular de la empresa. La sostenibilidad de la mejora depende de no abandonar el seguimiento una vez alcanzada la meta inicial.
+
+**Séptima.** Reinvertir parte del ahorro generado en el segundo año en la expansión del sistema hacia funciones complementarias: integración con el sistema de facturación, módulo de fidelización de clientes y módulo de gestión de medicamentos cercanos al vencimiento. La plataforma elegida permite estas extensiones con costo marginal acotado.
+
+**Octava.** Documentar el caso de implementación al cierre del primer año como referencia interna y eventualmente externa. Una farmacia minorista con cuatro sucursales que reduce su rotura de stock del 12,4% al 4% constituye un caso académico y de gestión de interés para el sector regional.
+`;
+
+// ── Fase 18: Bibliografía ───────────────────────────────────────────────────
+// Contexto: las fuentes citadas a lo largo del documento. APA-UNIFRANZ con
+// apellidos en minúscula. Solo se citan fuentes que aparecen en el cuerpo.
+const BIBLIOGRAFIA = `# BIBLIOGRAFÍA
+
+A continuación se listan las fuentes referenciadas en el cuerpo del presente Proyecto de Grado, ordenadas alfabéticamente por apellido del primer autor, en formato APA con la convención UNIFRANZ de apellidos en minúsculas.
+
+agencia estatal de medicamentos y tecnologías en salud. (2023). *Directrices sobre conservación y trazabilidad de medicamentos en farmacias minoristas*. La Paz: AGEMED.
+
+ballou, r. (2004). *Logística: administración de la cadena de suministro* (5.ª ed.). México: Pearson Educación.
+
+chase, r., jacobs, f., & aquilano, n. (2014). *Administración de operaciones: producción y cadena de suministros* (13.ª ed.). México: McGraw-Hill.
+
+estado plurinacional de bolivia. (2013). *Ley N.° 453 de Defensa del Consumidor*. Gaceta Oficial del Estado Plurinacional de Bolivia.
+
+kotler, p., & armstrong, g. (2017). *Marketing* (16.ª ed.). México: Pearson Educación.
+
+porter, m. e. (1980). *Competitive strategy: techniques for analyzing industries and competitors*. New York: The Free Press.
+
+sapag chain, n. (2011). *Proyectos de inversión: formulación y evaluación* (2.ª ed.). Santiago de Chile: Pearson Educación.
+`;
+
+// ── Fase 19: Compilación ────────────────────────────────────────────────────
+const COMPILACION = `# COMPILACIÓN FINAL
+
+El documento se consolidó en formato LaTeX siguiendo la guía oficial de Organización y Presentación de Trabajos de Grado de UNIFRANZ Cochabamba (edición 2017). El paquete final incluye:
+
+- Documento principal en formato \`.tex\` con todos los capítulos integrados.
+- Bibliografía en formato APA con apellidos en minúsculas (norma UNIFRANZ).
+- Carátula con datos del estudiante, tutor, programa, gestión académica y mes-año de presentación.
+- Índice de contenido, índice de tablas e índice de figuras generados automáticamente.
+- Resumen del trabajo (250 palabras) en las preliminares.
+- Logo institucional UNIFRANZ y plantilla oficial.
+
+El paquete está listo para compilarse en Overleaf o en distribución LaTeX local (TeXLive, MikTeX) y exportar a PDF para impresión empastada o entrega digital al tutor y al tribunal.
+`;
+
+// ── Fase 20: Banco de Preguntas para la Defensa ────────────────────────────
+// Contexto: documento completo. Las preguntas modelo cubren los puntos
+// más sensibles del trabajo y orientan respuestas defendibles.
+const DEFENSA = `# BANCO DE PREGUNTAS — DEFENSA
+
+A continuación se presentan las preguntas más probables que el tribunal académico podría formular durante la defensa oral, organizadas por bloque temático, con una respuesta orientativa que el estudiante debe ajustar a su propia preparación.
+
+## Bloque 1 — Diagnóstico
+
+**Pregunta:** ¿Cómo se calculó la tasa de rotura del 12,4% mensual?
+
+*Respuesta orientativa:* Se calculó mediante revisión documental de los registros de venta y las planillas de inventario de las cuatro sucursales durante los 12 meses previos al estudio. La tasa de rotura se definió como el porcentaje de solicitudes de cliente no atendidas por falta de producto, sobre el total de solicitudes registradas en el sistema. Se valida con la tasa equivalente obtenida en la encuesta a clientes (71,8% reportó al menos un evento de rotura en seis meses).
+
+**Pregunta:** ¿Por qué las tres causas estructurales identificadas y no otras?
+
+*Respuesta orientativa:* Las tres causas surgen de la convergencia entre la revisión documental (los registros muestran órdenes generadas por estimación, sin método formal), las entrevistas al personal (las 16 entrevistas confirman las mismas tres causas con mención mayoritaria) y la auditoría del sistema de información (no integra inventario entre sucursales). Otras causas posibles (problemas del distribuidor, ausencia de stock de seguridad por producto) se descartaron porque no se confirmaron en las tres fuentes.
+
+## Bloque 2 — Propuesta
+
+**Pregunta:** ¿Por qué seis estrategias y no menos? ¿No es demasiada complejidad para una empresa de cuatro sucursales?
+
+*Respuesta orientativa:* Las seis estrategias responden a las tres causas estructurales del diagnóstico más a tres habilitadores necesarios para sostenerlas (capacitación del personal, acuerdo marco con distribuidores, protocolo formal de transferencia). Reducir el número dejaría brechas: por ejemplo, implementar ABC y EOQ sin capacitación produciría adopción deficiente; firmar acuerdo marco sin sistema integrado no resolvería la visibilidad cruzada. Las seis se diseñaron como un sistema cuya integralidad es lo que entrega el resultado.
+
+**Pregunta:** ¿No sería mejor implementar todo en simultáneo en las cuatro sucursales?
+
+*Respuesta orientativa:* El piloto en la sucursal de mayor volumen reduce el riesgo de implementación. Si una regla del modelo necesita ajuste, se corrige sobre una sucursal antes de escalar a las cuatro. El costo del piloto es bajo (un mes adicional) y el beneficio es alto: aprendizaje validado antes del despliegue. Este patrón se documenta en la literatura como práctica estándar de implementación de sistemas operativos.
+
+## Bloque 3 — Evaluación Financiera
+
+**Pregunta:** ¿La proyección de recuperación de venta no es demasiado optimista?
+
+*Respuesta orientativa:* Se aplicó una proyección conservadora del 51% de recuperación de la venta perdida en el año 1 (no del 100%), reconociendo que la implementación es gradual y que algunos clientes que ya migraron no vuelven inmediatamente. El año 2 y 3 se proyectan con 68% sostenido, también por debajo del teórico 100%. El análisis de sensibilidad muestra que aun con menor recuperación el proyecto sigue siendo viable.
+
+**Pregunta:** ¿Por qué tasa de descuento del 14%?
+
+*Respuesta orientativa:* Se construyó como costo de oportunidad ajustado al perfil de riesgo de la empresa: tasa pasiva promedio del sistema bancario boliviano (4-5%) más prima por riesgo país, prima por riesgo sectorial y prima por riesgo específico de un proyecto interno (más bajo que un proyecto greenfield). El resultado de 14% representa el rendimiento mínimo que justifica usar el capital propio en este proyecto en lugar de mantenerlo líquido.
+
+## Bloque 4 — Implementación
+
+**Pregunta:** ¿Y si el sistema de información elegido falla?
+
+*Respuesta orientativa:* El plan contempla operación paralela (planilla antigua + sistema nuevo) durante 30 días en el piloto, lo que permite detectar fallas críticas antes de eliminar la operación previa. Además, el contrato con el proveedor incluye SLA con compromiso de disponibilidad del 99,5% y respaldo diario de datos. En caso de falla mayor, el equipo puede operar temporalmente con planilla manual hasta que el sistema se restablezca.
+
+## Bloque 5 — Sostenibilidad
+
+**Pregunta:** ¿Qué garantiza que la mejora se sostenga después del año 1?
+
+*Respuesta orientativa:* Tres elementos: la apropiación del proyecto por parte del personal (capacitación + farmacéutico responsable como líder interno), el gobierno mensual del sistema con revisión de indicadores ante la Gerencia (no es una mejora "que se hizo y se olvida", se gestiona regularmente) y la evaluación integral al cierre del año con recalibración de los parámetros del modelo. Sin estos tres elementos cualquier mejora operativa se desvanece con el tiempo.
+`;
+
 export const MEJORA_ORG_DEMO_SEED: DemoSeed = {
   seed_id: "mejora-bolifarma-v1",
   universidad_id: "unifranz-cba-001",
@@ -737,7 +866,10 @@ export const MEJORA_ORG_DEMO_SEED: DemoSeed = {
     "ph-unifranz-pg-mejora-org-cap3c-implementacion": CAP3C_IMPLEMENTACION,
     "ph-unifranz-pg-mejora-org-cap3d-seguimiento": CAP3D_SEGUIMIENTO,
     "ph-unifranz-pg-mejora-org-cap3e-financiera": CAP3E_FINANCIERA,
-    // Conclusiones, recomendaciones, bibliografía, compilación y defensa en
-    // el próximo commit.
+    "ph-unifranz-pg-mejora-org-conclusiones": CONCLUSIONES,
+    "ph-unifranz-pg-mejora-org-recomendaciones": RECOMENDACIONES,
+    "ph-unifranz-pg-mejora-org-bibliografia": BIBLIOGRAFIA,
+    "ph-unifranz-pg-mejora-org-compilacion": COMPILACION,
+    "ph-unifranz-pg-mejora-org-defensa": DEFENSA,
   },
 };
