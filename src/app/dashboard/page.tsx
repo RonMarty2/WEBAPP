@@ -233,6 +233,18 @@ export default function DashboardPage() {
                 >
                   Demo: Mejora Org (BoliFarma)
                 </button>
+                <button
+                  onClick={() => cargarDemo("artefacto-iot")}
+                  disabled={seedingDemo}
+                  title="UNIFRANZ — Diseño de Artefacto. Caso: sistema IoT de monitoreo de calidad del aire en aulas universitarias."
+                  style={{
+                    fontSize: 12, padding: "7px 12px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
+                    border: "1px solid rgba(6,182,212,0.35)", background: "rgba(6,182,212,0.08)", color: "#0891b2",
+                    fontWeight: 600, opacity: seedingDemo ? 0.6 : 1,
+                  }}
+                >
+                  Demo: Artefacto (IoT Aire)
+                </button>
                 {seedingDemo && (
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", alignSelf: "center", marginLeft: 4 }}>
                     Cargando…
