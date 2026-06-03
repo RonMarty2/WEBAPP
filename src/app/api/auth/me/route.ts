@@ -3,6 +3,15 @@ import { cookies } from "next/headers";
 import { verifySessionToken, SESSION_COOKIE } from "@/lib/auth";
 import { dbGetUserByEmail } from "@/lib/db";
 
+// CRÍTICO: forzar que este endpoint NUNCA sea cacheado por Next.js / Vercel
+// edge. Necesitamos que se ejecute en cada request para revalidar el rol
+// contra la BD. Sin esto, una respuesta vieja con role=admin podía quedar
+// pegada en el edge cache y mostrar el botón Admin a usuarios que ya no
+// lo son.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
@@ -26,8 +35,24 @@ export async function GET() {
       plan: dbUser.plan ?? userFromToken.plan,
       active: dbUser.active ?? userFromToken.active,
     };
-    return NextResponse.json({ user });
+    return NextResponse.json(
+      { user, __source: "db", __ts: Date.now() },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+      },
+    );
   } catch {
-    return NextResponse.json({ user: userFromToken });
+    return NextResponse.json(
+      { user: userFromToken, __source: "jwt-fallback", __ts: Date.now() },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+        },
+      },
+    );
   }
 }
