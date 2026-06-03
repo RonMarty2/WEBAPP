@@ -1126,26 +1126,9 @@ html.is-mobile-ua * {
   max-width: 100vw !important;
 }
 
-/* Diagnostic badge — confirma visualmente si el código nuevo está activo.
-   Si lo ves arriba a la izquierda, mi fix está cargando. Si no, sigues con
-   cache viejo y hay que limpiar (desinstalar PWA / borrar datos del sitio). */
-html.is-mobile-ua body::before {
-  content: "📱 v10 ALL";
-  position: fixed;
-  top: max(8px, env(safe-area-inset-top, 8px));
-  left: 8px;
-  z-index: 99999;
-  background: #dc2626;
-  color: #fff;
-  padding: 3px 8px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  border-radius: 4px;
-  pointer-events: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  font-family: ui-monospace, monospace;
-}
+/* Diagnostic badge — eliminado en v11. Ya cumplió su función de confirmar
+   que el código nuevo cargaba. Si necesitamos diagnosticar de nuevo, lo
+   reintroducimos puntualmente. */
 
 /* ═══ MOBILE OVERRIDE v4 — protección global para toda la app ════════════ */
 
@@ -1203,4 +1186,38 @@ html.is-mobile-ua [role="dialog"],
 html.is-mobile-ua [aria-modal="true"] {
   max-width: 100vw !important;
   max-height: 100vh !important;
+}
+
+/* ═══ MOBILE OVERRIDE v5 — Headers con muchos botones + flotantes ════════ */
+
+/* HEADER: en móvil, sin wrap (no romper botones), con scroll horizontal.
+   Sin esto, los botones quedan comprimidos a ~50px y el texto se renderiza
+   verticalmente letra por letra. Con esto, el header queda en una sola fila
+   y el usuario puede deslizarlo para ver los botones que no caben. */
+html.is-mobile-ua header {
+  flex-wrap: nowrap !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+html.is-mobile-ua header > *,
+html.is-mobile-ua header button,
+html.is-mobile-ua header a {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+/* El bloque del título del proyecto (suele estar dentro de un div con flex:1)
+   sí puede shrinkear para no empujar demás botones fuera de la vista. */
+html.is-mobile-ua header > div[style*="flex:1"],
+html.is-mobile-ua header > div[style*="flex: 1"] {
+  flex-shrink: 1 !important;
+  min-width: 100px !important;
+}
+
+/* AdminViewToggle (botón flotante "Vista admin → estudiante"): en móvil lo
+   subimos 76px más arriba para no chocar con el botón verde de WhatsApp. */
+html.is-mobile-ua .admin-view-toggle-fab {
+  bottom: 94px !important;
+  right: 16px !important;
 }

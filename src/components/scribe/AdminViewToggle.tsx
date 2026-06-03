@@ -77,6 +77,7 @@ export default function AdminViewToggle({ isAdmin }: Props) {
 
   return (
     <div
+      className="admin-view-toggle-fab"
       style={{
         position: "fixed",
         bottom: 18,
