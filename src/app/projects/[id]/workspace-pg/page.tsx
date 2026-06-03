@@ -37,6 +37,7 @@ import MarkdownAcademico from "@/components/scribe-pg/MarkdownAcademico";
 import Cap3eModoSelector from "@/components/scribe-pg/Cap3eModoSelector";
 import Cap4gConfigSelector from "@/components/scribe-pg/Cap4gConfigSelector";
 import FaseAcciones from "@/components/scribe-pg/FaseAcciones";
+import WorkspaceEstudiante from "@/components/scribe-pg/WorkspaceEstudiante";
 import type { SessionUser } from "@/lib/auth";
 
 interface Proyecto {
@@ -210,6 +211,23 @@ export default function WorkspacePGPage() {
   }
 
   const titulo = proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título";
+
+  // ── VISTA DE ESTUDIANTE ──────────────────────────────────────────────
+  // Si el usuario NO es admin → vista simplificada (etapas + texto plano + chat).
+  // Si es admin → workspace completo con todas las herramientas (debajo).
+  if (user && user.role !== "admin") {
+    return (
+      <WorkspaceEstudiante
+        tituloProyecto={titulo}
+        etapas={sidebarItems}
+        selectedIndex={selectedIndex}
+        onSelect={setSelectedIndex}
+        phaseContents={phaseContents}
+        contenidoActual={contenidoActual}
+        isGenerating={generating}
+      />
+    );
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden" }}>
