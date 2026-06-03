@@ -357,6 +357,343 @@ La proyección comercial considera una cuota de mercado objetivo de 200 unidades
 El mercado presenta condiciones favorables: precio objetivo dentro del rango aceptado, capacidad técnica institucional suficiente, disposición a piloto, presupuesto disponible. La principal palanca de adopción es construir 3 a 5 casos exitosos en instituciones aliadas durante el primer año.
 `;
 
+// ── Fase 10: Cap III — Header ───────────────────────────────────────────────
+const CAP3_HEADER = `# CAPÍTULO III — DISEÑO DEL ARTEFACTO
+
+El presente capítulo desarrolla el diseño del sistema IoT de monitoreo de calidad del aire, articulando las decisiones técnicas a partir del marco teórico del Capítulo I y del diagnóstico del Capítulo II. Se organiza en cinco bloques: determinación de las especificaciones funcionales y no funcionales del artefacto (sección 3.1), planos y especificaciones constructivas con diagramas de conexión (sección 3.2), construcción del prototipo y desarrollo del software embebido y del servidor (sección 3.3), validación del prototipo en aula real (sección 3.4) y evaluación financiera del artefacto como producto comercializable (sección 3.5).
+`;
+
+// ── Fase 11: 3.1 Especificaciones ───────────────────────────────────────────
+const CAP3A_ESPECIFICACIONES = `# 3.1. Determinación de Especificaciones
+
+## 3.1.1. Requerimientos Funcionales
+
+El sistema debe:
+
+- **RF1.** Medir concentración de CO2 en el rango de 400 ppm a 5.000 ppm con exactitud ±50 ppm.
+- **RF2.** Medir concentración de partículas PM2,5 en el rango de 0 a 999 µg/m³ con exactitud ±15 µg/m³.
+- **RF3.** Medir temperatura ambiente en el rango de 0 °C a 50 °C con exactitud ±0,5 °C.
+- **RF4.** Medir humedad relativa en el rango de 0% a 100% con exactitud ±3% RH.
+- **RF5.** Transmitir las mediciones al servidor cada 30 segundos cuando la conectividad WiFi esté disponible.
+- **RF6.** Almacenar localmente hasta 24 horas de mediciones cuando la conectividad WiFi no esté disponible, y sincronizarlas al recuperar conexión.
+- **RF7.** Emitir alerta visual (LED rojo + parpadeo de pantalla) cuando CO2 supere 1.000 ppm.
+- **RF8.** Emitir alerta visual cuando PM2,5 supere 35 µg/m³.
+- **RF9.** Mostrar las lecturas en una pantalla OLED de 0,96" para inspección visual local.
+- **RF10.** Configurarse vía WiFi en modo Access Point durante el primer encendido.
+
+## 3.1.2. Requerimientos No Funcionales
+
+- **RNF1. Costo:** costo unitario de fabricación inferior a Bs. 1.000.
+- **RNF2. Consumo:** alimentación 5V por USB estándar, consumo promedio inferior a 200 mA.
+- **RNF3. Tamaño:** carcasa con dimensiones máximas 12 × 8 × 4 cm.
+- **RNF4. Disponibilidad operativa:** superior al 98% del tiempo en funcionamiento normal.
+- **RNF5. Latencia de alerta:** inferior a 10 segundos desde la detección.
+- **RNF6. Mantenimiento:** limpieza del sensor PM2,5 cada 6 meses, recalibración del CO2 cada 12 meses.
+- **RNF7. Documentación:** manual de instalación y manual de operación en español neutro.
+- **RNF8. Garantía:** garantía de fabricación de 12 meses sobre componentes electrónicos.
+
+## 3.1.3. Selección de Componentes
+
+A partir de los requerimientos y de las alternativas evaluadas en el Cap I sección 1.2.4, se seleccionaron los siguientes componentes:
+
+| Componente | Modelo seleccionado | Justificación |
+|---|---|---|
+| Microcontrolador | ESP32 DevKit V1 | WiFi integrado, doble núcleo, costo accesible |
+| Sensor CO2 | Sensirion SCD30 | NDIR, exactitud ±30 ppm, calibración automática |
+| Sensor PM2,5 | NovaFitness SDS011 | Láser, exactitud ±15 µg/m³, disponible localmente |
+| Sensor T/HR | Incorporado en SCD30 | Reduce componentes, evita conflictos I2C |
+| Pantalla | OLED 0,96" I2C | Bajo consumo, legible, costo bajo |
+| LED indicador | RGB cátodo común | Tres estados (verde/ámbar/rojo) |
+| Carcasa | Impresión 3D PLA | Diseño propio, escalable y reparable |
+| Alimentación | Cable USB-A a Micro-USB | Estándar universal, sin fuente adicional |
+
+## 3.1.4. Especificaciones Tabuladas
+
+| Parámetro | Valor objetivo |
+|---|---|
+| Costo total componentes (BOM) | Bs. 540 |
+| Costo carcasa + montaje | Bs. 110 |
+| Margen de comercialización | Bs. 200 |
+| **Precio al cliente (200 unidades)** | **Bs. 720** |
+| Consumo eléctrico promedio | 80 mA |
+| Tamaño exterior | 11 × 7 × 3,5 cm |
+| Peso | 180 g |
+| Tiempo de calentamiento del sensor PM2,5 | 30 segundos |
+| Frecuencia de transmisión | Cada 30 segundos |
+| Capacidad de almacenamiento offline | 24 horas (2.880 mediciones) |
+`;
+
+// ── Fase 12: 3.2 Planos y Especificaciones Constructivas ────────────────────
+const CAP3B_PLANOS = `# 3.2. Planos y Especificaciones Constructivas
+
+## 3.2.1. Diagrama de Arquitectura
+
+El sistema se organiza en tres bloques arquitectónicos:
+
+**Bloque 1 — Hardware del dispositivo:**
+
+\`\`\`
++-------------------------------+
+|  Carcasa impresa 3D (PLA)     |
+|  +-------------------------+  |
+|  | ESP32 DevKit V1         |  |
+|  |   I2C  --> SCD30 (CO2)  |  |
+|  |        --> OLED 0.96"   |  |
+|  |   UART --> SDS011 (PM)  |  |
+|  |   GPIO --> LED RGB      |  |
+|  +-------------------------+  |
+|  Alimentación: USB 5V         |
++-------------------------------+
+        |
+        | WiFi 2.4 GHz HTTPS
+        v
++-------------------------------+
+|  Servidor en la nube          |
++-------------------------------+
+\`\`\`
+
+**Bloque 2 — Servidor backend:**
+
+- API REST en Node.js + Express recibiendo POST con las mediciones.
+- Base de datos PostgreSQL con tablas: dispositivos, mediciones, alertas, usuarios.
+- Servicio de notificación a usuarios cuando se detecta umbral excedido.
+
+**Bloque 3 — Interfaz de visualización:**
+
+- Aplicación web responsive en React.
+- Vista de tiempo real por dispositivo y vista histórica con gráficos.
+- Configuración de umbrales personalizados por institución.
+
+## 3.2.2. Diagrama de Conexiones (Bloque 1)
+
+| Componente | Pin ESP32 | Protocolo |
+|---|---|---|
+| SCD30 SDA | GPIO 21 | I2C |
+| SCD30 SCL | GPIO 22 | I2C |
+| OLED SDA | GPIO 21 (compartido) | I2C |
+| OLED SCL | GPIO 22 (compartido) | I2C |
+| SDS011 TX | GPIO 16 (RX2) | UART |
+| SDS011 RX | GPIO 17 (TX2) | UART |
+| LED Rojo | GPIO 25 | PWM |
+| LED Verde | GPIO 26 | PWM |
+| LED Azul | GPIO 27 | PWM |
+| Alimentación SCD30 | 3,3V | DC |
+| Alimentación SDS011 | 5V (USB del ESP32) | DC |
+| Alimentación OLED | 3,3V | DC |
+| GND común | GND | — |
+
+## 3.2.3. Diseño de la Carcasa (impresión 3D)
+
+La carcasa se diseñó en Fusion 360 con las siguientes características:
+
+- Dimensiones exteriores: 11 × 7 × 3,5 cm.
+- Tres ranuras de ventilación para el sensor PM2,5 (frontal, lateral, posterior).
+- Ventana transparente para la pantalla OLED.
+- Orificio circular para el LED RGB.
+- Puerto Micro-USB accesible en lateral.
+- Tornillería M3 para ensamble.
+
+Los archivos STL están disponibles para descarga e impresión por cualquier institución interesada.
+
+## 3.2.4. Estructura del Software Embebido
+
+El firmware se organiza en módulos:
+
+- **Módulo de inicialización:** detección de sensores, conexión WiFi, sincronización de tiempo.
+- **Módulo de lectura periódica:** ciclo cada 30 segundos que consulta los sensores y arma el paquete de datos.
+- **Módulo de comunicación:** envío HTTPS con reintento y buffer offline.
+- **Módulo de alertas locales:** evaluación de umbrales y control del LED RGB.
+- **Módulo de pantalla:** refresco del OLED con valores actuales.
+- **Módulo de configuración:** modo Access Point para configurar WiFi en primer encendido.
+`;
+
+// ── Fase 13: 3.3 Construcción del Prototipo ────────────────────────────────
+const CAP3C_PROTOTIPO = `# 3.3. Construcción del Prototipo
+
+## 3.3.1. Etapa 1 — Prototipo en Protoboard
+
+El primer prototipo se construyó sobre protoboard para validar el funcionamiento básico de los sensores y de la comunicación con el ESP32. Se probaron las lecturas individuales del SCD30 y del SDS011, se verificó la integridad del bus I2C y se validó la comunicación UART con el sensor de partículas. El tiempo total de construcción de este primer prototipo fue de 14 horas de trabajo.
+
+## 3.3.2. Etapa 2 — Firmware Funcional
+
+El firmware se desarrolló en Arduino IDE con el framework ESP32 oficial de Espressif. Se utilizaron las librerías:
+
+- **Sparkfun_SCD30_Arduino_Library** para el sensor CO2.
+- **SdsDustSensor** para el sensor PM2,5.
+- **Adafruit_SSD1306** para la pantalla OLED.
+- **WiFi.h** y **HTTPClient.h** nativas para comunicación inalámbrica.
+
+El código fuente total son 685 líneas distribuidas en 6 archivos. El firmware ocupa 1,1 MB de los 4 MB de memoria flash del ESP32.
+
+## 3.3.3. Etapa 3 — Servidor Backend
+
+El servidor se desarrolló en Node.js con Express. Los endpoints principales son:
+
+- **POST /api/measurements** — recibe paquete de medición del dispositivo y lo persiste.
+- **GET /api/dashboard/:deviceId** — devuelve datos para la visualización.
+- **GET /api/alerts** — lista alertas activas.
+- **POST /api/devices/register** — registra un nuevo dispositivo.
+
+El servidor se desplegó en un servidor virtual con 1 vCPU y 1 GB RAM, suficiente para soportar hasta 500 dispositivos transmitiendo cada 30 segundos. Costo mensual del servidor: USD 6.
+
+## 3.3.4. Etapa 4 — Interfaz Web
+
+La aplicación web se desarrolló en React con la librería de gráficos Chart.js. Cuenta con tres vistas:
+
+- **Vista actual:** valores instantáneos por dispositivo con código de color (verde/ámbar/rojo).
+- **Vista histórica:** gráficos de las últimas 24 horas, 7 días o 30 días.
+- **Vista institucional:** mapa de todas las aulas de la institución con su estado.
+
+## 3.3.5. Etapa 5 — Impresión de la Carcasa
+
+La carcasa se imprimió en una impresora 3D Creality Ender 3 V2 con filamento PLA blanco. Cada unidad requiere 4 horas de impresión a temperatura de extrusión 200 °C y velocidad 50 mm/s. El consumo de material por unidad es 65 gramos.
+
+## 3.3.6. Etapa 6 — Ensamble Final
+
+El ensamble del dispositivo final requiere 35 minutos de trabajo manual: soldadura de pines del SCD30 y del OLED al protoboard de circuito impreso, conexión del SDS011, montaje en la carcasa, prueba inicial. El procedimiento está documentado en un manual ilustrado paso a paso para replicación.
+
+## 3.3.7. Costo Real del Prototipo
+
+| Componente | Costo unitario (Bs.) |
+|---|---:|
+| ESP32 DevKit V1 | 65 |
+| SCD30 (Sensirion) | 285 |
+| SDS011 (NovaFitness) | 110 |
+| OLED 0,96" | 25 |
+| LED RGB + resistores | 12 |
+| Protoboard PCB ensamblado | 28 |
+| Cable USB | 15 |
+| Filamento PLA (65g) | 30 |
+| Misceláneos (tornillería, cables, soldadura) | 20 |
+| **Total componentes** | **590** |
+| Mano de obra de ensamble (estimado 1h × Bs. 60) | 60 |
+| Mano de obra de impresión 3D (estimado 0,5h) | 30 |
+| **Costo total directo unitario** | **680** |
+
+El costo real es 5,5% inferior al estimado en la sección 3.1.4, lo que da margen para absorber fluctuaciones de precio de componentes importados.
+`;
+
+// ── Fase 14: 3.4 Validación del Prototipo ──────────────────────────────────
+const CAP3D_VALIDACION = `# 3.4. Validación del Prototipo
+
+## 3.4.1. Diseño Experimental de la Validación
+
+El prototipo se instaló en un aula de la Facultad de Ingeniería de UNIFRANZ Cochabamba (aula 204, dimensiones 7 × 6 m, capacidad nominal 35 estudiantes) durante 4 semanas continuas (marzo 24 a abril 18 de 2025). Durante el período se registraron mediciones cada 30 segundos, cubriendo 12 sesiones de clase de 2 a 3 horas (con ocupación promedio del 80% de capacidad) y 6 períodos sin clase como control.
+
+Adicionalmente, durante 3 sesiones de clase se instaló un medidor calibrado de referencia (TES-1370 Indoor Air Quality Meter prestado por el laboratorio de Ingeniería Ambiental) junto al prototipo, para comparar las lecturas y calcular el error relativo.
+
+## 3.4.2. Resultados de Exactitud
+
+### CO2 (n = 1.840 mediciones pareadas)
+
+- Error relativo medio: 2,8% (equivalente a ±28 ppm para una lectura típica de 1.000 ppm).
+- Error máximo observado: 4,1%.
+- Conclusión: la exactitud del SCD30 es comparable a la del medidor de referencia, en línea con la especificación declarada por el fabricante (±30 ppm).
+
+### PM2,5 (n = 1.840 mediciones pareadas)
+
+- Error relativo medio: 11,4% (equivalente a ±5,7 µg/m³ para una lectura típica de 50 µg/m³).
+- Error máximo observado: 18,2% en lecturas bajas (<15 µg/m³), donde la limitación física del sensor SDS011 es conocida.
+- Conclusión: la exactitud del SDS011 es suficiente para el caso de uso (alertar sobre umbrales OMS), aunque inferior a equipos profesionales.
+
+### Temperatura y Humedad
+
+- Error medio temperatura: ±0,3 °C.
+- Error medio humedad: ±2,1%.
+- Conclusión: ambas mediciones cumplen los requerimientos.
+
+## 3.4.3. Resultados de Confiabilidad Operativa
+
+- **Disponibilidad:** 99,4% del tiempo total (períodos de indisponibilidad por reinicios del WiFi institucional).
+- **Latencia de alerta:** 7,8 segundos en promedio (mediana 6,5 s), con percentil 95 en 12,2 s.
+- **Conexiones perdidas:** el módulo de buffer offline funcionó correctamente, sincronizando todas las mediciones tras cada reconexión.
+- **Consumo eléctrico real:** 95 mA promedio, dentro del requerimiento RNF2 (<200 mA).
+
+## 3.4.4. Hallazgos del Período Observacional
+
+Durante las 12 sesiones de clase observadas:
+
+- **CO2 al inicio (aula recién aireada):** 480 ± 35 ppm.
+- **CO2 al cabo de 1 hora de clase:** 850 ± 95 ppm.
+- **CO2 al cabo de 2 horas de clase:** 1.420 ± 180 ppm (umbral OMS excedido).
+- **CO2 al cabo de 3 horas de clase:** 1.880 ± 240 ppm.
+
+Las alertas del sistema en el umbral de 1.000 ppm se dispararon en el 100% de las sesiones de 2 horas o más de duración con ocupación superior al 75%. En las 8 ocasiones en que el docente accedió a la vista en tiempo real y abrió ventanas en respuesta a la alerta, el CO2 descendió en promedio 35% en menos de 4 minutos.
+
+## 3.4.5. Verificación de la Hipótesis
+
+La hipótesis general planteada en la Introducción se confirma: el diseño propuesto produce un sistema con costo unitario inferior a Bs. 1.000 (real: Bs. 680) y desempeño técnico comparable a sistemas comerciales (error medio CO2 2,8%, latencia de alerta 7,8 s). La validación empírica de 4 semanas con 1.840 mediciones pareadas constituye evidencia suficiente para sustentar la hipótesis.
+`;
+
+// ── Fase 15: 3.5 Evaluación Financiera ──────────────────────────────────────
+const CAP3E_FINANCIERA = `# 3.5. Evaluación Financiera
+
+## 3.5.1. Inversión Inicial
+
+La inversión inicial para arrancar la fabricación a escala se estima en **Bs. 68.500**:
+
+| Rubro | Monto (Bs.) | Participación |
+|---|---:|---:|
+| Stock inicial de componentes para 40 unidades | 23.600 | 34,5% |
+| Impresora 3D adicional para acelerar producción | 3.500 | 5,1% |
+| Servidor en la nube anualizado | 5.000 | 7,3% |
+| Desarrollo final del software (consultoría externa) | 18.000 | 26,3% |
+| Marketing inicial y casos piloto | 10.000 | 14,6% |
+| Capital de trabajo (3 meses operación) | 5.000 | 7,3% |
+| Reserva para contingencias (5%) | 3.400 | 4,9% |
+| **Total** | **68.500** | **100,0%** |
+
+## 3.5.2. Proyección de Ingresos a 3 Años
+
+| Año | Unidades | Precio (Bs.) | Ingresos (Bs.) |
+|---:|---:|---:|---:|
+| 1 | 40 | 720 | 28.800 |
+| 2 | 70 | 720 | 50.400 |
+| 3 | 90 | 720 | 64.800 |
+
+Adicionalmente se proyecta un ingreso recurrente de **Bs. 80/año** por dispositivo en concepto de mantenimiento del servidor y soporte, lo que arroja:
+
+| Año | Dispositivos activos | Ingreso recurrente (Bs.) |
+|---:|---:|---:|
+| 1 | 40 | 3.200 |
+| 2 | 110 (40 año 1 + 70 año 2) | 8.800 |
+| 3 | 200 | 16.000 |
+
+## 3.5.3. Costos Operativos Proyectados
+
+| Año | Costo de venta (68% precio) | Costos operativos | Total |
+|---:|---:|---:|---:|
+| 1 | 19.584 | 8.000 | 27.584 |
+| 2 | 34.272 | 11.000 | 45.272 |
+| 3 | 44.064 | 14.000 | 58.064 |
+
+## 3.5.4. Flujo de Caja Proyectado
+
+| Año | Inversión | Ingresos totales | Costos totales | Flujo neto (Bs.) |
+|---:|---:|---:|---:|---:|
+| 0 | (68.500) | — | — | (68.500) |
+| 1 | — | 32.000 | 27.584 | 4.416 |
+| 2 | — | 59.200 | 45.272 | 13.928 |
+| 3 | — | 80.800 | 58.064 | 22.736 |
+
+## 3.5.5. Indicadores
+
+Con tasa de descuento del 14%:
+
+- **VAN:** **Bs. 56.480** (positivo).
+- **TIR:** **17,4%** (supera el costo de oportunidad del 14%).
+- **B/C:** **1,12**.
+- **Payback:** **2,1 años**.
+
+## 3.5.6. Análisis de Sensibilidad
+
+El proyecto mantiene viabilidad si las unidades vendidas en el año 3 caen hasta 65 (umbral mínimo). Por debajo, el VAN se vuelve negativo. La dependencia de la cuota del año 3 coloca al plan comercial (en particular a los casos piloto del año 1) como factor crítico de éxito.
+
+## 3.5.7. Conclusión Financiera
+
+Los indicadores financieros sustentan la viabilidad económica del proyecto bajo los supuestos. El margen es menor al observado en proyectos de Pre-Factibilidad típicos porque se trata de un producto técnico nuevo en un mercado emergente. La validación empírica del prototipo y la disposición a piloto documentada en el Cap II reducen significativamente el riesgo de no cumplimiento de la proyección comercial.
+`;
+
 export const ARTEFACTO_DEMO_SEED: DemoSeed = {
   seed_id: "artefacto-iot-aire-v1",
   universidad_id: "unifranz-cba-001",
@@ -386,6 +723,13 @@ export const ARTEFACTO_DEMO_SEED: DemoSeed = {
     "ph-unifranz-pg-artefacto-cap2c-matricial": CAP2C_MATRICIAL,
     "ph-unifranz-pg-artefacto-cap2d-metodologia": CAP2D_METODOLOGIA,
     "ph-unifranz-pg-artefacto-cap2e-mercado": CAP2E_MERCADO,
-    // Cap III (Diseño del Artefacto) y cierre en commits subsiguientes.
+    "ph-unifranz-pg-artefacto-cap3-diseno": CAP3_HEADER,
+    "ph-unifranz-pg-artefacto-cap3a-especificaciones": CAP3A_ESPECIFICACIONES,
+    "ph-unifranz-pg-artefacto-cap3b-planos": CAP3B_PLANOS,
+    "ph-unifranz-pg-artefacto-cap3c-prototipo": CAP3C_PROTOTIPO,
+    "ph-unifranz-pg-artefacto-cap3d-validacion": CAP3D_VALIDACION,
+    "ph-unifranz-pg-artefacto-cap3e-financiera": CAP3E_FINANCIERA,
+    // Cierre (conclusiones, recomendaciones, bibliografía, compilación,
+    // defensa) en el próximo commit.
   },
 };
