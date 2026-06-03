@@ -221,6 +221,18 @@ export default function DashboardPage() {
                 >
                   Demo: Tesis (Marketing Gen Z)
                 </button>
+                <button
+                  onClick={() => cargarDemo("mejora-bolifarma")}
+                  disabled={seedingDemo}
+                  title="UNIFRANZ — Mejora Organizacional. Caso: BoliFarma cadena farmacéutica, mejora del sistema de gestión de inventarios."
+                  style={{
+                    fontSize: 12, padding: "7px 12px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
+                    border: "1px solid rgba(245,158,11,0.35)", background: "rgba(245,158,11,0.08)", color: "#d97706",
+                    fontWeight: 600, opacity: seedingDemo ? 0.6 : 1,
+                  }}
+                >
+                  Demo: Mejora Org (BoliFarma)
+                </button>
                 {seedingDemo && (
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", alignSelf: "center", marginLeft: 4 }}>
                     Cargando…
