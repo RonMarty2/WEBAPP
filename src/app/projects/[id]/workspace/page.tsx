@@ -26,7 +26,6 @@ import AdminViewToggle, { useViewMode } from "@/components/scribe/AdminViewToggl
 import GeneratingState from "@/components/scribe/GeneratingState";
 import AudioFeedback from "@/components/scribe/AudioFeedback";
 import PGPhaseSidebar from "@/components/scribe/PGPhaseSidebar";
-import WorkspaceEstudiante from "@/components/scribe-pg/WorkspaceEstudiante";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -2131,24 +2130,6 @@ export default function WorkspacePage() {
   const canDefense     = userPlan === "elite";
 
   // ── 3-COLUMN WORKSPACE ────────────────────────────────────────────────────────
-
-  // Vista simplificada de estudiante (role !== "admin"). Foco en LEER el
-  // documento + SUBIR material. El workspace completo con Inspector IA,
-  // descarga LaTeX, Bitácora, banco de preguntas, etc. queda intacto para
-  // admin (debajo).
-  if (user && user.role !== "admin") {
-    return (
-      <WorkspaceEstudiante
-        tituloProyecto={proyecto.tema_aprobado || proyecto.titulo_provisional || "Proyecto sin título"}
-        etapas={displayFases.map((f, i) => ({ id: f.id, label: f.label, short: f.short, orden: "orden" in f && typeof f.orden === "number" ? f.orden : i }))}
-        selectedIndex={selectedFase}
-        onSelect={setSelectedFase}
-        phaseContents={proyecto.phase_contents ?? {}}
-        contenidoActual={displayContent}
-        isGenerating={isGenerating}
-      />
-    );
-  }
 
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, display:"flex", flexDirection:"column", background:"transparent", color:"var(--fg-primary)", fontFamily:"'Inter', sans-serif" }}>

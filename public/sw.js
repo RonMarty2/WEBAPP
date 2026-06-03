@@ -2,7 +2,7 @@
 // Estrategia: network-first para HTML/API, cache-first para estáticos.
 // Necesario para que el navegador considere la app "instalable".
 
-const CACHE_VERSION = 'lab-academico-v24';
+const CACHE_VERSION = 'lab-academico-v23';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
