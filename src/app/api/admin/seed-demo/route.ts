@@ -1,26 +1,43 @@
 /**
  * POST /api/admin/seed-demo
  *
- * Carga el proyecto de demostración AgroHub (UNIFRANZ · Proyecto de Grado ·
- * Pre-Factibilidad) en la cuenta del usuario autenticado, con el contenido de
- * cada fase ya poblado. Sirve para ver cómo se ve y se llena la plataforma
- * antes de conectar la API de IA de producción.
+ * Carga un proyecto de demostración en la cuenta del admin con todas las
+ * fases pobladas. Sirve para ver el aspecto y el flujo de un proyecto
+ * terminado antes de conectar la API de IA real.
  *
- * Restringido a usuarios con rol admin. Se usa `requireAuth` (no `requireAdmin`)
- * para que el proyecto quede vinculado al usuario real de la sesión del
- * dashboard, no al usuario genérico del panel admin.
+ * Body opcional: { demo?: "agrohub" | "tesis-marketing" }
+ *   - Si no se pasa demo, asume "agrohub" (Pre-Factibilidad) por compatibilidad
+ *     con la versión anterior del endpoint.
  *
- * Idempotente: si el usuario ya tiene cargado este seed, devuelve el proyecto
- * existente en lugar de duplicarlo.
+ * Restringido a usuarios con rol admin. El proyecto queda vinculado al
+ * usuario real de la sesión, no al panel admin genérico.
+ *
+ * Si el usuario ya tiene cargado el mismo demo, hace UPDATE de las fases
+ * (merge — los contenidos nuevos prevalecen) en lugar de crear duplicado.
  */
 
 import { NextResponse } from "next/server";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbCreateProyecto, dbUpdateProyecto, dbListProyectos } from "@/lib/db";
 import { phaseDefinitionsForProject } from "@/lib/projectTypePhases";
-import { AGROHUB_DEMO_SEED } from "@/lib/seed/agrohubDemo";
+import { AGROHUB_DEMO_SEED, type DemoSeed } from "@/lib/seed/agrohubDemo";
+import { TESIS_DEMO_SEED } from "@/lib/seed/tesisDemo";
 
-export async function POST() {
+// Registro central de demos disponibles. Para agregar uno nuevo, importar
+// su seed y mapearlo a una clave estable que el dashboard usa en el body.
+const DEMOS: Record<string, DemoSeed> = {
+  "agrohub": AGROHUB_DEMO_SEED,
+  "tesis-marketing": TESIS_DEMO_SEED,
+};
+const DEFAULT_DEMO = "agrohub";
+
+// Prefijo común que tienen todos los seed_id de un mismo demo (v1, v2…).
+// Permite detectar el proyecto previo aunque haya cambiado de versión.
+function seedFamilyPrefix(seedId: string): string {
+  return seedId.replace(/-v\d+$/, "");
+}
+
+export async function POST(req: Request) {
   try {
     const { user } = await requireAuth();
     if (user.role !== "admin") {
@@ -30,7 +47,23 @@ export async function POST() {
       );
     }
 
-    const seed = AGROHUB_DEMO_SEED;
+    // Body opcional: { demo?: string }. Si no se pasa, usar AgroHub por
+    // compatibilidad con el botón viejo del dashboard.
+    let demoKey: string = DEFAULT_DEMO;
+    try {
+      const body = await req.json().catch(() => ({}));
+      if (typeof body?.demo === "string" && DEMOS[body.demo]) {
+        demoKey = body.demo;
+      }
+    } catch { /* body vacío o inválido — usar default */ }
+
+    const seed = DEMOS[demoKey];
+    if (!seed) {
+      return NextResponse.json(
+        { error: `Demo desconocido: ${demoKey}. Disponibles: ${Object.keys(DEMOS).join(", ")}` },
+        { status: 400 },
+      );
+    }
 
     // ── Resolver las fases UNIFRANZ para validar IDs y calcular estado_fase ──
     const phaseDefs = phaseDefinitionsForProject({
@@ -65,11 +98,12 @@ export async function POST() {
     //    v1 con solo Introducción a v2 con las 20 fases). El seed_id se
     //    actualiza al nuevo valor para indicar la versión aplicada.
     const existentes = await dbListProyectos(user.id);
+    const familyPrefix = seedFamilyPrefix(seed.seed_id);
     const previo = existentes.find((p) => {
       const ctx = p.academic_context as Record<string, unknown> | undefined;
       const sid = ctx?.demo_seed_id as string | undefined;
-      // Match cualquier versión del demo AgroHub (v1, v2, etc.)
-      return typeof sid === "string" && sid.startsWith("agrohub-prefactibilidad");
+      // Match cualquier versión del mismo demo (sin importar -v1, -v2, etc.)
+      return typeof sid === "string" && seedFamilyPrefix(sid) === familyPrefix;
     });
 
     if (previo) {

@@ -99,13 +99,19 @@ export default function DashboardPage() {
     router.refresh();
   }
 
-  // Carga el proyecto de demostración AgroHub (UNIFRANZ · Pre-Factibilidad) en
-  // la cuenta del admin, con el contenido ya poblado, y abre su workspace.
-  async function cargarDemoAgrohub() {
+  // Carga uno de los proyectos de demostración en la cuenta del admin, con
+  // el contenido de las fases ya poblado, y abre su workspace. Cada demo
+  // representa una modalidad UNIFRANZ distinta y permite ver cómo se vería
+  // un proyecto terminado de ese tipo cuando la API de IA esté conectada.
+  async function cargarDemo(demoKey: string) {
     if (seedingDemo) return;
     setSeedingDemo(true);
     try {
-      const res = await fetch("/api/admin/seed-demo", { method: "POST" });
+      const res = await fetch("/api/admin/seed-demo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ demo: demoKey }),
+      });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url_workspace) {
         router.push(data.url_workspace);
@@ -190,18 +196,37 @@ export default function DashboardPage() {
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-muted)" }}>Mis proyectos</h2>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
             {user.role === "admin" && (
-              <button
-                onClick={cargarDemoAgrohub}
-                disabled={seedingDemo}
-                title="Carga un Proyecto de Grado UNIFRANZ (AgroHub) ya poblado para ver cómo se llena la plataforma"
-                style={{
-                  fontSize: 13, padding: "8px 16px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
-                  border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.08)", color: "#a78bfa",
-                  fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 6, opacity: seedingDemo ? 0.6 : 1,
-                }}
-              >
-                {seedingDemo ? "Cargando…" : "⚡ Cargar demo AgroHub"}
-              </button>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => cargarDemo("agrohub")}
+                  disabled={seedingDemo}
+                  title="UNIFRANZ — Proyecto de Grado modalidad Pre-Factibilidad. Caso: plataforma de acopio agroalimentario AgroHub."
+                  style={{
+                    fontSize: 12, padding: "7px 12px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
+                    border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.08)", color: "#a78bfa",
+                    fontWeight: 600, opacity: seedingDemo ? 0.6 : 1,
+                  }}
+                >
+                  Demo: Pre-Fact (AgroHub)
+                </button>
+                <button
+                  onClick={() => cargarDemo("tesis-marketing")}
+                  disabled={seedingDemo}
+                  title="UNIFRANZ — Tesis de Grado. Caso: marketing digital y Generación Z en restaurantes de comida rápida."
+                  style={{
+                    fontSize: 12, padding: "7px 12px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
+                    border: "1px solid rgba(34,197,94,0.35)", background: "rgba(34,197,94,0.08)", color: "#16a34a",
+                    fontWeight: 600, opacity: seedingDemo ? 0.6 : 1,
+                  }}
+                >
+                  Demo: Tesis (Marketing Gen Z)
+                </button>
+                {seedingDemo && (
+                  <span style={{ fontSize: 11, color: "var(--fg-muted)", alignSelf: "center", marginLeft: 4 }}>
+                    Cargando…
+                  </span>
+                )}
+              </div>
             )}
             <Link href="/projects/new" className="btn-cyan" style={{ textDecoration: "none", fontSize: 13, padding: "8px 18px" }}>
               + Nuevo proyecto
