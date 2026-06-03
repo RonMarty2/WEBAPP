@@ -2699,8 +2699,9 @@ export default function WorkspacePage() {
               </div>
             )}
 
-            {/* TABS — solo aparecen cuando ya hay contenido generado.
-                "Observaciones del tutor" solo aparece cuando ya pasó Cap V (hay algo que revisar). */}
+            {/* TABS — etiquetas claras para el estudiante. Las tabs que no
+                puede usar por su plan se OCULTAN (no se muestran con candado:
+                eso confunde y suma ruido visual). Admin siempre ve todo. */}
             {!isCap0Phase && (hasBorrador || hasFinal) && (
               <div style={{ display: "flex", borderBottom: "1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
                 <button
@@ -2708,38 +2709,41 @@ export default function WorkspacePage() {
                   title="Generar, regenerar o dar feedback al contenido"
                   style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "generacion" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "generacion" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
                 >
-                  ⚡ Generación
+                  Generar
                 </button>
-                <button
-                  onClick={() => setCol1Tab("fuentes")}
-                  title="Subir PDFs, papers o normativa adicional para que la IA los considere"
-                  style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "fuentes" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "fuentes" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
-                >
-                  📎 Material adicional
-                </button>
-                {/* "Observaciones del tutor": solo después de Cap V (selectedFase >= 5) */}
-                {selectedFase >= 5 && (
+                {(canUploadDocs || isAdmin) && (
                   <button
-                    onClick={() => canDefense ? setCol1Tab("tribunal") : undefined}
-                    title={canDefense ? "Registrar observaciones del tutor o tribunal" : "Disponible en Plan Elite"}
-                    style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: canDefense ? (col1Tab === "tribunal" ? "#f59e0b" : "var(--fg-secondary)") : "rgba(148,163,184,0.45)", borderBottom: col1Tab === "tribunal" ? "2px solid #f59e0b" : "2px solid transparent", background: "none", cursor: canDefense ? "pointer" : "not-allowed", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                    onClick={() => setCol1Tab("fuentes")}
+                    title="Subir PDFs, papers o normativa adicional para que la IA los considere"
+                    style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "fuentes" ? "var(--accent)" : "var(--fg-secondary)", borderBottom: col1Tab === "fuentes" ? "2px solid var(--accent)" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
                   >
-                    {canDefense ? "📋" : "🔒"} Tutor
+                    Material
+                  </button>
+                )}
+                {/* "Tutor": solo después de Cap V Y solo si plan Elite (canDefense).
+                    Plan inferior NO la ve (en vez de mostrarla con candado). */}
+                {selectedFase >= 5 && (canDefense || isAdmin) && (
+                  <button
+                    onClick={() => setCol1Tab("tribunal")}
+                    title="Registrar observaciones del tutor o tribunal"
+                    style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "tribunal" ? "#f59e0b" : "var(--fg-secondary)", borderBottom: col1Tab === "tribunal" ? "2px solid #f59e0b" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+                  >
+                    Tutor
                   </button>
                 )}
                 <button
                   onClick={() => setCol1Tab("bitacora")}
-                  title="Bitácora del Tutor: registro de cada observación con su análisis y respuesta"
+                  title="Historial de observaciones del tutor con su análisis y respuesta"
                   style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "bitacora" ? "#6366f1" : "var(--fg-secondary)", borderBottom: col1Tab === "bitacora" ? "2px solid #6366f1" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
                 >
-                  📒 Bitácora
+                  Historial
                 </button>
                 <button
                   onClick={() => setCol1Tab("cuadernillo")}
-                  title="Tu Cuadernillo Personal: sugerencias, datos a buscar, preguntas probables del tutor. Solo tú lo ves."
+                  title="Análisis de la fase: sugerencias, datos a buscar, preguntas probables del tutor"
                   style={{ flex: 1, padding: "10px", fontSize: 11, fontWeight: 700, color: col1Tab === "cuadernillo" ? "#a855f7" : "var(--fg-secondary)", borderBottom: col1Tab === "cuadernillo" ? "2px solid #a855f7" : "2px solid transparent", background: "none", cursor: "pointer", display: "flex", justifyContent: "center", alignItems: "center", gap: 6, transition: "all 0.2s" }}
                 >
-                  📕 Cuadernillo
+                  Análisis
                 </button>
                 {canDefense && (
                   <button
@@ -3035,10 +3039,12 @@ export default function WorkspacePage() {
             {/* Chat messages */}
             <div style={{ flex:1, padding:"10px 14px", display:"flex", flexDirection:"column", gap:9 }}>
             {chatMsgs.length === 0 && (
-              <div style={{ color:"var(--border-hover)", fontSize:12, textAlign:"center", padding:"20px 0", lineHeight:1.6 }}>
-                {displayContent
-                  ? "Este espacio es para correcciones puntuales o ajustes por revision del tutor."
-                  : "Primero genera la fase. Luego aqui puedes pedir cambios puntuales."}
+              <div style={{ color:"var(--fg-secondary)", fontSize:12.5, textAlign:"center", padding:"24px 16px", lineHeight:1.6, maxWidth:340, margin:"0 auto" }}>
+                {!displayContent
+                  ? "Empieza por generar este capítulo. Una vez listo, podrás pedir ajustes acá."
+                  : canEditPhases
+                    ? "Cuando tu tutor te haga una observación, escríbela acá. La IA aplicará el ajuste solo a la sección correspondiente."
+                    : "El capítulo está listo. Si tu tutor te pide ajustes puntuales al texto, puedes registrarlos con Plan Pro."}
               </div>
             )}
             {chatMsgs.map((msg, i) => (
@@ -3475,12 +3481,15 @@ export default function WorkspacePage() {
     {!isCap0Phase && !(esGuiado && hasBorrador && !hasFinal) && (
     <div style={{ flexShrink: 0, padding:"10px 14px", borderTop:"1px solid rgba(148,163,184,0.18)", background:"rgba(255,255,255,0.5)", backdropFilter:"blur(6px)" }}>
       {!canEditPhases ? (
-      <div style={{ border: "1px solid rgba(245,158,11,0.25)", borderRadius: 16, background: "rgba(245,158,11,0.04)", padding: "12px 16px", marginBottom: displayContent ? 8 : 0, display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 18 }}>🔒</span>
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b" }}>Correcciones disponibles en Plan Pro</div>
-          <div style={{ fontSize: 10.5, color: "var(--fg-secondary)", lineHeight: 1.5, marginTop: 2 }}>En el plan Estándar la IA genera el documento completo y tú lo aceptás. Actualizá a Pro para hacer cambios.</div>
-        </div>
+      // Upgrade prompt en plan Estándar — versión sobria: una sola línea de
+      // texto inline, sin card amarilla intrusiva ni icono candado. El empty
+      // state de arriba ya le dijo al estudiante que necesita Plan Pro para
+      // ajustes manuales; acá solo dejamos el link al detalle.
+      <div style={{ padding:"8px 4px", fontSize:11.5, color:"var(--fg-muted)", textAlign:"center", lineHeight:1.5, marginBottom: displayContent ? 8 : 0 }}>
+        <Link href="/pago" style={{ color:"var(--accent)", fontWeight:600, textDecoration:"none" }}>
+          Plan Pro
+        </Link>
+        {" "}te permite pedir ajustes puntuales al texto.
       </div>
       ) : (
       <div
@@ -3658,7 +3667,11 @@ export default function WorkspacePage() {
             <div
               className="workspace-editor-inner fade-in p-6 md:p-10 lg:p-16 pb-20 relative overflow-hidden"
             >
-              {/* Inner wrapper */}
+              {/* Inner wrapper — header de la fase actual.
+                  En la fase de export (LaTeX/Compilar) el LatexExportView ya
+                  tiene su propio H1 ("Tu monografía está lista para descargar"),
+                  así que evitamos duplicar la eyebrow LATEX + título arriba. */}
+              {phaseId !== "ph-latex" && (
               <div style={{ marginBottom:24, paddingBottom:14, borderBottom:"1px solid var(--bg-subtle)" }}>
                 <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap" }}>
                   <div style={{ flex:1 }}>
@@ -3677,6 +3690,7 @@ export default function WorkspacePage() {
                   </div>
                 )}
               </div>
+              )}
 
               <style>{`
                 /* Documento académico — tipografía y espaciado tipo Word */

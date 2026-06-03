@@ -351,13 +351,14 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
   return (
     <div style={{ padding: "20px 24px 40px", maxWidth: 1100, margin: "0 auto" }}>
 
-      {/* Encabezado — copy amigable que no usa "compilar" ni "LaTeX". */}
+      {/* Encabezado — sin emoji decorativo (DESIGN.md prohíbe emojis decorativos
+          en producto académico). El icono SVG ya está en el header del workspace. */}
       <div style={{ marginBottom: 18 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)", margin: "0 0 6px" }}>
-          📄 Tu monografía está lista para descargar
+          Tu monografía está lista para descargar
         </h1>
         <p style={{ fontSize: 13.5, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
-          Documento completo generado. Elige cómo seguir abajo.
+          Documento completo generado. Elige cómo seguir.
         </p>
       </div>
 
@@ -393,7 +394,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
         >
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-primary)", marginBottom: 2 }}>
-              ⚙️ Antes de pedir tu PDF, configurá tu carátula
+              Antes de pedir tu PDF, configura tu carátula
             </div>
             <div style={{ fontSize: 11.5, color: "var(--fg-secondary)", lineHeight: 1.5 }}>
               Nombre completo, tutor, programa, mes y año de presentación. Estos datos van
