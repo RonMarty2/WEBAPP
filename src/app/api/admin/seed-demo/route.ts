@@ -24,6 +24,7 @@ import { AGROHUB_DEMO_SEED, type DemoSeed } from "@/lib/seed/agrohubDemo";
 import { TESIS_DEMO_SEED } from "@/lib/seed/tesisDemo";
 import { MEJORA_ORG_DEMO_SEED } from "@/lib/seed/mejoraOrgDemo";
 import { ARTEFACTO_DEMO_SEED } from "@/lib/seed/artefactoDemo";
+import { TRABAJO_DIRIGIDO_DEMO_SEED } from "@/lib/seed/trabajoDirigidoDemo";
 
 // Registro central de demos disponibles. Para agregar uno nuevo, importar
 // su seed y mapearlo a una clave estable que el dashboard usa en el body.
@@ -32,6 +33,7 @@ const DEMOS: Record<string, DemoSeed> = {
   "tesis-marketing": TESIS_DEMO_SEED,
   "mejora-bolifarma": MEJORA_ORG_DEMO_SEED,
   "artefacto-iot": ARTEFACTO_DEMO_SEED,
+  "td-sumaq": TRABAJO_DIRIGIDO_DEMO_SEED,
 };
 const DEFAULT_DEMO = "agrohub";
 

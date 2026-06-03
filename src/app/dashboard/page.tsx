@@ -245,6 +245,18 @@ export default function DashboardPage() {
                 >
                   Demo: Artefacto (IoT Aire)
                 </button>
+                <button
+                  onClick={() => cargarDemo("td-sumaq")}
+                  disabled={seedingDemo}
+                  title="UNIFRANZ — Trabajo Dirigido. Caso: programa de fidelización en restaurante Sumaq Mikhuna."
+                  style={{
+                    fontSize: 12, padding: "7px 12px", borderRadius: 8, cursor: seedingDemo ? "progress" : "pointer",
+                    border: "1px solid rgba(236,72,153,0.35)", background: "rgba(236,72,153,0.08)", color: "#db2777",
+                    fontWeight: 600, opacity: seedingDemo ? 0.6 : 1,
+                  }}
+                >
+                  Demo: TD (Sumaq Mikhuna)
+                </button>
                 {seedingDemo && (
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", alignSelf: "center", marginLeft: 4 }}>
                     Cargando…
