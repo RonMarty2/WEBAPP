@@ -27,6 +27,9 @@ interface Props {
   proyectoId?: string;
   /** Callback para abrir el modal "Configurar Carátula" (provisto por el workspace). */
   onConfigurarCaratula?: () => void;
+  /** Si el usuario es admin, se muestran stats técnicas (líneas/caracteres/tamaño)
+      y otros detalles internos. Para estudiantes se ocultan. */
+  isAdmin?: boolean;
 }
 
 function extractLatexCode(text: string): string | null {
@@ -42,7 +45,7 @@ function isBlockReport(text: string): boolean {
   return /REPORTE DE BLOQUEO EDITORIAL|No se genera LaTeX/i.test(text);
 }
 
-export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, proyectoId, onConfigurarCaratula }: Props) {
+export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, proyectoId, onConfigurarCaratula, isAdmin }: Props) {
   const [copied, setCopied] = useState(false);
   const [logoDescargado, setLogoDescargado] = useState(false);
   const [pdfDescargando, setPdfDescargando] = useState(false);
@@ -348,18 +351,19 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
   return (
     <div style={{ padding: "20px 24px 40px", maxWidth: 1100, margin: "0 auto" }}>
 
-      {/* Encabezado */}
+      {/* Encabezado — copy amigable que no usa "compilar" ni "LaTeX". */}
       <div style={{ marginBottom: 18 }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--fg-primary)", margin: "0 0 6px" }}>
-          📄 Tu monografía está lista para compilar
+          📄 Tu monografía está lista para descargar
         </h1>
         <p style={{ fontSize: 13.5, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
-          Documento LaTeX completo generado. Elige cómo seguir abajo.
+          Documento completo generado. Elige cómo seguir abajo.
         </p>
       </div>
 
-      {/* Stats */}
-      {stats && (
+      {/* Stats técnicos — solo admin. Para estudiantes el conteo de líneas
+          y bytes del .tex no aporta nada, solo confunde. */}
+      {isAdmin && stats && (
         <div style={{
           display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, marginBottom: 18,
         }}>

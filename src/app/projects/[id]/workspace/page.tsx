@@ -2151,7 +2151,9 @@ export default function WorkspacePage() {
                   ? "Completo ✓"
                   : `${fasesCompletadasAcademicas} de ${totalFasesAcademicas} capítulos`}
             </span>
-            {totalWords > 0 && (
+            {/* Stats de páginas/palabras — solo admin. Para estudiantes
+                "~76/70 págs · excede el límite" parece error y los confunde. */}
+            {isAdmin && totalWords > 0 && (
               <>
                 <span className="hidden sm:inline">·</span>
                 <span style={{ position: "relative", display: "inline-block" }} className="hidden sm:inline">
@@ -2419,12 +2421,19 @@ export default function WorkspacePage() {
               🔄 Regenerar fase <span style={{ fontSize: 9, opacity: 0.7, fontWeight: 500 }}>· admin</span>
             </button>
           )}
-          {fasesCompletadas > 0 && (
+          {/* Botón .tex — descarga LaTeX crudo. Solo admin: un estudiante
+              no sabe qué es .tex. El estudiante baja el documento desde la
+              vista "Compilar LaTeX" cuando termina su proyecto. */}
+          {isAdmin && fasesCompletadas > 0 && (
             <button onClick={descargarLatex} disabled={isDownloading} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4 }}>
               {isDownloading ? <div className="spinner" style={{ width:12, height:12, borderWidth:2 }}/> : "⬇️"}<span>.tex</span>
             </button>
           )}
-          {fasesCompletadas > 0 && (
+          {/* Botón Bitácora del header — solo admin: el estudiante ya tiene
+              el tab "Bitácora" en el sidebar del COL 1. Este es un duplicado
+              que confunde. Para admin lo mantenemos por el atajo a la versión
+              imprimible (Ctrl+P). */}
+          {isAdmin && fasesCompletadas > 0 && (
             <a
               href={`/api/projects/${proyectoId}/bitacora/imprimible`}
               target="_blank"
@@ -2438,7 +2447,7 @@ export default function WorkspacePage() {
           )}
           {fasesCompletadas >= 2 && (
             <Link href={`/projects/${proyectoId}/defensa`} className="btn-ghost" style={{ fontSize:11, padding:"5px 10px", display:"flex", alignItems:"center", gap:4, textDecoration:"none" }} title="Simula tu defensa oral con IA">
-              ⚖️ <span className="hidden sm:inline">Defensa</span>
+              ⚖️ <span>Defensa</span>
             </Link>
           )}
           {user?.role === "admin" && (
@@ -3726,6 +3735,7 @@ export default function WorkspacePage() {
                   logoUrl={university?.logo_url}
                   proyectoId={proyectoId}
                   onConfigurarCaratula={() => setShowCoverSettings(true)}
+                  isAdmin={isAdmin}
                 />
               ) : phaseId === "ph-calidad" ? (
                 /* Banco de preguntas para defensa oral (ex-Auditoría Final).
