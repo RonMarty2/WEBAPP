@@ -6,6 +6,7 @@ import NucleoFooter from "@/components/ui/NucleoFooter";
 import WhatsAppFloat from "@/components/ui/WhatsAppFloat";
 import PWAServiceWorker from "@/components/pwa/PWAServiceWorker";
 import PWAInstallPrompt from "@/components/pwa/PWAInstallPrompt";
+import AuthRefreshGate from "@/components/AuthRefreshGate";
 import "./globals.css";
 
 const crimsonPro = Crimson_Pro({ 
@@ -93,6 +94,7 @@ export default function RootLayout({
         <WhatsAppFloat />
         <PWAServiceWorker />
         <PWAInstallPrompt />
+        <AuthRefreshGate />
       </body>
     </html>
   );
