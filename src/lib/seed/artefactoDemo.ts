@@ -116,6 +116,77 @@ Si se aplica un diseño IoT que combina microcontrolador ESP32, sensores SCD30 y
 Definidos el problema, los objetivos, los alcances y la hipótesis, el documento avanza hacia el Capítulo I, que desarrolla el marco teórico de sustento; continúa con el Capítulo II, que presenta el análisis del entorno y el mercado potencial; prosigue con el Capítulo III, que detalla el diseño y la validación del artefacto; y culmina con las conclusiones y recomendaciones derivadas.
 `;
 
+// ── Fase 3: Capítulo I — Marco Teórico ──────────────────────────────────────
+// Contexto: Resumen + Intro generados. Bases técnicas IoT + calidad del aire.
+const CAP1_MARCO_TEORICO = `# CAPÍTULO I — MARCO TEÓRICO
+
+## 1.1. Antecedentes del Estudio
+
+La preocupación por la calidad del aire interior en espacios educativos ha sido objeto de estudios crecientes en las últimas dos décadas. La pandemia de COVID-19 aceleró el interés global por monitorear la ventilación de aulas como herramienta de salud pública (OMS, 2021). En el ámbito tecnológico, la convergencia de microcontroladores de bajo costo (ESP32, Arduino) con sensores ambientales comerciales de creciente exactitud (Sensirion, Bosch, NovaFitness) ha hecho económicamente accesibles soluciones que hace una década eran exclusivas de laboratorios profesionales (rajkumar, lee, sha, & stankovic, 2010). En Bolivia, los estudios sobre IoT aplicado a calidad del aire interior son aún escasos, lo que constituye una de las razones del presente proyecto.
+
+## 1.2. Bases Teóricas
+
+### 1.2.1. Calidad del Aire Interior
+
+La calidad del aire interior (Indoor Air Quality, IAQ) se evalúa con un conjunto de parámetros físico-químicos cuyos umbrales recomendados están documentados por la Organización Mundial de la Salud (OMS, 2021) y por estándares técnicos como ASHRAE 62.1 (american society of heating, refrigerating and air-conditioning engineers, 2019). Los parámetros relevantes para aulas universitarias son:
+
+- **Dióxido de carbono (CO2):** producido por la respiración. Umbrales: por debajo de 1.000 ppm es aceptable; entre 1.000 y 1.500 ppm produce fatiga y reducción del rendimiento cognitivo; por encima de 1.500 ppm es indicativo de ventilación insuficiente.
+- **Partículas finas PM2,5:** partículas con diámetro inferior a 2,5 micrones, asociadas a tránsito vehicular, polvo y combustión. Umbral OMS: 15 µg/m³ promedio diario.
+- **Temperatura:** confort térmico para aulas entre 20 °C y 24 °C.
+- **Humedad relativa:** confort entre 40% y 60%. Por debajo del 30% incrementa irritación respiratoria; por encima del 70% favorece desarrollo de moho.
+
+### 1.2.2. Arquitectura IoT
+
+Una arquitectura IoT se compone clásicamente de cuatro capas (rajkumar, lee, sha, & stankovic, 2010):
+
+- **Capa de percepción:** sensores que capturan datos del entorno físico.
+- **Capa de red:** mecanismo de transmisión inalámbrica (WiFi, Bluetooth, LoRa, celular).
+- **Capa de plataforma:** servidor o servicio en la nube que recibe, almacena y procesa los datos.
+- **Capa de aplicación:** interfaz que el usuario final consume (web, móvil, alertas).
+
+El presente artefacto aplica esta arquitectura clásica con decisiones específicas de selección de sensores, microcontrolador, protocolo de comunicación y plataforma de visualización detalladas en el Capítulo III.
+
+### 1.2.3. Microcontrolador ESP32
+
+El ESP32 es un microcontrolador de bajo costo con WiFi y Bluetooth integrados, desarrollado por Espressif Systems. Su capacidad de procesamiento de doble núcleo a 240 MHz, su memoria RAM de 520 KB y su soporte nativo de comunicación inalámbrica lo han consolidado como plataforma de referencia para aplicaciones IoT de gama baja y media. Su consumo energético en operación es de aproximadamente 80 mA, lo que permite alimentación por USB estándar (5V) sin necesidad de fuente especial.
+
+### 1.2.4. Sensores Ambientales Seleccionables
+
+La literatura técnica y los catálogos de fabricantes documentan varias alternativas de sensores ambientales accesibles para proyectos IoT educativos:
+
+- **CO2:** Sensirion SCD30 (NDIR, exactitud ±30 ppm), Sensirion SCD40 (foto-acústico, ±50 ppm), MH-Z19B (NDIR, ±50 ppm).
+- **Partículas PM2,5:** NovaFitness SDS011 (láser, ±15 µg/m³), Plantower PMS5003 (láser, ±10 µg/m³).
+- **Temperatura y humedad:** DHT22 (calibrado, ±0,5 °C / ±2% RH), SHT31 (alta exactitud, ±0,3 °C / ±2% RH).
+
+La selección del SCD30 y el SDS011 para el presente artefacto se justifica en el Capítulo III por su balance entre exactitud, costo, disponibilidad en el mercado local y compatibilidad con el ESP32.
+
+### 1.2.5. Protocolos de Comunicación IoT
+
+Los protocolos más usados en aplicaciones IoT de calidad del aire son:
+
+- **HTTP/HTTPS:** simple, ampliamente soportado, pero pesado para transmisiones frecuentes.
+- **MQTT:** publish-subscribe, eficiente para mensajes pequeños y frecuentes. Estándar de facto en IoT.
+- **WebSocket:** para comunicación bidireccional en tiempo real con la interfaz web.
+
+El presente artefacto utiliza HTTPS para transmitir datos cada 30 segundos al servidor, dada la simplicidad de implementación y la frecuencia moderada que el caso de uso requiere.
+
+### 1.2.6. Plataformas de Visualización en la Nube
+
+Existen plataformas IoT que proveen el componente servidor y la interfaz de visualización con costo bajo o nulo en planes iniciales: Adafruit IO, ThingSpeak, Blynk, AWS IoT Core. El presente proyecto utiliza una plataforma propia desarrollada en Node.js sobre un servidor virtual en la nube, lo que permite control total sobre el almacenamiento de datos institucional y evita dependencias comerciales que podrían cambiar sus políticas.
+
+## 1.3. Marco Conceptual
+
+- **ppm (partes por millón):** unidad de concentración usada para CO2.
+- **µg/m³:** unidad de concentración para partículas finas en aire.
+- **NDIR (Non-Dispersive Infrared):** principio físico de medición de CO2 por absorción de luz infrarroja.
+- **PWM (Pulse-Width Modulation):** técnica de modulación usada por algunos sensores para reportar su lectura.
+- **Latencia de alerta:** tiempo entre que un sensor detecta un valor fuera de umbral y el sistema notifica al usuario.
+
+## 1.4. Marco Contextual
+
+El proyecto se desarrolló en el campus de UNIFRANZ Cochabamba. La validación empírica del prototipo se realizó en un aula de la Facultad de Ingeniería con capacidad nominal de 35 estudiantes, dimensiones aproximadas de 7 × 6 metros, ventilación natural por dos ventanas laterales y una puerta. El aula tiene cobertura WiFi institucional estable y conexión eléctrica disponible para alimentar el dispositivo por USB.
+`;
+
 export const ARTEFACTO_DEMO_SEED: DemoSeed = {
   seed_id: "artefacto-iot-aire-v1",
   universidad_id: "unifranz-cba-001",
@@ -138,6 +209,7 @@ export const ARTEFACTO_DEMO_SEED: DemoSeed = {
   fases_contenido: {
     "ph-unifranz-pg-artefacto-resumen": RESUMEN,
     "ph-unifranz-pg-artefacto-introduccion": INTRODUCCION,
-    // Cap I, II, III y cierre en commits subsiguientes, fase por fase.
+    "ph-unifranz-pg-artefacto-cap1": CAP1_MARCO_TEORICO,
+    // Cap II y Cap III en commits subsiguientes.
   },
 };
