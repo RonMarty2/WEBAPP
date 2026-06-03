@@ -6,6 +6,7 @@ import {
   SESSION_COOKIE,
   SESSION_MAX_AGE,
   isAdmin,
+  type UserRole,
 } from "@/lib/auth";
 import { dbUpsertUser, dbGetUser } from "@/lib/db";
 
@@ -27,19 +28,44 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL("/login?error=profile_failed", origin));
   }
 
-  const admin = isAdmin(profile.email);
-
-  // Mantener rol/plan si el usuario ya existe y fue activado
+  // Resolver rol/active con esta jerarquía:
+  //
+  //   1) Si el usuario YA EXISTE en BD → respetar su rol actual.
+  //      La BD es la fuente de verdad. Esto evita que la env var ADMIN_EMAILS
+  //      pise un cambio manual (ej: "este usuario era admin y lo bajé a
+  //      estudiante con un SQL"). Si un admin bajó a alguien, no queremos
+  //      que el próximo login lo vuelva a subir solo porque su email
+  //      aparece en la whitelist.
+  //
+  //   2) Si el usuario NO EXISTE (primer login) → la env var ADMIN_EMAILS
+  //      decide. Útil para alta automática del admin del SaaS.
+  //
+  // ANTES (bug que mantuvo a rnd261190 como admin en cada login):
+  //   role: admin ? "admin" : (existing?.role ?? "estudiante")
+  // → si el email estaba en ADMIN_EMAILS, el callback forzaba role=admin
+  // en CADA login, pisando lo que tuviera la BD.
+  const isWhitelistedAdmin = isAdmin(profile.email);
   const existing = await dbGetUser(profile.id);
+
+  let finalRole: UserRole;
+  let finalActive: boolean;
+
+  if (existing) {
+    finalRole = (existing.role as UserRole | undefined) ?? "estudiante";
+    finalActive = existing.active ?? false;
+  } else {
+    finalRole = isWhitelistedAdmin ? "admin" : "estudiante";
+    finalActive = isWhitelistedAdmin ? true : false;
+  }
 
   const userRecord = await dbUpsertUser({
     id: profile.id,
     email: profile.email,
     name: profile.name,
     picture: profile.picture,
-    role: admin ? "admin" : (existing?.role ?? "estudiante"),
+    role: finalRole,
     plan: existing?.plan,
-    active: admin ? true : (existing?.active ?? false),
+    active: finalActive,
   });
 
   const sessionUser = {
@@ -62,7 +88,8 @@ export async function GET(req: Request) {
     path: "/",
   });
 
-  if (admin) return NextResponse.redirect(new URL("/admin", origin));
+  // Redirigir según el rol REAL del usuario (de BD), no según la whitelist.
+  if (userRecord.role === "admin") return NextResponse.redirect(new URL("/admin", origin));
   if (!userRecord.active) return NextResponse.redirect(new URL("/pendiente", origin));
   return NextResponse.redirect(new URL("/dashboard", origin));
 }
