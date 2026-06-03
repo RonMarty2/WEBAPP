@@ -567,17 +567,27 @@ export default function WorkspacePage() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [loading, setLoading] = useState(true);
-  // Detección de móvil por UA y/o viewport ≤ 1023px. Necesaria porque algunos
-  // PWAs standalone reportan viewport raro y el grid de 3 columnas se activa
-  // cuando no debería, comprimiendo el contenido del documento.
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  // Detección de móvil. Usa lazy initializer para tener el valor correcto desde
+  // el PRIMER render (sin esperar useEffect, sin race conditions de hidratación).
+  // Necesario porque PWA standalone en Android puede reportar viewport >=1280
+  // y el grid de 3 columnas se activa comprimiendo el contenido.
+  // Adicionalmente: leemos la clase .is-mobile-ua que el script inline en
+  // layout.tsx ya puso en <html> antes de cualquier render de React.
+  const [isMobileDevice, setIsMobileDevice] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    if (typeof document !== "undefined" && document.documentElement.classList.contains("is-mobile-ua")) return true;
+    const ua = window.navigator.userAgent;
+    if (/Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua)) return true;
+    return window.matchMedia("(max-width: 1023px)").matches;
+  });
   useEffect(() => {
     if (typeof window === "undefined") return;
     const check = () => {
       const ua = window.navigator.userAgent;
       const isMobileUA = /Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua);
       const isNarrow = window.matchMedia("(max-width: 1023px)").matches;
-      setIsMobileDevice(isMobileUA || isNarrow);
+      const isCoarse = window.matchMedia("(pointer:coarse)").matches;
+      setIsMobileDevice(isMobileUA || isNarrow || isCoarse);
     };
     check();
     window.addEventListener("resize", check);
@@ -2561,7 +2571,12 @@ export default function WorkspacePage() {
         {/* ── COL 1: CHAT & GENERATION (fixed 360px on desktop) ── */}
         <div
           className="w-full xl:w-auto shrink-0 flex flex-col border-b xl:border-b-0 relative z-40 min-h-[500px] xl:min-h-0"
-          style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderRight: panelBorder, boxShadow: panelShadow }}
+          style={{
+            background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderRight: panelBorder, boxShadow: panelShadow,
+            // En móvil, forzar 100% width — bypassa el xl:w-auto de Tailwind si el
+            // viewport reporta >=1280 lógico aunque sea un teléfono físicamente.
+            ...(isMobileDevice ? { width: "100%", maxWidth: "100%", minWidth: 0, flexBasis: "auto" } : {}),
+          }}
         >
           {/* UPPER SCROLLABLE AREA */}
           <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column" }}>
@@ -3623,9 +3638,12 @@ export default function WorkspacePage() {
         </div>
 
         {/* ── COL 2: CONTENT VIEWER (flex) ── */}
-        <div 
+        <div
           className="workspace-main-column overflow-y-auto relative z-10 min-h-[600px] xl:min-h-0"
-          style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur }}
+          style={{
+            background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur,
+            ...(isMobileDevice ? { width: "100%", maxWidth: "100%", minWidth: 0, flexBasis: "auto" } : {}),
+          }}
         >
           {displayContent ? (
             <div
@@ -3804,7 +3822,10 @@ export default function WorkspacePage() {
         {showPdfPanel && !isCap0Phase && (
           <div
             className="w-full xl:w-auto shrink-0 flex flex-col border-t xl:border-t-0 relative z-40 min-h-[500px] xl:min-h-0"
-            style={{ background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow }}
+            style={{
+              background: panelBg, backdropFilter: panelBlur, WebkitBackdropFilter: panelBlur, borderLeft: panelBorder, boxShadow: panelShadow,
+              ...(isMobileDevice ? { width: "100%", maxWidth: "100%", minWidth: 0, flexBasis: "auto" } : {}),
+            }}
           >
             {/* Panel header */}
             <div style={{ padding:"12px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", display:"flex", flexDirection:"column", gap:8, flexShrink:0 }}>
