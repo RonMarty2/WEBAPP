@@ -416,6 +416,292 @@ Las entrevistas a los tres distribuidores principales arrojaron:
 
 El conjunto de hallazgos confirma que la rotura del 12,4% mensual tiene causa estructural interna (ausencia de modelos formales de gestión, sin visibilidad cruzada) más que causa externa (los distribuidores cumplen razonablemente bien). El espacio de mejora se concentra en la operación interna y resulta abordable con las estrategias del Capítulo III. Adicionalmente, la disposición favorable del personal y de los distribuidores facilita la implementación.
 `;
+// ── Fase 10: Capítulo III — Propuesta (header) ──────────────────────────────
+// Contexto disponible: Cap II completo con diagnóstico de 3 causas
+// estructurales (sin ABC, sin EOQ, sin visibilidad cruzada). El Cap III
+// presenta la propuesta integral que corrige esas causas.
+const CAP3_HEADER = `# CAPÍTULO III — PROPUESTA DE MEJORA
+
+El presente capítulo presenta la propuesta de mejora del sistema de gestión de inventarios de BoliFarma S.R.L., construida a partir del diagnóstico desarrollado en el Capítulo II y de las bases teóricas del Capítulo I. La estructura sigue la guía UNIFRANZ 2017 sección 4.2.2 y se organiza en cinco bloques: identificación y formulación de las estrategias de mejora (sección 3.1), diseño detallado de la propuesta articulando las estrategias en un sistema coherente (sección 3.2), plan de implementación con responsables, plazos e indicadores (sección 3.3), plan de seguimiento y control post-implementación (sección 3.4) y evaluación financiera de la propuesta con un horizonte de tres años (sección 3.5).
+`;
+
+// ── Fase 11: 3.1 Identificación de Estrategias ─────────────────────────────
+// Contexto: diagnóstico (3 causas estructurales) + FODA del Cap II.
+// Se formulan las 6 estrategias prometidas en el Resumen Ejecutivo.
+const CAP3A_ESTRATEGIAS = `# 3.1. Identificación de Estrategias
+
+A partir del diagnóstico del Capítulo II y de las estrategias DO y FO formuladas en la matriz FODA, se identificaron seis estrategias que articuladas conforman la propuesta de mejora del sistema de gestión de inventarios.
+
+## 3.1.1. Estrategia 1: Clasificación ABC del Inventario
+
+**Objetivo:** priorizar el esfuerzo de gestión sobre los productos que aportan el mayor valor de venta y sobre los medicamentos crónicos cuya rotura tiene impacto sanitario.
+
+**Descripción:** clasificar los 2.400 SKUs del catálogo en tres categorías sobre la base de la venta acumulada de los últimos 12 meses: A (los SKUs que aportan el 75% del valor de venta), B (los siguientes que aportan el 20%) y C (el resto). Adicionalmente, todos los medicamentos crónicos se elevan a categoría A por relevancia sanitaria, independientemente de su aporte económico.
+
+**Justificación:** la ausencia de clasificación es la primera causa estructural identificada. Su corrección permite asignar el esfuerzo de gestión proporcionalmente al valor.
+
+## 3.1.2. Estrategia 2: Modelo de Revisión Periódica con EOQ Adaptado
+
+**Objetivo:** sustituir la generación de órdenes de compra por estimación con un cálculo formal de punto de reorden y cantidad económica de pedido.
+
+**Descripción:** aplicar el modelo de revisión periódica (T-S) con frecuencia semanal a los productos de categoría A y quincenal a los productos de categorías B y C. La cantidad económica de pedido se calcula con la fórmula clásica (EOQ) ajustada por el factor de vencimiento del producto. El punto de reorden se calibra con la demanda histórica más el stock de seguridad equivalente a 1,5 lead times del distribuidor.
+
+**Justificación:** corrige la segunda causa estructural identificada en el diagnóstico.
+
+## 3.1.3. Estrategia 3: Sistema de Información Integrado entre Sucursales
+
+**Objetivo:** dar visibilidad cruzada en tiempo real del inventario disponible en las cuatro sucursales y disparar automáticamente alertas de reposición o transferencia.
+
+**Descripción:** implementar un sistema en la nube que consolide en tiempo real las ventas y los movimientos de inventario de las cuatro sucursales y de la oficina central. El sistema genera reportes de cobertura por SKU y alertas configuradas según los puntos de reorden de cada categoría.
+
+**Justificación:** corrige la tercera causa estructural y habilita las estrategias 4 y 6.
+
+## 3.1.4. Estrategia 4: Programa de Capacitación del Personal
+
+**Objetivo:** desarrollar competencias internas en gestión de inventarios para sostener el nuevo sistema más allá de la implementación inicial.
+
+**Descripción:** programa de capacitación de 24 horas distribuido en 6 sesiones de 4 horas, dirigido a los 16 colaboradores y al equipo administrativo, cubriendo: fundamentos de gestión de inventarios, uso del sistema de información nuevo, protocolo de recepción y validación, protocolo de transferencia entre sucursales, indicadores y reportes, gestión de excepciones (vencimientos, devoluciones, productos con quiebre del distribuidor).
+
+**Justificación:** la disposición favorable del personal documentada en el Cap II (14/16) facilita la adopción, pero requiere una inversión formativa estructurada.
+
+## 3.1.5. Estrategia 5: Acuerdo Marco con Tres Distribuidores
+
+**Objetivo:** formalizar la relación con los tres distribuidores principales para mejorar previsibilidad de plazos y precios.
+
+**Descripción:** firma de acuerdos marco de 18 meses con los tres distribuidores principales, con cláusulas de: compromiso de volumen mensual mínimo de BoliFarma, compromiso de plazo de entrega y disponibilidad mínima del distribuidor, descuento por volumen escalonado, mecanismo de escalamiento para casos de quiebre del laboratorio.
+
+**Justificación:** los tres distribuidores expresaron disposición favorable en las entrevistas del Cap II.
+
+## 3.1.6. Estrategia 6: Protocolo de Transferencia entre Sucursales
+
+**Objetivo:** formalizar la transferencia de producto entre sucursales como mecanismo operativo regular, no como recurso excepcional.
+
+**Descripción:** protocolo escrito que define cuándo se dispara una transferencia (sucursal con stock cero y otra sucursal con inventario superior al punto de reorden), quién la autoriza, cómo se ejecuta logísticamente, plazo objetivo (4 horas dentro del área urbana) y registro en el sistema integrado.
+
+**Justificación:** convierte un recurso informal en un mecanismo confiable, en sinergia con la Estrategia 3.
+
+## 3.1.7. Articulación de las Seis Estrategias
+
+Las seis estrategias se articulan como un sistema integrado donde ninguna funciona aislada: la clasificación ABC orienta el esfuerzo del modelo EOQ; el sistema de información habilita el modelo EOQ y el protocolo de transferencia; la capacitación garantiza la adopción de las cuatro estrategias anteriores; el acuerdo marco con distribuidores reduce la variabilidad externa que el sistema interno no controla. La implementación coordinada de las seis es lo que permite alcanzar el objetivo de rotura inferior al 4%.
+`;
+
+// ── Fase 12: 3.2 Diseño de la Propuesta ─────────────────────────────────────
+// Contexto: 6 estrategias formuladas. Esta fase las articula en un diseño
+// operativo concreto con flujos, roles y herramientas.
+const CAP3B_DISENO = `# 3.2. Diseño de la Propuesta
+
+## 3.2.1. Arquitectura del Sistema Propuesto
+
+El sistema propuesto opera sobre tres capas:
+
+- **Capa de datos:** base de datos centralizada en la nube con los movimientos de inventario y ventas de las cuatro sucursales en tiempo real.
+- **Capa de gestión:** módulo de clasificación ABC, módulo de cálculo EOQ y punto de reorden, módulo de alertas y reportes, módulo de transferencias.
+- **Capa de operación:** interfaces sencillas para el personal de sucursal (registro de venta y de movimiento) y para el equipo administrativo (revisión, autorización de orden de compra, autorización de transferencia).
+
+## 3.2.2. Flujo Operativo Rediseñado
+
+**Recepción de mercadería:** el dependiente que recibe escanea cada producto contra la orden de compra en el sistema, que valida cantidad y vencimiento. Las discrepancias se registran y escalan automáticamente al equipo administrativo.
+
+**Venta y reposición:** cada venta descuenta del inventario en tiempo real. Cuando un SKU alcanza el punto de reorden, el sistema emite alerta al equipo administrativo. Cuando un SKU alcanza stock cero en una sucursal, el sistema verifica las otras tres y propone una transferencia si corresponde.
+
+**Generación de órdenes de compra:** revisión semanal de los productos A y quincenal de los B y C. El sistema propone cantidades según EOQ; el equipo administrativo revisa y autoriza.
+
+**Transferencia entre sucursales:** disparada automáticamente o manualmente. El sistema registra origen, destino, SKU, cantidad, hora de despacho y hora de recepción. Plazo objetivo 4 horas dentro del área urbana.
+
+## 3.2.3. Roles y Responsabilidades
+
+- **Gerencia General:** aprobación de la propuesta y de los acuerdos marco con distribuidores. Revisión mensual de indicadores agregados.
+- **Equipo administrativo central (2 personas):** autorización de órdenes de compra, autorización de transferencias entre sucursales que crucen distrito, seguimiento de cumplimiento de los distribuidores.
+- **Farmacéutico responsable por sucursal (4 personas):** validación del inventario propio, autorización de transferencias entre sucursales del mismo distrito, escalamiento de excepciones.
+- **Dependientes (8 personas):** registro de venta, recepción de mercadería con validación contra orden, ejecución del protocolo de transferencia (recibir y entregar producto entre sucursales según corresponda).
+- **Personal de logística (2 personas):** movimiento físico del producto entre sucursales según las transferencias autorizadas.
+
+## 3.2.4. Indicadores del Sistema
+
+El sistema produce los siguientes indicadores mensuales:
+
+- Tasa de rotura por sucursal y por categoría ABC.
+- Rotación del inventario por sucursal.
+- Días de inventario por sucursal.
+- Cumplimiento del distribuidor (plazo real vs. comprometido).
+- Cantidad de transferencias ejecutadas y tiempo promedio.
+- Vencimiento (% de inventario vencido sobre inventario total).
+
+Los indicadores se revisan mensualmente con la Gerencia General y trimestralmente con todo el equipo.
+`;
+
+// ── Fase 13: 3.3 Plan de Implementación ─────────────────────────────────────
+// Contexto: arquitectura y roles definidos. Esta fase pone fechas y
+// responsables a la ejecución.
+const CAP3C_IMPLEMENTACION = `# 3.3. Plan de Implementación
+
+El plan de implementación se organiza en cinco fases secuenciales y se ejecuta durante el primer semestre de 2025.
+
+## 3.3.1. Fase 1 — Preparación (Mes 1)
+
+- Selección del proveedor del sistema de información en la nube.
+- Firma de contrato y configuración inicial.
+- Clasificación ABC del catálogo a partir de los datos históricos de venta.
+- Cálculo inicial de punto de reorden y EOQ para los productos de categoría A.
+- Negociación y firma del acuerdo marco con los tres distribuidores principales.
+
+**Responsable:** Gerencia General + equipo administrativo central.
+**Indicador de cumplimiento:** sistema configurado, clasificación cargada, acuerdos firmados.
+
+## 3.3.2. Fase 2 — Capacitación (Mes 2)
+
+- Ejecución del programa de 6 sesiones × 4 horas para los 16 colaboradores.
+- Manuales operativos entregados (procedimiento de recepción, procedimiento de transferencia, uso del sistema).
+- Evaluación de aprendizaje al cierre del programa.
+
+**Responsable:** equipo administrativo central + consultor externo de gestión de inventarios.
+**Indicador de cumplimiento:** 16/16 colaboradores aprobados en la evaluación; manuales operativos firmados.
+
+## 3.3.3. Fase 3 — Piloto en una Sucursal (Mes 3)
+
+- Activación del sistema solo en la sucursal de mayor venta (sucursal 1, distrito central).
+- Operación paralela: planilla antigua + sistema nuevo durante 30 días.
+- Revisión diaria de discrepancias y ajustes.
+- Cierre del piloto: validación de la operación en sucursal 1.
+
+**Responsable:** farmacéutico responsable sucursal 1 + equipo administrativo central.
+**Indicador de cumplimiento:** rotura mensual en sucursal 1 reducida por debajo del 7% (intermedio entre línea base 12,4% y objetivo final 4%).
+
+## 3.3.4. Fase 4 — Despliegue a las Otras Tres Sucursales (Meses 4 y 5)
+
+- Activación del sistema en sucursales 2, 3 y 4 de forma escalonada (sucursal 2 al inicio del mes 4, sucursal 3 a mitad del mes 4, sucursal 4 al inicio del mes 5).
+- Activación del protocolo de transferencia entre sucursales una vez que las 4 estén en línea.
+- Seguimiento semanal de indicadores por sucursal.
+
+**Responsable:** equipo administrativo central + farmacéutico responsable de cada sucursal.
+**Indicador de cumplimiento:** rotura mensual consolidada por debajo del 6% al cierre del mes 5.
+
+## 3.3.5. Fase 5 — Estabilización y Cierre del Proyecto (Mes 6)
+
+- Operación regular con el nuevo sistema.
+- Primera revisión mensual completa con Gerencia.
+- Ajustes finos sobre la base de la primera medición consolidada.
+- Documentación final del proyecto y traspaso a operación.
+
+**Responsable:** Gerencia General + equipo administrativo central.
+**Indicador de cumplimiento:** rotura mensual por debajo del 4% al cierre del mes 6.
+
+## 3.3.6. Cronograma Resumido
+
+| Mes | Hito principal |
+|---|---|
+| Mes 1 | Sistema configurado + ABC cargado + acuerdo marco firmado |
+| Mes 2 | 16 colaboradores capacitados |
+| Mes 3 | Piloto sucursal 1: rotura < 7% |
+| Mes 4 | Despliegue sucursales 2 y 3 |
+| Mes 5 | Despliegue sucursal 4 + transferencia entre sucursales activa |
+| Mes 6 | Operación regular: rotura < 4% |
+`;
+
+// ── Fase 14: 3.4 Plan de Seguimiento y Control ─────────────────────────────
+// Contexto: implementación definida. Esta fase asegura sostenibilidad
+// post-cierre del proyecto.
+const CAP3D_SEGUIMIENTO = `# 3.4. Plan de Seguimiento y Control
+
+## 3.4.1. Indicadores de Seguimiento Mensual
+
+Los indicadores del sistema (sección 3.2.4) se reportan mensualmente con la siguiente jerarquía:
+
+- **Indicador principal:** tasa de rotura mensual consolidada. Meta: por debajo de 4% sostenida.
+- **Indicadores secundarios:** rotación del inventario (meta: 8 a 10 veces anuales), días de inventario (meta: entre 36 y 45 días), tasa de vencimiento (meta: por debajo del 0,8% del inventario promedio).
+- **Indicadores operativos:** cumplimiento del distribuidor (meta: por encima del 92%), cantidad de transferencias y tiempo promedio (meta: 4 horas), errores en recepción contra orden (meta: por debajo del 1,5%).
+
+## 3.4.2. Gobierno del Sistema
+
+- **Revisión mensual** entre Gerencia General y equipo administrativo central, con el reporte de los indicadores y plan de acción ante desviaciones.
+- **Revisión trimestral** ampliada con farmacéuticos responsables y representantes del personal operativo, para detectar oportunidades de ajuste no visibles en los indicadores agregados.
+- **Revisión anual** del acuerdo marco con los distribuidores, evaluando el cumplimiento mutuo y renegociando condiciones si corresponde.
+
+## 3.4.3. Mecanismos de Acción ante Desviaciones
+
+Cuando un indicador se desvía de la meta más allá de un umbral acordado, se dispara el siguiente protocolo:
+
+- **Diagnóstico inmediato:** identificación de la sucursal y los SKUs involucrados.
+- **Plan de acción acotado:** medidas correctivas con responsable y plazo (típicamente 7 días).
+- **Verificación de cumplimiento:** revisión a los 30 días para confirmar que la corrección sostiene.
+
+Las desviaciones recurrentes se elevan al gobierno mensual para análisis estructural y eventual ajuste de las reglas del sistema.
+
+## 3.4.4. Continuidad y Mejora Continua
+
+Al cierre del primer año de operación se realiza una evaluación integral del sistema con tres focos: revisión de la clasificación ABC con los datos de venta acumulados del año, recalibración de los puntos de reorden y EOQ con la demanda actualizada, y evaluación de la satisfacción del personal con el sistema. Los hallazgos alimentan el plan de mejora continua para el segundo año.
+`;
+
+// ── Fase 15: 3.5 Evaluación Financiera ──────────────────────────────────────
+// Contexto: propuesta diseñada con costos identificables. Esta fase
+// cuantifica la inversión y demuestra la viabilidad financiera con
+// VAN, TIR y B/C, en línea con la promesa del Resumen Ejecutivo.
+const CAP3E_FINANCIERA = `# 3.5. Evaluación Financiera
+
+## 3.5.1. Inversión Inicial
+
+La inversión incremental requerida para implementar la propuesta se estima en **Bs. 95.000**, distribuida así:
+
+| Rubro | Monto (Bs.) | Participación |
+|---|---:|---:|
+| Licencias del sistema de información (12 meses anticipados) | 32.000 | 33,7% |
+| Hardware adicional (escáneres de código de barras, tablets de sucursal) | 18.000 | 18,9% |
+| Honorarios de consultoría para configuración inicial e implementación | 24.000 | 25,3% |
+| Programa de capacitación (consultor externo + materiales) | 9.500 | 10,0% |
+| Costos de migración de datos y carga histórica | 6.500 | 6,8% |
+| Reserva para contingencias (5%) | 5.000 | 5,3% |
+| **Total** | **95.000** | **100,0%** |
+
+## 3.5.2. Estructura de Financiamiento
+
+La inversión se cubre con flujo de caja propio de BoliFarma, distribuido en los seis meses del plan de implementación. La empresa cuenta con la liquidez para asumir esta inversión sin necesidad de financiamiento externo, lo que elimina el componente de gasto financiero del análisis.
+
+## 3.5.3. Beneficios Esperados (Proyección a 3 años)
+
+Los beneficios se estiman en dos categorías:
+
+**Recuperación de venta por reducción de rotura.** La línea base de rotura es del 12,4% mensual con pérdida de venta de Bs. 38.500/mes. El objetivo es rotura por debajo del 4%. Se aplica una proyección conservadora:
+
+- Año 1: rotura promedio del 6% (rampa: meses 1-2 = 12,4%, meses 3-5 = 7%, meses 6-12 = 4,5%). Recuperación de venta del 51% de la base = Bs. 235.620.
+- Año 2: rotura sostenida del 4%. Recuperación del 68% de la base = Bs. 314.160.
+- Año 3: rotura sostenida del 4%. Recuperación del 68% de la base = Bs. 314.160.
+
+**Reducción de obsolescencia.** La operación actual sin ABC ni EOQ genera 1,4% mensual de inventario vencido o deteriorado. La meta es 0,8%. Sobre un inventario promedio valorado en Bs. 320.000, la mejora libera Bs. 23.040 anuales sostenidos a partir del año 2.
+
+**Margen neto sobre la venta recuperada.** El margen promedio del rubro farmacéutico minorista es del 18,5%. Se aplica este margen sobre la venta recuperada para obtener el beneficio neto efectivo.
+
+## 3.5.4. Flujo de Caja Proyectado
+
+| Año | Inversión / costo (Bs.) | Beneficio neto (Bs.) | Flujo neto (Bs.) |
+|---:|---:|---:|---:|
+| 0 | (95.000) | 0 | (95.000) |
+| 1 | (12.000) (licencias renovación + soporte) | 43.590 | 31.590 |
+| 2 | (12.000) | 81.180 | 69.180 |
+| 3 | (12.000) | 81.180 | 69.180 |
+
+## 3.5.5. Indicadores de Evaluación
+
+Aplicando los indicadores estandarizados con tasa de descuento del 14% (costo de oportunidad ajustado por riesgo):
+
+- **Valor Actual Neto (VAN):** **Bs. 184.620** (positivo, agrega valor sobre la mejor alternativa de uso del capital).
+- **Tasa Interna de Retorno (TIR):** **31,4%** (supera el costo de oportunidad del 14%).
+- **Relación Beneficio-Costo (B/C):** **1,87** (cada Bs. invertido genera Bs. 1,87 de beneficio actualizado).
+- **Período de recuperación de la inversión (Payback):** **14 meses**.
+
+## 3.5.6. Análisis de Sensibilidad
+
+Se analizó la sensibilidad ante tres variables críticas:
+
+- **Tasa de rotura sostenida del año 2 y 3:** si la rotura final fuera del 6% en lugar de 4%, el VAN sigue siendo positivo en Bs. 102.450.
+- **Inversión inicial superior en 20%:** si la inversión total fuera Bs. 114.000, el VAN sigue siendo positivo en Bs. 165.620.
+- **Margen efectivo del rubro inferior al 18,5%:** si fuera 15%, el VAN sigue siendo positivo en Bs. 134.840.
+
+El proyecto mantiene viabilidad financiera ante variaciones razonables de las variables críticas.
+
+## 3.5.7. Conclusión Financiera
+
+Los indicadores VAN, TIR, B/C y Payback sustentan la viabilidad financiera de la propuesta bajo los supuestos definidos. La sensibilidad muestra robustez ante variaciones moderadas. El principal riesgo financiero identificado es el ritmo de adopción del nuevo sistema por parte del personal, que el plan de implementación aborda con el programa de capacitación y el piloto previo al despliegue.
+`;
 export const MEJORA_ORG_DEMO_SEED: DemoSeed = {
   seed_id: "mejora-bolifarma-v1",
   universidad_id: "unifranz-cba-001",
@@ -445,6 +731,13 @@ export const MEJORA_ORG_DEMO_SEED: DemoSeed = {
     "ph-unifranz-pg-mejora-org-cap2c-matricial": CAP2C_MATRICIAL,
     "ph-unifranz-pg-mejora-org-cap2d-metodologia": CAP2D_METODOLOGIA,
     "ph-unifranz-pg-mejora-org-cap2e-mercado": CAP2E_MERCADO,
-    // Capítulo III (Propuesta) se completará en el próximo commit, fase por fase.
+    "ph-unifranz-pg-mejora-org-cap3-propuesta": CAP3_HEADER,
+    "ph-unifranz-pg-mejora-org-cap3a-estrategias": CAP3A_ESTRATEGIAS,
+    "ph-unifranz-pg-mejora-org-cap3b-diseno": CAP3B_DISENO,
+    "ph-unifranz-pg-mejora-org-cap3c-implementacion": CAP3C_IMPLEMENTACION,
+    "ph-unifranz-pg-mejora-org-cap3d-seguimiento": CAP3D_SEGUIMIENTO,
+    "ph-unifranz-pg-mejora-org-cap3e-financiera": CAP3E_FINANCIERA,
+    // Conclusiones, recomendaciones, bibliografía, compilación y defensa en
+    // el próximo commit.
   },
 };
