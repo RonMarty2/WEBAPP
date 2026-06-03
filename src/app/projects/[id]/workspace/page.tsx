@@ -2541,7 +2541,22 @@ export default function WorkspacePage() {
         }
       `}</style>
 
-      <div className={`workspace-three-pane flex-1 overflow-y-auto xl:overflow-hidden relative w-full ${isMobileDevice ? "is-mobile-device" : ""}`}>
+      <div
+        className={`workspace-three-pane flex-1 overflow-y-auto xl:overflow-hidden relative w-full ${isMobileDevice ? "is-mobile-device" : ""}`}
+        style={
+          isMobileDevice
+            ? {
+                display: "flex",
+                flexDirection: "column",
+                gridTemplateColumns: "none",
+                overflowX: "hidden",
+                overflowY: "auto",
+                width: "100vw",
+                maxWidth: "100vw",
+              }
+            : undefined
+        }
+      >
 
         {/* ── COL 1: CHAT & GENERATION (fixed 360px on desktop) ── */}
         <div
@@ -2595,11 +2610,16 @@ export default function WorkspacePage() {
               <div
                 className="pg-sidebar-overlay"
                 style={{
-                  position: "absolute",
-                  top: 63, // altura del botón phase label
+                  // En móvil: position:fixed para cubrir TODO el viewport
+                  // (el overlay no depende del width del padre).
+                  // En desktop: absolute como antes para superponerse sobre COL 1.
+                  position: isMobileDevice ? "fixed" : "absolute",
+                  top: isMobileDevice ? 96 : 63,
                   left: 0,
                   right: 0,
                   bottom: 0,
+                  width: isMobileDevice ? "100vw" : undefined,
+                  maxWidth: isMobileDevice ? "100vw" : undefined,
                   zIndex: 50,
                   background: "var(--bg-base)",
                   display: "flex",
