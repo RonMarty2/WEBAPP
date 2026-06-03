@@ -124,6 +124,88 @@ Si se implementa un sistema de gestión de inventarios que combina clasificació
 Definidos el problema, la justificación, los objetivos, los alcances y la hipótesis, el documento avanza hacia el Capítulo I, que desarrolla el marco teórico de sustento; continúa con el Capítulo II, que presenta el diagnóstico de la situación actual; prosigue con el Capítulo III, que formula la propuesta de mejora con su evaluación financiera; y culmina con las conclusiones y recomendaciones derivadas del estudio.
 `;
 
+// ── Fase 3: Capítulo I — Marco Teórico ──────────────────────────────────────
+// Contexto disponible para esta llamada: Resumen + Introducción ya generados.
+// El Cap I debe sentar las bases teóricas que sustenten el Cap II (diagnóstico)
+// y el Cap III (propuesta de mejora). Para una propuesta de gestión de
+// inventarios en farmacia minorista, las bases obligatorias son: modelos
+// clásicos de inventario (ABC, EOQ, revisión periódica/continua), cadena de
+// suministro, indicadores de desempeño y particularidades del rubro
+// farmacéutico (vencimiento, trazabilidad, conservación).
+const CAP1_MARCO_TEORICO = `# CAPÍTULO I — MARCO TEÓRICO
+
+## 1.1. Antecedentes del Estudio
+
+La gestión de inventarios en farmacias minoristas ha sido objeto de estudios en distintos contextos. A nivel internacional, las investigaciones de chase, jacobs y aquilano (chase, jacobs, & aquilano, 2014) han documentado que la aplicación de modelos clásicos de gestión de inventarios reduce la rotura de stock entre 40% y 70% en cadenas farmacéuticas que parten de una operación informal. En el contexto latinoamericano, estudios sobre farmacias independientes han evidenciado que la combinación de clasificación ABC con sistemas de información integrados es la práctica de mayor impacto operativo (ballou, 2004, p. 412). En Bolivia, los estudios específicos sobre el sub-sector son escasos, lo que constituye una de las razones que justifican el presente trabajo.
+
+## 1.2. Bases Teóricas
+
+### 1.2.1. Gestión de Inventarios
+
+La gestión de inventarios se define como el conjunto de políticas, decisiones y procedimientos que determinan qué productos almacenar, en qué cantidad, dónde y con qué frecuencia reponer (chase, jacobs, & aquilano, 2014, p. 547). Su objetivo central es equilibrar dos costos en tensión: el costo de mantener inventario (capital inmovilizado, espacio, deterioro, vencimiento) y el costo de no tenerlo (venta perdida, deterioro de la confianza del cliente, costo de reposición urgente). El equilibrio óptimo varía según el rubro y la velocidad de rotación del producto.
+
+### 1.2.2. Clasificación ABC del Inventario
+
+La clasificación ABC, propuesta originalmente por pareto y formalizada para la gestión de inventarios por dickie, agrupa los productos en tres categorías según el aporte de cada uno a la venta total (ballou, 2004, p. 396):
+
+- **Categoría A:** productos que representan aproximadamente el 70%–80% del valor de venta acumulado y constituyen el 10%–20% del catálogo. Requieren control estricto, revisión frecuente y proyección de demanda detallada.
+- **Categoría B:** productos que representan el 15%–25% del valor de venta y constituyen el 20%–30% del catálogo. Requieren control intermedio.
+- **Categoría C:** productos que representan el 5%–10% del valor de venta y el 50%–70% del catálogo. Requieren control simple, normalmente con stock de seguridad y revisión menos frecuente.
+
+La clasificación ABC permite asignar el esfuerzo de gestión proporcionalmente al valor que cada producto aporta al negocio. En farmacia minorista, los medicamentos de alta rotación (analgésicos, antigripales) y los medicamentos crónicos (antihipertensivos, antidiabéticos) suelen concentrarse en la categoría A.
+
+### 1.2.3. Cantidad Económica de Pedido (EOQ)
+
+El modelo de cantidad económica de pedido, formalizado por harris en 1913 y desarrollado por wilson, determina el tamaño óptimo de cada orden de reposición minimizando la suma de los costos de mantenimiento y los costos de hacer cada pedido (chase, jacobs, & aquilano, 2014, p. 561). La fórmula básica es:
+
+$$EOQ = \\sqrt{\\frac{2 \\cdot D \\cdot S}{H}}$$
+
+Donde:
+- D: demanda anual del producto (unidades).
+- S: costo unitario de hacer un pedido (administración, transporte).
+- H: costo unitario anual de mantener una unidad en inventario.
+
+Para productos farmacéuticos, el modelo se ajusta incorporando el factor de vencimiento: la cantidad económica calculada no debe exceder lo que se prevé vender antes del vencimiento del lote.
+
+### 1.2.4. Modelos de Revisión: Periódica y Continua
+
+Los sistemas de revisión de inventario se agrupan en dos familias principales (ballou, 2004, p. 421):
+
+- **Revisión continua (Q-R):** el inventario se monitorea en tiempo real. Cuando alcanza el punto de reorden R, se emite una orden de cantidad fija Q. Es apropiado para productos de categoría A donde la inversión en monitoreo se justifica.
+- **Revisión periódica (T-S):** el inventario se revisa cada T unidades de tiempo (semana, quincena, mes) y se ordena la cantidad necesaria para llegar a un nivel objetivo S. Es apropiado para productos de categorías B y C donde el costo de monitoreo continuo es desproporcionado.
+
+La aplicación combinada de los dos modelos según categoría ABC del producto es la práctica de mayor adopción en farmacia minorista organizada.
+
+### 1.2.5. Cadena de Suministro Farmacéutica
+
+La cadena de suministro farmacéutica minorista articula tres actores principales: el laboratorio fabricante, el distribuidor mayorista y la farmacia minorista (kotler & armstrong, 2017). En Bolivia, los distribuidores mayoristas concentran el aprovisionamiento de la mayoría de cadenas farmacéuticas minoristas, con tiempos de entrega que varían entre 24 horas (productos de alta rotación con stock garantizado) y 7 a 10 días (productos importados con quiebre de stock en el distribuidor). La negociación de un acuerdo marco con tres a cinco distribuidores estratégicos es una práctica documentada para reducir la variabilidad de la cadena.
+
+### 1.2.6. Indicadores de Desempeño en Gestión de Inventarios
+
+La literatura sobre gestión de operaciones ha consolidado un conjunto de indicadores estándar para el seguimiento de un sistema de gestión de inventarios (chase, jacobs, & aquilano, 2014, p. 583):
+
+- **Tasa de rotura de stock (stockout rate):** porcentaje de solicitudes de cliente que no pudieron atenderse por falta de producto.
+- **Rotación del inventario (inventory turnover):** veces que el inventario promedio se renueva en un período (típicamente anual). Mayor rotación implica menor capital inmovilizado.
+- **Días de inventario:** cantidad de días que el inventario actual cubriría la venta promedio.
+- **Costo del inventario como porcentaje de venta:** medida agregada del peso del capital inmovilizado.
+- **Tasa de obsolescencia / vencimiento:** porcentaje de inventario que se pierde por deterioro o expiración.
+
+Estos indicadores se utilizan tanto en el diagnóstico inicial (línea base) como en el seguimiento posterior a la implementación de la propuesta.
+
+## 1.3. Marco Conceptual
+
+- **Rotura de stock:** situación en la que el cliente solicita un producto y la farmacia no puede atenderlo por falta de inventario.
+- **Stock de seguridad:** cantidad mínima que se mantiene como buffer frente a variabilidad de la demanda o de los tiempos de reposición.
+- **Punto de reorden:** nivel de inventario que dispara automáticamente una nueva orden de compra.
+- **Cantidad económica de pedido (EOQ):** tamaño óptimo de la orden que minimiza la suma de costos de mantenimiento y de pedido.
+- **Lead time:** tiempo que transcurre entre la emisión de la orden y la recepción del producto en la farmacia.
+- **Acuerdo marco con distribuidores:** contrato de mediano plazo que fija condiciones de precio, plazo de entrega y disponibilidad mínima para un conjunto definido de productos.
+
+## 1.4. Marco Contextual
+
+El estudio se desarrolló sobre BoliFarma S.R.L., empresa que opera desde 2011 cuatro sucursales en el área urbana del municipio de Cochabamba. La cadena cuenta con 16 colaboradores en total (4 farmacéuticos titulados, 8 dependientes con curso técnico, 2 administrativos en oficina central y 2 personas de logística). El catálogo activo de la cadena comprende aproximadamente 2.400 productos referenciados (SKU), de los cuales 380 son considerados de alta rotación. Los principales distribuidores con los que opera son tres mayoristas regionales que cubren el 78% del aprovisionamiento, complementados con compras directas a laboratorios para productos exclusivos.
+`;
+
 export const MEJORA_ORG_DEMO_SEED: DemoSeed = {
   seed_id: "mejora-bolifarma-v1",
   universidad_id: "unifranz-cba-001",
@@ -146,8 +228,7 @@ export const MEJORA_ORG_DEMO_SEED: DemoSeed = {
   fases_contenido: {
     "ph-unifranz-pg-mejora-org-resumen": RESUMEN,
     "ph-unifranz-pg-mejora-org-introduccion": INTRODUCCION,
-    // Cap I — Marco Teórico: se generará en el próximo commit con el contexto
-    // de Resumen + Introducción ya disponibles para la siguiente "llamada API".
+    "ph-unifranz-pg-mejora-org-cap1": CAP1_MARCO_TEORICO,
     // Capítulos II y III se completarán en commits subsiguientes, fase por fase.
   },
 };
