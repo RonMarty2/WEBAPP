@@ -248,6 +248,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const [activeModule, setActiveModule] = useState("GLOBAL");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // Guard de rol: la página /admin queda PROHIBIDA para usuarios que no
+  // tienen role=admin. Sin esto cualquiera podía entrar a /admin solo
+  // escribiendo la URL (aunque los API endpoints rechazaban, la UI cargaba).
+  const [authStatus, setAuthStatus] = useState<"checking" | "ok" | "denied">("checking");
+
+  useEffect(() => {
+    // La ruta /admin/login no requiere validación (es el formulario de entrada).
+    if (pathname?.includes("/admin/login")) {
+      setAuthStatus("ok");
+      return;
+    }
+    let aborted = false;
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (aborted) return;
+        if (d?.user?.role === "admin") {
+          setAuthStatus("ok");
+        } else {
+          setAuthStatus("denied");
+          router.replace(d?.user ? "/dashboard" : "/login");
+        }
+      })
+      .catch(() => {
+        if (aborted) return;
+        setAuthStatus("denied");
+        router.replace("/login");
+      });
+    return () => { aborted = true; };
+  }, [pathname, router]);
 
   useEffect(() => {
     const savedModule = localStorage.getItem("adminActiveModule");
@@ -271,6 +301,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   if (!pathname || pathname.includes("/admin/login")) return <>{children}</>;
+
+  // Mientras valida o si no es admin: no rendea nada del panel (evita flash de UI).
+  if (authStatus === "checking") {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: 13 }}>
+        Verificando acceso…
+      </div>
+    );
+  }
+  if (authStatus === "denied") return null;
 
   const currentModuleNav = MODULE_NAV[activeModule] || [];
 
