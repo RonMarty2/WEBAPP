@@ -74,6 +74,32 @@ export default function WorkspacePGPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [generating, setGenerating] = useState(false);
+  // Detección de móvil — lee la clase .is-mobile-ua que el script inline en
+  // layout.tsx puso en <html> antes de cualquier render, fallback a UA y
+  // viewport. Sin race conditions de hidratación.
+  const [isMobileDevice, setIsMobileDevice] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    if (typeof document !== "undefined" && document.documentElement.classList.contains("is-mobile-ua")) return true;
+    const ua = window.navigator.userAgent;
+    if (/Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua)) return true;
+    return window.matchMedia("(max-width: 1023px)").matches;
+  });
+  // Sidebar colapsable en móvil — cuando seleccionan una fase, se cierra solo
+  // para que el contenido use todo el ancho.
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(true);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => {
+      const ua = window.navigator.userAgent;
+      const isUA = /Mobi|Mobile|Android|iPhone|iPad|iPod/i.test(ua);
+      const isNarrow = window.matchMedia("(max-width: 1023px)").matches;
+      const isCoarse = window.matchMedia("(pointer:coarse)").matches;
+      setIsMobileDevice(isUA || isNarrow || isCoarse);
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   // Modo de generación elegido por el estudiante para cap3e
   const [cap3eModo, setCap3eModo] = useState<"PROYECCION" | "DATOS_REALES" | null>(null);
 
@@ -331,17 +357,30 @@ export default function WorkspacePGPage() {
       </header>
 
       {/* Body: sidebar + main */}
-      <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          minHeight: 0,
+          overflow: "hidden",
+          // En móvil: apilar vertical (sidebar arriba + contenido abajo)
+          ...(isMobileDevice ? { flexDirection: "column" as const } : {}),
+        }}
+      >
         {/* Sidebar PG */}
         <aside
           style={{
-            width: 280,
-            borderRight: "1px solid var(--border)",
+            // En móvil: 100% width, altura limitada con scroll, colapsable
+            width: isMobileDevice ? "100%" : 280,
+            maxHeight: isMobileDevice ? (mobileSidebarOpen ? "45vh" : 0) : undefined,
+            borderRight: isMobileDevice ? "none" : "1px solid var(--border)",
+            borderBottom: isMobileDevice ? "1px solid var(--border)" : "none",
             background: "var(--bg-secondary)",
             display: "flex",
             flexDirection: "column",
             flexShrink: 0,
             overflow: "hidden",
+            transition: isMobileDevice ? "max-height 0.25s ease" : undefined,
           }}
         >
           {(() => {
@@ -359,7 +398,7 @@ export default function WorkspacePGPage() {
                   modalidad={proyecto.modalidad_titulacion as ModalidadUnifranz}
                   selectedIndex={selectedIndex}
                   phaseContents={phaseContents}
-                  onSelect={setSelectedIndex}
+                  onSelect={(i) => { setSelectedIndex(i); if (isMobileDevice) setMobileSidebarOpen(false); }}
                 />
               );
             }
@@ -374,13 +413,42 @@ export default function WorkspacePGPage() {
           })()}
         </aside>
 
+        {/* Botón toggle del sidebar — solo móvil */}
+        {isMobileDevice && (
+          <button
+            onClick={() => setMobileSidebarOpen((v) => !v)}
+            style={{
+              width: "100%",
+              padding: "10px 16px",
+              background: "var(--bg-secondary)",
+              border: "none",
+              borderBottom: "1px solid var(--border)",
+              color: "var(--fg-primary)",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexShrink: 0,
+            }}
+          >
+            <span>{mobileSidebarOpen ? "▲ Cerrar navegación" : "☰ Ver todas las fases"}</span>
+            <span style={{ fontSize: 11, color: "var(--fg-muted)" }}>
+              Fase {selectedIndex + 1} de {sidebarItems.length}
+            </span>
+          </button>
+        )}
         {/* Main: fase actual */}
         <main
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: "24px 32px",
+            padding: isMobileDevice ? "16px" : "24px 32px",
             background: "var(--bg-primary)",
+            width: isMobileDevice ? "100%" : undefined,
+            maxWidth: isMobileDevice ? "100%" : undefined,
+            minWidth: 0,
           }}
         >
           {!fasaActual ? (

@@ -1130,7 +1130,7 @@ html.is-mobile-ua * {
    Si lo ves arriba a la izquierda, mi fix está cargando. Si no, sigues con
    cache viejo y hay que limpiar (desinstalar PWA / borrar datos del sitio). */
 html.is-mobile-ua body::before {
-  content: "📱 v8";
+  content: "📱 v9 PG-FIX";
   position: fixed;
   top: max(8px, env(safe-area-inset-top, 8px));
   left: 8px;
