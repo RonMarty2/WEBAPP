@@ -31,7 +31,7 @@ export function PlatformCard({ platform, index }: { platform: PlatformMeta; inde
           {platform.tagline}
         </p>
         <p className="text-sm leading-relaxed text-slate-600">{platform.descripcionCorta}</p>
-        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4 text-sm">
+        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-[1rem] text-sm">
           <span className="font-semibold text-slate-900">Bs. {platform.precioStandalone}/mes</span>
           <span className="text-slate-500 group-hover:text-slate-900">Conocer plataforma →</span>
         </div>

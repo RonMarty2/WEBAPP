@@ -11,7 +11,7 @@ export default function EcosistemaLanding() {
   return (
     <>
       <EcosystemNav />
-      <section className="mx-auto max-w-7xl px-6 pt-20 pb-16">
+      <section className="mx-auto max-w-7xl px-6 pt-[5rem] pb-16">
         <div className="mx-auto max-w-3xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600">
             🇧🇴 Hecho en Cochabamba para Latinoamérica

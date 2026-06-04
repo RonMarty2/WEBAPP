@@ -18,7 +18,7 @@ export default function LoginPage() {
   return (
     <>
       <EcosystemNav />
-      <section className="mx-auto max-w-md px-6 py-20">
+      <section className="mx-auto w-full max-w-md px-6 py-20">
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl">
           <h1 className="text-2xl font-bold text-slate-900">Entra al ecosistema</h1>
           <p className="mt-2 text-sm text-slate-600">

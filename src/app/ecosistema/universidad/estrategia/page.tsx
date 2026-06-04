@@ -172,8 +172,8 @@ function MatrizCard({ titulo, filas }: { titulo: string; filas: { f: string; pes
         </tbody>
         <tfoot>
           <tr className="border-t-2 border-slate-300 font-bold">
-            <td className="pt-2" colSpan={3}>Total ponderado</td>
-            <td className="pt-2 text-right text-violet-700">{total.toFixed(2)}</td>
+            <td className="pt-[0.5rem]" colSpan={3}>Total ponderado</td>
+            <td className="pt-[0.5rem] text-right text-violet-700">{total.toFixed(2)}</td>
           </tr>
         </tfoot>
       </table>
