@@ -135,9 +135,15 @@ async function buildUnifranzZip(
   // Resolver las fases UNIFRANZ de esta modalidad (ordenadas por `orden`).
   const fasesModalidad = getUnifranzPhases(modalidadId).sort((a, b) => a.orden - b.orden);
 
+  // Prefijo exacto para extraer slugs sin perder guiones internos. Ver nota
+  // larga en la declaración de `slugDe` más abajo.
+  const slugPrefix = `ph-unifranz-${modalidadId.replace(/^unifranz-/, "")}-`;
+  const extraerSlug = (faseId: string) =>
+    faseId.startsWith(slugPrefix) ? faseId.slice(slugPrefix.length) : faseId;
+
   // Verificar que al menos una fase del documento esté generada.
   const algunaConContenido = fasesModalidad.some((f) => {
-    const slug = f.id.replace(/^ph-unifranz-[^-]+(?:-[^-]+)*-/, "");
+    const slug = extraerSlug(f.id);
     // Excluir compilacion y defensa que no van al PDF.
     if (slug === "compilacion" || slug === "defensa") return false;
     return getContent(f.id).length > 0;
@@ -158,8 +164,17 @@ async function buildUnifranzZip(
   const nombre = (user.email || "Estudiante").split("@")[0];
   const tutor = (ctxInicial?.tutor || "").trim() || undefined;
 
-  // Slug helper: extrae el slug de la fase ("cap1", "cap2-investigacion", etc.).
-  const slugDe = (faseId: string) => faseId.replace(/^ph-unifranz-[^-]+(?:-[^-]+)*-/, "");
+  // ⚠️ HISTÓRICO: aquí había un regex `/^ph-unifranz-[^-]+(?:-[^-]+)*-/` que
+  // era greedy y comía DEMASIADO cuando la modalidad tiene guion en el
+  // nombre (`pg-prefactibilidad`, `pg-mejora-org`, `pg-artefacto`,
+  // `trabajo-dirigido`). Resultado: `cap2a-macroentorno` se convertía
+  // en `macroentorno`, los filtros `cap2Fases`/`cap3Fases` quedaban
+  // vacíos y 10+ subfases (PESTEL, Porter, Matricial, Financiera, etc.)
+  // NO se incluían en el .tex final. El AgroHub salía con solo Cap I.
+  //
+  // Fix: usar `extraerSlug` que parte de `slugPrefix` construido desde
+  // `modalidadId` (fuente de verdad) en lugar de adivinarlo por regex.
+  const slugDe = extraerSlug;
 
   // Clasificar fases por sección estructural.
   const resumen = fasesModalidad.find((f) => slugDe(f.id) === "resumen");
