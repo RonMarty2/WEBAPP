@@ -51,10 +51,10 @@ function enModoStandalone(): boolean {
  * en `procesarCallbackOAuthSiAplica()` al inicializar el auth-store.
  */
 export async function iniciarSesionConGoogle() {
-  // En la URL agregamos un marcador para identificar el callback al volver.
-  // Sirve al `procesarCallbackOAuthSiAplica()` para saber que tiene que
-  // intercambiar el code aunque detectSessionInUrl no lo haya hecho solo.
-  const redirectTo = `${window.location.origin}/?oauth=1`;
+  // Volver al hub del módulo Finanzas tras la auth de Google. El marcador
+  // ?oauth=1 sirve a procesarCallbackOAuthSiAplica() para intercambiar el
+  // code aunque detectSessionInUrl no lo haya hecho solo.
+  const redirectTo = `${window.location.origin}/finanzas/?oauth=1`;
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
