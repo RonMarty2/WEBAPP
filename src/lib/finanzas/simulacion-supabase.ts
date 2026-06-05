@@ -8,7 +8,7 @@ export async function crearSimulacion(params: {
   estado_inicial: EstadoSimulacion;
 }): Promise<Simulacion> {
   const { data, error } = await supabase
-    .from("simulaciones")
+    .from("finanzas_simulaciones")
     .insert({
       proyecto_id: params.proyecto_id,
       turnos_totales: params.turnos_totales,
@@ -25,7 +25,7 @@ export async function crearSimulacion(params: {
 
 export async function obtenerSimulacionActiva(proyecto_id: string): Promise<Simulacion | null> {
   const { data, error } = await supabase
-    .from("simulaciones")
+    .from("finanzas_simulaciones")
     .select("*")
     .eq("proyecto_id", proyecto_id)
     .eq("estado", "activa")
@@ -40,12 +40,12 @@ export async function actualizarSimulacion(
   id: string,
   cambios: Partial<Pick<Simulacion, "turno_actual" | "estado" | "estado_actual" | "finalizada_en">>
 ): Promise<void> {
-  const { error } = await supabase.from("simulaciones").update(cambios).eq("id", id);
+  const { error } = await supabase.from("finanzas_simulaciones").update(cambios).eq("id", id);
   if (error) throw error;
 }
 
 export async function registrarTurno(turno: Omit<TurnoHistorial, "id" | "procesado_en">): Promise<void> {
-  const { error } = await supabase.from("turnos_historial").insert({
+  const { error } = await supabase.from("finanzas_turnos_historial").insert({
     simulacion_id: turno.simulacion_id,
     numero_turno: turno.numero_turno,
     estado_antes: turno.estado_antes,
@@ -58,7 +58,7 @@ export async function registrarTurno(turno: Omit<TurnoHistorial, "id" | "procesa
 
 export async function obtenerHistorial(simulacion_id: string): Promise<TurnoHistorial[]> {
   const { data, error } = await supabase
-    .from("turnos_historial")
+    .from("finanzas_turnos_historial")
     .select("*")
     .eq("simulacion_id", simulacion_id)
     .order("numero_turno");

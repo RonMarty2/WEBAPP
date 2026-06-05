@@ -65,7 +65,7 @@ export async function crearGrupoEstudiante(params: {
   // 1. Grupo (el estudiante no setea cupo: viene del curso)
   const { data: grupo, error: e1 } = await conTimeout(
     supabase
-      .from("grupos")
+      .from("finanzas_grupos")
       .insert({
         curso_id: params.cursoId,
         nombre: params.nombre,
@@ -93,7 +93,7 @@ export async function crearGrupoEstudiante(params: {
 
   // 3. El creador se une al grupo
   const { error: e3 } = await supabase
-    .from("grupo_miembros")
+    .from("finanzas_grupo_miembros")
     .insert({ grupo_id: grupoId, estudiante_id: params.creadorId });
   if (e3) throw e3;
 }
@@ -101,7 +101,7 @@ export async function crearGrupoEstudiante(params: {
 /** Lista los grupos de un curso con integrantes y el id de su proyecto. */
 export async function listarGruposDeCurso(cursoId: string): Promise<GrupoConMiembros[]> {
   const { data: grupos, error } = await conTimeout(
-    supabase.from("grupos").select("*").eq("curso_id", cursoId).order("creado_en"),
+    supabase.from("finanzas_grupos").select("*").eq("curso_id", cursoId).order("creado_en"),
     10000,
     "listando grupos"
   );
@@ -111,10 +111,10 @@ export async function listarGruposDeCurso(cursoId: string): Promise<GrupoConMiem
   const ids = grupos.map((g: any) => g.id);
   const [{ data: miembros, error: e2 }, { data: proys, error: e3 }] = await Promise.all([
     supabase
-      .from("grupo_miembros")
+      .from("finanzas_grupo_miembros")
       .select("grupo_id, estudiante_id, perfiles(nombre, apellido, email)")
       .in("grupo_id", ids),
-    supabase.from("proyectos").select("id, grupo_id").in("grupo_id", ids),
+    supabase.from("finanzas_proyectos").select("id, grupo_id").in("grupo_id", ids),
   ]);
   if (e2) throw e2;
   if (e3) throw e3;
@@ -148,7 +148,7 @@ export async function obtenerMiGrupo(
   cursoId: string
 ): Promise<Grupo | null> {
   const { data: filas, error } = await supabase
-    .from("grupo_miembros")
+    .from("finanzas_grupo_miembros")
     .select("grupo_id, grupos!inner(*)")
     .eq("estudiante_id", estudianteId)
     .eq("grupos.curso_id", cursoId);
@@ -165,7 +165,7 @@ export async function obtenerMiGrupo(
 export async function unirseAGrupo(grupoId: string, estudianteId: string): Promise<void> {
   // Grupo destino (para conocer curso y cupo)
   const { data: grupo, error: eg } = await supabase
-    .from("grupos")
+    .from("finanzas_grupos")
     .select("id, curso_id, cupo_max")
     .eq("id", grupoId)
     .single();
@@ -180,7 +180,7 @@ export async function unirseAGrupo(grupoId: string, estudianteId: string): Promi
 
   // ¿Hay cupo?
   const { count, error: ec } = await supabase
-    .from("grupo_miembros")
+    .from("finanzas_grupo_miembros")
     .select("id", { count: "exact", head: true })
     .eq("grupo_id", grupoId);
   if (ec) throw ec;
@@ -189,7 +189,7 @@ export async function unirseAGrupo(grupoId: string, estudianteId: string): Promi
   }
 
   const { error } = await supabase
-    .from("grupo_miembros")
+    .from("finanzas_grupo_miembros")
     .insert({ grupo_id: grupoId, estudiante_id: estudianteId });
   if (error) throw error;
 }
@@ -197,7 +197,7 @@ export async function unirseAGrupo(grupoId: string, estudianteId: string): Promi
 /** El estudiante sale de un grupo. */
 export async function salirDeGrupo(grupoId: string, estudianteId: string): Promise<void> {
   const { error } = await supabase
-    .from("grupo_miembros")
+    .from("finanzas_grupo_miembros")
     .delete()
     .eq("grupo_id", grupoId)
     .eq("estudiante_id", estudianteId);
@@ -207,7 +207,7 @@ export async function salirDeGrupo(grupoId: string, estudianteId: string): Promi
 /** El docente borra un grupo (cascada: borra miembros y el proyecto compartido). */
 export async function eliminarGrupo(grupoId: string): Promise<void> {
   const { error } = await conTimeout(
-    supabase.from("grupos").delete().eq("id", grupoId),
+    supabase.from("finanzas_grupos").delete().eq("id", grupoId),
     15000,
     "borrando el grupo"
   );
@@ -221,7 +221,7 @@ export async function calificarGrupo(
   comentario: string
 ): Promise<void> {
   const { error } = await supabase
-    .from("grupos")
+    .from("finanzas_grupos")
     .update({
       nota,
       comentario_docente: comentario,

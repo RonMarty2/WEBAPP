@@ -56,7 +56,7 @@ export default function EvaluacionFinal() {
       setProyecto(p);
       // Tomar la última simulación FINALIZADA o quebrada (no la activa)
       const { data } = await supabase
-        .from("simulaciones")
+        .from("finanzas_simulaciones")
         .select("*")
         .eq("proyecto_id", p.id)
         .in("estado", ["finalizada", "quebrada"])

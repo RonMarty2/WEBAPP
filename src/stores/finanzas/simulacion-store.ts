@@ -81,7 +81,7 @@ export const useSimulacionStore = create<SimulacionState>((set, get) => ({
       let curso: Curso | null = null;
       if (proyecto.curso_id) {
         const { data: cursoFila } = await supabase
-          .from("cursos")
+          .from("finanzas_cursos")
           .select("*")
           .eq("id", proyecto.curso_id)
           .maybeSingle();
@@ -218,7 +218,7 @@ export const useSimulacionStore = create<SimulacionState>((set, get) => ({
       // Releemos solo el campo evento_forzado_id de la simulación para evitar
       // sobrescribir el estado local con datos viejos.
       const { data } = await supabase
-        .from("simulaciones")
+        .from("finanzas_simulaciones")
         .select("evento_forzado_id")
         .eq("id", simulacion.id)
         .maybeSingle();

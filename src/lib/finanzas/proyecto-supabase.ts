@@ -93,7 +93,7 @@ function conTimeout<T>(promise: PromiseLike<T>, ms: number, motivo: string): Pro
 export async function listarMisProyectos(estudianteId: string): Promise<Proyecto[]> {
   const hacerQuery = () =>
     supabase
-      .from("proyectos")
+      .from("finanzas_proyectos")
       .select("*")
       .eq("estudiante_id", estudianteId)
       .order("actualizado_en", { ascending: false });
@@ -123,13 +123,13 @@ export async function listarMisProyectos(estudianteId: string): Promise<Proyecto
  */
 export async function listarProyectosGrupales(estudianteId: string): Promise<Proyecto[]> {
   const { data: mm, error: e1 } = await supabase
-    .from("grupo_miembros")
+    .from("finanzas_grupo_miembros")
     .select("grupo_id")
     .eq("estudiante_id", estudianteId);
   if (e1) throw e1;
   const gids = (mm ?? []).map((m: any) => m.grupo_id);
   if (gids.length === 0) return [];
-  const { data, error } = await supabase.from("proyectos").select("*").in("grupo_id", gids);
+  const { data, error } = await supabase.from("finanzas_proyectos").select("*").in("grupo_id", gids);
   if (error) throw error;
   return (data ?? []).map(deFilaSupabase);
 }
@@ -141,24 +141,24 @@ export async function guardarProyecto(p: Proyecto): Promise<void> {
   // tienen permiso de UPDATE (no INSERT), así que para no romper su autoguardado
   // acá siempre EDITAMOS (update), nunca upsert.
   if (p.tipo === "proyecto_grupal") {
-    const { error } = await supabase.from("proyectos").update(fila).eq("id", p.id);
+    const { error } = await supabase.from("finanzas_proyectos").update(fila).eq("id", p.id);
     if (error) throw error;
     return;
   }
-  const { error } = await supabase.from("proyectos").upsert(fila, { onConflict: "id" });
+  const { error } = await supabase.from("finanzas_proyectos").upsert(fila, { onConflict: "id" });
   if (error) throw error;
 }
 
 /** Inserta un proyecto nuevo (usado al crear el proyecto compartido de un grupo). */
 export async function insertarProyecto(p: Proyecto): Promise<void> {
   const fila = aFilaSupabase(p);
-  const { error } = await supabase.from("proyectos").insert(fila);
+  const { error } = await supabase.from("finanzas_proyectos").insert(fila);
   if (error) throw error;
 }
 
 /** Elimina un proyecto (cascada borra simulaciones/turnos asociados en FASE 6). */
 export async function eliminarProyecto(id: string): Promise<void> {
-  const { error } = await supabase.from("proyectos").delete().eq("id", id);
+  const { error } = await supabase.from("finanzas_proyectos").delete().eq("id", id);
   if (error) throw error;
 }
 
@@ -177,7 +177,7 @@ export async function guardarComoCasoDelCurso(
   pasoInicioEstudiante: number
 ): Promise<void> {
   const { error } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .update({
       tipo: "caso_curso",
       curso_id: cursoId,
@@ -223,7 +223,7 @@ export async function publicarPlantillaComoCaso(params: {
 export async function listarCasosDelCurso(cursoId: string): Promise<Proyecto[]> {
   const { data, error } = await conTimeout(
     supabase
-      .from("proyectos")
+      .from("finanzas_proyectos")
       .select("*")
       .eq("curso_id", cursoId)
       .eq("tipo", "caso_curso")
@@ -248,7 +248,7 @@ export async function tomarCasoDelCurso(
 ): Promise<Proyecto> {
   // 1. Cargar el caso original
   const { data: casoFila, error: errCargar } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .select("*")
     .eq("id", casoId)
     .single();
@@ -384,7 +384,7 @@ export async function entregarProyecto(
   // 1. Calcular el próximo número de intento para este (proyecto, paso).
   // Cada paso tiene su propia secuencia de intentos.
   let q = supabase
-    .from("entregas")
+    .from("finanzas_entregas")
     .select("numero_intento")
     .eq("proyecto_id", proyecto.id)
     .order("numero_intento", { ascending: false })
@@ -415,7 +415,7 @@ export async function entregarProyecto(
   };
 
   const { data, error } = await supabase
-    .from("entregas")
+    .from("finanzas_entregas")
     .insert(filaEntrega)
     .select()
     .single();
@@ -426,7 +426,7 @@ export async function entregarProyecto(
 /** Lista las entregas de un estudiante (su propio historial). */
 export async function listarMisEntregas(estudianteId: string): Promise<Entrega[]> {
   const { data, error } = await supabase
-    .from("entregas")
+    .from("finanzas_entregas")
     .select("*")
     .eq("estudiante_id", estudianteId)
     .order("entregado_en", { ascending: false });
@@ -437,7 +437,7 @@ export async function listarMisEntregas(estudianteId: string): Promise<Entrega[]
 /** Lista las entregas PENDIENTES de un curso (para el docente). */
 export async function listarEntregasPendientes(cursoId: string): Promise<Entrega[]> {
   const { data, error } = await supabase
-    .from("entregas")
+    .from("finanzas_entregas")
     .select("*")
     .eq("curso_id", cursoId)
     .eq("estado", "pendiente")
@@ -451,7 +451,7 @@ export async function listarEntregasPendientes(cursoId: string): Promise<Entrega
  * reales en el panel del docente. */
 export async function listarEntregasDelCurso(cursoId: string): Promise<Entrega[]> {
   const { data, error } = await supabase
-    .from("entregas")
+    .from("finanzas_entregas")
     .select("*, perfiles:estudiante_id(nombre, apellido, email)")
     .eq("curso_id", cursoId)
     .order("entregado_en", { ascending: false });
@@ -477,7 +477,7 @@ export async function revisarEntrega(
   comentario: string
 ): Promise<void> {
   const { error } = await supabase
-    .from("entregas")
+    .from("finanzas_entregas")
     .update({
       estado,
       nota,

@@ -47,7 +47,7 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
   // Carga del curso para saber qué alcances están habilitados.
   useEffect(() => {
     supabase
-      .from("cursos")
+      .from("finanzas_cursos")
       .select("*")
       .eq("id", cursoId)
       .maybeSingle()

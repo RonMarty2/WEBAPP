@@ -4,7 +4,7 @@ import type { Evento } from "@/types/finanzas/evento";
 /** Lista todos los eventos activos, ordenados por código. */
 export async function listarEventos(): Promise<Evento[]> {
   const { data, error } = await supabase
-    .from("eventos")
+    .from("finanzas_eventos")
     .select("*")
     .eq("activo", true)
     .order("codigo");
@@ -15,7 +15,7 @@ export async function listarEventos(): Promise<Evento[]> {
 /** Lista eventos por categoría. */
 export async function listarEventosPorCategoria(categoria: string): Promise<Evento[]> {
   const { data, error } = await supabase
-    .from("eventos")
+    .from("finanzas_eventos")
     .select("*")
     .eq("activo", true)
     .eq("categoria", categoria)

@@ -103,7 +103,7 @@ export async function obtenerPodioCurso(
   const mapaPerfiles: Record<string, { nombre: string; apellido: string }> = {};
   if (estudianteIds.length > 0) {
     const { data: perfiles, error: e2 } = await supabase
-      .from("perfiles")
+      .from("finanzas_perfiles")
       .select("id, nombre, apellido")
       .in("id", estudianteIds);
     if (e2) throw e2;
@@ -117,7 +117,7 @@ export async function obtenerPodioCurso(
 
   // 3. Grupos del curso con nota
   const { data: grupos, error: e3 } = await supabase
-    .from("grupos")
+    .from("finanzas_grupos")
     .select("id, nombre, nota")
     .eq("curso_id", cursoId)
     .not("nota", "is", null)
@@ -133,7 +133,7 @@ export async function obtenerPodioCurso(
   // 4. Miembros de TODOS los grupos (con o sin nota) — necesario para saber
   //    cuál es mi grupo y contar integrantes de los del podio.
   const { data: todosGrupos } = await supabase
-    .from("grupos")
+    .from("finanzas_grupos")
     .select("id")
     .eq("curso_id", cursoId);
   const todosGrupoIds = (todosGrupos ?? []).map((g: any) => g.id);
@@ -142,7 +142,7 @@ export async function obtenerPodioCurso(
   let miGrupoId: string | null = null;
   if (todosGrupoIds.length > 0) {
     const { data: miembros, error: e4 } = await supabase
-      .from("grupo_miembros")
+      .from("finanzas_grupo_miembros")
       .select("grupo_id, estudiante_id")
       .in("grupo_id", todosGrupoIds);
     if (e4) throw e4;
@@ -158,7 +158,7 @@ export async function obtenerPodioCurso(
   let miRacha = 0;
   if (miEstudianteId) {
     const { data: misEntregas } = await supabase
-      .from("entregas")
+      .from("finanzas_entregas")
       .select("estado, nota, entregado_en")
       .eq("estudiante_id", miEstudianteId)
       .eq("curso_id", cursoId)

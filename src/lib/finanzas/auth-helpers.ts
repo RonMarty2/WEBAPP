@@ -143,7 +143,7 @@ export async function obtenerPerfil(userId: string): Promise<Perfil | null> {
   // de un login (OAuth o no). Reintentar una vez resuelve la mayoría.
   const hacerQuery = () =>
     supabase
-      .from("perfiles")
+      .from("finanzas_perfiles")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
@@ -186,7 +186,7 @@ export async function actualizarMiPerfil(
   cambios: { nombre?: string; apellido?: string; universidad?: string | null }
 ): Promise<void> {
   const { error } = await supabase
-    .from("perfiles")
+    .from("finanzas_perfiles")
     .update(cambios)
     .eq("id", userId);
   if (error) throw error;

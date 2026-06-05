@@ -57,7 +57,7 @@ export async function actualizarConfigGrupal(
   }
 ): Promise<void> {
   const { error } = await conTimeout(
-    supabase.from("cursos").update(cfg).eq("id", cursoId),
+    supabase.from("finanzas_cursos").update(cfg).eq("id", cursoId),
     10000,
     "guardando la configuración del proyecto grupal"
   );
@@ -70,7 +70,7 @@ export async function actualizarPermiteProyectoLibre(
   permite: boolean
 ): Promise<void> {
   const { error } = await conTimeout(
-    supabase.from("cursos").update({ permite_proyecto_libre: permite }).eq("id", cursoId),
+    supabase.from("finanzas_cursos").update({ permite_proyecto_libre: permite }).eq("id", cursoId),
     10000,
     "guardando la opción de proyecto del estudiante"
   );
@@ -87,7 +87,7 @@ export async function actualizarTiposSimulables(
   }
 ): Promise<void> {
   const { error } = await conTimeout(
-    supabase.from("cursos").update(cfg).eq("id", cursoId),
+    supabase.from("finanzas_cursos").update(cfg).eq("id", cursoId),
     10000,
     "guardando tipos simulables"
   );
@@ -102,7 +102,7 @@ export async function actualizarPesosCurso(
 ): Promise<void> {
   const { error } = await conTimeout(
     supabase
-      .from("cursos")
+      .from("finanzas_cursos")
       .update({ peso_individual: pesoIndividual, peso_grupal: pesoGrupal })
       .eq("id", cursoId),
     10000,
@@ -131,7 +131,7 @@ function generarCodigoCurso(): string {
 export async function listarMisCursos(docenteId: string): Promise<Curso[]> {
   const hacerQuery = () =>
     supabase
-      .from("cursos")
+      .from("finanzas_cursos")
       .select("*")
       .eq("docente_id", docenteId)
       .order("creado_en", { ascending: false });
@@ -196,7 +196,7 @@ export async function crearCurso(params: {
     const codigo = generarCodigoCurso();
     const { data, error } = await conTimeout(
       supabase
-        .from("cursos")
+        .from("finanzas_cursos")
         .insert({
           docente_id: params.docente_id,
           nombre: params.nombre,
@@ -232,7 +232,7 @@ export async function crearCurso(params: {
  */
 export async function eliminarCurso(cursoId: string): Promise<void> {
   const { error } = await conTimeout(
-    supabase.from("cursos").delete().eq("id", cursoId),
+    supabase.from("finanzas_cursos").delete().eq("id", cursoId),
     15000,
     "borrando curso"
   );
@@ -242,7 +242,7 @@ export async function eliminarCurso(cursoId: string): Promise<void> {
 export async function buscarCursoPorCodigo(codigo: string): Promise<Curso | null> {
   const hacerQuery = () =>
     supabase
-      .from("cursos")
+      .from("finanzas_cursos")
       .select("*")
       .eq("codigo", codigo.toUpperCase())
       .eq("estado", "activo")
@@ -268,7 +268,7 @@ export async function inscribirseACurso(params: {
   estudiante_id: string;
 }): Promise<void> {
   const { error } = await conTimeout(
-    supabase.from("inscripciones").insert({
+    supabase.from("finanzas_inscripciones").insert({
       curso_id: params.curso_id,
       estudiante_id: params.estudiante_id,
     }),
@@ -283,7 +283,7 @@ export async function listarMisInscripciones(estudianteId: string): Promise<
 > {
   const hacerQuery = () =>
     supabase
-      .from("inscripciones")
+      .from("finanzas_inscripciones")
       .select("inscrito_en, curso_id")
       .eq("estudiante_id", estudianteId);
 
@@ -304,7 +304,7 @@ export async function listarMisInscripciones(estudianteId: string): Promise<
 
   const cursoIds = inscripciones.map((i) => i.curso_id);
   const { data: cursos, error: errCursos } = await supabase
-    .from("cursos")
+    .from("finanzas_cursos")
     .select("*")
     .in("id", cursoIds);
   if (errCursos) throw errCursos;
@@ -317,7 +317,7 @@ export async function listarMisInscripciones(estudianteId: string): Promise<
 
 export async function listarInscritosDeCurso(cursoId: string): Promise<InscripcionConPerfil[]> {
   const { data, error } = await supabase
-    .from("inscripciones")
+    .from("finanzas_inscripciones")
     .select("id, estudiante_id, inscrito_en, perfiles(nombre, apellido, email, universidad)")
     .eq("curso_id", cursoId);
   if (error) throw error;
@@ -371,7 +371,7 @@ export async function obtenerRankingCurso(cursoId: string): Promise<FilaRanking[
   // 2. Proyectos de esos estudiantes. Traemos actualizado_en para mostrar
   // "última actividad" en el ranking.
   const { data: proyectos, error: errProyectos } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .select("id, estudiante_id, nombre, estado, actualizado_en")
     .in("estudiante_id", estudianteIds);
   if (errProyectos) throw errProyectos;
@@ -381,7 +381,7 @@ export async function obtenerRankingCurso(cursoId: string): Promise<FilaRanking[
   let simulaciones: any[] = [];
   if (proyectoIds.length > 0) {
     const { data, error } = await supabase
-      .from("simulaciones")
+      .from("finanzas_simulaciones")
       .select("proyecto_id, turno_actual, turnos_totales, estado, estado_actual, iniciada_en")
       .in("proyecto_id", proyectoIds)
       .order("iniciada_en", { ascending: false });
@@ -487,7 +487,7 @@ export async function obtenerDetalleProyectoEstudiante(
 ): Promise<DetalleProyectoEstudiante | null> {
   // 1. Proyecto del estudiante en este curso
   const { data: proyecto, error: e1 } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .select("id, nombre, datos")
     .eq("estudiante_id", estudianteId)
     .eq("curso_id", cursoId)
@@ -496,7 +496,7 @@ export async function obtenerDetalleProyectoEstudiante(
 
   // 2. Simulación activa o última
   const { data: simulacion } = await supabase
-    .from("simulaciones")
+    .from("finanzas_simulaciones")
     .select("*")
     .eq("proyecto_id", proyecto.id)
     .order("iniciada_en", { ascending: false })
@@ -507,7 +507,7 @@ export async function obtenerDetalleProyectoEstudiante(
   let historial: any[] = [];
   if (simulacion) {
     const { data } = await supabase
-      .from("turnos_historial")
+      .from("finanzas_turnos_historial")
       .select("numero_turno, eventos_aplicados, decision_tomada, estado_despues")
       .eq("simulacion_id", simulacion.id)
       .order("numero_turno");

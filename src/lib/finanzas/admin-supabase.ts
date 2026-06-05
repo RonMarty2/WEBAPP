@@ -16,7 +16,7 @@ export interface PerfilExtendido extends Perfil {
 /** Lista todos los perfiles del sistema (solo admin). */
 export async function listarTodosLosUsuarios(): Promise<Perfil[]> {
   const { data, error } = await supabase
-    .from("perfiles")
+    .from("finanzas_perfiles")
     .select("*")
     .order("creado_en", { ascending: false });
   if (error) throw error;
@@ -26,7 +26,7 @@ export async function listarTodosLosUsuarios(): Promise<Perfil[]> {
 /** Cambia el rol de un usuario (estudiante ↔ docente). */
 export async function cambiarRolUsuario(userId: string, nuevoRol: Rol): Promise<void> {
   const { error } = await supabase
-    .from("perfiles")
+    .from("finanzas_perfiles")
     .update({ rol: nuevoRol })
     .eq("id", userId);
   if (error) throw error;
@@ -35,7 +35,7 @@ export async function cambiarRolUsuario(userId: string, nuevoRol: Rol): Promise<
 /** Marca o desmarca a un usuario como admin. */
 export async function setearAdmin(userId: string, esAdmin: boolean): Promise<void> {
   const { error } = await supabase
-    .from("perfiles")
+    .from("finanzas_perfiles")
     .update({ es_admin: esAdmin })
     .eq("id", userId);
   if (error) throw error;
@@ -44,7 +44,7 @@ export async function setearAdmin(userId: string, esAdmin: boolean): Promise<voi
 /** Lista todos los cursos del sistema (admin ve todo). */
 export async function listarTodosLosCursos() {
   const { data, error } = await supabase
-    .from("cursos")
+    .from("finanzas_cursos")
     .select("*")
     .order("creado_en", { ascending: false });
   if (error) throw error;
@@ -54,7 +54,7 @@ export async function listarTodosLosCursos() {
 /** Lista todos los proyectos del sistema (admin ve todo). */
 export async function listarTodosLosProyectos() {
   const { data, error } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .select("id, nombre, tipo, estudiante_id, curso_id, estado, creado_en, actualizado_en")
     .order("actualizado_en", { ascending: false });
   if (error) throw error;
@@ -64,10 +64,10 @@ export async function listarTodosLosProyectos() {
 /** Estadísticas globales rápidas. */
 export async function obtenerEstadisticasGlobales() {
   const [perfiles, cursos, proyectos, entregas] = await Promise.all([
-    supabase.from("perfiles").select("rol, es_admin"),
-    supabase.from("cursos").select("id"),
-    supabase.from("proyectos").select("id, tipo"),
-    supabase.from("entregas").select("id, estado"),
+    supabase.from("finanzas_perfiles").select("rol, es_admin"),
+    supabase.from("finanzas_cursos").select("id"),
+    supabase.from("finanzas_proyectos").select("id, tipo"),
+    supabase.from("finanzas_entregas").select("id, estado"),
   ]);
 
   const totalDocentes = (perfiles.data ?? []).filter((p) => p.rol === "docente").length;
@@ -93,7 +93,7 @@ export async function obtenerEstadisticasGlobales() {
  */
 export async function reasignarProyecto(proyectoId: string, nuevoUsuarioId: string): Promise<void> {
   const { error } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .update({ estudiante_id: nuevoUsuarioId })
     .eq("id", proyectoId);
   if (error) throw error;
@@ -109,7 +109,7 @@ export async function clonarProyectoAMiCuenta(
   miUserId: string
 ): Promise<void> {
   const { data, error } = await supabase
-    .from("proyectos")
+    .from("finanzas_proyectos")
     .select("*")
     .eq("id", proyectoId)
     .single();
@@ -127,12 +127,12 @@ export async function clonarProyectoAMiCuenta(
     paso_inicio_estudiante: null,
     datos: { ...((data as any).datos ?? {}), creado_en: ahora, actualizado_en: ahora },
   };
-  const { error: e2 } = await supabase.from("proyectos").insert(nuevaFila);
+  const { error: e2 } = await supabase.from("finanzas_proyectos").insert(nuevaFila);
   if (e2) throw e2;
 }
 
 /** Borra un curso (cascade: inscripciones, proyectos y entregas asociados). */
 export async function borrarCursoComoAdmin(cursoId: string): Promise<void> {
-  const { error } = await supabase.from("cursos").delete().eq("id", cursoId);
+  const { error } = await supabase.from("finanzas_cursos").delete().eq("id", cursoId);
   if (error) throw error;
 }
