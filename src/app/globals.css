@@ -142,9 +142,6 @@ a { color: inherit; }
 
 /* (Sistema de partículas .pt/.pt-1..36 + keyframes pd-a..e eliminado: era código muerto que colisionaba con las utilities pt-N de Tailwind 4 — verificado con grep, ningún componente lo usaba.) */
 
-  }
-}
-
 .app-content {
   position: relative;
   z-index: 1;
