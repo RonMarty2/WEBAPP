@@ -291,39 +291,71 @@ text-indigo-900 + text-indigo-800/80
 
 ---
 
-## 10. Cómo retomar mañana (recomendación)
+## 10. Cómo retomar mañana (DECISIÓN FINAL CONFIRMADA POR EL USUARIO)
 
-### Paso 0 (1 minuto)
-Lee este documento de arriba a abajo. Resume al usuario en 3 líneas qué tiene HOY (no qué se intentó hacer).
+> ⚠️ Esta sección se actualizó al cierre de la sesión. La decisión cambió:
+> el usuario YA NO quiere iframe ni link externo ni Modo Conectado vía API.
+> Quiere **MIGRAR el simuladorPRO ENTERO a webapp como módulo independiente**,
+> y construir 3 módulos más con el mismo patrón. Sin compartir Supabase,
+> sin migrar usuarios viejos, sin SSO. Cada módulo aparte, con su propia
+> identidad visual, dentro de webapp.
 
-### Paso 1 (15 minutos): definir UN objetivo concreto
-No empieces a codificar. Pregunta al usuario qué quiere priorizar mañana, entre 3 opciones realistas:
+### Plan ejecutable mañana (sin preguntar más, el usuario dio luz verde)
 
-**A. Resolver el `host_not_allowed` del simuladorPRO**
-   - Audit completo del proyecto simulador-pro en Vercel (Settings → Domains, Environments, Edge Middleware).
-   - Identificar de dónde sale el deny reason.
-   - Una vez resuelto, el iframe en webapp se vuelve viable.
+**Fase 1 — Setup webapp para soportar el módulo (1-2 h)**
+1. Instalar dependencias que faltan: `shadcn/ui` (CLI + componentes base), `zustand`, `recharts`, `react-hook-form`, `@hookform/resolvers`, `zod`, `xlsx`, `xlsx-js-style`, `lucide-react`, `class-variance-authority`, `clsx`, `tailwind-merge`.
+2. Crear estructura `src/app/finanzas/` con su propio `layout.tsx` que tenga el header del simuladorPRO ("Simulador de Proyectos de Inversión" + chip "Bolivia" + sidebar) — totalmente independiente del root layout de webapp (aislado igual que el ecosistema hoy).
+3. Agregar tokens shadcn neutral como CSS scoped al módulo (sin tocar globals.css de webapp).
 
-**B. Construir el "Generador en Modo Conectado" REAL**
-   - Define el contract: ¿cómo webapp obtiene los proyectos del simuladorPRO?
-   - Opción más simple (sin tocar simuladorPRO): compartir proyecto Supabase, RLS por user_id.
-   - Endpoint `/api/ecosistema/artefactos/finanzas` que lista los proyectos del usuario.
-   - Página `/ecosistema/generador` que reemplaza los datos hardcoded por el endpoint real.
+**Fase 2 — Migrar código del simuladorPRO (4-6 h)**
+4. Copiar `src/lib/calculo-financiero.ts`, `src/lib/motor-eventos.ts`, `src/lib/plantillas.ts`, `src/lib/notas.ts`, `src/lib/flujo-proyecto.ts`, `src/lib/proyecto-factory.ts`, `src/types/*` — son funciones puras + tipos, copy/paste directo.
+5. Copiar componentes `src/components/constructor/*`, `src/components/simulacion/*`, `src/components/docente/*`, `src/components/curso/*` — adaptar imports (`@/*`).
+6. Adaptar React Router → Next.js App Router:
+   - `routes/login.tsx` → `app/finanzas/login/page.tsx`
+   - `routes/dashboard-docente.tsx` → `app/finanzas/docente/page.tsx`
+   - `routes/dashboard-estudiante.tsx` → `app/finanzas/estudiante/page.tsx`
+   - `routes/construir-proyecto.tsx` → `app/finanzas/construir/page.tsx`
+   - `routes/simular-proyecto.tsx` → `app/finanzas/simular/page.tsx`
+   - `routes/galeria-ejemplos.tsx` → `app/finanzas/ejemplos/page.tsx`
+   - etc.
+7. Cambiar `<NavLink>` → `<Link>`, `useNavigate()` → `useRouter()`, `useParams()` → Next params.
+8. Zustand stores (`auth-store`, `proyecto-store`, `simulacion-store`) copy/paste directo, son client-side.
 
-**C. Construir UNA nueva plataforma educativa en webapp (Mercados, Estrategia o Marketing)**
-   - Replica el patrón del simuladorPRO pero adaptado a Next.js.
-   - Riesgo: MUCHA superficie de producto, fácil que se vuelva otra ronda de fricción.
-   - Solo si el usuario tiene energía para una semana completa de iteración.
+**Fase 3 — Supabase nuevo para el módulo (2-3 h)**
+9. Crear proyecto Supabase nuevo o usar el de webapp (decisión del usuario al arrancar).
+10. Migrar el schema SQL del simuladorPRO (carpeta `supabase/` del repo simuladorPRO).
+11. Configurar env vars en webapp.
+12. Auth nuevo: Google OAuth + email/password (mismo patrón).
 
-### Paso 2 (resto de la sesión)
-Ejecutar el paso elegido CON CHECKPOINTS cada 30 minutos. Mostrar al usuario el avance. Si algo no sale en 2 intentos, parar y replantear, no insistir.
+**Fase 4 — Verificación funcional (2 h)**
+13. Probar en localhost:3000/finanzas: login → docente/estudiante → construir proyecto → simular → exportar Excel.
+14. Verificar que el módulo NO interfiere con el resto de webapp (`/projects`, `/scribe`, `/axiom`, `/admin`).
 
-### Anti-patrones para evitar mañana
-- ❌ NO construyas piloto en webapp que duplique funcionalidad del simuladorPRO.
-- ❌ NO ofrezcas iframe hasta que el `host_not_allowed` esté resuelto.
-- ❌ NO presentes 4 opciones al usuario al inicio. Una recomendación clara + "¿procedo o ajustas?".
-- ❌ NO escribas más de 200 líneas de código sin testear visualmente en el browser.
-- ❌ NO uses `awk` para borrar bloques de CSS (deja llaves huérfanas — pasó hoy y rompió Vercel).
+**Total estimado para el módulo Finanzas migrado: 1-2 sesiones completas (8-12 horas de trabajo serio).**
+
+**Fase 5 — Construir los 3 módulos nuevos (varios días cada uno, post-Finanzas)**
+- `app/mercados/` — Simulador de Investigación de Mercados (calculadora muestreo + diseñador encuestas + análisis con APIs Google Trends/Meta/TikTok)
+- `app/marketing/` — Simulador de Marketing (4Ps/7Ps + segmentación con datos Meta Ads + presupuesto + calendario)
+- `app/estrategia/` — Simulador de Macroentorno/PESTEL (PESTEL + Porter + MEFE/MEFI + FODA cruzada)
+
+Cada uno: definir alcance funcional primero, después construir. Reusar el patrón del simuladorPRO migrado.
+
+### Decisión visual + funcional confirmada (CRÍTICO)
+
+| Aspecto | Cómo |
+|---|---|
+| **Identidad visual** | **Cada módulo APARTE.** Header propio, sidebar propio, tokens propios. Finanzas se ve como el simuladorPRO original. Los otros 3 tendrán su propia personalidad visual (no copy-paste del simuladorPRO, cada uno con su look). |
+| **Auth y datos** | **CONECTADOS AL LABORATORIO.** Un solo Supabase (el de webapp). Un solo login (el usuario entra una vez a webapp y accede a todos los módulos). Los user_ids son consistentes en todas las tablas. |
+| **Cruce con Generador** | **SÍ.** Lo que un estudiante guarda en Finanzas/Mercados/Marketing/PESTEL queda disponible como "artefacto" para importar al Generador de tesis/proyectos de grado. Eso ES el "Modo Conectado". |
+
+**Implicancia técnica para mañana:** NO crear Supabase nuevo para Finanzas. Usar el de webapp. Crear las tablas del simuladorPRO ahí (proyectos, simulaciones, cursos, etc.) pero con user_id compartido contra la tabla `auth.users` de webapp.
+
+### Lo que NO hay que hacer mañana
+- ❌ NO preguntar al usuario qué quiere — ya decidió.
+- ❌ NO intentar iframe ni link externo — el usuario lo descartó.
+- ❌ NO migrar usuarios ni datos del Supabase actual del simuladorPRO — empezar limpio.
+- ❌ NO crear un Supabase nuevo solo para Finanzas — usar el de webapp (auth compartido).
+- ❌ NO intentar mantener el código del simuladorPRO sincronizado con webapp — el simuladorPRO se queda como repo separado de archivo histórico, webapp toma su versión propia.
 
 ---
 
