@@ -97,8 +97,13 @@
 }
 
 /* ═══ RESET ════════════════════════════════════════════════════════════ */
+/* IMPORTANTE: dentro de @layer base para que las utilities de Tailwind 4
+ * (mx-auto, p-X, mt-X, etc.) puedan sobrescribirlo. Sin la capa, este reset
+ * gana contra cualquier .mx-auto / .p-X y rompe los layouts del ecosistema. */
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+}
 
 html, body {
   color-scheme: light dark;
