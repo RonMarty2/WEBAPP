@@ -73,6 +73,19 @@ visualmente pero comparten sesión y datos.
 ## §4 Decisiones clave (orden cronológico inverso)
 
 ### 2026-06-06
+- **Módulo Mercados — alcance aprobado:**
+  - Alcance completo: 13 clases (academia) + 8 herramientas (laboratorio).
+  - Encuestas se recolectan vía link/QR público SIN login (cualquiera responde).
+  - Integración con datos abiertos bolivianos (INE, datos.gob.bo) es
+    NO-BLOQUEANTE: si las APIs están caídas, el módulo igual funciona y el
+    estudiante puede ingresar datos manualmente.
+  - APIs de Meta Ads y TikTok Ads en fase 2, cuando el usuario tenga
+    las credenciales correspondientes.
+  - Mercados NO copia la estructura de Finanzas. Finanzas es calculadora;
+    Mercados es un proceso completo (diseñar → recolectar → analizar → reportar).
+- **Regla de ejecución:** dividir el trabajo grande en fases de alta
+  calidad. NO hacer todo de un golpe (sale simplón). Cada fase se construye,
+  verifica y commitea por separado.
 - **Axiom queda eliminado** del ecosistema. No se cuenta como producto.
 - **Bitácora viva creada.** Este archivo se actualiza con cada cambio
   importante y se entrega cuando el usuario lo pide.
