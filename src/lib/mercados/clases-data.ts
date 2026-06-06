@@ -439,11 +439,325 @@ export const CLASES_MERCADOS: ClaseMercados[] = [
       },
     ],
   },
+
+  // ───────────────────────────────────────────────────────── CLASE 6
+  {
+    slug: 'diseno-de-instrumentos',
+    numero: 6,
+    titulo: 'Diseño de instrumentos: encuesta, entrevista, focus, observación',
+    resumen:
+      'Cada pregunta de tu estudio necesita la herramienta correcta para responderse. Elige mal y los datos no sirven.',
+    duracionMin: 15,
+    dificultad: 'intermedia',
+    secciones: [
+      {
+        titulo: 'Cuatro instrumentos, cuatro propósitos',
+        parrafos: [
+          'Encuesta: muchas personas, preguntas cerradas, datos cuantificables. Responde "cuántos / qué porcentaje". Es el instrumento estrella del estudio descriptivo.',
+          'Entrevista en profundidad: pocas personas, preguntas abiertas, mucho detalle. Responde "por qué / cómo". Ideal en la fase exploratoria.',
+          'Focus group: 6-10 personas discutiendo guiadas por un moderador. Saca a la luz percepciones, reacciones a un producto, lenguaje del cliente.',
+          'Observación: mirar el comportamiento real sin preguntar. "¿Cuántos entran y cuántos compran?" La gente dice una cosa y hace otra; la observación captura lo que realmente hacen.',
+        ],
+      },
+      {
+        titulo: 'El error de usar el instrumento equivocado',
+        parrafos: [
+          'Si quieres saber "qué porcentaje de la zona consumiría tu producto", una entrevista a 8 personas NO te lo dice (muy pocas). Necesitas encuesta.',
+          'Si quieres entender "por qué la gente no vuelve a tu local", una encuesta de opción múltiple te da opciones que TÚ inventaste; quizás la razón real no está en tu lista. Ahí una entrevista o focus descubre lo que no sabías preguntar.',
+          'Regla: cuantitativo (números, generalizar) → encuesta/observación. Cualitativo (entender, profundizar) → entrevista/focus.',
+        ],
+        ejemplo: {
+          enunciado: 'Proyecto: gimnasio boutique en Santa Cruz.',
+          desarrollo:
+            'Fase 1 (exploratoria): 6 entrevistas a personas que dejaron su gimnasio → descubres que el motivo #1 es "horarios saturados", algo que no habías considerado. Fase 2 (descriptiva): encuesta a 384 personas midiendo cuántas valoran horarios flexibles y cuánto pagarían.',
+          resultado:
+            'La entrevista reveló la variable; la encuesta la cuantificó. Los dos instrumentos se complementan.',
+        },
+      },
+      {
+        titulo: 'Reglas de oro al redactar preguntas',
+        parrafos: [
+          'Una idea por pregunta. "¿Te gusta el precio y la calidad?" es dos preguntas disfrazadas de una (pregunta doble). Sepáralas.',
+          'Sin inducir la respuesta. "¿No crees que nuestro excelente café merece tu visita?" empuja al sí. Neutral: "¿Con qué frecuencia consumes café fuera de casa?".',
+          'Lenguaje del encuestado, no técnico. Evita jerga. Si tu cliente no diría "disposición a pagar", pregunta "¿cuánto pagarías por...?".',
+          'Ordena de lo general a lo específico, y deja lo sensible (ingresos, edad) para el final.',
+        ],
+      },
+    ],
+    ejercicio: null,
+    quiz: [
+      {
+        pregunta: 'Quieres el porcentaje de la población que compraría tu producto. ¿Qué instrumento?',
+        opciones: ['Entrevista en profundidad', 'Encuesta', 'Focus group', 'Observación de 5 personas'],
+        correcta: 1,
+        explicacion:
+          'Para cuantificar y generalizar (porcentajes) necesitas la encuesta a una muestra representativa. Los demás son cualitativos o de muy pocas personas.',
+      },
+      {
+        pregunta: '"¿Te gusta nuestro precio y nuestra calidad?" es un ejemplo de:',
+        opciones: ['Pregunta neutral', 'Pregunta doble (dos ideas en una)', 'Pregunta abierta', 'Buena práctica'],
+        correcta: 1,
+        explicacion:
+          'Mezcla dos ideas (precio Y calidad). Si alguien responde "no", no sabes a cuál se refiere. Una idea por pregunta.',
+      },
+      {
+        pregunta: 'La observación directa es valiosa porque:',
+        opciones: [
+          'Es la más barata siempre',
+          'Captura lo que la gente realmente hace, no lo que dice que hace',
+          'Permite entrevistar a más personas',
+          'No requiere análisis',
+        ],
+        correcta: 1,
+        explicacion:
+          'La gente a veces dice una cosa y hace otra. La observación registra el comportamiento real, sin el sesgo de la respuesta declarada.',
+      },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────── CLASE 7
+  {
+    slug: 'escalas-de-medicion',
+    numero: 7,
+    titulo: 'Escalas de medición: cómo conviertes opiniones en datos',
+    resumen:
+      'Nominal, ordinal, Likert, diferencial semántico. La escala que eliges decide qué análisis podrás hacer después.',
+    duracionMin: 14,
+    dificultad: 'intermedia',
+    secciones: [
+      {
+        titulo: 'Los cuatro niveles de medición',
+        parrafos: [
+          'Nominal: categorías sin orden. Género, ciudad, marca preferida. Solo puedes contar frecuencias ("40% prefiere la marca A").',
+          'Ordinal: categorías CON orden, pero sin distancia medible. Nivel educativo (primaria < secundaria < universidad). Sabes el orden, no "cuánto más".',
+          'De intervalo: orden y distancias iguales, sin cero absoluto. Temperatura. Raro en encuestas de mercado.',
+          'De razón: orden, distancia y cero absoluto real. Edad, ingreso, cantidad comprada. Permite todos los cálculos (promedio, etc.).',
+        ],
+      },
+      {
+        titulo: 'La escala Likert: la reina de los estudios de mercado',
+        parrafos: [
+          'Mide grado de acuerdo o intensidad en una escala simétrica, típicamente de 5 puntos: Totalmente en desacuerdo (1) → Totalmente de acuerdo (5).',
+          'Ejemplo: "El precio me parece justo" → 1 a 5. Permite calcular promedios y comparar ítems ("el WiFi 4.6 vs el precio 3.2").',
+          'Buenas prácticas: usa 5 o 7 puntos (impar, para tener punto neutro), etiqueta TODOS los puntos, y mantén la misma dirección en todas (no mezcles donde a veces 5 es bueno y a veces malo).',
+        ],
+        ejemplo: {
+          enunciado: 'Quieres medir qué tan importante es cada atributo de una cafetería.',
+          desarrollo:
+            'Para cada atributo (WiFi, precio, ubicación, sabor) preguntas: "Qué tan importante es para ti — 1 nada importante a 5 muy importante". Promedias cada uno.',
+          resultado:
+            'WiFi 4.6, sabor 4.4, ubicación 3.9, precio 3.2 → sabes priorizar tu inversión en lo que el cliente más valora.',
+        },
+      },
+      {
+        titulo: 'Por qué la escala define tu análisis',
+        parrafos: [
+          'Con datos nominales solo cuentas y sacas porcentajes/modas. No tiene sentido un "promedio de ciudad".',
+          'Con ordinales sacas medianas y porcentajes, pero el promedio es discutible.',
+          'Con Likert (tratada como intervalo, práctica aceptada) y razón sacas promedios, desviaciones, correlaciones.',
+          'Moraleja: piensa el análisis ANTES de elegir la escala. Si necesitas promediar, no uses categorías nominales.',
+        ],
+      },
+    ],
+    ejercicio: null,
+    quiz: [
+      {
+        pregunta: '"Ciudad de residencia" (La Paz, Santa Cruz, Cochabamba) es una variable:',
+        opciones: ['Nominal', 'Ordinal', 'De intervalo', 'De razón'],
+        correcta: 0,
+        explicacion:
+          'Son categorías sin orden inherente. Es nominal: solo puedes contar frecuencias, no promediar.',
+      },
+      {
+        pregunta: '¿Por qué la escala Likert suele tener un número impar de puntos (5 o 7)?',
+        opciones: [
+          'Por estética',
+          'Para tener un punto neutro central',
+          'Porque es obligatorio',
+          'Para confundir al encuestado',
+        ],
+        correcta: 1,
+        explicacion:
+          'Un número impar deja un punto medio neutro (ni de acuerdo ni en desacuerdo), evitando forzar al encuestado hacia un lado.',
+      },
+      {
+        pregunta: 'Si quieres calcular el promedio de importancia de un atributo, NO debes usar una escala:',
+        opciones: ['Likert de 5 puntos', 'De razón', 'Nominal', 'De intervalo'],
+        correcta: 2,
+        explicacion:
+          'En una escala nominal (categorías sin orden) el promedio no tiene sentido. Para promediar necesitas Likert, intervalo o razón.',
+      },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────── CLASE 8
+  {
+    slug: 'trabajo-de-campo',
+    numero: 8,
+    titulo: 'Trabajo de campo: recolectar sin arruinar tus datos',
+    resumen:
+      'La mejor encuesta diseñada se arruina en el campo si la aplicas mal. Errores comunes y cómo evitarlos.',
+    duracionMin: 13,
+    dificultad: 'intermedia',
+    secciones: [
+      {
+        titulo: 'Presencial, telefónica u online: ventajas y trampas',
+        parrafos: [
+          'Online (formulario + link/QR): barata, rápida, llega lejos. Riesgo: sesgo de auto-selección (responden los más interesados) y de cobertura (quien no usa internet queda fuera).',
+          'Presencial: mayor control, puedes aclarar dudas, mejor para zonas sin internet. Riesgo: costo, tiempo, y el sesgo del encuestador (tu presencia influye la respuesta).',
+          'Telefónica: rápida y con cobertura amplia, pero respuestas más cortas y tasa de rechazo alta.',
+          'Para proyectos de grado, lo común hoy es online con link/QR, complementado con algunas presenciales para cubrir sesgos. (En la herramienta del módulo vas a generar tu link/QR.)',
+        ],
+      },
+      {
+        titulo: 'Los sesgos que matan un estudio',
+        parrafos: [
+          'Sesgo de selección: tu muestra no representa al universo (encuestaste solo a quien tenías cerca). Es el más grave y el más común.',
+          'Sesgo del encuestador: tu tono, gestos o forma de preguntar empujan respuestas. Se controla con un guion estandarizado.',
+          'Sesgo de deseabilidad social: la gente responde lo que "queda bien", no lo que hace. Especialmente en temas sensibles (higiene, ingresos, hábitos).',
+          'No-respuesta: los que no contestan pueden ser sistemáticamente distintos de los que sí. Si el 70% no responde, tu 30% quizás no representa a nadie.',
+        ],
+        ejemplo: {
+          enunciado: 'Encuestas sobre consumo de comida saludable solo a la salida de un gimnasio.',
+          desarrollo:
+            'La gente que sale del gimnasio NO representa a la población general: ya está sesgada hacia lo saludable. Además, dirán que comen más sano de lo que comen (deseabilidad social).',
+          resultado:
+            'Doble sesgo (selección + deseabilidad). Conclusión inflada e inservible. Solución: muestrear en lugares variados y preguntar de forma indirecta.',
+        },
+      },
+      {
+        titulo: 'Prueba piloto: el paso que casi todos saltan',
+        parrafos: [
+          'Antes de lanzar la encuesta real, aplícala a 10-15 personas. Vas a descubrir preguntas que se malinterpretan, opciones que faltan, y cuánto tarda en responderse.',
+          'Corregir después de recolectar 384 respuestas es imposible; corregir tras un piloto de 12 es trivial. El piloto te ahorra el desastre.',
+        ],
+      },
+    ],
+    ejercicio: null,
+    quiz: [
+      {
+        pregunta: 'Encuestar solo a quien tienes cerca y que esto no represente al universo es:',
+        opciones: ['Sesgo de selección', 'Sesgo del encuestador', 'Deseabilidad social', 'No-respuesta'],
+        correcta: 0,
+        explicacion:
+          'El sesgo de selección (muestra no representativa) es el error más grave y común del trabajo de campo.',
+      },
+      {
+        pregunta: 'La gente responde "lo que queda bien" en temas sensibles. Eso es:',
+        opciones: ['Sesgo de selección', 'Deseabilidad social', 'Sesgo de cobertura', 'Buen dato'],
+        correcta: 1,
+        explicacion:
+          'El sesgo de deseabilidad social: el encuestado da la respuesta socialmente aceptable, no la real. Se mitiga con anonimato y preguntas indirectas.',
+      },
+      {
+        pregunta: '¿Para qué sirve la prueba piloto?',
+        opciones: [
+          'Para completar la muestra final',
+          'Para detectar preguntas confusas y errores antes del lanzamiento real',
+          'Para reemplazar el análisis',
+          'Para inflar el número de respuestas',
+        ],
+        correcta: 1,
+        explicacion:
+          'El piloto (10-15 personas) revela preguntas mal entendidas y opciones faltantes cuando corregir aún es barato, antes de recolectar la muestra completa.',
+      },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────── CLASE 9
+  {
+    slug: 'tabulacion-y-codificacion',
+    numero: 9,
+    titulo: 'Tabulación y codificación: de respuestas crudas a datos ordenados',
+    resumen:
+      'Antes de analizar, tus respuestas necesitan orden. Codificar y tabular bien evita conclusiones falsas.',
+    duracionMin: 14,
+    dificultad: 'intermedia',
+    secciones: [
+      {
+        titulo: 'Codificar: traducir respuestas a números manejables',
+        parrafos: [
+          'Codificar es asignar un código a cada respuesta para procesarla. "Femenino" → 1, "Masculino" → 2. "Totalmente de acuerdo" → 5.',
+          'Las preguntas cerradas se codifican solas. Las abiertas requieren un paso extra: lees las respuestas, identificas categorías recurrentes y las agrupas (post-codificación).',
+          'Regla: define el libro de códigos ANTES de recolectar (para cerradas). Para abiertas, créalo después leyendo una muestra de respuestas.',
+        ],
+      },
+      {
+        titulo: 'Tabular: contar de forma organizada',
+        parrafos: [
+          'Tabulación simple (univariada): cuentas cuántos respondieron cada opción de UNA pregunta. "120 de 384 prefieren delivery = 31%".',
+          'Tabulación cruzada (bivariada): cruzas DOS preguntas. "De los que prefieren delivery, ¿qué edad tienen?". Aquí aparecen los hallazgos jugosos.',
+          'La herramienta del módulo va a tabular automáticamente tus respuestas. Pero entender qué hace te permite interpretar y defender los resultados.',
+        ],
+        ejemplo: {
+          enunciado: '384 respuestas sobre forma de consumo preferida.',
+          desarrollo:
+            'Tabulación simple: En local 198 (52%), Delivery 120 (31%), Para llevar 66 (17%). Cruzada con edad: el delivery lo prefieren sobre todo los de 18-24 (68% de ese grupo).',
+          resultado:
+            'El dato simple dice "hay demanda de delivery"; el cruzado dice "el delivery es clave para captar jóvenes" → decisión más fina.',
+        },
+      },
+      {
+        titulo: 'Limpieza: basura entra, basura sale',
+        parrafos: [
+          'Antes de tabular, limpia: respuestas incompletas, contradictorias (dice que no consume café pero responde cuánto gasta en café), o claramente apuradas (todo "3" en Likert).',
+          'Documenta cuántas respuestas descartaste y por qué. El tribunal valora la transparencia: "de 400 recolectadas, 384 válidas tras eliminar 16 incompletas".',
+          'Nunca inventes ni "ajustes" datos para que cuadren con tu hipótesis. Eso invalida todo el estudio y es éticamente grave.',
+        ],
+      },
+    ],
+    ejercicio: {
+      enunciado:
+        'De 420 encuestas recolectadas, descartas 36 por estar incompletas. ¿Qué porcentaje de respuestas válidas tienes sobre el total recolectado? (redondea a entero)',
+      campos: [{ id: 'pct', label: 'Porcentaje de respuestas válidas', unidad: '%' }],
+      resolver: (inputs) => {
+        const validas = 420 - 36;
+        const pctReal = Math.round((validas / 420) * 100);
+        const valor = inputs.pct ?? 0;
+        const correcto = Math.abs(valor - pctReal) <= 1;
+        return {
+          correcto,
+          valorCorrecto: pctReal,
+          explicacion: correcto
+            ? `Correcto. (420−36)/420 = 384/420 ≈ ${pctReal}% válidas. Una tasa sana; documenta el descarte en tu metodología.`
+            : `(420−36)/420 = 384/420 = ${pctReal}%. Recuerda documentar cuántas descartaste y por qué.`,
+        };
+      },
+    },
+    quiz: [
+      {
+        pregunta: 'Asignar "Femenino → 1, Masculino → 2" para poder procesar es:',
+        opciones: ['Tabular', 'Codificar', 'Limpiar', 'Muestrear'],
+        correcta: 1,
+        explicacion:
+          'Codificar es asignar códigos (números) a las respuestas para poder procesarlas estadísticamente.',
+      },
+      {
+        pregunta: 'Cruzar "forma de consumo" con "edad" para hallar patrones es una tabulación:',
+        opciones: ['Simple / univariada', 'Cruzada / bivariada', 'Nominal', 'Piloto'],
+        correcta: 1,
+        explicacion:
+          'Cruzar dos variables es tabulación cruzada (bivariada). Ahí suelen aparecer los hallazgos más útiles.',
+      },
+      {
+        pregunta: '¿Qué debes hacer con respuestas incompletas o contradictorias?',
+        opciones: [
+          'Inventar los datos faltantes',
+          'Ajustarlas para que apoyen tu hipótesis',
+          'Limpiarlas/descartarlas y documentar cuántas y por qué',
+          'Ignorar el problema',
+        ],
+        correcta: 2,
+        explicacion:
+          'Se limpian o descartan documentando el proceso con transparencia. Inventar o ajustar datos invalida el estudio y es éticamente grave.',
+      },
+    ],
+  },
 ];
 
 export function getClaseMercados(slug: string): ClaseMercados | undefined {
   return CLASES_MERCADOS.find((c) => c.slug === slug);
 }
 
-/** Total de clases planeadas en la academia completa (13). Por ahora hay 5. */
+/** Total de clases planeadas en la academia completa (13). Disponibles: 9 (olas 1A+1B). */
 export const TOTAL_CLASES_PLANEADAS = 13;
