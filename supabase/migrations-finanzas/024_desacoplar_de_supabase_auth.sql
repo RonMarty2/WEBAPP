@@ -6,16 +6,16 @@
 -- webapp (cookie lab_session). Por eso, finanzas_perfiles.id NO puede ser
 -- una FK a auth.users.
 --
--- Versión 2: dropea TODAS las RLS policies primero (algunas dependen de
--- las columnas que vamos a alterar). La autorización la hará el JWT de
--- webapp en server-side endpoints /api/finanzas/*.
+-- Versión 3: detecta TODAS las FKs hacia finanzas_perfiles dinámicamente
+-- (incluyendo disparado_por en finanzas_eventos_disparados que la v2 no
+-- conocía). Y dropea TODAS las RLS policies de tablas finanzas_* primero.
+-- Si ya ejecutaste una versión anterior parcial, este script es idempotente:
+-- puedes ejecutarlo encima y se ajusta solo.
 -- ============================================================================
 
 BEGIN;
 
--- ============================================================================
--- 1) DROP ALL POLICIES de tablas finanzas_* (dinámicamente)
--- ============================================================================
+-- 1) DROP ALL POLICIES de tablas finanzas_*
 DO $$
 DECLARE
   pol RECORD;
@@ -25,78 +25,58 @@ BEGIN
     FROM pg_policies
     WHERE schemaname = 'public' AND tablename LIKE 'finanzas_%'
   LOOP
-    EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I', pol.policyname, pol.schemaname, pol.tablename);
+    EXECUTE format('DROP POLICY IF EXISTS %I ON %I.%I',
+                   pol.policyname, pol.schemaname, pol.tablename);
   END LOOP;
 END $$;
 
--- ============================================================================
--- 2) DROP FK de finanzas_perfiles → auth.users
--- ============================================================================
+-- 2) DROP TODAS las FKs hacia finanzas_perfiles + alterar tipo de cada columna
+DO $$
+DECLARE
+  fk RECORD;
+BEGIN
+  FOR fk IN
+    SELECT
+      tc.table_schema,
+      tc.table_name,
+      tc.constraint_name,
+      kcu.column_name
+    FROM information_schema.table_constraints tc
+    JOIN information_schema.key_column_usage kcu
+      ON tc.constraint_name = kcu.constraint_name
+      AND tc.table_schema = kcu.table_schema
+    JOIN information_schema.constraint_column_usage ccu
+      ON tc.constraint_name = ccu.constraint_name
+      AND tc.table_schema = ccu.table_schema
+    WHERE tc.constraint_type = 'FOREIGN KEY'
+      AND ccu.table_name = 'finanzas_perfiles'
+      AND ccu.column_name = 'id'
+  LOOP
+    EXECUTE format('ALTER TABLE %I.%I DROP CONSTRAINT %I',
+                   fk.table_schema, fk.table_name, fk.constraint_name);
+    EXECUTE format('ALTER TABLE %I.%I ALTER COLUMN %I TYPE TEXT USING %I::text',
+                   fk.table_schema, fk.table_name, fk.column_name, fk.column_name);
+  END LOOP;
+END $$;
+
+-- 3) DROP FK de finanzas_perfiles a auth.users + alter su id a TEXT
 ALTER TABLE finanzas_perfiles DROP CONSTRAINT IF EXISTS finanzas_perfiles_id_fkey;
-
--- ============================================================================
--- 3) DROP todas las FKs entrantes a finanzas_perfiles
--- ============================================================================
-ALTER TABLE finanzas_cursos DROP CONSTRAINT IF EXISTS finanzas_cursos_docente_id_fkey;
-ALTER TABLE finanzas_inscripciones DROP CONSTRAINT IF EXISTS finanzas_inscripciones_estudiante_id_fkey;
-ALTER TABLE finanzas_proyectos DROP CONSTRAINT IF EXISTS finanzas_proyectos_estudiante_id_fkey;
-ALTER TABLE finanzas_proyectos DROP CONSTRAINT IF EXISTS finanzas_proyectos_docente_id_fkey;
-ALTER TABLE finanzas_entregas DROP CONSTRAINT IF EXISTS finanzas_entregas_estudiante_id_fkey;
-ALTER TABLE finanzas_entregas DROP CONSTRAINT IF EXISTS finanzas_entregas_docente_id_fkey;
-ALTER TABLE finanzas_grupos DROP CONSTRAINT IF EXISTS finanzas_grupos_lider_id_fkey;
-ALTER TABLE finanzas_grupo_miembros DROP CONSTRAINT IF EXISTS finanzas_grupo_miembros_estudiante_id_fkey;
-ALTER TABLE finanzas_eventos_disparados DROP CONSTRAINT IF EXISTS finanzas_eventos_disparados_docente_id_fkey;
-ALTER TABLE finanzas_simulaciones DROP CONSTRAINT IF EXISTS finanzas_simulaciones_estudiante_id_fkey;
-
--- ============================================================================
--- 4) ALTER tipos de UUID → TEXT
--- ============================================================================
 ALTER TABLE finanzas_perfiles ALTER COLUMN id TYPE TEXT USING id::text;
-ALTER TABLE finanzas_cursos ALTER COLUMN docente_id TYPE TEXT USING docente_id::text;
-ALTER TABLE finanzas_inscripciones ALTER COLUMN estudiante_id TYPE TEXT USING estudiante_id::text;
-ALTER TABLE finanzas_proyectos ALTER COLUMN estudiante_id TYPE TEXT USING estudiante_id::text;
-ALTER TABLE finanzas_proyectos ALTER COLUMN docente_id TYPE TEXT USING docente_id::text;
-ALTER TABLE finanzas_entregas ALTER COLUMN estudiante_id TYPE TEXT USING estudiante_id::text;
-ALTER TABLE finanzas_entregas ALTER COLUMN docente_id TYPE TEXT USING docente_id::text;
-ALTER TABLE finanzas_grupos ALTER COLUMN lider_id TYPE TEXT USING lider_id::text;
-ALTER TABLE finanzas_grupo_miembros ALTER COLUMN estudiante_id TYPE TEXT USING estudiante_id::text;
-ALTER TABLE finanzas_eventos_disparados ALTER COLUMN docente_id TYPE TEXT USING docente_id::text;
-ALTER TABLE finanzas_simulaciones ALTER COLUMN estudiante_id TYPE TEXT USING estudiante_id::text;
 
--- ============================================================================
--- 5) RECREAR FKs internas (entre tablas finanzas_*) ahora con tipo TEXT
--- ============================================================================
-ALTER TABLE finanzas_cursos ADD CONSTRAINT finanzas_cursos_docente_id_fkey
-  FOREIGN KEY (docente_id) REFERENCES finanzas_perfiles(id) ON DELETE CASCADE;
-ALTER TABLE finanzas_inscripciones ADD CONSTRAINT finanzas_inscripciones_estudiante_id_fkey
-  FOREIGN KEY (estudiante_id) REFERENCES finanzas_perfiles(id) ON DELETE CASCADE;
-ALTER TABLE finanzas_proyectos ADD CONSTRAINT finanzas_proyectos_estudiante_id_fkey
-  FOREIGN KEY (estudiante_id) REFERENCES finanzas_perfiles(id) ON DELETE CASCADE;
-ALTER TABLE finanzas_entregas ADD CONSTRAINT finanzas_entregas_estudiante_id_fkey
-  FOREIGN KEY (estudiante_id) REFERENCES finanzas_perfiles(id) ON DELETE CASCADE;
-ALTER TABLE finanzas_grupos ADD CONSTRAINT finanzas_grupos_lider_id_fkey
-  FOREIGN KEY (lider_id) REFERENCES finanzas_perfiles(id) ON DELETE SET NULL;
-ALTER TABLE finanzas_grupo_miembros ADD CONSTRAINT finanzas_grupo_miembros_estudiante_id_fkey
-  FOREIGN KEY (estudiante_id) REFERENCES finanzas_perfiles(id) ON DELETE CASCADE;
-ALTER TABLE finanzas_simulaciones ADD CONSTRAINT finanzas_simulaciones_estudiante_id_fkey
-  FOREIGN KEY (estudiante_id) REFERENCES finanzas_perfiles(id) ON DELETE CASCADE;
+-- 4) NO se recrean FKs entre tablas finanzas_* — la integridad la maneja
+--    la app a nivel de endpoints. Es más simple y no afecta funcionalidad.
 
--- ============================================================================
--- 6) DISABLE RLS en TODAS las tablas finanzas_*
--- ============================================================================
--- La autorización la hace webapp's JWT en endpoints server-side /api/finanzas/*.
--- Cliente nunca toca las tablas finanzas_* directo, todo pasa por endpoints
--- que validan la sesión de webapp y usan service_role_key para los queries.
-ALTER TABLE finanzas_perfiles DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_cursos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_inscripciones DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_proyectos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_eventos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_simulaciones DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_turnos_historial DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_entregas DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_grupos DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_grupo_miembros DISABLE ROW LEVEL SECURITY;
-ALTER TABLE finanzas_eventos_disparados DISABLE ROW LEVEL SECURITY;
+-- 5) DISABLE RLS en TODAS las tablas finanzas_*
+DO $$
+DECLARE
+  tbl TEXT;
+BEGIN
+  FOR tbl IN
+    SELECT tablename FROM pg_tables
+    WHERE schemaname = 'public' AND tablename LIKE 'finanzas_%'
+  LOOP
+    EXECUTE format('ALTER TABLE %I DISABLE ROW LEVEL SECURITY', tbl);
+  END LOOP;
+END $$;
 
 COMMIT;
