@@ -41,7 +41,7 @@ export default function BotonVistaPreviaEstudiante() {
     <>
       <button
         onClick={() => setAbierto(true)}
-        className="flex items-center gap-1.5 rounded-md border border-sky-400 bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-900 hover:bg-sky-100 dark:border-sky-700 dark:bg-sky-950/40 dark:text-sky-100"
+        className="flex items-center gap-1.5 rounded-md border border-sky-400 bg-sky-50 px-3 py-1.5 text-xs font-medium text-sky-900 hover:bg-sky-100"
         title="Ver qué llega lleno y qué vacío al estudiante (sin necesidad de otra cuenta)"
       >
         <Eye className="h-3.5 w-3.5" />
@@ -141,8 +141,8 @@ function PasoPreview({
       className={cn(
         "rounded-md border p-3",
         llega
-          ? "border-emerald-300 bg-emerald-50/50 dark:border-emerald-700 dark:bg-emerald-950/20"
-          : "border-sky-300 bg-sky-50/50 dark:border-sky-700 dark:bg-sky-950/20"
+          ? "border-emerald-300 bg-emerald-50/50"
+          : "border-sky-300 bg-sky-50/50"
       )}
     >
       <div className="flex items-start gap-2">
@@ -165,8 +165,8 @@ function PasoPreview({
               className={cn(
                 "rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider",
                 llega
-                  ? "bg-emerald-200 text-emerald-900 dark:bg-emerald-900 dark:text-emerald-100"
-                  : "bg-sky-200 text-sky-900 dark:bg-sky-900 dark:text-sky-100"
+                  ? "bg-emerald-200 text-emerald-900"
+                  : "bg-sky-200 text-sky-900"
               )}
             >
               {llega ? "✓ Llega armado" : "El estudiante completa"}

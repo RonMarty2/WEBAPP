@@ -11,12 +11,12 @@ import type { Proyecto } from "@/types/finanzas/proyecto";
 
 // Paleta de colores por producto (cíclica si hay más de 6)
 const COLORES_PRODUCTO = [
-  { borde: "border-l-blue-500", chip: "bg-blue-100 text-blue-900 dark:bg-blue-900/40 dark:text-blue-200" },
-  { borde: "border-l-emerald-500", chip: "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200" },
-  { borde: "border-l-amber-500", chip: "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200" },
-  { borde: "border-l-purple-500", chip: "bg-purple-100 text-purple-900 dark:bg-purple-900/40 dark:text-purple-200" },
-  { borde: "border-l-pink-500", chip: "bg-pink-100 text-pink-900 dark:bg-pink-900/40 dark:text-pink-200" },
-  { borde: "border-l-cyan-500", chip: "bg-cyan-100 text-cyan-900 dark:bg-cyan-900/40 dark:text-cyan-200" },
+  { borde: "border-l-blue-500", chip: "bg-blue-100 text-blue-900" },
+  { borde: "border-l-emerald-500", chip: "bg-emerald-100 text-emerald-900" },
+  { borde: "border-l-amber-500", chip: "bg-amber-100 text-amber-900" },
+  { borde: "border-l-purple-500", chip: "bg-purple-100 text-purple-900" },
+  { borde: "border-l-pink-500", chip: "bg-pink-100 text-pink-900" },
+  { borde: "border-l-cyan-500", chip: "bg-cyan-100 text-cyan-900" },
 ];
 
 const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) =>
@@ -150,11 +150,11 @@ export default function Paso2Proyeccion() {
             <tbody>
               {/* SECCIÓN TASAS GLOBALES — encabezado colapsable */}
               <tr
-                className="cursor-pointer bg-amber-100/60 hover:bg-amber-100 dark:bg-amber-950/30"
+                className="cursor-pointer bg-amber-100/60 hover:bg-amber-100"
                 onClick={() => setTasasAbierto((v) => !v)}
               >
                 <td
-                  className="border-l-4 border-l-amber-500 p-2 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:text-amber-200"
+                  className="border-l-4 border-l-amber-500 p-2 text-[11px] font-bold uppercase tracking-wide text-amber-900"
                   colSpan={8}
                 >
                   <span className="inline-flex items-center gap-1">
@@ -174,7 +174,7 @@ export default function Paso2Proyeccion() {
               </tr>
               {tasasAbierto && (
                 <>
-                  <tr className="bg-amber-50/60 dark:bg-amber-950/20">
+                  <tr className="bg-amber-50/60">
                     <td className="border-l-4 border-l-amber-500 p-1.5 text-[11px]" colSpan={2}>
                       ↳ Cantidad (%)
                     </td>
@@ -195,7 +195,7 @@ export default function Paso2Proyeccion() {
                     ))}
                     <td></td>
                   </tr>
-                  <tr className="border-b-2 border-border bg-amber-50/60 dark:bg-amber-950/20">
+                  <tr className="border-b-2 border-border bg-amber-50/60">
                     <td className="border-l-4 border-l-amber-500 p-1.5 text-[11px]" colSpan={2}>
                       ↳ Precio (%)
                     </td>
@@ -281,8 +281,8 @@ export default function Paso2Proyeccion() {
         {/* ── Vista MÓVIL: tarjetas (sin scroll horizontal) ─────────────────── */}
         <div className="space-y-3 md:hidden">
           {/* Tasas de crecimiento */}
-          <details className="rounded-md border-l-4 border-l-amber-500 bg-amber-50/60 dark:bg-amber-950/20">
-            <summary className="cursor-pointer list-none p-2.5 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:text-amber-200">
+          <details className="rounded-md border-l-4 border-l-amber-500 bg-amber-50/60">
+            <summary className="cursor-pointer list-none p-2.5 text-[11px] font-bold uppercase tracking-wide text-amber-900">
               📈 Tasas de crecimiento (aplican a todos) · tocar para editar
             </summary>
             <div className="space-y-2 p-2.5 pt-0">
@@ -482,7 +482,7 @@ export default function Paso2Proyeccion() {
             <strong>El precio:</strong> como mínimo cubre tus costos + margen; como máximo, lo
             que el cliente está dispuesto a pagar. Compara con la competencia.
           </p>
-          <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+          <p className="border-t border-sky-200 pt-1.5">
             <strong>Según tu tipo de negocio:</strong>
           </p>
           <ul className="ml-4 list-disc space-y-0.5">
@@ -636,7 +636,7 @@ function PanelSuscripcion({
           <p>
             <strong>Cuota:</strong> compárala con la competencia y con el valor que entregas.
           </p>
-          <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+          <p className="border-t border-sky-200 pt-1.5">
             <strong>Regla de oro:</strong> tu base se estabiliza en <em>altas ÷ churn</em>.
             Si captas 40 al mes pero pierdes el 4% de 1.000, te estancas en ~1.000.{" "}
             <strong>Bajar el churn vale más que captar más.</strong>
@@ -763,7 +763,7 @@ function PanelPublicidad({
             <strong>Anuncios por usuario:</strong> cuántos avisos ve cada persona al mes. Sé
             realista: saturar de anuncios espanta a la audiencia.
           </p>
-          <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+          <p className="border-t border-sky-200 pt-1.5">
             <strong>Regla:</strong> con audiencia chica el ingreso es bajo aunque el CPM sea
             bueno. Por eso al inicio se invierte en <em>crecer audiencia</em> antes que en
             monetizar.
@@ -846,7 +846,7 @@ function PanelCostoBeneficio({
           </table>
         </div>
 
-        <div className="rounded-md border border-amber-400/60 bg-amber-50 p-2.5 text-[11px] text-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+        <div className="rounded-md border border-amber-400/60 bg-amber-50 p-2.5 text-[11px] text-amber-900">
           ⓘ El costo del plan se carga en los pasos siguientes (personal, gastos,
           inversión). El proyecto "conviene" si el <strong>VAN sale positivo</strong>: el
           beneficio incremental supera lo que cuesta el plan.
@@ -867,7 +867,7 @@ function PanelCostoBeneficio({
             <strong>Apóyate en evidencia:</strong> una prueba piloto pequeña, resultados de
             campañas pasadas, o benchmarks del sector — no en "esperamos vender más".
           </p>
-          <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+          <p className="border-t border-sky-200 pt-1.5">
             <strong>Define cómo lo vas a medir (KPIs):</strong> ventas atribuibles, clientes
             nuevos, % de aumento. Así después puedes comprobar si el plan realmente funcionó.
           </p>
@@ -961,7 +961,7 @@ function ProductoFilas({
             <button
               type="button"
               onClick={onToggle}
-              className="flex min-w-0 items-center gap-1.5 rounded p-0.5 text-left hover:bg-black/5 dark:hover:bg-white/10"
+              className="flex min-w-0 items-center gap-1.5 rounded p-0.5 text-left hover:bg-black/5"
               title={abierto ? "Contraer" : "Expandir"}
             >
               {abierto ? (

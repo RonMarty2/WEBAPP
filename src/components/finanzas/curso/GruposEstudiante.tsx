@@ -203,7 +203,7 @@ export default function GruposEstudiante({
       ) : (
         <div className="space-y-2">
           {curso.grupo_consigna && (
-            <div className="rounded-md border border-sky-300 bg-sky-50/60 p-2 text-[11px] dark:border-sky-800 dark:bg-sky-950/20">
+            <div className="rounded-md border border-sky-300 bg-sky-50/60 p-2 text-[11px]">
               <strong>Consigna del docente:</strong> {curso.grupo_consigna}
             </div>
           )}

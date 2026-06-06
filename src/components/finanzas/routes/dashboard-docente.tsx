@@ -76,16 +76,16 @@ export default function DashboardDocente() {
 
       {/* CTA visible: galería de ejemplos para usar en clase. */}
       <Link href="/finanzas/ejemplos"
-        className="flex w-full items-center gap-3 rounded-lg border border-indigo-300 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-3 text-left transition hover:border-indigo-400 hover:shadow-md dark:border-indigo-800 dark:from-indigo-950/40 dark:via-violet-950/40 dark:to-fuchsia-950/40"
+        className="flex w-full items-center gap-3 rounded-lg border border-indigo-300 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-3 text-left transition hover:border-indigo-400 hover:shadow-md"
       >
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg shadow-md">
           📖
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-bold text-indigo-900 dark:text-indigo-100">
+          <div className="text-sm font-bold text-indigo-900">
             Galería de 26 proyectos de ejemplo para enseñar en clase
           </div>
-          <div className="text-[11px] text-indigo-800/80 dark:text-indigo-300">
+          <div className="text-[11px] text-indigo-800/80">
             Restaurantes, fábricas, podcast, canal de YouTube, gimnasio, turismo, agricultura…
             Comparalos con tus alumnos para que se vuelvan expertos.
           </div>
@@ -240,7 +240,7 @@ function FormCrearCurso({
           «Sube el bono Juancito Pinto» (más demanda en librerías). Así el estudiante ve qué
           tan resistente es su proyecto ante la realidad, no solo en el papel.
         </p>
-        <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+        <p className="border-t border-sky-200 pt-1.5">
           <strong>Frecuencia de turnos</strong> = en cuántos pedazos se parten los 5 años{" "}
           <em>simulados del proyecto</em>. <strong>No es tu calendario de clases</strong>: los
           5 años son la vida del negocio (lo que proyecta tu flujo de caja), no la duración del
@@ -256,7 +256,7 @@ function FormCrearCurso({
           en modo «Docente dispara»): una vez por semana ~5 meses → <strong>Trimestral (20)</strong>;
           clase diaria por pocas semanas → <strong>Mensual (60)</strong>. Igual es opcional.
         </p>
-        <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+        <p className="border-t border-sky-200 pt-1.5">
           <strong>Modo de simulación</strong> = quién decide cuándo caen los eventos:
         </p>
         <ul className="ml-4 list-disc space-y-0.5">
@@ -303,11 +303,11 @@ function FormCrearCurso({
       </div>
 
       {/* Qué tipos de proyecto se pueden SIMULAR en este curso */}
-      <div className="rounded-md border border-amber-300 bg-amber-50/40 p-3 dark:border-amber-800 dark:bg-amber-950/20">
-        <div className="mb-2 text-xs font-semibold text-amber-900 dark:text-amber-100">
+      <div className="rounded-md border border-amber-300 bg-amber-50/40 p-3">
+        <div className="mb-2 text-xs font-semibold text-amber-900">
           🎲 ¿Qué tipos de proyecto se pueden simular en este curso?
         </div>
-        <p className="mb-2 text-[11px] text-amber-800/80 dark:text-amber-300">
+        <p className="mb-2 text-[11px] text-amber-800/80">
           El alumno solo va a ver en su pantalla "Simular" los tipos que marques. El lanzador
           de situaciones también respeta esto. Podés cambiarlo después.
         </p>

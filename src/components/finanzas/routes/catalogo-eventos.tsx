@@ -24,18 +24,18 @@ const etiquetasCategoria: Record<CategoriaEvento, string> = {
 };
 
 const coloresCategoria: Record<CategoriaEvento, string> = {
-  macroeconomico: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
-  laboral: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
-  sectorial: "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200",
-  logistico: "bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200",
-  tecnologico: "bg-cyan-100 text-cyan-800 dark:bg-cyan-950 dark:text-cyan-200",
-  climatico: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200",
-  financiero: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200",
-  internacional: "bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-200",
-  comercio: "bg-pink-100 text-pink-800 dark:bg-pink-950 dark:text-pink-200",
-  servicios: "bg-teal-100 text-teal-800 dark:bg-teal-950 dark:text-teal-200",
-  produccion: "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200",
-  oportunidad: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200",
+  macroeconomico: "bg-red-100 text-red-800",
+  laboral: "bg-blue-100 text-blue-800",
+  sectorial: "bg-purple-100 text-purple-800",
+  logistico: "bg-orange-100 text-orange-800",
+  tecnologico: "bg-cyan-100 text-cyan-800",
+  climatico: "bg-sky-100 text-sky-800",
+  financiero: "bg-amber-100 text-amber-800",
+  internacional: "bg-indigo-100 text-indigo-800",
+  comercio: "bg-pink-100 text-pink-800",
+  servicios: "bg-teal-100 text-teal-800",
+  produccion: "bg-rose-100 text-rose-800",
+  oportunidad: "bg-emerald-100 text-emerald-800",
 };
 
 export default function CatalogoEventos() {

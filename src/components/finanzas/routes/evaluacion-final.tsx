@@ -157,17 +157,17 @@ export default function EvaluacionFinal() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-emerald-500/40 bg-emerald-50 p-4 dark:bg-emerald-950/30">
-          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+        <div className="rounded-lg border border-emerald-500/40 bg-emerald-50 p-4">
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-emerald-800">
             <CheckCircle2 className="h-4 w-4" />
             Aciertos
           </div>
           {analisis.aciertos.length === 0 ? (
-            <p className="text-xs text-emerald-700/70 dark:text-emerald-300/70">
+            <p className="text-xs text-emerald-700/70">
               No identificamos aciertos destacables. Hubo varios errores estructurales.
             </p>
           ) : (
-            <ul className="space-y-1 text-xs text-emerald-900 dark:text-emerald-100">
+            <ul className="space-y-1 text-xs text-emerald-900">
               {analisis.aciertos.map((a, i) => (
                 <li key={i} className="flex gap-1.5">
                   <span>•</span>
@@ -200,15 +200,15 @@ export default function EvaluacionFinal() {
         </div>
       </div>
 
-      <div className="rounded-lg border border-amber-500/40 bg-amber-50 p-5 dark:bg-amber-950/30">
-        <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-amber-900 dark:text-amber-200">
+      <div className="rounded-lg border border-amber-500/40 bg-amber-50 p-5">
+        <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-amber-900">
           <Lightbulb className="h-4 w-4" />
           Calificación sugerida
         </div>
-        <div className="text-3xl font-bold text-amber-900 dark:text-amber-200">
+        <div className="text-3xl font-bold text-amber-900">
           {analisis.calificacion.toFixed(0)}/100
         </div>
-        <div className="mt-2 text-xs text-amber-800/80 dark:text-amber-300/80">
+        <div className="mt-2 text-xs text-amber-800/80">
           Rúbrica sugerida: 30% calidad de construcción inicial · 40% decisiones durante simulación
           · 30% resultado final (VAN, caja). El docente puede ajustar pesos.
         </div>
@@ -264,7 +264,7 @@ function ComparativoCard({
           <div
             className={`font-semibold ${
               fueMejor
-                ? "text-emerald-700 dark:text-emerald-400"
+                ? "text-emerald-700"
                 : "text-destructive"
             }`}
           >

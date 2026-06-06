@@ -191,7 +191,7 @@ export default function Paso3Capital() {
         </div>
 
         {faltanDatos && (
-          <div className="flex items-start gap-2 rounded-md border border-amber-400 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100">
+          <div className="flex items-start gap-2 rounded-md border border-amber-400 bg-amber-50 p-3 text-xs text-amber-900">
             <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
             <div>
               <strong>Te faltan datos.</strong> Vuelve a los pasos anteriores y completa:
@@ -279,8 +279,8 @@ export default function Paso3Capital() {
                       </tr>
                     ))}
                     {totalHuerfanos > 0 && (
-                      <tr className="border-b border-border/30 bg-amber-50 dark:bg-amber-950/20">
-                        <td className="px-2 py-1 italic text-amber-900 dark:text-amber-200" colSpan={2}>
+                      <tr className="border-b border-border/30 bg-amber-50">
+                        <td className="px-2 py-1 italic text-amber-900" colSpan={2}>
                           ⚠ Costos sin producto asignado (legacy) — se prorratean sobre todas las unidades
                         </td>
                         <td className="px-2 py-1 text-right">{formatearBolivianos(costoUnitHuerfanos)}</td>
@@ -401,7 +401,7 @@ export default function Paso3Capital() {
 
         {/* Cuotas de préstamo — informativo: NO es capital de trabajo */}
         {financiamientoConfigurado && (
-          <div className="rounded-md border border-violet-300 bg-violet-50/50 p-3 dark:border-violet-800 dark:bg-violet-950/20">
+          <div className="rounded-md border border-violet-300 bg-violet-50/50 p-3">
             <div className="flex items-start gap-2 text-[11px] text-foreground/90">
               <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-violet-600" />
               <div className="min-w-0 flex-1">
@@ -411,7 +411,7 @@ export default function Paso3Capital() {
                 (capital + interés). <strong>No</strong> forma parte del capital de trabajo: la
                 deuda se paga con el flujo de cada año y ya está contemplada en el{" "}
                 <strong>Paso 7 · Financiamiento</strong> y en el flujo del Paso 9.
-                <div className="mt-2 overflow-x-auto rounded-md border border-violet-200 bg-card dark:border-violet-900">
+                <div className="mt-2 overflow-x-auto rounded-md border border-violet-200 bg-card">
                   <table className="w-full text-[11px]">
                     <thead className="border-b border-border text-muted-foreground">
                       <tr>
@@ -454,7 +454,7 @@ export default function Paso3Capital() {
         )}
 
         {/* Editor de % imprevistos */}
-        <div className="rounded-md border border-amber-400/60 bg-amber-50/60 p-3 dark:border-amber-700/60 dark:bg-amber-950/20">
+        <div className="rounded-md border border-amber-400/60 bg-amber-50/60 p-3">
           <label htmlFor="p7-imp" className="block text-xs font-medium">
             % de imprevistos (colchón sobre los costos operativos):{" "}
             <span className="font-bold text-foreground">
@@ -645,7 +645,7 @@ function FilaGastoDetalle({
               {detalle}
             </div>
           ) : (
-            <div className="rounded-md border border-dashed border-amber-400/60 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+            <div className="rounded-md border border-dashed border-amber-400/60 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
               {vacioMsg}
             </div>
           )}

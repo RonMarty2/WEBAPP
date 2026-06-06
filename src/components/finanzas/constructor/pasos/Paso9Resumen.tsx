@@ -382,7 +382,7 @@ export default function Paso9Resumen() {
             capital actual. <strong>Payback</strong> indica cuán rápido recuperás la
             inversión.
             <br />
-            <span className="text-amber-800/80 dark:text-amber-300/80">
+            <span className="text-amber-800/80">
               Recuerda: estos son tus números <em>proyectados</em>. La simulación de 60
               turnos con eventos económicos bolivianos te mostrará cuánto puede mover
               estos valores la realidad.
@@ -416,7 +416,7 @@ function AnalisisAvanzadoV2({
   const [abierto, setAbierto] = useState(false);
 
   return (
-    <div className="rounded-lg border-2 border-indigo-300 bg-indigo-50/40 p-4 dark:border-indigo-800 dark:bg-indigo-950/20">
+    <div className="rounded-lg border-2 border-indigo-300 bg-indigo-50/40 p-4">
       <button
         type="button"
         onClick={() => setAbierto((v) => !v)}
@@ -578,14 +578,14 @@ function AnalisisAvanzadoV2({
                 VAN del proyecto<br />
                 <span className="text-[9px] opacity-70">negocio entero · descontado al WACC {(calc.wacc * 100).toFixed(1)}%</span>
               </span>
-              <span className={cn("font-semibold tabular-nums", v2.flujoInv.vanProyecto >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-destructive")}>{formatearBolivianos(v2.flujoInv.vanProyecto)}</span>
+              <span className={cn("font-semibold tabular-nums", v2.flujoInv.vanProyecto >= 0 ? "text-emerald-700" : "text-destructive")}>{formatearBolivianos(v2.flujoInv.vanProyecto)}</span>
             </div>
             <div className="flex items-start justify-between gap-2">
               <span className="text-muted-foreground leading-tight">
                 VAN de tu parte (accionista)<br />
                 <span className="text-[9px] opacity-70">tras pagar la deuda · descontado al Ke {(proyecto.financiamiento.costoOportunidadAccionista * 100).toFixed(1)}%</span>
               </span>
-              <span className={cn("font-semibold tabular-nums", v2.flujoInv.vanAccionista >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-destructive")}>{formatearBolivianos(v2.flujoInv.vanAccionista)}</span>
+              <span className={cn("font-semibold tabular-nums", v2.flujoInv.vanAccionista >= 0 ? "text-emerald-700" : "text-destructive")}>{formatearBolivianos(v2.flujoInv.vanAccionista)}</span>
             </div>
           </div>
           <div className="mt-1.5 text-[10px] font-medium leading-snug text-muted-foreground">
@@ -783,9 +783,9 @@ function PanelMonteCarlo({
   const prob = res.probabilidadVANPositivo;
   const colorProb =
     prob >= 0.7
-      ? "text-emerald-700 dark:text-emerald-400"
+      ? "text-emerald-700"
       : prob >= 0.4
-        ? "text-amber-600 dark:text-amber-400"
+        ? "text-amber-600"
         : "text-destructive";
   const fmtK = (n: number) => `${Math.round(n / 1000)}k`;
   const dataHist = res.histograma.map((h) => ({
@@ -953,7 +953,7 @@ function V2Card({
           <span
             className={cn(
               "ml-2 text-base font-bold tabular-nums",
-              positivo ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
+              positivo ? "text-emerald-700" : "text-destructive"
             )}
           >
             {valor}
@@ -995,7 +995,7 @@ function FilaSensibilidadVAN({
             "p-1.5 text-right tabular-nums",
             f.van < 0
               ? "text-destructive"
-              : "text-emerald-700 dark:text-emerald-400",
+              : "text-emerald-700",
             f.variacion === 0 && "bg-secondary/50 font-semibold"
           )}
         >
@@ -1166,7 +1166,7 @@ function CardIndicador({
       <div
         className={cn(
           "mt-1.5 text-xl font-bold tabular-nums",
-          positivo ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
+          positivo ? "text-emerald-700" : "text-destructive"
         )}
       >
         {valor}
@@ -1176,7 +1176,7 @@ function CardIndicador({
       <div
         className={cn(
           "mt-1 text-[10px] font-medium",
-          positivo ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
+          positivo ? "text-emerald-700" : "text-destructive"
         )}
       >
         {interpretacion}
@@ -1210,10 +1210,10 @@ function CardIndicador({
 type ColorFila = "emerald" | "rose" | "violet" | "sky" | "primary";
 
 const FILA_BG: Record<ColorFila, string> = {
-  emerald: "bg-emerald-50/40 dark:bg-emerald-950/15",
-  rose: "bg-rose-50/40 dark:bg-rose-950/15",
-  violet: "bg-violet-50/40 dark:bg-violet-950/15",
-  sky: "bg-sky-50/40 dark:bg-sky-950/15",
+  emerald: "bg-emerald-50/40",
+  rose: "bg-rose-50/40",
+  violet: "bg-violet-50/40",
+  sky: "bg-sky-50/40",
   primary: "bg-primary/10",
 };
 
@@ -1345,10 +1345,10 @@ function BotonExportarExcelAdmin({ proyecto }: { proyecto: any }) {
       onClick={exportar}
       disabled={exportando}
       title="Descarga el proyecto en .xlsx con todas las etapas y fórmulas Excel. (Visible solo para admin durante pruebas.)"
-      className="flex flex-shrink-0 items-center gap-1.5 rounded-md border border-emerald-400/60 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-200"
+      className="flex flex-shrink-0 items-center gap-1.5 rounded-md border border-emerald-400/60 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
     >
       📊 {exportando ? "Generando…" : "Exportar a Excel"}{" "}
-      <span className="rounded bg-emerald-200 px-1 text-[9px] font-bold text-emerald-900 dark:bg-emerald-800 dark:text-emerald-100">admin</span>
+      <span className="rounded bg-emerald-200 px-1 text-[9px] font-bold text-emerald-900">admin</span>
     </button>
   );
 }

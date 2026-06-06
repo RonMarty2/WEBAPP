@@ -52,39 +52,39 @@ const SUBCATEGORIAS_POR_SECTOR: Record<Sector, ConfigSubcat[]> = {
 const COLORES_PRODUCTO = [
   {
     borde: "border-l-blue-500",
-    bgFila: "bg-blue-50 dark:bg-blue-950/20",
-    bgHeader: "bg-blue-100/70 dark:bg-blue-950/40",
-    chip: "bg-blue-200 text-blue-900 dark:bg-blue-900/60 dark:text-blue-100",
+    bgFila: "bg-blue-50",
+    bgHeader: "bg-blue-100/70",
+    chip: "bg-blue-200 text-blue-900",
   },
   {
     borde: "border-l-emerald-500",
-    bgFila: "bg-emerald-50 dark:bg-emerald-950/20",
-    bgHeader: "bg-emerald-100/70 dark:bg-emerald-950/40",
-    chip: "bg-emerald-200 text-emerald-900 dark:bg-emerald-900/60 dark:text-emerald-100",
+    bgFila: "bg-emerald-50",
+    bgHeader: "bg-emerald-100/70",
+    chip: "bg-emerald-200 text-emerald-900",
   },
   {
     borde: "border-l-amber-500",
-    bgFila: "bg-amber-50 dark:bg-amber-950/20",
-    bgHeader: "bg-amber-100/70 dark:bg-amber-950/40",
-    chip: "bg-amber-200 text-amber-900 dark:bg-amber-900/60 dark:text-amber-100",
+    bgFila: "bg-amber-50",
+    bgHeader: "bg-amber-100/70",
+    chip: "bg-amber-200 text-amber-900",
   },
   {
     borde: "border-l-purple-500",
-    bgFila: "bg-purple-50 dark:bg-purple-950/20",
-    bgHeader: "bg-purple-100/70 dark:bg-purple-950/40",
-    chip: "bg-purple-200 text-purple-900 dark:bg-purple-900/60 dark:text-purple-100",
+    bgFila: "bg-purple-50",
+    bgHeader: "bg-purple-100/70",
+    chip: "bg-purple-200 text-purple-900",
   },
   {
     borde: "border-l-pink-500",
-    bgFila: "bg-pink-50 dark:bg-pink-950/20",
-    bgHeader: "bg-pink-100/70 dark:bg-pink-950/40",
-    chip: "bg-pink-200 text-pink-900 dark:bg-pink-900/60 dark:text-pink-100",
+    bgFila: "bg-pink-50",
+    bgHeader: "bg-pink-100/70",
+    chip: "bg-pink-200 text-pink-900",
   },
   {
     borde: "border-l-cyan-500",
-    bgFila: "bg-cyan-50 dark:bg-cyan-950/20",
-    bgHeader: "bg-cyan-100/70 dark:bg-cyan-950/40",
-    chip: "bg-cyan-200 text-cyan-900 dark:bg-cyan-900/60 dark:text-cyan-100",
+    bgFila: "bg-cyan-50",
+    bgHeader: "bg-cyan-100/70",
+    chip: "bg-cyan-200 text-cyan-900",
   },
 ];
 
@@ -187,8 +187,8 @@ export default function Paso6CostosProduccion() {
 
         {/* Items huérfanos: legados sin producto asignado */}
         {itemsHuerfanos.length > 0 && (
-          <div className="rounded-md border-2 border-amber-400 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950/40">
-            <div className="flex items-start gap-2 text-xs text-amber-950 dark:text-amber-100">
+          <div className="rounded-md border-2 border-amber-400 bg-amber-50 p-3">
+            <div className="flex items-start gap-2 text-xs text-amber-950">
               <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
               <div className="flex-1">
                 <strong>
@@ -389,7 +389,7 @@ function BloqueProducto({
             <div
               className={cn(
                 "font-bold",
-                margen >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
+                margen >= 0 ? "text-emerald-700" : "text-destructive"
               )}
             >
               {formatearBolivianos(margen)}{" "}

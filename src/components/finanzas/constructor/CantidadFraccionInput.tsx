@@ -76,7 +76,7 @@ export default function CantidadFraccionInput({
         title="Puedes escribir un número (0.25) o una fracción (3/12)"
       />
       {mostrarDecimal && (
-        <div className="mt-0.5 text-right text-[9px] font-semibold leading-none text-emerald-700 dark:text-emerald-300">
+        <div className="mt-0.5 text-right text-[9px] font-semibold leading-none text-emerald-700">
           = {parsed!.toFixed(4)}
         </div>
       )}

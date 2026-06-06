@@ -51,16 +51,16 @@ function detalleCostoAnual(sueldoMensual: number, cantidad: number, aportes: Apo
 // Paso 4 tiene 2 bloques: Personal (azul) y Aportes Patronales (ámbar).
 const BLOQUE_PERSONAL = {
   borde: "border-l-blue-500",
-  bgFila: "bg-blue-50 dark:bg-blue-950/20",
-  bgHeader: "bg-blue-100/70 dark:bg-blue-950/40",
-  chip: "bg-blue-200 text-blue-900 dark:bg-blue-900/60 dark:text-blue-100",
+  bgFila: "bg-blue-50",
+  bgHeader: "bg-blue-100/70",
+  chip: "bg-blue-200 text-blue-900",
 };
 
 const BLOQUE_APORTES = {
   borde: "border-l-amber-500",
-  bgFila: "bg-amber-50 dark:bg-amber-950/20",
-  bgHeader: "bg-amber-100/70 dark:bg-amber-950/40",
-  chip: "bg-amber-200 text-amber-900 dark:bg-amber-900/60 dark:text-amber-100",
+  bgFila: "bg-amber-50",
+  bgHeader: "bg-amber-100/70",
+  chip: "bg-amber-200 text-amber-900",
 };
 
 interface ConfigAporte {
@@ -117,7 +117,7 @@ export default function Paso4Personal() {
               Aportes patronales ({(totalTasa * 100).toFixed(2)}%) se calculan
               automáticamente según las tasas de abajo.
               {tasasModificadas && (
-                <span className="ml-1 italic text-amber-700 dark:text-amber-300">
+                <span className="ml-1 italic text-amber-700">
                   Tasas personalizadas
                 </span>
               )}
@@ -160,7 +160,7 @@ export default function Paso4Personal() {
                 — total {(totalTasa * 100).toFixed(2)}%
               </span>
               {tasasModificadas && (
-                <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-semibold text-amber-950 dark:bg-amber-700 dark:text-amber-100">
+                <span className="rounded bg-amber-300 px-1.5 py-0.5 text-[10px] font-semibold text-amber-950">
                   Modificadas
                 </span>
               )}
@@ -471,7 +471,7 @@ export default function Paso4Personal() {
             <strong>segundo aguinaldo "Esfuerzo por Bolivia"</strong> (cuando el PIB crece
             más de 4,5%), considera el costo extra de ese año.
           </p>
-          <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+          <p className="border-t border-sky-200 pt-1.5">
             <strong>⚠ No dupliques la mano de obra:</strong> si ya cargaste a un operario o
             barista como <em>mano de obra directa por unidad</em> en el Paso 5 (Costos
             directos), <strong>no lo pongas también aquí</strong> como puesto fijo. Regla:

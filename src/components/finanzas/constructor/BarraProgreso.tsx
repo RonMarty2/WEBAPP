@@ -59,7 +59,7 @@ export default function BarraProgreso({
                   actual
                     ? "border-primary bg-primary text-primary-foreground shadow-sm"
                     : completado
-                      ? "border-emerald-500/40 bg-emerald-50 text-emerald-900 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:text-emerald-200"
+                      ? "border-emerald-500/40 bg-emerald-50 text-emerald-900 hover:bg-emerald-100"
                       : "border-border bg-background text-muted-foreground hover:border-foreground/40 hover:bg-secondary/50"
                 )}
                 title={titulos[n]}
@@ -139,7 +139,7 @@ function EstadoGuardadoChip({ estado }: { estado: EstadoGuardado }) {
   }
   if (estado.tipo === "guardando") {
     return (
-      <span className="flex items-center gap-1 rounded-md bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-200">
+      <span className="flex items-center gap-1 rounded-md bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-900">
         <Save className="h-3 w-3 animate-pulse" />
         Guardando… (no refresques)
       </span>
@@ -147,7 +147,7 @@ function EstadoGuardadoChip({ estado }: { estado: EstadoGuardado }) {
   }
   if (estado.tipo === "guardado") {
     return (
-      <span className="flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+      <span className="flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">
         <Check className="h-3 w-3" />
         Guardado ✓
       </span>

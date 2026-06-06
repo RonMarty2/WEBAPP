@@ -68,7 +68,7 @@ export default function EmpezarProyecto() {
 
       {casosDisponibles.length > 0 && (
         <div className="space-y-2">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
             📥 Casos disponibles en tus cursos
           </div>
           {casosDisponibles.map(({ curso, caso }) => (
@@ -135,7 +135,7 @@ function TarjetaCasoDisponible({
   const pasoInicio = caso.paso_inicio_estudiante ?? 1;
 
   return (
-    <div className="rounded-md border-2 border-emerald-300 bg-emerald-50/50 p-3 dark:border-emerald-700 dark:bg-emerald-950/20">
+    <div className="rounded-md border-2 border-emerald-300 bg-emerald-50/50 p-3">
       <div className="flex items-start gap-3">
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md bg-emerald-500 text-white">
           <BookOpen className="h-4 w-4" />
@@ -146,7 +146,7 @@ function TarjetaCasoDisponible({
             Curso: <strong>{curso.nombre}</strong> · {curso.materia}
             {curso.paralelo ? ` · ${curso.paralelo}` : ""}
           </div>
-          <div className="mt-1 text-[11px] text-emerald-900 dark:text-emerald-100">
+          <div className="mt-1 text-[11px] text-emerald-900">
             {pasoInicio === 1
               ? "Tendrás que armar TODO el proyecto desde cero (el docente solo te dio el contexto)."
               : pasoInicio === 9

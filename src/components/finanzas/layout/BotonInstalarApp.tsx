@@ -125,11 +125,11 @@ export default function BotonInstalarApp() {
 
   return (
     <>
-      <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 shadow-xl shadow-amber-500/30 backdrop-blur dark:border-amber-700 dark:from-amber-950/80 dark:to-orange-950/80">
-        <Smartphone className="h-4 w-4 flex-shrink-0 text-amber-700 dark:text-amber-300" />
+      <div className="fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 px-4 py-2.5 shadow-xl shadow-amber-500/30 backdrop-blur">
+        <Smartphone className="h-4 w-4 flex-shrink-0 text-amber-700" />
         <div className="text-xs">
-          <div className="font-bold text-amber-900 dark:text-amber-100">Instalá la app</div>
-          <div className="text-[10px] text-amber-800/80 dark:text-amber-300">
+          <div className="font-bold text-amber-900">Instalá la app</div>
+          <div className="text-[10px] text-amber-800/80">
             Más rápido, ícono en tu pantalla, sin barra de navegador.
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function BotonInstalarApp() {
         <button
           onClick={cerrar}
           aria-label="Cerrar"
-          className="rounded-full p-1 text-amber-800 transition hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900"
+          className="rounded-full p-1 text-amber-800 transition hover:bg-amber-100"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -190,7 +190,7 @@ export default function BotonInstalarApp() {
                 </span>
               </li>
             </ol>
-            <p className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-[11px] text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+            <p className="mt-4 rounded-md bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
               ⚠️ Tiene que ser desde <strong>Safari</strong>. Chrome en iPhone no permite instalar.
             </p>
             <button

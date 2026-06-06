@@ -99,7 +99,7 @@ export default function BadgeRevisionesNuevas() {
   return (
     <Link href="/finanzas/mis-entregas"
       title={`Tienes ${pendientesVer} entrega${pendientesVer === 1 ? "" : "s"} revisada${pendientesVer === 1 ? "" : "s"} sin leer`}
-      className="relative flex items-center gap-1.5 rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-900 transition hover:bg-rose-100 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200 dark:hover:bg-rose-950/60"
+      className="relative flex items-center gap-1.5 rounded-md border border-rose-300 bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-900 transition hover:bg-rose-100"
     >
       <span className="relative flex h-2 w-2">
         <span className="absolute inset-0 animate-ping rounded-full bg-rose-500 opacity-75" />

@@ -44,9 +44,9 @@ export default function ModalRevisarEntrega({
       <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-lg bg-card shadow-xl">
         {/* Header — nombre del alumno BIEN PROMINENTE, sticky para que el
             docente no lo pierda mientras revisa y habla con él. */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-4 dark:from-indigo-950/40 dark:via-violet-950/40 dark:to-fuchsia-950/40">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-4">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-700">
               {yaRevisada ? "👁 Viendo revisión de" : "📝 Revisando a"}
             </div>
             <h2 className="truncate text-xl font-extrabold tracking-tight text-foreground">
@@ -105,10 +105,10 @@ export default function ModalRevisarEntrega({
               className={cn(
                 "rounded-md border-2 p-3",
                 entrega.sugerencia_automatica === "aprobar"
-                  ? "border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30"
+                  ? "border-emerald-400 bg-emerald-50"
                   : entrega.sugerencia_automatica === "reprobar"
-                  ? "border-rose-400 bg-rose-50 dark:bg-rose-950/30"
-                  : "border-amber-400 bg-amber-50 dark:bg-amber-950/30"
+                  ? "border-rose-400 bg-rose-50"
+                  : "border-amber-400 bg-amber-50"
               )}
             >
               <div className="flex items-center gap-2 text-sm font-semibold">
@@ -256,7 +256,7 @@ function Indicador({
       <div
         className={cn(
           "text-sm font-bold tabular-nums",
-          positivo ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
+          positivo ? "text-emerald-700" : "text-destructive"
         )}
       >
         {valor}

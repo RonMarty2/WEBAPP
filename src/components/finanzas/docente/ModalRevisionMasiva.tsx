@@ -147,9 +147,9 @@ export default function ModalRevisionMasiva({
       <div className="flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-lg bg-card shadow-xl">
         {/* Header — nombre del alumno BIEN PROMINENTE, sticky para que el
             docente no lo pierda mientras revisa y habla con el alumno. */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-4 dark:from-indigo-950/40 dark:via-violet-950/40 dark:to-fuchsia-950/40">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-4">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-violet-700">
               📚 Revisando a
             </div>
             <h2 className="truncate text-xl font-extrabold tracking-tight text-foreground">
@@ -310,10 +310,10 @@ function FormEtapa({
             className={cn(
               "rounded-md border px-2 py-1 text-[11px]",
               entrega.sugerencia_automatica === "aprobar"
-                ? "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100"
+                ? "border-emerald-400 bg-emerald-50 text-emerald-900"
                 : entrega.sugerencia_automatica === "reprobar"
-                  ? "border-rose-400 bg-rose-50 text-rose-900 dark:bg-rose-950/30 dark:text-rose-100"
-                  : "border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-100"
+                  ? "border-rose-400 bg-rose-50 text-rose-900"
+                  : "border-amber-400 bg-amber-50 text-amber-900"
             )}
           >
             🤖 Sugiere: <strong>{entrega.sugerencia_automatica}</strong>

@@ -620,7 +620,7 @@ function Medallon({
 
 function TuTarjetaIndividual({ mi }: { mi: import("@/lib/finanzas/podio-supabase").MiPosicion }) {
   return (
-    <div className="relative z-10 mt-4 overflow-hidden rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-3 dark:border-violet-900 dark:bg-violet-950/30">
+    <div className="relative z-10 mt-4 overflow-hidden rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-3">
       <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-violet-400/25 blur-3xl" />
 
       <div className="relative flex items-center gap-3">
@@ -629,30 +629,30 @@ function TuTarjetaIndividual({ mi }: { mi: import("@/lib/finanzas/podio-supabase
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-sm font-bold text-violet-900 dark:text-violet-100">Tu posición</span>
-            <span className="rounded border border-violet-300 bg-white px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-violet-700 dark:border-violet-700 dark:bg-violet-900/50 dark:text-violet-200">
+            <span className="text-sm font-bold text-violet-900">Tu posición</span>
+            <span className="rounded border border-violet-300 bg-white px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-violet-700">
               {mi.puesto}.° de {mi.total}
             </span>
           </div>
           {mi.para_top5 !== null && mi.para_top5 > 0 ? (
-            <div className="mt-0.5 text-[11px] text-violet-800 dark:text-violet-300">
-              Te faltan <strong className="text-amber-700 dark:text-amber-400">{mi.para_top5.toFixed(0)} pts</strong> para entrar al top 5
+            <div className="mt-0.5 text-[11px] text-violet-800">
+              Te faltan <strong className="text-amber-700">{mi.para_top5.toFixed(0)} pts</strong> para entrar al top 5
             </div>
           ) : mi.puesto <= 3 ? (
-            <div className="mt-0.5 text-[11px] font-semibold text-amber-700 dark:text-amber-400">
+            <div className="mt-0.5 text-[11px] font-semibold text-amber-700">
               ¡Estás en el podio! 🏆
             </div>
           ) : (
-            <div className="mt-0.5 text-[11px] text-violet-800 dark:text-violet-300">
+            <div className="mt-0.5 text-[11px] text-violet-800">
               Ya estás en el top 5 — apuntá al podio.
             </div>
           )}
         </div>
         <div className="text-right">
-          <div className="text-2xl font-extrabold leading-none text-violet-900 dark:text-violet-100">
+          <div className="text-2xl font-extrabold leading-none text-violet-900">
             {mi.nota.toFixed(0)}
           </div>
-          <div className="text-[9px] font-semibold uppercase tracking-widest text-violet-700 dark:text-violet-300">
+          <div className="text-[9px] font-semibold uppercase tracking-widest text-violet-700">
             tu nota
           </div>
         </div>
@@ -664,16 +664,16 @@ function TuTarjetaIndividual({ mi }: { mi: import("@/lib/finanzas/podio-supabase
 function CtaGrupal({ mi }: { mi: import("@/lib/finanzas/podio-supabase").MiGrupoPosicion }) {
   if (mi.para_oro === null) {
     return (
-      <div className="relative z-10 mt-4 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-100 px-4 py-3 dark:border-amber-700 dark:bg-amber-950/30">
+      <div className="relative z-10 mt-4 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-100 px-4 py-3">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-600 shadow-lg shadow-amber-500/40">
             <Trophy className="h-4 w-4 text-white" />
           </div>
           <div>
-            <div className="text-sm font-bold text-amber-900 dark:text-amber-100">
+            <div className="text-sm font-bold text-amber-900">
               Tu grupo <strong>{mi.nombre}</strong> es el campeón.
             </div>
-            <div className="text-[11px] text-amber-800/80 dark:text-amber-300">
+            <div className="text-[11px] text-amber-800/80">
               ¡Sigan así para mantener el primer puesto!
             </div>
           </div>
@@ -682,20 +682,20 @@ function CtaGrupal({ mi }: { mi: import("@/lib/finanzas/podio-supabase").MiGrupo
     );
   }
   return (
-    <div className="relative z-10 mt-4 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-100 px-4 py-3 dark:border-amber-700 dark:bg-amber-950/30">
+    <div className="relative z-10 mt-4 rounded-xl border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-100 px-4 py-3">
       <div className="flex items-center gap-3">
         <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-600 shadow-lg shadow-amber-500/40">
           <Flame className="h-4 w-4 fill-white text-white" />
         </div>
         <div>
-          <div className="text-sm font-bold text-amber-900 dark:text-amber-100">
+          <div className="text-sm font-bold text-amber-900">
             Tu grupo <strong>{mi.nombre}</strong> está a{" "}
             <span className="bg-gradient-to-b from-amber-500 via-orange-600 to-red-600 bg-clip-text text-base font-extrabold text-transparent">
               {mi.para_oro.toFixed(0)} puntos
             </span>{" "}
             del campeonato
           </div>
-          <div className="text-[11px] text-amber-800/80 dark:text-amber-300">
+          <div className="text-[11px] text-amber-800/80">
             Una buena entrega más y podrían tomar el primer lugar.
           </div>
         </div>

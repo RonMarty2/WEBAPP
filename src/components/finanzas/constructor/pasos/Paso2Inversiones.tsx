@@ -28,9 +28,9 @@ const categorias: ConfigCategoria[] = [
     sinDepreciacion: true,
     vidaDefault: 0,
     borde: "border-l-amber-500",
-    chip: "bg-amber-200 text-amber-900 dark:bg-amber-900/60 dark:text-amber-100",
-    bgFila: "bg-amber-50 dark:bg-amber-950/20",
-    bgHeader: "bg-amber-100/70 dark:bg-amber-950/40",
+    chip: "bg-amber-200 text-amber-900",
+    bgFila: "bg-amber-50",
+    bgHeader: "bg-amber-100/70",
   },
   {
     valor: "obrasCiviles",
@@ -38,9 +38,9 @@ const categorias: ConfigCategoria[] = [
     ejemplo: "Ej: Galpón, adecuación, instalación eléctrica",
     vidaDefault: 20,
     borde: "border-l-blue-500",
-    chip: "bg-blue-200 text-blue-900 dark:bg-blue-900/60 dark:text-blue-100",
-    bgFila: "bg-blue-50 dark:bg-blue-950/20",
-    bgHeader: "bg-blue-100/70 dark:bg-blue-950/40",
+    chip: "bg-blue-200 text-blue-900",
+    bgFila: "bg-blue-50",
+    bgHeader: "bg-blue-100/70",
   },
   {
     valor: "maquinaria",
@@ -48,9 +48,9 @@ const categorias: ConfigCategoria[] = [
     ejemplo: "Ej: Cafetera espresso, horno, refrigerador",
     vidaDefault: 10,
     borde: "border-l-emerald-500",
-    chip: "bg-emerald-200 text-emerald-900 dark:bg-emerald-900/60 dark:text-emerald-100",
-    bgFila: "bg-emerald-50 dark:bg-emerald-950/20",
-    bgHeader: "bg-emerald-100/70 dark:bg-emerald-950/40",
+    chip: "bg-emerald-200 text-emerald-900",
+    bgFila: "bg-emerald-50",
+    bgHeader: "bg-emerald-100/70",
   },
   {
     valor: "mobiliario",
@@ -58,9 +58,9 @@ const categorias: ConfigCategoria[] = [
     ejemplo: "Ej: Mesas, sillas, estantería, vitrina",
     vidaDefault: 7,
     borde: "border-l-purple-500",
-    chip: "bg-purple-200 text-purple-900 dark:bg-purple-900/60 dark:text-purple-100",
-    bgFila: "bg-purple-50 dark:bg-purple-950/20",
-    bgHeader: "bg-purple-100/70 dark:bg-purple-950/40",
+    chip: "bg-purple-200 text-purple-900",
+    bgFila: "bg-purple-50",
+    bgHeader: "bg-purple-100/70",
   },
   {
     valor: "activoDiferido",
@@ -68,9 +68,9 @@ const categorias: ConfigCategoria[] = [
     ejemplo: "Ej: Licencias, registro de marca, software, web",
     vidaDefault: 5,
     borde: "border-l-pink-500",
-    chip: "bg-pink-200 text-pink-900 dark:bg-pink-900/60 dark:text-pink-100",
-    bgFila: "bg-pink-50 dark:bg-pink-950/20",
-    bgHeader: "bg-pink-100/70 dark:bg-pink-950/40",
+    chip: "bg-pink-200 text-pink-900",
+    bgFila: "bg-pink-50",
+    bgHeader: "bg-pink-100/70",
   },
 ];
 
@@ -186,7 +186,7 @@ export default function Paso2Inversiones() {
             (referencias contables: edificios ~20-40 años, maquinaria ~5-10, equipos de
             cómputo ~4, mobiliario ~5-10). No la infles para tapar un aviso.
           </p>
-          <p className="border-t border-sky-200 pt-1.5 dark:border-sky-900">
+          <p className="border-t border-sky-200 pt-1.5">
             <strong>Activos que duran menos que el proyecto (5 años):</strong> no te
             preocupes — el modelo los <strong>repone automáticamente</strong> en el año que se
             acaban (lo verás como "Reinversión" en el flujo de caja) y ajusta solo su
@@ -294,7 +294,7 @@ function SeccionCategoria({
             );
             if (itemsCortos.length === 0) return null;
             return (
-              <div className="rounded-md border-2 border-sky-400 bg-sky-50 p-3 text-xs text-sky-950 dark:border-sky-600 dark:bg-sky-950/40 dark:text-sky-100">
+              <div className="rounded-md border-2 border-sky-400 bg-sky-50 p-3 text-xs text-sky-950">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-sky-600" />
                   <div className="space-y-2 leading-relaxed">
@@ -304,7 +304,7 @@ function SeccionCategoria({
                         : `Tienes ${itemsCortos.length} activos que no duran los 5 años — el modelo los repone solos`}
                     </div>
 
-                    <div className="rounded bg-sky-100/70 p-2.5 dark:bg-sky-900/30">
+                    <div className="rounded bg-sky-100/70 p-2.5">
                       <ul className="ml-3 space-y-1.5">
                         {itemsCortos.map((it) => {
                           const vida = it.vidaUtilAnios ?? 1;
@@ -436,7 +436,7 @@ function SeccionCategoria({
                                 it.vidaUtilAnios !== null &&
                                   it.vidaUtilAnios > 0 &&
                                   it.vidaUtilAnios < ANIOS_PROYECTO
-                                  ? "border-amber-400 bg-amber-50/50 dark:bg-amber-950/30"
+                                  ? "border-amber-400 bg-amber-50/50"
                                   : "border-input"
                               )}
                             />
@@ -444,7 +444,7 @@ function SeccionCategoria({
                               it.vidaUtilAnios > 0 &&
                               it.vidaUtilAnios < ANIOS_PROYECTO && (
                                 <AlertTriangle
-                                  className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-amber-600 dark:text-amber-400"
+                                  className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-amber-600"
                                   aria-label={`Vida útil menor a ${ANIOS_PROYECTO} años — se depreciará completo antes del fin del proyecto`}
                                 />
                               )}
@@ -470,7 +470,7 @@ function SeccionCategoria({
                               className={cn(
                                 "font-medium",
                                 totalmenteDepreciado
-                                  ? "text-amber-700 dark:text-amber-400"
+                                  ? "text-amber-700"
                                   : "text-foreground/80"
                               )}
                               title={
@@ -569,7 +569,7 @@ function SeccionCategoria({
                               it.vidaUtilAnios !== null &&
                                 it.vidaUtilAnios > 0 &&
                                 it.vidaUtilAnios < ANIOS_PROYECTO
-                                ? "border-amber-400 bg-amber-50/50 dark:bg-amber-950/30"
+                                ? "border-amber-400 bg-amber-50/50"
                                 : "border-input"
                             )}
                           />

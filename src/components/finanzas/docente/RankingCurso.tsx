@@ -193,7 +193,7 @@ export default function RankingCurso({ cursoId, curso }: Props) {
                       className={cn(
                         "font-medium",
                         f.utilidad_acumulada >= 0
-                          ? "text-emerald-700 dark:text-emerald-400"
+                          ? "text-emerald-700"
                           : "text-destructive"
                       )}
                     >
@@ -312,7 +312,7 @@ function UltimaActividadCell({
     const diasDesdeInscripcion = (ahora - new Date(inscritoEn).getTime()) / (1000 * 60 * 60 * 24);
     return (
       <div className="flex flex-col">
-        <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+        <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800">
           ✗ sin actividad
         </span>
         <span className="mt-0.5 text-[9px] text-muted-foreground">
@@ -334,10 +334,10 @@ function UltimaActividadCell({
 
   const clase =
     dias < 1
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+      ? "bg-emerald-100 text-emerald-800"
       : dias < 7
-        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-        : "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300";
+        ? "bg-amber-100 text-amber-800"
+        : "bg-rose-100 text-rose-800";
 
   const fechaFmt = new Date(fecha).toLocaleString("es-BO", {
     dateStyle: "short",
@@ -357,19 +357,19 @@ function UltimaActividadCell({
 function PuestoChip({ puesto }: { puesto: number }) {
   if (puesto === 1)
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400/20 text-yellow-700 dark:text-yellow-300">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-yellow-400/20 text-yellow-700">
         <Trophy className="h-3.5 w-3.5" />
       </span>
     );
   if (puesto === 2)
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-400/20 text-slate-600 dark:text-slate-300">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-400/20 text-slate-600">
         <Medal className="h-3.5 w-3.5" />
       </span>
     );
   if (puesto === 3)
     return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-700/20 text-amber-700 dark:text-amber-400">
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-700/20 text-amber-700">
         <Award className="h-3.5 w-3.5" />
       </span>
     );
@@ -392,21 +392,21 @@ function EstadoChip({
   }
   if (estado === "activa") {
     return (
-      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] text-blue-800">
         simulando
       </span>
     );
   }
   if (estado === "finalizada") {
     return (
-      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800">
         finalizada
       </span>
     );
   }
   if (estado === "quebrada") {
     return (
-      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-800 dark:bg-red-950 dark:text-red-300">
+      <span className="rounded bg-red-100 px-1.5 py-0.5 text-[10px] text-red-800">
         quebrada
       </span>
     );

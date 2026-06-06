@@ -64,7 +64,7 @@ export default function GaleriaEjemplos() {
         </p>
       </div>
 
-      <div className="rounded-md border border-amber-300 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+      <div className="rounded-md border border-amber-300 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-900">
         💡 Idea pedagógica: comparar 3 cafeterías muestra cómo el tamaño cambia los
         indicadores. Comparar restaurante vs food truck muestra estructuras de costo
         distintas. Comparar podcast premium vs canal de YouTube muestra suscripción vs
@@ -136,7 +136,7 @@ export default function GaleriaEjemplos() {
                     {esDocente && (
                       <button
                         onClick={() => setAPublicar(pl)}
-                        className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-emerald-400 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-800 transition hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-200"
+                        className="mt-1 flex items-center justify-center gap-1.5 rounded-md border border-emerald-400 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-bold text-emerald-800 transition hover:bg-emerald-100"
                         title="Publicar este ejemplo como caso del curso para tus alumnos"
                       >
                         <Send className="h-3.5 w-3.5" />
@@ -234,12 +234,12 @@ function ModalPublicarCaso({
 
         {exito ? (
           <div className="space-y-3">
-            <div className="rounded-md border border-emerald-400 bg-emerald-50 p-3 dark:bg-emerald-950/40">
-              <div className="flex items-center gap-2 text-sm font-bold text-emerald-900 dark:text-emerald-100">
+            <div className="rounded-md border border-emerald-400 bg-emerald-50 p-3">
+              <div className="flex items-center gap-2 text-sm font-bold text-emerald-900">
                 <CheckCircle2 className="h-4 w-4" />
                 ¡Caso publicado!
               </div>
-              <p className="mt-1 text-[11px] text-emerald-800/90 dark:text-emerald-200">
+              <p className="mt-1 text-[11px] text-emerald-800/90">
                 Los alumnos de <strong>{exito.cursoNombre}</strong> ya pueden tomarlo desde su
                 panel, en la sección <strong>"Caso del curso"</strong>.
               </p>
@@ -257,7 +257,7 @@ function ModalPublicarCaso({
             Cargando tus cursos…
           </div>
         ) : cursos.length === 0 ? (
-          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
             No tenés cursos creados. Andá al <strong>Panel del docente</strong> y creá un curso
             primero.
           </div>
@@ -377,10 +377,10 @@ function FiltroCategoria({
 function ChipEscala({ escala }: { escala: "Pequeño" | "Mediano" | "Grande" }) {
   const clase =
     escala === "Pequeño"
-      ? "bg-sky-100 text-sky-900 dark:bg-sky-950/50 dark:text-sky-200"
+      ? "bg-sky-100 text-sky-900"
       : escala === "Mediano"
-        ? "bg-amber-100 text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
-        : "bg-rose-100 text-rose-900 dark:bg-rose-950/50 dark:text-rose-200";
+        ? "bg-amber-100 text-amber-900"
+        : "bg-rose-100 text-rose-900";
   return (
     <span className={cn("rounded-full px-2 py-0.5 text-[9px] font-bold uppercase", clase)}>
       {escala}
@@ -488,7 +488,7 @@ function Indicador({ titulo, valor, positivo }: { titulo: string; valor: string;
       <div
         className={cn(
           "text-sm font-bold tabular-nums",
-          positivo ? "text-emerald-700 dark:text-emerald-400" : "text-destructive"
+          positivo ? "text-emerald-700" : "text-destructive"
         )}
       >
         {valor}

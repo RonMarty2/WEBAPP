@@ -29,7 +29,7 @@ export default function BotonGuardarComoCaso() {
     <>
       <button
         onClick={() => setAbierto(true)}
-        className="flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
+        className="flex items-center gap-1.5 rounded-md border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-100"
         title="Convertir este proyecto en un caso plantilla para tus estudiantes"
       >
         <BookmarkPlus className="h-3.5 w-3.5" />
@@ -65,22 +65,22 @@ function ToastExito({
 }) {
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
-      <div className="pointer-events-auto flex max-w-md items-start gap-3 rounded-lg border border-emerald-400 bg-emerald-50 px-4 py-3 shadow-lg dark:border-emerald-700 dark:bg-emerald-950">
+      <div className="pointer-events-auto flex max-w-md items-start gap-3 rounded-lg border border-emerald-400 bg-emerald-50 px-4 py-3 shadow-lg">
         <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white">
           <CheckCircle2 className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1 text-xs">
-          <div className="font-semibold text-emerald-900 dark:text-emerald-100">
+          <div className="font-semibold text-emerald-900">
             Caso guardado en "{cursoNombre}"
           </div>
-          <div className="mt-0.5 text-emerald-900/80 dark:text-emerald-100/80">
+          <div className="mt-0.5 text-emerald-900/80">
             Tus estudiantes inscritos podrán tomarlo. Empiezan desde el{" "}
             <strong>paso {pasoInicio}</strong>.
           </div>
         </div>
         <button
           onClick={onCerrar}
-          className="flex-shrink-0 rounded p-0.5 text-emerald-900/70 hover:bg-emerald-200 dark:text-emerald-100/70 dark:hover:bg-emerald-900"
+          className="flex-shrink-0 rounded p-0.5 text-emerald-900/70 hover:bg-emerald-200"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -169,7 +169,7 @@ function ModalGuardar({
                 Cargando tus cursos…
               </div>
             ) : cursos.length === 0 ? (
-              <div className="mt-1 rounded-md border border-dashed border-amber-400 bg-amber-50 p-3 text-xs text-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+              <div className="mt-1 rounded-md border border-dashed border-amber-400 bg-amber-50 p-3 text-xs text-amber-900">
                 No tienes cursos activos. Crea uno desde el panel docente primero.
               </div>
             ) : (
@@ -214,11 +214,11 @@ function ModalGuardar({
 
           {/* Vista previa */}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <div className="rounded-md border border-emerald-400/60 bg-emerald-50 p-2 dark:bg-emerald-950/20">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-emerald-900 dark:text-emerald-100">
+            <div className="rounded-md border border-emerald-400/60 bg-emerald-50 p-2">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-emerald-900">
                 ✓ Recibe ya armado ({pasosEntregados.length})
               </div>
-              <ul className="mt-1 space-y-0.5 text-[11px] text-emerald-900/80 dark:text-emerald-100/80">
+              <ul className="mt-1 space-y-0.5 text-[11px] text-emerald-900/80">
                 {pasosEntregados.length === 0 ? (
                   <li className="italic">— Ningún paso —</li>
                 ) : (
@@ -230,11 +230,11 @@ function ModalGuardar({
                 )}
               </ul>
             </div>
-            <div className="rounded-md border border-sky-400/60 bg-sky-50 p-2 dark:bg-sky-950/20">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-sky-900 dark:text-sky-100">
+            <div className="rounded-md border border-sky-400/60 bg-sky-50 p-2">
+              <div className="text-[10px] font-bold uppercase tracking-wide text-sky-900">
                 ✎ Debe completar ({pasosACompletar.length})
               </div>
-              <ul className="mt-1 space-y-0.5 text-[11px] text-sky-900/80 dark:text-sky-100/80">
+              <ul className="mt-1 space-y-0.5 text-[11px] text-sky-900/80">
                 {pasosACompletar.map((p) => (
                   <li key={p.n}>
                     {p.n}. {p.label}

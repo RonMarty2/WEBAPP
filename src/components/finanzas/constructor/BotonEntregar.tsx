@@ -114,17 +114,17 @@ export default function BotonEntregar({ indicadores, paso }: Props) {
                 Total: <strong>{yaEntregadas}</strong>
               </span>
               {pendientes > 0 && (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900">
                   Pendientes: <strong>{pendientes}</strong>
                 </span>
               )}
               {aprobadas > 0 && (
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
+                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900">
                   Aprobadas: <strong>{aprobadas}</strong>
                 </span>
               )}
               {reprobadas > 0 && (
-                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-rose-900">
                   Reprobadas: <strong>{reprobadas}</strong>
                 </span>
               )}
@@ -135,7 +135,7 @@ export default function BotonEntregar({ indicadores, paso }: Props) {
             <div
               className={
                 mensaje.tipo === "ok"
-                  ? "mt-2 rounded-md border border-emerald-400/60 bg-emerald-50 px-2 py-1.5 text-[11px] text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100"
+                  ? "mt-2 rounded-md border border-emerald-400/60 bg-emerald-50 px-2 py-1.5 text-[11px] text-emerald-900"
                   : "mt-2 rounded-md border border-destructive/60 bg-destructive/10 px-2 py-1.5 text-[11px] text-destructive"
               }
             >

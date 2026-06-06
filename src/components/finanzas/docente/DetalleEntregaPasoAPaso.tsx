@@ -68,7 +68,7 @@ function PasoAccordion({
       className={cn(
         "overflow-hidden rounded-md border transition",
         esEntregado
-          ? "border-amber-400 bg-amber-50/50 dark:border-amber-700 dark:bg-amber-950/20"
+          ? "border-amber-400 bg-amber-50/50"
           : "border-border bg-card"
       )}
     >

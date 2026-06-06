@@ -222,12 +222,12 @@ export default function SimularProyecto() {
         <div
           className={
             sim?.evento_forzado_id
-              ? "rounded-lg border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-md dark:from-amber-950/30 dark:to-orange-950/30"
+              ? "rounded-lg border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-6 shadow-md"
               : "rounded-lg border border-border bg-card p-6"
           }
         >
           {sim?.evento_forzado_id && (
-            <div className="mb-3 flex items-center gap-2 rounded-md bg-amber-200/60 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-900 dark:bg-amber-800/40 dark:text-amber-100">
+            <div className="mb-3 flex items-center gap-2 rounded-md bg-amber-200/60 px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-900">
               🎲 SITUACIÓN LANZADA POR TU DOCENTE EN VIVO
             </div>
           )}
@@ -323,7 +323,7 @@ function Metrica({
       {delta !== undefined && Math.abs(delta) > 0.01 && (
         <div
           className={`text-[10px] ${
-            delta > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"
+            delta > 0 ? "text-emerald-600" : "text-destructive"
           }`}
         >
           {delta > 0 ? "+" : ""}
@@ -395,7 +395,7 @@ function PantallaFinalizada({
         className={`rounded-lg border p-6 text-center ${
           quebrada
             ? "border-destructive bg-destructive/5"
-            : "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
+            : "border-emerald-500 bg-emerald-50"
         }`}
       >
         {quebrada ? (
@@ -409,7 +409,7 @@ function PantallaFinalizada({
           </>
         ) : (
           <>
-            <Trophy className="mx-auto h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+            <Trophy className="mx-auto h-10 w-10 text-emerald-600" />
             <h2 className="mt-3 text-lg font-semibold">Simulación completa</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Llegaste al final de los {simulacion.turnos_totales} turnos.
@@ -470,13 +470,13 @@ function SelectorProyectoSimular({
 }) {
   const tipoMeta = (p: Proyecto) => {
     if (p.tipo === "proyecto_grupal") {
-      return { emoji: "🤝", label: "Grupal", clase: "border-violet-400 bg-violet-50 text-violet-900 dark:bg-violet-950/40 dark:text-violet-100" };
+      return { emoji: "🤝", label: "Grupal", clase: "border-violet-400 bg-violet-50 text-violet-900" };
     }
     if (p.caso_origen_id) {
       // copia del caso del docente — viene de un caso_curso
-      return { emoji: "🎓", label: "Caso del curso", clase: "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100" };
+      return { emoji: "🎓", label: "Caso del curso", clase: "border-emerald-400 bg-emerald-50 text-emerald-900" };
     }
-    return { emoji: "📁", label: "Individual", clase: "border-sky-400 bg-sky-50 text-sky-900 dark:bg-sky-950/40 dark:text-sky-100" };
+    return { emoji: "📁", label: "Individual", clase: "border-sky-400 bg-sky-50 text-sky-900" };
   };
 
   return (
@@ -502,7 +502,7 @@ function SelectorProyectoSimular({
             >
               <span>{meta.emoji}</span>
               <span className="max-w-[160px] truncate font-semibold">{p.nombre}</span>
-              <span className="rounded bg-black/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider dark:bg-white/10">
+              <span className="rounded bg-black/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider">
                 {meta.label}
               </span>
             </button>

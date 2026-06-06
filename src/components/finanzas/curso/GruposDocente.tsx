@@ -296,7 +296,7 @@ function GrupoFila({
             {grupo.miembros.length} / {grupo.cupo_max} cupos
           </span>
           {grupo.nota != null && (
-            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
+            <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800">
               Nota: {grupo.nota}
             </span>
           )}

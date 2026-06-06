@@ -171,10 +171,10 @@ function TarjetaEntrega({ entrega }: { entrega: Entrega }) {
 
   const colorChip =
     entrega.estado === "aprobada"
-      ? "border-emerald-400 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100"
+      ? "border-emerald-400 bg-emerald-50 text-emerald-900"
       : entrega.estado === "reprobada"
-      ? "border-rose-400 bg-rose-50 text-rose-900 dark:bg-rose-950/30 dark:text-rose-100"
-      : "border-amber-400 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-100";
+      ? "border-rose-400 bg-rose-50 text-rose-900"
+      : "border-amber-400 bg-amber-50 text-amber-900";
 
   const Icono =
     entrega.estado === "aprobada"
@@ -187,7 +187,7 @@ function TarjetaEntrega({ entrega }: { entrega: Entrega }) {
     <div className={cn("rounded-md border", colorChip)}>
       <button
         onClick={() => setAbierto((v) => !v)}
-        className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-white/30 dark:hover:bg-black/20"
+        className="flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-white/30"
       >
         {abierto ? (
           <ChevronDown className="h-3.5 w-3.5 flex-shrink-0" />
@@ -249,7 +249,7 @@ function TarjetaEntrega({ entrega }: { entrega: Entrega }) {
 
           {/* Sugerencia automática */}
           {entrega.sugerencia_automatica && (
-            <div className="rounded bg-white/40 px-2 py-1 dark:bg-black/20">
+            <div className="rounded bg-white/40 px-2 py-1">
               <strong>🤖 Sistema sugirió:</strong> {entrega.sugerencia_automatica}{" "}
               {entrega.sugerencia_nota !== null && `(${entrega.sugerencia_nota}/100)`}
               {entrega.sugerencia_razones && entrega.sugerencia_razones.length > 0 && (
@@ -264,7 +264,7 @@ function TarjetaEntrega({ entrega }: { entrega: Entrega }) {
 
           {/* Comentario del docente */}
           {entrega.comentario_docente && (
-            <div className="rounded bg-white/60 p-2 dark:bg-black/30">
+            <div className="rounded bg-white/60 p-2">
               <div className="text-[10px] font-semibold opacity-75">
                 💬 Comentario del docente:
               </div>

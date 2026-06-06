@@ -179,14 +179,14 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
   return (
     <div className="space-y-4">
       {/* Header con conteo de activas */}
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-3 dark:border-amber-700 dark:from-amber-950/40 dark:to-orange-950/40">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50 p-3">
         <div className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+          <Zap className="h-5 w-5 text-amber-700" />
           <div>
-            <div className="text-sm font-bold text-amber-900 dark:text-amber-100">
+            <div className="text-sm font-bold text-amber-900">
               Lanzador de situaciones en vivo
             </div>
-            <div className="text-[11px] text-amber-800/80 dark:text-amber-300">
+            <div className="text-[11px] text-amber-800/80">
               Elegí una situación y mandala a todos los alumnos que estén simulando ahora.
             </div>
           </div>
@@ -194,17 +194,17 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMostrarConfig(true)}
-            className="flex items-center gap-1 rounded-md border border-amber-400 bg-white px-2.5 py-1.5 text-[11px] font-medium text-amber-900 shadow-sm hover:bg-amber-50 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-100"
+            className="flex items-center gap-1 rounded-md border border-amber-400 bg-white px-2.5 py-1.5 text-[11px] font-medium text-amber-900 shadow-sm hover:bg-amber-50"
             title="Configurar qué tipos de proyecto se pueden simular en este curso"
           >
             <Settings2 className="h-3.5 w-3.5" />
             Configurar
           </button>
-          <div className="rounded-md bg-white px-3 py-1.5 text-center text-xs shadow-sm dark:bg-amber-950/60">
+          <div className="rounded-md bg-white px-3 py-1.5 text-center text-xs shadow-sm">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
               Simulaciones activas
             </div>
-            <div className="text-xl font-bold text-amber-900 dark:text-amber-100">
+            <div className="text-xl font-bold text-amber-900">
               {conteo?.totalDelAlcance ?? "—"}
             </div>
           </div>
@@ -235,9 +235,9 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
 
       {/* Éxito banner */}
       {exito && (
-        <div className="flex items-start gap-2 rounded-md border border-emerald-400 bg-emerald-50 p-3 dark:bg-emerald-950/40">
+        <div className="flex items-start gap-2 rounded-md border border-emerald-400 bg-emerald-50 p-3">
           <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-700" />
-          <div className="flex-1 text-xs text-emerald-900 dark:text-emerald-100">
+          <div className="flex-1 text-xs text-emerald-900">
             <div className="font-bold">¡Situación lanzada!</div>
             <p className="mt-0.5">
               «{exito.titulo}» llegó a <strong>{exito.afectadas}</strong> alumno
@@ -270,7 +270,7 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
                   className={cn(
                     "flex items-center gap-1.5 rounded-md border-2 px-2.5 py-1 text-xs transition",
                     activo
-                      ? "border-amber-500 bg-amber-100 font-semibold text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
+                      ? "border-amber-500 bg-amber-100 font-semibold text-amber-900"
                       : "border-border bg-background hover:border-amber-300"
                   )}
                 >
@@ -327,7 +327,7 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
               className={cn(
                 "rounded-md border p-2.5 text-left transition",
                 seleccionado?.id === e.id
-                  ? "border-amber-500 bg-amber-50 ring-2 ring-amber-400 dark:bg-amber-950/40"
+                  ? "border-amber-500 bg-amber-50 ring-2 ring-amber-400"
                   : "border-border bg-background hover:border-primary"
               )}
             >
@@ -346,14 +346,14 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
                   {e.opciones_decision.length} decisiones · 🎯
                 </span>
                 {e.sectores_afectados.includes("todos") ? (
-                  <span className="rounded bg-emerald-100 px-1 py-0.5 text-[9px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">
+                  <span className="rounded bg-emerald-100 px-1 py-0.5 text-[9px] font-semibold text-emerald-800">
                     todos los sectores
                   </span>
                 ) : (
                   e.sectores_afectados.map((s) => (
                     <span
                       key={s}
-                      className="rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold text-sky-800 dark:bg-sky-950/40 dark:text-sky-200"
+                      className="rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold text-sky-800"
                     >
                       {s}
                     </span>
@@ -367,24 +367,24 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
 
       {/* Filtrado sectorial (solo si hay evento seleccionado con sectores específicos) */}
       {seleccionado && !aplicaATodos && (
-        <div className="rounded-md border border-sky-300 bg-sky-50/60 p-3 dark:border-sky-800 dark:bg-sky-950/30">
-          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold text-sky-900 dark:text-sky-100">
+        <div className="rounded-md border border-sky-300 bg-sky-50/60 p-3">
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-bold text-sky-900">
             🎯 Este evento solo aplica a:{" "}
             {seleccionado.sectores_afectados.map((s) => (
               <span
                 key={s}
-                className="rounded bg-sky-200 px-1.5 py-0.5 text-[9px] uppercase dark:bg-sky-800/60"
+                className="rounded bg-sky-200 px-1.5 py-0.5 text-[9px] uppercase"
               >
                 {s}
               </span>
             ))}
           </div>
-          <p className="mb-2 text-[10px] leading-snug text-sky-800/80 dark:text-sky-200/80">
+          <p className="mb-2 text-[10px] leading-snug text-sky-800/80">
             De los <strong>{conteo?.totalDelAlcance ?? 0}</strong> alumnos con simulación,{" "}
             <strong>{conteo?.enSectoresAfectados ?? 0}</strong> tienen proyectos en sectores
             afectados. El resto tiene proyectos en otros sectores (ej. servicios, software).
           </p>
-          <label className="flex cursor-pointer items-start gap-2 text-[11px] text-sky-900 dark:text-sky-100">
+          <label className="flex cursor-pointer items-start gap-2 text-[11px] text-sky-900">
             <input
               type="checkbox"
               checked={forzarATodos}
@@ -551,15 +551,15 @@ function ModalConfigSimulacion({
         </p>
 
         <div className="space-y-2">
-          <label className="flex cursor-pointer items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50/40 p-2 text-xs dark:border-emerald-900 dark:bg-emerald-950/20">
+          <label className="flex cursor-pointer items-start gap-2 rounded-md border border-emerald-200 bg-emerald-50/40 p-2 text-xs">
             <input type="checkbox" checked={caso} onChange={(e) => setCaso(e.target.checked)} className="mt-0.5" />
             <span>🎓 <strong>Caso del curso</strong> — la copia del caso que publicaste como docente.</span>
           </label>
-          <label className="flex cursor-pointer items-start gap-2 rounded-md border border-sky-200 bg-sky-50/40 p-2 text-xs dark:border-sky-900 dark:bg-sky-950/20">
+          <label className="flex cursor-pointer items-start gap-2 rounded-md border border-sky-200 bg-sky-50/40 p-2 text-xs">
             <input type="checkbox" checked={individual} onChange={(e) => setIndividual(e.target.checked)} className="mt-0.5" />
             <span>📁 <strong>Proyecto individual</strong> — el proyecto propio del alumno.</span>
           </label>
-          <label className="flex cursor-pointer items-start gap-2 rounded-md border border-violet-200 bg-violet-50/40 p-2 text-xs dark:border-violet-900 dark:bg-violet-950/20">
+          <label className="flex cursor-pointer items-start gap-2 rounded-md border border-violet-200 bg-violet-50/40 p-2 text-xs">
             <input type="checkbox" checked={grupal} onChange={(e) => setGrupal(e.target.checked)} className="mt-0.5" />
             <span>🤝 <strong>Proyecto grupal</strong> — el proyecto compartido del grupo.</span>
           </label>

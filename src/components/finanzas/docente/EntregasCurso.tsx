@@ -187,7 +187,7 @@ export default function EntregasCurso({ cursoId }: { cursoId: string }) {
       </div>
 
       {vista === "grupales" && (
-        <p className="text-[11px] text-violet-700 dark:text-violet-300">
+        <p className="text-[11px] text-violet-700">
           Cuando calificas una entrega grupal, la nota se acredita al promedio individual de
           TODOS los miembros del grupo.
         </p>
@@ -321,17 +321,17 @@ function TarjetaAgrupada({
             Entregas: <strong>{grupo.entregas.length}</strong>
           </span>
           {grupo.pendientes > 0 && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-amber-900">
               {grupo.pendientes} pendiente{grupo.pendientes === 1 ? "" : "s"}
             </span>
           )}
           {grupo.aprobadas > 0 && (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
+            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900">
               {grupo.aprobadas} aprobada{grupo.aprobadas === 1 ? "" : "s"}
             </span>
           )}
           {grupo.reprobadas > 0 && (
-            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-rose-900 dark:bg-rose-950/40 dark:text-rose-100">
+            <span className="rounded-full bg-rose-100 px-2 py-0.5 text-rose-900">
               {grupo.reprobadas} reprobada{grupo.reprobadas === 1 ? "" : "s"}
             </span>
           )}
@@ -356,10 +356,10 @@ function ChipEtapa({ entrega, onClick }: { entrega: Entrega; onClick: () => void
   const etapa = entrega.paso_entregado;
   const estiloEstado =
     entrega.estado === "aprobada"
-      ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-100"
+      ? "border-emerald-300 bg-emerald-50 text-emerald-900"
       : entrega.estado === "reprobada"
-        ? "border-rose-300 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-100"
-        : "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100";
+        ? "border-rose-300 bg-rose-50 text-rose-900"
+        : "border-amber-300 bg-amber-50 text-amber-900";
   return (
     <button
       onClick={onClick}
@@ -374,7 +374,7 @@ function ChipEtapa({ entrega, onClick }: { entrega: Entrega; onClick: () => void
         {entrega.numero_intento > 1 ? ` · #${entrega.numero_intento}` : ""}
       </span>
       {entrega.nota != null ? (
-        <span className="rounded bg-white/60 px-1 font-bold dark:bg-black/40">{entrega.nota}</span>
+        <span className="rounded bg-white/60 px-1 font-bold">{entrega.nota}</span>
       ) : (
         <span className="opacity-70">·</span>
       )}

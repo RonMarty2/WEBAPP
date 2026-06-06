@@ -121,7 +121,7 @@ export default function MiPerfil() {
             <div
               className={
                 mensaje.tipo === "ok"
-                  ? "flex items-center gap-2 rounded-md border border-emerald-400 bg-emerald-50 px-3 py-2 text-xs text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-100"
+                  ? "flex items-center gap-2 rounded-md border border-emerald-400 bg-emerald-50 px-3 py-2 text-xs text-emerald-900"
                   : "rounded-md border border-destructive/60 bg-destructive/10 px-3 py-2 text-xs text-destructive"
               }
             >

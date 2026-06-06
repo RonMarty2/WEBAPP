@@ -26,9 +26,9 @@ import type { Proyecto, VersionProyecto } from "@/types/finanzas/proyecto";
 import { cn } from "@/lib/finanzas/utils";
 
 const ESTADO_LABEL: Record<string, { txt: string; clase: string }> = {
-  construyendo: { txt: "En construcción", clase: "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-200" },
-  completo: { txt: "Completo", clase: "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200" },
-  simulando: { txt: "Simulando", clase: "bg-sky-100 text-sky-900 dark:bg-sky-900/40 dark:text-sky-200" },
+  construyendo: { txt: "En construcción", clase: "bg-amber-100 text-amber-900" },
+  completo: { txt: "Completo", clase: "bg-emerald-100 text-emerald-900" },
+  simulando: { txt: "Simulando", clase: "bg-sky-100 text-sky-900" },
   finalizado: { txt: "Finalizado", clase: "bg-secondary text-muted-foreground" },
 };
 
@@ -172,16 +172,16 @@ export default function DashboardEstudiante() {
           en mobile). Card destacado para que cualquier alumno la encuentre. */}
       <button
         onClick={() => router.push("/finanzas/ejemplos")}
-        className="flex w-full items-center gap-3 rounded-lg border border-indigo-300 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-3 text-left transition hover:border-indigo-400 hover:shadow-md dark:border-indigo-800 dark:from-indigo-950/40 dark:via-violet-950/40 dark:to-fuchsia-950/40"
+        className="flex w-full items-center gap-3 rounded-lg border border-indigo-300 bg-gradient-to-r from-indigo-50 via-violet-50 to-fuchsia-50 p-3 text-left transition hover:border-indigo-400 hover:shadow-md"
       >
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-indigo-500 to-fuchsia-600 text-lg shadow-md">
           📖
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-sm font-bold text-indigo-900 dark:text-indigo-100">
+          <div className="text-sm font-bold text-indigo-900">
             Galería de 26 proyectos de ejemplo
           </div>
-          <div className="text-[11px] text-indigo-800/80 dark:text-indigo-300">
+          <div className="text-[11px] text-indigo-800/80">
             Restaurantes, fábricas, podcast, canal de YouTube, gimnasio, turismo, agricultura…
             Mirá ejemplos completos antes de armar el tuyo.
           </div>
@@ -251,19 +251,19 @@ export default function DashboardEstudiante() {
               )}
 
               {/* ── 1. 🎓 CASO DEL CURSO (emerald) — contraído por defecto ── */}
-              <details className="group overflow-hidden rounded-md border border-emerald-200 bg-emerald-50/40 dark:border-emerald-900 dark:bg-emerald-950/20">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 border-b border-emerald-200 bg-emerald-100/60 px-3 py-2 dark:border-emerald-900 dark:bg-emerald-900/30">
+              <details className="group overflow-hidden rounded-md border border-emerald-200 bg-emerald-50/40">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 border-b border-emerald-200 bg-emerald-100/60 px-3 py-2">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900 dark:text-emerald-100">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
                       <span className="text-base">🎓</span>
                       <span>Caso del curso</span>
                       {(casosDisponibles.length + casosTomados.length) > 0 && (
-                        <span className="rounded bg-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-900 dark:bg-emerald-800 dark:text-emerald-100">
+                        <span className="rounded bg-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-900">
                           {casosDisponibles.length + casosTomados.length}
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-emerald-900/70 dark:text-emerald-200/70">
+                    <div className="text-[11px] text-emerald-900/70">
                       Los proyectos que el docente publicó para tomar y trabajar.
                     </div>
                   </div>
@@ -297,7 +297,7 @@ export default function DashboardEstudiante() {
                         return (
                           <div
                             key={c.id}
-                            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-emerald-200 bg-card p-2 dark:border-emerald-900"
+                            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-emerald-200 bg-card p-2"
                           >
                             <div className="min-w-0 flex-1">
                               <div className="text-xs font-semibold">{c.nombre}</div>
@@ -325,19 +325,19 @@ export default function DashboardEstudiante() {
               </details>
 
               {/* ── 2. 📁 CASO INDIVIDUAL (sky) — contraído por defecto ──── */}
-              <details className="group mt-3 overflow-hidden rounded-md border border-sky-200 bg-sky-50/40 dark:border-sky-900 dark:bg-sky-950/20">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 border-b border-sky-200 bg-sky-100/60 px-3 py-2 dark:border-sky-900 dark:bg-sky-900/30">
+              <details className="group mt-3 overflow-hidden rounded-md border border-sky-200 bg-sky-50/40">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 border-b border-sky-200 bg-sky-100/60 px-3 py-2">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-sky-900 dark:text-sky-100">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-sky-900">
                       <span className="text-base">📁</span>
                       <span>Caso individual</span>
                       {proyectosLibres.length > 0 && (
-                        <span className="rounded bg-sky-200 px-1.5 py-0.5 text-[10px] font-bold text-sky-900 dark:bg-sky-800 dark:text-sky-100">
+                        <span className="rounded bg-sky-200 px-1.5 py-0.5 text-[10px] font-bold text-sky-900">
                           {proyectosLibres.length}
                         </span>
                       )}
                     </div>
-                    <div className="text-[11px] text-sky-900/70 dark:text-sky-200/70">
+                    <div className="text-[11px] text-sky-900/70">
                       Tu propio proyecto del curso — lo armas tú desde cero.
                     </div>
                   </div>
@@ -373,14 +373,14 @@ export default function DashboardEstudiante() {
               </details>
 
               {/* ── 3. 🤝 CASO GRUPAL (violet) — contraído por defecto ───── */}
-              <details className="group mt-3 overflow-hidden rounded-md border border-violet-200 bg-violet-50/40 dark:border-violet-900 dark:bg-violet-950/20">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 border-b border-violet-200 bg-violet-100/60 px-3 py-2 dark:border-violet-900 dark:bg-violet-900/30">
+              <details className="group mt-3 overflow-hidden rounded-md border border-violet-200 bg-violet-50/40">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-2 border-b border-violet-200 bg-violet-100/60 px-3 py-2">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-violet-900 dark:text-violet-100">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-violet-900">
                       <span className="text-base">🤝</span>
                       <span>Caso grupal</span>
                     </div>
-                    <div className="text-[11px] text-violet-900/70 dark:text-violet-200/70">
+                    <div className="text-[11px] text-violet-900/70">
                       Trabajen en equipo sobre un mismo proyecto.
                     </div>
                   </div>

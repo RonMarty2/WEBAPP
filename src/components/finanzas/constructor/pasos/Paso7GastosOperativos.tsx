@@ -21,9 +21,9 @@ const CONFIG_ADMIN: ConfigSubcat = {
   sugerencia: "Alquiler oficina, servicios básicos, contador, papelería…",
   placeholderDescripcion: "Ej: Alquiler oficina, contador, luz, internet…",
   borde: "border-l-blue-500",
-  bgFila: "bg-blue-50 dark:bg-blue-950/20",
-  bgHeader: "bg-blue-100/70 dark:bg-blue-950/40",
-  chip: "bg-blue-200 text-blue-900 dark:bg-blue-900/60 dark:text-blue-100",
+  bgFila: "bg-blue-50",
+  bgHeader: "bg-blue-100/70",
+  chip: "bg-blue-200 text-blue-900",
 };
 
 const CONFIG_COMERC: ConfigSubcat = {
@@ -31,9 +31,9 @@ const CONFIG_COMERC: ConfigSubcat = {
   sugerencia: "Publicidad, comisiones de venta, transporte de despacho, marketing…",
   placeholderDescripcion: "Ej: Publicidad, comisiones venta, transporte despacho…",
   borde: "border-l-emerald-500",
-  bgFila: "bg-emerald-50 dark:bg-emerald-950/20",
-  bgHeader: "bg-emerald-100/70 dark:bg-emerald-950/40",
-  chip: "bg-emerald-200 text-emerald-900 dark:bg-emerald-900/60 dark:text-emerald-100",
+  bgFila: "bg-emerald-50",
+  bgHeader: "bg-emerald-100/70",
+  chip: "bg-emerald-200 text-emerald-900",
 };
 
 const selectOnFocus = (e: React.FocusEvent<HTMLInputElement>) =>
@@ -76,21 +76,21 @@ export default function Paso7GastosOperativos() {
             Gastos fijos del proyecto que no escalan con cada unidad producida.
           </p>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <div className="rounded-md border border-blue-500/40 bg-blue-50 px-2.5 py-1.5 text-[11px] dark:bg-blue-950/20">
-              <span className="font-semibold text-blue-900 dark:text-blue-100">
+            <div className="rounded-md border border-blue-500/40 bg-blue-50 px-2.5 py-1.5 text-[11px]">
+              <span className="font-semibold text-blue-900">
                 Administrativos →
               </span>{" "}
-              <span className="text-blue-900/80 dark:text-blue-100/80">
+              <span className="text-blue-900/80">
                 hacen que la empresa <em>funcione</em> (alquiler de oficina, luz, agua,
                 internet, contador externo, papelería). Los <strong>sueldos van en el Paso 4 ·
                 Personal</strong>, no aquí.
               </span>
             </div>
-            <div className="rounded-md border border-emerald-500/40 bg-emerald-50 px-2.5 py-1.5 text-[11px] dark:bg-emerald-950/20">
-              <span className="font-semibold text-emerald-900 dark:text-emerald-100">
+            <div className="rounded-md border border-emerald-500/40 bg-emerald-50 px-2.5 py-1.5 text-[11px]">
+              <span className="font-semibold text-emerald-900">
                 Comercialización →
               </span>{" "}
-              <span className="text-emerald-900/80 dark:text-emerald-100/80">
+              <span className="text-emerald-900/80">
                 sirven para <em>vender</em> el producto (publicidad, comisiones, transporte de despacho).
               </span>
             </div>

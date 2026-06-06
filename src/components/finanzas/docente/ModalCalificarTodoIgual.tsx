@@ -59,9 +59,9 @@ export default function ModalCalificarTodoIgual({
       <div className="w-full max-w-md overflow-hidden rounded-lg bg-card shadow-xl">
         {/* Header — nombre del alumno BIEN PROMINENTE para que el docente
             sepa siempre a quién le está poniendo la nota. */}
-        <div className="flex items-start justify-between gap-3 border-b border-border bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-4 dark:from-emerald-950/40 dark:via-teal-950/40 dark:to-cyan-950/40">
+        <div className="flex items-start justify-between gap-3 border-b border-border bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-4">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-300">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
               <Zap className="h-3 w-3" /> Calificando a
             </div>
             <h2 className="truncate text-xl font-extrabold tracking-tight text-foreground">
@@ -87,8 +87,8 @@ export default function ModalCalificarTodoIgual({
             className={cn(
               "border-b border-border p-3 text-xs",
               resultado.fallidas === 0
-                ? "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100"
-                : "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
+                ? "bg-emerald-50 text-emerald-900"
+                : "bg-amber-50 text-amber-900"
             )}
           >
             {resultado.fallidas === 0 ? (
@@ -114,7 +114,7 @@ export default function ModalCalificarTodoIgual({
               .map((e) => (
                 <span
                   key={e.id}
-                  className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900 dark:bg-amber-900/50 dark:text-amber-100"
+                  className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-900"
                 >
                   {e.paso_entregado ? `Etapa ${e.paso_entregado}` : "Proyecto"}
                 </span>
