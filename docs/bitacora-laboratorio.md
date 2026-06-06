@@ -58,7 +58,7 @@ visualmente pero comparten sesión y datos.
 | # | Módulo | Estado | Notas |
 |---|---|---|---|
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
-| 2 | Mercados (Investigación) | 🔨 EN CONSTRUCCIÓN | FASE 0,1,2 ✅. Detalle de fases abajo. |
+| 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | ❌ | PESTEL, Porter, MEFE/MEFI, FODA cruzada con scoring guiado |
 | 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
@@ -73,10 +73,14 @@ visualmente pero comparten sesión y datos.
 - ✅ **FASE 2** — Laboratorio: dashboard "Mis investigaciones" (CRUD, opción B
   aprobada), etapa Diseño (objetivos/hipótesis/variables/geografía), etapa
   Muestreo (calculadora real conectada a la fórmula de la clase 5).
-- ⬜ **FASE 3** — Diseñador de encuestas (constructor de preguntas/escalas).
-- ⬜ **FASE 4** — Recolección pública: link/QR sin login, dashboard live.
-- ⬜ **FASE 5** — Análisis: tabulación + gráficos + estimador de demanda.
-- ⬜ **FASE 6** — Reporte exportable + artefacto para el Generador.
+- ✅ **FASE 3** — Diseñador de encuestas (6 tipos de pregunta con guías).
+- ✅ **FASE 4** — Recolección pública: link/QR sin login (`/mercados/responder/[token]`),
+  endpoint público, dashboard con conteo vs meta, publicar/cerrar/reabrir.
+- ✅ **FASE 5** — Análisis univariado automático (frecuencias, %, stats numéricas).
+- ✅ **FASE 6** — Reporte consolidado en Markdown, descargable + artefacto.
+
+**MÓDULO MERCADOS COMPLETO.** Ciclo entero funcional: aprender → diseñar →
+muestrear → encuestar → recolectar respuestas reales → analizar → reportar.
 
 Patrón confirmado: cada fase grande se divide en sub-olas (1A/1B/1C, 2A/2B)
 para mantener calidad y no saturar el contexto.
