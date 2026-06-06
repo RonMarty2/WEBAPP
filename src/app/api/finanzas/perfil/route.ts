@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { verifySessionToken, SESSION_COOKIE } from '@/lib/auth';
+import { verifySessionToken, SESSION_COOKIE, isAdmin } from '@/lib/auth';
 import { isSupabaseConfigured, createAdminClient } from '@/lib/supabase';
 
 /**
@@ -39,10 +39,16 @@ export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = createAdminClient() as any;
 
-  // Calcular el rol esperado a partir del JWT de webapp
+  // Calcular el rol esperado.
+  // CRÍTICO: revalidamos admin por email contra HARDCODED_ADMIN_EMAILS +
+  // env var ADMIN_EMAILS, NO confiamos en user.role del JWT (puede estar
+  // desactualizado si el usuario entró antes de ser promovido).
+  const esSuperAdmin = isAdmin(user.email);
   const rolEsperado: 'docente' | 'estudiante' =
-    user.role === 'docente' || user.role === 'admin' ? 'docente' : 'estudiante';
-  const esAdminEsperado = user.role === 'admin';
+    esSuperAdmin || user.role === 'docente' || user.role === 'admin'
+      ? 'docente'
+      : 'estudiante';
+  const esAdminEsperado = esSuperAdmin || user.role === 'admin';
 
   // 1) Buscar perfil existente
   const { data: existing, error: errSelect } = await sb
