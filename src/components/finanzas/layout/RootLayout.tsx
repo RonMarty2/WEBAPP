@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   const cerrar = async () => {
     await logout();
-    router.replace('/finanzas/login');
+    router.replace('/login');
   };
 
   const navItems = (onClick?: () => void) =>
