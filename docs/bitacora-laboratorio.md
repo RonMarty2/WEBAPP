@@ -98,7 +98,7 @@ visualmente pero comparten sesión y datos.
 |---|---|---|---|
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
-| 3 | Estrategia / Macroentorno | 🔨 EN CONSTRUCCIÓN | 5 de ~11 herramientas listas (PESTEL, Porter, MEFE, MEFI, FODA cruzada). Faltan MPC, Cadena Valor, MIE, BCG, Ansoff, PEYEA, Reporte + Academia. Detalle abajo. |
+| 3 | Estrategia / Macroentorno | 🔨 LABORATORIO COMPLETO (falta Academia) | 12 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, Reporte. Pendiente: MCPE/QSPM + FASE 1 (Academia). Detalle abajo. |
 | 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
@@ -108,15 +108,23 @@ visualmente pero comparten sesión y datos.
 - ✅ **FASE 0** — Cimientos: identidad visual VIOLETA propia (#8b5cf6, distinta
   a Finanzas/negro y Mercados/azul), login único vía `/api/estrategia/perfil`,
   tablas SQL `estrategia_*` (matrices como JSONB), hub. Light-only.
-- ✅ **Laboratorio (parcial)** — dashboard "Mis análisis" (CRUD) + vista del
-  análisis con las herramientas como etapas. Herramientas LISTAS (5 de ~11):
+- ✅ **Laboratorio COMPLETO** — dashboard "Mis análisis" (CRUD) + vista del
+  análisis con las 12 herramientas como etapas. Herramientas LISTAS (12/12):
   · PESTEL (macroentorno, plantillas bolivianas + IA)
   · 5 Fuerzas de Porter (microentorno, intensidad + IA)
+  · MPC — Matriz de Perfil Competitivo (mi empresa vs competidores, ponderado)
+  · Cadena de Valor (9 actividades primarias/apoyo + IA)
   · MEFE (factores externos ponderados) — componente MatrizPonderada reusable
   · MEFI (factores internos ponderados) — mismo componente
+  · MIE — Matriz Interna-Externa (se deriva sola de los totales MEFE+MEFI)
   · FODA cruzada — pre-carga O/A desde el PESTEL + genera FO/DO/FA/DA con IA
-- ⬜ **Herramientas faltantes:** MPC, Cadena de Valor, MIE, BCG, Ansoff,
-  PEYEA, Reporte (consolidado + artefacto).
+  · BCG — matriz de portafolio (gráfico 2x2, clasifica unidades de negocio)
+  · Ansoff — 4 cuadrantes de crecimiento (listas editables + IA)
+  · PEYEA/SPACE — vector de posición estratégica (SVG, 4 dimensiones)
+  · Reporte consolidado — todas las herramientas en un documento, con copiar
+    (markdown) e imprimir → artefacto para el modo conectado del Generador
+- ⬜ **Herramienta faltante:** MCPE/QSPM (matriz cuantitativa de planificación
+  estratégica). VRIO quedó como opcional.
 - ⬜ **FASE 1** — Academia: clases sobre análisis situacional.
 - Patrón de cada herramienta: plantillas bolivianas (modo B) + botón
   "Sugerir con IA" (modo C, vía /api/ai/asistir con contexto del proyecto).
@@ -158,6 +166,18 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-06 — Estrategia: laboratorio completo (12 herramientas)
+- Construidas las 4 herramientas que faltaban: **BCG** (matriz de portafolio
+  con gráfico 2x2), **Ansoff** (4 cuadrantes de crecimiento + IA), **PEYEA**
+  (vector de posición estratégica en SVG) y el **Reporte consolidado** (todas
+  las herramientas en un documento, con copiar en markdown e imprimir → es el
+  artefacto que alimentará el modo conectado del Generador).
+- Las 12 herramientas del laboratorio quedan habilitadas en la vista del
+  análisis. Build verde (tsc + eslint + next build), push a `main` (624ee9e).
+- **Pendiente reconocido:** MCPE/QSPM era parte de la lista "TODAS" aprobada y
+  aún no se construyó (VRIO quedó como opcional). El usuario decidió construir
+  MCPE/QSPM a continuación para cerrar el 100% de las herramientas.
 
 ### 2026-06-06 — CIERRE DE SESIÓN
 Sesión enorme. Logrado:
