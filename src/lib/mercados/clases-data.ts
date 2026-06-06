@@ -753,11 +753,357 @@ export const CLASES_MERCADOS: ClaseMercados[] = [
       },
     ],
   },
+
+  // ───────────────────────────────────────────────────────── CLASE 10
+  {
+    slug: 'analisis-univariado',
+    numero: 10,
+    titulo: 'Análisis univariado: leer cada variable por separado',
+    resumen:
+      'El primer análisis siempre es de una variable a la vez: frecuencias, porcentajes, promedios y dispersión. La base de todo lo demás.',
+    duracionMin: 14,
+    dificultad: 'intermedia',
+    secciones: [
+      {
+        titulo: 'Frecuencias y porcentajes: el primer paso',
+        parrafos: [
+          'Antes de cualquier análisis sofisticado, mira cada variable sola. Para variables categóricas (nominales y ordinales), cuentas cuántos eligieron cada opción y calculas el porcentaje sobre el total.',
+          '"De 384 encuestados, 198 prefieren consumo en local (52%), 120 delivery (31%) y 66 para llevar (17%)". Esa lectura simple ya cuenta una historia.',
+          'Si una opción tiene <5% de respuestas, evalúa si vale la pena reportarla separada o agruparla en "otros".',
+        ],
+      },
+      {
+        titulo: 'Medidas de tendencia central: el centro de tus datos',
+        parrafos: [
+          'Promedio (media): suma de valores / cantidad. Útil para variables numéricas y Likert. Sensible a valores extremos.',
+          'Mediana: el valor del medio cuando ordenas. Mejor si hay outliers (ej. ingresos: un millonario en tu muestra dispara el promedio pero no la mediana).',
+          'Moda: el valor más frecuente. Útil para nominales: no tiene sentido el "promedio de marca", sí la "marca más elegida".',
+          'Regla: para Likert e ingresos reporta promedio Y mediana. Si son muy distintos, hay outliers o sesgo.',
+        ],
+        ejemplo: {
+          enunciado: 'Gasto mensual en café reportado por 10 personas (Bs): 60, 80, 75, 90, 65, 70, 85, 75, 80, 850.',
+          desarrollo:
+            'Promedio = 1.530/10 = 153 Bs. Mediana (valor del medio): 77.5 Bs. La diferencia enorme indica el outlier (850 Bs).',
+          resultado:
+            'Reportar solo promedio (153) sería engañoso: nadie típico gasta eso. La mediana (77.5) representa mejor al consumidor real.',
+        },
+      },
+      {
+        titulo: 'Dispersión: ¿qué tan parecidas son las respuestas?',
+        parrafos: [
+          'Desviación estándar: cuánto se alejan los datos del promedio. Pequeña = todos opinaron parecido. Grande = mucha variedad de opiniones.',
+          'Rango: del valor más bajo al más alto. Da idea rápida del extremo.',
+          'Si todos calificaron tu WiFi 4-5 (poca dispersión), tienes consenso. Si las respuestas van de 1 a 5 con promedio 3, no hay consenso: tu producto polariza.',
+        ],
+      },
+    ],
+    ejercicio: null,
+    quiz: [
+      {
+        pregunta: 'En presencia de outliers (ingresos millonarios en una muestra mixta), ¿qué representa mejor al "típico"?',
+        opciones: ['El promedio', 'La mediana', 'La moda', 'El rango'],
+        correcta: 1,
+        explicacion:
+          'La mediana es robusta a outliers; el promedio se dispara. Por eso INE reporta ingreso mediano, no promedio.',
+      },
+      {
+        pregunta: 'Para "marca preferida" (variable nominal), ¿qué medida central tiene sentido?',
+        opciones: ['Promedio', 'Mediana', 'Moda', 'Desviación estándar'],
+        correcta: 2,
+        explicacion:
+          'En nominales no hay promedio ni mediana. La moda (la marca más elegida) es la única medida que tiene sentido.',
+      },
+      {
+        pregunta: 'Una desviación estándar pequeña en una respuesta Likert significa:',
+        opciones: [
+          'Las personas opinaron parecido',
+          'Hay mucha variedad de opiniones',
+          'El promedio es bajo',
+          'Falta más muestra',
+        ],
+        correcta: 0,
+        explicacion:
+          'Poca dispersión = consenso. Mucha dispersión = opiniones polarizadas. La desviación estándar te dice cuánto se parecen entre sí las respuestas.',
+      },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────── CLASE 11
+  {
+    slug: 'analisis-bivariado',
+    numero: 11,
+    titulo: 'Análisis bivariado: cruzar variables para encontrar patrones',
+    resumen:
+      'Aquí están los hallazgos jugosos. Cruzar dos variables a la vez revela quién hace qué, y eso decide tu estrategia.',
+    duracionMin: 16,
+    dificultad: 'avanzada',
+    secciones: [
+      {
+        titulo: 'Tablas de contingencia (cross-tabs)',
+        parrafos: [
+          'Una tabla de contingencia cruza dos variables categóricas. Filas = una variable, columnas = otra. Las celdas muestran cuántos encuestados caen en cada combinación.',
+          'Ejemplo: filas = grupo de edad (18-24, 25-34, 35+), columnas = forma de consumo preferida (local/delivery/para llevar). Lees frecuencia por celda y porcentaje por fila.',
+          'El truco está en leer porcentajes por fila, no totales: "del grupo 18-24, el 68% prefiere delivery" dice más que "delivery total = 31%".',
+        ],
+        ejemplo: {
+          enunciado: 'Cruce edad × forma de consumo (porcentajes por fila).',
+          desarrollo:
+            '18-24: Local 22%, Delivery 68%, Para llevar 10%\n25-34: Local 55%, Delivery 30%, Para llevar 15%\n35+:    Local 75%, Delivery 10%, Para llevar 15%',
+          resultado:
+            'Conclusión accionable: el delivery es la propuesta para captar 18-24; el local clásico atrae a 35+. Esto NO lo veías mirando solo el total.',
+        },
+      },
+      {
+        titulo: 'Correlación: ¿dos variables numéricas se mueven juntas?',
+        parrafos: [
+          'Cuando ambas variables son numéricas (ej. ingreso y gasto en café), puedes calcular la correlación: un número entre -1 y +1.',
+          '+1: cuando una sube, la otra sube proporcionalmente. -1: una sube, la otra baja. 0: no se relacionan.',
+          'Cuidado: correlación NO es causalidad. Que las ventas de helado y los ahogamientos suban juntos no significa que el helado mate; el verano causa ambos.',
+        ],
+      },
+      {
+        titulo: 'Chi-cuadrado: ¿la diferencia es real o casualidad?',
+        parrafos: [
+          'En una tabla de contingencia, los porcentajes por grupo se ven distintos. Pero ¿esa diferencia es real o pudo ocurrir por azar en tu muestra?',
+          'El test chi-cuadrado responde eso. Si el p-valor es <0.05, la diferencia es estadísticamente significativa (no es casualidad). Si es >0.05, no puedes afirmar que sea real.',
+          'En tu reporte, mostrar p-valores le da peso académico a tus afirmaciones. "Las preferencias varían significativamente por edad (χ² = 28.4, p < 0.001)".',
+        ],
+      },
+    ],
+    ejercicio: null,
+    quiz: [
+      {
+        pregunta: 'Una tabla de contingencia se usa principalmente para cruzar:',
+        opciones: [
+          'Una variable consigo misma',
+          'Dos variables categóricas',
+          'Solo variables numéricas',
+          'Solo variables Likert',
+        ],
+        correcta: 1,
+        explicacion:
+          'Las cross-tabs cruzan dos variables categóricas (filas vs columnas) para encontrar patrones por grupo.',
+      },
+      {
+        pregunta: 'Una correlación de +0.85 entre dos variables significa:',
+        opciones: [
+          'Una causa la otra',
+          'No están relacionadas',
+          'Se mueven juntas en la misma dirección con fuerza',
+          'Una causa la baja de la otra',
+        ],
+        correcta: 2,
+        explicacion:
+          '+0.85 es una correlación positiva fuerte: cuando una sube, la otra tiende a subir. Pero correlación no implica causalidad.',
+      },
+      {
+        pregunta: 'Un p-valor de 0.001 en un test chi-cuadrado indica:',
+        opciones: [
+          'La diferencia entre grupos es casualidad',
+          'No hay diferencia',
+          'La diferencia es estadísticamente significativa (no es casualidad)',
+          'Necesitas más muestra',
+        ],
+        correcta: 2,
+        explicacion:
+          'p < 0.05 significa que la diferencia es estadísticamente significativa. 0.001 es altamente significativa: muy difícil que sea casualidad.',
+      },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────── CLASE 12
+  {
+    slug: 'analisis-de-demanda',
+    numero: 12,
+    titulo: 'Análisis de demanda: potencial, real e insatisfecha',
+    resumen:
+      'La pregunta del millón: ¿cuánto mercado hay para ti? Cómo calcular demanda con los datos de tu estudio.',
+    duracionMin: 16,
+    dificultad: 'avanzada',
+    secciones: [
+      {
+        titulo: 'Demanda potencial: el techo del mercado',
+        parrafos: [
+          'Demanda potencial = universo × % que podría consumir × frecuencia × ticket promedio.',
+          'Es el tamaño máximo del mercado si todos los que podrían consumir, lo hicieran. Es una referencia, no una expectativa realista.',
+          'Para calcularla necesitas datos del INE (tamaño del universo) y de tu encuesta (% interesados, frecuencia, ticket).',
+        ],
+        ejemplo: {
+          enunciado: 'Cafetería zona norte Cochabamba.',
+          desarrollo:
+            'Universo: 50.000 personas (INE).\nDe la encuesta: 70% consume café fuera de casa (35.000 personas).\nFrecuencia media: 6 veces/mes.\nTicket: Bs. 15.',
+          resultado:
+            'Demanda potencial = 35.000 × 6 × 15 = Bs. 3.150.000/mes. ENORME, porque es el techo absoluto.',
+        },
+      },
+      {
+        titulo: 'Demanda real: la que ya consumen en otros',
+        parrafos: [
+          'Demanda real = lo que el universo gasta hoy en la categoría, repartido entre los competidores existentes.',
+          'Se estima sumando ventas estimadas de competidores, o preguntando en tu encuesta cuánto gastan actualmente.',
+          'Indica el tamaño activo del mercado: lo que ya se mueve. Tu meta no es capturar todo, sino una porción.',
+        ],
+      },
+      {
+        titulo: 'Demanda insatisfecha: tu oportunidad real',
+        parrafos: [
+          'Demanda insatisfecha = potencial − real. Es el espacio que no se está cubriendo: personas que querrían consumir más o algo distinto pero no encuentran la oferta adecuada.',
+          'En la encuesta lo capturas preguntando: "¿Qué te gustaría que existiera y no encuentras?" o "¿Por qué no consumes más?".',
+          'Esta es la parte donde tu propuesta tiene chance real: atender a quien hoy está mal servido.',
+        ],
+        ejemplo: {
+          enunciado: 'Cafetería: encuesta dice que 40% consume menos café de lo que querría por falta de opciones cómodas para trabajar.',
+          desarrollo:
+            'Demanda real: 35.000 × 4 visitas/mes × 15 = Bs. 2.100.000.\nDemanda insatisfecha: 35.000 × 2 visitas potenciales perdidas × 15 = Bs. 1.050.000/mes.',
+          resultado:
+            'Hay Bs. 1.050.000/mes en consumo "perdido" por falta de oferta. Si captas 5% → Bs. 52.500/mes. Eso es realista y defendible.',
+        },
+      },
+      {
+        titulo: 'Cuota de mercado: tu meta razonable',
+        parrafos: [
+          'Cuota = lo que vas a captar / demanda total. Una cafetería nueva captando 1-3% del mercado en su primer año es típico.',
+          'Justifica tu cuota con tu propuesta diferencial: "captamos 3% porque somos los únicos con horario nocturno en la zona".',
+          'Una cuota inflada (15% el primer año) es lo más común en proyectos mal hechos y lo primero que el tribunal cuestiona.',
+        ],
+      },
+    ],
+    ejercicio: {
+      enunciado:
+        'Universo 20.000 personas. 60% consume la categoría. Frecuencia 4/mes. Ticket Bs. 25. ¿Cuál es la demanda potencial mensual en Bs.?',
+      campos: [{ id: 'd', label: 'Demanda potencial', unidad: 'Bs/mes' }],
+      resolver: (inputs) => {
+        const correcto = 20000 * 0.6 * 4 * 25;
+        const v = inputs.d ?? 0;
+        const ok = Math.abs(v - correcto) <= 1000;
+        return {
+          correcto: ok,
+          valorCorrecto: correcto,
+          explicacion: ok
+            ? `Correcto. 20.000 × 0.6 × 4 × 25 = ${correcto.toLocaleString('es-BO')} Bs/mes. Recuerda: es el techo, no la meta.`
+            : `20.000 × 0.6 × 4 × 25 = ${correcto.toLocaleString('es-BO')} Bs/mes.`,
+        };
+      },
+    },
+    quiz: [
+      {
+        pregunta: 'La demanda potencial representa:',
+        opciones: [
+          'Lo que vas a vender el primer año',
+          'El techo máximo del mercado si todos consumieran',
+          'Lo que consumen los competidores',
+          'La cuota de mercado realista',
+        ],
+        correcta: 1,
+        explicacion:
+          'La demanda potencial es el techo absoluto del mercado: tamaño máximo si todos los que podrían, consumieran. Es referencia, no expectativa.',
+      },
+      {
+        pregunta: 'Demanda insatisfecha = ?',
+        opciones: ['Potencial × cuota', 'Potencial − real', 'Real + competencia', 'Universo × precio'],
+        correcta: 1,
+        explicacion:
+          'Insatisfecha = potencial − real. Es el espacio que no está cubierto por la oferta actual; ahí está tu oportunidad real.',
+      },
+      {
+        pregunta: 'Captar 3% del mercado en el primer año para un negocio nuevo es:',
+        opciones: ['Imposible', 'Realista y defendible', 'Inflado', 'Demasiado bajo, hay que poner 30%'],
+        correcta: 1,
+        explicacion:
+          '1-3% en el primer año es típico y defendible. Cuotas infladas (15-30% el primer año) son la señal más común de un proyecto mal hecho.',
+      },
+    ],
+  },
+
+  // ───────────────────────────────────────────────────────── CLASE 13
+  {
+    slug: 'presentacion-de-hallazgos',
+    numero: 13,
+    titulo: 'Presentación de hallazgos: contar la historia con datos',
+    resumen:
+      'Datos sin narrativa no convencen. Cómo organizar tu reporte para que el tribunal entienda y crea.',
+    duracionMin: 12,
+    dificultad: 'intermedia',
+    secciones: [
+      {
+        titulo: 'Estructura clásica de un reporte de investigación',
+        parrafos: [
+          '1. Resumen ejecutivo: 1 página con los 3-5 hallazgos clave. Lo único que algunos van a leer.',
+          '2. Objetivo y metodología: qué buscabas y cómo lo hiciste (universo, muestra, instrumento, fechas).',
+          '3. Resultados univariados: cada variable importante con su gráfico y lectura.',
+          '4. Resultados bivariados: los cruces interesantes que revelan patrones.',
+          '5. Análisis de demanda: potencial, real, insatisfecha y cuota propuesta.',
+          '6. Conclusiones y recomendaciones: qué decisiones tomar con esta evidencia.',
+          '7. Anexos: instrumento completo, tablas detalladas, fichas técnicas.',
+        ],
+      },
+      {
+        titulo: 'Gráficos: cada tipo para su uso',
+        parrafos: [
+          'Barras: comparar categorías ("preferencias por forma de consumo"). El más usado y claro.',
+          'Pastel: porcentajes de un total. ÚSALO POCO: solo cuando hay 3-5 categorías y la suma da 100%. Más allá, barras gana.',
+          'Línea: evolución en el tiempo. Si tienes datos de Google Trends, este es tu gráfico.',
+          'Histograma: distribución de variables numéricas (edades, ingresos). Diferente al de barras: aquí las "columnas" son rangos continuos.',
+          'Tabla: cuando lo importante son los números exactos, no la forma.',
+        ],
+      },
+      {
+        titulo: 'La trampa de la mala visualización',
+        parrafos: [
+          'Ejes mal escalados que exageran diferencias mínimas son una manipulación clásica. Ej: eje Y empieza en 90 en vez de 0 para hacer parecer enorme una diferencia de 2%.',
+          'Colores que no aportan (arco iris en una variable que no es categórica) o que excluyen a daltónicos (rojo/verde son los peores).',
+          'Etiqueta TODO: ejes, unidades, fuente, n=muestra. Un gráfico sin contexto no es defendible.',
+        ],
+      },
+      {
+        titulo: 'De dato a recomendación',
+        parrafos: [
+          'Un buen reporte no enumera datos; los conecta con decisiones. "El 68% de 18-24 prefiere delivery → recomendación: priorizar canal delivery con apps en el primer año, presupuesto X."',
+          'Sin recomendaciones, los datos son trivia. Con recomendaciones, tu estudio cambia decisiones reales.',
+          'En tu herramienta del módulo Mercados, el reporte final va a estructurar esto automáticamente y dejarlo exportable como artefacto para tu proyecto de grado.',
+        ],
+      },
+    ],
+    ejercicio: null,
+    quiz: [
+      {
+        pregunta: '¿Cuál es el único objeto que algunos lectores leerán de tu reporte?',
+        opciones: ['Los anexos', 'El resumen ejecutivo', 'La metodología', 'Las tablas crudas'],
+        correcta: 1,
+        explicacion:
+          'El resumen ejecutivo (1 página con los hallazgos clave) es lo más leído. Trátalo como la versión que sí o sí se va a recordar.',
+      },
+      {
+        pregunta: '¿Cuándo es mejor usar gráfico de pastel?',
+        opciones: [
+          'Para 10+ categorías',
+          'Para 3-5 categorías que suman 100%',
+          'Para evolución en el tiempo',
+          'Nunca',
+        ],
+        correcta: 1,
+        explicacion:
+          'El pastel funciona con pocas categorías (3-5) que suman un total. Con muchas categorías, barras es siempre más legible.',
+      },
+      {
+        pregunta: 'Mostrar "diferencia enorme" alterando el eje Y para que empiece en 90 en vez de 0 es:',
+        opciones: [
+          'Buena práctica',
+          'Manipulación visual: el eje debe partir de 0',
+          'Un análisis estadístico',
+          'Una correlación',
+        ],
+        correcta: 1,
+        explicacion:
+          'Distorsionar la escala para inflar diferencias es manipulación visual. El tribunal académico lo detecta y baja la nota.',
+      },
+    ],
+  },
 ];
 
 export function getClaseMercados(slug: string): ClaseMercados | undefined {
   return CLASES_MERCADOS.find((c) => c.slug === slug);
 }
 
-/** Total de clases planeadas en la academia completa (13). Disponibles: 9 (olas 1A+1B). */
+/** Total de clases planeadas en la academia (13). Disponibles: 13 (academia completa). */
 export const TOTAL_CLASES_PLANEADAS = 13;
