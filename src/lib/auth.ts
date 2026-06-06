@@ -65,6 +65,7 @@ export interface SessionUser {
  */
 const HARDCODED_ADMIN_EMAILS = [
   "ronaldmartinezjimenes@gmail.com",
+  "rnd261190@gmail.com",
 ];
 
 export function getAdminEmails(): string[] {
