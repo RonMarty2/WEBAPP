@@ -66,6 +66,38 @@ export interface Foda {
   estrategias: { fo: string[]; do_: string[]; fa: string[]; da: string[] };
 }
 
+/** MPC — Matriz de Perfil Competitivo. */
+export interface Mpc {
+  factores: Array<{ factor: string; peso: number }>;
+  // Cada competidor tiene una calificación (1-4) por factor (mismo orden que factores).
+  competidores: Array<{ nombre: string; esMiEmpresa?: boolean; calificaciones: number[] }>;
+}
+
+/** Cadena de Valor de Porter: notas por actividad. */
+export interface CadenaValor {
+  primarias: Record<string, string>; // logisticaInterna, operaciones, logisticaExterna, marketing, servicio
+  apoyo: Record<string, string>; // infraestructura, rrhh, tecnologia, abastecimiento
+}
+
+/** Matriz BCG: unidades de negocio/productos posicionados por crecimiento y participación. */
+export interface Bcg {
+  unidades: Array<{ nombre: string; crecimiento: number; participacion: number }>;
+}
+
+/** Matriz de Ansoff: iniciativas en los 4 cuadrantes. */
+export interface Ansoff {
+  penetracion: string[];
+  desarrolloProducto: string[];
+  desarrolloMercado: string[];
+  diversificacion: string[];
+}
+
+/** PEYEA / SPACE: 4 dimensiones con factores puntuados. */
+export interface Peyea {
+  // FF financiera (+), VC ventaja competitiva (-), EE estabilidad entorno (-), FI fuerza industria (+)
+  ff: number; vc: number; ee: number; fi: number;
+}
+
 export interface ProyectoEstrategia {
   id: string;
   estudiante_id: string;
@@ -76,6 +108,11 @@ export interface ProyectoEstrategia {
   mefe: { filas: FilaMatriz[] };
   mefi: { filas: FilaMatriz[] };
   foda: Partial<Foda>;
+  mpc?: Partial<Mpc>;
+  cadena_valor?: Partial<CadenaValor>;
+  bcg?: Partial<Bcg>;
+  ansoff?: Partial<Ansoff>;
+  peyea?: Partial<Peyea>;
   estado: EstadoEstrategia;
   creado_en: string;
   actualizado_en: string;
