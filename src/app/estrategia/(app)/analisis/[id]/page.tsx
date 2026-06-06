@@ -12,7 +12,7 @@ import type { ProyectoEstrategia } from '@/types/estrategia';
  */
 const HERRAMIENTAS = [
   { ruta: 'pestel', label: 'PESTEL', desc: 'Análisis del macroentorno (6 dimensiones)', icon: Globe, disponible: true },
-  { ruta: 'porter', label: '5 Fuerzas de Porter', desc: 'Análisis del microentorno / sector', icon: Swords, disponible: false },
+  { ruta: 'porter', label: '5 Fuerzas de Porter', desc: 'Análisis del microentorno / sector', icon: Swords, disponible: true },
   { ruta: 'mpc', label: 'MPC', desc: 'Matriz de Perfil Competitivo', icon: Crosshair, disponible: false },
   { ruta: 'cadena-valor', label: 'Cadena de Valor', desc: 'Análisis interno de actividades', icon: GitBranch, disponible: false },
   { ruta: 'mefe', label: 'MEFE', desc: 'Evaluación de factores externos', icon: Grid3x3, disponible: false },
