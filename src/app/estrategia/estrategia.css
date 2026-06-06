@@ -1,0 +1,56 @@
+/**
+ * Identidad visual del módulo Estrategia: acento VIOLETA (#8b5cf6).
+ * Distinta a Finanzas (negro) y Mercados (azul). Light-only.
+ * Todo bajo .estrategia-scope para no contaminar el resto de webapp.
+ */
+
+.estrategia-scope {
+  --es-bg: 270 40% 99%;
+  --es-surface: 0 0% 100%;
+  --es-fg: 263 40% 14%;
+  --es-muted-fg: 264 12% 47%;
+  --es-border: 270 30% 91%;
+  --es-accent: 258 90% 66%;       /* violet-500 #8b5cf6 */
+  --es-accent-fg: 0 0% 100%;
+  --es-accent-soft: 258 92% 95%;  /* violet-100 */
+  --es-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--es-bg));
+  color: hsl(var(--es-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.estrategia-scope,
+.estrategia-scope * {
+  color-scheme: light !important;
+}
+
+.estrategia-scope .es-card {
+  background: hsl(var(--es-surface));
+  border: 1px solid hsl(var(--es-border));
+  border-radius: var(--es-radius);
+}
+.estrategia-scope .es-accent-bg { background: hsl(var(--es-accent)); }
+.estrategia-scope .es-accent-text { color: hsl(var(--es-accent)); }
+.estrategia-scope .es-accent-soft { background: hsl(var(--es-accent-soft)); }
+.estrategia-scope .es-muted { color: hsl(var(--es-muted-fg)); }
+.estrategia-scope .es-border { border-color: hsl(var(--es-border)); }
+
+.estrategia-scope .es-btn-primary {
+  background: hsl(var(--es-accent));
+  color: hsl(var(--es-accent-fg));
+  border-radius: var(--es-radius);
+  transition: opacity 0.15s ease;
+}
+.estrategia-scope .es-btn-primary:hover { opacity: 0.9; }
+
+.estrategia-scope .es-btn-ghost {
+  border: 1px solid hsl(var(--es-border));
+  color: hsl(var(--es-fg));
+  border-radius: var(--es-radius);
+  transition: background 0.15s ease;
+}
+.estrategia-scope .es-btn-ghost:hover { background: hsl(var(--es-accent-soft)); }
