@@ -1,0 +1,61 @@
+/**
+ * Identidad visual propia del módulo Mercados.
+ *
+ * A diferencia de Finanzas (shadcn neutral, negro/blanco), Mercados usa
+ * una identidad de "datos / investigación": acento azul-cyan (#0ea5e9),
+ * fondo muy claro azulado, tipografía system. Light-only (sin dark:).
+ *
+ * Todo vive bajo .mercados-scope para no contaminar el resto de webapp.
+ */
+
+.mercados-scope {
+  --mk-bg: 210 40% 99%;          /* casi blanco con tinte azul */
+  --mk-surface: 0 0% 100%;       /* cards blancas */
+  --mk-fg: 222 47% 11%;          /* azul muy oscuro casi negro */
+  --mk-muted-fg: 215 16% 47%;    /* gris azulado */
+  --mk-border: 214 32% 91%;      /* borde gris azulado claro */
+  --mk-accent: 199 89% 48%;      /* sky-500 #0ea5e9 */
+  --mk-accent-fg: 0 0% 100%;
+  --mk-accent-soft: 199 95% 94%; /* sky-100 para fondos suaves */
+  --mk-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--mk-bg));
+  color: hsl(var(--mk-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.mercados-scope,
+.mercados-scope * {
+  color-scheme: light !important;
+}
+
+/* Utilidades semánticas del módulo (clases propias, prefijo mk-) */
+.mercados-scope .mk-card {
+  background: hsl(var(--mk-surface));
+  border: 1px solid hsl(var(--mk-border));
+  border-radius: var(--mk-radius);
+}
+.mercados-scope .mk-accent-bg { background: hsl(var(--mk-accent)); }
+.mercados-scope .mk-accent-text { color: hsl(var(--mk-accent)); }
+.mercados-scope .mk-accent-soft { background: hsl(var(--mk-accent-soft)); }
+.mercados-scope .mk-muted { color: hsl(var(--mk-muted-fg)); }
+.mercados-scope .mk-border { border-color: hsl(var(--mk-border)); }
+
+.mercados-scope .mk-btn-primary {
+  background: hsl(var(--mk-accent));
+  color: hsl(var(--mk-accent-fg));
+  border-radius: var(--mk-radius);
+  transition: opacity 0.15s ease;
+}
+.mercados-scope .mk-btn-primary:hover { opacity: 0.9; }
+
+.mercados-scope .mk-btn-ghost {
+  border: 1px solid hsl(var(--mk-border));
+  color: hsl(var(--mk-fg));
+  border-radius: var(--mk-radius);
+  transition: background 0.15s ease;
+}
+.mercados-scope .mk-btn-ghost:hover { background: hsl(var(--mk-accent-soft)); }
