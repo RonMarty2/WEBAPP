@@ -1,0 +1,78 @@
+/**
+ * Estilos scoped del módulo /finanzas (simuladorPRO).
+ *
+ * Diseño: replicar el ADN visual del simuladorPRO (shadcn neutral) DENTRO
+ * del módulo, sin contaminar globals.css de webapp.
+ *
+ * Cualquier elemento bajo .finanzas-scope hereda estos tokens.
+ * Sin .finanzas-scope, los tokens no aplican y el resto de webapp sigue intacta.
+ */
+
+.finanzas-scope {
+  --finanzas-background: 0 0% 100%;
+  --finanzas-foreground: 0 0% 3.9%;
+  --finanzas-card: 0 0% 100%;
+  --finanzas-card-foreground: 0 0% 3.9%;
+  --finanzas-popover: 0 0% 100%;
+  --finanzas-popover-foreground: 0 0% 3.9%;
+  --finanzas-primary: 0 0% 9%;
+  --finanzas-primary-foreground: 0 0% 98%;
+  --finanzas-secondary: 0 0% 96.1%;
+  --finanzas-secondary-foreground: 0 0% 9%;
+  --finanzas-muted: 0 0% 96.1%;
+  --finanzas-muted-foreground: 0 0% 45.1%;
+  --finanzas-accent: 0 0% 96.1%;
+  --finanzas-accent-foreground: 0 0% 9%;
+  --finanzas-destructive: 0 84.2% 60.2%;
+  --finanzas-destructive-foreground: 0 0% 98%;
+  --finanzas-border: 0 0% 89.8%;
+  --finanzas-input: 0 0% 89.8%;
+  --finanzas-ring: 0 0% 3.9%;
+  --finanzas-radius: 0.5rem;
+
+  background: hsl(var(--finanzas-background));
+  color: hsl(var(--finanzas-foreground));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+/* Tokens reescritos a clases utilitarias usadas por shadcn dentro del scope */
+.finanzas-scope .bg-background { background-color: hsl(var(--finanzas-background)); }
+.finanzas-scope .bg-card { background-color: hsl(var(--finanzas-card)); }
+.finanzas-scope .bg-popover { background-color: hsl(var(--finanzas-popover)); }
+.finanzas-scope .bg-primary { background-color: hsl(var(--finanzas-primary)); }
+.finanzas-scope .bg-secondary { background-color: hsl(var(--finanzas-secondary)); }
+.finanzas-scope .bg-muted { background-color: hsl(var(--finanzas-muted)); }
+.finanzas-scope .bg-accent { background-color: hsl(var(--finanzas-accent)); }
+.finanzas-scope .bg-destructive { background-color: hsl(var(--finanzas-destructive)); }
+.finanzas-scope .text-foreground { color: hsl(var(--finanzas-foreground)); }
+.finanzas-scope .text-card-foreground { color: hsl(var(--finanzas-card-foreground)); }
+.finanzas-scope .text-popover-foreground { color: hsl(var(--finanzas-popover-foreground)); }
+.finanzas-scope .text-primary-foreground { color: hsl(var(--finanzas-primary-foreground)); }
+.finanzas-scope .text-secondary-foreground { color: hsl(var(--finanzas-secondary-foreground)); }
+.finanzas-scope .text-muted-foreground { color: hsl(var(--finanzas-muted-foreground)); }
+.finanzas-scope .text-accent-foreground { color: hsl(var(--finanzas-accent-foreground)); }
+.finanzas-scope .text-destructive { color: hsl(var(--finanzas-destructive)); }
+.finanzas-scope .text-destructive-foreground { color: hsl(var(--finanzas-destructive-foreground)); }
+.finanzas-scope .border-border { border-color: hsl(var(--finanzas-border)); }
+.finanzas-scope .border-input { border-color: hsl(var(--finanzas-input)); }
+.finanzas-scope .border-destructive { border-color: hsl(var(--finanzas-destructive)); }
+.finanzas-scope .ring-ring { --tw-ring-color: hsl(var(--finanzas-ring)); }
+.finanzas-scope .focus\:ring-ring:focus { --tw-ring-color: hsl(var(--finanzas-ring)); }
+.finanzas-scope .focus-visible\:ring-ring:focus-visible { --tw-ring-color: hsl(var(--finanzas-ring)); }
+
+/* Hover variants para los componentes shadcn */
+.finanzas-scope .hover\:bg-primary\/90:hover { background-color: hsl(var(--finanzas-primary) / 0.9); }
+.finanzas-scope .hover\:bg-secondary\/70:hover { background-color: hsl(var(--finanzas-secondary) / 0.7); }
+.finanzas-scope .hover\:bg-accent:hover { background-color: hsl(var(--finanzas-accent)); }
+.finanzas-scope .hover\:bg-destructive\/90:hover { background-color: hsl(var(--finanzas-destructive) / 0.9); }
+.finanzas-scope .hover\:text-accent-foreground:hover { color: hsl(var(--finanzas-accent-foreground)); }
+.finanzas-scope .bg-secondary\/30 { background-color: hsl(var(--finanzas-secondary) / 0.3); }
+.finanzas-scope .bg-secondary\/20 { background-color: hsl(var(--finanzas-secondary) / 0.2); }
+.finanzas-scope .bg-card\/50 { background-color: hsl(var(--finanzas-card) / 0.5); }
+.finanzas-scope .bg-destructive\/10 { background-color: hsl(var(--finanzas-destructive) / 0.1); }
+.finanzas-scope .bg-destructive\/5 { background-color: hsl(var(--finanzas-destructive) / 0.05); }
+.finanzas-scope .border-destructive\/50 { border-color: hsl(var(--finanzas-destructive) / 0.5); }
+.finanzas-scope .border-destructive\/40 { border-color: hsl(var(--finanzas-destructive) / 0.4); }
+.finanzas-scope .text-foreground\/80 { color: hsl(var(--finanzas-foreground) / 0.8); }
