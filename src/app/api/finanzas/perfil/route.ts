@@ -6,13 +6,18 @@ import { isSupabaseConfigured, createAdminClient } from '@/lib/supabase';
 /**
  * GET /api/finanzas/perfil
  *
- * Lee la sesión de webapp (cookie lab_session) y devuelve el perfil del
- * módulo Finanzas para ese usuario. Si el perfil no existe, lo crea
- * automáticamente usando los datos del usuario de webapp.
+ * Lee la sesión de webapp (cookie lab_session) y devuelve/crea el perfil
+ * del módulo Finanzas para ese usuario.
  *
- * Esto desacopla el módulo Finanzas de Supabase Auth: una vez que el
- * estudiante se logueó en webapp con Google, el módulo /finanzas lo
- * reconoce sin pedir un segundo login.
+ * AUTO-SYNC del rol: cada vez que se llama, sincroniza el rol del perfil
+ * con el JWT de webapp:
+ *   webapp role 'admin'      → finanzas rol 'docente' + es_admin: true
+ *   webapp role 'docente'    → finanzas rol 'docente'
+ *   webapp role 'estudiante' → finanzas rol 'estudiante'
+ *
+ * Esto permite que un usuario que primero entró como estudiante (cuando
+ * webapp aún no lo reconocía como admin) se promueva automáticamente la
+ * próxima vez sin pasos manuales.
  */
 export async function GET() {
   const cookieStore = await cookies();
@@ -31,9 +36,13 @@ export async function GET() {
   }
 
   // Cast genérico: el cliente Supabase tipado no conoce las tablas finanzas_*
-  // (son nuevas), así que las queries se hacen sin tipos estrictos.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = createAdminClient() as any;
+
+  // Calcular el rol esperado a partir del JWT de webapp
+  const rolEsperado: 'docente' | 'estudiante' =
+    user.role === 'docente' || user.role === 'admin' ? 'docente' : 'estudiante';
+  const esAdminEsperado = user.role === 'admin';
 
   // 1) Buscar perfil existente
   const { data: existing, error: errSelect } = await sb
@@ -43,10 +52,32 @@ export async function GET() {
     .maybeSingle();
 
   if (errSelect) {
-    return NextResponse.json({ error: 'db_select_error', detail: errSelect.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'db_select_error', detail: errSelect.message },
+      { status: 500 }
+    );
   }
 
   if (existing) {
+    // Sincronizar rol y es_admin si el JWT cambió desde el último login
+    const necesitaUpdate =
+      existing.rol !== rolEsperado || existing.es_admin !== esAdminEsperado;
+
+    if (necesitaUpdate) {
+      const { data: updated, error: errUpdate } = await sb
+        .from('finanzas_perfiles')
+        .update({ rol: rolEsperado, es_admin: esAdminEsperado })
+        .eq('id', user.id)
+        .select()
+        .single();
+
+      if (errUpdate) {
+        // No bloqueamos: devolvemos el perfil existente igual
+        return NextResponse.json({ user, perfil: existing });
+      }
+      return NextResponse.json({ user, perfil: updated });
+    }
+
     return NextResponse.json({ user, perfil: existing });
   }
 
@@ -56,17 +87,14 @@ export async function GET() {
   const nombre = partes[0] ?? 'Usuario';
   const apellido = partes.slice(1).join(' ') || '—';
 
-  const rol: 'docente' | 'estudiante' = user.role === 'docente' ? 'docente' : 'estudiante';
-  const esAdmin = user.role === 'admin';
-
   const nuevoPerfil = {
     id: user.id,
     nombre,
     apellido,
-    rol,
+    rol: rolEsperado,
     email: user.email,
     universidad: null as string | null,
-    es_admin: esAdmin,
+    es_admin: esAdminEsperado,
   };
 
   const { data: created, error: errInsert } = await sb
@@ -76,7 +104,10 @@ export async function GET() {
     .single();
 
   if (errInsert) {
-    return NextResponse.json({ error: 'db_insert_error', detail: errInsert.message }, { status: 500 });
+    return NextResponse.json(
+      { error: 'db_insert_error', detail: errInsert.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ user, perfil: created });
