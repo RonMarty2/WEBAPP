@@ -58,12 +58,28 @@ visualmente pero comparten sesión y datos.
 | # | Módulo | Estado | Notas |
 |---|---|---|---|
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
-| 2 | Mercados (Investigación) | ❌ | **PRÓXIMO a construir.** Diferenciador: APIs reales Google Trends + Meta Ads + TikTok Ads + datasets Bolivia |
+| 2 | Mercados (Investigación) | 🔨 EN CONSTRUCCIÓN | FASE 0,1,2 ✅. Detalle de fases abajo. |
 | 3 | Estrategia / Macroentorno | ❌ | PESTEL, Porter, MEFE/MEFI, FODA cruzada con scoring guiado |
 | 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
 | 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
+
+### Progreso detallado del módulo Mercados (`/mercados`)
+- ✅ **FASE 0** — Cimientos: identidad visual propia (azul/cyan, NO copia Finanzas),
+  login único vía `/api/mercados/perfil`, tablas SQL `mercados_*`, dashboard.
+- ✅ **FASE 1** — Academia completa: 13 clases con teoría + ejercicio + quiz.
+  (1A fundamentos, 1B instrumentos, 1C análisis). `/mercados/academia`.
+- ✅ **FASE 2** — Laboratorio: dashboard "Mis investigaciones" (CRUD, opción B
+  aprobada), etapa Diseño (objetivos/hipótesis/variables/geografía), etapa
+  Muestreo (calculadora real conectada a la fórmula de la clase 5).
+- ⬜ **FASE 3** — Diseñador de encuestas (constructor de preguntas/escalas).
+- ⬜ **FASE 4** — Recolección pública: link/QR sin login, dashboard live.
+- ⬜ **FASE 5** — Análisis: tabulación + gráficos + estimador de demanda.
+- ⬜ **FASE 6** — Reporte exportable + artefacto para el Generador.
+
+Patrón confirmado: cada fase grande se divide en sub-olas (1A/1B/1C, 2A/2B)
+para mantener calidad y no saturar el contexto.
 
 ### Módulos eliminados del ecosistema
 - ❌ **Axiom (simulador de exámenes)** — el usuario decidió quitarlo del ecosistema. NO mencionarlo más como producto activo.
