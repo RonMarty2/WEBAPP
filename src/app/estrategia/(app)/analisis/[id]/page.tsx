@@ -19,10 +19,10 @@ const HERRAMIENTAS = [
   { ruta: 'mefi', label: 'MEFI', desc: 'Evaluación de factores internos', icon: Grid3x3, disponible: true },
   { ruta: 'mie', label: 'MIE', desc: 'Matriz Interna-Externa', icon: Network, disponible: true },
   { ruta: 'foda', label: 'FODA cruzada', desc: 'Síntesis y estrategias FO/DO/FA/DA', icon: PieChart, disponible: true },
-  { ruta: 'bcg', label: 'BCG', desc: 'Matriz de portafolio', icon: PieChart, disponible: false },
-  { ruta: 'ansoff', label: 'Ansoff', desc: 'Matriz de crecimiento', icon: TrendingUp, disponible: false },
-  { ruta: 'peyea', label: 'PEYEA', desc: 'Posición estratégica', icon: Compass, disponible: false },
-  { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: false },
+  { ruta: 'bcg', label: 'BCG', desc: 'Matriz de portafolio', icon: PieChart, disponible: true },
+  { ruta: 'ansoff', label: 'Ansoff', desc: 'Matriz de crecimiento', icon: TrendingUp, disponible: true },
+  { ruta: 'peyea', label: 'PEYEA', desc: 'Posición estratégica', icon: Compass, disponible: true },
+  { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: true },
 ];
 
 export default function AnalisisDetalle() {
