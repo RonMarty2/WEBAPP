@@ -87,9 +87,9 @@ export default function ProyectoDetalle() {
           const idxEtapa = ORDEN.indexOf(etapa.key);
           const completada = idxActual > idxEtapa;
           const activa = idxActual === idxEtapa;
-          // Disponible: etapas hasta FASE 4 (diseño, muestreo, encuesta, recolección).
-          // Las demás (fase 5+) aún no → bloqueadas con candado.
-          const disponible = etapa.fase <= 4;
+          // Disponible: etapas hasta FASE 5 (… análisis).
+          // La etapa Reporte (fase 6) aún no → bloqueada con candado.
+          const disponible = etapa.fase <= 5;
           const Icon = etapa.icon;
 
           const contenido = (
