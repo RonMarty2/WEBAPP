@@ -111,17 +111,16 @@ visualmente pero comparten sesión y datos.
 - ⬜ **FASE 1** — Academia: clases sobre análisis situacional.
 - ⬜ **FASE 2+** — Laboratorio con las herramientas (ver alcance abajo).
 
-**Alcance de herramientas (DECISIÓN PENDIENTE del usuario):**
-- NÚCLEO confirmado (cubre ~80% de proyectos de grado):
-  PESTEL (macroentorno) → 5 Fuerzas de Porter (microentorno) →
-  MEFE + MEFI (evaluación de factores) → FODA cruzada (síntesis).
-- CANDIDATAS recomendadas a agregar:
-  · MPC (Matriz de Perfil Competitivo, microentorno)
-  · MIE (Matriz Interna-Externa, sale casi gratis de MEFE+MEFI)
-  · Cadena de Valor (análisis interno que a Porter le falta)
-- OPCIONALES avanzadas (solo si el mercado las pide):
-  BCG, Matriz de Ansoff, PEYEA/SPACE, MCPE/QSPM.
-- El usuario debe elegir el alcance final antes de construir FASE 2+.
+**Alcance de herramientas (DECIDIDO: TODAS):**
+El usuario aprobó incluir TODAS las herramientas de análisis situacional:
+- Macroentorno: PESTEL
+- Microentorno: 5 Fuerzas de Porter · MPC (Matriz de Perfil Competitivo)
+- Interno: Cadena de Valor · (VRIO opcional)
+- Evaluación de factores: MEFE · MEFI
+- Síntesis: FODA cruzada · MIE (Matriz Interna-Externa)
+- Decisión/posición: BCG · Matriz de Ansoff · PEYEA/SPACE · MCPE/QSPM
+Cada herramienta: plantillas bolivianas editables (modo B) + botón
+"Sugerir con IA" (modo C). Se construyen por fases, 1-2 por entrega.
 
 ### Progreso detallado del módulo Mercados (`/mercados`)
 - ✅ **FASE 0** — Cimientos: identidad visual propia (azul/cyan, NO copia Finanzas),
@@ -149,6 +148,30 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-06 — CIERRE DE SESIÓN
+Sesión enorme. Logrado:
+- **Finanzas:** simuladorPRO migrado entero a `/finanzas` (login único, light).
+- **Mercados:** módulo COMPLETO (FASES 0-6) — academia 13 clases + laboratorio
+  (diseño, muestreo, encuesta, recolección pública link/QR, análisis, reporte).
+- **Estrategia:** FASE 0 (cimientos, identidad violeta). Alcance = TODAS las
+  herramientas (decidido).
+- **Contexto compartido + IA:** Proyecto Maestro (PASO 1) + servicio IA
+  compartido `/api/ai/asistir` con contexto cruzado (PASO 2) + componente
+  reusable `SugerirIA`.
+- **Login único Google** funcionando en todos los módulos; super-admin por
+  email (ronaldmartinezjimenes@gmail.com, rnd261190@gmail.com).
+- **SQL ejecutado por el usuario en Supabase:** migrations-mercados,
+  migrations-estrategia, migrations-maestro (las 3 tablas base ya existen).
+
+**Próximo paso al retomar: PASO 3** — construir las herramientas de Estrategia
+(empezar por PESTEL) ya con plantillas bolivianas + botón "Sugerir con IA" +
+conexión al proyecto maestro. Replicar el patrón para el resto de herramientas.
+
+**Pendientes menores:**
+- Selector "Trabajando en: [proyecto maestro]" visible en cada módulo (UI del
+  PASO 1; la infraestructura ya existe, falta el widget en los headers).
+- Vincular Mercados/Finanzas existentes al proyecto maestro vía UI.
 
 ### 2026-06-06
 - **Módulo Mercados — alcance aprobado:**
