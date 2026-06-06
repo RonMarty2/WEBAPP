@@ -37,8 +37,47 @@ visualmente pero comparten sesión y datos.
 ### Producto B — Generador Conectado + Módulos Educativos
 - Cada módulo educativo es un mini-LMS: clases + herramienta + artefactos.
 - El estudiante avanza paso a paso, aprende, y construye su material real.
-- El Generador en modo conectado importa esos artefactos y los consolida.
 - Resultado: documento académico con SUS datos reales, no inventados.
+
+---
+
+## §2.5 Arquitectura de contexto compartido + IA (APROBADO 2026-06-06)
+
+### Proyecto Maestro — OPCIONAL (sirve a dos tipos de cliente)
+- **Cliente 1 — materia suelta:** un estudiante usa UN módulo solo (ej. solo
+  Mercados), sin proyecto maestro. El módulo funciona autónomo. IA sugiere
+  genérico. → se le vende el módulo individual.
+- **Cliente 2 — proyecto de grado completo:** crea un Proyecto Maestro
+  ("Cafetería La Orquídea, Cochabamba") y vincula los módulos. Cada módulo
+  lee el contexto del maestro + los artefactos de otros módulos; la IA genera
+  con contexto cruzado; el Generador consolida al final. → bundle.
+- **El mismo módulo sirve para ambos.** Si hay proyecto maestro activo, se
+  conecta y comparte contexto; si no, funciona solo.
+- UX: selector discreto arriba en cada módulo — "Trabajando en: [Ninguno ▾]"
+  con opción "+ Vincular a un proyecto".
+
+### Servicio de IA compartido
+- Endpoint único `/api/ai/asistir` que TODOS los módulos llaman. Recibe
+  módulo + tarea + contexto (proyecto maestro + artefactos de otros módulos),
+  arma el prompt con contexto cruzado y devuelve la sugerencia.
+- Reusa el `aiProvider.ts` existente de webapp: cascada Groq → Gemini (ambas
+  GRATIS y ya configuradas en Vercel) → Anthropic → OpenAI (pagas).
+- APIs de paga quedan ABIERTAS: el usuario pega la key en Vercel cuando quiera,
+  SIN tocar código.
+- El estudiante SIEMPRE edita/aprueba lo que la IA sugiere (principio del
+  laboratorio: "la IA redacta, el estudiante aprueba").
+
+### Modo de armado de cada herramienta (en todos los módulos)
+- **Por defecto (modo B):** plantillas/ejemplos bolivianos editables que
+  guían sin reemplazar el pensamiento.
+- **Opcional (modo C):** botón "Sugerir con IA" que usa el servicio compartido.
+
+### Orden de construcción aprobado
+- PASO 1: capa de Proyecto Maestro (contexto compartido) — PRIMERO.
+- PASO 2: servicio de IA compartido `/api/ai/asistir` + componente "Sugerir con IA".
+- PASO 3: integrar contexto+IA en módulos y terminar Estrategia con TODAS las
+  herramientas (PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA
+  cruzada, BCG, Ansoff, PEYEA, MCPE).
 
 ---
 
