@@ -59,11 +59,30 @@ visualmente pero comparten sesión y datos.
 |---|---|---|---|
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
-| 3 | Estrategia / Macroentorno | ❌ | PESTEL, Porter, MEFE/MEFI, FODA cruzada con scoring guiado |
+| 3 | Estrategia / Macroentorno | 🔨 EN CONSTRUCCIÓN | FASE 0 ✅ (cimientos, identidad violeta, login único). Núcleo de herramientas + candidatas: ver abajo. |
 | 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
 | 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
+
+### Progreso detallado del módulo Estrategia (`/estrategia`)
+- ✅ **FASE 0** — Cimientos: identidad visual VIOLETA propia (#8b5cf6, distinta
+  a Finanzas/negro y Mercados/azul), login único vía `/api/estrategia/perfil`,
+  tablas SQL `estrategia_*` (matrices como JSONB), hub. Light-only.
+- ⬜ **FASE 1** — Academia: clases sobre análisis situacional.
+- ⬜ **FASE 2+** — Laboratorio con las herramientas (ver alcance abajo).
+
+**Alcance de herramientas (DECISIÓN PENDIENTE del usuario):**
+- NÚCLEO confirmado (cubre ~80% de proyectos de grado):
+  PESTEL (macroentorno) → 5 Fuerzas de Porter (microentorno) →
+  MEFE + MEFI (evaluación de factores) → FODA cruzada (síntesis).
+- CANDIDATAS recomendadas a agregar:
+  · MPC (Matriz de Perfil Competitivo, microentorno)
+  · MIE (Matriz Interna-Externa, sale casi gratis de MEFE+MEFI)
+  · Cadena de Valor (análisis interno que a Porter le falta)
+- OPCIONALES avanzadas (solo si el mercado las pide):
+  BCG, Matriz de Ansoff, PEYEA/SPACE, MCPE/QSPM.
+- El usuario debe elegir el alcance final antes de construir FASE 2+.
 
 ### Progreso detallado del módulo Mercados (`/mercados`)
 - ✅ **FASE 0** — Cimientos: identidad visual propia (azul/cyan, NO copia Finanzas),
