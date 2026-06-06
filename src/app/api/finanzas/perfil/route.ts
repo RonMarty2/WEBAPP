@@ -78,10 +78,19 @@ export async function GET() {
         .single();
 
       if (errUpdate) {
-        // No bloqueamos: devolvemos el perfil existente igual
-        return NextResponse.json({ user, perfil: existing });
+        // Devolver el perfil existente pero con info de debug en headers/body
+        return NextResponse.json({
+          user,
+          perfil: existing,
+          debug: {
+            update_attempted: true,
+            update_error: errUpdate.message,
+            rol_esperado: rolEsperado,
+            es_admin_esperado: esAdminEsperado,
+          },
+        });
       }
-      return NextResponse.json({ user, perfil: updated });
+      return NextResponse.json({ user, perfil: updated, debug: { update_succeeded: true } });
     }
 
     return NextResponse.json({ user, perfil: existing });
