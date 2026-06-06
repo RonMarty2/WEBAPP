@@ -87,9 +87,8 @@ export default function ProyectoDetalle() {
           const idxEtapa = ORDEN.indexOf(etapa.key);
           const completada = idxActual > idxEtapa;
           const activa = idxActual === idxEtapa;
-          // Disponible: etapas hasta FASE 5 (… análisis).
-          // La etapa Reporte (fase 6) aún no → bloqueada con candado.
-          const disponible = etapa.fase <= 5;
+          // Todas las etapas del flujo están disponibles (módulo completo).
+          const disponible = etapa.fase <= 6;
           const Icon = etapa.icon;
 
           const contenido = (
