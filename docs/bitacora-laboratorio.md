@@ -98,7 +98,7 @@ visualmente pero comparten sesión y datos.
 |---|---|---|---|
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
-| 3 | Estrategia / Macroentorno | 🔨 EN CONSTRUCCIÓN | FASE 0 ✅ (cimientos, identidad violeta, login único). Núcleo de herramientas + candidatas: ver abajo. |
+| 3 | Estrategia / Macroentorno | 🔨 EN CONSTRUCCIÓN | 5 de ~11 herramientas listas (PESTEL, Porter, MEFE, MEFI, FODA cruzada). Faltan MPC, Cadena Valor, MIE, BCG, Ansoff, PEYEA, Reporte + Academia. Detalle abajo. |
 | 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
@@ -108,8 +108,18 @@ visualmente pero comparten sesión y datos.
 - ✅ **FASE 0** — Cimientos: identidad visual VIOLETA propia (#8b5cf6, distinta
   a Finanzas/negro y Mercados/azul), login único vía `/api/estrategia/perfil`,
   tablas SQL `estrategia_*` (matrices como JSONB), hub. Light-only.
+- ✅ **Laboratorio (parcial)** — dashboard "Mis análisis" (CRUD) + vista del
+  análisis con las herramientas como etapas. Herramientas LISTAS (5 de ~11):
+  · PESTEL (macroentorno, plantillas bolivianas + IA)
+  · 5 Fuerzas de Porter (microentorno, intensidad + IA)
+  · MEFE (factores externos ponderados) — componente MatrizPonderada reusable
+  · MEFI (factores internos ponderados) — mismo componente
+  · FODA cruzada — pre-carga O/A desde el PESTEL + genera FO/DO/FA/DA con IA
+- ⬜ **Herramientas faltantes:** MPC, Cadena de Valor, MIE, BCG, Ansoff,
+  PEYEA, Reporte (consolidado + artefacto).
 - ⬜ **FASE 1** — Academia: clases sobre análisis situacional.
-- ⬜ **FASE 2+** — Laboratorio con las herramientas (ver alcance abajo).
+- Patrón de cada herramienta: plantillas bolivianas (modo B) + botón
+  "Sugerir con IA" (modo C, vía /api/ai/asistir con contexto del proyecto).
 
 **Alcance de herramientas (DECIDIDO: TODAS):**
 El usuario aprobó incluir TODAS las herramientas de análisis situacional:
