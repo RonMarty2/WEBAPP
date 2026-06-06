@@ -127,6 +127,23 @@ visualmente pero comparten sesión y datos.
 9. **No replicar el simuladorPRO en código.** Si es necesario un módulo
    parecido, se copia y adapta como hicimos con Finanzas.
 
+10. **🚨 REGLA IRROMPIBLE — CUALQUIER cambio en la visión, contexto,
+    decisiones o este archivo de bitácora DEBE ser aprobado por el
+    usuario explícitamente antes de commitear.** No esperar al final
+    de la sesión. Anotar y preguntar EN VIVO, en cada decisión nueva,
+    para no perder nada al cerrarse la ventana de contexto.
+
+    Mecanismo de operación:
+    - Cuando surge una decisión nueva → la formulo en una línea
+      ("¿agrego a la bitácora: '...'?")
+    - Espero aprobación del usuario (sí / ajusta / no)
+    - Si aprueba → edito la bitácora + commit + push
+    - Si pide ajuste → reformulo y vuelvo a preguntar
+    - Si dice no → no toco la bitácora
+
+    Esto vale tanto para agregar decisiones nuevas como para modificar
+    visión, módulos, reglas, próximos pasos. SIN excepción.
+
 ---
 
 ## §6 Patrón técnico para construir un módulo nuevo
