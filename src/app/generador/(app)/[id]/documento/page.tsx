@@ -149,6 +149,26 @@ export default function DocumentoProyecto() {
     } finally { setDescargandoTex(false); }
   };
 
+  const [descargandoZip, setDescargandoZip] = useState(false);
+  const descargarZip = async () => {
+    setDescargandoZip(true);
+    try {
+      const r = await fetch(`/api/maestro/${params.id}/zip`, { credentials: 'include' });
+      if (!r.ok) return;
+      const blob = await r.blob();
+      // Extrae nombre del Content-Disposition; si no, usa fallback.
+      const cd = r.headers.get('Content-Disposition') ?? '';
+      const m = cd.match(/filename="([^"]+)"/);
+      const fname = m?.[1] ?? `${(maestro?.titulo ?? 'proyecto').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-overleaf.zip`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fname;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally { setDescargandoZip(false); }
+  };
+
   if (estado === 'cargando') return <div className="gen-muted py-10 text-center text-sm">Cargando documento…</div>;
   if (estado === 'error' || !maestro) {
     return (
@@ -185,6 +205,9 @@ export default function DocumentoProyecto() {
             <button onClick={descargar} className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium"><Download className="h-3.5 w-3.5" /> .md</button>
             <button onClick={descargarTex} disabled={descargandoTex} className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium disabled:opacity-50">
               {descargandoTex ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} .tex (Overleaf)
+            </button>
+            <button onClick={descargarZip} disabled={descargandoZip} className="gen-btn-primary inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium disabled:opacity-50" title="ZIP listo para subir a Overleaf, con plantilla de tu universidad si la detectamos">
+              {descargandoZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} ZIP Overleaf
             </button>
             <button onClick={() => window.print()} className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium"><Printer className="h-3.5 w-3.5" /> Imprimir</button>
           </div>
