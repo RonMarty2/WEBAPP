@@ -101,6 +101,10 @@ visualmente pero comparten sesión y datos.
     escaparLatex + mdALatex; endpoint `/api/maestro/[id]/latex`; botón
     ".tex (Overleaf)" en el documento.
   - Pendiente (opcional): PDF directo / ZIP Overleaf con carátula por universidad.
+- ✅ **Widget "Trabajando en: [proyecto maestro]"** en los headers de los
+  módulos (Estrategia, Marketing, Organización, Idea, Defensa, Mercados):
+  componente reusable `WidgetMaestro` + helper de maestro activo
+  (localStorage). Da continuidad y enlaza al Generador.
 
 ### Módulos educativos (orden de uso por el estudiante)
 
@@ -209,6 +213,19 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Widget "Trabajando en" → conexión transversal completa
+- Componente reusable **`WidgetMaestro`** (neutro) + helper `lib/maestro/activo.ts`
+  (maestro activo en localStorage, con evento `maestro-activo-cambio`).
+- Integrado en el header de los 6 módulos con RootLayout estándar (Estrategia,
+  Marketing, Organización, Idea, Defensa, Mercados): muestra/elige el proyecto
+  maestro activo y enlaza al Generador. Push 41be81f.
+- Con esto, el ecosistema queda cosido por ambos lados: desde el Generador
+  vinculas módulos; desde cada módulo ves y eliges tu proyecto y saltas al
+  Generador.
+- **Estado del proyecto:** 7 módulos COMPLETOS + Generador conectado (Waves 1-3)
+  + widget transversal. Pendientes solo opcionales (PDF/ZIP Overleaf con
+  carátula; pasar el maestro activo a las llamadas SugerirIA de cada módulo).
 
 ### 2026-06-07 — Academias de Marketing, Organización, Idea y Defensa → TODOS los módulos COMPLETOS
 - Replicado el patrón de academia (validado en Estrategia) en los 4 módulos
