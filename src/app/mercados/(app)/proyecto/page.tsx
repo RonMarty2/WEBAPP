@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Plus, FolderSearch, Trash2, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Plus, FolderSearch, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoProyecto } from '@/types/mercados';
 
 interface ProyectoLista {
@@ -24,10 +25,18 @@ const ESTADO_LABEL: Record<EstadoProyecto, { txt: string; clase: string }> = {
 };
 
 export default function MisInvestigaciones() {
+  const searchParams = useSearchParams();
+  // Si llegamos desde otro módulo (ej. Idea) con ?titulo=...&desde=idea,
+  // abrimos el formulario "Nueva" ya pre-llenado. Solo lo verán los
+  // estudiantes Pro/Elite porque SiguienteModulo solo agrega los params
+  // cuando el plan es premium.
+  const tituloPrellenado = searchParams.get('titulo') ?? '';
+  const desde = searchParams.get('desde');
+
   const [proyectos, setProyectos] = useState<ProyectoLista[]>([]);
   const [montado, setMontado] = useState(false);
-  const [creando, setCreando] = useState(false);
-  const [titulo, setTitulo] = useState('');
+  const [creando, setCreando] = useState(!!tituloPrellenado);
+  const [titulo, setTitulo] = useState(tituloPrellenado);
   const [guardando, setGuardando] = useState(false);
 
   const cargar = () => {
@@ -93,6 +102,15 @@ export default function MisInvestigaciones() {
 
       {creando && (
         <form onSubmit={crear} className="mk-card mb-5 p-5">
+          {tituloPrellenado && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs text-violet-900">
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-violet-600" />
+              <span>
+                Título tomado desde <strong>{desde === 'idea' ? 'tu Idea' : 'tu módulo anterior'}</strong>.
+                Puedes editarlo si quieres ajustarlo para esta investigación.
+              </span>
+            </div>
+          )}
           <label className="text-sm font-medium">Título de la investigación</label>
           <p className="mk-muted text-xs">Ej: Demanda de cafetería en la zona norte de Cochabamba</p>
           <input

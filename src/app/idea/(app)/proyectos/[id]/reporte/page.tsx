@@ -215,7 +215,7 @@ export default function ReporteIdea() {
       )}
 
       <div className="print:hidden">
-        <SiguienteModulo actual="idea" modalidad={p.tipo_trabajo} />
+        <SiguienteModulo actual="idea" modalidad={p.tipo_trabajo} tituloContexto={p.titulo} />
       </div>
     </div>
   );
