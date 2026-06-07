@@ -97,7 +97,10 @@ visualmente pero comparten sesión y datos.
     estructura de proyecto de grado (10 secciones) o desde cero, generación
     capítulo por capítulo con IA (contexto cruzado), edición/reordenar,
     persistencia (`documento` JSONB, migración 002), export markdown/.md/imprimir.
-  - Pendiente Wave 3: export LaTeX/PDF/Overleaf (reusar `/projects/*`).
+  - **Wave 3:** export **LaTeX/Overleaf** — `documentoALatex()` reusa
+    escaparLatex + mdALatex; endpoint `/api/maestro/[id]/latex`; botón
+    ".tex (Overleaf)" en el documento.
+  - Pendiente (opcional): PDF directo / ZIP Overleaf con carátula por universidad.
 
 ### Módulos educativos (orden de uso por el estudiante)
 
@@ -206,6 +209,15 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Generador Modo Conectado: Wave 3 (export LaTeX/Overleaf)
+- `documentoALatex()` en `src/lib/generador/latex.ts` reusa `escaparLatex` y
+  `mdALatex` de latexMonografia para producir un `.tex` compilable (article con
+  título, índice y secciones). Endpoint `GET /api/maestro/[id]/latex` y botón
+  ".tex (Overleaf)" en el documento. Push 4e655f0.
+- El Generador conectado entrega ya el ciclo completo: vincular módulos →
+  consolidar contexto → redactar el documento con IA → exportar a markdown/.md
+  y LaTeX/Overleaf.
 
 ### 2026-06-07 — Generador Modo Conectado: Wave 2 (documento)
 - Construido el **documento del proyecto** en `/generador/[id]/documento`: el
