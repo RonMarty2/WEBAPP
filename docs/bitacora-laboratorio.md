@@ -17,29 +17,22 @@ Con eso retoma todo el contexto. El proyecto está MUY avanzado: los **7 módulo
 educativos están COMPLETOS** (academia + laboratorio), el **Generador conectado**
 funciona (Waves 1-3) y el **widget transversal** "Trabajando en" está integrado.
 
-### ⚠️ Acción pendiente del usuario en Supabase (lo único que bloquea)
-Faltan ejecutar estas migraciones (idempotentes) en **Supabase → SQL Editor**:
-- `supabase/migrations-idea/001_estructura_base.sql` (tablas `idea_*`)
-- `supabase/migrations-defensa/001_estructura_base.sql` (tablas `defensa_*`)
-- `supabase/migrations-organizacion/001_estructura_base.sql` (tablas `organizacion_*`)
-- `supabase/migrations-maestro/002_documento.sql` (columna `documento`)
+### ✅ Migraciones de Supabase — TODAS EJECUTADAS (2026-06-07 sesión 2)
+El usuario ejecutó las 4 migraciones que faltaban (idea, defensa, organización,
+maestro/002_documento). El ecosistema queda 100% operativo.
 
-Hasta correrlas, `/idea`, `/defensa`, `/organizacion` no guardan, y el documento
-del Generador no persiste. (MCPE de Estrategia y Marketing 001 ya se corrieron.)
-
-### Estado de migraciones SQL (✅ = ejecutada por el usuario)
+### Estado de migraciones SQL (✅ todas ejecutadas)
 | Migración | Estado |
 |---|---|
-| `migrations-finanzas/*` | ✅ (módulo funcional) |
+| `migrations-finanzas/*` | ✅ |
 | `migrations-mercados/001` | ✅ |
-| `migrations-estrategia/001`, `002` | ✅ |
-| `migrations-estrategia/003_mcpe` | ✅ |
+| `migrations-estrategia/001`, `002`, `003_mcpe` | ✅ |
 | `migrations-maestro/001_proyecto_maestro` | ✅ |
+| `migrations-maestro/002_documento` | ✅ |
 | `migrations-marketing/001` | ✅ |
-| `migrations-idea/001` | ⬜ PENDIENTE |
-| `migrations-defensa/001` | ⬜ PENDIENTE |
-| `migrations-organizacion/001` | ⬜ PENDIENTE |
-| `migrations-maestro/002_documento` | ⬜ PENDIENTE |
+| `migrations-idea/001` | ✅ |
+| `migrations-defensa/001` | ✅ |
+| `migrations-organizacion/001` | ✅ |
 
 ### Pendientes
 - ⬜ **(opcional)** Export PDF directo del Generador. El `.tex` y el ZIP
