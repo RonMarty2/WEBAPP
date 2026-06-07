@@ -177,22 +177,23 @@ export async function armarZipOverleaf(
   const zip = new JSZip();
   zip.file('main.tex', mainTex);
 
+  // README breve y útil — checklist concreto, no narrativo.
+  const placeholdersAdvertencia = universidad
+    ? '\n⚠️  Hay placeholders [entre corchetes] en main.tex que DEBES reemplazar:\n     [Carrera], [Facultad], [Departamento], [Nombre del tutor], etc.\n     Búscalos con Ctrl+F en Overleaf y completa con tus datos.\n'
+    : '';
+  const logoNombre = universidad ? `logos/${universidad}.png` : null;
   const readme = [
-    'Paquete Overleaf generado por Laboratorio Académico PRO',
+    `# ${tituloProy}`,
     '',
-    `Proyecto: ${tituloProy}`,
-    `Estudiante: ${nombreEstudiante}`,
-    `Plantilla: ${universidad ? universidad.toUpperCase() : 'Genérica (article)'}`,
-    `Fecha: ${mes} ${anio}`,
+    `Generado: ${mes} ${anio}`,
+    `Plantilla: ${universidad ? universidad.toUpperCase() : 'genérica (article)'}`,
     '',
-    'Cómo usar:',
-    '  1) Sube este ZIP a Overleaf (Nuevo Proyecto → Subir).',
-    '  2) Si la plantilla usa logo de tu universidad, ponlo en `logos/` con',
-    '     el nombre que el preámbulo espera (ej. `logos/umss.png`).',
-    '  3) Reemplaza los placeholders `[Tu...]` por tus datos reales en main.tex.',
-    '  4) Compila con pdflatex.',
-  ].join('\n');
-  zip.file('README.txt', readme);
+    '## Pasos',
+    '1. Subir este ZIP a Overleaf (Nuevo Proyecto → Subir Proyecto).',
+    logoNombre ? `2. Subir tu logo a ${logoNombre} (o dejar el placeholder).` : '2. (No requiere logo.)',
+    `${placeholdersAdvertencia ? '3. ' + placeholdersAdvertencia.trim() + '\n4. ' : '3. '}Compilar con pdflatex.`,
+  ].filter(Boolean).join('\n');
+  zip.file('README.md', readme);
 
   // Carpeta para que el estudiante coloque su logo
   zip.folder('logos');

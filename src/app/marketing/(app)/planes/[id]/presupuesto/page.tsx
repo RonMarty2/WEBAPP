@@ -21,8 +21,9 @@ const formatBs = (n: number) =>
 
 /** Métricas derivadas por canal. */
 function metrica(c: CanalPresupuesto) {
-  const leads = c.cpl > 0 ? Math.floor(c.inversion / c.cpl) : 0;
-  const ventas = Math.floor(leads * (c.conversion / 100));
+  // Round en vez de floor: floor sub-estimaba ventas hasta ~22% acumulado.
+  const leads = c.cpl > 0 ? Math.round(c.inversion / c.cpl) : 0;
+  const ventas = Math.round(leads * (c.conversion / 100));
   const ingreso = ventas * c.ticket;
   const roas = c.inversion > 0 ? ingreso / c.inversion : 0;
   const cac = ventas > 0 ? c.inversion / ventas : 0;

@@ -176,7 +176,11 @@ export default function DocumentoProyecto() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${(maestro?.titulo ?? 'proyecto').replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.md`;
+    // Nombre seguro: quita acentos y caracteres especiales (consistente con .tex y .zip).
+    const base = (maestro?.titulo ?? 'proyecto')
+      .normalize('NFD').replace(/[^ -~]/g, '')
+      .replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'proyecto';
+    a.download = `${base}.md`;
     a.click();
     URL.revokeObjectURL(url);
   };
