@@ -99,7 +99,7 @@ visualmente pero comparten sesión y datos.
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
-| 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
+| 4 | Marketing | 🔨 EN CONSTRUCCIÓN | FASE 0 lista (cimientos: identidad rosa, login único, tablas `marketing_*`, shell navegable con CRUD de planes). Herramientas pendientes. Detalle abajo. |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
 | 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
@@ -143,6 +143,22 @@ El usuario aprobó incluir TODAS las herramientas de análisis situacional:
 Cada herramienta: plantillas bolivianas editables (modo B) + botón
 "Sugerir con IA" (modo C). Se construyen por fases, 1-2 por entrega.
 
+### Progreso detallado del módulo Marketing (`/marketing`)
+- ✅ **FASE 0** — Cimientos: identidad visual ROSA/MAGENTA (#f43f5e, distinta a
+  Finanzas/negro, Mercados/azul y Estrategia/violeta), login único vía
+  `/api/marketing/perfil`, tablas SQL `marketing_*` (herramientas como JSONB),
+  shell con CRUD de planes. Light-only. Prefijo de tokens y clases: `mkt-`
+  (Mercados ya usa `mk-`).
+- ⬜ **Herramientas:** Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL,
+  Calendario editorial, Reporte consolidado.
+- ⬜ **FASE 1** — Academia.
+- **La migración 001 ya incluye TODAS las columnas** (`buyer_persona`,
+  `mezcla`, `presupuesto`, `calendario`). No habrá más migraciones por
+  herramienta, salvo que aparezca algo nuevo.
+- **Aclaración importante:** `src/app/ecosistema/universidad/marketing/` es
+  el prototipo mock del ecosistema "dos mundos" (usa `mock-state`), NO se
+  toca. El módulo real funcional vive en `src/app/marketing/`.
+
 ### Progreso detallado del módulo Mercados (`/mercados`)
 - ✅ **FASE 0** — Cimientos: identidad visual propia (azul/cyan, NO copia Finanzas),
   login único vía `/api/mercados/perfil`, tablas SQL `mercados_*`, dashboard.
@@ -169,6 +185,23 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Marketing: FASE 0 (cimientos del módulo)
+- Construido el shell del módulo Marketing siguiendo el patrón validado:
+  identidad visual **rosa/magenta** (#f43f5e) bajo `.marketing-scope`, login
+  único por sesión de webapp con super-admin por email, tablas `marketing_*`
+  (JSONB, sin RLS, id TEXT), ProtectedRoute, RootLayout con menú lateral,
+  hub, Academia (stub), "Mis planes" (CRUD) y vista del plan con sus 5
+  herramientas como etapas marcadas "Pronto". Build verde. Push 5fc4835.
+- **Migración 001 incluye TODAS las columnas** (`buyer_persona`, `mezcla`,
+  `presupuesto`, `calendario`) — no habrá más migraciones por cada
+  herramienta. El usuario debe ejecutarla en Supabase para que el módulo
+  guarde datos (mientras tanto, el shell se ve pero el login fallará).
+- **Aclaración encontrada y registrada:** `src/app/ecosistema/` es un
+  prototipo con `mock-state` del ecosistema "dos mundos"; los módulos
+  reales viven en `src/app/<modulo>/`. Marketing real está en `src/app/marketing/`.
+- **Decisión del usuario:** seguir construyendo herramientas sin pausa
+  entre cada una ("LA QUE SIGUE POR QUE ME PREGUNTAS??").
 
 ### 2026-06-07 — Estrategia: laboratorio al 100% (MCPE/QSPM) + siguiente módulo
 - Construida la última herramienta: **MCPE/QSPM** (Matriz Cuantitativa de
