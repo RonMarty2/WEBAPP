@@ -191,7 +191,52 @@ export default function DashboardPage() {
           <p style={{ color: "var(--fg-muted)", fontSize: 14, position: "relative" }}>Desde aquí puedes crear y gestionar tus documentos académicos.</p>
         </div>
 
+        {/* Tu camino — dos opciones grandes para descubrir el ecosistema */}
+        <div style={{ marginBottom: 28 }}>
+          <h2 style={{ fontSize: 13, fontWeight: 700, color: "var(--fg-muted)", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>Tu camino</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 14 }}>
+            <a
+              href="#mis-proyectos"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById("mis-proyectos")?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="card"
+              style={{ borderColor: "rgba(37,99,235,0.25)", background: "linear-gradient(135deg, rgba(37,99,235,0.06), rgba(37,99,235,0.02))", padding: 22, textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", cursor: "pointer", transition: "transform 0.15s ease" }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, color: "rgb(37,99,235)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Camino rápido</div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, marginTop: 6, marginBottom: 6 }}>La IA hace todo desde tu tema</h3>
+              <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.5, flex: 1 }}>
+                Generador Autónomo. Para cuando vas apurado: dile el tema y obtén tu documento académico.
+              </p>
+              <span style={{ marginTop: 14, fontSize: 13, fontWeight: 600, color: "rgb(37,99,235)" }}>
+                Ver mis proyectos abajo ↓
+              </span>
+            </a>
+
+            <Link
+              href="/modulos"
+              className="card"
+              style={{ borderColor: "rgba(20,184,166,0.3)", background: "linear-gradient(135deg, rgba(20,184,166,0.08), rgba(16,185,129,0.04))", padding: 22, textDecoration: "none", color: "inherit", display: "flex", flexDirection: "column", transition: "transform 0.15s ease" }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+            >
+              <div style={{ fontSize: 11, fontWeight: 700, color: "rgb(13,148,136)", textTransform: "uppercase", letterSpacing: "0.08em" }}>Camino formativo</div>
+              <h3 style={{ fontSize: 18, fontWeight: 800, marginTop: 6, marginBottom: 6 }}>Aprende y construye con tus datos</h3>
+              <p style={{ fontSize: 13, color: "var(--fg-muted)", lineHeight: 1.5, flex: 1 }}>
+                7 módulos educativos + Generador Conectado. Tu documento con datos reales, no inventados — perfecto para defender.
+              </p>
+              <span style={{ marginTop: 14, fontSize: 13, fontWeight: 600, color: "rgb(13,148,136)" }}>
+                Explorar los módulos →
+              </span>
+            </Link>
+          </div>
+        </div>
+
         {/* Mis Proyectos */}
+        <div id="mis-proyectos" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--fg-muted)" }}>Mis proyectos</h2>
           <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
