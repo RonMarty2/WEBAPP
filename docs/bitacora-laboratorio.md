@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-07 (sesión: 7 módulos COMPLETOS + Generador conectado Waves 1-3 + widget transversal)
+> **Última actualización:** 2026-06-07 (sesión 2: auto-conexión widget→SugerirIA + ZIP Overleaf por universidad)
 
 ---
 
@@ -41,11 +41,21 @@ del Generador no persiste. (MCPE de Estrategia y Marketing 001 ya se corrieron.)
 | `migrations-organizacion/001` | ⬜ PENDIENTE |
 | `migrations-maestro/002_documento` | ⬜ PENDIENTE |
 
-### Pendientes (todos OPCIONALES, no bloquean nada)
-- Generador: export PDF directo / ZIP Overleaf con carátula por universidad
-  (reusar `src/lib/latex/preamble-*.ts`).
-- Pasar el maestro activo (widget) a las llamadas `SugerirIA` de cada módulo
-  para que las sugerencias usen contexto cruzado automáticamente.
+### Pendientes
+- ⬜ **(opcional)** Export PDF directo del Generador. El `.tex` y el ZIP
+  Overleaf cubren el caso de uso académico estándar.
+
+### Cerrado el 2026-06-07 (sesión 2)
+- ✅ **Auto-conexión widget → SugerirIA** (commit `e3dab91`). Hook
+  `useMaestroActivo()`: si `SugerirIA` no recibe `maestroId` por prop, lee el
+  maestro activo del widget y muestra "Usando contexto de: [proyecto]".
+  Todas las herramientas de los 7 módulos pasan a usar contexto cruzado
+  automáticamente sin tocar el código de cada herramienta.
+- ✅ **Export ZIP Overleaf con plantilla por universidad** (commit `ae06927`).
+  `armarZipOverleaf()` detecta UMSS/UCB/UCATEC/UNIFRANZ por nombre y reusa los
+  preámbulos+carátulas existentes. Endpoint `/api/maestro/[id]/zip` + botón
+  "ZIP Overleaf" en el documento. Campos faltantes quedan como placeholders
+  editables `[Tu carrera]`.
 
 ---
 
@@ -141,11 +151,19 @@ visualmente pero comparten sesión y datos.
   - **Wave 3:** export **LaTeX/Overleaf** — `documentoALatex()` reusa
     escaparLatex + mdALatex; endpoint `/api/maestro/[id]/latex`; botón
     ".tex (Overleaf)" en el documento.
-  - Pendiente (opcional): PDF directo / ZIP Overleaf con carátula por universidad.
+  - **Wave 4:** **ZIP Overleaf con plantilla por universidad** —
+    `armarZipOverleaf()` detecta UMSS/UCB/UCATEC/UNIFRANZ y reusa los
+    preámbulos+carátulas oficiales (`src/lib/latex/preamble-*.ts`). Endpoint
+    `/api/maestro/[id]/zip` + botón "ZIP Overleaf". Si no detecta, fallback
+    al article genérico.
+  - Pendiente (opcional): PDF directo (el `.tex` y el ZIP ya cubren el caso).
 - ✅ **Widget "Trabajando en: [proyecto maestro]"** en los headers de los
   módulos (Estrategia, Marketing, Organización, Idea, Defensa, Mercados):
   componente reusable `WidgetMaestro` + helper de maestro activo
   (localStorage). Da continuidad y enlaza al Generador.
+- ✅ **Auto-conexión widget → SugerirIA** — hook `useMaestroActivo()`. Todas las
+  herramientas que usan `SugerirIA` ahora pasan automáticamente el `maestroId`
+  al servicio de IA, sin necesidad de tocar el código de cada herramienta.
 
 ### Módulos educativos (orden de uso por el estudiante)
 
@@ -254,6 +272,21 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 (sesión 2) — Cerrados los dos pendientes opcionales
+- **Auto-conexión widget → SugerirIA** (`e3dab91`): hook `useMaestroActivo()`
+  en `src/lib/maestro/useMaestroActivo.ts` lee el id del widget (localStorage)
+  y consulta `/api/maestro/[id]` para el título. `SugerirIA` lo usa de fallback
+  si no recibe `maestroId` por prop. Muestra badge "Usando contexto de: [proy]".
+  Efecto: TODAS las herramientas pasan a contexto cruzado sin cambios en cada
+  módulo.
+- **ZIP Overleaf por universidad** (`ae06927`): `armarZipOverleaf()` en
+  `src/lib/generador/zip.ts` detecta UMSS/UCB/UCATEC/UNIFRANZ por nombre y
+  reusa los preámbulos+carátulas oficiales existentes. Endpoint
+  `/api/maestro/[id]/zip` y botón "ZIP Overleaf" en el documento. Sin match,
+  fallback al article genérico de `documentoALatex`.
+- **Estado:** el laboratorio queda funcionalmente terminado para el caso de
+  uso académico estándar. Solo queda el SQL pendiente del usuario en Supabase.
 
 ### 2026-06-07 — CIERRE DE SESIÓN (sesión enorme, todo el ecosistema)
 Logrado hoy, en orden:
