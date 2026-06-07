@@ -90,11 +90,14 @@ visualmente pero comparten sesión y datos.
 
 ### Generador
 - ✅ Modo Autónomo (lo que webapp hace hoy en `/projects/*`)
-- 🔨 Modo Conectado — **Wave 1 lista** en `/generador` (identidad teal): crear
-  Proyecto Maestro, vincular los 7 módulos, ver contexto consolidado y generar
-  un borrador del índice del proyecto de grado con IA (`/api/ai/asistir` +
-  `construirContextoMaestro` extendido a los 7 módulos). Pendiente Wave 2:
-  generación capítulo por capítulo y export (LaTeX/PDF/Overleaf).
+- 🔨 Modo Conectado en `/generador` (identidad teal):
+  - **Wave 1:** crear Proyecto Maestro, vincular los 7 módulos, ver contexto
+    consolidado, borrador rápido del índice con IA.
+  - **Wave 2:** documento del proyecto en `/generador/[id]/documento` —
+    estructura de proyecto de grado (10 secciones) o desde cero, generación
+    capítulo por capítulo con IA (contexto cruzado), edición/reordenar,
+    persistencia (`documento` JSONB, migración 002), export markdown/.md/imprimir.
+  - Pendiente Wave 3: export LaTeX/PDF/Overleaf (reusar `/projects/*`).
 
 ### Módulos educativos (orden de uso por el estudiante)
 
@@ -203,6 +206,18 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Generador Modo Conectado: Wave 2 (documento)
+- Construido el **documento del proyecto** en `/generador/[id]/documento`: el
+  estudiante arma la estructura (10 secciones típicas de proyecto de grado, o
+  desde cero), genera cada capítulo con IA usando el contexto cruzado del
+  maestro, edita/reordena, y exporta (copiar markdown, descargar `.md`, imprimir).
+- **Persistencia:** columna `documento` JSONB en `proyecto_maestro` (migración
+  **002_documento.sql** — el usuario debe ejecutarla). Whitelist PATCH ampliada.
+- Generación por sección y "generar todas las vacías" (loop). Reusa
+  `/api/ai/asistir` con `maestroId`. Push 164838f.
+- **Pendiente Wave 3:** export real LaTeX/PDF/Overleaf (reusar la maquinaria de
+  `/projects/*`). Sigue pendiente el widget "Trabajando en" y las Academias.
 
 ### 2026-06-07 — Generador Modo Conectado: Wave 1
 - Construida la primera ola del **Generador conectado** en `/generador`
