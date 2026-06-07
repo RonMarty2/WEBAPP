@@ -44,15 +44,18 @@ export interface Puesto {
 
 export interface Rrhh {
   puestos: Puesto[];
-  /** Aportes patronales en Bolivia (% sobre salario bruto). Valores defaults editables. */
+  /**
+   * Aportes patronales en Bolivia (% sobre el total ganado). Editables.
+   * Los 4 primeros son el aporte patronal mensual (≈16.71%); aguinaldo e
+   * indemnización son provisiones anuales prorrateadas (1/12 ≈ 8.33% c/u).
+   */
   aportes: {
-    cajaSalud: number;     // 10%
-    proVivienda: number;   // 2%
-    riesgosProf: number;   // 1.71%
-    aporteSolidario: number; // 3% (aporte patronal solidario)
-    afp: number;           // 1.71% (Riesgo común patronal AFP) - opcional
-    aguinaldo: number;     // 8.33% (1/12 sueldo anual)
-    primaProv: number;     // 8.33% provisión prima cuando aplica
+    cajaSalud: number;         // 10%   — Caja Nacional de Salud
+    proVivienda: number;       // 2%    — Aporte Patronal Vivienda
+    riesgoProfesional: number; // 1.71% — Prima de riesgo profesional (AFP)
+    aporteSolidario: number;   // 3%    — Aporte Patronal Solidario
+    aguinaldo: number;         // 8.33% — provisión aguinaldo (1 sueldo/año)
+    indemnizacion: number;     // 8.33% — provisión indemnización (1 sueldo/año)
   };
 }
 

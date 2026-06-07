@@ -11,12 +11,12 @@ import type { ProyectoOrganizacion } from '@/types/organizacion';
  * `disponible` marca cuáles ya están construidas.
  */
 const HERRAMIENTAS = [
-  { ruta: 'organigrama', label: 'Organigrama', desc: 'Estructura jerárquica de la empresa', icon: GitBranch, disponible: false },
-  { ruta: 'rrhh', label: 'Recursos Humanos', desc: 'Cargos, salarios y aportes patronales (Bolivia)', icon: Users, disponible: false },
-  { ruta: 'legal', label: 'Legalización', desc: 'NIT, Fundempresa, AFP, licencias', icon: Scale, disponible: false },
-  { ruta: 'tecnico', label: 'Aspectos técnicos', desc: 'Proceso productivo, capacidad, layout', icon: Cog, disponible: false },
-  { ruta: 'branding', label: 'Branding', desc: 'Identidad, valores, tono', icon: Palette, disponible: false },
-  { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: false },
+  { ruta: 'organigrama', label: 'Organigrama', desc: 'Estructura jerárquica de la empresa', icon: GitBranch, disponible: true },
+  { ruta: 'rrhh', label: 'Recursos Humanos', desc: 'Cargos, salarios y aportes patronales (Bolivia)', icon: Users, disponible: true },
+  { ruta: 'legal', label: 'Legalización', desc: 'NIT, Fundempresa, AFP, licencias', icon: Scale, disponible: true },
+  { ruta: 'tecnico', label: 'Aspectos técnicos', desc: 'Proceso productivo, capacidad, layout', icon: Cog, disponible: true },
+  { ruta: 'branding', label: 'Branding', desc: 'Identidad, valores, tono', icon: Palette, disponible: true },
+  { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: true },
 ];
 
 export default function ProyectoDetalle() {
