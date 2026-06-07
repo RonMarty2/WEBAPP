@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, GitBranch, Plus, X, Check } from 'lucide-react';
 import type { Organigrama, NodoOrganigrama } from '@/types/organizacion';
@@ -26,6 +26,7 @@ const PLANTILLA = (): NodoOrganigrama[] => {
 
 export default function HerramientaOrganigrama() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [org, setOrg] = useState<Organigrama>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -53,7 +54,7 @@ export default function HerramientaOrganigrama() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ organigrama: org, estado: 'organigrama' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/organizacion/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/organizacion/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

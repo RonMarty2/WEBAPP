@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Swords, Check } from 'lucide-react';
 import { FUERZAS_PORTER, ESCALA_INTENSIDAD, interpretarAtractivo } from '@/lib/estrategia/plantillas-porter';
@@ -20,6 +20,7 @@ const VACIO: Porter = {
 
 export default function HerramientaPorter() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [porter, setPorter] = useState<Porter>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [sector, setSector] = useState('');
@@ -57,7 +58,7 @@ export default function HerramientaPorter() {
       });
       if (res.ok) {
         setGuardado(true);
-        if (volver) window.location.href = `/estrategia/analisis/${params.id}`;
+        if (volver) router.push(`/estrategia/analisis/${params.id}`);
       }
     } finally {
       setGuardando(false);

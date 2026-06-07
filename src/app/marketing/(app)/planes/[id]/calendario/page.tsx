@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, CalendarDays, Plus, X, Check, Sparkles, Loader2 } from 'lucide-react';
 import type { Calendario, EstadoPublicacion, PublicacionCalendario } from '@/types/marketing';
@@ -25,6 +26,8 @@ function masDias(d: string, n: number) {
 
 export default function HerramientaCalendario() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const maestroActivo = useMaestroActivo();
   const [cal, setCal] = useState<Calendario>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [marca, setMarca] = useState('');
@@ -80,7 +83,7 @@ export default function HerramientaCalendario() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ calendario: cal, estado: 'calendario' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/marketing/planes/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/marketing/planes/${params.id}`); }
     } finally { setGuardando(false); }
   };
 
@@ -95,7 +98,7 @@ export default function HerramientaCalendario() {
       const instruccion = `Producto/marca: ${marca || titulo}. Sector: ${sector || '—'}.`;
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ modulo: 'marketing', tarea, instruccion, formato: 'texto' }),
+        body: JSON.stringify({ modulo: 'marketing', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),
       });
       const d = await res.json();
       if (res.ok && d.texto) {

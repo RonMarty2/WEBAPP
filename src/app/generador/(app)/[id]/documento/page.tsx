@@ -59,38 +59,74 @@ export default function DocumentoProyecto() {
     return copia;
   });
 
+  // Errores visibles para el estudiante (en lugar de tragárselos silenciosamente).
+  const [errorGen, setErrorGen] = useState<string | null>(null);
+  const [progresoLote, setProgresoLote] = useState<{ hechos: number; total: number; fallos: number } | null>(null);
+
   // Genera el contenido de una sección con IA usando el contexto del maestro.
-  const generarSeccion = async (sec: SeccionDocumento): Promise<string | null> => {
+  // Devuelve null si falla; el llamador surface el error al usuario.
+  const generarSeccion = async (sec: SeccionDocumento, signal?: AbortSignal): Promise<string | null> => {
     const tarea =
       `Redacta el contenido de la sección "${sec.titulo}" de un proyecto de grado para este negocio. ` +
       'Usa el trabajo real de los módulos vinculados (idea, mercados, estrategia, marketing, organización, finanzas, defensa) ' +
       'cuando aplique a esta sección. Redacta en prosa académica, español neutro boliviano (tuteo), concreto y sin inventar cifras como si fueran reales. ' +
       'Si falta información de un módulo, indícalo entre [corchetes] como pendiente.';
-    const r = await fetch('/api/ai/asistir', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-      body: JSON.stringify({ modulo: 'generador', tarea, instruccion: '', maestroId: params.id, formato: 'texto' }),
-    });
-    const d = await r.json();
-    return r.ok ? (d.texto ?? '') : null;
+    try {
+      const r = await fetch('/api/ai/asistir', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ modulo: 'generador', tarea, instruccion: '', maestroId: params.id, formato: 'texto' }),
+        signal,
+      });
+      if (!r.ok) {
+        const d = await r.json().catch(() => null);
+        throw new Error(d?.detail ?? `Error ${r.status}`);
+      }
+      const d = await r.json();
+      return d.texto ?? '';
+    } catch (e) {
+      if ((e as { name?: string }).name === 'AbortError') return null;
+      throw e;
+    }
   };
 
   const generarUna = async (sec: SeccionDocumento) => {
-    setGenerandoId(sec.id);
+    setGenerandoId(sec.id); setErrorGen(null);
     try {
       const txt = await generarSeccion(sec);
       if (txt !== null) upd(sec.id, { contenido: txt });
+    } catch (e) {
+      setErrorGen(`No se pudo generar "${sec.titulo}": ${(e as Error).message}`);
     } finally { setGenerandoId(null); }
   };
 
   const generarVacias = async () => {
-    setGenerandoTodas(true);
+    const vacias = secciones.filter((s) => !s.contenido.trim());
+    if (vacias.length === 0) return;
+    setGenerandoTodas(true); setErrorGen(null);
+    setProgresoLote({ hechos: 0, total: vacias.length, fallos: 0 });
+    let hechos = 0, fallos = 0;
+    const erroresAcum: string[] = [];
     try {
-      for (const sec of secciones) {
-        if (sec.contenido.trim()) continue;
-        const txt = await generarSeccion(sec);
-        if (txt !== null) setSecciones((s) => s.map((x) => (x.id === sec.id ? { ...x, contenido: txt } : x)));
+      for (const sec of vacias) {
+        try {
+          const txt = await generarSeccion(sec);
+          if (txt !== null) {
+            setSecciones((s) => s.map((x) => (x.id === sec.id ? { ...x, contenido: txt } : x)));
+            hechos++;
+          }
+        } catch (e) {
+          fallos++;
+          erroresAcum.push(`"${sec.titulo}": ${(e as Error).message}`);
+        }
+        setProgresoLote({ hechos, total: vacias.length, fallos });
       }
-    } finally { setGenerandoTodas(false); }
+      if (erroresAcum.length) {
+        setErrorGen(`${hechos} de ${vacias.length} generadas. Fallaron: ${erroresAcum.slice(0, 3).join(' · ')}${erroresAcum.length > 3 ? '…' : ''}`);
+      }
+    } finally {
+      setGenerandoTodas(false);
+      setTimeout(() => setProgresoLote(null), 3000);
+    }
   };
 
   const guardar = async () => {
@@ -231,11 +267,22 @@ export default function DocumentoProyecto() {
           <div className="mt-5 flex flex-wrap items-center gap-2 print:hidden">
             <button onClick={generarVacias} disabled={ocupado} className="gen-btn-primary inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium disabled:opacity-50">
               {generandoTodas ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {generandoTodas ? 'Generando todas…' : 'Generar las vacías con IA'}
+              {generandoTodas && progresoLote
+                ? `Generando ${progresoLote.hechos + progresoLote.fallos + 1}/${progresoLote.total}…`
+                : generandoTodas ? 'Generando todas…' : 'Generar las vacías con IA'}
             </button>
             <button onClick={guardar} disabled={guardando} className="gen-btn-ghost px-4 py-2 text-sm font-medium disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
             {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
           </div>
+
+          {errorGen && (
+            <div className="mt-3 rounded-lg border border-rose-300 bg-rose-50 p-3 text-xs text-rose-900">
+              <div className="flex items-start justify-between gap-2">
+                <span>⚠️ {errorGen}</span>
+                <button onClick={() => setErrorGen(null)} className="text-rose-700 hover:text-rose-900">✕</button>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 space-y-4">
             {secciones.map((sec, i) => (

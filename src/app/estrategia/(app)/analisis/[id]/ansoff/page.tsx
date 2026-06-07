@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, TrendingUp, Plus, X, Check, Sparkles, Loader2 } from 'lucide-react';
 import type { Ansoff } from '@/types/estrategia';
@@ -18,6 +19,8 @@ const CUADRANTES = [
 
 export default function HerramientaAnsoff() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const maestroActivo = useMaestroActivo();
   const [ansoff, setAnsoff] = useState<Ansoff>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [sector, setSector] = useState('');
@@ -50,7 +53,7 @@ export default function HerramientaAnsoff() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ ansoff }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 
@@ -67,7 +70,7 @@ export default function HerramientaAnsoff() {
       const instruccion = `Negocio/sector: ${sector || titulo || 'proyecto en Bolivia'}.`;
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ modulo: 'estrategia', tarea, instruccion, formato: 'texto' }),
+        body: JSON.stringify({ modulo: 'estrategia', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),
       });
       const d = await res.json();
       if (res.ok && d.texto) {

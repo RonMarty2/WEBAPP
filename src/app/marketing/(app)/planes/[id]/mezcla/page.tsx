@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Blend, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
@@ -28,6 +28,7 @@ const CAMPOS_3P_EXTRA = [
 
 export default function HerramientaMezcla() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [m, setM] = useState<Mezcla>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [marca, setMarca] = useState('');
@@ -61,7 +62,7 @@ export default function HerramientaMezcla() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ mezcla: m, estado: 'mezcla' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/marketing/planes/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/marketing/planes/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

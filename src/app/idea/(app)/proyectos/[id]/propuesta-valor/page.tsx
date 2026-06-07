@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Gift, Plus, X, Check, User, Package } from 'lucide-react';
 import type { PropuestaValor } from '@/types/idea';
@@ -13,6 +13,7 @@ const VACIO: PropuestaValor = {
 
 export default function HerramientaPropuestaValor() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [pv, setPv] = useState<PropuestaValor>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -35,7 +36,7 @@ export default function HerramientaPropuestaValor() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ propuesta_valor: pv, estado: 'valor' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/idea/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/idea/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, PieChart, Plus, X, Check, Sparkles, Loader2 } from 'lucide-react';
 import type { Foda } from '@/types/estrategia';
@@ -13,6 +14,8 @@ const VACIO: Foda = {
 
 export default function HerramientaFoda() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const maestroActivo = useMaestroActivo();
   const [foda, setFoda] = useState<Foda>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -51,7 +54,7 @@ export default function HerramientaFoda() {
         credentials: 'include',
         body: JSON.stringify({ foda, estado: 'foda' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 
@@ -70,7 +73,7 @@ export default function HerramientaFoda() {
         `Debilidades: ${foda.debilidades.join('; ')}. Amenazas: ${foda.amenazas.join('; ')}.`;
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ modulo: 'estrategia', tarea, instruccion, formato: 'texto' }),
+        body: JSON.stringify({ modulo: 'estrategia', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),
       });
       const d = await res.json();
       if (res.ok && d.texto) {

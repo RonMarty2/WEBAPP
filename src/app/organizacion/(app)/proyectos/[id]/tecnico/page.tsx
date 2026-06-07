@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Cog, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
@@ -19,6 +19,7 @@ const CAMPOS = [
 
 export default function HerramientaTecnico() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [t, setT] = useState<Tecnico>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [empresa, setEmpresa] = useState('');
@@ -52,7 +53,7 @@ export default function HerramientaTecnico() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ tecnico: t, estado: 'tecnico' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/organizacion/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/organizacion/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

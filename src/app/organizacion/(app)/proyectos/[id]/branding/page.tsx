@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Palette, Plus, X, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
@@ -13,6 +13,7 @@ const VACIO: Branding = {
 
 export default function HerramientaBranding() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [b, setB] = useState<Branding>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [empresa, setEmpresa] = useState('');
@@ -47,7 +48,7 @@ export default function HerramientaBranding() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ branding: b, estado: 'branding' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/organizacion/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/organizacion/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Compass, Check } from 'lucide-react';
 import type { Peyea } from '@/types/estrategia';
@@ -29,6 +29,7 @@ function cuadrante(x: number, y: number): { nombre: string; color: string; conse
 
 export default function HerramientaPeyea() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [p, setP] = useState<Peyea>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -63,7 +64,7 @@ export default function HerramientaPeyea() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ peyea: p }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

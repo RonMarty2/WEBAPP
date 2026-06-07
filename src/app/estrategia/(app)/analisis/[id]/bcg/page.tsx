@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, PieChart, Plus, X, Check } from 'lucide-react';
 import type { Bcg } from '@/types/estrategia';
@@ -20,6 +20,7 @@ function cuadrante(crecimiento: number, participacion: number): { nombre: string
 
 export default function HerramientaBCG() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [bcg, setBcg] = useState<Bcg>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -45,7 +46,7 @@ export default function HerramientaBCG() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ bcg }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

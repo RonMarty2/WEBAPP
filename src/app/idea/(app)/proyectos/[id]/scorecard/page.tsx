@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Gauge, Check } from 'lucide-react';
 import type { Scorecard } from '@/types/idea';
@@ -22,6 +22,7 @@ function veredicto(prom: number): { txt: string; clase: string; consejo: string 
 
 export default function HerramientaScorecard() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [s, setS] = useState<Scorecard>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -46,7 +47,7 @@ export default function HerramientaScorecard() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ scorecard: s, estado: 'scorecard' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/idea/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/idea/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

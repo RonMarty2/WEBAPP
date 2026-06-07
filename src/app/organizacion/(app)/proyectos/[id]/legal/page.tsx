@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Scale, Plus, X, Check } from 'lucide-react';
 import type { Legal, Tramite, EstadoTramite } from '@/types/organizacion';
@@ -30,6 +30,7 @@ const formatBs = (n: number) => `Bs ${n.toLocaleString('es-BO', { maximumFractio
 
 export default function HerramientaLegal() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [legal, setLegal] = useState<Legal>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -59,7 +60,7 @@ export default function HerramientaLegal() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ legal, estado: 'legal' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/organizacion/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/organizacion/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

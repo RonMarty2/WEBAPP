@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, GitBranch, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
@@ -25,6 +25,7 @@ const VACIO: CadenaValor = { primarias: {}, apoyo: {} };
 
 export default function HerramientaCadenaValor() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [cv, setCv] = useState<CadenaValor>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [sector, setSector] = useState('');
@@ -57,7 +58,7 @@ export default function HerramientaCadenaValor() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ cadena_valor: cv }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

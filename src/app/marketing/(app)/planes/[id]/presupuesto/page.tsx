@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Wallet, Plus, X, Check } from 'lucide-react';
 import type { Presupuesto, CanalPresupuesto } from '@/types/marketing';
@@ -31,6 +31,7 @@ function metrica(c: CanalPresupuesto) {
 
 export default function HerramientaPresupuesto() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [pres, setPres] = useState<Presupuesto>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -68,7 +69,7 @@ export default function HerramientaPresupuesto() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ presupuesto: pres, estado: 'presupuesto' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/marketing/planes/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/marketing/planes/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

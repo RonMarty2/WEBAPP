@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Mic, Check, Sparkles, Loader2, RefreshCw } from 'lucide-react';
 import type { Pregunta } from '@/types/defensa';
@@ -24,6 +25,8 @@ function colorPuntaje(p: number): string {
 
 export default function HerramientaSimulacro() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const maestroActivo = useMaestroActivo();
   const [items, setItems] = useState<ItemSim[]>([]);
   const [banco, setBanco] = useState<Pregunta[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -82,21 +85,34 @@ export default function HerramientaSimulacro() {
         `Respuesta del estudiante: ${it.respuesta}`;
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ modulo: 'defensa', tarea, instruccion, formato: 'texto' }),
+        body: JSON.stringify({ modulo: 'defensa', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),
       });
       const d = await res.json();
       let puntaje: number | null = null;
       let feedback = '';
       if (res.ok && d.texto) {
         const t: string = d.texto;
-        const mP = t.match(/Puntaje\s*:\s*(\d+(?:\.\d+)?)/i);
-        if (mP) puntaje = Math.max(0, Math.min(10, Math.round(parseFloat(mP[1]))));
-        const mF = t.match(/Feedback\s*:\s*([\s\S]+)/i);
+        // Tolerante: acepta "Puntaje", "Calificación", "**Puntaje:**", "Nota", comas decimales, etc.
+        const mP = t.match(/\*{0,2}\s*(?:puntaje|calificaci[oó]n|nota|score)\s*\*{0,2}\s*:?\s*(\d+(?:[.,]\d+)?)/i);
+        if (mP) puntaje = Math.max(0, Math.min(10, Math.round(parseFloat(mP[1].replace(',', '.')))));
+        // Fallback: número solo (0-10) en las primeras 3 líneas.
+        if (puntaje === null) {
+          const primeras = t.split('\n').slice(0, 3).join(' ');
+          const mNum = primeras.match(/\b(10|[0-9])\b(?!\.)/);
+          if (mNum) puntaje = parseInt(mNum[1], 10);
+        }
+        const mF = t.match(/\*{0,2}\s*feedback\s*\*{0,2}\s*:?\s*([\s\S]+)/i);
         feedback = mF ? mF[1].trim() : t.trim();
+      }
+      // Si no se pudo extraer puntaje, avisa al estudiante en vez de quedar mudo.
+      if (puntaje === null) {
+        feedback = feedback
+          ? `(No pude leer el puntaje, intenta de nuevo.) ${feedback}`
+          : 'No pude leer la respuesta de la IA. Intenta de nuevo.';
       }
       setItems((p) => p.map((x, idx) => (idx === i ? { ...x, puntaje, feedback, evaluando: false } : x)));
     } catch {
-      setItems((p) => p.map((x, idx) => (idx === i ? { ...x, evaluando: false } : x)));
+      setItems((p) => p.map((x, idx) => (idx === i ? { ...x, evaluando: false, feedback: 'Error de conexión al evaluar. Intenta de nuevo.' } : x)));
     }
   };
 
@@ -118,7 +134,7 @@ export default function HerramientaSimulacro() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ simulacro, estado: 'simulacro' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/defensa/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/defensa/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

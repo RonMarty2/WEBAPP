@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Users, Plus, X, Check } from 'lucide-react';
 import type { Rrhh, Puesto } from '@/types/organizacion';
@@ -29,6 +29,7 @@ const formatBs = (n: number) => `Bs ${n.toLocaleString('es-BO', { maximumFractio
 
 export default function HerramientaRrhh() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [rrhh, setRrhh] = useState<Rrhh>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -69,7 +70,7 @@ export default function HerramientaRrhh() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ rrhh, estado: 'rrhh' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/organizacion/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/organizacion/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

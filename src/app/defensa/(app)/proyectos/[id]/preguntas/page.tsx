@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ListChecks, Plus, X, Check, Sparkles, Loader2 } from 'lucide-react';
 import type { BancoPreguntas, Pregunta } from '@/types/defensa';
@@ -16,6 +17,8 @@ function nuevoId() {
 
 export default function HerramientaPreguntas() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const maestroActivo = useMaestroActivo();
   const [banco, setBanco] = useState<BancoPreguntas>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [tema, setTema] = useState('');
@@ -51,7 +54,7 @@ export default function HerramientaPreguntas() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ preguntas: banco, estado: 'preguntas' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/defensa/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/defensa/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 
@@ -66,7 +69,7 @@ export default function HerramientaPreguntas() {
       const instruccion = `Trabajo: ${titulo}. Tema: ${tema || '—'}. Carrera: ${carrera || '—'}.`;
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ modulo: 'defensa', tarea, instruccion, formato: 'texto' }),
+        body: JSON.stringify({ modulo: 'defensa', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),
       });
       const d = await res.json();
       if (res.ok && d.texto) {

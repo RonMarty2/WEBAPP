@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ListChecks, Plus, X, Check, RefreshCw } from 'lucide-react';
 import type { Mcpe, FilaMatriz, Foda } from '@/types/estrategia';
@@ -42,6 +42,7 @@ function derivar(proyecto: {
 
 export default function HerramientaMCPE() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [mcpe, setMcpe] = useState<Mcpe>(VACIO);
   const [derivado, setDerivado] = useState<Mcpe | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -101,7 +102,7 @@ export default function HerramientaMCPE() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ mcpe }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

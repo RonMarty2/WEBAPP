@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, LayoutGrid, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
@@ -26,6 +26,7 @@ const BLOQUES: Array<{ key: keyof LeanCanvas; label: string; desc: string; place
 
 export default function HerramientaLeanCanvas() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [c, setC] = useState<LeanCanvas>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [idea, setIdea] = useState('');
@@ -59,7 +60,7 @@ export default function HerramientaLeanCanvas() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ lean_canvas: c, estado: 'canvas' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/idea/proyectos/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/idea/proyectos/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

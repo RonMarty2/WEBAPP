@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Crosshair, Plus, X, Check } from 'lucide-react';
 import type { Mpc } from '@/types/estrategia';
@@ -16,6 +16,7 @@ const VACIO: Mpc = {
 
 export default function HerramientaMPC() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [mpc, setMpc] = useState<Mpc>(VACIO);
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -66,7 +67,7 @@ export default function HerramientaMPC() {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ mpc }),
       });
-      if (res.ok) { setGuardado(true); if (volver) window.location.href = `/estrategia/analisis/${params.id}`; }
+      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
     } finally { setGuardando(false); }
   };
 

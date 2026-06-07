@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Globe, Plus, X, Check, Lightbulb } from 'lucide-react';
 import { DIMENSIONES_PESTEL, ESCALA_IMPACTO } from '@/lib/estrategia/plantillas-pestel';
@@ -16,6 +16,7 @@ const VACIO: Pestel = {
 
 export default function HerramientaPestel() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [pestel, setPestel] = useState<Pestel>(VACIO);
   const [titulo, setTitulo] = useState('');
   const [sector, setSector] = useState('');
@@ -60,7 +61,7 @@ export default function HerramientaPestel() {
       });
       if (res.ok) {
         setGuardado(true);
-        if (volver) window.location.href = `/estrategia/analisis/${params.id}`;
+        if (volver) router.push(`/estrategia/analisis/${params.id}`);
       }
     } finally {
       setGuardando(false);
