@@ -1,0 +1,57 @@
+/**
+ * Identidad visual del módulo Defensa: acento ÍNDIGO (#4f46e5).
+ * Distinta a Finanzas/negro, Mercados/sky, Estrategia/violet, Marketing/rose,
+ * Organización/emerald, Idea/amber. Tema "tribunal / oral". Light-only.
+ * Todo bajo .defensa-scope. Prefijo de tokens y clases: def-
+ */
+
+.defensa-scope {
+  --def-bg: 240 60% 99.5%;
+  --def-surface: 0 0% 100%;
+  --def-fg: 240 30% 16%;
+  --def-muted-fg: 240 8% 46%;
+  --def-border: 240 30% 91%;
+  --def-accent: 243 75% 59%;      /* indigo-600 #4f46e5 */
+  --def-accent-fg: 0 0% 100%;
+  --def-accent-soft: 226 100% 94%;/* indigo-100 */
+  --def-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--def-bg));
+  color: hsl(var(--def-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.defensa-scope,
+.defensa-scope * {
+  color-scheme: light !important;
+}
+
+.defensa-scope .def-card {
+  background: hsl(var(--def-surface));
+  border: 1px solid hsl(var(--def-border));
+  border-radius: var(--def-radius);
+}
+.defensa-scope .def-accent-bg { background: hsl(var(--def-accent)); }
+.defensa-scope .def-accent-text { color: hsl(var(--def-accent)); }
+.defensa-scope .def-accent-soft { background: hsl(var(--def-accent-soft)); }
+.defensa-scope .def-muted { color: hsl(var(--def-muted-fg)); }
+.defensa-scope .def-border { border-color: hsl(var(--def-border)); }
+
+.defensa-scope .def-btn-primary {
+  background: hsl(var(--def-accent));
+  color: hsl(var(--def-accent-fg));
+  border-radius: var(--def-radius);
+  transition: opacity 0.15s ease;
+}
+.defensa-scope .def-btn-primary:hover { opacity: 0.9; }
+
+.defensa-scope .def-btn-ghost {
+  border: 1px solid hsl(var(--def-border));
+  color: hsl(var(--def-fg));
+  border-radius: var(--def-radius);
+  transition: background 0.15s ease;
+}
+.defensa-scope .def-btn-ghost:hover { background: hsl(var(--def-accent-soft)); }
