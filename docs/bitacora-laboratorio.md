@@ -100,7 +100,7 @@ visualmente pero comparten sesión y datos.
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
-| 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
+| 5 | Organización | 🔨 EN CONSTRUCCIÓN | FASE 0 lista (cimientos: identidad emerald, login único, tablas `organizacion_*` con todas las columnas, shell navegable con CRUD de proyectos). Herramientas pendientes (6): organigrama, RRHH con aportes patronales bolivianos, legal, técnico, branding, reporte. |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
 | 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
 
@@ -199,6 +199,23 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Organización: FASE 0 (cimientos)
+- Construido el shell del módulo Organización siguiendo el patrón ya validado
+  4 veces (Finanzas, Mercados, Estrategia, Marketing): identidad **emerald-600**
+  (#059669) bajo `.organizacion-scope`, login único, tablas `organizacion_*`
+  con todas las columnas incluidas, ProtectedRoute, RootLayout, hub, Academia
+  stub, "Mis proyectos" (CRUD) y vista de proyecto con sus 6 herramientas como
+  etapas marcadas "Pronto". Build verde. Push cc1be06.
+- **Colores asignados a los módulos (registro definitivo):** Finanzas/negro ·
+  Mercados/sky · Estrategia/violet · Marketing/rose · Organización/emerald.
+  Quedan disponibles para próximos módulos: amber, teal, indigo.
+- Herramientas previstas (orden lógico): organigrama → RRHH (con aportes
+  patronales bolivianos 30.37%: caja salud 10%, provivienda 2%, riesgos
+  profesionales 1.71%, aporte solidario 3%, aguinaldo 8.33%, prima 8.33%) →
+  legal (NIT, Fundempresa, AFP, licencia funcionamiento) → técnico (proceso,
+  capacidad, layout, equipos, proveedores) → branding (esencia, valores,
+  personalidad, promesa, paleta) → reporte consolidado.
 
 ### 2026-06-07 — Marketing: laboratorio completo (5 herramientas)
 - Construidas las 5 herramientas del laboratorio en una sola ola (sin pausas
