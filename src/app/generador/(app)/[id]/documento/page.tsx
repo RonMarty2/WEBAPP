@@ -2,28 +2,18 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { ArrowLeft, Sparkles, Loader2, Plus, X, ChevronUp, ChevronDown, Copy, Printer, Download, Check, FileText } from 'lucide-react';
 import type { ProyectoMaestro, SeccionDocumento } from '@/types/maestro';
+import { ordenarFormatos, getFormato, type FormatoEstructura } from '@/lib/formatos/estructuras';
 
 function nuevoId() {
   return `s_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
 }
 
-/** Estructura típica de un proyecto de grado boliviano (cada sección mapea a módulos). */
-function estructuraDefault(): SeccionDocumento[] {
-  return [
-    'Resumen ejecutivo',
-    'Capítulo I — Generalidades (antecedentes, problema, objetivos, justificación)',
-    'Capítulo II — Marco teórico y referencial',
-    'Capítulo III — Análisis del entorno y mercado',
-    'Capítulo IV — Propuesta estratégica y de marketing',
-    'Capítulo V — Estructura organizacional y legal',
-    'Capítulo VI — Estudio técnico',
-    'Capítulo VII — Evaluación financiera',
-    'Capítulo VIII — Conclusiones y recomendaciones',
-    'Anexo — Preparación de defensa',
-  ].map((titulo) => ({ id: nuevoId(), titulo, contenido: '' }));
+/** Convierte un formato (lista de títulos) en secciones del documento. */
+function formatoASecciones(f: FormatoEstructura): SeccionDocumento[] {
+  return f.secciones.map((titulo) => ({ id: nuevoId(), titulo, contenido: '' }));
 }
 
 export default function DocumentoProyecto() {
@@ -47,6 +37,17 @@ export default function DocumentoProyecto() {
   }, [params.id]);
 
   useEffect(() => { cargar(); }, [cargar]);
+
+  // Formatos ordenados según la universidad + modalidad del maestro.
+  const { formatos, recomendadoId } = useMemo(
+    () => ordenarFormatos(maestro?.universidad, maestro?.modalidad),
+    [maestro?.universidad, maestro?.modalidad],
+  );
+  const [formatoSel, setFormatoSel] = useState<string>('');
+  useEffect(() => {
+    // Preselecciona el formato recomendado cuando carga el maestro.
+    if (!formatoSel) setFormatoSel(recomendadoId ?? 'generico-proyecto-grado');
+  }, [recomendadoId, formatoSel]);
 
   const upd = (id: string, c: Partial<SeccionDocumento>) => setSecciones((s) => s.map((x) => (x.id === id ? { ...x, ...c } : x)));
   const del = (id: string) => setSecciones((s) => s.filter((x) => x.id !== id));
@@ -267,17 +268,58 @@ export default function DocumentoProyecto() {
         )}
       </header>
 
-      {secciones.length === 0 && (
-        <div className="gen-card mt-6 p-8 text-center">
-          <p className="text-3xl">📄</p>
-          <p className="mt-3 font-semibold">Arma la estructura de tu proyecto</p>
-          <p className="gen-muted mt-1 text-sm">Empieza con la estructura típica de un proyecto de grado y genera cada capítulo con IA, o créala desde cero.</p>
-          <div className="mt-4 flex items-center justify-center gap-2">
-            <button onClick={() => setSecciones(estructuraDefault())} className="gen-btn-primary px-4 py-2 text-sm font-medium">Usar estructura de proyecto de grado</button>
-            <button onClick={add} className="gen-btn-ghost inline-flex items-center gap-1 px-4 py-2 text-sm"><Plus className="h-4 w-4" /> Sección vacía</button>
+      {secciones.length === 0 && (() => {
+        const fmt = getFormato(formatoSel);
+        return (
+          <div className="gen-card mt-6 p-6">
+            <div className="text-center">
+              <p className="text-3xl">📄</p>
+              <p className="mt-3 font-semibold">Arma la estructura de tu proyecto</p>
+              <p className="gen-muted mt-1 text-sm">
+                Elige el formato de tu universidad y modalidad. Usamos la estructura
+                oficial de capítulos; luego generas cada uno con IA.
+              </p>
+            </div>
+
+            <div className="mx-auto mt-5 max-w-xl">
+              <label className="block text-sm font-medium">Formato del documento</label>
+              <select
+                value={formatoSel}
+                onChange={(e) => setFormatoSel(e.target.value)}
+                className="gen-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
+              >
+                {formatos.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.id === recomendadoId ? '⭐ ' : ''}{f.nombre}
+                  </option>
+                ))}
+              </select>
+
+              {fmt && (
+                <div className="mt-3 rounded-lg border border-teal-100 bg-teal-50/50 p-3 text-left">
+                  <p className="gen-muted text-xs">
+                    <strong>Fuente:</strong> {fmt.fuente}
+                    {fmt.id === recomendadoId && <span className="ml-1 text-teal-700">· recomendado para tu proyecto</span>}
+                  </p>
+                  <p className="mt-2 text-xs font-medium text-slate-700">{fmt.secciones.length} secciones:</p>
+                  <p className="gen-muted mt-0.5 text-xs leading-relaxed">{fmt.secciones.join(' · ')}</p>
+                </div>
+              )}
+
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <button
+                  onClick={() => { if (fmt) setSecciones(formatoASecciones(fmt)); }}
+                  disabled={!fmt}
+                  className="gen-btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50"
+                >
+                  Usar esta estructura
+                </button>
+                <button onClick={add} className="gen-btn-ghost inline-flex items-center gap-1 px-4 py-2 text-sm"><Plus className="h-4 w-4" /> Empezar en blanco</button>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {secciones.length > 0 && (
         <>
