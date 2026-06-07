@@ -40,6 +40,19 @@ function cuadranteBcg(crec: number, part: number): string {
   return 'Perro';
 }
 
+/** Estrategia ganadora del MCPE (mayor suma de peso × atractivo). */
+function ganadorMcpe(mcpe?: ProyectoEstrategia['mcpe']): { nombre: string; total: number } | null {
+  const factores = mcpe?.factores ?? [];
+  const estrategias = mcpe?.estrategias ?? [];
+  if (!factores.length || !estrategias.length) return null;
+  let mejor = { nombre: '', total: -1 };
+  for (const e of estrategias) {
+    const total = factores.reduce((s, f, i) => s + (f.peso || 0) * (e.calificaciones?.[i] || 0), 0);
+    if (total > mejor.total) mejor = { nombre: e.nombre, total };
+  }
+  return mejor.total >= 0 ? mejor : null;
+}
+
 const PESTEL_LABEL: Record<string, string> = {
   politico: 'Político', economico: 'Económico', social: 'Social',
   tecnologico: 'Tecnológico', ecologico: 'Ecológico', legal: 'Legal',
@@ -164,6 +177,13 @@ export default function ReporteEstrategia() {
       l.push('');
     }
 
+    const gana = ganadorMcpe(p.mcpe);
+    if (gana) {
+      l.push('## Decisión (MCPE / QSPM)');
+      l.push(`Estrategia recomendada: ${gana.nombre} (puntaje ${gana.total.toFixed(2)}).`);
+      l.push('');
+    }
+
     return l.join('\n');
   };
 
@@ -185,6 +205,7 @@ export default function ReporteEstrategia() {
   const hayPestel = Object.values(pestel).some((a) => Array.isArray(a) && a.length);
   const hayFoda = [foda.fortalezas, foda.oportunidades, foda.debilidades, foda.amenazas].some((a) => a?.length);
   const hayAnsoff = [ansoff.penetracion, ansoff.desarrolloProducto, ansoff.desarrolloMercado, ansoff.diversificacion].some((a) => a?.length);
+  const gana = ganadorMcpe(p.mcpe);
 
   return (
     <div className="mx-auto max-w-3xl pb-10">
@@ -318,6 +339,12 @@ export default function ReporteEstrategia() {
       {peyea && (
         <Seccion titulo="Posición estratégica (PEYEA)">
           <p>El vector PEYEA ubica al negocio con un perfil <strong>{peyea}</strong>.</p>
+        </Seccion>
+      )}
+
+      {gana && (
+        <Seccion titulo="Decisión final (MCPE / QSPM)">
+          <p>La estrategia con mayor puntaje es <strong className="es-accent-text">{gana.nombre}</strong> (total {gana.total.toFixed(2)}). Es la opción recomendada según los factores clave y sus pesos.</p>
         </Seccion>
       )}
     </div>

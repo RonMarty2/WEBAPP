@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Globe, Swords, Crosshair, GitBranch, Grid3x3, Network, PieChart, TrendingUp, Compass, FileText, Lock } from 'lucide-react';
+import { ArrowLeft, Globe, Swords, Crosshair, GitBranch, Grid3x3, Network, PieChart, TrendingUp, Compass, ListChecks, FileText, Lock } from 'lucide-react';
 import type { ProyectoEstrategia } from '@/types/estrategia';
 
 /**
@@ -22,6 +22,7 @@ const HERRAMIENTAS = [
   { ruta: 'bcg', label: 'BCG', desc: 'Matriz de portafolio', icon: PieChart, disponible: true },
   { ruta: 'ansoff', label: 'Ansoff', desc: 'Matriz de crecimiento', icon: TrendingUp, disponible: true },
   { ruta: 'peyea', label: 'PEYEA', desc: 'Posición estratégica', icon: Compass, disponible: true },
+  { ruta: 'mcpe', label: 'MCPE / QSPM', desc: 'Decisión cuantitativa: elige la mejor estrategia', icon: ListChecks, disponible: true },
   { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: true },
 ];
 

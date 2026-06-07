@@ -98,6 +98,14 @@ export interface Peyea {
   ff: number; vc: number; ee: number; fi: number;
 }
 
+/** MCPE / QSPM — Matriz Cuantitativa de Planificación Estratégica (decisión final). */
+export interface Mcpe {
+  // Factores clave (provienen de MEFE/MEFI). El peso es el mismo de esas matrices.
+  factores: Array<{ factor: string; peso: number; tipo: 'externo' | 'interno' }>;
+  // Cada estrategia candidata con su atractivo (CA: 1-4, o 0 = no afecta) por factor.
+  estrategias: Array<{ nombre: string; calificaciones: number[] }>;
+}
+
 export interface ProyectoEstrategia {
   id: string;
   estudiante_id: string;
@@ -113,6 +121,7 @@ export interface ProyectoEstrategia {
   bcg?: Partial<Bcg>;
   ansoff?: Partial<Ansoff>;
   peyea?: Partial<Peyea>;
+  mcpe?: Partial<Mcpe>;
   estado: EstadoEstrategia;
   creado_en: string;
   actualizado_en: string;
