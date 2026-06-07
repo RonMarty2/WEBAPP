@@ -60,11 +60,21 @@ export interface Validacion {
   hipotesis: Hipotesis[];
 }
 
-/** Scorecard de viabilidad (1-5 por dimensión). */
+/**
+ * Análisis de Viabilidad (Scorecard formal con rúbrica).
+ *
+ * Cada dimensión guarda no solo el puntaje 1-5, sino la EVIDENCIA que lo
+ * respalda — necesaria para defender el resultado ante el tribunal y para
+ * usarlo como sección formal en proyectos de grado / planes de negocio.
+ */
 export interface Scorecard {
-  deseabilidad: number; // ¿lo quieren? (cliente)
-  factibilidad: number; // ¿podemos hacerlo? (técnico/operativo)
-  viabilidad: number;   // ¿es rentable/sostenible? (negocio)
+  deseabilidad: number; // 1..5 según rúbrica
+  factibilidad: number;
+  viabilidad: number;
+  /** Evidencia que respalda cada puntaje. Opcionales para compatibilidad con scorecards viejos. */
+  evidencia_deseabilidad?: string;
+  evidencia_factibilidad?: string;
+  evidencia_viabilidad?: string;
   notas: string;
 }
 

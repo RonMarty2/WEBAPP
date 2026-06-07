@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Copy, Printer, Check } from 'lucide-react';
+import { aplicaComoSeccion, getDescriptor } from '@/lib/idea/rubrica-viabilidad';
 import type { ProyectoIdea, LeanCanvas } from '@/types/idea';
 
 const CANVAS_LABEL: Record<keyof LeanCanvas, string> = {
@@ -83,11 +84,26 @@ export default function ReporteIdea() {
     }
 
     if (prom !== null && sc) {
-      l.push('## Scorecard de viabilidad');
+      // Si la modalidad lo amerita, esto va como SECCIÓN ACADÉMICA formal
+      // con evidencia citada. Si no, como nota interna del estudiante.
+      const seccionFormal = aplicaComoSeccion(p.tipo_trabajo);
+      l.push(seccionFormal ? '## Análisis de Viabilidad' : '## Scorecard de viabilidad (interno)');
       l.push(`Deseabilidad ${sc.deseabilidad}/5 · Factibilidad ${sc.factibilidad}/5 · Viabilidad ${sc.viabilidad}/5`);
       l.push(`Promedio: ${prom.toFixed(1)}/5 — ${veredicto(prom)}`);
-      if (sc.notas) l.push(`Notas: ${sc.notas}`);
       l.push('');
+      // Detalle por dimensión con descriptor + evidencia citada
+      for (const dim of (['deseabilidad', 'factibilidad', 'viabilidad'] as const)) {
+        const valor = sc[dim] as number;
+        const desc = getDescriptor(dim, valor);
+        const ev = (sc as unknown as Record<string, unknown>)[`evidencia_${dim}`] as string | undefined;
+        if (!desc) continue;
+        l.push(`### ${dim.charAt(0).toUpperCase() + dim.slice(1)}: ${valor}/5 — ${desc.etiqueta}`);
+        l.push(desc.descripcion);
+        if (ev?.trim()) l.push(`Evidencia: ${ev.trim()}`);
+        else l.push(`Evidencia: _(pendiente de documentar)_`);
+        l.push('');
+      }
+      if (sc.notas) { l.push('### Decisión'); l.push(sc.notas); l.push(''); }
     }
 
     return l.join('\n');
