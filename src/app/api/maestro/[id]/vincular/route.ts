@@ -74,3 +74,32 @@ export async function POST(
   if (error) return NextResponse.json({ error: 'db_error', detail: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, vinculo: data });
 }
+
+/** DELETE → desvincula un módulo del maestro. Body o query: { modulo }. */
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: 'no_session' }, { status: 401 });
+  if (!isSupabaseConfigured()) return NextResponse.json({ error: 'sin_db' }, { status: 500 });
+
+  const url = new URL(req.url);
+  const body = await req.json().catch(() => ({}));
+  const modulo = (body?.modulo as string) ?? url.searchParams.get('modulo');
+  if (!modulo) return NextResponse.json({ error: 'falta_modulo' }, { status: 400 });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = createAdminClient() as any;
+  if (!(await esDueno(sb, id, user.id))) return NextResponse.json({ error: 'no_encontrado' }, { status: 404 });
+
+  const { error } = await sb
+    .from('proyecto_maestro_vinculos')
+    .delete()
+    .eq('maestro_id', id)
+    .eq('modulo', modulo);
+
+  if (error) return NextResponse.json({ error: 'db_error', detail: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}

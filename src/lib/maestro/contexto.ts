@@ -66,7 +66,7 @@ export async function construirContextoMaestro(
   for (const v of vinculos ?? []) {
     try {
       if (v.modulo === 'estrategia') {
-        const { data } = await sb.from('estrategia_proyectos').select('titulo, sector, estado, pestel, porter, foda').eq('id', v.ref_id).maybeSingle();
+        const { data } = await sb.from('estrategia_proyectos').select('titulo, sector, estado, pestel, porter, foda, mcpe').eq('id', v.ref_id).maybeSingle();
         if (data) ctx.modulos.estrategia = data;
       } else if (v.modulo === 'mercados') {
         const { data } = await sb.from('mercados_proyectos').select('titulo, tipo_estudio, objetivo_general, universo, tamano_muestra, estado').eq('id', v.ref_id).maybeSingle();
@@ -74,8 +74,19 @@ export async function construirContextoMaestro(
       } else if (v.modulo === 'finanzas') {
         const { data } = await sb.from('finanzas_proyectos').select('*').eq('id', v.ref_id).maybeSingle();
         if (data) ctx.modulos.finanzas = data;
+      } else if (v.modulo === 'marketing') {
+        const { data } = await sb.from('marketing_planes').select('titulo, marca, sector, buyer_persona, mezcla, presupuesto, estado').eq('id', v.ref_id).maybeSingle();
+        if (data) ctx.modulos.marketing = data;
+      } else if (v.modulo === 'organizacion') {
+        const { data } = await sb.from('organizacion_proyectos').select('titulo, empresa, sector, organigrama, rrhh, legal, tecnico, branding, estado').eq('id', v.ref_id).maybeSingle();
+        if (data) ctx.modulos.organizacion = data;
+      } else if (v.modulo === 'idea') {
+        const { data } = await sb.from('idea_proyectos').select('titulo, idea, sector, lean_canvas, propuesta_valor, scorecard, estado').eq('id', v.ref_id).maybeSingle();
+        if (data) ctx.modulos.idea = data;
+      } else if (v.modulo === 'defensa') {
+        const { data } = await sb.from('defensa_proyectos').select('titulo, tema, carrera, preguntas, simulacro, estado').eq('id', v.ref_id).maybeSingle();
+        if (data) ctx.modulos.defensa = data;
       }
-      // otros módulos se agregan aquí a medida que se construyan
     } catch {
       // módulo sin tabla todavía: lo ignoramos
     }

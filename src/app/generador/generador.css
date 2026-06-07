@@ -1,0 +1,56 @@
+/**
+ * Identidad visual del Generador conectado: acento TEAL (#0f766e).
+ * Es el orquestador (núcleo) que une los módulos. Distinto a los 7 módulos.
+ * Light-only. Todo bajo .generador-scope. Prefijo de tokens y clases: gen-
+ */
+
+.generador-scope {
+  --gen-bg: 175 50% 99%;
+  --gen-surface: 0 0% 100%;
+  --gen-fg: 185 32% 14%;
+  --gen-muted-fg: 185 8% 44%;
+  --gen-border: 175 30% 89%;
+  --gen-accent: 175 70% 26%;      /* teal-700 #0f766e (legible con blanco) */
+  --gen-accent-fg: 0 0% 100%;
+  --gen-accent-soft: 167 85% 91%; /* teal-100 */
+  --gen-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--gen-bg));
+  color: hsl(var(--gen-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.generador-scope,
+.generador-scope * {
+  color-scheme: light !important;
+}
+
+.generador-scope .gen-card {
+  background: hsl(var(--gen-surface));
+  border: 1px solid hsl(var(--gen-border));
+  border-radius: var(--gen-radius);
+}
+.generador-scope .gen-accent-bg { background: hsl(var(--gen-accent)); }
+.generador-scope .gen-accent-text { color: hsl(var(--gen-accent)); }
+.generador-scope .gen-accent-soft { background: hsl(var(--gen-accent-soft)); }
+.generador-scope .gen-muted { color: hsl(var(--gen-muted-fg)); }
+.generador-scope .gen-border { border-color: hsl(var(--gen-border)); }
+
+.generador-scope .gen-btn-primary {
+  background: hsl(var(--gen-accent));
+  color: hsl(var(--gen-accent-fg));
+  border-radius: var(--gen-radius);
+  transition: opacity 0.15s ease;
+}
+.generador-scope .gen-btn-primary:hover { opacity: 0.9; }
+
+.generador-scope .gen-btn-ghost {
+  border: 1px solid hsl(var(--gen-border));
+  color: hsl(var(--gen-fg));
+  border-radius: var(--gen-radius);
+  transition: background 0.15s ease;
+}
+.generador-scope .gen-btn-ghost:hover { background: hsl(var(--gen-accent-soft)); }
