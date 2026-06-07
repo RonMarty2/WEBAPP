@@ -90,7 +90,11 @@ visualmente pero comparten sesión y datos.
 
 ### Generador
 - ✅ Modo Autónomo (lo que webapp hace hoy en `/projects/*`)
-- ❌ Modo Conectado (cuando tengamos ≥ 3 módulos para alimentarlo)
+- 🔨 Modo Conectado — **Wave 1 lista** en `/generador` (identidad teal): crear
+  Proyecto Maestro, vincular los 7 módulos, ver contexto consolidado y generar
+  un borrador del índice del proyecto de grado con IA (`/api/ai/asistir` +
+  `construirContextoMaestro` extendido a los 7 módulos). Pendiente Wave 2:
+  generación capítulo por capítulo y export (LaTeX/PDF/Overleaf).
 
 ### Módulos educativos (orden de uso por el estudiante)
 
@@ -199,6 +203,26 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Generador Modo Conectado: Wave 1
+- Construida la primera ola del **Generador conectado** en `/generador`
+  (identidad teal, usa la sesión de webapp con `/api/auth/me`, sin tabla de
+  perfil propia). Es el corazón de la visión "Dos Mundos".
+- **Qué hace ya:** crear/listar Proyecto Maestro; en el workspace, vincular UN
+  proyecto por cada uno de los 7 módulos (idea, mercados, estrategia, marketing,
+  organización, finanzas, defensa); ver el "contexto consolidado" que la IA
+  leerá; y generar con IA un borrador del índice del proyecto de grado que
+  integra el trabajo real de cada módulo.
+- **Infra reusada/extendida:** `construirContextoMaestro()` ahora cubre los 7
+  módulos (antes solo 3). Nuevas APIs: GET/PATCH/DELETE `/api/maestro/[id]`,
+  GET `/api/maestro/disponibles`, GET `/api/maestro/[id]/contexto`, DELETE en
+  vincular. `/api/ai/asistir` ya inyectaba el contexto cruzado vía `maestroId`.
+- No requiere migración nueva (las tablas `proyecto_maestro` ya existían).
+  Push 3808cfb.
+- **Pendiente Wave 2 del Generador:** generación capítulo por capítulo (no solo
+  el índice), guardar el borrador, y export (LaTeX/PDF/Overleaf como ya hace
+  `/projects/*`). Además sigue pendiente el widget "Trabajando en: [proyecto
+  maestro]" en los headers de los módulos y las Academias (FASE 1).
 
 ### 2026-06-07 — Defensa: módulo completo (FASE 0 + 3 herramientas). ¡TODOS los módulos con laboratorio!
 - Construido el módulo Defensa: identidad **índigo** (#4f46e5, tema tribunal),
