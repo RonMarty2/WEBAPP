@@ -102,7 +102,7 @@ visualmente pero comparten sesión y datos.
 | 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 5 | Organización | 🔨 LABORATORIO COMPLETO (falta Academia) | 6 herramientas listas: Organigrama, RRHH (aportes patronales BO en vivo), Legal (checklist trámites BO), Técnico, Branding, Reporte. Pendiente: solo FASE 1 (Academia). |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
-| 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
+| 7 | Defensa | 🔨 LABORATORIO COMPLETO (falta Academia) | 3 herramientas listas: Banco de preguntas (con IA), Simulacro (IA evalúa cada respuesta 0-10 + feedback), Reporte. Identidad índigo. Pendiente: solo FASE 1 (Academia). |
 
 ### Progreso detallado del módulo Estrategia (`/estrategia`)
 - ✅ **FASE 0** — Cimientos: identidad visual VIOLETA propia (#8b5cf6, distinta
@@ -199,6 +199,22 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Defensa: módulo completo (FASE 0 + 3 herramientas). ¡TODOS los módulos con laboratorio!
+- Construido el módulo Defensa: identidad **índigo** (#4f46e5, tema tribunal),
+  login único, tablas `defensa_*`, y 3 herramientas: **Banco de preguntas**
+  (por categoría + generador IA de 8), **Simulacro** (la IA evalúa cada
+  respuesta 0-10 con feedback; promedio en vivo, reanuda intento) y **Reporte**
+  (desempeño por categoría con barras + categorías a reforzar). Push a0d31f9.
+- Reusa `/api/ai/asistir` para generar preguntas y evaluar respuestas (sin
+  endpoint nuevo).
+- **HITO: los 7 módulos del orden tienen laboratorio funcional.** Idea,
+  Mercados, Estrategia, Marketing, Organización, Finanzas y Defensa.
+- **7 colores asignados:** Finanzas/negro · Mercados/sky · Estrategia/violet ·
+  Marketing/rose · Organización/emerald · Idea/amber · Defensa/indigo.
+- **Pendientes globales:** Academias (FASE 1) de cada laboratorio nuevo;
+  Generador modo conectado (importar los reportes/artefactos); widget
+  "Trabajando en: [proyecto maestro]" en los headers.
 
 ### 2026-06-07 — Idea / Pre-validación: módulo completo (FASE 0 + 5 herramientas)
 - Construido el módulo entero en una sola ola: identidad **ámbar** (#d97706,
