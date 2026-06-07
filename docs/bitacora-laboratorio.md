@@ -106,13 +106,13 @@ visualmente pero comparten sesión y datos.
 
 | # | Módulo | Estado | Notas |
 |---|---|---|---|
-| 1 | Idea / Pre-validación | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Lean Canvas, Propuesta de Valor (VPC), Validación (hipótesis), Scorecard de viabilidad, Reporte. Identidad ámbar. Pendiente: solo FASE 1 (Academia). |
+| 1 | Idea / Pre-validación | ✅ COMPLETO | Academia (5 clases + quiz) + laboratorio (5 herramientas: Lean Canvas, VPC, Validación, Scorecard, Reporte). Ámbar. |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | ✅ COMPLETO | Academia (6 clases + quiz) + laboratorio (13 herramientas). Detalle abajo. |
-| 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
-| 5 | Organización | 🔨 LABORATORIO COMPLETO (falta Academia) | 6 herramientas listas: Organigrama, RRHH (aportes patronales BO en vivo), Legal (checklist trámites BO), Técnico, Branding, Reporte. Pendiente: solo FASE 1 (Academia). |
-| 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
-| 7 | Defensa | 🔨 LABORATORIO COMPLETO (falta Academia) | 3 herramientas listas: Banco de preguntas (con IA), Simulacro (IA evalúa cada respuesta 0-10 + feedback), Reporte. Identidad índigo. Pendiente: solo FASE 1 (Academia). |
+| 4 | Marketing | ✅ COMPLETO | Academia (5 clases + quiz) + laboratorio (5 herramientas: buyer persona, mezcla 4Ps/7Ps, presupuesto/CPL con ROAS/CAC, calendario, reporte). Rose. |
+| 5 | Organización | ✅ COMPLETO | Academia (5 clases + quiz, incl. aportes patronales y legal BO) + laboratorio (6 herramientas). Emerald. |
+| 6 | **Finanzas (simuladorPRO)** | ✅ COMPLETO | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
+| 7 | Defensa | ✅ COMPLETO | Academia (4 clases + quiz) + laboratorio (banco de preguntas con IA, simulacro evaluado por IA, reporte). Índigo. |
 
 ### Progreso detallado del módulo Estrategia (`/estrategia`)
 - ✅ **FASE 0** — Cimientos: identidad visual VIOLETA propia (#8b5cf6, distinta
@@ -209,6 +209,22 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Academias de Marketing, Organización, Idea y Defensa → TODOS los módulos COMPLETOS
+- Replicado el patrón de academia (validado en Estrategia) en los 4 módulos
+  restantes, cada uno con su color y su `*_progreso_clases` (ya existían, sin
+  migración): **Marketing** (5 clases, rose), **Organización** (5 clases con
+  aportes patronales y legal boliviano, emerald), **Idea** (5 clases, ámbar)
+  y **Defensa** (4 clases, indigo). Cada clase: teoría + ejemplo boliviano + quiz de 3.
+- **HITO: los 7 módulos educativos están COMPLETOS** (academia + laboratorio):
+  Idea, Mercados, Estrategia, Marketing, Organización, Finanzas y Defensa.
+  Push aa85e60.
+- Estructura de cada academia: `lib/<modulo>/clases-data.ts`, lista
+  `/<modulo>/academia`, clase `[slug]` (teoría→quiz→fin con progreso), API
+  `/api/<modulo>/progreso`.
+- **Pendientes globales restantes:** widget "Trabajando en: [proyecto maestro]"
+  en los headers; mejoras opcionales del Generador (ZIP Overleaf con carátula,
+  PDF directo).
 
 ### 2026-06-07 — Estrategia: Academia (FASE 1) → módulo COMPLETO
 - Construida la **Academia de Estrategia** (6 clases con teoría + ejemplo
