@@ -143,14 +143,18 @@ export default function HerramientaPropuestaValor() {
           }
           formato="texto"
           acentoClase="idea-accent-bg text-white"
-          placeholder={
-            `Idea: ${idea || titulo}. Sector: ${sector || '—'}.` +
-            (leanCanvas.problema ? ` Problema del Lean Canvas: ${leanCanvas.problema}.` : '') +
-            (leanCanvas.segmentos ? ` Segmento: ${leanCanvas.segmentos}.` : '') +
-            (pv.trabajos.length || pv.dolores.length
-              ? ` Ya tengo: trabajos=[${pv.trabajos.join(', ')}], dolores=[${pv.dolores.join(', ')}]. Complementa, no repitas.`
-              : '')
+          contexto={
+            `MI IDEA: ${idea || titulo}. SECTOR: ${sector || 'no especificado'}.` +
+            (leanCanvas.problema ? `\nPROBLEMA (Lean Canvas): ${leanCanvas.problema}` : '') +
+            (leanCanvas.segmentos ? `\nSEGMENTO DE CLIENTES: ${leanCanvas.segmentos}` : '') +
+            (leanCanvas.propuestaValor ? `\nPROPUESTA ÚNICA DE VALOR: ${leanCanvas.propuestaValor}` : '') +
+            (pv.trabajos.length ? `\nTrabajos que ya tengo: ${pv.trabajos.join(', ')}` : '') +
+            (pv.dolores.length ? `\nDolores que ya tengo: ${pv.dolores.join(', ')}` : '') +
+            (pv.alegrias?.length ? `\nAlegrías que ya tengo: ${pv.alegrias.join(', ')}` : '') +
+            '\n\nIMPORTANTE: NO inventes un negocio distinto. Mantente FIEL a la idea y al sector que te di. ' +
+            'Complementa lo que ya tengo sin repetir.'
           }
+          placeholder="Detalle opcional (ej: enfócate en clientes urbanos jóvenes)…"
           onAplicar={aplicarIA}
         />
         <p className="idea-muted mt-2 text-xs">

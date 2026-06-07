@@ -155,14 +155,16 @@ export default function HerramientaScorecard() {
           }
           formato="texto"
           acentoClase="idea-accent-bg text-white"
-          placeholder={
-            `Idea: ${idea || titulo}. Sector: ${sector || '—'}.` +
-            (leanCanvas.problema ? ` Problema: ${leanCanvas.problema}.` : '') +
-            (leanCanvas.segmentos ? ` Segmento: ${leanCanvas.segmentos}.` : '') +
-            (propVal.dolores?.length ? ` Dolores: ${propVal.dolores.join(', ')}.` : '') +
-            (propVal.aliviadores?.length ? ` Aliviadores: ${propVal.aliviadores.join(', ')}.` : '') +
-            (validac.hipotesis?.length ? ` Hipótesis: ${validac.hipotesis.map((h) => `${h.supuesto} [${h.estado}]`).join('; ')}.` : '')
+          contexto={
+            `MI IDEA: ${idea || titulo}. SECTOR: ${sector || 'no especificado'}.` +
+            (leanCanvas.problema ? `\nPROBLEMA: ${leanCanvas.problema}` : '') +
+            (leanCanvas.segmentos ? `\nSEGMENTO: ${leanCanvas.segmentos}` : '') +
+            (propVal.dolores?.length ? `\nDolores: ${propVal.dolores.join(', ')}` : '') +
+            (propVal.aliviadores?.length ? `\nAliviadores: ${propVal.aliviadores.join(', ')}` : '') +
+            (validac.hipotesis?.length ? `\nHipótesis (con estado): ${validac.hipotesis.map((h) => `${h.supuesto} [${h.estado}]`).join('; ')}` : '') +
+            '\n\nIMPORTANTE: Puntajes específicos a ESTA idea, justificación apoyada en lo que escribí arriba.'
           }
+          placeholder="Detalle opcional para afinar la sugerencia…"
           onAplicar={aplicarIA}
         />
         <p className="idea-muted mt-2 text-xs">

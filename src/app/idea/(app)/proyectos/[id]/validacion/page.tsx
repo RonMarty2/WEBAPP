@@ -184,12 +184,16 @@ export default function HerramientaValidacion() {
           }
           formato="texto"
           acentoClase="idea-accent-bg text-white"
-          placeholder={
-            `Idea: ${idea || titulo}. Sector: ${sector || '—'}.` +
-            (leanCanvas.problema ? ` Problema: ${leanCanvas.problema}.` : '') +
-            (propVal.dolores?.length ? ` Dolores del cliente: ${propVal.dolores.join(', ')}.` : '') +
-            (val.hipotesis.length ? ` Ya tengo ${val.hipotesis.length} hipótesis; complementa, no repitas.` : '')
+          contexto={
+            `MI IDEA: ${idea || titulo}. SECTOR: ${sector || 'no especificado'}.` +
+            (leanCanvas.problema ? `\nPROBLEMA: ${leanCanvas.problema}` : '') +
+            (leanCanvas.segmentos ? `\nSEGMENTO: ${leanCanvas.segmentos}` : '') +
+            (propVal.dolores?.length ? `\nDolores del cliente: ${propVal.dolores.join(', ')}` : '') +
+            (propVal.aliviadores?.length ? `\nAliviadores propuestos: ${propVal.aliviadores.join(', ')}` : '') +
+            (val.hipotesis.length ? `\nHipótesis que ya tengo: ${val.hipotesis.map((h) => h.supuesto).join(' | ')}` : '') +
+            '\n\nIMPORTANTE: Hipótesis específicas a ESTA idea, no genéricas. Las más riesgosas: si son falsas, hunden la idea.'
           }
+          placeholder="Detalle opcional (ej: enfócate en hipótesis de precio)…"
           onAplicar={aplicarIA}
         />
         <p className="idea-muted mt-2 text-xs">

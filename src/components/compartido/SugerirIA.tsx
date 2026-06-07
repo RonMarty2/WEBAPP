@@ -22,6 +22,7 @@ import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 export function SugerirIA({
   modulo,
   tarea,
+  contexto,
   maestroId,
   formato = 'texto',
   acentoClase = 'bg-slate-900 text-white',
@@ -30,6 +31,13 @@ export function SugerirIA({
 }: {
   modulo: string;
   tarea: string;
+  /**
+   * Contexto del proyecto local (idea, sector, lo ya construido en otras
+   * herramientas, etc.) que SIEMPRE se envía al servicio de IA, aunque el
+   * estudiante no escriba nada en el textarea. Si lo pones aquí, llega al
+   * backend; si lo pones en `placeholder`, solo es UI y no llega.
+   */
+  contexto?: string;
   /** Si no se pasa, usa automáticamente el maestro activo del widget. */
   maestroId?: string | null;
   formato?: 'lista' | 'texto';
@@ -64,7 +72,10 @@ export function SugerirIA({
         body: JSON.stringify({
           modulo,
           tarea,
-          instruccion,
+          // Antepone el contexto del proyecto (si la herramienta lo pasó) a la
+          // instrucción que el estudiante escribió. Así la IA siempre tiene
+          // los datos del proyecto local aunque el textarea esté vacío.
+          instruccion: [contexto, instruccion].filter((s) => s && s.trim()).join('\n\n').trim(),
           maestroId: maestroIdEfectivo ?? undefined,
           formato,
         }),
