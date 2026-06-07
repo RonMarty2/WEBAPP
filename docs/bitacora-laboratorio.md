@@ -108,7 +108,7 @@ visualmente pero comparten sesión y datos.
 |---|---|---|---|
 | 1 | Idea / Pre-validación | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Lean Canvas, Propuesta de Valor (VPC), Validación (hipótesis), Scorecard de viabilidad, Reporte. Identidad ámbar. Pendiente: solo FASE 1 (Academia). |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
-| 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
+| 3 | Estrategia / Macroentorno | ✅ COMPLETO | Academia (6 clases + quiz) + laboratorio (13 herramientas). Detalle abajo. |
 | 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 5 | Organización | 🔨 LABORATORIO COMPLETO (falta Academia) | 6 herramientas listas: Organigrama, RRHH (aportes patronales BO en vivo), Legal (checklist trámites BO), Técnico, Branding, Reporte. Pendiente: solo FASE 1 (Academia). |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
@@ -209,6 +209,16 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Estrategia: Academia (FASE 1) → módulo COMPLETO
+- Construida la **Academia de Estrategia** (6 clases con teoría + ejemplo
+  boliviano + quiz de 3), replicando el patrón de Mercados con tokens violeta:
+  `clases-data.ts`, lista `/estrategia/academia`, clase `[slug]` (teoría→quiz→
+  fin con progreso), API `/api/estrategia/progreso` (tabla ya existía). Push 06d1aef.
+- **Estrategia pasa a ✅ COMPLETO** (academia + laboratorio), como Mercados.
+- Patrón de Academia ya validado y reutilizable para los otros módulos
+  (Marketing, Organización, Idea, Defensa): copiar el patrón con su color y
+  su `*_progreso_clases`.
 
 ### 2026-06-07 — Generador Modo Conectado: Wave 3 (export LaTeX/Overleaf)
 - `documentoALatex()` en `src/lib/generador/latex.ts` reusa `escaparLatex` y
