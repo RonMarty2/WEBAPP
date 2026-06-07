@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Plus, Layers, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Layers, Trash2, ArrowRight, Sparkles, Loader2, Check } from 'lucide-react';
 import type { EstadoIdea } from '@/types/idea';
 import { MODALIDADES, UNIVERSIDADES } from '@/lib/idea/catalogos';
 
@@ -39,8 +39,56 @@ export default function MisIdeas() {
   const [uniOtra, setUniOtra] = useState('');
   const [guardando, setGuardando] = useState(false);
 
+  // Sugerencia con IA (título sugerido + idea mejorada)
+  const [sugIA, setSugIA] = useState<{ titulo: string; idea: string } | null>(null);
+  const [generandoIA, setGenerandoIA] = useState(false);
+  const [errorIA, setErrorIA] = useState<string | null>(null);
+
   const tipoFinal = tipoTrabajo === '__otra__' ? tipoOtro.trim() : tipoTrabajo;
   const uniFinal = universidad === '__otra__' ? uniOtra.trim() : universidad;
+
+  /**
+   * Pide a la IA un título académico y una versión mejorada de la idea, basados
+   * en lo que el estudiante ya escribió. NO inventa de cero — refina.
+   */
+  const sugerirConIA = async () => {
+    setGenerandoIA(true);
+    setErrorIA(null);
+    setSugIA(null);
+    try {
+      const contexto =
+        `Tipo de trabajo: ${tipoFinal || 'no definido'}\n` +
+        `Universidad: ${uniFinal || 'no definida'}\n` +
+        `Sector / rubro: ${sector || 'no definido'}\n` +
+        `Título actual del estudiante: ${titulo || '(vacío)'}\n` +
+        `Idea actual del estudiante: ${idea || '(vacía)'}`;
+
+      const tarea =
+        'El estudiante boliviano necesita ayuda para nombrar y refinar su idea. ' +
+        'Basándote SOLO en lo que escribió arriba (sin inventar un negocio distinto), devuelve EXACTAMENTE 2 líneas con este formato literal:\n' +
+        'Titulo: <título académico claro, entre 8 y 15 palabras, sin signos al final>\n' +
+        'Idea: <reformulación de su idea en 1-2 frases, con a quién ayuda, qué problema resuelve y cómo>';
+
+      const r = await fetch('/api/ai/asistir', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ modulo: 'idea', tarea, instruccion: contexto, formato: 'texto' }),
+      });
+      const d = await r.json();
+      if (!r.ok) { setErrorIA(d?.detail ?? 'No se pudo generar.'); return; }
+
+      const texto: string = d.texto ?? '';
+      const mT = texto.match(/\*{0,2}\s*T[ií]tulo\s*\*{0,2}\s*:?\s*(.+)/i);
+      const mI = texto.match(/\*{0,2}\s*Idea\s*\*{0,2}\s*:?\s*(.+)/i);
+      const tit = mT?.[1]?.trim().replace(/^["'«]|["'».]$/g, '') ?? '';
+      const ide = mI?.[1]?.trim() ?? '';
+      if (!tit && !ide) { setErrorIA('La IA no devolvió el formato esperado. Intenta de nuevo.'); return; }
+      setSugIA({ titulo: tit, idea: ide });
+    } catch {
+      setErrorIA('Error de conexión.');
+    } finally {
+      setGenerandoIA(false);
+    }
+  };
 
   const cargar = () => {
     fetch('/api/idea/proyectos', { credentials: 'include' })
@@ -69,7 +117,7 @@ export default function MisIdeas() {
         }),
       });
       if (res.ok) {
-        setTitulo(''); setIdea(''); setSector(''); setTipoTrabajo(''); setTipoOtro(''); setUniversidad(''); setUniOtra(''); setCreando(false);
+        setTitulo(''); setIdea(''); setSector(''); setTipoTrabajo(''); setTipoOtro(''); setUniversidad(''); setUniOtra(''); setSugIA(null); setErrorIA(null); setCreando(false);
         cargar();
       }
     } finally {
@@ -164,11 +212,78 @@ export default function MisIdeas() {
             placeholder="Ej: Comida / delivery"
             className="idea-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
           />
+
+          {/* Sugerencia con IA: título académico + idea mejorada */}
+          {(titulo.trim() || idea.trim()) && (
+            <div className="mt-4 rounded-lg border border-amber-100 bg-amber-50/40 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-slate-700">
+                  ¿No sabes cómo llamarle o cómo decirlo? La IA puede proponer un{' '}
+                  <strong>título académico</strong> y reformular tu idea con base en lo que escribiste.
+                </p>
+                <button
+                  type="button"
+                  onClick={sugerirConIA}
+                  disabled={generandoIA}
+                  className="idea-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium disabled:opacity-50"
+                >
+                  {generandoIA ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+                  {generandoIA ? 'Pensando…' : 'Sugerir con IA'}
+                </button>
+              </div>
+
+              {errorIA && <p className="mt-2 text-xs text-rose-700">⚠️ {errorIA}</p>}
+
+              {sugIA && (
+                <div className="mt-3 space-y-2">
+                  {sugIA.titulo && (
+                    <div className="rounded-md border border-amber-200 bg-white p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700">Título sugerido</p>
+                      <p className="mt-1 text-sm font-medium text-slate-800">{sugIA.titulo}</p>
+                      <button
+                        type="button"
+                        onClick={() => setTitulo(sugIA.titulo)}
+                        className="mt-2 inline-flex items-center gap-1 rounded-md bg-amber-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-700"
+                      >
+                        <Check className="h-3 w-3" /> Usar este título
+                      </button>
+                    </div>
+                  )}
+                  {sugIA.idea && (
+                    <div className="rounded-md border border-amber-200 bg-white p-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-amber-700">Idea mejorada</p>
+                      <p className="mt-1 text-sm text-slate-800">{sugIA.idea}</p>
+                      <button
+                        type="button"
+                        onClick={() => setIdea(sugIA.idea)}
+                        className="mt-2 inline-flex items-center gap-1 rounded-md bg-amber-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-700"
+                      >
+                        <Check className="h-3 w-3" /> Usar esta idea
+                      </button>
+                    </div>
+                  )}
+                  {sugIA.titulo && sugIA.idea && (
+                    <button
+                      type="button"
+                      onClick={() => { setTitulo(sugIA.titulo); setIdea(sugIA.idea); }}
+                      className="idea-btn-ghost w-full px-3 py-1.5 text-xs"
+                    >
+                      Usar ambos
+                    </button>
+                  )}
+                  <p className="text-[10px] text-slate-500">
+                    Revisa y edita — la IA es un punto de partida; tú apruebas.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 flex gap-2">
             <button type="submit" disabled={guardando || !titulo.trim()} className="idea-btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50">
               {guardando ? 'Creando…' : 'Crear y empezar →'}
             </button>
-            <button type="button" onClick={() => { setCreando(false); setTitulo(''); setIdea(''); setSector(''); setTipoTrabajo(''); setTipoOtro(''); setUniversidad(''); setUniOtra(''); }} className="idea-btn-ghost px-4 py-2 text-sm">
+            <button type="button" onClick={() => { setCreando(false); setTitulo(''); setIdea(''); setSector(''); setTipoTrabajo(''); setTipoOtro(''); setUniversidad(''); setUniOtra(''); setSugIA(null); setErrorIA(null); }} className="idea-btn-ghost px-4 py-2 text-sm">
               Cancelar
             </button>
           </div>
