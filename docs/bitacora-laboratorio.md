@@ -99,7 +99,7 @@ visualmente pero comparten sesión y datos.
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
-| 4 | Marketing | 🔨 EN CONSTRUCCIÓN | FASE 0 lista (cimientos: identidad rosa, login único, tablas `marketing_*`, shell navegable con CRUD de planes). Herramientas pendientes. Detalle abajo. |
+| 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
 | 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
@@ -149,9 +149,23 @@ Cada herramienta: plantillas bolivianas editables (modo B) + botón
   `/api/marketing/perfil`, tablas SQL `marketing_*` (herramientas como JSONB),
   shell con CRUD de planes. Light-only. Prefijo de tokens y clases: `mkt-`
   (Mercados ya usa `mk-`).
-- ⬜ **Herramientas:** Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL,
-  Calendario editorial, Reporte consolidado.
-- ⬜ **FASE 1** — Academia.
+- ✅ **Laboratorio COMPLETO (5/5):**
+  · **Buyer persona** — perfil del cliente ideal (nombre/edad/ocupación/
+    ubicación, metas y frustraciones como listas, canales con píldoras
+    sugeridas + libres, cita literal). IA aplica formato literal a los
+    campos.
+  · **Mezcla 4Ps/7Ps** — selector productos vs servicios; 4 o 7 campos
+    largos (producto, precio, plaza, promoción, +personas/procesos/
+    evidencia física). IA aplica por P.
+  · **Presupuesto y CPL** — tabla por canal con inversión, CPL, conversión
+    y ticket; calcula leads, ventas, ingreso, ROAS y CAC en vivo.
+    Plantilla boliviana con Meta/TikTok/Google/Influencer.
+  · **Calendario editorial** — publicaciones por fecha/canal/tipo/copy/
+    estado, filtros por estado, generador IA de 4 semanas (12 piezas).
+  · **Reporte consolidado** — indicadores (inversión, leads, ventas, ROAS),
+    cuatro secciones, copiar (markdown) e imprimir → artefacto que
+    alimentará el modo conectado del Generador.
+- ⬜ **FASE 1** — Academia (único pendiente del módulo).
 - **La migración 001 ya incluye TODAS las columnas** (`buyer_persona`,
   `mezcla`, `presupuesto`, `calendario`). No habrá más migraciones por
   herramienta, salvo que aparezca algo nuevo.
@@ -185,6 +199,19 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Marketing: laboratorio completo (5 herramientas)
+- Construidas las 5 herramientas del laboratorio en una sola ola (sin pausas
+  entre cada una, por decisión del usuario): **Buyer persona**, **Mezcla
+  4Ps/7Ps**, **Presupuesto y CPL por canal**, **Calendario editorial** y
+  **Reporte consolidado**.
+- El Presupuesto/CPL calcula leads, ventas, ingreso, ROAS y CAC en vivo
+  (todo en bolivianos). El Reporte es el artefacto que el Generador modo
+  conectado podrá importar. Push 3b585c6.
+- **Patrón confirmado:** una vez la FASE 0 está sólida (identidad + login +
+  shell + tablas con todas las columnas), construir las herramientas de
+  un módulo entero en una sola ola es viable y mantiene calidad si cada
+  herramienta hereda el patrón ya validado.
 
 ### 2026-06-07 — Marketing: FASE 0 (cimientos del módulo)
 - Construido el shell del módulo Marketing siguiendo el patrón validado:
