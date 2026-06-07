@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-07 (sesión 4: hub /modulos, IA en herramientas, "Define tu idea" + formatos oficiales)
+> **Última actualización:** 2026-06-07 (sesión 5: flujo por modalidad + voseo)
 
 ---
 
@@ -268,6 +268,41 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 (sesión 5) — Flujo por modalidad + limpieza de voseo
+
+- **Mapa de flujo por modalidad** (`6071246`): cierra el bucle "¿y ahora
+  qué?" que dejaba al estudiante sin saber a qué módulo pasar después del
+  reporte. Nuevo `src/lib/flujos/por-modalidad.ts` con el orden de módulos
+  recomendado para las 8 modalidades académicas (Proyecto de Grado usa los
+  8 módulos; Tesis solo mercados/estrategia/defensa/generador; Monografía
+  mercados/defensa/generador; etc.).
+- **Componentes compartidos `ProgresoFlujo` y `SiguienteModulo`**: el
+  primero pinta el breadcrumb "Idea ✓ › Mercados (aquí) › Estrategia → ..."
+  arriba de cada reporte; el segundo pinta el botón "¿Y ahora? → ir a X"
+  al final. Si el módulo abierto no aplica a la modalidad (ej. Tesis
+  abriendo Marketing), muestra warning ámbar.
+- **Integrados en los 6 reportes + Generador**: idea, mercados, estrategia,
+  marketing, organizacion, defensa, generador. idea lee `tipo_trabajo` del
+  propio proyecto; los demás leen `modalidad` del Proyecto Maestro activo
+  vía `useMaestroActivo` (hook ampliado para exponer `modalidad` además
+  de id/titulo).
+- **Limpieza de voseo argentino** (`bc0ce8c`): CLAUDE.md marca el voseo
+  como bloqueante de calidad (mercado boliviano). Eliminado de 7 strings
+  user-facing en `FaseAcciones`, `Cap0TituloSelector`, `Cap3eModoSelector`,
+  `Cap4gConfigSelector`, `workspace-pg`, `projects/new` y el mensaje de
+  error de `analizar-observacion`. Pendiente revisar prompts del backend
+  (14 archivos con voseo en `src/lib/prompts/`) en otra tanda — esos
+  instruyen a la IA, no se ven directo.
+
+### Pendiente activo (que arrancamos en esta sesión)
+- ⬜ **Pre-llenado de título entre módulos para plan Pro**: cuando el
+  estudiante con plan `pro` aprieta "Siguiente paso" desde el reporte
+  de Idea, al llegar a Mercados el formulario "Nueva investigación"
+  ya debe traer el título cargado. Para plan `estandar` (los alumnos
+  de cátedra del usuario), debe llegar vacío para que aprendan el
+  proceso a mano. La decisión: NO agregar nada al admin — gating por
+  el campo `plan` que ya existe en `auth.ts`.
 
 ### 2026-06-07 (sesión 4) — Descubribilidad, IA en herramientas y formatos oficiales
 - **Hub `/modulos` + bloque "Tu camino" en `/dashboard`** (`b0cb21c`): el dashboard
