@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Sparkles, Loader2, X, Copy, Check } from 'lucide-react';
+import { Sparkles, Loader2, X, Copy, Check, Target } from 'lucide-react';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
 
 /**
  * Componente reusable "Sugerir con IA" — para cualquier módulo del laboratorio.
@@ -9,6 +10,11 @@ import { Sparkles, Loader2, X, Copy, Check } from 'lucide-react';
  * Llama al servicio compartido /api/ai/asistir con la tarea y (si hay)
  * el maestroId para contexto cruzado. Muestra la sugerencia en un panel;
  * el estudiante puede copiarla o aplicarla vía onAplicar.
+ *
+ * **Auto-conexión al Proyecto Maestro:** si no se pasa `maestroId` por prop,
+ * el componente usa AUTOMÁTICAMENTE el proyecto maestro activo del widget
+ * (localStorage). Así todas las herramientas comparten contexto cruzado sin
+ * que cada módulo tenga que cablearlo a mano.
  *
  * Es estéticamente neutro (no usa tokens de un módulo específico) para
  * encajar en cualquiera. El módulo le pasa su color de acento por prop.
@@ -24,6 +30,7 @@ export function SugerirIA({
 }: {
   modulo: string;
   tarea: string;
+  /** Si no se pasa, usa automáticamente el maestro activo del widget. */
   maestroId?: string | null;
   formato?: 'lista' | 'texto';
   /** Clase Tailwind para el botón de acento del módulo. */
@@ -40,6 +47,11 @@ export function SugerirIA({
   const [error, setError] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
 
+  // Maestro activo del widget — solo se usa si la prop no lo definió.
+  const maestroAuto = useMaestroActivo();
+  const maestroIdEfectivo = maestroId ?? maestroAuto?.id ?? null;
+  const tituloMaestro = maestroId ? null : maestroAuto?.titulo ?? null;
+
   const generar = async () => {
     setCargando(true);
     setError(null);
@@ -49,7 +61,13 @@ export function SugerirIA({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ modulo, tarea, instruccion, maestroId: maestroId ?? undefined, formato }),
+        body: JSON.stringify({
+          modulo,
+          tarea,
+          instruccion,
+          maestroId: maestroIdEfectivo ?? undefined,
+          formato,
+        }),
       });
       const d = await res.json();
       if (!res.ok) {
@@ -96,6 +114,13 @@ export function SugerirIA({
         </button>
       </div>
       <p className="mt-1 text-xs text-slate-500">{tarea}</p>
+
+      {tituloMaestro && (
+        <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[11px] text-slate-600" title="Tu trabajo en otros módulos vinculados a este proyecto alimentará la sugerencia">
+          <Target className="h-3 w-3" />
+          Usando contexto de <strong className="font-semibold">{tituloMaestro}</strong>
+        </div>
+      )}
 
       <textarea
         value={instruccion}
