@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-07 (sesión 2: auto-conexión widget→SugerirIA + ZIP Overleaf por universidad)
+> **Última actualización:** 2026-06-07 (sesión 3: auditoría completa + 21 fixes en 4 tandas)
 
 ---
 
@@ -265,6 +265,49 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 (sesión 3) — Auditoría profunda + 21 fixes en 4 tandas
+Audité todo el código nuevo. Encontré 23 issues; arreglé 21 (3 skips conscientes).
+
+**Tanda 1 — 4 CRÍTICOS (`c451279`):**
+1. **CVE divulgación cruzada en `vincular`**: validar que `ref_id` pertenece
+   al user antes de crear el vínculo. Sin esto, atacante podía leer proyectos
+   ajenos vía contexto IA.
+2. **LaTeX rompía en ZIP** con caracteres especiales en títulos (`%`, `&`, `$`).
+   Ahora usa `escaparLatex` completo.
+3. **Simulacro guardaba preguntas no evaluadas como 0/10**. Tipo cambiado a
+   `number | null`; reporte distingue "sin evaluar".
+4. **Upserts de progreso degradaban privilegios de super-admin**. Helper
+   compartido `asegurarPerfilModulo()` respeta `isAdmin` + `ignoreDuplicates`.
+
+**Tanda 2 — 5 GRAVES (`4f4a10f`):**
+5. `window.location.href` → `router.push` en **24 archivos**. Ya no recarga
+   página entera al "Guardar y volver".
+6. Las 5 llamadas directas a `/api/ai/asistir` ahora usan `useMaestroActivo`.
+   Antes, algunos generadores usaban contexto cruzado y otros no.
+7. `generarVacias` del Generador: progreso visible ("Generando 3/10…"),
+   cuenta éxitos/fallos, surface al final qué falló.
+8. `generarSeccion` lanza errores en vez de retornar `null` mudo.
+9. Tribunal IA acepta `Puntaje`, `Calificación`, `Nota`, comas, markdown bold;
+   con fallback a número solo; avisa si no pudo extraer.
+
+**Tanda 3 — 8 IMPORTANTES (`1e78563`):**
+10. `/api/maestro` GET ya no devuelve `documento` JSONB (pesado).
+11. PATCH de documento limita a 2 MB.
+12. `useMaestroActivo` con cache compartido (TTL 60s + dedup).
+13. AbortController en generaciones del Generador con botón Cancelar.
+14. Calendario marketing usa `id` estable en cada publicación; ya no usa
+    `indexOf` por referencia.
+15. Skip: el widget retorna `null` durante hydration → no hay flash.
+16. Detección de universidad acepta `U.M.S.S.`, `Univ. Católica Boliviana`…
+17. mes/año de carátula usa `actualizado_en` del maestro, no NOW.
+
+**Tanda 4 — 3 MENORES (`95fb270`):**
+18. `Math.round` en métricas marketing (antes `floor` sub-estimaba ~22%).
+19. README del ZIP es checklist concreto, no narrativo.
+22. Filename del `.md` consistente con `.tex`/`.zip` (sin acentos raros).
+Skips conscientes: 20 (print CSS textareas), 21 (paginación >50 maestros),
+23 (no es bug).
 
 ### 2026-06-07 (sesión 2) — Cerrados los dos pendientes opcionales
 - **Auto-conexión widget → SugerirIA** (`e3dab91`): hook `useMaestroActivo()`
