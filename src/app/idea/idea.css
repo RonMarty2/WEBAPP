@@ -1,0 +1,57 @@
+/**
+ * Identidad visual del módulo Idea / Pre-validación: acento ÁMBAR (#d97706).
+ * Distinta a Finanzas/negro, Mercados/sky, Estrategia/violet, Marketing/rose,
+ * Organización/emerald. Tema "bombilla / idea". Light-only.
+ * Todo bajo .idea-scope. Prefijo de tokens y clases: idea-
+ */
+
+.idea-scope {
+  --idea-bg: 48 60% 99%;          /* casi blanco cálido */
+  --idea-surface: 0 0% 100%;
+  --idea-fg: 30 30% 15%;          /* casi negro cálido */
+  --idea-muted-fg: 35 10% 45%;    /* gris cálido */
+  --idea-border: 40 40% 90%;      /* borde ámbar muy claro */
+  --idea-accent: 32 95% 44%;      /* amber-600 #d97706 (legible con blanco) */
+  --idea-accent-fg: 0 0% 100%;
+  --idea-accent-soft: 48 96% 89%; /* amber-100 */
+  --idea-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--idea-bg));
+  color: hsl(var(--idea-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.idea-scope,
+.idea-scope * {
+  color-scheme: light !important;
+}
+
+.idea-scope .idea-card {
+  background: hsl(var(--idea-surface));
+  border: 1px solid hsl(var(--idea-border));
+  border-radius: var(--idea-radius);
+}
+.idea-scope .idea-accent-bg { background: hsl(var(--idea-accent)); }
+.idea-scope .idea-accent-text { color: hsl(var(--idea-accent)); }
+.idea-scope .idea-accent-soft { background: hsl(var(--idea-accent-soft)); }
+.idea-scope .idea-muted { color: hsl(var(--idea-muted-fg)); }
+.idea-scope .idea-border { border-color: hsl(var(--idea-border)); }
+
+.idea-scope .idea-btn-primary {
+  background: hsl(var(--idea-accent));
+  color: hsl(var(--idea-accent-fg));
+  border-radius: var(--idea-radius);
+  transition: opacity 0.15s ease;
+}
+.idea-scope .idea-btn-primary:hover { opacity: 0.9; }
+
+.idea-scope .idea-btn-ghost {
+  border: 1px solid hsl(var(--idea-border));
+  color: hsl(var(--idea-fg));
+  border-radius: var(--idea-radius);
+  transition: background 0.15s ease;
+}
+.idea-scope .idea-btn-ghost:hover { background: hsl(var(--idea-accent-soft)); }
