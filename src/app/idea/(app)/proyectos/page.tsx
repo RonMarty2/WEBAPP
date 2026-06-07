@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Plus, Layers, Trash2, ArrowRight } from 'lucide-react';
 import type { EstadoIdea } from '@/types/idea';
+import { MODALIDADES, UNIVERSIDADES } from '@/lib/idea/catalogos';
 
 interface ProyectoLista {
   id: string;
   titulo: string;
   idea: string | null;
   sector: string | null;
+  tipo_trabajo: string | null;
+  universidad: string | null;
   estado: EstadoIdea;
   actualizado_en: string;
 }
@@ -30,7 +33,14 @@ export default function MisIdeas() {
   const [titulo, setTitulo] = useState('');
   const [idea, setIdea] = useState('');
   const [sector, setSector] = useState('');
+  const [tipoTrabajo, setTipoTrabajo] = useState('');
+  const [tipoOtro, setTipoOtro] = useState('');
+  const [universidad, setUniversidad] = useState('');
+  const [uniOtra, setUniOtra] = useState('');
   const [guardando, setGuardando] = useState(false);
+
+  const tipoFinal = tipoTrabajo === '__otra__' ? tipoOtro.trim() : tipoTrabajo;
+  const uniFinal = universidad === '__otra__' ? uniOtra.trim() : universidad;
 
   const cargar = () => {
     fetch('/api/idea/proyectos', { credentials: 'include' })
@@ -50,10 +60,16 @@ export default function MisIdeas() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ titulo: titulo.trim(), idea: idea.trim() || null, sector: sector.trim() || null }),
+        body: JSON.stringify({
+          titulo: titulo.trim(),
+          idea: idea.trim() || null,
+          sector: sector.trim() || null,
+          tipo_trabajo: tipoFinal || null,
+          universidad: uniFinal || null,
+        }),
       });
       if (res.ok) {
-        setTitulo(''); setIdea(''); setSector(''); setCreando(false);
+        setTitulo(''); setIdea(''); setSector(''); setTipoTrabajo(''); setTipoOtro(''); setUniversidad(''); setUniOtra(''); setCreando(false);
         cargar();
       }
     } finally {
@@ -87,16 +103,59 @@ export default function MisIdeas() {
 
       {creando && (
         <form onSubmit={crear} className="idea-card mb-5 p-5">
-          <label className="text-sm font-medium">Título</label>
+          <p className="idea-accent-text text-xs font-semibold uppercase tracking-wider">Define tu trabajo</p>
+
+          {/* Tipo de trabajo + Universidad */}
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium">¿Qué trabajo final harás?</label>
+              <select
+                value={tipoTrabajo} onChange={(e) => setTipoTrabajo(e.target.value)}
+                className="idea-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+              >
+                <option value="">Elegir…</option>
+                {MODALIDADES.map((m) => <option key={m.valor} value={m.valor}>{m.label}</option>)}
+                <option value="__otra__">Otra…</option>
+              </select>
+              {tipoTrabajo === '__otra__' && (
+                <input
+                  value={tipoOtro} onChange={(e) => setTipoOtro(e.target.value)} placeholder="Escribe tu modalidad"
+                  className="idea-border mt-2 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              )}
+              {tipoTrabajo && tipoTrabajo !== '__otra__' && (
+                <p className="idea-muted mt-1 text-xs">{MODALIDADES.find((m) => m.valor === tipoTrabajo)?.ayuda}</p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Universidad <span className="idea-muted font-normal">(opcional)</span></label>
+              <select
+                value={universidad} onChange={(e) => setUniversidad(e.target.value)}
+                className="idea-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+              >
+                <option value="">Elegir…</option>
+                {UNIVERSIDADES.map((u) => <option key={u} value={u}>{u}</option>)}
+                <option value="__otra__">Otra…</option>
+              </select>
+              {universidad === '__otra__' && (
+                <input
+                  value={uniOtra} onChange={(e) => setUniOtra(e.target.value)} placeholder="Escribe tu universidad"
+                  className="idea-border mt-2 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
+                />
+              )}
+            </div>
+          </div>
+
+          <label className="mt-4 block text-sm font-medium">Título de tu trabajo</label>
           <input
             autoFocus value={titulo} onChange={(e) => setTitulo(e.target.value)}
-            placeholder="Ej: App de delivery de almuerzos caseros"
+            placeholder="Ej: Delivery de almuerzos caseros para oficinistas"
             className="idea-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
           />
           <label className="mt-3 block text-sm font-medium">¿Cuál es la idea? <span className="idea-muted font-normal">(opcional)</span></label>
           <textarea
             value={idea} onChange={(e) => setIdea(e.target.value)} rows={2}
-            placeholder="En una frase: a quién ayudas y cómo."
+            placeholder="En una frase: a quién ayudas y cómo. (Si aún no la tienes clara, la armas en el Lean Canvas.)"
             className="idea-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
           />
           <label className="mt-3 block text-sm font-medium">Sector / rubro <span className="idea-muted font-normal">(opcional)</span></label>
@@ -105,11 +164,11 @@ export default function MisIdeas() {
             placeholder="Ej: Comida / delivery"
             className="idea-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200"
           />
-          <div className="mt-3 flex gap-2">
+          <div className="mt-4 flex gap-2">
             <button type="submit" disabled={guardando || !titulo.trim()} className="idea-btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50">
-              {guardando ? 'Creando…' : 'Crear idea'}
+              {guardando ? 'Creando…' : 'Crear y empezar →'}
             </button>
-            <button type="button" onClick={() => { setCreando(false); setTitulo(''); setIdea(''); setSector(''); }} className="idea-btn-ghost px-4 py-2 text-sm">
+            <button type="button" onClick={() => { setCreando(false); setTitulo(''); setIdea(''); setSector(''); setTipoTrabajo(''); setTipoOtro(''); setUniversidad(''); setUniOtra(''); }} className="idea-btn-ghost px-4 py-2 text-sm">
               Cancelar
             </button>
           </div>
@@ -142,8 +201,9 @@ export default function MisIdeas() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="truncate font-semibold">{p.titulo}</h2>
-                  <div className="mt-1 flex items-center gap-2 text-xs">
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                     <span className={`rounded-full px-2 py-0.5 font-medium ${est.clase}`}>{est.txt}</span>
+                    {p.tipo_trabajo && <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700 ring-1 ring-amber-200">{p.tipo_trabajo}</span>}
                     {(p.idea || p.sector) && <span className="idea-muted truncate">{p.idea || p.sector}</span>}
                   </div>
                 </div>

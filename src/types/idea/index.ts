@@ -74,6 +74,8 @@ export interface ProyectoIdea {
   titulo: string;
   idea: string | null;
   sector: string | null;
+  tipo_trabajo: string | null;
+  universidad: string | null;
   lean_canvas?: Partial<LeanCanvas>;
   propuesta_valor?: Partial<PropuestaValor>;
   validacion?: Partial<Validacion>;

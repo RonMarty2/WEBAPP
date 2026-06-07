@@ -25,7 +25,7 @@ export async function GET() {
   const sb = createAdminClient() as any;
   const { data } = await sb
     .from('idea_proyectos')
-    .select('id, titulo, idea, sector, estado, creado_en, actualizado_en')
+    .select('id, titulo, idea, sector, tipo_trabajo, universidad, estado, creado_en, actualizado_en')
     .eq('estudiante_id', user.id)
     .order('actualizado_en', { ascending: false });
 
@@ -60,6 +60,8 @@ export async function POST(req: Request) {
       titulo,
       idea: body.idea ?? null,
       sector: body.sector ?? null,
+      tipo_trabajo: body.tipo_trabajo ?? null,
+      universidad: body.universidad ?? null,
       estado: 'canvas',
     })
     .select()
