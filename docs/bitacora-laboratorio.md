@@ -4,7 +4,48 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-06 (sesión: migración simuladorPRO + login único)
+> **Última actualización:** 2026-06-07 (sesión: 7 módulos COMPLETOS + Generador conectado Waves 1-3 + widget transversal)
+
+---
+
+## §0 Cómo retomar (LEER PRIMERO)
+
+**Para arrancar la próxima sesión, dile a Claude:**
+> "Lee `docs/bitacora-laboratorio.md` y seguimos."
+
+Con eso retoma todo el contexto. El proyecto está MUY avanzado: los **7 módulos
+educativos están COMPLETOS** (academia + laboratorio), el **Generador conectado**
+funciona (Waves 1-3) y el **widget transversal** "Trabajando en" está integrado.
+
+### ⚠️ Acción pendiente del usuario en Supabase (lo único que bloquea)
+Faltan ejecutar estas migraciones (idempotentes) en **Supabase → SQL Editor**:
+- `supabase/migrations-idea/001_estructura_base.sql` (tablas `idea_*`)
+- `supabase/migrations-defensa/001_estructura_base.sql` (tablas `defensa_*`)
+- `supabase/migrations-organizacion/001_estructura_base.sql` (tablas `organizacion_*`)
+- `supabase/migrations-maestro/002_documento.sql` (columna `documento`)
+
+Hasta correrlas, `/idea`, `/defensa`, `/organizacion` no guardan, y el documento
+del Generador no persiste. (MCPE de Estrategia y Marketing 001 ya se corrieron.)
+
+### Estado de migraciones SQL (✅ = ejecutada por el usuario)
+| Migración | Estado |
+|---|---|
+| `migrations-finanzas/*` | ✅ (módulo funcional) |
+| `migrations-mercados/001` | ✅ |
+| `migrations-estrategia/001`, `002` | ✅ |
+| `migrations-estrategia/003_mcpe` | ✅ |
+| `migrations-maestro/001_proyecto_maestro` | ✅ |
+| `migrations-marketing/001` | ✅ |
+| `migrations-idea/001` | ⬜ PENDIENTE |
+| `migrations-defensa/001` | ⬜ PENDIENTE |
+| `migrations-organizacion/001` | ⬜ PENDIENTE |
+| `migrations-maestro/002_documento` | ⬜ PENDIENTE |
+
+### Pendientes (todos OPCIONALES, no bloquean nada)
+- Generador: export PDF directo / ZIP Overleaf con carátula por universidad
+  (reusar `src/lib/latex/preamble-*.ts`).
+- Pasar el maestro activo (widget) a las llamadas `SugerirIA` de cada módulo
+  para que las sugerencias usen contexto cruzado automáticamente.
 
 ---
 
@@ -142,7 +183,7 @@ visualmente pero comparten sesión y datos.
     decisión del MCPE), con copiar (markdown) e imprimir → artefacto para el
     modo conectado del Generador
 - ✅ **Todas las herramientas construidas.** VRIO quedó como opcional (no crítica).
-- ⬜ **FASE 1** — Academia: clases sobre análisis situacional (único pendiente).
+- ✅ **FASE 1 — Academia:** 6 clases (teoría + ejemplo boliviano + quiz) en `/estrategia/academia`. **Módulo COMPLETO.**
 - Patrón de cada herramienta: plantillas bolivianas (modo B) + botón
   "Sugerir con IA" (modo C, vía /api/ai/asistir con contexto del proyecto).
 
@@ -179,7 +220,7 @@ Cada herramienta: plantillas bolivianas editables (modo B) + botón
   · **Reporte consolidado** — indicadores (inversión, leads, ventas, ROAS),
     cuatro secciones, copiar (markdown) e imprimir → artefacto que
     alimentará el modo conectado del Generador.
-- ⬜ **FASE 1** — Academia (único pendiente del módulo).
+- ✅ **FASE 1 — Academia:** 5 clases (teoría + ejemplo boliviano + quiz) en `/marketing/academia`. **Módulo COMPLETO.**
 - **La migración 001 ya incluye TODAS las columnas** (`buyer_persona`,
   `mezcla`, `presupuesto`, `calendario`). No habrá más migraciones por
   herramienta, salvo que aparezca algo nuevo.
@@ -213,6 +254,28 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — CIERRE DE SESIÓN (sesión enorme, todo el ecosistema)
+Logrado hoy, en orden:
+- **Estrategia:** completadas BCG, Ansoff, PEYEA, Reporte y **MCPE/QSPM** →
+  laboratorio 13/13.
+- **Marketing:** módulo nuevo (FASE 0 + 5 herramientas).
+- **Organización:** módulo nuevo (FASE 0 + 6 herramientas).
+- **Idea:** módulo nuevo completo (FASE 0 + 5 herramientas).
+- **Defensa:** módulo nuevo completo (FASE 0 + 3 herramientas, simulacro con IA).
+- **Generador Conectado** `/generador`: Wave 1 (vincular módulos + contexto +
+  borrador), Wave 2 (documento capítulo por capítulo + persistencia + export
+  md), Wave 3 (export LaTeX/Overleaf).
+- **Academias** de Estrategia, Marketing, Organización, Idea y Defensa →
+  **los 7 módulos quedan COMPLETOS** (academia + laboratorio).
+- **Widget "Trabajando en"** integrado en los 6 headers de módulos.
+- Bitácora auditada y al día. Todo commiteado y pusheado a `main`.
+
+**Cómo retomar:** ver §0 (arriba). Lo único que bloquea es ejecutar 4
+migraciones SQL pendientes (idea, defensa, organización, maestro/002).
+
+**Próximos pasos sugeridos (opcionales):** export PDF/ZIP Overleaf con
+carátula por universidad; conectar el maestro activo del widget a SugerirIA.
 
 ### 2026-06-07 — Widget "Trabajando en" → conexión transversal completa
 - Componente reusable **`WidgetMaestro`** (neutro) + helper `lib/maestro/activo.ts`
