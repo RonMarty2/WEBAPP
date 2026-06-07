@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Gauge, Check } from 'lucide-react';
-import type { Scorecard } from '@/types/idea';
+import { ArrowLeft, Gauge, Check, X } from 'lucide-react';
+import { SugerirIA } from '@/components/compartido/SugerirIA';
+import type { Scorecard, LeanCanvas, PropuestaValor, Validacion } from '@/types/idea';
 
 const VACIO: Scorecard = { deseabilidad: 3, factibilidad: 3, viabilidad: 3, notas: '' };
 
@@ -24,6 +25,12 @@ export default function HerramientaScorecard() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [s, setS] = useState<Scorecard>(VACIO);
+  const [titulo, setTitulo] = useState('');
+  const [idea, setIdea] = useState('');
+  const [sector, setSector] = useState('');
+  const [leanCanvas, setLeanCanvas] = useState<Partial<LeanCanvas>>({});
+  const [propVal, setPropVal] = useState<Partial<PropuestaValor>>({});
+  const [validac, setValidac] = useState<Partial<Validacion>>({});
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -31,7 +38,18 @@ export default function HerramientaScorecard() {
   useEffect(() => {
     fetch(`/api/idea/proyectos/${params.id}`, { credentials: 'include' })
       .then((r) => r.json())
-      .then((d) => { const x = d.proyecto?.scorecard; if (x && typeof x.deseabilidad === 'number') setS({ ...VACIO, ...x }); })
+      .then((d) => {
+        if (d.proyecto) {
+          setTitulo(d.proyecto.titulo ?? '');
+          setIdea(d.proyecto.idea ?? '');
+          setSector(d.proyecto.sector ?? '');
+          setLeanCanvas(d.proyecto.lean_canvas ?? {});
+          setPropVal(d.proyecto.propuesta_valor ?? {});
+          setValidac(d.proyecto.validacion ?? {});
+          const x = d.proyecto.scorecard;
+          if (x && typeof x.deseabilidad === 'number') setS({ ...VACIO, ...x });
+        }
+      })
       .catch(() => {})
       .finally(() => setCargando(false));
   }, [params.id]);
@@ -39,6 +57,28 @@ export default function HerramientaScorecard() {
   const prom = (s.deseabilidad + s.factibilidad + s.viabilidad) / 3;
   const v = veredicto(prom);
   const set = (key: keyof Scorecard, val: number | string) => setS((p) => ({ ...p, [key]: val }));
+
+  /**
+   * La IA sugiere puntajes y agrega su razonamiento a las notas SIN borrar
+   * lo que ya escribió el estudiante.
+   */
+  const aplicarIA = (texto: string) => {
+    const get = (etq: string): number | null => {
+      const m = texto.match(new RegExp(`${etq}\\s*:\\s*(\\d)`, 'i'));
+      const n = m ? parseInt(m[1], 10) : null;
+      return n !== null && n >= 1 && n <= 5 ? n : null;
+    };
+    const d = get('Deseabilidad'); const f = get('Factibilidad'); const vi = get('Viabilidad');
+    const notasIA = texto.match(/Notas?\s*:\s*([\s\S]+)/i)?.[1]?.trim();
+    setS((prev) => ({
+      deseabilidad: d ?? prev.deseabilidad,
+      factibilidad: f ?? prev.factibilidad,
+      viabilidad: vi ?? prev.viabilidad,
+      notas: prev.notas
+        ? `${prev.notas}\n\n— Sugerencia IA —\n${notasIA ?? ''}`.trim()
+        : (notasIA ?? prev.notas),
+    }));
+  };
 
   const guardar = async (volver: boolean) => {
     setGuardando(true); setGuardado(false);
@@ -98,9 +138,37 @@ export default function HerramientaScorecard() {
 
       <div className="idea-card mt-4 p-4">
         <p className="text-sm font-semibold">Notas / decisión</p>
-        <textarea value={s.notas} onChange={(e) => set('notas', e.target.value)} rows={3}
+        <textarea value={s.notas} onChange={(e) => set('notas', e.target.value)} rows={5}
           placeholder="¿Avanzas, pivoteas o paras? ¿Qué falta validar primero?"
           className="idea-border mt-2 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-200" />
+      </div>
+
+      {/* Sugerir puntajes con IA — lee todo lo previo del proyecto */}
+      <div className="mt-4">
+        <SugerirIA
+          modulo="idea"
+          tarea={
+            'Considerando todo el trabajo previo de la idea, propón puntajes (1-5) con justificación corta. ' +
+            'Devuelve EXACTAMENTE estas líneas con este formato literal:\n' +
+            'Deseabilidad: <1-5>\nFactibilidad: <1-5>\nViabilidad: <1-5>\n' +
+            'Notas: <2-3 frases justificando el promedio y diciendo si conviene avanzar, pivotear o parar>'
+          }
+          formato="texto"
+          acentoClase="idea-accent-bg text-white"
+          placeholder={
+            `Idea: ${idea || titulo}. Sector: ${sector || '—'}.` +
+            (leanCanvas.problema ? ` Problema: ${leanCanvas.problema}.` : '') +
+            (leanCanvas.segmentos ? ` Segmento: ${leanCanvas.segmentos}.` : '') +
+            (propVal.dolores?.length ? ` Dolores: ${propVal.dolores.join(', ')}.` : '') +
+            (propVal.aliviadores?.length ? ` Aliviadores: ${propVal.aliviadores.join(', ')}.` : '') +
+            (validac.hipotesis?.length ? ` Hipótesis: ${validac.hipotesis.map((h) => `${h.supuesto} [${h.estado}]`).join('; ')}.` : '')
+          }
+          onAplicar={aplicarIA}
+        />
+        <p className="idea-muted mt-2 text-xs">
+          La IA propone puntajes y agrega su razonamiento a tus notas <strong>sin borrar lo tuyo</strong>.
+          Usa los sliders para ajustar lo que no te convenza, o limpia el texto de la nota manualmente <X className="inline h-3 w-3" />.
+        </p>
       </div>
 
       <div className="mt-6 flex items-center gap-3">

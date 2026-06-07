@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Gift, Plus, X, Check, User, Package } from 'lucide-react';
-import type { PropuestaValor } from '@/types/idea';
+import { SugerirIA } from '@/components/compartido/SugerirIA';
+import type { PropuestaValor, LeanCanvas } from '@/types/idea';
 
 const VACIO: PropuestaValor = {
   trabajos: [], dolores: [], alegrias: [],
@@ -15,6 +16,10 @@ export default function HerramientaPropuestaValor() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [pv, setPv] = useState<PropuestaValor>(VACIO);
+  const [titulo, setTitulo] = useState('');
+  const [idea, setIdea] = useState('');
+  const [sector, setSector] = useState('');
+  const [leanCanvas, setLeanCanvas] = useState<Partial<LeanCanvas>>({});
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -22,12 +27,46 @@ export default function HerramientaPropuestaValor() {
   useEffect(() => {
     fetch(`/api/idea/proyectos/${params.id}`, { credentials: 'include' })
       .then((r) => r.json())
-      .then((d) => { if (d.proyecto?.propuesta_valor) setPv({ ...VACIO, ...d.proyecto.propuesta_valor }); })
+      .then((d) => {
+        if (d.proyecto) {
+          setTitulo(d.proyecto.titulo ?? '');
+          setIdea(d.proyecto.idea ?? '');
+          setSector(d.proyecto.sector ?? '');
+          setLeanCanvas(d.proyecto.lean_canvas ?? {});
+          if (d.proyecto.propuesta_valor) setPv({ ...VACIO, ...d.proyecto.propuesta_valor });
+        }
+      })
       .catch(() => {})
       .finally(() => setCargando(false));
   }, [params.id]);
 
   const set = (key: keyof PropuestaValor, v: string[]) => setPv((p) => ({ ...p, [key]: v }));
+
+  /**
+   * Aplica la sugerencia de la IA AGREGANDO items a las listas (no reemplaza).
+   * El estudiante puede quitar lo que no le sirva con el botón X de cada item.
+   */
+  const aplicarIA = (texto: string) => {
+    const get = (etiqueta: string): string[] => {
+      const re = new RegExp(`^\\s*${etiqueta}\\s*:\\s*(.+)$`, 'im');
+      const m = texto.match(re);
+      if (!m) return [];
+      return m[1].split(/[;,•]/).map((s) => s.replace(/^[-•]\s*/, '').trim()).filter(Boolean);
+    };
+    // Dedup case-insensitive con lo que ya existe.
+    const merge = (actuales: string[], nuevos: string[]): string[] => {
+      const yaPresentes = new Set(actuales.map((x) => x.toLowerCase()));
+      return [...actuales, ...nuevos.filter((n) => !yaPresentes.has(n.toLowerCase()))];
+    };
+    setPv((prev) => ({
+      trabajos: merge(prev.trabajos, get('Trabajos')),
+      dolores: merge(prev.dolores, get('Dolores')),
+      alegrias: merge(prev.alegrias, get('Alegr[íi]as')),
+      productos: merge(prev.productos, get('Productos')),
+      aliviadores: merge(prev.aliviadores, get('Aliviadores')),
+      creadores: merge(prev.creadores, get('Creadores')),
+    }));
+  };
 
   const guardar = async (volver: boolean) => {
     setGuardando(true); setGuardado(false);
@@ -85,6 +124,39 @@ export default function HerramientaPropuestaValor() {
           <Lista label="Aliviadores de dolores" color="rose" items={pv.aliviadores} onChange={(v) => set('aliviadores', v)} placeholder="Ej: Pre-pedido sin filas" />
           <Lista label="Creadores de alegrías" color="emerald" items={pv.creadores} onChange={(v) => set('creadores', v)} placeholder="Ej: Menú balanceado por nutricionista" />
         </div>
+      </div>
+
+      {/* Sugerir con IA — agrega items a las 6 listas sin reemplazar lo existente */}
+      <div className="mt-4">
+        <SugerirIA
+          modulo="idea"
+          tarea={
+            'Para una Propuesta de Valor (VPC) de esta idea en Bolivia, propón ítems concretos. ' +
+            'Devuelve EXACTAMENTE 6 líneas con este formato literal (separa con punto y coma):\n' +
+            'Trabajos: trabajo 1; trabajo 2; trabajo 3\n' +
+            'Dolores: dolor 1; dolor 2; dolor 3\n' +
+            'Alegrías: alegría 1; alegría 2; alegría 3\n' +
+            'Productos: producto 1; producto 2\n' +
+            'Aliviadores: aliviador 1; aliviador 2; aliviador 3\n' +
+            'Creadores: creador 1; creador 2; creador 3\n' +
+            'Sé específico y aterrizado al contexto, no genérico.'
+          }
+          formato="texto"
+          acentoClase="idea-accent-bg text-white"
+          placeholder={
+            `Idea: ${idea || titulo}. Sector: ${sector || '—'}.` +
+            (leanCanvas.problema ? ` Problema del Lean Canvas: ${leanCanvas.problema}.` : '') +
+            (leanCanvas.segmentos ? ` Segmento: ${leanCanvas.segmentos}.` : '') +
+            (pv.trabajos.length || pv.dolores.length
+              ? ` Ya tengo: trabajos=[${pv.trabajos.join(', ')}], dolores=[${pv.dolores.join(', ')}]. Complementa, no repitas.`
+              : '')
+          }
+          onAplicar={aplicarIA}
+        />
+        <p className="idea-muted mt-2 text-xs">
+          La IA <strong>agrega</strong> sugerencias a tus listas sin borrar lo que ya tienes.
+          Usa el botón <X className="inline h-3 w-3" /> de cada ítem para quitar lo que no te sirva.
+        </p>
       </div>
 
       <div className="mt-6 flex items-center gap-3">

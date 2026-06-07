@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FlaskConical, Plus, X, Check } from 'lucide-react';
-import type { Validacion, Hipotesis, EstadoHipotesis } from '@/types/idea';
+import { SugerirIA } from '@/components/compartido/SugerirIA';
+import type { Validacion, Hipotesis, EstadoHipotesis, LeanCanvas, PropuestaValor } from '@/types/idea';
 
 const VACIO: Validacion = { hipotesis: [] };
 
@@ -23,6 +24,11 @@ export default function HerramientaValidacion() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [val, setVal] = useState<Validacion>(VACIO);
+  const [titulo, setTitulo] = useState('');
+  const [idea, setIdea] = useState('');
+  const [sector, setSector] = useState('');
+  const [leanCanvas, setLeanCanvas] = useState<Partial<LeanCanvas>>({});
+  const [propVal, setPropVal] = useState<Partial<PropuestaValor>>({});
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -30,7 +36,16 @@ export default function HerramientaValidacion() {
   useEffect(() => {
     fetch(`/api/idea/proyectos/${params.id}`, { credentials: 'include' })
       .then((r) => r.json())
-      .then((d) => { if (d.proyecto?.validacion?.hipotesis) setVal({ hipotesis: d.proyecto.validacion.hipotesis }); })
+      .then((d) => {
+        if (d.proyecto) {
+          setTitulo(d.proyecto.titulo ?? '');
+          setIdea(d.proyecto.idea ?? '');
+          setSector(d.proyecto.sector ?? '');
+          setLeanCanvas(d.proyecto.lean_canvas ?? {});
+          setPropVal(d.proyecto.propuesta_valor ?? {});
+          if (d.proyecto.validacion?.hipotesis) setVal({ hipotesis: d.proyecto.validacion.hipotesis });
+        }
+      })
       .catch(() => {})
       .finally(() => setCargando(false));
   }, [params.id]);
@@ -39,6 +54,32 @@ export default function HerramientaValidacion() {
   const upd = (i: number, c: Partial<Hipotesis>) => setVal((v) => ({ hipotesis: v.hipotesis.map((h, idx) => (idx === i ? { ...h, ...c } : h)) }));
   const del = (i: number) => setVal((v) => ({ hipotesis: v.hipotesis.filter((_, idx) => idx !== i) }));
   const cargarPlantilla = () => setVal({ hipotesis: PLANTILLA.map((h) => ({ ...h })) });
+
+  /**
+   * AGREGA hipótesis sugeridas por la IA a las existentes. El estudiante puede
+   * quitar las que no le sirvan con el botón X de cada una.
+   * Formato esperado: bloques "H<n>: <supuesto> | Probar: <…> | Criterio: <…>".
+   */
+  const aplicarIA = (texto: string) => {
+    const bloques = texto.split(/\n\s*(?=H\d)|(?<=\n)(?=\d+\.\s*Hip[oó]tesis)/i);
+    const nuevas: Hipotesis[] = [];
+    for (const b of bloques) {
+      const supuesto = b.match(/(?:^H\d+|Hip[oó]tesis(?:\s*\d+)?)\s*:?\s*([^\n|]+)/i)?.[1]?.trim()
+        ?? b.match(/Supuesto\s*:\s*([^\n|]+)/i)?.[1]?.trim();
+      const comoProbar = b.match(/(?:Probar|Experimento|C[oó]mo probar)\s*:\s*([^\n|]+)/i)?.[1]?.trim() ?? '';
+      const criterio = b.match(/Criterio(?:\s*de\s*[eé]xito)?\s*:\s*([^\n|]+)/i)?.[1]?.trim() ?? '';
+      if (supuesto && supuesto.length > 5) {
+        nuevas.push({ supuesto, comoProbar, criterio, resultado: '', estado: 'sin_probar' });
+      }
+    }
+    if (nuevas.length === 0) return;
+    setVal((prev) => {
+      // Dedup case-insensitive por supuesto.
+      const ya = new Set(prev.hipotesis.map((h) => h.supuesto.toLowerCase().trim()));
+      const filtradas = nuevas.filter((n) => !ya.has(n.supuesto.toLowerCase().trim()));
+      return { hipotesis: [...prev.hipotesis, ...filtradas] };
+    });
+  };
 
   const validadas = val.hipotesis.filter((h) => h.estado === 'validada').length;
 
@@ -129,6 +170,32 @@ export default function HerramientaValidacion() {
           </div>
         </div>
       )}
+
+      {/* Sugerir con IA — agrega hipótesis sin reemplazar */}
+      <div className="mt-4">
+        <SugerirIA
+          modulo="idea"
+          tarea={
+            'Para validar esta idea, propón 3 hipótesis priorizadas (las más riesgosas: si son falsas, hunden la idea). ' +
+            'Devuelve EXACTAMENTE 3 bloques con este formato literal, uno por línea:\n' +
+            'H1: <supuesto> | Probar: <experimento concreto y barato> | Criterio: <métrica de éxito>\n' +
+            'H2: <supuesto> | Probar: <…> | Criterio: <…>\n' +
+            'H3: <supuesto> | Probar: <…> | Criterio: <…>'
+          }
+          formato="texto"
+          acentoClase="idea-accent-bg text-white"
+          placeholder={
+            `Idea: ${idea || titulo}. Sector: ${sector || '—'}.` +
+            (leanCanvas.problema ? ` Problema: ${leanCanvas.problema}.` : '') +
+            (propVal.dolores?.length ? ` Dolores del cliente: ${propVal.dolores.join(', ')}.` : '') +
+            (val.hipotesis.length ? ` Ya tengo ${val.hipotesis.length} hipótesis; complementa, no repitas.` : '')
+          }
+          onAplicar={aplicarIA}
+        />
+        <p className="idea-muted mt-2 text-xs">
+          La IA <strong>agrega</strong> hipótesis a tu lista. Usa el botón <X className="inline h-3 w-3" /> de cada una para quitar lo que no te sirva.
+        </p>
+      </div>
 
       <div className="mt-6 flex items-center gap-3">
         <button onClick={() => guardar(false)} disabled={guardando} className="idea-btn-ghost px-5 py-2.5 text-sm font-medium disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
