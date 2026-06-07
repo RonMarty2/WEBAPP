@@ -19,7 +19,7 @@ async function getUser() {
 
 const CAMPOS = new Set([
   'titulo', 'tipo_negocio', 'sector', 'departamento', 'municipio', 'zona',
-  'descripcion', 'universidad', 'modalidad',
+  'descripcion', 'universidad', 'modalidad', 'documento',
 ]);
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {

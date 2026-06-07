@@ -196,8 +196,11 @@ export default function GeneradorWorkspace() {
         <div className="gen-card p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h2 className="flex items-center gap-1.5 text-sm font-semibold"><FileText className="h-4 w-4" /> Borrador del proyecto</h2>
-              <p className="gen-muted mt-0.5 text-xs">La IA arma el índice del proyecto de grado integrando tus módulos. Tú lo editas y apruebas.</p>
+              <h2 className="flex items-center gap-1.5 text-sm font-semibold"><FileText className="h-4 w-4" /> Borrador rápido del índice</h2>
+              <p className="gen-muted mt-0.5 text-xs">Vista rápida del índice integrando tus módulos. Para redactar capítulo por capítulo y guardarlo, abre el documento completo.</p>
+              <Link href={`/generador/${params.id}/documento`} className="gen-accent-text mt-1 inline-flex items-center gap-1 text-xs font-medium hover:underline">
+                Abrir documento completo →
+              </Link>
             </div>
             <button onClick={generar} disabled={generando || conectados === 0} className="gen-btn-primary inline-flex flex-shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-medium disabled:opacity-50">
               {generando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
