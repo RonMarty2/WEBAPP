@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-07 (sesión 3: auditoría completa + 21 fixes en 4 tandas)
+> **Última actualización:** 2026-06-07 (sesión 4: hub /modulos, IA en herramientas, "Define tu idea" + formatos oficiales)
 
 ---
 
@@ -17,14 +17,17 @@ Con eso retoma todo el contexto. El proyecto está MUY avanzado: los **7 módulo
 educativos están COMPLETOS** (academia + laboratorio), el **Generador conectado**
 funciona (Waves 1-3) y el **widget transversal** "Trabajando en" está integrado.
 
-### ✅ Migraciones de Supabase — TODAS EJECUTADAS (2026-06-07 sesión 2)
-El usuario ejecutó las 4 migraciones que faltaban (idea, defensa, organización,
-maestro/002_documento). El ecosistema queda 100% operativo.
+### ⚠️ Migración pendiente (sesión 4)
+- ⬜ `migrations-idea/002_modalidad.sql` — columnas `tipo_trabajo` + `universidad`
+  en `idea_proyectos`. Necesaria para que "Define tu idea" guarde la modalidad.
+  Pegar en Supabase → SQL Editor:
+  `ALTER TABLE idea_proyectos ADD COLUMN IF NOT EXISTS tipo_trabajo TEXT, ADD COLUMN IF NOT EXISTS universidad TEXT;`
 
-### Estado de migraciones SQL (✅ todas ejecutadas)
+### Estado de migraciones SQL
 | Migración | Estado |
 |---|---|
 | `migrations-finanzas/*` | ✅ |
+| `migrations-idea/002_modalidad` | ⬜ PENDIENTE (sesión 4) |
 | `migrations-mercados/001` | ✅ |
 | `migrations-estrategia/001`, `002`, `003_mcpe` | ✅ |
 | `migrations-maestro/001_proyecto_maestro` | ✅ |
@@ -265,6 +268,32 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 (sesión 4) — Descubribilidad, IA en herramientas y formatos oficiales
+- **Hub `/modulos` + bloque "Tu camino" en `/dashboard`** (`b0cb21c`): el dashboard
+  solo mostraba el Generador Autónomo; ahora hay 2 caminos (rápido / formativo)
+  y un hub que muestra los 7 módulos + Generador Conectado.
+- **SugerirIA legible** (`ce7512f`): el `<pre>` monoespaciado se veía horrible;
+  ahora tipografía sans + interlineado, con etiquetas en negrita.
+- **Botón IA en herramientas de Idea** (`cb4c97b`): propuesta-valor, validación,
+  scorecard. **Bug clave corregido** (`8b1533c`): el contexto del proyecto se
+  pasaba en `placeholder` (¡solo UI, nunca llegaba al backend!) → la IA generaba
+  cosas ajenas a la idea. Nueva prop `contexto` que SÍ llega al servicio de IA.
+  Al aplicar AGREGA (no reemplaza) con dedup; el ✕ de cada ítem quita.
+- **"Define tu idea" con modalidad + universidad** (`f2425f3`): al crear una idea
+  se elige el tipo de trabajo (monografía, tesis, proyecto de grado, exploración
+  investigativa, taller de simulación, etc.) y universidad, ambos con "Otra"
+  libre. Catálogo en `src/lib/idea/catalogos.ts`. Migración **002_modalidad.sql**
+  (columnas `tipo_trabajo`, `universidad` en `idea_proyectos`) — el usuario debe
+  ejecutarla.
+- **Estructuras oficiales en el Generador** (`d8e5e64`): el documento ya no usa
+  una plantilla genérica inventada. `src/lib/formatos/estructuras.ts` define las
+  estructuras reales: **UNIFRANZ x5** (de la guía 2017, ya codificadas en
+  `proyectoGrado/unifranz`), **UMSS Posgrado FCE x3** (monografía, tesis,
+  exploración investigativa — de los PDFs oficiales 2024 que subió el usuario) y
+  **3 genéricos**. El documento muestra un selector con ⭐ recomendado según la
+  universidad/modalidad del maestro. NOTA: el usuario aportó 8 guías oficiales
+  reales; las modalidades/estructuras YA NO se inventan.
 
 ### 2026-06-07 (sesión 3) — Auditoría profunda + 21 fixes en 4 tandas
 Audité todo el código nuevo. Encontré 23 issues; arreglé 21 (3 skips conscientes).
