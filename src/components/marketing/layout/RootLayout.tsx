@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/marketing/utils';
 import { Megaphone, GraduationCap, Layers, LogOut, Menu, X, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '@/stores/marketing/auth-store';
+import { WidgetMaestro } from '@/components/compartido/WidgetMaestro';
 
 const ENLACES = [
   { href: '/marketing', label: 'Inicio', icon: Megaphone },
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
         <div className="flex flex-shrink-0 items-center gap-3">
+          <WidgetMaestro />
           {perfil && (
             <div className="hidden text-right text-xs sm:block">
               <div className="font-medium">{perfil.nombre} {perfil.apellido}</div>

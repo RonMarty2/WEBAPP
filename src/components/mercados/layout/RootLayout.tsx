@@ -15,6 +15,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/mercados/auth-store';
+import { WidgetMaestro } from '@/components/compartido/WidgetMaestro';
 
 const ENLACES = [
   { href: '/mercados', label: 'Inicio', icon: Compass },
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
         <div className="flex flex-shrink-0 items-center gap-3">
+          <WidgetMaestro />
           {perfil && (
             <div className="hidden text-right text-xs sm:block">
               <div className="font-medium">
