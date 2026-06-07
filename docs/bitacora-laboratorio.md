@@ -100,7 +100,7 @@ visualmente pero comparten sesión y datos.
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
-| 5 | Organización | 🔨 EN CONSTRUCCIÓN | FASE 0 lista (cimientos: identidad emerald, login único, tablas `organizacion_*` con todas las columnas, shell navegable con CRUD de proyectos). Herramientas pendientes (6): organigrama, RRHH con aportes patronales bolivianos, legal, técnico, branding, reporte. |
+| 5 | Organización | 🔨 LABORATORIO COMPLETO (falta Academia) | 6 herramientas listas: Organigrama, RRHH (aportes patronales BO en vivo), Legal (checklist trámites BO), Técnico, Branding, Reporte. Pendiente: solo FASE 1 (Academia). |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
 | 7 | Defensa | ❌ | Banco de preguntas por capítulo + simulador con IA evaluando respuestas |
 
@@ -199,6 +199,20 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Organización: laboratorio completo (6 herramientas)
+- Construidas las 6 herramientas en una sola ola: **Organigrama** (editor +
+  árbol derivado de "reporta a"), **RRHH** (planilla con aportes patronales
+  bolivianos editables y costo-empresa en vivo), **Legal** (checklist de
+  trámites bolivianos con estado/costo/avance), **Técnico**, **Branding** y
+  **Reporte consolidado**. Push 80d15be.
+- Ajuste: el tipo de aportes de RRHH se corrigió para ser fiel a Bolivia —
+  patronal mensual ≈16.71% (caja salud 10 + provivienda 2 + riesgo prof 1.71
+  + solidario 3) y provisiones aguinaldo+indemnización (8.33% c/u). El total
+  se calcula y se muestra; el estudiante puede ajustar cada %.
+- **3 módulos con laboratorio 100%** (Estrategia, Marketing, Organización) +
+  Mercados completo + Finanzas. Pendiente transversal: Academias (FASE 1) de
+  Estrategia/Marketing/Organización, y el Generador modo conectado.
 
 ### 2026-06-07 — Organización: FASE 0 (cimientos)
 - Construido el shell del módulo Organización siguiendo el patrón ya validado
