@@ -169,7 +169,11 @@ export default function HerramientaBuyerPersona() {
           }
           formato="texto"
           acentoClase="mkt-accent-bg text-white"
-          placeholder={`Producto/marca: ${marca || titulo}. Sector: ${sector || '—'}.`}
+          contexto={
+            `PRODUCTO/MARCA: ${marca || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: el buyer persona debe corresponder a ESTE producto/negocio y sector, no a uno genérico.'
+          }
+          placeholder="Detalle opcional para afinar la sugerencia…"
           onAplicar={aplicarIA}
         />
       </div>

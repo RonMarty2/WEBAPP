@@ -17,6 +17,8 @@ export default function HerramientaFoda() {
   const router = useRouter();
   const maestroActivo = useMaestroActivo();
   const [foda, setFoda] = useState<Foda>(VACIO);
+  const [titulo, setTitulo] = useState('');
+  const [sector, setSector] = useState('');
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
@@ -27,6 +29,8 @@ export default function HerramientaFoda() {
       .then((r) => r.json())
       .then((d) => {
         if (d.proyecto) {
+          setTitulo(d.proyecto.titulo ?? '');
+          setSector(d.proyecto.sector ?? '');
           const f = d.proyecto.foda ?? {};
           setFoda({ ...VACIO, ...f, estrategias: { ...VACIO.estrategias, ...(f.estrategias ?? {}) } });
           // Pre-cargar F/O/D/A desde PESTEL (oportunidades/amenazas) si FODA vacío
@@ -69,8 +73,10 @@ export default function HerramientaFoda() {
         'FA: <una estrategia defensiva (fortaleza+amenaza)>\n' +
         'DA: <una estrategia de supervivencia (debilidad+amenaza)>';
       const instruccion =
-        `Fortalezas: ${foda.fortalezas.join('; ')}. Oportunidades: ${foda.oportunidades.join('; ')}. ` +
-        `Debilidades: ${foda.debilidades.join('; ')}. Amenazas: ${foda.amenazas.join('; ')}.`;
+        `PROYECTO: ${titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+        `Fortalezas: ${foda.fortalezas.join('; ')}.\nOportunidades: ${foda.oportunidades.join('; ')}.\n` +
+        `Debilidades: ${foda.debilidades.join('; ')}.\nAmenazas: ${foda.amenazas.join('; ')}.\n\n` +
+        'IMPORTANTE: las estrategias deben ser ESPECÍFICAS a este proyecto y sector, no genéricas.';
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ modulo: 'estrategia', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),

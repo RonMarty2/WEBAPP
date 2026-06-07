@@ -67,7 +67,9 @@ export default function HerramientaAnsoff() {
         'PROD: <iniciativa de desarrollo de producto>\n' +
         'MERC: <iniciativa de desarrollo de mercado>\n' +
         'DIV: <iniciativa de diversificación>';
-      const instruccion = `Negocio/sector: ${sector || titulo || 'proyecto en Bolivia'}.`;
+      const instruccion =
+        `PROYECTO: ${titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+        'IMPORTANTE: las iniciativas deben ser ESPECÍFICAS a este proyecto y sector, no genéricas.';
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ modulo: 'estrategia', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),

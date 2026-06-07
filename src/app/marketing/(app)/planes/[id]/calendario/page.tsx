@@ -106,7 +106,9 @@ export default function HerramientaCalendario() {
         'Para el plan de contenidos de las próximas 4 semanas de este negocio en Bolivia, propón 12 piezas. Devuelve EXACTAMENTE 12 líneas con este formato literal (una pieza por línea):\n' +
         '<canal> | <tipo> | <copy de 1-2 líneas>\n' +
         'Donde canal ∈ {Instagram, TikTok, Facebook, WhatsApp}, tipo ∈ {Post, Reel, Historia, Carrusel, Video}.';
-      const instruccion = `Producto/marca: ${marca || titulo}. Sector: ${sector || '—'}.`;
+      const instruccion =
+        `PRODUCTO/MARCA: ${marca || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+        'IMPORTANTE: las piezas de contenido deben corresponder a ESTE producto y sector, no a uno genérico.';
       const res = await fetch('/api/ai/asistir', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ modulo: 'marketing', tarea, instruccion, maestroId: maestroActivo?.id, formato: 'texto' }),
