@@ -232,7 +232,11 @@ function Dimension({
           tarea={`Sugiere 3-4 factores del entorno ${dim.label} (PESTEL) relevantes para este proyecto en Bolivia. Uno por línea, concisos.`}
           formato="lista"
           acentoClase="es-accent-bg text-white"
-          placeholder={`Sector: ${sector || titulo || 'tu proyecto'}…`}
+          contexto={
+            `PROYECTO: ${titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: los factores PESTEL deben ser ESPECÍFICOS a este proyecto y sector, no genéricos.'
+          }
+          placeholder="Detalle opcional…"
           onAplicar={(texto) => {
             texto.split('\n').map((l) => l.replace(/^[-*\d.\s]+/, '').trim()).filter(Boolean)
               .forEach((linea) => onAgregar(linea, 0));

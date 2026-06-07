@@ -116,7 +116,11 @@ export default function HerramientaTecnico() {
           }
           formato="texto"
           acentoClase="org-accent-bg text-white"
-          placeholder={`Empresa: ${empresa || titulo}. Sector: ${sector || '—'}.`}
+          contexto={
+            `EMPRESA: ${empresa || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: NO inventes una empresa distinta. Trabaja SOLO sobre la empresa y el sector indicados.'
+          }
+          placeholder="Detalle opcional para afinar la sugerencia…"
           onAplicar={aplicarIA}
         />
       </div>

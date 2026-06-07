@@ -149,7 +149,11 @@ export default function HerramientaMezcla() {
           tarea={tareaIA}
           formato="texto"
           acentoClase="mkt-accent-bg text-white"
-          placeholder={`Producto/marca: ${marca || titulo}. Sector: ${sector || '—'}.`}
+          contexto={
+            `PRODUCTO/MARCA: ${marca || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: NO inventes un producto/negocio distinto. La mezcla debe corresponder al producto y sector indicados.'
+          }
+          placeholder="Detalle opcional para afinar la sugerencia…"
           onAplicar={aplicarIA}
         />
       </div>

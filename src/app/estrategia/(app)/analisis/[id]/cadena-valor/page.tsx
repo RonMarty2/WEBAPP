@@ -113,7 +113,11 @@ export default function HerramientaCadenaValor() {
           modulo="estrategia"
           tarea="Para una cadena de valor de Porter de este proyecto, sugiere brevemente cómo cada actividad (primarias y de apoyo) puede generar valor o ventaja competitiva en Bolivia."
           acentoClase="es-accent-bg text-white"
-          placeholder={`Sector: ${sector || titulo || 'tu proyecto'}…`}
+          contexto={
+            `PROYECTO: ${titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: la cadena de valor debe ser ESPECÍFICA a este proyecto y sector, no genérica.'
+          }
+          placeholder="Detalle opcional…"
         />
       </div>
 

@@ -140,7 +140,11 @@ export default function HerramientaBranding() {
           }
           formato="texto"
           acentoClase="org-accent-bg text-white"
-          placeholder={`Empresa: ${empresa || titulo}. Sector: ${sector || '—'}.`}
+          contexto={
+            `EMPRESA: ${empresa || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: NO inventes una empresa distinta. La identidad de marca debe ser coherente con esa empresa y sector.'
+          }
+          placeholder="Detalle opcional para afinar la sugerencia…"
           onAplicar={aplicarIA}
         />
       </div>

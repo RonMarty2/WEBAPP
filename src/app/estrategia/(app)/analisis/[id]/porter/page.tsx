@@ -152,7 +152,11 @@ export default function HerramientaPorter() {
                 modulo="estrategia"
                 tarea={`Para la fuerza de Porter "${f.label}", redacta un análisis breve (2-3 frases) aplicado a este proyecto en Bolivia, y sugiere una intensidad de 1 a 5 justificándola.`}
                 acentoClase="es-accent-bg text-white"
-                placeholder={`Sector: ${sector || titulo || 'tu proyecto'}…`}
+                contexto={
+                  `PROYECTO: ${titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+                  'IMPORTANTE: el análisis debe ser ESPECÍFICO a este proyecto y sector, no genérico.'
+                }
+                placeholder="Detalle opcional…"
                 onAplicar={(texto) => actualizar(f.key, { notas: texto })}
               />
             </div>

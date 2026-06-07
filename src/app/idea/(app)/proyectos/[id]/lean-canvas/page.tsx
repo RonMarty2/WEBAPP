@@ -127,7 +127,11 @@ export default function HerramientaLeanCanvas() {
           }
           formato="texto"
           acentoClase="idea-accent-bg text-white"
-          placeholder={`Idea: ${idea || titulo}. Sector: ${sector || '—'}.`}
+          contexto={
+            `MI IDEA: ${idea || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+            'IMPORTANTE: NO inventes un negocio distinto. Trabaja SOLO sobre la idea y el sector que te di arriba. Si la idea es vaga, refina sin cambiar el rubro.'
+          }
+          placeholder="Detalle opcional para afinar la sugerencia…"
           onAplicar={aplicarIA}
         />
       </div>
