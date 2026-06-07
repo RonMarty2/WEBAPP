@@ -98,7 +98,7 @@ visualmente pero comparten sesión y datos.
 |---|---|---|---|
 | 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
-| 3 | Estrategia / Macroentorno | 🔨 LABORATORIO COMPLETO (falta Academia) | 12 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, Reporte. Pendiente: MCPE/QSPM + FASE 1 (Academia). Detalle abajo. |
+| 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 4 | Marketing | ❌ | 4Ps/7Ps + presupuesto y CPL con datos reales Meta/TikTok + calendario editorial |
 | 5 | Organización | ❌ | Organigrama, RRHH (aportes patronales 30.37% Bolivia), legal (NIT, Fundempresa, AFP), técnico, branding |
 | 6 | **Finanzas (simuladorPRO)** | ✅ | Migrado desde repo externo `RonMarty2/simuladorPRO`. Constructor 9 pasos + simulación turno-a-turno con eventos económicos bolivianos + ranking + 26 ejemplos |
@@ -108,8 +108,8 @@ visualmente pero comparten sesión y datos.
 - ✅ **FASE 0** — Cimientos: identidad visual VIOLETA propia (#8b5cf6, distinta
   a Finanzas/negro y Mercados/azul), login único vía `/api/estrategia/perfil`,
   tablas SQL `estrategia_*` (matrices como JSONB), hub. Light-only.
-- ✅ **Laboratorio COMPLETO** — dashboard "Mis análisis" (CRUD) + vista del
-  análisis con las 12 herramientas como etapas. Herramientas LISTAS (12/12):
+- ✅ **Laboratorio 100%** — dashboard "Mis análisis" (CRUD) + vista del
+  análisis con las 13 herramientas como etapas. Herramientas LISTAS (13/13):
   · PESTEL (macroentorno, plantillas bolivianas + IA)
   · 5 Fuerzas de Porter (microentorno, intensidad + IA)
   · MPC — Matriz de Perfil Competitivo (mi empresa vs competidores, ponderado)
@@ -121,11 +121,14 @@ visualmente pero comparten sesión y datos.
   · BCG — matriz de portafolio (gráfico 2x2, clasifica unidades de negocio)
   · Ansoff — 4 cuadrantes de crecimiento (listas editables + IA)
   · PEYEA/SPACE — vector de posición estratégica (SVG, 4 dimensiones)
-  · Reporte consolidado — todas las herramientas en un documento, con copiar
-    (markdown) e imprimir → artefacto para el modo conectado del Generador
-- ⬜ **Herramienta faltante:** MCPE/QSPM (matriz cuantitativa de planificación
-  estratégica). VRIO quedó como opcional.
-- ⬜ **FASE 1** — Academia: clases sobre análisis situacional.
+  · MCPE/QSPM — decisión cuantitativa final: autocompleta factores desde
+    MEFE/MEFI y estrategias desde el FODA, puntúa peso × atractivo → ranking
+    con la estrategia recomendada (requiere migración 003_mcpe.sql)
+  · Reporte consolidado — todas las herramientas en un documento (incluye la
+    decisión del MCPE), con copiar (markdown) e imprimir → artefacto para el
+    modo conectado del Generador
+- ✅ **Todas las herramientas construidas.** VRIO quedó como opcional (no crítica).
+- ⬜ **FASE 1** — Academia: clases sobre análisis situacional (único pendiente).
 - Patrón de cada herramienta: plantillas bolivianas (modo B) + botón
   "Sugerir con IA" (modo C, vía /api/ai/asistir con contexto del proyecto).
 
@@ -166,6 +169,18 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Estrategia: laboratorio al 100% (MCPE/QSPM) + siguiente módulo
+- Construida la última herramienta: **MCPE/QSPM** (Matriz Cuantitativa de
+  Planificación Estratégica). Autocompleta los factores clave desde MEFE/MEFI
+  y las estrategias candidatas desde el FODA cruzado; puntúa peso × atractivo
+  (CA 1-4) y entrega el ranking con la estrategia recomendada (🏆). El Reporte
+  consolidado ahora incluye esa decisión final.
+- **Laboratorio de Estrategia: 13/13 herramientas.** Build verde, push f289a0c.
+- Nueva migración **003_mcpe.sql** (columna JSONB `mcpe`) — el usuario debe
+  ejecutarla en Supabase para que MCPE guarde (las otras 12 ya funcionan).
+- **Decisión del usuario:** seguir con "el que sigue" = el módulo **Marketing**
+  (4° del orden aprobado). La Academia de Estrategia (FASE 1) queda pendiente.
 
 ### 2026-06-06 — Estrategia: laboratorio completo (12 herramientas)
 - Construidas las 4 herramientas que faltaban: **BCG** (matriz de portafolio
