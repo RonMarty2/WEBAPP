@@ -1,0 +1,57 @@
+/**
+ * Identidad visual del módulo Organización: acento EMERALD (#10b981).
+ * Distinta a Finanzas/negro, Mercados/sky, Estrategia/violet, Marketing/rose.
+ * Light-only. Todo bajo .organizacion-scope para no contaminar el resto de webapp.
+ * Prefijo de tokens y clases: org-
+ */
+
+.organizacion-scope {
+  --org-bg: 152 60% 99%;          /* casi blanco con tinte verde */
+  --org-surface: 0 0% 100%;       /* cards blancas */
+  --org-fg: 152 30% 14%;          /* casi negro con tinte verde */
+  --org-muted-fg: 152 10% 45%;    /* gris verdoso */
+  --org-border: 152 30% 90%;      /* borde verde claro */
+  --org-accent: 158 64% 39%;      /* emerald-600 #059669 (más legible que 500) */
+  --org-accent-fg: 0 0% 100%;
+  --org-accent-soft: 152 76% 92%; /* emerald-100 para fondos suaves */
+  --org-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--org-bg));
+  color: hsl(var(--org-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.organizacion-scope,
+.organizacion-scope * {
+  color-scheme: light !important;
+}
+
+.organizacion-scope .org-card {
+  background: hsl(var(--org-surface));
+  border: 1px solid hsl(var(--org-border));
+  border-radius: var(--org-radius);
+}
+.organizacion-scope .org-accent-bg { background: hsl(var(--org-accent)); }
+.organizacion-scope .org-accent-text { color: hsl(var(--org-accent)); }
+.organizacion-scope .org-accent-soft { background: hsl(var(--org-accent-soft)); }
+.organizacion-scope .org-muted { color: hsl(var(--org-muted-fg)); }
+.organizacion-scope .org-border { border-color: hsl(var(--org-border)); }
+
+.organizacion-scope .org-btn-primary {
+  background: hsl(var(--org-accent));
+  color: hsl(var(--org-accent-fg));
+  border-radius: var(--org-radius);
+  transition: opacity 0.15s ease;
+}
+.organizacion-scope .org-btn-primary:hover { opacity: 0.9; }
+
+.organizacion-scope .org-btn-ghost {
+  border: 1px solid hsl(var(--org-border));
+  color: hsl(var(--org-fg));
+  border-radius: var(--org-radius);
+  transition: background 0.15s ease;
+}
+.organizacion-scope .org-btn-ghost:hover { background: hsl(var(--org-accent-soft)); }
