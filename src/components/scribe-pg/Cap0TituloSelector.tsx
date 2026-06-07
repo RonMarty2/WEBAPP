@@ -235,12 +235,12 @@ export default function Cap0TituloSelector({
           📌 Decisión del estudiante
         </div>
         <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "var(--fg-primary)" }}>
-          Elegí el título oficial de tu proyecto
+          Elige el título oficial de tu proyecto
         </h3>
         <p style={{ fontSize: 13, color: "var(--fg-secondary)", marginTop: 6, lineHeight: 1.5 }}>
           Este título aparecerá en la carátula de tu documento y se usará en
-          todas las siguientes fases del proyecto. Podés cambiarlo después si
-          lo necesitás.
+          todas las siguientes fases del proyecto. Puedes cambiarlo después si
+          lo necesitas.
         </p>
       </div>
 
@@ -298,7 +298,7 @@ export default function Cap0TituloSelector({
 
       {seleccion && !error && (
         <div style={{ marginTop: 12, padding: 10, background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 8, color: "#16a34a", fontSize: 12 }}>
-          ✓ Título guardado. Ya podés pasar al Capítulo I.
+          ✓ Título guardado. Ya puedes pasar al Capítulo I.
         </div>
       )}
     </div>

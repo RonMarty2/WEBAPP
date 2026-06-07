@@ -199,7 +199,7 @@ export async function POST(req: Request, { params }: Params) {
           if (regex.test(contenidoActual)) {
             contenidoPropuesto = contenidoActual.replace(regex, analizado.bloque_nuevo);
           } else {
-            errorCirugia = "La IA devolvió un bloque_original que no se encuentra en el documento (ni con normalización de espacios). Reformulá la observación de forma más precisa o pegá el fragmento exacto del documento que querés cambiar.";
+            errorCirugia = "La IA devolvió un bloque_original que no se encuentra en el documento (ni con normalización de espacios). Reformula la observación de forma más precisa o pega el fragmento exacto del documento que quieres cambiar.";
           }
         }
       }

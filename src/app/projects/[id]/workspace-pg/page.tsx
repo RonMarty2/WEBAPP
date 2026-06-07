@@ -499,13 +499,13 @@ export default function WorkspacePGPage() {
                         cursor: generating ? "wait" : "pointer",
                         opacity: (generating || (fasaActual.id?.includes("cap3e") && !cap3eModo)) ? 0.6 : 1,
                       }}
-                      title={fasaActual.id?.includes("cap3e") && !cap3eModo ? "Primero elegí el modo de generación arriba" : ""}
+                      title={fasaActual.id?.includes("cap3e") && !cap3eModo ? "Primero elige el modo de generación arriba" : ""}
                     >
                       {generating ? "Generando…" : `🚀 Generar ${fasaActual.label}`}
                     </button>
                     {fasaActual.id?.includes("cap3e") && !cap3eModo && (
                       <div style={{ marginTop: 12, fontSize: 12, color: "var(--fg-muted)" }}>
-                        ↑ Elegí primero el modo de generación arriba
+                        ↑ Elige primero el modo de generación arriba
                       </div>
                     )}
                   </div>

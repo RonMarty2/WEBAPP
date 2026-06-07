@@ -48,11 +48,11 @@ export default function Cap3eModoSelector({
           📌 Decisión metodológica
         </div>
         <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "var(--fg-primary)" }}>
-          ¿Cómo querés generar el análisis de resultados?
+          ¿Cómo quieres generar el análisis de resultados?
         </h3>
         <p style={{ fontSize: 13, color: "var(--fg-secondary)", marginTop: 6, lineHeight: 1.5 }}>
           Tu decisión define la metodología del Cap. III.5 y se documenta en el
-          informe final. No podés cambiarla después sin regenerar la fase.
+          informe final. No puedes cambiarla después sin regenerar la fase.
         </p>
       </div>
 

@@ -105,12 +105,12 @@ export default function FaseAcciones({
       {mostrarFeedback && (
         <div style={{ marginTop: 14 }}>
           <label style={{ fontSize: 12, fontWeight: 700, color: "var(--fg-secondary)", display: "block", marginBottom: 6 }}>
-            Comentá qué querés ajustar (opcional)
+            Comenta qué quieres ajustar (opcional)
           </label>
           <textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
-            placeholder={'Ej: "hacé el segmento más específico", "agregá una cuarta opción de título", "tono menos formal"'}
+            placeholder={'Ej: "haz el segmento más específico", "agrega una cuarta opción de título", "tono menos formal"'}
             rows={3}
             disabled={procesando}
             style={{

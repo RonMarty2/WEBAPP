@@ -886,8 +886,8 @@ function NuevoProyectoPageInner() {
               </h1>
               <p style={{ color: "var(--fg-muted)", fontSize: 13.5, lineHeight: 1.6 }}>
                 UMSS publicó dos guías para monografías de Posgrado. Cada variante
-                que ofrecemos está alineada exactamente a una de ellas — abrí el{" "}
-                <strong>PDF oficial</strong> y comparalo con el que te entregó tu
+                que ofrecemos está alineada exactamente a una de ellas — abre el{" "}
+                <strong>PDF oficial</strong> y compáralo con el que te entregó tu
                 coordinador para elegir con seguridad.
               </p>
             </div>
@@ -1192,9 +1192,9 @@ function NuevoProyectoPageInner() {
               <span>
                 <strong>¿No sabes cuál elegir?</strong> Si tu diplomado pertenece a la
                 Facultad de Ciencias Económicas (Doble Titulación 2024 en adelante),
-                usá <strong>Clásico</strong>. Si tu coordinador te entregó la guía con
+                usa <strong>Clásico</strong>. Si tu coordinador te entregó la guía con
                 ejemplos por diplomado (Comercio Internacional, Banca, Finanzas, etc.),
-                usá <strong>Reducido</strong>.
+                usa <strong>Reducido</strong>.
               </span>
             </div>
 

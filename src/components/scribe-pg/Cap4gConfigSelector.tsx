@@ -108,7 +108,7 @@ export default function Cap4gConfigSelector({
           📌 Decisión final del proyecto
         </div>
         <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0, color: "var(--fg-primary)" }}>
-          Elegí la configuración que adoptarás como propuesta final
+          Elige la configuración que adoptarás como propuesta final
         </h3>
         <p style={{ fontSize: 13, color: "var(--fg-secondary)", marginTop: 6, lineHeight: 1.5 }}>
           El análisis de sensibilidad identificó {escenarios.length} escenario(s)
