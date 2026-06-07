@@ -96,7 +96,7 @@ visualmente pero comparten sesión y datos.
 
 | # | Módulo | Estado | Notas |
 |---|---|---|---|
-| 1 | Idea / Pre-validación | ❌ | Más simple, lo dejamos para casi al final |
+| 1 | Idea / Pre-validación | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Lean Canvas, Propuesta de Valor (VPC), Validación (hipótesis), Scorecard de viabilidad, Reporte. Identidad ámbar. Pendiente: solo FASE 1 (Academia). |
 | 2 | Mercados (Investigación) | ✅ COMPLETO | Módulo entero (FASES 0-6). Detalle abajo. |
 | 3 | Estrategia / Macroentorno | 🔨 LABORATORIO 100% (falta Academia) | 13 herramientas listas: PESTEL, Porter, MPC, Cadena de Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE/QSPM, Reporte. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
 | 4 | Marketing | 🔨 LABORATORIO COMPLETO (falta Academia) | 5 herramientas listas: Buyer persona, Mezcla 4Ps/7Ps, Presupuesto/CPL por canal (con ROAS/CAC), Calendario editorial, Reporte consolidado. Pendiente: solo FASE 1 (Academia). Detalle abajo. |
@@ -199,6 +199,18 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-07 — Idea / Pre-validación: módulo completo (FASE 0 + 5 herramientas)
+- Construido el módulo entero en una sola ola: identidad **ámbar** (#d97706,
+  tema bombilla), login único, tablas `idea_*`, shell, y 5 herramientas:
+  **Lean Canvas** (9 bloques + IA), **Propuesta de valor** (VPC: perfil del
+  cliente + mapa de valor), **Validación** (hipótesis con experimento/criterio/
+  resultado + plantilla de las 2 críticas), **Scorecard** (deseabilidad/
+  factibilidad/viabilidad 1-5 → veredicto) y **Reporte** consolidado. Push 7b2ff5a.
+- **6 colores asignados:** Finanzas/negro · Mercados/sky · Estrategia/violet ·
+  Marketing/rose · Organización/emerald · Idea/amber. Libres: teal, indigo.
+- **4 laboratorios al 100%** (Idea, Estrategia, Marketing, Organización) +
+  Mercados completo + Finanzas. Falta del orden: solo **Defensa** (7°).
 
 ### 2026-06-07 — Organización: laboratorio completo (6 herramientas)
 - Construidas las 6 herramientas en una sola ola: **Organigrama** (editor +
