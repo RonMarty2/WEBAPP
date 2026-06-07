@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FlaskConical, Plus, X, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
+import { AutoTextarea } from '@/components/compartido/AutoTextarea';
 import type { Validacion, Hipotesis, EstadoHipotesis, LeanCanvas, PropuestaValor } from '@/types/idea';
 
 const VACIO: Validacion = { hipotesis: [] };
@@ -138,7 +139,7 @@ export default function HerramientaValidacion() {
             <div key={i} className="idea-card p-4">
               <div className="flex items-start justify-between gap-2">
                 <span className="idea-accent-soft idea-accent-text flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">{i + 1}</span>
-                <textarea value={h.supuesto} onChange={(e) => upd(i, { supuesto: e.target.value })} rows={1} placeholder="Supuesto: creemos que…"
+                <AutoTextarea value={h.supuesto} onChange={(e) => upd(i, { supuesto: e.target.value })} rowsMin={1} placeholder="Supuesto: creemos que…"
                   className="idea-border flex-1 rounded border bg-white px-2 py-1 text-sm font-medium focus:outline-none" />
                 <select value={h.estado} onChange={(e) => upd(i, { estado: e.target.value as EstadoHipotesis })}
                   className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium ${ESTADOS.find((s) => s.v === h.estado)?.clase}`}>
@@ -149,17 +150,17 @@ export default function HerramientaValidacion() {
               <div className="mt-2 grid gap-2 sm:grid-cols-3">
                 <label className="text-xs">
                   <span className="idea-muted">Cómo probarlo</span>
-                  <textarea value={h.comoProbar} onChange={(e) => upd(i, { comoProbar: e.target.value })} rows={2} placeholder="Experimento…"
+                  <AutoTextarea value={h.comoProbar} onChange={(e) => upd(i, { comoProbar: e.target.value })} rowsMin={2} placeholder="Experimento…"
                     className="idea-border mt-0.5 w-full rounded border bg-white px-2 py-1 text-sm focus:outline-none" />
                 </label>
                 <label className="text-xs">
                   <span className="idea-muted">Criterio de éxito</span>
-                  <textarea value={h.criterio} onChange={(e) => upd(i, { criterio: e.target.value })} rows={2} placeholder="Métrica que confirma…"
+                  <AutoTextarea value={h.criterio} onChange={(e) => upd(i, { criterio: e.target.value })} rowsMin={2} placeholder="Métrica que confirma…"
                     className="idea-border mt-0.5 w-full rounded border bg-white px-2 py-1 text-sm focus:outline-none" />
                 </label>
                 <label className="text-xs">
                   <span className="idea-muted">Resultado</span>
-                  <textarea value={h.resultado} onChange={(e) => upd(i, { resultado: e.target.value })} rows={2} placeholder="Qué pasó…"
+                  <AutoTextarea value={h.resultado} onChange={(e) => upd(i, { resultado: e.target.value })} rowsMin={2} placeholder="Qué pasó…"
                     className="idea-border mt-0.5 w-full rounded border bg-white px-2 py-1 text-sm focus:outline-none" />
                 </label>
               </div>
