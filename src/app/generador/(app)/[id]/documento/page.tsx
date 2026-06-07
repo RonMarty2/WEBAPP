@@ -62,6 +62,11 @@ export default function DocumentoProyecto() {
   // Errores visibles para el estudiante (en lugar de tragárselos silenciosamente).
   const [errorGen, setErrorGen] = useState<string | null>(null);
   const [progresoLote, setProgresoLote] = useState<{ hechos: number; total: number; fallos: number } | null>(null);
+  // AbortControllers para cancelar generaciones largas (botón cancelar y unmount).
+  const [aborterUno, setAborterUno] = useState<AbortController | null>(null);
+  const [aborterTodas, setAborterTodas] = useState<AbortController | null>(null);
+  const cancelarUna = () => { aborterUno?.abort(); };
+  const cancelarTodas = () => { aborterTodas?.abort(); };
 
   // Genera el contenido de una sección con IA usando el contexto del maestro.
   // Devuelve null si falla; el llamador surface el error al usuario.
@@ -90,26 +95,31 @@ export default function DocumentoProyecto() {
   };
 
   const generarUna = async (sec: SeccionDocumento) => {
+    const ctrl = new AbortController();
+    setAborterUno(ctrl);
     setGenerandoId(sec.id); setErrorGen(null);
     try {
-      const txt = await generarSeccion(sec);
+      const txt = await generarSeccion(sec, ctrl.signal);
       if (txt !== null) upd(sec.id, { contenido: txt });
     } catch (e) {
       setErrorGen(`No se pudo generar "${sec.titulo}": ${(e as Error).message}`);
-    } finally { setGenerandoId(null); }
+    } finally { setGenerandoId(null); setAborterUno(null); }
   };
 
   const generarVacias = async () => {
     const vacias = secciones.filter((s) => !s.contenido.trim());
     if (vacias.length === 0) return;
+    const ctrl = new AbortController();
+    setAborterTodas(ctrl);
     setGenerandoTodas(true); setErrorGen(null);
     setProgresoLote({ hechos: 0, total: vacias.length, fallos: 0 });
     let hechos = 0, fallos = 0;
     const erroresAcum: string[] = [];
     try {
       for (const sec of vacias) {
+        if (ctrl.signal.aborted) break;
         try {
-          const txt = await generarSeccion(sec);
+          const txt = await generarSeccion(sec, ctrl.signal);
           if (txt !== null) {
             setSecciones((s) => s.map((x) => (x.id === sec.id ? { ...x, contenido: txt } : x)));
             hechos++;
@@ -120,11 +130,14 @@ export default function DocumentoProyecto() {
         }
         setProgresoLote({ hechos, total: vacias.length, fallos });
       }
-      if (erroresAcum.length) {
+      if (ctrl.signal.aborted) {
+        setErrorGen(`Cancelado. ${hechos} de ${vacias.length} generadas antes de detener.`);
+      } else if (erroresAcum.length) {
         setErrorGen(`${hechos} de ${vacias.length} generadas. Fallaron: ${erroresAcum.slice(0, 3).join(' · ')}${erroresAcum.length > 3 ? '…' : ''}`);
       }
     } finally {
       setGenerandoTodas(false);
+      setAborterTodas(null);
       setTimeout(() => setProgresoLote(null), 3000);
     }
   };
@@ -271,6 +284,9 @@ export default function DocumentoProyecto() {
                 ? `Generando ${progresoLote.hechos + progresoLote.fallos + 1}/${progresoLote.total}…`
                 : generandoTodas ? 'Generando todas…' : 'Generar las vacías con IA'}
             </button>
+            {generandoTodas && (
+              <button onClick={cancelarTodas} className="gen-btn-ghost px-3 py-2 text-xs font-medium">Cancelar</button>
+            )}
             <button onClick={guardar} disabled={guardando} className="gen-btn-ghost px-4 py-2 text-sm font-medium disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
             {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
           </div>
@@ -300,11 +316,14 @@ export default function DocumentoProyecto() {
                 <textarea value={sec.contenido} onChange={(e) => upd(sec.id, { contenido: e.target.value })} rows={sec.contenido ? 8 : 3}
                   placeholder="Contenido de la sección. Genera con IA o escribe directamente…"
                   className="gen-border mt-2 w-full rounded-lg border bg-white px-3 py-2 text-sm leading-relaxed focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200" />
-                <div className="mt-2 print:hidden">
+                <div className="mt-2 flex items-center gap-2 print:hidden">
                   <button onClick={() => generarUna(sec)} disabled={ocupado} className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50">
                     {generandoId === sec.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
                     {generandoId === sec.id ? 'Generando…' : sec.contenido ? 'Regenerar con IA' : 'Generar con IA'}
                   </button>
+                  {generandoId === sec.id && (
+                    <button onClick={cancelarUna} className="text-xs text-slate-500 hover:text-rose-600">Cancelar</button>
+                  )}
                 </div>
               </div>
             ))}

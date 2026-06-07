@@ -64,6 +64,8 @@ export interface Presupuesto {
 export type EstadoPublicacion = 'idea' | 'listo' | 'publicado';
 
 export interface PublicacionCalendario {
+  /** Identificador estable de la publicación (para edits/deletes seguros). */
+  id?: string;
   fecha: string;   // YYYY-MM-DD
   canal: string;
   tipo: string;    // post, reel, historia, video, correo…

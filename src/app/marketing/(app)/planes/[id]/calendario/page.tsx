@@ -47,7 +47,13 @@ export default function HerramientaCalendario() {
           setMarca(d.plan.marca ?? '');
           setSector(d.plan.sector ?? '');
           const c = d.plan.calendario;
-          if (c?.publicaciones?.length) setCal({ publicaciones: c.publicaciones });
+          // Publicaciones viejas no traen id; les asignamos uno estable al cargar.
+          if (c?.publicaciones?.length) {
+            const conIds: PublicacionCalendario[] = c.publicaciones.map((p: PublicacionCalendario) =>
+              p.id ? p : { ...p, id: `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}` },
+            );
+            setCal({ publicaciones: conIds });
+          }
         }
       })
       .catch(() => {})
@@ -59,21 +65,26 @@ export default function HerramientaCalendario() {
 
   const conteo = (e: EstadoPublicacion) => cal.publicaciones.filter((p) => p.estado === e).length;
 
+  // Asegura que cada publicación tenga un id estable (los del banco viejo no lo traen).
+  const aseguraId = (p: PublicacionCalendario): PublicacionCalendario =>
+    p.id ? p : { ...p, id: `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}` };
+
   const addPub = () => setCal((c) => ({
-    publicaciones: [...c.publicaciones, { fecha: hoy(), canal: 'Instagram', tipo: 'Post', copy: '', estado: 'idea' }],
+    publicaciones: [...c.publicaciones, aseguraId({ fecha: hoy(), canal: 'Instagram', tipo: 'Post', copy: '', estado: 'idea' })],
   }));
+
+  // Edit/delete por id estable — NO por indexOf(referencia), que era frágil.
   const upd = (idx: number, c: Partial<PublicacionCalendario>) => {
-    // El índice se aplica sobre el array ordenado mostrado → traducir al original
-    const original = cal.publicaciones.indexOf(filtradas[idx]);
-    if (original < 0) return;
+    const pid = filtradas[idx]?.id;
+    if (!pid) return;
     setCal((prev) => ({
-      publicaciones: prev.publicaciones.map((p, i) => (i === original ? { ...p, ...c } : p)),
+      publicaciones: prev.publicaciones.map((p) => (p.id === pid ? { ...p, ...c } : p)),
     }));
   };
   const del = (idx: number) => {
-    const original = cal.publicaciones.indexOf(filtradas[idx]);
-    if (original < 0) return;
-    setCal((prev) => ({ publicaciones: prev.publicaciones.filter((_, i) => i !== original) }));
+    const pid = filtradas[idx]?.id;
+    if (!pid) return;
+    setCal((prev) => ({ publicaciones: prev.publicaciones.filter((p) => p.id !== pid) }));
   };
 
   const guardar = async (volver: boolean) => {
@@ -186,7 +197,7 @@ export default function HerramientaCalendario() {
       {filtradas.length > 0 && (
         <div className="mt-4 space-y-2">
           {filtradas.map((p, i) => (
-            <div key={`${p.fecha}-${i}`} className="mkt-card flex flex-wrap items-start gap-2 p-3">
+            <div key={p.id ?? `${p.fecha}-${i}`} className="mkt-card flex flex-wrap items-start gap-2 p-3">
               <input
                 type="date" value={p.fecha} onChange={(e) => upd(i, { fecha: e.target.value })}
                 className="mkt-border w-36 rounded border px-2 py-1 text-sm"

@@ -29,14 +29,24 @@ import type { ProyectoMaestro, SeccionDocumento } from '@/types/maestro';
 
 export type UniversidadDetectada = 'umss' | 'ucb' | 'ucatec' | 'unifranz' | null;
 
-/** Mapea texto libre del campo `universidad` a una de las 4 plantillas. */
+/**
+ * Mapea texto libre del campo `universidad` a una de las 4 plantillas.
+ * Tolerante a variantes: U.M.S.S., UMSS, Univ. Mayor de San Simón, etc.
+ */
 export function detectarUniversidad(texto: string | null | undefined): UniversidadDetectada {
   if (!texto) return null;
-  const t = texto.toLowerCase().replace(/[^a-z]/g, ' ');
-  if (/\bumss\b|mayor\s*de\s*san\s*sim/.test(t)) return 'umss';
-  if (/\bucb\b|cat[oó]lica\s*boliviana/.test(t)) return 'ucb';
-  if (/\bucatec\b|catolica\s*tecnologica|cat[oó]lica\s*ciencia\s*y\s*tecnolog/.test(t)) return 'ucatec';
-  if (/\bunifranz\b|franz\s*tamayo/.test(t)) return 'unifranz';
+  // Normaliza: minúsculas, sin acentos, sin puntos/comas/espacios extra
+  const t = texto
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // quita acentos
+    .replace(/[^a-z]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (/\bumss\b|mayor de san simon/.test(t)) return 'umss';
+  if (/\bucatec\b|catolica de ciencias y artes|catolica tecnologica/.test(t)) return 'ucatec';
+  // UCB debe ir DESPUÉS de UCATEC (también es "Católica" pero más específica).
+  if (/\bucb\b|catolica boliviana/.test(t)) return 'ucb';
+  if (/\bunifranz\b|franz tamayo/.test(t)) return 'unifranz';
   return null;
 }
 
@@ -45,8 +55,15 @@ const MESES = [
   'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
 ];
 
-function mesActual(): string { return MESES[new Date().getMonth()]; }
-function anioActual(): string { return String(new Date().getFullYear()); }
+/** Mes y año del documento — usa `actualizado_en` del maestro si existe, sino NOW. */
+function mesAnio(maestro: { actualizado_en?: string }): { mes: string; anio: string } {
+  const d = maestro.actualizado_en ? new Date(maestro.actualizado_en) : new Date();
+  if (isNaN(d.getTime())) {
+    const ahora = new Date();
+    return { mes: MESES[ahora.getMonth()], anio: String(ahora.getFullYear()) };
+  }
+  return { mes: MESES[d.getMonth()], anio: String(d.getFullYear()) };
+}
 
 /** Genera el cuerpo (secciones convertidas a LaTeX) sin preámbulo ni fin. */
 function cuerpoSecciones(secciones: SeccionDocumento[], usarChapter: boolean): string {
@@ -84,8 +101,7 @@ export async function armarZipOverleaf(
   const tutor = '[Nombre del tutor]'; // editable en Overleaf
   const ciudad = maestro.municipio || '[Ciudad]';
   const pais = 'Bolivia';
-  const mes = mesActual();
-  const anio = anioActual();
+  const { mes, anio } = mesAnio(maestro);
 
   let mainTex: string;
 

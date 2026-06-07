@@ -26,9 +26,12 @@ export async function GET() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = createAdminClient() as any;
+  // OJO: NO traer `documento` aquí — puede pesar MB y el listado solo necesita
+  // titulo+metadatos. El widget y la lista son los principales clientes y
+  // hacían N descargas inútiles.
   const { data } = await sb
     .from('proyecto_maestro')
-    .select('*')
+    .select('id, estudiante_id, titulo, tipo_negocio, sector, departamento, municipio, zona, descripcion, universidad, modalidad, creado_en, actualizado_en')
     .eq('estudiante_id', user.id)
     .order('actualizado_en', { ascending: false });
 

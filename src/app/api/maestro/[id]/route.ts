@@ -54,6 +54,20 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!isSupabaseConfigured()) return NextResponse.json({ error: 'sin_db' }, { status: 500 });
 
   const body = await req.json().catch(() => ({}));
+
+  // Límite duro de tamaño: 2 MB del documento JSONB. Un proyecto de grado
+  // realista cabe en ~200 KB; 2 MB es 10x ese límite. Sin esto, un bug o
+  // ataque podría meter MB en JSONB y degradar Supabase.
+  if (body?.documento) {
+    const bytes = Buffer.byteLength(JSON.stringify(body.documento), 'utf8');
+    if (bytes > 2_000_000) {
+      return NextResponse.json(
+        { error: 'documento_demasiado_grande', detail: `Máximo 2 MB, recibido ${(bytes / 1_000_000).toFixed(2)} MB` },
+        { status: 413 },
+      );
+    }
+  }
+
   const updates: Record<string, unknown> = { actualizado_en: new Date().toISOString() };
   for (const [k, v] of Object.entries(body)) if (CAMPOS.has(k)) updates[k] = v;
 
