@@ -1,0 +1,57 @@
+/**
+ * Identidad visual del módulo Marketing: acento ROSA/MAGENTA (#f43f5e).
+ * Distinta a Finanzas (negro), Mercados (azul) y Estrategia (violeta).
+ * Light-only. Todo bajo .marketing-scope para no contaminar el resto de webapp.
+ * Prefijo de tokens y clases: mkt- (Mercados ya usa mk-).
+ */
+
+.marketing-scope {
+  --mkt-bg: 350 60% 99%;          /* casi blanco con tinte rosa */
+  --mkt-surface: 0 0% 100%;       /* cards blancas */
+  --mkt-fg: 345 30% 15%;          /* casi negro con tinte rosa */
+  --mkt-muted-fg: 345 10% 47%;    /* gris rosado */
+  --mkt-border: 350 30% 91%;      /* borde rosa claro */
+  --mkt-accent: 350 89% 60%;      /* rose-500 #f43f5e */
+  --mkt-accent-fg: 0 0% 100%;
+  --mkt-accent-soft: 351 100% 95%;/* rose-100 para fondos suaves */
+  --mkt-radius: 0.625rem;
+
+  color-scheme: light;
+  background: hsl(var(--mkt-bg));
+  color: hsl(var(--mkt-fg));
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+  min-height: 100vh;
+}
+
+.marketing-scope,
+.marketing-scope * {
+  color-scheme: light !important;
+}
+
+.marketing-scope .mkt-card {
+  background: hsl(var(--mkt-surface));
+  border: 1px solid hsl(var(--mkt-border));
+  border-radius: var(--mkt-radius);
+}
+.marketing-scope .mkt-accent-bg { background: hsl(var(--mkt-accent)); }
+.marketing-scope .mkt-accent-text { color: hsl(var(--mkt-accent)); }
+.marketing-scope .mkt-accent-soft { background: hsl(var(--mkt-accent-soft)); }
+.marketing-scope .mkt-muted { color: hsl(var(--mkt-muted-fg)); }
+.marketing-scope .mkt-border { border-color: hsl(var(--mkt-border)); }
+
+.marketing-scope .mkt-btn-primary {
+  background: hsl(var(--mkt-accent));
+  color: hsl(var(--mkt-accent-fg));
+  border-radius: var(--mkt-radius);
+  transition: opacity 0.15s ease;
+}
+.marketing-scope .mkt-btn-primary:hover { opacity: 0.9; }
+
+.marketing-scope .mkt-btn-ghost {
+  border: 1px solid hsl(var(--mkt-border));
+  color: hsl(var(--mkt-fg));
+  border-radius: var(--mkt-radius);
+  transition: background 0.15s ease;
+}
+.marketing-scope .mkt-btn-ghost:hover { background: hsl(var(--mkt-accent-soft)); }

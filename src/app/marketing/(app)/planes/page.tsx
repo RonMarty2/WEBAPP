@@ -1,0 +1,163 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { Plus, Layers, Trash2, ArrowRight } from 'lucide-react';
+import type { EstadoMarketing } from '@/types/marketing';
+
+interface PlanLista {
+  id: string;
+  titulo: string;
+  marca: string | null;
+  sector: string | null;
+  estado: EstadoMarketing;
+  actualizado_en: string;
+}
+
+const ESTADO_LABEL: Record<EstadoMarketing, { txt: string; clase: string }> = {
+  persona: { txt: 'Buyer persona', clase: 'bg-rose-100 text-rose-800' },
+  mezcla: { txt: 'Mezcla', clase: 'bg-pink-100 text-pink-800' },
+  presupuesto: { txt: 'Presupuesto', clase: 'bg-amber-100 text-amber-800' },
+  calendario: { txt: 'Calendario', clase: 'bg-sky-100 text-sky-800' },
+  reporte: { txt: 'Reporte', clase: 'bg-emerald-100 text-emerald-800' },
+  completo: { txt: 'Completo', clase: 'bg-emerald-600 text-white' },
+};
+
+export default function MisPlanes() {
+  const [planes, setPlanes] = useState<PlanLista[]>([]);
+  const [montado, setMontado] = useState(false);
+  const [creando, setCreando] = useState(false);
+  const [titulo, setTitulo] = useState('');
+  const [marca, setMarca] = useState('');
+  const [sector, setSector] = useState('');
+  const [guardando, setGuardando] = useState(false);
+
+  const cargar = () => {
+    fetch('/api/marketing/planes', { credentials: 'include' })
+      .then((r) => r.json())
+      .then((d) => setPlanes(d.planes ?? []))
+      .catch(() => {})
+      .finally(() => setMontado(true));
+  };
+  useEffect(cargar, []);
+
+  const crear = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!titulo.trim()) return;
+    setGuardando(true);
+    try {
+      const res = await fetch('/api/marketing/planes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ titulo: titulo.trim(), marca: marca.trim() || null, sector: sector.trim() || null }),
+      });
+      if (res.ok) {
+        setTitulo(''); setMarca(''); setSector(''); setCreando(false);
+        cargar();
+      }
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const eliminar = async (id: string) => {
+    if (!window.confirm('¿Eliminar este plan? No se puede deshacer.')) return;
+    await fetch(`/api/marketing/planes/${id}`, { method: 'DELETE', credentials: 'include' });
+    cargar();
+  };
+
+  return (
+    <div className="mx-auto max-w-4xl">
+      <header className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <p className="mkt-accent-text text-xs font-semibold uppercase tracking-wider">Laboratorio</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight">Mis planes de marketing</h1>
+          <p className="mkt-muted mt-2 text-sm">
+            Cada plan recorre las herramientas: buyer persona → mezcla 4Ps/7Ps →
+            presupuesto y CPL → calendario → reporte. Retoma donde lo dejaste.
+          </p>
+        </div>
+        {!creando && (
+          <button onClick={() => setCreando(true)} className="mkt-btn-primary flex flex-shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-medium">
+            <Plus className="h-4 w-4" /> Nuevo
+          </button>
+        )}
+      </header>
+
+      {creando && (
+        <form onSubmit={crear} className="mkt-card mb-5 p-5">
+          <label className="text-sm font-medium">Título del plan</label>
+          <input
+            autoFocus value={titulo} onChange={(e) => setTitulo(e.target.value)}
+            placeholder="Ej: Plan de marketing — Cafetería La Orquídea"
+            className="mkt-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          />
+          <label className="mt-3 block text-sm font-medium">Producto o marca <span className="mkt-muted font-normal">(opcional)</span></label>
+          <input
+            value={marca} onChange={(e) => setMarca(e.target.value)}
+            placeholder="Ej: Café de especialidad La Orquídea"
+            className="mkt-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          />
+          <label className="mt-3 block text-sm font-medium">Sector / rubro <span className="mkt-muted font-normal">(opcional)</span></label>
+          <input
+            value={sector} onChange={(e) => setSector(e.target.value)}
+            placeholder="Ej: Gastronomía / cafeterías"
+            className="mkt-border mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          />
+          <div className="mt-3 flex gap-2">
+            <button type="submit" disabled={guardando || !titulo.trim()} className="mkt-btn-primary px-4 py-2 text-sm font-medium disabled:opacity-50">
+              {guardando ? 'Creando…' : 'Crear plan'}
+            </button>
+            <button type="button" onClick={() => { setCreando(false); setTitulo(''); setMarca(''); setSector(''); }} className="mkt-btn-ghost px-4 py-2 text-sm">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      )}
+
+      {!montado && <div className="mkt-muted py-10 text-center text-sm">Cargando…</div>}
+
+      {montado && planes.length === 0 && !creando && (
+        <div className="mkt-card p-10 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-100">
+            <Layers className="mkt-accent-text h-6 w-6" />
+          </div>
+          <p className="mt-3 font-semibold">Aún no tienes planes</p>
+          <p className="mkt-muted mt-1 text-sm">Crea el primero para empezar con tu buyer persona.</p>
+          <button onClick={() => setCreando(true)} className="mkt-btn-primary mt-4 inline-flex items-center gap-1.5 px-5 py-2 text-sm font-medium">
+            <Plus className="h-4 w-4" /> Crear plan
+          </button>
+        </div>
+      )}
+
+      {montado && planes.length > 0 && (
+        <div className="space-y-3">
+          {planes.map((p) => {
+            const est = ESTADO_LABEL[p.estado];
+            return (
+              <div key={p.id} className="mkt-card flex items-center gap-4 p-5">
+                <div className="mkt-accent-soft flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl">
+                  <Layers className="mkt-accent-text h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate font-semibold">{p.titulo}</h2>
+                  <div className="mt-1 flex items-center gap-2 text-xs">
+                    <span className={`rounded-full px-2 py-0.5 font-medium ${est.clase}`}>{est.txt}</span>
+                    {(p.marca || p.sector) && <span className="mkt-muted truncate">{p.marca || p.sector}</span>}
+                  </div>
+                </div>
+                <button onClick={() => eliminar(p.id)} className="mkt-muted flex-shrink-0 rounded-lg p-2 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+                <Link href={`/marketing/planes/${p.id}`} className="mkt-btn-primary flex flex-shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-medium">
+                  Continuar <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
