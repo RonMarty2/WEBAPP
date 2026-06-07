@@ -142,8 +142,8 @@ export function SugerirIA({
       {error && <p className="mt-2 text-xs text-rose-600">{error}</p>}
 
       {resultado && (
-        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-          <pre className="whitespace-pre-wrap text-sm text-slate-700">{resultado}</pre>
+        <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <SugerenciaFormateada texto={resultado} />
           <div className="mt-2 flex items-center gap-2">
             {onAplicar && (
               <button
@@ -164,6 +164,47 @@ export function SugerirIA({
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Renderiza la sugerencia con tipografía leíble (no monoespaciada como el `<pre>`
+ * que usábamos antes). Si detecta líneas con formato `Etiqueta: contenido`,
+ * las muestra con la etiqueta en semibold para escanear más fácil.
+ */
+function SugerenciaFormateada({ texto }: { texto: string }) {
+  const lineas = texto.split('\n');
+  // Heurística: si ≥ 2 líneas tienen formato "Palabra:" o "Palabras palabras:",
+  // tratamos como respuesta etiquetada (Lean Canvas, FODA, etc.).
+  const conteoEtiquetadas = lineas.filter((l) => /^[A-ZÁÉÍÓÚÑa-záéíóúñ][A-ZÁÉÍÓÚÑa-záéíóúñ\s]{0,30}:\s/.test(l.trim())).length;
+  const esEtiquetado = conteoEtiquetadas >= 2;
+
+  if (esEtiquetado) {
+    return (
+      <div className="space-y-2 text-sm leading-relaxed text-slate-700">
+        {lineas.map((l, i) => {
+          const trimmed = l.trim();
+          if (!trimmed) return null;
+          const m = trimmed.match(/^([A-ZÁÉÍÓÚÑa-záéíóúñ][A-ZÁÉÍÓÚÑa-záéíóúñ\s]{0,30}):\s*(.*)$/);
+          if (m) {
+            return (
+              <p key={i}>
+                <span className="font-semibold text-slate-900">{m[1]}:</span>{' '}
+                <span>{m[2]}</span>
+              </p>
+            );
+          }
+          return <p key={i}>{trimmed}</p>;
+        })}
+      </div>
+    );
+  }
+
+  // Texto libre: preserva saltos, pero con tipografía y leading agradables.
+  return (
+    <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+      {texto}
     </div>
   );
 }
