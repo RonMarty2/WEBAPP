@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifySessionToken, SESSION_COOKIE } from '@/lib/auth';
 import { isSupabaseConfigured, createAdminClient } from '@/lib/supabase';
+import { asegurarPerfilModulo } from '@/lib/modulos/autoOnboard';
 
 /**
  * Progreso de la Academia del módulo Estrategia.
@@ -46,10 +47,7 @@ export async function POST(req: Request) {
   const sb = createAdminClient() as any;
 
   // Auto-onboarding del perfil (por si entra directo a una clase)
-  await sb.from('estrategia_perfiles').upsert(
-    { id: user.id, nombre: (user.name ?? user.email.split('@')[0]).split(/\s+/)[0], email: user.email },
-    { onConflict: 'id' }
-  );
+  await asegurarPerfilModulo(sb, 'estrategia_perfiles', user);
 
   const { data, error } = await sb
     .from('estrategia_progreso_clases')

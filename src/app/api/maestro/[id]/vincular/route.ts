@@ -29,6 +29,39 @@ async function esDueno(sb: any, maestroId: string, userId: string) {
   return !!data;
 }
 
+/** Tabla del módulo donde vive el proyecto que se está vinculando. */
+const TABLA_POR_MODULO: Record<string, string> = {
+  idea: 'idea_proyectos',
+  mercados: 'mercados_proyectos',
+  estrategia: 'estrategia_proyectos',
+  marketing: 'marketing_planes',
+  organizacion: 'organizacion_proyectos',
+  finanzas: 'finanzas_proyectos',
+  defensa: 'defensa_proyectos',
+};
+
+/**
+ * Confirma que el proyecto del módulo (ref_id) pertenece al userId.
+ * Previene que un usuario vincule un proyecto ajeno a su maestro y
+ * lea su contenido vía contexto cruzado / IA.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function refIdEsDelUsuario(sb: any, modulo: string, refId: string, userId: string): Promise<boolean> {
+  const tabla = TABLA_POR_MODULO[modulo];
+  if (!tabla) return false;
+  try {
+    const { data } = await sb
+      .from(tabla)
+      .select('id')
+      .eq('id', refId)
+      .eq('estudiante_id', userId)
+      .maybeSingle();
+    return !!data;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -63,6 +96,13 @@ export async function POST(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = createAdminClient() as any;
   if (!(await esDueno(sb, id, user.id))) return NextResponse.json({ error: 'no_encontrado' }, { status: 404 });
+
+  // ⚠️ Crítico: el proyecto vinculado DEBE pertenecer al mismo usuario.
+  // Sin esta validación, un usuario podría vincular un proyecto ajeno a su
+  // propio maestro y leer su contenido vía el contexto cruzado de IA.
+  if (!(await refIdEsDelUsuario(sb, modulo, refId, user.id))) {
+    return NextResponse.json({ error: 'ref_id_invalido' }, { status: 403 });
+  }
 
   // upsert: un proyecto por módulo por maestro
   const { data, error } = await sb

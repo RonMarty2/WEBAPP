@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifySessionToken, SESSION_COOKIE } from '@/lib/auth';
 import { isSupabaseConfigured, createAdminClient } from '@/lib/supabase';
+import { asegurarPerfilModulo } from '@/lib/modulos/autoOnboard';
 
 /** Progreso de la Academia de Marketing. GET lista, POST registra { claseSlug, quizScore }. */
 
@@ -36,10 +37,7 @@ export async function POST(req: Request) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sb = createAdminClient() as any;
-  await sb.from('marketing_perfiles').upsert(
-    { id: user.id, nombre: (user.name ?? user.email.split('@')[0]).split(/\s+/)[0], email: user.email },
-    { onConflict: 'id' }
-  );
+  await asegurarPerfilModulo(sb, 'marketing_perfiles', user);
   const { data, error } = await sb
     .from('marketing_progreso_clases')
     .upsert(

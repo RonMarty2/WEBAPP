@@ -27,12 +27,12 @@ export interface BancoPreguntas {
   items: Pregunta[];
 }
 
-/** Una respuesta evaluada en el simulacro. */
+/** Una respuesta del simulacro. Puntaje null = aún no evaluada por la IA. */
 export interface RespuestaSimulacro {
   pregunta: string;
   categoria: string;
   respuesta: string;
-  puntaje: number;   // 0-10 (asignado por la IA)
+  puntaje: number | null;   // 0-10 si evaluada; null si pendiente
   feedback: string;
 }
 

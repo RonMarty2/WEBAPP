@@ -106,8 +106,11 @@ export default function HerramientaSimulacro() {
   const guardar = async (volver: boolean) => {
     setGuardando(true); setGuardado(false);
     try {
+      // Importante: preserva `null` en preguntas no evaluadas para que al
+      // recargar el estudiante NO vea "0/10" en preguntas que la IA nunca
+      // calificó. El promedio se calcula solo con las evaluadas (state).
       const simulacro = {
-        respuestas: items.map((x) => ({ pregunta: x.pregunta, categoria: x.categoria, respuesta: x.respuesta, puntaje: x.puntaje ?? 0, feedback: x.feedback })),
+        respuestas: items.map((x) => ({ pregunta: x.pregunta, categoria: x.categoria, respuesta: x.respuesta, puntaje: x.puntaje, feedback: x.feedback })),
         promedio: Math.round(promedio * 10) / 10,
         fecha: new Date().toISOString(),
       };

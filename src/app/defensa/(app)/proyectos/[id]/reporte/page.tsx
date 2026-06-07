@@ -42,9 +42,10 @@ export default function ReporteDefensa() {
   const respuestas = sim?.respuestas ?? [];
   const promedio = typeof sim?.promedio === 'number' ? sim.promedio : null;
 
-  // Promedio por categoría (de las respuestas evaluadas)
+  // Promedio por categoría — solo cuenta respuestas EVALUADAS (puntaje no null).
   const porCategoria = new Map<string, { suma: number; n: number }>();
   respuestas.forEach((r) => {
+    if (r.puntaje === null) return;
     const c = porCategoria.get(r.categoria) ?? { suma: 0, n: 0 };
     c.suma += r.puntaje; c.n += 1;
     porCategoria.set(r.categoria, c);
@@ -74,7 +75,8 @@ export default function ReporteDefensa() {
       respuestas.forEach((r, i) => {
         l.push(`${i + 1}. [${r.categoria}] ${r.pregunta}`);
         if (r.respuesta) l.push(`   Respuesta: ${r.respuesta}`);
-        l.push(`   Puntaje: ${r.puntaje}/10${r.feedback ? ` — ${r.feedback}` : ''}`);
+        const punt = r.puntaje === null ? 'sin evaluar' : `${r.puntaje}/10`;
+        l.push(`   Puntaje: ${punt}${r.feedback ? ` — ${r.feedback}` : ''}`);
       });
       l.push('');
     }
@@ -153,7 +155,11 @@ export default function ReporteDefensa() {
               <li key={i} className="border-l-2 border-indigo-200 pl-3">
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-medium">{i + 1}. {r.pregunta}</p>
-                  <span className={`flex-shrink-0 font-bold ${colorPuntaje(r.puntaje)}`}>{r.puntaje}/10</span>
+                  {r.puntaje === null ? (
+                    <span className="def-muted flex-shrink-0 text-xs italic">sin evaluar</span>
+                  ) : (
+                    <span className={`flex-shrink-0 font-bold ${colorPuntaje(r.puntaje)}`}>{r.puntaje}/10</span>
+                  )}
                 </div>
                 {r.respuesta && <p className="def-muted mt-0.5 text-xs">Tu respuesta: {r.respuesta}</p>}
                 {r.feedback && <p className="mt-0.5 text-xs"><span className="font-semibold">Feedback:</span> {r.feedback}</p>}

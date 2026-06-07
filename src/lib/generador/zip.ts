@@ -11,7 +11,7 @@
  * `[Tu carrera]`. El estudiante completa el `.tex` antes de compilar en Overleaf.
  */
 import JSZip from 'jszip';
-import { mdALatex } from '@/lib/latexMonografia';
+import { mdALatex, escaparLatex } from '@/lib/latexMonografia';
 import { documentoALatex, nombreTex } from '@/lib/generador/latex';
 import {
   buildPreambleUMSS, buildCaratulaUMSS,
@@ -53,7 +53,9 @@ function cuerpoSecciones(secciones: SeccionDocumento[], usarChapter: boolean): s
   const cmd = usarChapter ? 'chapter' : 'section';
   return secciones
     .map((s) => {
-      const titulo = (s.titulo || 'Sección').replace(/[{}]/g, (m) => `\\${m}`);
+      // Escape completo: $ & % # _ \ ~^ { } y Unicode problemático. Si el
+      // estudiante titula "Análisis 50% rentabilidad", el % rompía compilación.
+      const titulo = escaparLatex(s.titulo || 'Sección');
       const contenido = s.contenido?.trim()
         ? mdALatex(s.contenido)
         : '\\textit{(Sección pendiente de redactar.)}';
