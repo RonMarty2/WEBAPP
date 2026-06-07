@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Copy, Printer, Check } from 'lucide-react';
 import { aplicaComoSeccion, getDescriptor } from '@/lib/idea/rubrica-viabilidad';
 import type { ProyectoIdea, LeanCanvas } from '@/types/idea';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 const CANVAS_LABEL: Record<keyof LeanCanvas, string> = {
   problema: 'Problema', segmentos: 'Segmentos', propuestaValor: 'Propuesta única de valor',
@@ -125,6 +127,10 @@ export default function ReporteIdea() {
         </Link>
       </div>
 
+      <div className="mt-3 print:hidden">
+        <ProgresoFlujo actual="idea" modalidad={p.tipo_trabajo} tipoTrabajoLabel={p.tipo_trabajo ?? undefined} />
+      </div>
+
       <header className="mt-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="idea-accent-soft flex h-10 w-10 items-center justify-center rounded-xl">
@@ -207,6 +213,10 @@ export default function ReporteIdea() {
           <p className="idea-muted">{sc.notas}</p>
         </Seccion>
       )}
+
+      <div className="print:hidden">
+        <SiguienteModulo actual="idea" modalidad={p.tipo_trabajo} />
+      </div>
     </div>
   );
 }

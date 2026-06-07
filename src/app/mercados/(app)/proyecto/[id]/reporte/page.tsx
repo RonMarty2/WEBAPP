@@ -7,9 +7,13 @@ import { ArrowLeft, FileText, Download, Check, Sparkles } from 'lucide-react';
 import type { ProyectoMercados } from '@/types/mercados';
 import { generarReporteMarkdown } from '@/lib/mercados/reporte';
 import type { PreguntaParaAnalisis, RespuestaCruda } from '@/lib/mercados/analisis';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 export default function EtapaReporte() {
   const params = useParams<{ id: string }>();
+  const maestro = useMaestroActivo();
   const [proyecto, setProyecto] = useState<ProyectoMercados | null>(null);
   const [preguntas, setPreguntas] = useState<PreguntaParaAnalisis[]>([]);
   const [respuestas, setRespuestas] = useState<RespuestaCruda[]>([]);
@@ -80,6 +84,10 @@ export default function EtapaReporte() {
         <ArrowLeft className="h-4 w-4" /> Volver al proyecto
       </Link>
 
+      <div className="mt-3">
+        <ProgresoFlujo actual="mercados" modalidad={maestro?.modalidad} tipoTrabajoLabel={maestro?.modalidad ?? undefined} />
+      </div>
+
       <header className="mt-4 flex items-center gap-3">
         <div className="mk-accent-soft flex h-10 w-10 items-center justify-center rounded-xl">
           <FileText className="mk-accent-text h-5 w-5" />
@@ -132,6 +140,8 @@ export default function EtapaReporte() {
           {markdown}
         </pre>
       </div>
+
+      <SiguienteModulo actual="mercados" modalidad={maestro?.modalidad} />
     </div>
   );
 }

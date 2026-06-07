@@ -6,6 +6,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { ArrowLeft, Link2, Unlink, Layers, Sparkles, Loader2, Copy, Check, FileText } from 'lucide-react';
 import { MODULOS } from '@/lib/generador/utils';
 import type { ProyectoMaestro, VinculoModulo } from '@/types/maestro';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 type Disponibles = Record<string, Array<{ id: string; titulo: string }>>;
 
@@ -114,6 +116,10 @@ export default function GeneradorWorkspace() {
       <Link href="/generador" className="gen-muted inline-flex items-center gap-1 text-sm hover:text-teal-700">
         <ArrowLeft className="h-4 w-4" /> Mis proyectos
       </Link>
+
+      <div className="mt-3">
+        <ProgresoFlujo actual="generador" modalidad={maestro.modalidad} tipoTrabajoLabel={maestro.modalidad ?? undefined} />
+      </div>
 
       <header className="mt-4">
         <h1 className="text-2xl font-bold tracking-tight">{maestro.titulo}</h1>
@@ -224,6 +230,8 @@ export default function GeneradorWorkspace() {
           )}
         </div>
       </section>
+
+      <SiguienteModulo actual="generador" modalidad={maestro.modalidad} />
     </div>
   );
 }

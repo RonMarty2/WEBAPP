@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Copy, Printer, Check } from 'lucide-react';
 import type { ProyectoEstrategia, FilaMatriz } from '@/types/estrategia';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 /** Total ponderado de una matriz MEFE/MEFI. */
 function totalPonderado(filas?: FilaMatriz[]): number {
@@ -70,6 +73,7 @@ const CV_LABEL: Record<string, string> = {
 
 export default function ReporteEstrategia() {
   const params = useParams<{ id: string }>();
+  const maestro = useMaestroActivo();
   const [p, setP] = useState<ProyectoEstrategia | null>(null);
   const [estado, setEstado] = useState<'cargando' | 'ok' | 'error'>('cargando');
   const [copiado, setCopiado] = useState(false);
@@ -215,6 +219,10 @@ export default function ReporteEstrategia() {
         </Link>
       </div>
 
+      <div className="mt-3 print:hidden">
+        <ProgresoFlujo actual="estrategia" modalidad={maestro?.modalidad} tipoTrabajoLabel={maestro?.modalidad ?? undefined} />
+      </div>
+
       <header className="mt-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="es-accent-soft flex h-10 w-10 items-center justify-center rounded-xl">
@@ -347,6 +355,10 @@ export default function ReporteEstrategia() {
           <p>La estrategia con mayor puntaje es <strong className="es-accent-text">{gana.nombre}</strong> (total {gana.total.toFixed(2)}). Es la opción recomendada según los factores clave y sus pesos.</p>
         </Seccion>
       )}
+
+      <div className="print:hidden">
+        <SiguienteModulo actual="estrategia" modalidad={maestro?.modalidad} />
+      </div>
     </div>
   );
 }

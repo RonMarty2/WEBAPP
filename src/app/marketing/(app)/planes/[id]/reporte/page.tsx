@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Copy, Printer, Check } from 'lucide-react';
 import type { PlanMarketing, CanalPresupuesto } from '@/types/marketing';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 const formatBs = (n: number) =>
   `Bs ${n.toLocaleString('es-BO', { maximumFractionDigits: 0 })}`;
@@ -24,6 +27,7 @@ const MEZCLA_LABEL: Record<string, string> = {
 
 export default function ReporteMarketing() {
   const params = useParams<{ id: string }>();
+  const maestro = useMaestroActivo();
   const [p, setP] = useState<PlanMarketing | null>(null);
   const [estado, setEstado] = useState<'cargando' | 'ok' | 'error'>('cargando');
   const [copiado, setCopiado] = useState(false);
@@ -123,6 +127,10 @@ export default function ReporteMarketing() {
         <Link href={`/marketing/planes/${params.id}`} className="mkt-muted inline-flex items-center gap-1 text-sm hover:text-rose-700">
           <ArrowLeft className="h-4 w-4" /> Volver al plan
         </Link>
+      </div>
+
+      <div className="mt-3 print:hidden">
+        <ProgresoFlujo actual="marketing" modalidad={maestro?.modalidad} tipoTrabajoLabel={maestro?.modalidad ?? undefined} />
       </div>
 
       <header className="mt-4 flex items-center justify-between gap-3">
@@ -240,6 +248,10 @@ export default function ReporteMarketing() {
           </ul>
         </Seccion>
       )}
+
+      <div className="print:hidden">
+        <SiguienteModulo actual="marketing" modalidad={maestro?.modalidad} />
+      </div>
     </div>
   );
 }

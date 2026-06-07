@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Copy, Printer, Check } from 'lucide-react';
 import type { ProyectoDefensa } from '@/types/defensa';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 function colorPuntaje(p: number): string {
   if (p >= 8) return 'text-emerald-600';
@@ -14,6 +17,7 @@ function colorPuntaje(p: number): string {
 
 export default function ReporteDefensa() {
   const params = useParams<{ id: string }>();
+  const maestro = useMaestroActivo();
   const [p, setP] = useState<ProyectoDefensa | null>(null);
   const [estado, setEstado] = useState<'cargando' | 'ok' | 'error'>('cargando');
   const [copiado, setCopiado] = useState(false);
@@ -100,6 +104,10 @@ export default function ReporteDefensa() {
         </Link>
       </div>
 
+      <div className="mt-3 print:hidden">
+        <ProgresoFlujo actual="defensa" modalidad={maestro?.modalidad} tipoTrabajoLabel={maestro?.modalidad ?? undefined} />
+      </div>
+
       <header className="mt-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="def-accent-soft flex h-10 w-10 items-center justify-center rounded-xl">
@@ -179,6 +187,10 @@ export default function ReporteDefensa() {
           <p className="def-muted mt-2 text-sm">Aún no has hecho el simulacro. Practica para ver tu desempeño aquí.</p>
         </Seccion>
       )}
+
+      <div className="print:hidden">
+        <SiguienteModulo actual="defensa" modalidad={maestro?.modalidad} />
+      </div>
     </div>
   );
 }

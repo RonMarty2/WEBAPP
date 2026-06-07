@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FileText, Copy, Printer, Check } from 'lucide-react';
 import type { ProyectoOrganizacion, NodoOrganigrama } from '@/types/organizacion';
+import { useMaestroActivo } from '@/lib/maestro/useMaestroActivo';
+import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
+import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 const formatBs = (n: number) => `Bs ${n.toLocaleString('es-BO', { maximumFractionDigits: 0 })}`;
 
@@ -14,6 +17,7 @@ const ESTADO_TRAMITE: Record<string, string> = {
 
 export default function ReporteOrganizacion() {
   const params = useParams<{ id: string }>();
+  const maestro = useMaestroActivo();
   const [p, setP] = useState<ProyectoOrganizacion | null>(null);
   const [estado, setEstado] = useState<'cargando' | 'ok' | 'error'>('cargando');
   const [copiado, setCopiado] = useState(false);
@@ -141,6 +145,10 @@ export default function ReporteOrganizacion() {
         </Link>
       </div>
 
+      <div className="mt-3 print:hidden">
+        <ProgresoFlujo actual="organizacion" modalidad={maestro?.modalidad} tipoTrabajoLabel={maestro?.modalidad ?? undefined} />
+      </div>
+
       <header className="mt-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="org-accent-soft flex h-10 w-10 items-center justify-center rounded-xl">
@@ -237,6 +245,10 @@ export default function ReporteOrganizacion() {
           )}
         </Seccion>
       )}
+
+      <div className="print:hidden">
+        <SiguienteModulo actual="organizacion" modalidad={maestro?.modalidad} />
+      </div>
     </div>
   );
 }

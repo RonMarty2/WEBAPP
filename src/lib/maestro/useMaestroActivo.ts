@@ -21,11 +21,14 @@ import { getMaestroActivo } from '@/lib/maestro/activo';
 export interface MaestroActivoInfo {
   id: string;
   titulo: string;
+  /** Modalidad académica del maestro (ej. "Tesis", "Proyecto de Grado"). */
+  modalidad: string | null;
 }
 
 interface CacheEntry {
   id: string;
   titulo: string;
+  modalidad: string | null;
   ts: number;
 }
 const TTL_MS = 60_000;
@@ -35,7 +38,7 @@ let pendingFetch: Promise<MaestroActivoInfo | null> | null = null;
 async function cargarConCache(id: string): Promise<MaestroActivoInfo | null> {
   // Hit de cache fresco
   if (cache && cache.id === id && Date.now() - cache.ts < TTL_MS) {
-    return { id: cache.id, titulo: cache.titulo };
+    return { id: cache.id, titulo: cache.titulo, modalidad: cache.modalidad };
   }
   // Dedup: si ya hay un fetch en vuelo para este id, espera ese.
   if (pendingFetch) return pendingFetch;
@@ -45,8 +48,13 @@ async function cargarConCache(id: string): Promise<MaestroActivoInfo | null> {
       if (!r.ok) return null;
       const d = await r.json();
       if (!d?.maestro) return null;
-      cache = { id: d.maestro.id, titulo: d.maestro.titulo, ts: Date.now() };
-      return { id: cache.id, titulo: cache.titulo };
+      cache = {
+        id: d.maestro.id,
+        titulo: d.maestro.titulo,
+        modalidad: d.maestro.modalidad ?? null,
+        ts: Date.now(),
+      };
+      return { id: cache.id, titulo: cache.titulo, modalidad: cache.modalidad };
     } catch {
       return null;
     } finally {
