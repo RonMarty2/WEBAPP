@@ -11,11 +11,11 @@ import type { PlanMarketing } from '@/types/marketing';
  * `disponible` marca cuáles ya están construidas (se irán habilitando por fase).
  */
 const HERRAMIENTAS = [
-  { ruta: 'buyer-persona', label: 'Buyer persona', desc: 'Define a tu cliente ideal', icon: UserRound, disponible: false },
-  { ruta: 'mezcla', label: 'Mezcla 4Ps / 7Ps', desc: 'Producto, precio, plaza, promoción…', icon: Blend, disponible: false },
-  { ruta: 'presupuesto', label: 'Presupuesto y CPL', desc: 'Inversión y costo por lead por canal', icon: Wallet, disponible: false },
-  { ruta: 'calendario', label: 'Calendario editorial', desc: 'Plan de contenidos por fecha y canal', icon: CalendarDays, disponible: false },
-  { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: false },
+  { ruta: 'buyer-persona', label: 'Buyer persona', desc: 'Define a tu cliente ideal', icon: UserRound, disponible: true },
+  { ruta: 'mezcla', label: 'Mezcla 4Ps / 7Ps', desc: 'Producto, precio, plaza, promoción…', icon: Blend, disponible: true },
+  { ruta: 'presupuesto', label: 'Presupuesto y CPL', desc: 'Inversión y costo por lead por canal', icon: Wallet, disponible: true },
+  { ruta: 'calendario', label: 'Calendario editorial', desc: 'Plan de contenidos por fecha y canal', icon: CalendarDays, disponible: true },
+  { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: true },
 ];
 
 export default function PlanDetalle() {
