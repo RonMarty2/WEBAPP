@@ -169,6 +169,18 @@ export default function DashboardPage() {
             <Link href="/" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--fg-muted)", textDecoration: "none", fontSize: 13 }}>
               Inicio
             </Link>
+            {(user.role === "docente" || user.role === "admin") && (
+              <Link href="/docente" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.08)", color: "#7c3aed", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+                  <path d="M6 12v5c3 3 9 3 12 0v-5" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+                </svg>
+                Mis alumnos
+              </Link>
+            )}
+            <Link href="/unirse-docente" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(148,163,184,0.35)", background: "transparent", color: "var(--fg-secondary)", textDecoration: "none", fontSize: 13 }} title="Vincúlate a un docente con un código">
+              ¿Código de docente?
+            </Link>
             {user.role === "admin" && (
               <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
