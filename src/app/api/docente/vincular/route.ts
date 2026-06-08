@@ -45,6 +45,27 @@ export async function POST(req: Request) {
     }
 
     // Crear el vínculo (o devolver 409 si ya existía — el UNIQUE lo bloquea).
+    // El JWT no incluye universidad. Intentamos leerla del perfil del
+    // módulo Idea (primer perfil que suelen crear los alumnos al entrar
+    // por primera vez). Si no existe ahí, intentamos los demás módulos
+    // como fallback. Si nada existe, queda null (la UI lo maneja).
+    let universidadSnapshot: string | null = null;
+    for (const tabla of ["idea_perfiles", "mercados_perfiles", "estrategia_perfiles", "marketing_perfiles", "organizacion_perfiles", "defensa_perfiles"]) {
+      try {
+        const { data: perfil } = await sb
+          .from(tabla)
+          .select("universidad")
+          .eq("id", user.id)
+          .maybeSingle();
+        if (perfil?.universidad) {
+          universidadSnapshot = perfil.universidad as string;
+          break;
+        }
+      } catch {
+        // tabla no existe (migración pendiente) — sigue con la próxima
+      }
+    }
+
     const { data: vinculo, error: errVin } = await sb
       .from("docente_alumno_vinculos")
       .insert({
@@ -53,9 +74,7 @@ export async function POST(req: Request) {
         codigo_usado: codigoRow.codigo,
         alumno_nombre: user.name,
         alumno_email: user.email,
-        // Universidad la guardamos al snapshot si el usuario la tiene; los
-        // tipos JWT no la incluyen, así que la dejamos en null por ahora.
-        alumno_universidad: null,
+        alumno_universidad: universidadSnapshot,
       })
       .select()
       .single();

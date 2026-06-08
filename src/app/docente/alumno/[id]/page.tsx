@@ -48,6 +48,12 @@ interface AlumnoDetalle {
   total_proyectos: number;
   modulos: ModuloResumen[];
   sin_finanzas?: boolean;
+  /**
+   * El alumno permite que este docente vea el CONTENIDO de sus proyectos
+   * (no solo metadatos). El alumno controla este flag en `/unirse-docente`.
+   * Por defecto false hasta que el alumno active el toggle.
+   */
+  consentimiento_ver_contenido?: boolean;
 }
 
 interface Observacion {
@@ -422,15 +428,29 @@ export default function DetalleAlumno() {
         </p>
       </div>
 
-      <div className="mt-3 flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-[11px] text-slate-500">
-        <GraduationCap className="mt-0.5 h-3 w-3 flex-shrink-0 text-slate-400" aria-hidden="true" />
-        <span>
-          Esta vista te muestra <strong>solo los metadatos</strong> de los
-          proyectos del alumno. El contenido completo se habilita solo si el
-          alumno te da permiso explícito en su pantalla <strong>Mis docentes</strong>
-          (por defecto está apagado). <Check className="inline h-3 w-3 text-emerald-600" aria-hidden="true" /> Tus observaciones SÍ
-          le llegan en cualquier caso.
-        </span>
+      <div className={`mt-3 flex items-start gap-2 rounded-lg border p-3 text-[11px] ${
+        data.consentimiento_ver_contenido
+          ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
+          : 'border-slate-200 bg-white text-slate-500'
+      }`}>
+        <GraduationCap className="mt-0.5 h-3 w-3 flex-shrink-0" aria-hidden="true" />
+        {data.consentimiento_ver_contenido ? (
+          <span>
+            <strong>Consentimiento del alumno: activo.</strong> El alumno te
+            autorizó a ver el contenido de sus proyectos. La integración con la
+            lectura del contenido completo de cada herramienta se entregará en
+            una próxima Wave. Por ahora ves los mismos metadatos, pero tus
+            permisos están registrados.
+          </span>
+        ) : (
+          <span>
+            Esta vista te muestra <strong>solo los metadatos</strong> de los
+            proyectos del alumno. El contenido completo se habilita solo si el
+            alumno te da permiso explícito en su pantalla <strong>Mis docentes</strong>
+            (por defecto está apagado). <Check className="inline h-3 w-3 text-emerald-600" aria-hidden="true" /> Tus observaciones SÍ
+            le llegan en cualquier caso.
+          </span>
+        )}
       </div>
     </div>
   );

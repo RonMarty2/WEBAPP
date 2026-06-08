@@ -15,6 +15,8 @@ import { ArrowLeft, MessageSquare, Check, CheckCircle2 } from 'lucide-react';
 interface Observacion {
   id: string;
   docente_id: string;
+  /** Snapshot del nombre del docente que dejó la observación. */
+  docente_nombre?: string;
   modulo: string;
   proyecto_id: string;
   proyecto_titulo: string;
@@ -174,7 +176,9 @@ export default function MisObservaciones() {
                       </span>
                     </div>
                     <p className="mt-2 text-sm text-slate-800">{o.observacion}</p>
-                    <p className="mt-1 text-[11px] text-slate-400">Recibida el {fmtFecha(o.creada_en)}</p>
+                    <p className="mt-1 text-[11px] text-slate-400">
+                      De <strong className="text-slate-600">{o.docente_nombre ?? 'tu docente'}</strong> · Recibida el {fmtFecha(o.creada_en)}
+                    </p>
 
                     {o.respuesta_alumno && !esEditando && (
                       <div className="mt-2 rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-900">

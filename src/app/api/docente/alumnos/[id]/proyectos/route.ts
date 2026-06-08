@@ -152,6 +152,23 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 
     const totalProyectos = modulos.reduce((s, m) => s + m.proyectos.length, 0);
 
+    // Lee el consentimiento del alumno para ESTE docente. La UI muestra
+    // "solo metadatos" hasta que el alumno active el toggle. Antes el
+    // toggle era 100% cosmético: NUNCA se leía en backend. Ahora se
+    // expone el flag para que el frontend confirme la promesa.
+    let consentimientoVerContenido = false;
+    try {
+      const { data: cons } = await sb
+        .from("docente_consentimientos")
+        .select("permitir_ver_contenido")
+        .eq("alumno_id", alumnoId)
+        .eq("docente_id", user.id)
+        .maybeSingle();
+      consentimientoVerContenido = !!cons?.permitir_ver_contenido;
+    } catch {
+      // tabla no existe (migración pendiente) → tratamos como false
+    }
+
     return NextResponse.json({
       alumno: {
         vinculo_id: vinculo.id,
@@ -166,6 +183,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       },
       total_proyectos: totalProyectos,
       modulos,
+      // El alumno permite ver contenido completo (no solo metadatos).
+      // Wave 4 expondrá el contenido real condicional a este flag.
+      consentimiento_ver_contenido: consentimientoVerContenido,
       // Aviso para la UI sobre Finanzas
       sin_finanzas: true,
     });

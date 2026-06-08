@@ -1150,9 +1150,14 @@ html.is-mobile-ua .admin-view-toggle-fab {
     background: #ffffff !important;
     color: #000000 !important;
   }
-  /* Ocultar elementos comunes de chrome de la app que NO son contenido. */
-  header[role="banner"],
-  nav[role="navigation"],
+  /* Ocultar TODO chrome de la app: headers (los layouts de cada módulo
+     usan <header> sin role="banner"), nav lateral (<aside>), botones
+     flotantes, modales, widgets transversales. La auditoría de sesión 6
+     detectó que `header[role="banner"]` no matcheaba ningún header del
+     proyecto — el PDF salía con sidebar y nav arriba. Ahora ocultamos
+     el <header> raíz del layout independientemente del role. */
+  header,
+  nav,
   aside,
   .gen-header,
   .mk-header,
@@ -1161,8 +1166,15 @@ html.is-mobile-ua .admin-view-toggle-fab {
   .org-header,
   .def-header,
   .idea-header,
-  .admin-view-toggle-fab {
+  .admin-view-toggle-fab,
+  .print\:hidden {
     display: none !important;
+  }
+  /* `flex h-screen w-screen flex-col` fija el viewport, lo cual recorta
+     el contenido al imprimir. Forzar altura natural. */
+  body, html, main {
+    height: auto !important;
+    overflow: visible !important;
   }
   /* Texto compacto, evitar saltos en medio de párrafos */
   p, li {

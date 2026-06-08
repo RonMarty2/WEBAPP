@@ -6,7 +6,12 @@ import { useSearchParams } from 'next/navigation';
 import { Plus, FolderGit2, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { ProyectoMaestro } from '@/types/maestro';
 
-const MODALIDADES = ['Proyecto de grado', 'Tesis', 'Monografía', 'Trabajo dirigido', 'Otro'];
+// IMPORTANTE: estas etiquetas deben coincidir EXACTAMENTE con las claves de
+// FLUJO_POR_MODALIDAD en src/lib/flujos/por-modalidad.ts. Antes había un
+// casing mismatch ("Proyecto de grado" minúscula vs "Proyecto de Grado")
+// que hacía caer al flujo default (todos los módulos) en vez del flujo
+// específico de la modalidad.
+const MODALIDADES = ['Proyecto de Grado', 'Tesis', 'Monografía', 'Trabajo Dirigido', 'Otro'];
 
 const DESDE_LABEL: Record<string, string> = {
   idea: 'tu Idea',
