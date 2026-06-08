@@ -8,7 +8,6 @@ import {
   Compass,
   GraduationCap,
   FolderSearch,
-  Database,
   LogOut,
   Menu,
   X,
@@ -17,11 +16,14 @@ import {
 import { useAuthStore } from '@/stores/mercados/auth-store';
 import { WidgetMaestro } from '@/components/compartido/WidgetMaestro';
 
+// "Datos abiertos" se ocultó de la nav porque la página solo muestra
+// "En construcción" y confundía al estudiante. La ruta `/mercados/datos`
+// sigue existiendo para no romper bookmarks. Reactivar cuando se construya
+// la integración real con INE / datos.gob.bo / Google Trends.
 const ENLACES = [
   { href: '/mercados', label: 'Inicio', icon: Compass },
   { href: '/mercados/academia', label: 'Academia', icon: GraduationCap },
   { href: '/mercados/proyecto', label: 'Mi investigación', icon: FolderSearch },
-  { href: '/mercados/datos', label: 'Datos abiertos', icon: Database },
 ];
 
 export default function RootLayout({ children }: { children: ReactNode }) {

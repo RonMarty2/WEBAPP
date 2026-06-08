@@ -25,21 +25,41 @@ estudiantes generan **monografías**, **proyectos de grado** y se preparan para
 
 ---
 
-## Módulos del Producto (16 áreas, no "4 etapas")
+## Módulos del Producto (los que existen HOY en el código)
 
+> ⚠️ **Nota:** versiones anteriores de este archivo mencionaban Axiom, Lumen,
+> Mentor, Núcleo y Laboratorio como módulos. Esos **NO existen** en el código
+> y se eliminaron del listado para no confundir futuras sesiones. Si se
+> deciden construir, agregar acá cuando estén en `src/app/`.
+
+### Generadores de documento
 | Módulo | Ruta | Descripción |
 |--------|------|-------------|
-| **Scribe** | `/scribe`, `/projects/[id]/workspace` | Generador de monografías (5 caps + bibliografía APA 7) |
-| **Proyecto de Grado** | `/projects/[id]/workspace` (tipo=PG) | Plan de negocio completo (23 fases: PESTEL/Porter/matrices/encuestas/RRHH/legal/técnico/branding/marketing/financiero/evaluación) |
-| **Axiom** | `/axiom`, `/axiom/simulador` | Simulador de exámenes con ranking de podios y plan personalizado |
-| **Lumen** | `/lumen` | Generador docente |
-| **Mentor** | `/mentor` | Tutoría y feedback |
-| **Núcleo** | `/nucleo` | Hub padre que orquesta los productos |
-| **Laboratorio** | `/laboratorio` | Sandbox / experimentación |
-| **Pagos** | `/pago`, `/admin/pagos` | Tigo Money / QR bancario / transferencia (Bolivia) |
+| **Scribe** | `/scribe` (landing) + `/projects/[id]/workspace` | Generador autónomo de monografías (5 caps + bibliografía APA 7) |
+| **Proyecto de Grado** | `/projects/[id]/workspace-pg` | Workspace UNIFRANZ/UCATEC con 5 modalidades + fases agrupadas (Preliminares/Cuerpo/Cierre/Export) |
+| **Generador Conectado** | `/generador`, `/generador/[id]`, `/generador/[id]/documento` | Consolida los 7 módulos educativos en un solo documento via Proyecto Maestro |
+
+### Módulos educativos (academia + laboratorio)
+| Módulo | Ruta | Color | Estado |
+|--------|------|-------|--------|
+| **Idea / Pre-validación** | `/idea/**` | ámbar | ✅ Academia (5 clases) + Laboratorio (Lean Canvas, VPC, Validación, Scorecard rúbrica, Reporte) |
+| **Mercados** | `/mercados/**` | sky | ✅ Academia (13 clases) + Laboratorio (Diseño, Muestreo, Encuesta, Recolección link/QR, Análisis, Reporte) |
+| **Estrategia** | `/estrategia/**` | violet | ✅ Academia (6 clases) + Laboratorio (PESTEL, Porter, MPC, Cadena Valor, MEFE, MEFI, MIE, FODA, BCG, Ansoff, PEYEA, MCPE, Reporte) |
+| **Marketing** | `/marketing/**` | rose | ✅ Academia (5 clases) + Laboratorio (Buyer persona, Mezcla 4/7Ps, Presupuesto+CPL+ROAS, Calendario, Reporte) |
+| **Organización** | `/organizacion/**` | emerald | ✅ Academia (5 clases) + Laboratorio (Organigrama, RRHH BO, Legal BO, Técnico, Branding, Reporte) |
+| **Finanzas** | `/finanzas/**` | slate | ✅ simuladorPRO migrado (Constructor 9 pasos + simulación turno-a-turno + ranking + 26 ejemplos) |
+| **Defensa** | `/defensa/**` | indigo | ✅ Academia (4 clases) + Laboratorio (Banco preguntas IA, Simulacro evaluado por IA, Reporte) |
+
+### Infraestructura comercial / soporte
+| Área | Ruta | Descripción |
+|--------|------|-------------|
+| **Pagos** | `/pago`, `/admin/pagos` | Tigo Money / QR bancario / transferencia (Bolivia) — aprobación manual |
 | **Admin** | `/admin/**` | Panel completo (ver tabla abajo) |
-| **Auth** | `/login`, `/api/auth/*` | Google OAuth + demo + pendiente |
+| **Auth** | `/login`, `/api/auth/*` | Google OAuth + demo + super-admin hardcoded por email |
+| **Hub módulos** | `/modulos` | Catálogo de los 7 módulos + 2 generadores |
+| **Dashboard** | `/dashboard` | Hub principal con bloque "Tu camino" (rápido vs formativo) |
 | **Tutorial / Legales** | `/tutorial`, `/terminos`, `/privacidad` | Páginas estáticas |
+| **Ecosistema (MOCKUP)** | `/ecosistema/**` | Prototipo navegable de la visión "Dos Mundos". **NO es producto real.** |
 
 ### Subpaneles de Admin
 `/admin/{ai-config, calibration-questions, dashboard, estadisticas, fases, feedback-insights, logs, modelos, monografias, pagos, project-types, prompts, proyectos, ui-config, universidades, usuarios, workspace-prompts}`
@@ -107,11 +127,26 @@ ACCESO: Solo servidor (API routes). NUNCA desde el cliente.
 - `GET/POST /api/citas[/monografia_id]`, `/api/documentos[/monografia_id]`
 - `POST /api/cap1-variants` — variantes por universidad
 
-### Axiom (simulador exámenes)
-- `GET/POST /api/axiom/examenes` — gestión de exámenes
-- `POST /api/axiom/plan-personalizado` — plan IA personalizado
-- `GET /api/axiom/progreso/estadisticas` — métricas usuario
-- `GET /api/axiom/ranking` — ranking de podios
+### Módulos educativos (cada uno con su prefijo)
+- `GET/POST /api/idea/proyectos[/[id]]`, `/api/idea/perfil`, `/api/idea/progreso`
+- `GET/POST /api/mercados/proyectos[/[id]]`, `/api/mercados/perfil`, `/api/mercados/progreso`
+- `GET /api/mercados/publico/[token]` (encuesta anónima sin login)
+- `GET/POST /api/estrategia/proyectos[/[id]]`, `/api/estrategia/perfil`
+- `GET/POST /api/marketing/planes[/[id]]`
+- `GET/POST /api/organizacion/proyectos[/[id]]`
+- `GET/POST /api/defensa/proyectos[/[id]]`, `/api/defensa/perfil`, `/api/defensa/progreso`
+- `GET /api/finanzas/perfil`
+
+### Proyecto Maestro + Generador Conectado
+- `GET/POST /api/maestro` — CRUD de proyectos maestro
+- `GET/DELETE /api/maestro/[id]` — detalle, eliminar
+- `POST /api/maestro/[id]/vincular` — vincular módulo al maestro
+- `GET /api/maestro/[id]/contexto` — contexto consolidado para IA
+- `GET /api/maestro/[id]/latex`, `/api/maestro/[id]/zip` — export
+- `GET /api/maestro/disponibles` — qué proyectos vincular
+
+### Servicio de IA compartido
+- `POST /api/ai/asistir` — endpoint único que TODOS los módulos llaman (con cascada Groq → Gemini → Anthropic → OpenAI)
 
 ### Pagos
 - `POST /api/payments` — crear solicitud (tigo_money | qr_bancario | transferencia)
@@ -220,10 +255,24 @@ Cap.4a-g: Diseño interno (organizacional, RRHH, legal, técnico, branding, mark
 Conclusiones → Defensa → Referencias → Resumen ejecutivo → LaTeX
 ```
 
-### Axiom — Simulador de exámenes
+### Generador Conectado — Proyecto integral por módulos
 ```
-Estudiante → plan personalizado IA → exámenes → ranking de podios
+Crear Proyecto Maestro → vincular módulos (Idea, Mercados, Estrategia, etc)
+   ↓ widget "Trabajando en" enciende contexto en cada módulo
+Trabajar cada módulo → cada uno genera su artefacto (reporte)
+   ↓ "Siguiente paso" navega al próximo módulo según la modalidad
+/generador/[id] → ver contexto consolidado
+/generador/[id]/documento → generar capítulos con IA (contexto cruzado)
+   ↓
+Export Markdown / .tex / ZIP Overleaf con plantilla por universidad
 ```
+
+### Módulos educativos individuales
+Cada módulo (Idea, Mercados, Estrategia, Marketing, Organización, Finanzas, Defensa) tiene su propio flujo:
+- **Academia:** clases con teoría + ejemplo boliviano + quiz
+- **Laboratorio:** herramientas con plantillas (modo B) + botón "Sugerir IA" (modo C)
+- **Reporte consolidado:** artefacto exportable al Generador Conectado
+- Estudiante puede usar UN módulo solo (sin Proyecto Maestro) o conectarlo todo
 
 **Para cada fase de cualquier producto:** `POST /api/projects/generate-phase`
 con `{ projectId, phaseId, contexto, modo? }`. El backend orquesta:

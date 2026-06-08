@@ -464,15 +464,15 @@ export async function GET(_req: Request, { params }: Params) {
 Archivo principal: proyecto-grado.tex
 
 Para compilar en tu PC:
-  1. Instalá una distribución LaTeX (TeX Live, MiKTeX o MacTeX).
-  2. Abrí el .tex en tu editor (TeXstudio, VSCode con LaTeX Workshop, etc.).
-  3. Compilá dos veces con pdflatex (la segunda vez actualiza el índice):
+  1. Instala una distribución LaTeX (TeX Live, MiKTeX o MacTeX).
+  2. Abre el .tex en tu editor (TeXstudio, VSCode con LaTeX Workshop, etc.).
+  3. Compila dos veces con pdflatex (la segunda vez actualiza el índice):
        pdflatex proyecto-grado.tex
        pdflatex proyecto-grado.tex
 
 Para compilar en Overleaf:
-  1. Entrá a https://www.overleaf.com
-  2. New Project → Upload Project → seleccioná este ZIP completo.
+  1. Entra a https://www.overleaf.com
+  2. New Project → Upload Project → selecciona este ZIP completo.
   3. Overleaf detecta proyecto-grado.tex y lo compila automáticamente.
 
 Notas:

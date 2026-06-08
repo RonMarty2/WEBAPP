@@ -773,9 +773,9 @@ export async function GET(_req: Request, { params }: Params) {
         `Estas figuras estaban referenciadas en el documento pero no se`,
         `subió ningún archivo de imagen correspondiente. Para incluirlas:`,
         `1. Consigue las imágenes (formatos: .png, .jpg, .pdf).`,
-        `2. Subilas a tu proyecto Overleaf con esos mismos nombres.`,
-        `3. En el .tex, descomentá las líneas que empiezan con`,
-        `   "% [auto] Figura omitida:" y restaurá el bloque \\begin{figure}.`,
+        `2. Súbelas a tu proyecto Overleaf con esos mismos nombres.`,
+        `3. En el .tex, descomenta las líneas que empiezan con`,
+        `   "% [auto] Figura omitida:" y restaura el bloque \\begin{figure}.`,
       );
     }
 

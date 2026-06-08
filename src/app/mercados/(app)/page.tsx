@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { GraduationCap, FolderSearch, Database, ArrowRight } from 'lucide-react';
+import { GraduationCap, FolderSearch, ArrowRight } from 'lucide-react';
 import { useAuthStore } from '@/stores/mercados/auth-store';
 
 /**
@@ -46,13 +46,9 @@ export default function MercadosHub() {
           cta="Empezar"
           destacado
         />
-        <AccesoCard
-          href="/mercados/datos"
-          icon={<Database className="h-5 w-5" />}
-          titulo="Datos abiertos"
-          desc="INE Bolivia, datos.gob.bo, Google Trends."
-          cta="Explorar"
-        />
+        {/* Card "Datos abiertos" se ocultó del hub porque la página solo
+            muestra "En construcción" y confundía al estudiante. Reactivar
+            cuando se construya la integración real con INE/datos.gob.bo. */}
       </div>
 
       <div className="mk-card mt-8 p-5">
