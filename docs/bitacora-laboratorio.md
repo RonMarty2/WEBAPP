@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-07 (sesión 5: flujo por modalidad + voseo)
+> **Última actualización:** 2026-06-08 (sesión 6: auditoría completa + pre-fill Idea→Mercados + cleanup)
 
 ---
 
@@ -269,6 +269,53 @@ para mantener calidad y no saturar el contexto.
 
 ## §4 Decisiones clave (orden cronológico inverso)
 
+### 2026-06-08 (sesión 6) — Pre-fill premium + auditoría completa + cleanup
+
+**Lo que se construyó:**
+- **Pre-llenado de título Idea→Mercados para plan Pro** (`e28f9ec`): cuando un
+  estudiante Pro/Elite aprieta "Siguiente paso" en el reporte de Idea, el
+  formulario "Nueva investigación" de Mercados ya llega con el título cargado;
+  para Estándar llega vacío (alumnos de cátedra del dueño aprenden a mano).
+  Nuevo hook `src/lib/auth/usePlan.ts` con cache 60s + helper `esPremium()`;
+  roles admin/docente cuentan como Pro por defecto para que el dueño pueda
+  evaluar la experiencia premium sin cambiar de cuenta. `SiguienteModulo`
+  acepta prop `tituloContexto` y lo arrastra vía `?titulo=&desde=` solo si
+  premium. Mercados lee los params con `useSearchParams` y muestra hint
+  violeta "Título tomado desde tu Idea". **Pendiente:** replicar a los otros
+  5 saltos del flujo (Mercados→Estrategia, etc.).
+- **Hook `useMaestroActivo` ampliado** para exponer `modalidad`. Ya lo usaban
+  los 5 reportes de la sesión 5; ahora también la evaluación final de
+  Finanzas.
+
+**Auditoría completa (2 agentes Explore en paralelo):**
+- Mapa exhaustivo de todas las rutas y features por módulo.
+- Informe de puntos a mejorar con severidades.
+
+**Fixes de auditoría (`cfdd141`):**
+- **voseo en READMEs de paquetes LaTeX**: los ZIPs que descarga el estudiante
+  traían "Instalá / Abrí / Compilá / Entrá / Seleccioná / Descomentá / Restaurá /
+  Subilas". Reemplazado por tuteo neutro. Archivos: `paquete-latex-pg/route.ts`,
+  `paquete-latex/route.ts`.
+- **CVE: `ADMIN_JWT_SECRET` con fallback hardcodeado**: `/api/admin/auth` y
+  `/api/admin/auth/check` caían en `"laboratorio-academico-super-secret-key-2024"`
+  si la env faltaba — cualquiera con acceso al repo podía firmar sesiones admin
+  en un entorno mal configurado. Ahora ambos devuelven 503 con mensaje claro si
+  la variable no está o tiene <16 caracteres.
+- **"Datos abiertos" del sidebar Mercados oculto**: la página solo mostraba
+  "En construcción 🚧" y confundía como feature roto. Sacada del nav lateral
+  y del hub. Ruta `/mercados/datos` sigue existiendo para no romper bookmarks.
+- **CLAUDE.md limpio de módulos fantasma**: el archivo listaba Axiom, Lumen,
+  Mentor, Núcleo y Laboratorio como "módulos del producto" — ninguno existe en
+  `src/app/`. Cuando una nueva sesión los leía y trataba de usarlos, se rompía.
+  Reemplazado por la tabla real: 3 generadores (Scribe, PG, Conectado) + 7
+  educativos + infraestructura. Se agregaron las rutas `/api/{módulo}/*` y
+  `/api/maestro/*` que faltaban; se eliminó la sección `/api/axiom/*`.
+
+**Finanzas cerrado con SiguienteModulo (`d92851a`):**
+- El simulador financiero terminaba sin decir a dónde ir; los otros 6 módulos
+  sí lo hacen. Agregado al final de `evaluacion-final.tsx`. Lee modalidad
+  del maestro activo; sin maestro cae al default (Defensa al final).
+
 ### 2026-06-07 (sesión 5) — Flujo por modalidad + limpieza de voseo
 
 - **Mapa de flujo por modalidad** (`6071246`): cierra el bucle "¿y ahora
@@ -295,14 +342,34 @@ para mantener calidad y no saturar el contexto.
   (14 archivos con voseo en `src/lib/prompts/`) en otra tanda — esos
   instruyen a la IA, no se ven directo.
 
-### Pendiente activo (que arrancamos en esta sesión)
-- ⬜ **Pre-llenado de título entre módulos para plan Pro**: cuando el
-  estudiante con plan `pro` aprieta "Siguiente paso" desde el reporte
-  de Idea, al llegar a Mercados el formulario "Nueva investigación"
-  ya debe traer el título cargado. Para plan `estandar` (los alumnos
-  de cátedra del usuario), debe llegar vacío para que aprendan el
-  proceso a mano. La decisión: NO agregar nada al admin — gating por
-  el campo `plan` que ya existe en `auth.ts`.
+### Pendientes activos (post-sesión 6)
+- ⬜ **Replicar pre-llenado a los 5 saltos restantes** del flujo
+  (Mercados→Estrategia, Estrategia→Marketing, etc.). Solo está hecho
+  Idea→Mercados. Cada salto requiere: (a) pasar `tituloContexto` al
+  `SiguienteModulo` del módulo origen y (b) leer `?titulo=&desde=` en
+  la página "Mis ..." del módulo destino.
+- ⬜ **Panel docente real** — el agujero más grande del segundo público.
+  Hoy el docente ve la misma vista del estudiante. Necesita: "Mis
+  alumnos" (con su progreso), corregir/dar feedback con rúbrica,
+  calendario de entregas. Sin esto, la plataforma sirve para vender
+  como SaaS pero no como herramienta de cátedra del dueño.
+- ⬜ **Pago automático** (Tigo Money / QR / Stripe webhook). Hoy todo
+  es manual: estudiante sube comprobante → admin aprueba a mano.
+- ⬜ **Pricing por módulo individual** en `/pago`. La arquitectura ya
+  lo soporta (cada módulo funciona sin Proyecto Maestro), pero `/pago`
+  solo ofrece "el SaaS entero".
+- ⬜ **PDF directo desde el Generador Conectado** (hoy solo .tex y ZIP
+  Overleaf, el estudiante tiene que abrir Overleaf).
+- ⬜ **Limpiar voseo de prompts del backend** (14 archivos en
+  `src/lib/prompts/`) — instruyen a la IA, no se ven directo, pero
+  contradicen las propias reglas anti-voseo del prompt.
+- ⬜ **Reactivar `/mercados/datos`** cuando se construya la integración
+  real con INE / datos.gob.bo / Google Trends. Hoy la nav lo oculta.
+- ⬜ **Errores silenciados** (`.catch(() => {})`) en varios formularios
+  de los módulos — el estudiante cree que guardó pero no.
+- ⬜ **Accesibilidad** — agregar `aria-label` y `alt` (solo 6 instancias
+  en todo el código).
+- ⬜ **36 `console.log`** regados — limpieza pre-deploy a producción.
 
 ### 2026-06-07 (sesión 4) — Descubribilidad, IA en herramientas y formatos oficiales
 - **Hub `/modulos` + bloque "Tu camino" en `/dashboard`** (`b0cb21c`): el dashboard
