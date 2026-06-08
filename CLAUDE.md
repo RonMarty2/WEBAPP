@@ -16,10 +16,12 @@ estudiantes generan **monografías**, **proyectos de grado** y se preparan para
 - **Base de datos:** Supabase (PostgreSQL) — con fallback in-memory + disk (`.store/data.json`)
 - **Auth:** Google OAuth + JWT (librería `jose`)
 - **PDF:** pdf-parse + jsPDF + ZIP (jszip) para Overleaf
-- **IA Principal:** Groq → `llama-3.3-70b-versatile`
-- **IA Fallback 1:** Anthropic → `claude-haiku-4-5-20251001`
+- **IA Principal:** Anthropic → `claude-haiku-4-5-20251001`
+- **IA Fallback 1:** Google Gemini → `gemini-2.5-flash`
 - **IA Fallback 2:** OpenAI → `gpt-4o-mini`
-- **Otros proveedores soportados:** Google Gemini, Mistral, DeepSeek, xAI, Cohere, Together AI, Perplexity, LM Studio Local
+- **IA Fallback final:** Groq → `llama-3.3-70b-versatile`
+- **Otros proveedores soportados:** Mistral, DeepSeek, xAI, Cohere, Together AI, Perplexity, LM Studio Local
+- **Timeouts:** todas las llamadas a IA usan `AbortSignal.timeout(50_000)` para no exceder los 60s de Vercel y dejar margen para fallback
 - **Export:** LaTeX → Overleaf → PDF
 - **Deploy pendiente:** Vercel
 
@@ -146,7 +148,7 @@ ACCESO: Solo servidor (API routes). NUNCA desde el cliente.
 - `GET /api/maestro/disponibles` — qué proyectos vincular
 
 ### Servicio de IA compartido
-- `POST /api/ai/asistir` — endpoint único que TODOS los módulos llaman (con cascada Groq → Gemini → Anthropic → OpenAI)
+- `POST /api/ai/asistir` — endpoint único que TODOS los módulos llaman (con cascada Anthropic → Gemini → OpenAI → Groq, ver §"Cascada de IA" abajo)
 
 ### Pagos
 - `POST /api/payments` — crear solicitud (tigo_money | qr_bancario | transferencia)
@@ -176,7 +178,7 @@ ACCESO: Solo servidor (API routes). NUNCA desde el cliente.
 ### IA y prompts
 | Archivo | Función |
 |---------|---------|
-| `aiProvider.ts` | Cascada Groq → Anthropic → OpenAI (+ 8 fallbacks adicionales) |
+| `aiProvider.ts` | Cascada Anthropic → Gemini → OpenAI → Groq (+ 7 fallbacks adicionales) — con `AbortSignal.timeout(50s)` para no exceder runtime serverless |
 | `modelRouter.ts` | Selección de modelo por fase / contexto |
 | `ai/guardian.ts` | Guardián anti-alucinación |
 | `ai/rag-processor.ts` | RAG para documentos del usuario |
@@ -404,14 +406,22 @@ Cualquier cambio que toque estas áreas **DEBE ser autorizado explícitamente** 
 - ❌ Cambiar firma de `llamarIA()` o `llamarIAConConfig()`
 - ❌ Eliminar soporte de cualquiera de los 11 proveedores IA
 
-### Cascada de IA (ORDEN CRÍTICO)
+### Cascada de IA (ORDEN ACTUAL — ver `src/lib/aiProvider.ts:47-52`)
 ```
-NUNCA cambiar este orden:
-1. Groq (llama-3.3-70b-versatile) — principal
-2. Anthropic (claude-haiku-4-5-20251001) — fallback 1
-3. OpenAI (gpt-4o-mini) — fallback final
+1. Anthropic (claude-haiku-4-5-20251001) — principal
+2. Gemini (gemini-2.5-flash) — fallback 1
+3. OpenAI (gpt-4o-mini) — fallback 2
+4. Groq (llama-3.3-70b-versatile) — último recurso
 ```
-Si un proveedor falla, el sistema DEBE reintentar con el siguiente. Si alteras esta cascada, el 30% de usuarios sin Groq perderá acceso.
+Si un proveedor falla, el sistema DEBE reintentar con el siguiente. La
+cascada se reordenó en sesión 6: antes era Groq → Anthropic → OpenAI;
+ahora Anthropic es principal porque su rate-limit gratis es más
+generoso para el volumen actual. Si vas a cambiar el orden, verifica
+en `aiProvider.ts:47` y actualiza esta tabla acá.
+
+**Timeouts:** cada llamada usa `AbortSignal.timeout(50_000)` para no
+exceder los 60s del runtime serverless. Sin esto la cascada nunca
+ejecutaba el fallback cuando un proveedor se colgaba.
 
 ### Validaciones Anti-Alucinación (BLINDADAS)
 - ❌ Cambiar lógica de `detectarAlucinaciones()` sin testing exhaustivo

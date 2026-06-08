@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, Layers, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoMarketing } from '@/types/marketing';
@@ -24,7 +24,15 @@ const ESTADO_LABEL: Record<EstadoMarketing, { txt: string; clase: string }> = {
   completo: { txt: 'Completo', clase: 'bg-emerald-600 text-white' },
 };
 
-export default function MisPlanes() {
+export default function MisPlanesPage() {
+  return (
+    <Suspense fallback={null}>
+      <MisPlanes />
+    </Suspense>
+  );
+}
+
+function MisPlanes() {
   const searchParams = useSearchParams();
   const tituloPrellenado = searchParams.get('titulo') ?? '';
   const desde = searchParams.get('desde');

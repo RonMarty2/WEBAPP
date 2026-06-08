@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, Layers, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoEstrategia } from '@/types/estrategia';
@@ -23,7 +23,15 @@ const ESTADO_LABEL: Record<EstadoEstrategia, { txt: string; clase: string }> = {
   completo: { txt: 'Completo', clase: 'bg-emerald-600 text-white' },
 };
 
-export default function MiAnalisis() {
+export default function MiAnalisisPage() {
+  return (
+    <Suspense fallback={null}>
+      <MiAnalisis />
+    </Suspense>
+  );
+}
+
+function MiAnalisis() {
   const searchParams = useSearchParams();
   const tituloPrellenado = searchParams.get('titulo') ?? '';
   const desde = searchParams.get('desde');

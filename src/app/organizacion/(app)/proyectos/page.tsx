@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, Layers, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoOrganizacion } from '@/types/organizacion';
@@ -25,7 +25,15 @@ const ESTADO_LABEL: Record<EstadoOrganizacion, { txt: string; clase: string }> =
   completo: { txt: 'Completo', clase: 'bg-emerald-600 text-white' },
 };
 
-export default function MisProyectos() {
+export default function MisProyectosPage() {
+  return (
+    <Suspense fallback={null}>
+      <MisProyectos />
+    </Suspense>
+  );
+}
+
+function MisProyectos() {
   const searchParams = useSearchParams();
   const tituloPrellenado = searchParams.get('titulo') ?? '';
   const desde = searchParams.get('desde');

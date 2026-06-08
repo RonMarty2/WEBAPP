@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, Layers, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoDefensa } from '@/types/defensa';
@@ -22,7 +22,15 @@ const ESTADO_LABEL: Record<EstadoDefensa, { txt: string; clase: string }> = {
   completo: { txt: 'Completo', clase: 'bg-emerald-600 text-white' },
 };
 
-export default function MisDefensas() {
+export default function MisDefensasPage() {
+  return (
+    <Suspense fallback={null}>
+      <MisDefensas />
+    </Suspense>
+  );
+}
+
+function MisDefensas() {
   const searchParams = useSearchParams();
   const tituloPrellenado = searchParams.get('titulo') ?? '';
   const desde = searchParams.get('desde');

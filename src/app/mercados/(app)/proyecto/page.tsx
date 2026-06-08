@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, FolderSearch, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoProyecto } from '@/types/mercados';
@@ -24,7 +24,18 @@ const ESTADO_LABEL: Record<EstadoProyecto, { txt: string; clase: string }> = {
   completo: { txt: 'Completo', clase: 'bg-emerald-600 text-white' },
 };
 
-export default function MisInvestigaciones() {
+// Wrapper que envuelve el componente real en <Suspense> porque
+// useSearchParams() requiere boundary explícito en Next.js 16 strict
+// para que la página pueda generarse estáticamente.
+export default function MisInvestigacionesPage() {
+  return (
+    <Suspense fallback={null}>
+      <MisInvestigaciones />
+    </Suspense>
+  );
+}
+
+function MisInvestigaciones() {
   const searchParams = useSearchParams();
   // Si llegamos desde otro módulo (ej. Idea) con ?titulo=...&desde=idea,
   // abrimos el formulario "Nueva" ya pre-llenado. Solo lo verán los

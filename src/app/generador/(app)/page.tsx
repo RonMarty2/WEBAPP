@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Plus, FolderGit2, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { ProyectoMaestro } from '@/types/maestro';
@@ -23,7 +23,15 @@ const DESDE_LABEL: Record<string, string> = {
   defensa: 'tu preparación de defensa',
 };
 
-export default function GeneradorHub() {
+export default function GeneradorHubPage() {
+  return (
+    <Suspense fallback={null}>
+      <GeneradorHub />
+    </Suspense>
+  );
+}
+
+function GeneradorHub() {
   const searchParams = useSearchParams();
   const tituloPrellenado = searchParams.get('titulo') ?? '';
   const desde = searchParams.get('desde');

@@ -466,6 +466,11 @@ async function callOpenAIFormat(
   const res = await fetch(endpoint, {
     method: "POST",
     headers,
+    // Timeout duro de 50s. Vercel mata las funciones a 60s; si la API tarda
+    // 90s el contenedor muere SIN llegar a probar el siguiente proveedor
+    // en la cascada. 50s deja 10s de margen para que el catch arme la
+    // siguiente llamada.
+    signal: AbortSignal.timeout(50_000),
     body: JSON.stringify({
       model,
       messages: [{ role: "system", content: system }, { role: "user", content: user }],
@@ -496,6 +501,7 @@ async function callAnthropic(
       "anthropic-version": "2023-06-01",
       "Content-Type": "application/json",
     },
+    signal: AbortSignal.timeout(50_000), // Ver comentario en callOpenAICompatible
     body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: [{ role: "user", content: user }] }),
   });
   if (!res.ok) {
@@ -544,6 +550,7 @@ async function callGemini(
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(50_000), // Ver comentario en callOpenAICompatible
     body: JSON.stringify({
       system_instruction: { parts: [{ text: system }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
@@ -638,6 +645,11 @@ async function callGeminiWithGrounding(
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    // Grounding (Google Search) tarda mas que las llamadas normales — hasta
+    // 90s segun la auditoria. Ya hay otra ruta (analizar-observacion) que
+    // documenta esto y usa Gemini SIN grounding. Si aqui se llega y el
+    // tiempo es critico, fallar rapido y dejar que el caller decida.
+    signal: AbortSignal.timeout(55_000),
     body: JSON.stringify({
       system_instruction: { parts: [{ text: system }] },
       contents: [{ role: "user", parts: [{ text: user }] }],
