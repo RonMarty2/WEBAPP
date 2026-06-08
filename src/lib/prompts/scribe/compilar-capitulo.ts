@@ -41,7 +41,7 @@ La línea redundante del markdown debe DESAPARECER.
 
 🚨 #2-BIS — JAMÁS NUMERES SECCIONES MANUALMENTE.
 LaTeX numera automáticamente con \\section, \\subsection, \\subsubsection.
-Si vos escribís un número adentro, queda doble:
+Si escribes un número adentro, queda doble:
 
   MAL:   \\section{3.2. Tipo de investigación}    → sale "3.0.2 3.2. Tipo..."
   MAL:   \\subsection{1.4 Justificación}          → sale "1.0.4 1.4 Justificación"
@@ -52,15 +52,15 @@ Si vos escribís un número adentro, queda doble:
   BIEN:  \\subsubsection{Concepto teórico}
 
 Si el markdown del estudiante dice "## 3.2. Tipo de investigación",
-convertilo a \\subsection{Tipo de investigación} (sin el "3.2.").
+conviértelo a \\subsection{Tipo de investigación} (sin el "3.2.").
 
 🚨 #2-TER — TABLAS COMPLETAS, SIEMPRE CON HEADER.
 TODA tabla debe tener fila de encabezado. NUNCA generes una tabla con
 filas de datos pero sin header. Si el markdown fuente tiene una tabla
-sin header, agregá un header genérico ("Concepto | Definición" / etc.).
+sin header, agrega un header genérico ("Concepto | Definición" / etc.).
 
 Si la tabla tiene "Nota.", "Fuente:" o "Elaboración propia" al final,
-ponelos DESPUÉS del \\end{table} con \\par y \\textit{}, NO dentro de
+ponlos DESPUÉS del \\end{table} con \\par y \\textit{}, NO dentro de
 la tabla. Ejemplo:
 
   \\begin{table}[H]
@@ -77,7 +77,7 @@ tablas. LaTeX inserta automáticamente "Cuadro N.M" antes del caption
 gracias al preámbulo. Tu trabajo:
 
   ✅ En el caption: NO escribas "Tabla 2.1:" ni "Cuadro 2.1:" al inicio.
-     Solo escribí la descripción.
+     Solo escribe la descripción.
   ✅ En el texto del cuerpo cuando hagas referencia inline:
      "Como muestra el Cuadro 2.1..."  (NO "Como muestra la Tabla 2.1...")
      "Los datos del Cuadro 4.3 indican..."
@@ -148,12 +148,12 @@ Tablas markdown ( |col1|col2| ):
     Tabla normal, sin envolturas. Caben sobradas en página vertical.
 
   NIVEL 2 — Tabla de 4 columnas o 3 con texto medio (~50 chars/celda):
-    Envolvé en \\begin{adjustbox}{width=\\textwidth,center}...\\end{adjustbox}
-    + agregá \\small antes del \\begin{tabular}.
+    Envuélvela en \\begin{adjustbox}{width=\\textwidth,center}...\\end{adjustbox}
+    + agrega \\small antes del \\begin{tabular}.
 
   NIVEL 3 — Tabla de 5+ columnas O cualquier tabla con celdas de texto
             largo (>80 chars por celda):
-    USÁ MODO LANDSCAPE (página rotada 90°). El paquete \`pdflscape\` ya
+    USA MODO LANDSCAPE (página rotada 90°). El paquete \`pdflscape\` ya
     está cargado en el preámbulo. Estructura:
 
       \\begin{landscape}
@@ -222,7 +222,7 @@ Para el RESUMEN EJECUTIVO o BIBLIOGRAFÍA:
 las agrega antes de tu contenido. Solo devuelve el TEXTO convertido.
 
 Caso especial bibliografía: si tu input es una lista de referencias,
-envolvelas en:
+envuélvelas en:
 
 \\begin{hangparas}{1.27cm}{1}
 <cada referencia en su propio párrafo, con \\& escapado>
@@ -236,7 +236,7 @@ Devuelve SOLO el código LaTeX del capítulo. SIN bloques markdown
 \`\`\`latex. SIN comentarios. SIN explicaciones. Texto LaTeX puro
 listo para ser concatenado con otros caps.
 
-Si te quedás sin espacio (límite de tokens), prefiere terminar la
+Si te quedas sin espacio (límite de tokens), prefiere terminar la
 oración actual antes que cortar. NO resumas las últimas secciones —
 si dudas, sigue copiando literal hasta donde puedas.`;
 
@@ -256,9 +256,9 @@ export function buildCompilarCapituloUserPrompt(input: CompilarCapituloInput): s
   return [
     `═══ ${tipoTexto}: ${input.titulo} ═══`,
     ``,
-    `Convertí el siguiente contenido markdown a LaTeX limpio siguiendo TODAS las reglas del sistema.`,
+    `Convierte el siguiente contenido markdown a LaTeX limpio siguiendo TODAS las reglas del sistema.`,
     `NO incluyas preámbulo. Empieza directo con \\chapter{} o \\section*{}.`,
-    `Recordá: 100% del contenido, limpio de marcadores, caracteres escapados.`,
+    `Recuerda: 100% del contenido, limpio de marcadores, caracteres escapados.`,
     ``,
     `--- CONTENIDO MARKDOWN ---`,
     input.contenidoMd,

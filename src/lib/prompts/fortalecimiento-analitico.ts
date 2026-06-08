@@ -135,7 +135,7 @@ de datos. SIEMPRE deben ser sustantivos genéricos del eje:
   ✅ ylabel={Millones USD}    ✅ ylabel={Porcentaje (%)}    ✅ ylabel={Unidades}
   ❌ xlabel={2026}    ❌ xlabel={2020}    ❌ ylabel={500}
   ❌ xlabel={Soya}    ❌ xlabel={Variación}
-Si copiás un AÑO o NÚMERO específico como xlabel/ylabel/title, ES UN ERROR.
+Si copias un AÑO o NÚMERO específico como xlabel/ylabel/title, ES UN ERROR.
 Los valores numéricos van EXCLUSIVAMENTE en \\addplot coordinates {...}.
 El texto del title también debe ser descriptivo de la figura completa, NO
 una fecha o cifra suelta.

@@ -29,8 +29,8 @@ variante UCATEC de 7 fuerzas) del Capítulo III del Proyecto de Grado.
 Tu trabajo es analizar cada una de las 7 fuerzas competitivas del rubro
 y zona del proyecto con prosa académica profunda, citando a Porter
 (2008) como autor del modelo y a fuentes sectoriales bolivianas para
-los datos del sector. Identificá competidores REALES por tipo (no
-inventes nombres) y vinculá cada fuerza al proyecto explícitamente.
+los datos del sector. Identifica competidores REALES por tipo (no
+inventes nombres) y vincula cada fuerza al proyecto explícitamente.
 
 Recibes:
 1. [CONTEXTO DEL PROYECTO] — Idea, subtipo, ubicación, título.
@@ -104,7 +104,7 @@ A continuación, una sección por cada una de las 7 fuerzas:
 
 ANÁLISIS (5 a 8 párrafos):
 
-Cubrí (adaptá la densidad al rubro):
+Cubre (adapta la densidad al rubro):
 
   - Capital mínimo requerido para entrar al rubro en Bolivia.
     Estimación con base en información de la industria. ¿Es barrera
@@ -128,7 +128,7 @@ Cubrí (adaptá la densidad al rubro):
 
   - Acceso a tecnología propietaria si aplica.
 
-Cerrá con vinculación al proyecto: dada la altura de las barreras,
+Cierra con vinculación al proyecto: dada la altura de las barreras,
 ¿qué tan amenazante es la entrada de competidores nuevos? ¿En cuánto
 tiempo el proyecto debería construir barreras propias?
 
@@ -160,7 +160,7 @@ de cierre regulatorios (cancelación NIT, baja SEPREC, finiquito CNS).
 
 (Análisis 4-6 párrafos + tabla + interpretación.)
 
-Cubrí: políticas sectoriales activas, programas de fomento (BDP,
+Cubre: políticas sectoriales activas, programas de fomento (BDP,
 PRO-BOLIVIA, ProBolivia), controles de precios si aplican, subsidios
 cruzados, normativa promulgada recientemente que afecte al rubro,
 proyectos de ley en discusión que podrían afectar.
@@ -170,8 +170,8 @@ proyectos de ley en discusión que podrían afectar.
 (Análisis 6 a 9 párrafos — esta fuerza es habitualmente la MÁS
 DENSA del modelo + tabla + interpretación.)
 
-Aquí identificás los competidores REALES del rubro en la ubicación del
-proyecto. Mínimo 3-5 competidores nominales SI los conocés con certeza
+Aquí identificas los competidores REALES del rubro en la ubicación del
+proyecto. Mínimo 3-5 competidores nominales SI los conoces con certeza
 razonable; si no, descripción tipológica detallada:
 
   ✓ "Operan en la zona dos cadenas nacionales con presencia en
@@ -184,8 +184,8 @@ razonable; si no, descripción tipológica detallada:
   ✗ "Cafetería La Moderna, La Esquinita y El Buen Sabor" (nombres
      inventados).
 
-Cubrí: número de competidores (datos de SEPREC/FUNDEMPRESA si los
-conocés), concentración (¿hay líderes claros o atomización?), tasa de
+Cubre: número de competidores (datos de SEPREC/FUNDEMPRESA si los
+conoces), concentración (¿hay líderes claros o atomización?), tasa de
 crecimiento del rubro (¿pastel creciente o estancado?), diferenciación
 entre competidores, costos fijos del rubro (alto costo fijo → guerra
 de precios), barreras de salida (que retienen competidores zombi),
@@ -222,7 +222,7 @@ proyecto y vender directo al cliente final?).
 
 (Análisis 4-6 párrafos + tabla + interpretación.)
 
-Identificá productos/servicios que satisfacen la misma necesidad del
+Identifica productos/servicios que satisfacen la misma necesidad del
 cliente por vías diferentes al rubro del proyecto. Para cada
 sustituto: ¿cuán cerca está en función?, ¿cuán cerca está en precio?,
 ¿tendencia de adopción del sustituto?, ¿qué tan rápido podría
@@ -253,14 +253,14 @@ PESTEL anterior: ¿hay coherencia entre macro y micro?
 COMPETIDORES — CÓMO TRATARLOS
 ═══════════════════════════════════════════════════════════════
 
-Si CONOCÉS nombres reales de competidores del rubro con certeza
-razonable (cadenas nacionales, empresas conocidas), mencionalos. Si
-NO los conocés con certeza, NO inventes — usá descriptores
+Si CONOCES nombres reales de competidores del rubro con certeza
+razonable (cadenas nacionales, empresas conocidas), menciónalos. Si
+NO los conoces con certeza, NO inventes — usa descriptores
 tipológicos detallados que mantengan información útil sobre el
 panorama competitivo (número aproximado, escala relativa, ubicación
 geográfica, antigüedad típica, formalidad/informalidad).
 
-Mantén consistencia tipológica entre las 7 fuerzas: si decís "tres
+Mantén consistencia tipológica entre las 7 fuerzas: si dices "tres
 cadenas grandes" en 3.2.4, no pongas "más de quince actores" en 3.2.5
 para la misma categoría.
 
@@ -313,7 +313,7 @@ PROHIBICIONES ESPECÍFICAS
 - ❌ Omitir cita a Porter en cada fuerza (al menos 1 referencia al
   autor del modelo por fuerza).
 
-- ❌ Terminar con conclusión del Cap. III completo — solo cerrás
+- ❌ Terminar con conclusión del Cap. III completo — solo cierras
   Porter. Matrices, encuesta y demanda van después.
 `.trim();
 

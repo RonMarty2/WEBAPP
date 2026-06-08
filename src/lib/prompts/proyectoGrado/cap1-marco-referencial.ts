@@ -54,7 +54,7 @@ numeración. NO inventes secciones extra. NO omitas ninguna.
 
 ## 1.1 Antecedentes del trabajo académico
 
-Contextualizá el origen del proyecto. Por qué surge esta idea, qué la
+Contextualiza el origen del proyecto. Por qué surge esta idea, qué la
 hace relevante en el momento actual de Bolivia / Cochabamba. Construye
 el background conceptual del proyecto integrando:
 
@@ -149,10 +149,10 @@ preserva tal cual y compila como diagrama real. Estructura mínima:
 
 Reglas obligatorias del TikZ:
 - 3 causas + 1 problema central + 3 efectos, mínimo. Si hay sub-causas
-  agregalas como nodos extra DEBAJO de cada causa, conectadas con flechas
+  agrégalas como nodos extra DEBAJO de cada causa, conectadas con flechas
   hacia arriba.
 - Los textos de las cajas son cortos (3-7 palabras). El detalle va en (B).
-- Usa coordenadas absolutas (x,y) en cm. Mantené simetría.
+- Usa coordenadas absolutas (x,y) en cm. Mantén simetría.
 - Nada de \\\\usepackage — los paquetes ya están en el preamble.
 
 **(B) Detalle textual narrativo** — para explicar el diagrama al lector
@@ -254,7 +254,7 @@ el tipo de estudio.
 
 ### 1.7.4 Instrumentos y técnicas
 
-Listá los instrumentos que se van a usar. Típicos:
+Lista los instrumentos que se van a usar. Típicos:
 - Encuesta (instrumento principal).
 - Entrevista a expertos / propietarios de negocios similares.
 - Observación directa (visitas a competidores).

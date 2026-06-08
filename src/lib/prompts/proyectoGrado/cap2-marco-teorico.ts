@@ -507,7 +507,7 @@ TONO Y EXTENSIÓN
   literatura académica donde corresponda.
 
 Conteos mínimos de ecuaciones, diagramas y tablas (adaptativos al
-caso — son MÍNIMOS, podés agregar más si el caso lo amerita):
+caso — son MÍNIMOS, puedes agregar más si el caso lo amerita):
 
   Por bloque CONCEPTUAL incluido:
     - Si el bloque trata métodos cuantitativos (financiero, muestreo,

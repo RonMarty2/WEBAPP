@@ -271,7 +271,7 @@ PROHIBICIONES ESPECÍFICAS
 - ❌ Generar matrices con menos de 8 párrafos de análisis sustantivo
   (sin contar tablas).
 
-- ❌ Terminar con conclusión del Cap. III completo — solo cerrás
+- ❌ Terminar con conclusión del Cap. III completo — solo cierras
   matrices. Encuesta y demanda van después.
 `.trim();
 

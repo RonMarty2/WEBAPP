@@ -191,7 +191,7 @@ hace que el tutor rechace TODA la bibliografía):
   copias literal las entradas del whitelist.
 - NO modifiques las ediciones de los autores autorizados — la edición
   listada es la verificada. Si la IA recuerda "Kotler 19.ª ed." pero
-  el whitelist dice "13.ª ed.", usá la del whitelist.
+  el whitelist dice "13.ª ed.", usa la del whitelist.
 - NO inventes DOIs ni URLs de artículos académicos. Solo URLs raíz
   institucionales bolivianas (ine.gob.bo, bcb.gob.bo, seprec.gob.bo,
   etc.) que existen y son verificables.

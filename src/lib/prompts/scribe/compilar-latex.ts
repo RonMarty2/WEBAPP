@@ -71,7 +71,7 @@ ELIMINAR si lo encuentras:
 - Líneas con solo caracteres de separación: ─── / ════ / ---- / ____
 - "Falta el título completo del reporte" y frases tipo "Referencias observadas
   que requieren verificación" — son notas internas del sistema
-- DOI placeholders como "10.xxxx/..." → reemplazar por URL real si la conocés
+- DOI placeholders como "10.xxxx/..." → reemplazar por URL real si la conoces
   o omitir la línea si es una cita inventada
 - Texto entre brackets que sea instrucción al estudiante: "[Insertar foto X]",
   "[Reemplazar por dato real]"
@@ -118,7 +118,7 @@ Si el contenido del Cap I empieza con líneas como:
   CAPÍTULO PRIMERO
 
 → NO conviertas esas líneas a otro \\chapter, \\section, etc. El \\chapter{}
-   YA lo agregás vos al inicio. Eliminá la línea de título redundante del
+   YA lo agrega el sistema al inicio. Elimina la línea de título redundante del
    contenido fuente para que el TOC no muestre dos veces el mismo capítulo.
 
 🚨 REGLA #1 — PROHIBIDO RESUMIR (LA MÁS IMPORTANTE).
@@ -130,7 +130,7 @@ Mediremos esto al evaluar tu output.
 🎯 OBJETIVO DE EXTENSIÓN: 50-70 páginas (norma UMSS Posgrado FCE).
 Si el contenido fuente suma ~25 mil palabras, tu .tex debe producir entre
 50 y 70 páginas al compilar en pdflatex con 12pt + doble espacio + márgenes
-2.54cm. NO comprimas para hacer "más corto" — al contrario, expandí lo
+2.54cm. NO comprimas para hacer "más corto" — al contrario, expande lo
 necesario para llegar al rango.
 
 Procedimiento OBLIGATORIO antes de generar el .tex:
@@ -319,7 +319,7 @@ PREÁMBULO OBLIGATORIO (no omitir paquetes, no reordenar)
 
 REGLAS CRÍTICAS DEL PREÁMBULO:
 
-1. COPIÁ el preámbulo EXACTAMENTE como aparece abajo según el motor.
+1. COPIA el preámbulo EXACTAMENTE como aparece abajo según el motor.
    NO omitas paquetes. NO reordenes. NO sustituyas. Si un paquete está
    en la lista, va. Punto.
 
@@ -328,9 +328,9 @@ REGLAS CRÍTICAS DEL PREÁMBULO:
    explícito. fontspec con pdfLaTeX falla con "Fatal Package fontspec
    Error: requires XeTeX or LuaTeX".
 
-3. PAQUETES OBLIGATORIOS sin importar el motor (si los omitís, el .tex
+3. PAQUETES OBLIGATORIOS sin importar el motor (si los omites, el .tex
    no compila):
-   - ragged2e: para \\justifying. Si NO incluís ragged2e, NUNCA uses
+   - ragged2e: para \\justifying. Si NO incluyes ragged2e, NUNCA uses
      \\justifying en el cuerpo. (LaTeX Error: \\justifying undefined)
    - hyperref: para enlaces, debe ir al FINAL del preámbulo.
    - inputenc + fontenc (solo pdfLaTeX): para acentos correctos.
@@ -346,12 +346,12 @@ Si MOTOR LATEX = XeLaTeX (solo si está explícitamente pedido):
 \\usepackage{geometry}
 \\geometry{letterpaper, margin=2.54cm}
 \\usepackage{setspace}
-% Interlineado: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% Interlineado: usa el comando indicado en [DECISIONES TIPOGRÁFICAS]
 % - formato_umss = guia_1_posgrado → \\doublespacing
 % - formato_umss = guia_2_cespedes → \\onehalfspacing
 \\doublespacing
 \\usepackage{ragged2e}
-% Alineación: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% Alineación: usa el comando indicado en [DECISIONES TIPOGRÁFICAS]
 % - formato_umss = guia_1_posgrado → \\raggedright (sin justificar, norma UMSS Posgrado)
 % - formato_umss = guia_2_cespedes → \\justify (margen justificado, variante Céspedes)
 \\raggedright
@@ -396,12 +396,12 @@ Si MOTOR LATEX = pdfLaTeX:
 \\usepackage{geometry}
 \\geometry{letterpaper, margin=2.54cm}
 \\usepackage{setspace}
-% Interlineado: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% Interlineado: usa el comando indicado en [DECISIONES TIPOGRÁFICAS]
 % - formato_umss = guia_1_posgrado → \\doublespacing
 % - formato_umss = guia_2_cespedes → \\onehalfspacing
 \\doublespacing
 \\usepackage{ragged2e}
-% Alineación: usá el comando indicado en [DECISIONES TIPOGRÁFICAS]
+% Alineación: usa el comando indicado en [DECISIONES TIPOGRÁFICAS]
 % - formato_umss = guia_1_posgrado → \\raggedright (sin justificar, norma UMSS Posgrado)
 % - formato_umss = guia_2_cespedes → \\justify (margen justificado, variante Céspedes)
 \\raggedright
@@ -478,28 +478,28 @@ decide según el flag [incluir_caratula_umss] del bloque [DATOS DE CARÁTULA]
 CARÁTULA UMSS — CONDICIONAL (según incluir_caratula_umss)
 ═══════════════════════════════════════════════════════════════
 
-Mirá el bloque [DATOS DE CARÁTULA] que recibís arriba. Tiene un flag llamado
+Mira el bloque [DATOS DE CARÁTULA] que recibes arriba. Tiene un flag llamado
 \`incluir_caratula_umss\` que puede valer "true" o "false".
 
 ────────────────────────────────────────────────────────────────
 CASO A — incluir_caratula_umss = true (default UMSS Posgrado)
 ────────────────────────────────────────────────────────────────
 
-Generá la carátula oficial UMSS USANDO EXACTAMENTE el template LaTeX que
-sigue, sustituyendo los datos del bloque [DATOS DE CARÁTULA]. Insertala
+Genera la carátula oficial UMSS USANDO EXACTAMENTE el template LaTeX que
+sigue, sustituyendo los datos del bloque [DATOS DE CARÁTULA]. Insértala
 INMEDIATAMENTE después de \\begin{document} y ANTES de \\pagenumbering{roman}.
 
 Reglas:
 - Margen superior carátula: 2.54 cm (ya viene del preámbulo).
-- Carátula SIN número de página → usá \\thispagestyle{empty}.
-- Logo: usá \\IfFileExists{logos/umss.png}{...}{...} para mostrar
+- Carátula SIN número de página → usa \\thispagestyle{empty}.
+- Logo: usa \\IfFileExists{logos/umss.png}{...}{...} para mostrar
   un placeholder de texto si el archivo del logo no está disponible
   en el ZIP de Overleaf.
 - Después de la carátula viene la página de \\pagenumbering{roman}
   con el índice (i, ii, iii...).
 - El Capítulo I arranca en \\pagenumbering{arabic} reiniciando en 1.
 
-TEMPLATE LATEX EXACTO (copialo tal cual, reemplazando solo los campos
+TEMPLATE LATEX EXACTO (cópialo tal cual, reemplazando solo los campos
 entre << >> con los datos del bloque [DATOS DE CARÁTULA]):
 
 ═══ LAYOUT OFICIAL UMSS POSGRADO ═══
@@ -652,11 +652,11 @@ Y reemplaza el marcador en el cuerpo por código TikZ con esta estructura:
 \\addcontentsline{lof}{figure}{Figura X.X. Árbol de problemas}
 
 Reemplaza "Consecuencia 1", "PROBLEMA CENTRAL", "Causa 1", etc. con el contenido
-exacto del marcador. NUMERÁ la figura coherentemente con las demás (X.X).
-Si hay menos de 3 consecuencias o causas en el marcador, ajustá el código
+exacto del marcador. NUMERA la figura coherentemente con las demás (X.X).
+Si hay menos de 3 consecuencias o causas en el marcador, ajusta el código
 omitiendo nodos según corresponda (preservando la simetría visual).
 
-ELIMINÁ el marcador [[ARBOL_PROBLEMAS]] del .tex final — debe quedar solo
+ELIMINA el marcador [[ARBOL_PROBLEMAS]] del .tex final — debe quedar solo
 el código TikZ.
 
 ═══════════════════════════════════════════════════════════════
@@ -687,7 +687,7 @@ Mapeo APA 7 → comandos LaTeX para la monografía UMSS:
 % Estos dos parches resuelven defectos visibles del PDF UMSS:
 %   1. Eliminar el \\vspace*{50pt} que la clase report mete por defecto
 %      ANTES de cada \\chapter — sin este parche aparecen ~6cm de blanco
-%      antes del título de cada capítulo, INCLUSO si configurás titlespacing.
+%      antes del título de cada capítulo, INCLUSO si configuras titlespacing.
 %   2. UMSS Guía 1 (Posgrado FCE) y Guía 2 (Céspedes) exigen NUMERACIÓN
 %      ARÁBIGA (1, 2, 3 ...) — NO romana. Las secciones son 1.1, 1.2,
 %      las sub-secciones 1.1.1, hasta 5 niveles (1.1.1.1.1).
@@ -841,7 +841,7 @@ No dejar símbolos Markdown visibles:
 - ---
 
 ⚠️ EXCEPCIÓN CRÍTICA — BLOQUES LATEX RAW:
-Si en el contenido fuente encontrás un bloque de código tipo:
+Si en el contenido fuente encuentras un bloque de código tipo:
   \`\`\`latex
   \\begin{figure}[H]
     \\centering
@@ -1154,9 +1154,9 @@ REGLAS DE CARÁTULA — RECORDATORIO
 La inclusión de carátula depende del flag \`incluir_caratula_umss\` que
 viene en el bloque [DATOS DE CARÁTULA].
 
-- Si incluir_caratula_umss = true  → generá la carátula UMSS oficial usando
+- Si incluir_caratula_umss = true  → genera la carátula UMSS oficial usando
   el template definido en la sección "CARÁTULA UMSS — CONDICIONAL" más arriba.
-- Si incluir_caratula_umss = false → arrancá directamente con
+- Si incluir_caratula_umss = false → arranca directamente con
   \\pagenumbering{roman} + \\tableofcontents, sin titlepage.
 
 En CUALQUIER caso NO uses placeholders sin reemplazar (todo entre << >>
@@ -1322,8 +1322,8 @@ export function buildContextoLatex(datos: ContextoLatex): string {
   lineas.push(`Tamaño de papel: Carta`);
   lineas.push(`Márgenes: 2.54 cm en los cuatro lados`);
   lineas.push(`formato_umss: ${formatoUmss}`);
-  lineas.push(`Interlineado: ${interlineadoLegible} → en LaTeX usá ${interlineadoLatex}`);
-  lineas.push(`Alineación del cuerpo: ${alineacionLegible} → en LaTeX usá ${alineacionLatex}`);
+  lineas.push(`Interlineado: ${interlineadoLegible} → en LaTeX usa ${interlineadoLatex}`);
+  lineas.push(`Alineación del cuerpo: ${alineacionLegible} → en LaTeX usa ${alineacionLatex}`);
   lineas.push(`Tipo de letra: ${tipoLetra}`);
   lineas.push(`Motor LaTeX: ${motorLatex}`);
   lineas.push(`Idioma: Español`);

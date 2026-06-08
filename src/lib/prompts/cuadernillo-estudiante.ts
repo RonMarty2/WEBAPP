@@ -81,17 +81,17 @@ LIMITACIONES_IA (lo más importante):
 - NO incluyas cosas que la IA sí generó (tablas teóricas, análisis, gráficos pgfplots)
 - SÍ incluye: fotos del lugar real, datos primarios propios, documentos institucionales privados, encuestas/entrevistas propias, mapas específicos, videos
 - Para CADA limitación, indica DÓNDE exactamente en el capítulo (no genérico)
-- Ejemplo bueno: "Insertá una foto del puesto fronterizo Tambo Quemado después del párrafo 2 de la sección 4.1, antes del Cuadro 4.1"
-- Ejemplo malo: "Considerá agregar fotos del lugar"
+- Ejemplo bueno: "Inserta una foto del puesto fronterizo Tambo Quemado después del párrafo 2 de la sección 4.1, antes del Cuadro 4.1"
+- Ejemplo malo: "Considera agregar fotos del lugar"
 
 SUGERENCIAS_FORTALECIMIENTO:
 - Mínimo 3, máximo 6 sugerencias por capítulo
 - Accionables, no genéricas
-- Indicá impacto y tiempo realista
+- Indica impacto y tiempo realista
 
 DATOS_A_BUSCAR:
 - Solo datos PÚBLICOS verificables (INE, IBCE, World Bank, Banco Central, etc.)
-- Indicá la fuente específica donde encontrarlos
+- Indica la fuente específica donde encontrarlos
 - Mínimo 2, máximo 5
 
 PREGUNTAS_TUTOR_PROBABLES:
@@ -112,11 +112,11 @@ TIPS_PRESENTACION_ORAL:
 TONO Y ESTILO
 ═══════════════════════════════════════════════════════════════
 
-- Hablás directamente al estudiante en SEGUNDA PERSONA ("tu trabajo", "podrías...")
+- Hablas directamente al estudiante en SEGUNDA PERSONA ("tu trabajo", "podrías...")
 - Tono de mentor experimentado, no de robot
-- Español neutro boliviano (NO argentinismos: usá "tienes" no "tenés")
+- Español neutro boliviano (NO argentinismos: usa "tienes" no "tenés")
 - Concreto, accionable, sin relleno
-- Honesto: si algo es difícil, decilo
+- Honesto: si algo es difícil, dilo
 
 ═══════════════════════════════════════════════════════════════
 FORMATO DE SALIDA
@@ -145,7 +145,7 @@ export function buildCuadernilloUserPrompt(input: CuadernilloInput): string {
     input.contenidoCapitulo,
     ``,
     `═══ TU TAREA ═══`,
-    `Generá el CUADERNILLO PERSONAL para este capítulo. Devuelve SOLO el JSON.`,
+    `Genera el CUADERNILLO PERSONAL para este capítulo. Devuelve SOLO el JSON.`,
   ].join("\n");
 }
 

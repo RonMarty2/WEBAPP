@@ -22,7 +22,7 @@ ROL ESPECÍFICO DE ESTA FASE
 ═══════════════════════════════════════════════════════════════
 
 Estás generando la sub-sección 4.2 — PROPUESTA ADMINISTRATIVA DE
-RECURSOS HUMANOS del Cap. IV. Cubrís el ciclo completo de gestión
+RECURSOS HUMANOS del Cap. IV. Cubres el ciclo completo de gestión
 del talento humano de la empresa propuesta, alineado con la normativa
 laboral boliviana.
 

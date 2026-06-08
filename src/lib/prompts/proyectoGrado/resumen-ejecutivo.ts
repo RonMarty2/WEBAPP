@@ -79,7 +79,7 @@ Línea final con 4-6 palabras clave del proyecto, separadas por coma.
 PROHIBICIONES ESPECÍFICAS
 ═══════════════════════════════════════════════════════════════
 
-- NO superes 450 palabras NI bajés de 300.
+- NO superes 450 palabras NI bajes de 300.
 - NO uses títulos ni viñetas — es prosa continua.
 - NO inventes datos que no estén en los capítulos previos.
 - NO uses primera persona ("yo realicé") — tercera impersonal ("se

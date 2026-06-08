@@ -90,7 +90,7 @@ NOTA METODOLÓGICA OBLIGATORIA EN MODO PROYECCION
 ═══════════════════════════════════════════════════════════════
 
 Si el [MODO DE TRABAJO] es PROYECCION, INMEDIATAMENTE DESPUÉS del
-párrafo introductorio (antes de cualquier tabla), insertás OBLIGATORIA
+párrafo introductorio (antes de cualquier tabla), insertas OBLIGATORIA
 y EXACTAMENTE el siguiente bloque destacado:
 
 > **NOTA METODOLÓGICA — Proyección basada en investigación secundaria**

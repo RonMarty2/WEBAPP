@@ -304,9 +304,9 @@ PROHIBICIONES ESPECÍFICAS
 - ❌ Cifras sin cita o sustento. Cada porcentaje del embudo debe
   trazarse a fuente o supuesto explícito.
 
-- ❌ Mezclar unidades — si hablás de "personas atendidas", todas las
-  tablas en personas; si hablás de "transacciones", todas en
-  transacciones; si hablás de "hogares activos", todas en hogares.
+- ❌ Mezclar unidades — si hablas de "personas atendidas", todas las
+  tablas en personas; si hablas de "transacciones", todas en
+  transacciones; si hablas de "hogares activos", todas en hogares.
 
 - ❌ Presentar la demanda como certeza ("100.000 personas comprarán
   seguro"). Son ESTIMACIONES con margen de incertidumbre — usar

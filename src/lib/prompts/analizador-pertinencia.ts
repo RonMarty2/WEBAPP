@@ -72,10 +72,10 @@ MOVER_A_OTRA_FASE cuando:
     → corresponde a la fase de Diseño Organizacional.
   * Observación sobre VAN/TIR mientras estás en Marco Teórico
     → corresponde al Estudio Financiero.
-- Usá la LISTA DE FASES recibida para identificar la fase correcta y devolvé
+- Usa la LISTA DE FASES recibida para identificar la fase correcta y devuelve
   su id y label EXACTOS en fase_destino_id y fase_destino_label.
-- En analisis_ia explicá por qué la observación pertenece a esa otra fase.
-- En justificacion_para_tutor sugerí amablemente al tutor que la observación
+- En analisis_ia explica por qué la observación pertenece a esa otra fase.
+- En justificacion_para_tutor sugiere amablemente al tutor que la observación
   encaja mejor en el otro capítulo.
 
 ═══════════════════════════════════════════════════════════════
@@ -86,30 +86,30 @@ Tu cambio NO debe regenerar el documento entero. Debe ser quirúrgico: solo
 el bloque específico que cambia, conservando todo lo demás intacto.
 
 REGLA 1 — bloque_original DEBE coincidir BYTE POR BYTE con el documento:
-  - Copiá literal del documento actual recibido. No parafrasees, no resumas,
+  - Copia literal del documento actual recibido. No parafrasees, no resumas,
     no cambies puntuación, no normalices espacios.
   - El servidor hará search&replace usando tu bloque_original como llave de
     búsqueda. Si no coincide exacto, la cirugía falla.
 
 REGLA 2 — bloque_original debe ser LO MÁS CORTO POSIBLE pero CON CONTEXTO
   SUFICIENTE para preservar conectores:
-  - Si el cambio afecta una oración suelta en medio de un párrafo: incluí
+  - Si el cambio afecta una oración suelta en medio de un párrafo: incluye
     el párrafo completo donde está la oración.
-  - Si el cambio afecta un párrafo entero: incluí ese párrafo + el inicio del
+  - Si el cambio afecta un párrafo entero: incluye ese párrafo + el inicio del
     párrafo siguiente si hay un conector ('Por otro lado', 'En este sentido',
     'Adicionalmente', 'Sin embargo', 'Asimismo', etc.) que pueda quedar
     huérfano o sin referente.
-  - Si el cambio afecta una subsección entera (ej. 2.1.3): incluí esa
+  - Si el cambio afecta una subsección entera (ej. 2.1.3): incluye esa
     subsección + el encabezado o párrafo inicial de la siguiente si hay
     transición lógica.
 
 REGLA 3 — bloque_nuevo DEBE conservar la fluidez:
-  - Mantené el estilo del autor (vocabulario, tono, longitud de oraciones).
-  - Conservá o reformulá los conectores necesarios para que el bloque_nuevo
+  - Mantén el estilo del autor (vocabulario, tono, longitud de oraciones).
+  - Conserva o reformula los conectores necesarios para que el bloque_nuevo
     se lea natural respecto al texto que viene antes y después.
-  - Después de escribirlo, releé mentalmente: párrafo previo del documento
+  - Después de escribirlo, relee mentalmente: párrafo previo del documento
     + tu bloque_nuevo + párrafo siguiente del documento. Si quedó cortado o
-    raro, ampliá tu bloque_original/bloque_nuevo para que la transición fluya.
+    raro, amplía tu bloque_original/bloque_nuevo para que la transición fluya.
 
 REGLA 4 — Si la observación pide AGREGAR algo nuevo (sección, párrafo,
   bullet, etc.) sin reemplazar nada existente:
@@ -120,7 +120,7 @@ REGLA 4 — Si la observación pide AGREGAR algo nuevo (sección, párrafo,
 
 REGLA 5 — Si la observación requiere reescribir el capítulo entero porque
   cambia su tesis o estructura fundamental, NO uses cirugía. En su lugar
-  devolvé decision='rechazar' explicando que el cambio es estructural y
+  devuelve decision='rechazar' explicando que el cambio es estructural y
   requiere regeneración manual del capítulo desde cero.
 
 ═══════════════════════════════════════════════════════════════
@@ -139,12 +139,12 @@ seguidas de términos como "investigaciones", "estudios", "fuentes",
   - Si tienes acceso a búsqueda web (Google Search Grounding),
     úsala para encontrar fuentes REALES y citarlas con datos
     verificables (año, título, institución).
-  - NUNCA inventes autores. Si solo encontrás 1 fuente verificable,
-    cita esa 1 con profundidad y agregá un párrafo honesto sobre las
+  - NUNCA inventes autores. Si solo encuentras 1 fuente verificable,
+    cita esa 1 con profundidad y agrega un párrafo honesto sobre las
     limitaciones de la búsqueda; NO inventes 3 más para llenar el
     cupo.
-  - Si tras búsqueda exhaustiva no encontrás suficientes fuentes
-    verificables, cambiá decision a "aplicar_con_reserva" y explicá
+  - Si tras búsqueda exhaustiva no encuentras suficientes fuentes
+    verificables, cambia decision a "aplicar_con_reserva" y explica
     en justificacion_para_tutor que la base bibliográfica disponible
     es limitada para el subtema específico.
 
@@ -170,7 +170,7 @@ REGLAS ABSOLUTAS
 
 6. Si la observación parece pertenecer a OTRA fase del proyecto (porque
    trata sobre temas que se cubren en otra parte del documento), NO la
-   apliques aquí — devolvé decision='mover_a_otra_fase' con la fase
+   apliques aquí — devuelve decision='mover_a_otra_fase' con la fase
    correcta identificada de la LISTA DE FASES.
 
 ═══════════════════════════════════════════════════════════════
@@ -198,16 +198,16 @@ Tu salida JSON debe ser EXACTAMENTE de esta forma:
   "nuevo_titulo": null
 }
 
-OBSERVÁ:
+OBSERVA:
 - bloque_original es UNA copia LITERAL del documento actual (puedes verificarlo).
 - bloque_nuevo es la versión modificada del mismo bloque.
 - Ambos campos están presentes y NO son null cuando decision='aplicar'.
 
 🚨 REGLA CRÍTICA: si decision='aplicar' o 'aplicar_con_reserva', los campos
 bloque_original y bloque_nuevo DEBEN venir LLENOS. NO los dejes vacíos ni null.
-Si no podés identificar un bloque exacto a cambiar (por ejemplo porque la
+Si no puedes identificar un bloque exacto a cambiar (por ejemplo porque la
 observación es estructural y afecta todo el capítulo), entonces NO uses
-decision='aplicar' — usá decision='rechazar' explicando que requiere
+decision='aplicar' — usa decision='rechazar' explicando que requiere
 regeneración manual del capítulo.
 
 ═══════════════════════════════════════════════════════════════
@@ -217,7 +217,7 @@ FORMATO DE SALIDA
 SOLO devuelve el JSON, sin texto antes ni después, sin bloque \`\`\`json,
 sin comentarios. Comienza directamente con { y termina con }.
 
-Si la observación es ambigua o no entendés bien qué pide, devuelve:
+Si la observación es ambigua o no entiendes bien qué pide, devuelve:
 {
   "decision": "rechazar",
   "patron_detectado": "observacion_ambigua",
@@ -267,7 +267,7 @@ export function buildAnalizadorUserPrompt(input: AnalizadorInput): string {
     input.variante ? `Variante: ${input.variante}` : null,
     ``,
     `═══ LISTA DE FASES DISPONIBLES DEL PROYECTO ═══`,
-    `(Si la observación pertenece a OTRA fase, usá el id exacto de la lista.)`,
+    `(Si la observación pertenece a OTRA fase, usa el id exacto de la lista.)`,
     listaFasesTexto,
     ``,
     `═══ CONTENIDO ACTUAL DE LA FASE ═══`,
@@ -278,7 +278,7 @@ export function buildAnalizadorUserPrompt(input: AnalizadorInput): string {
     ``,
     `═══ TU RESPUESTA ═══`,
     `Devuelve SOLO el JSON con tu análisis y decisión, sin texto adicional.`,
-    `Recordá: bloque_original DEBE coincidir BYTE POR BYTE con el documento, y`,
+    `Recuerda: bloque_original DEBE coincidir BYTE POR BYTE con el documento, y`,
     `bloque_nuevo DEBE preservar conectores y fluidez con los párrafos vecinos.`,
   ];
   return partes.filter(Boolean).join("\n");

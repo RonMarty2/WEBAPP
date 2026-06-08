@@ -130,13 +130,13 @@ cual. Estructura típica de cadena lineal (adaptá según el rubro):
 
 Reglas obligatorias:
 - Inicio (verde) → procesos (azul) → control de calidad (rombo naranja) →
-  empaque (azul) → fin (rojo). Adaptá los nombres al rubro real.
+  empaque (azul) → fin (rojo). Adapta los nombres al rubro real.
 - Cada nodo con texto corto (3-5 palabras, salto de línea \\\\\\\\ si hace falta).
 - Nada de \\\\usepackage — los paquetes ya están en el preamble.
-- Si el flujo es de SERVICIOS (no producción), usá nodos: solicitud →
+- Si el flujo es de SERVICIOS (no producción), usa nodos: solicitud →
   validación → atención → entrega del servicio → seguimiento.
 
-**(B) Tabla de entradas y salidas** — listá cada etapa con su entrada
+**(B) Tabla de entradas y salidas** — lista cada etapa con su entrada
 y su salida, para complementar el diagrama:
 
 | Etapa | Entrada | Salida | Tiempo estimado |

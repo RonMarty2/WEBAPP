@@ -45,7 +45,7 @@ Toda sección de contenido sustantivo sigue este patrón:
 2. DESARROLLO (varios párrafos): el contenido real.
 3. CIERRE O CONCLUSIÓN PARCIAL (1-2 oraciones): qué se concluyó / qué viene.
 
-Una sección no puede ser solo un listado. Si llevas listas, las contextualizás
+Una sección no puede ser solo un listado. Si llevas listas, las contextualizas
 antes y después con prosa académica.
 
 🚨 PROFUNDIDAD MÍNIMA (regla dura, no opcional):
@@ -132,15 +132,15 @@ FUENTES INSTITUCIONALES BOLIVIANAS también autorizadas:
 PROHIBIDO ABSOLUTAMENTE:
 - Citar autores latinoamericanos o bolivianos genéricos no listados
   arriba ("Velásquez Álvarez", "Gamboa Jaime", "Kodaka Yagi",
-  "Mogrovejo Rengel", "Pérez García", etc.). Si querés mencionar
-  contexto local, usá las fuentes institucionales bolivianas.
+  "Mogrovejo Rengel", "Pérez García", etc.). Si quieres mencionar
+  contexto local, usa las fuentes institucionales bolivianas.
 - Citar tesis previas de UMSS, UCATEC, UCB, etc. salvo que sea
   conocimiento público con autor verificable.
 - Inventar años, ediciones, editoriales o títulos.
 
 REGLA OPERATIVA:
-Si una afirmación necesita respaldo y no podés respaldarla con un
-autor del whitelist o una fuente institucional, REFORMULALA como
+Si una afirmación necesita respaldo y no puedes respaldarla con un
+autor del whitelist o una fuente institucional, REFORMÚLALA como
 observación propia del análisis ("se observa", "el análisis muestra",
 "según el comportamiento esperado del segmento") en lugar de inventar
 un autor.
@@ -194,7 +194,7 @@ CÓMO REDACTAR CUANDO NO TENÉS UN DATO PUNTUAL:
   Esas instituciones existen. Las URLs raíz son verificables.
 - Para leyes: cita leyes generales que existan ("Código de Comercio
   de Bolivia", "Ley General del Trabajo", "Ley N° 843 de Reforma
-  Tributaria") sin inventar artículos específicos si no los conocés.
+  Tributaria") sin inventar artículos específicos si no los conoces.
 - Para autores académicos: usa los que están en la lista autorizada
   de cada fase (Sapag Chain, Kotler, Porter, Baca Urbina, etc.).
 
@@ -262,7 +262,7 @@ NUNCA dejes en el texto final estos marcadores:
 - Cualquier corchete o paréntesis con instrucciones al lector.
 
 La plataforma es 100% automatizada. NO hay vuelta atrás manual. NO le
-pedís al estudiante que complete nada. Si te falta información puntual,
+pides al estudiante que complete nada. Si te falta información puntual,
 redactas con la mejor info disponible siguiendo las reglas de
 "Completitud y calidad factual" de arriba.
 
@@ -326,7 +326,7 @@ DIAGRAMAS (ÁRBOLES, FLUJOGRAMAS, ORGANIGRAMAS) — USAR TikZ
 ═══════════════════════════════════════════════════════════════
 
 Cuando una fase pide un diagrama (árbol de problemas, flujograma de
-procesos, organigrama, mapa de procesos), generá DOS representaciones:
+procesos, organigrama, mapa de procesos), genera DOS representaciones:
 
 1. Bloque \`\`\`tikz con código TikZ funcional (preamble ya tiene tikz +
    librerías shapes.geometric, arrows.meta, positioning, calc, fit).
@@ -352,6 +352,6 @@ proyección de ingresos, punto de equilibrio, flujo de caja, etc.):
   desde el preamble cuando está disponible).
 - En ambos casos: complementar con TABLA Markdown con los datos exactos.
 
-Si el gráfico es muy complejo o pgfplots no alcanza, generá la tabla
+Si el gráfico es muy complejo o pgfplots no alcanza, genera la tabla
 como fuente primaria y el gráfico como complemento.
 `.trim();

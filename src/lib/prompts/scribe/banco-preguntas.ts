@@ -79,7 +79,7 @@ Verifican si el estudiante REALMENTE HIZO el trabajo y entiende sus decisiones.
 EJEMPLOS para un cap. de Metodología:
 - "Justificaste un muestreo no probabilístico por conveniencia: ¿qué riesgos de
    sesgo asumiste con esa decisión y cómo los mitigaste?"
-- "Tu período de análisis va de 2010 a 2024: ¿por qué arrancás en 2010 y no en
+- "Tu período de análisis va de 2010 a 2024: ¿por qué arrancas en 2010 y no en
    un año anterior o posterior?"
 
 ═══════════════════════════════════════════════════════════════

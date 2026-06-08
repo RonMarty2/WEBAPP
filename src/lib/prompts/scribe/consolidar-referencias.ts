@@ -146,7 +146,7 @@ Si hay dos versiones del mismo documento:
 
 PASO 2.5 — CRUCE OBLIGATORIO CITAS-TEXTO ↔ LISTA DE REFERENCIAS
 
-🚨 ESTE PASO ES CRÍTICO. Si lo omitís, la bibliografía final tendrá
+🚨 ESTE PASO ES CRÍTICO. Si lo omites, la bibliografía final tendrá
 referencias huérfanas (en la lista pero nunca citadas) y citas fantasma
 (citadas en el texto pero faltantes en la lista). Ambos errores son
 penalizados en revisión académica UMSS.
@@ -163,20 +163,20 @@ A) Extraé MENTALMENTE todas las citas inline que aparezcan en el cuerpo
      • (Institución, año)            → (Aduana Nacional de Bolivia, 2024)
      • (Institución [Sigla], año)    → (Instituto Boliviano de Comercio Exterior [IBCE], 2023)
 
-B) Comparalo con la lista de trabajo de REFERENCIAS_ETAPA:
+B) Compáralo con la lista de trabajo de REFERENCIAS_ETAPA:
 
    B.1) Si una cita del texto NO tiene entrada en la lista → es una CITA
-        FANTASMA. Buscala en las REFERENCIAS_ETAPA de TODOS los capítulos.
-        Si la encontrás, agregala. Si no, anotala en "Referencias
+        FANTASMA. Búscala en las REFERENCIAS_ETAPA de TODOS los capítulos.
+        Si la encuentras, agrégala. Si no, anótala en "Referencias
         observadas" como faltante — la IA NUNCA debe inventarla.
 
    B.2) Si una referencia de la lista NO tiene cita en ningún capítulo →
-        es una REFERENCIA HUÉRFANA. ELIMINALA de la lista final.
+        es una REFERENCIA HUÉRFANA. ELIMÍNALA de la lista final.
         Excepción: si es un texto institucional o normativo central del
         marco teórico que aparece como cita indirecta (sin paréntesis),
-        conservalo. En duda, eliminá.
+        consérvalo. En duda, elimina.
 
-C) Reportá en el "Resumen editorial de consolidación" cuántas citas
+C) Reporta en el "Resumen editorial de consolidación" cuántas citas
    fantasma encontraste y cuántas huérfanas eliminaste.
 
 PASO 3 — Depuración de referencias no usadas

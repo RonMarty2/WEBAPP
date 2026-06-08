@@ -89,7 +89,7 @@ multidimensional, citando a Kotler y Keller (2016) sobre los cuatro
 criterios principales (geográfico, demográfico, psicográfico,
 conductual).
 
-PRIMERO determiná cuántos segmentos requiere el proyecto. La gran
+PRIMERO determina cuántos segmentos requiere el proyecto. La gran
 mayoría de proyectos requiere UN SOLO segmento de cliente final;
 algunos modelos específicos requieren DOS o más. Casos típicos:
 
@@ -104,8 +104,8 @@ algunos modelos específicos requieren DOS o más. Casos típicos:
     (clientes + proveedores estratégicos), proyectos B2B2C
     (empresa intermediaria + consumidor final), etc.
 
-Aplicá DOS segmentos solo si el modelo de negocio lo justifica;
-en caso contrario, aplicá UNO.
+Aplica DOS segmentos solo si el modelo de negocio lo justifica;
+en caso contrario, aplica UNO.
 
 SEGMENTO PRINCIPAL (cliente final del proyecto):
 
@@ -122,11 +122,11 @@ SEGMENTO PRINCIPAL (cliente final del proyecto):
 
 SEGMENTO SECUNDARIO (solo si el modelo lo requiere):
 
-  - Si el proyecto es una plataforma bilateral: caracterizá también
+  - Si el proyecto es una plataforma bilateral: caracteriza también
     el lado opuesto del mercado con las mismas dimensiones.
   - Si el proyecto depende críticamente de un grupo de proveedores
     o aliados específicos cuya disposición a participar es
-    pre-condición de la operación: caracterizalos también.
+    pre-condición de la operación: caracterízalos también.
   - En todos los demás casos: omitir este segmento.
 
 Cada variable concreta y cuantificable. 3-5 párrafos sustantivos por
@@ -162,7 +162,7 @@ DEFINICIÓN DE VARIABLES (párrafo "donde:"):
 
 APLICACIÓN AL CASO:
 
-Para cada segmento (A y/o B según aplique), presentá el cálculo
+Para cada segmento (A y/o B según aplique), presenta el cálculo
 concreto con el N específico, citando la fuente de N. Por ejemplo:
 
 \`\`\`latex
