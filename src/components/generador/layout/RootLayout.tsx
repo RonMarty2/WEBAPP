@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Sparkles, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/stores/generador/auth-store';
+import { WidgetMaestro } from '@/components/compartido/WidgetMaestro';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
@@ -26,9 +27,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </span>
         </Link>
         <div className="flex flex-shrink-0 items-center gap-3">
+          <WidgetMaestro />
           {user && <span className="gen-muted hidden text-xs sm:inline">{user.name ?? user.email}</span>}
           <button onClick={cerrar} className="gen-btn-ghost flex items-center gap-1.5 px-2.5 py-1.5 text-xs">
-            <LogOut className="h-3.5 w-3.5" />
+            <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="hidden sm:inline">Salir</span>
           </button>
         </div>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, FileText, Download, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, FileText, Download, Check, Sparkles, Copy, Printer } from 'lucide-react';
 import type { ProyectoMercados } from '@/types/mercados';
 import { generarReporteMarkdown } from '@/lib/mercados/reporte';
 import type { PreguntaParaAnalisis, RespuestaCruda } from '@/lib/mercados/analisis';
@@ -103,9 +103,23 @@ export default function EtapaReporte() {
       </p>
 
       {/* Acciones */}
-      <div className="mt-5 flex flex-wrap gap-3">
+      <div className="mt-5 flex flex-wrap gap-3 print:hidden">
         <button onClick={descargar} className="mk-btn-primary flex items-center gap-2 px-5 py-2.5 text-sm font-medium">
-          <Download className="h-4 w-4" /> Descargar reporte (.md)
+          <Download className="h-4 w-4" aria-hidden="true" /> Descargar reporte (.md)
+        </button>
+        <button
+          onClick={() => { navigator.clipboard.writeText(markdown).catch(() => {}); }}
+          className="mk-btn-ghost flex items-center gap-2 px-5 py-2.5 text-sm font-medium"
+          title="Copiar el reporte completo como markdown al portapapeles"
+        >
+          <Copy className="h-4 w-4" aria-hidden="true" /> Copiar
+        </button>
+        <button
+          onClick={() => window.print()}
+          className="mk-btn-ghost flex items-center gap-2 px-5 py-2.5 text-sm font-medium"
+          title="Abre el diálogo de impresión. Elige 'Guardar como PDF' como destino."
+        >
+          <Printer className="h-4 w-4" aria-hidden="true" /> Imprimir / PDF
         </button>
         {!completado ? (
           <button onClick={marcarCompleto} disabled={marcando} className="mk-btn-ghost flex items-center gap-2 px-5 py-2.5 text-sm font-medium disabled:opacity-50">

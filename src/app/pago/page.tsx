@@ -224,7 +224,7 @@ function PagoContent() {
                 ))}
               </div>
               <a
-                href="https://wa.me/59100000000?text=Hola%2C%20quiero%20comprar%20un%20m%C3%B3dulo%20individual%20del%20Laboratorio%20Acad%C3%A9mico%20PRO"
+                href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_VENTAS || "").replace(/[^0-9]/g, "") || "59100000000"}?text=Hola%2C%20quiero%20comprar%20un%20m%C3%B3dulo%20individual%20del%20Laboratorio%20Acad%C3%A9mico%20PRO`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, background: "#7c3aed", color: "white", textDecoration: "none", fontSize: 13, fontWeight: 700 }}
