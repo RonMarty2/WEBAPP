@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 6: Waves 1+2+3 docente, voseo backend, a11y, errores silenciados, PDF directo)
+> **Última actualización:** 2026-06-08 (sesión 7: auditoría 360° + cierre de 14 CRÍTICOS de seguridad/funcionales/performance)
 
 ---
 
@@ -270,6 +270,176 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-08 (sesión 7) — Auditoría 360° del SaaS + cierre de 14 CRÍTICOS
+
+**Contexto:** el usuario pidió auditoría completa post-deploy de la sesión
+6. Se ejecutaron 4 agentes Explore en paralelo (seguridad, bugs
+funcionales, performance/calidad, producto/negocio). Resultado: 4
+informes exhaustivos con 50+ hallazgos. Esta sesión cierra los más
+graves explotables o que rompen UX.
+
+**Commits de esta tanda:**
+- `7915eed` — middleware + 10 endpoints admin sin guard
+- `cd94121` — IMPORTANTES de seguridad (demo, generate, exports, health, codigos)
+- `cc5d554` — bugs funcionales críticos (modalidad casing, print CSS, consentimiento)
+- `5f5df94` — timeouts IA + Suspense + CLAUDE.md actualizado
+
+**Cerrados (CRÍTICOS):**
+
+*Seguridad:*
+- ⚠️ **Middleware NO se cargaba** porque vivía en `src/proxy.ts` (Next 16
+  marca `proxy.ts` como el nuevo convencional pero el manifest estaba
+  vacío). Renombrado a `src/middleware.ts` con export `middleware`.
+  Verificado en `.next/server/middleware-manifest.json` que ahora SÍ
+  carga. Esto restablece los headers de seguridad (CSP,
+  X-Frame-Options, Referrer-Policy, etc.) que estaban inertes en
+  producción.
+- ⚠️ **10 endpoints `/api/admin/*` sin `requireAdmin()`** — cualquier
+  anónimo en producción podía: convertirse en admin (`usuarios`),
+  borrar proyectos (`seed-cleanup`), gastar tokens IA del SaaS
+  (`test-prompt-unifranz`), modificar lista de universidades, leer
+  historial completo de cualquier usuario, listar monografías,
+  estadísticas internas, descargar .tex de cualquier monografía,
+  crear/borrar tipos de proyecto y fases, modificar preguntas de
+  calibración. Los 10 endpoints ahora hacen `await requireAdmin()`.
+  En los que tienen GET legítimamente público (universities,
+  project-types, calibration-questions porque el wizard
+  `/projects/new` los lee), solo se gateda POST/PUT/DELETE.
+- ⚠️ **`/api/auth/demo` en producción** — un visitante podía POST
+  `{ role: "docente" }` y obtener una sesión docente válida. Ahora
+  se bloquea en prod salvo que el body incluya un token que coincida
+  con `DEMO_INVITE_TOKEN` env var.
+- ⚠️ **`/api/generate`** aceptaba `userId` y `plan` arbitrarios del
+  body/query. Atacante podía agotar créditos ajenos o leer créditos
+  de otro user. Ahora `requireAuth()` + `user.id`/`user.plan` de la
+  sesión. PUT (configurar API keys de IA) ahora `requireAdmin()`.
+- ⚠️ **`/api/export/{pdf,latex}`** sin auth. El primero renderiza HTML
+  arbitrario con Chrome headless en server — vector de SSRF y DoS.
+  Ahora `requireAuth()`.
+- ⚠️ **`/api/health?detail=full`** exponía email + role de TODOS los
+  usuarios y metadata de TODOS los proyectos. PII + mapa para atacar.
+  El health básico (solo flags y conteos) sigue público; `detail=full`
+  ahora degrada silenciosamente a básico si no es admin.
+- ⚠️ **`/api/docente/codigos` usaba `Math.random`** (predecible).
+  Atacante con tiempo podía enumerar códigos y vincularse a docentes
+  ajenos. Ahora usa `crypto.randomInt` (CSPRNG).
+- ⚠️ **`/api/auth/callback/google` logueaba email completo** en cada
+  login → PII en Vercel logs + permite enumerar admins. Ahora loguea
+  solo el dominio (activable con `LOG_AUTH_DEBUG=1`).
+
+*Bugs funcionales:*
+- ⚠️ **Casing de modalidades en `/generador`** rompía el flujo. Las
+  etiquetas decían "Proyecto de grado" minúscula pero las claves de
+  `FLUJO_POR_MODALIDAD` son titlecase. Un maestro con esas modalidades
+  caía al FLUJO_DEFAULT (los 8 módulos) en vez del flujo específico.
+  Ahora coinciden + comentario explicando por qué.
+- ⚠️ **CSS de impresión `header[role="banner"]` no matcheaba nada**.
+  El PDF salía con sidebar y nav arriba. Ahora se oculta `<header>` y
+  `<nav>` raíz sin importar el role. Además override de `h-screen
+  w-screen flex-col` que recortaba contenido.
+- ⚠️ **Consentimiento del alumno era 100% cosmético**. El toggle
+  "permitir ver contenido a mi docente" se guardaba pero NINGÚN
+  endpoint lo leía. La promesa de UX en `/docente/alumno/[id]` era
+  falsa. Ahora `/api/docente/alumnos/[id]/proyectos` lee la fila de
+  `docente_consentimientos` y devuelve `consentimiento_ver_contenido`.
+  La UI muestra el aviso correcto (banda verde si está activo, mismo
+  aviso original si no).
+
+*Performance crítica:*
+- ⚠️ **Llamadas IA sin timeout** — si un proveedor se colgaba 90s,
+  Vercel mataba la función a 60s y la cascada NUNCA pasaba al
+  siguiente. Ahora `AbortSignal.timeout(50_000)` en callOpenAICompatible,
+  callAnthropic, callGemini; 55_000 en callGeminiGrounding (es más
+  lenta por la Google Search).
+- ⚠️ **`useSearchParams` sin `<Suspense>` en 6 páginas** — Next 16
+  strict puede romper el build. Envueltas las 6 páginas destino del
+  pre-llenado (mercados, estrategia, marketing, organizacion, defensa,
+  generador) en un wrapper Suspense.
+
+*Documentación:*
+- ⚠️ **CLAUDE.md decía cascada `Groq → Anthropic → OpenAI`** pero el
+  código (línea 47-52 de `aiProvider.ts`) tiene `Anthropic → Gemini
+  → OpenAI → Groq` desde sesión 6. Cualquier IA leyendo CLAUDE.md
+  tomaba decisiones obsoletas. Actualizado el stack + tabla en
+  "Cascada de IA" + librerías clave + nota sobre `AbortSignal.timeout`.
+
+**Mejoras adicionales:**
+- `alumno_universidad` en docente_alumno_vinculos ya no es null
+  hardcoded — se consulta el perfil del alumno en los 6 módulos
+  educativos buscando el primer que tenga universidad llena.
+- `/api/alumno/observaciones` ahora devuelve `docente_nombre` para
+  cada observación (snapshot del perfil idea_perfiles como mejor
+  aproximación). La UI `/mis-observaciones` muestra "De {docente}".
+
+**Hallazgos PENDIENTES (no cerrados esta sesión):**
+
+*Seguridad — IMPORTANTES restantes:*
+- ⬜ Endpoints legacy sin auth: `/api/monografias[/...]`, `/api/citas`,
+  `/api/documentos`, `/api/compilar/[id]`. Son legacy de Scribe;
+  conviene `requireAuth` + ownership check o deprecation.
+- ⬜ Rate limiting global en endpoints de IA (sin Redis es difícil
+  hacerlo bien, pero quemar tokens es un costo real).
+- ⬜ Sanitizar `detail: error.message` en respuestas de DB — revela
+  schema interno (nombres de tablas, columnas, constraints).
+- ⬜ Prompt injection: input del usuario va directo al prompt sin
+  sanitización en `qa`, `route-options`, `edit-phase-section`,
+  `ai/asistir`. Mitigación: longitud máxima + anti-prompt-injection
+  rules en system prompt.
+
+*Funcionales restantes:*
+- ⬜ Observaciones huérfanas si proyecto se borra (proyecto_id sin FK).
+  Cascade delete o flag "proyecto eliminado".
+- ⬜ WidgetMaestro falta en Finanzas y Generador.
+- ⬜ Mercados reporte: SIN botón "Imprimir" ni "Copiar" (inconsistente
+  con los otros 5 reportes).
+- ⬜ Idea reporte usa `tipo_trabajo` propio, los otros 5 reportes usan
+  `maestro?.modalidad`. Estudiantes de Tesis sin maestro activo verán
+  el flujo default (incluye Marketing/Organización) en vez del suyo.
+- ⬜ Listas vacías por error silencioso: `.catch(() => {})` en 30
+  archivos disfraza errores como empty state.
+- ⬜ Doble-submit en `/unirse-docente` muestra "Ya estás vinculado"
+  como error en vez de éxito.
+
+*Performance restantes:*
+- ⬜ `workspace/page.tsx`: 4.605 LOC, 43 useState, 396 inline styles —
+  monolito que rompe React.memo y causa re-renders cascada.
+- ⬜ `dbListAllProyectos()` con `select("*")` JSONB completo: dashboard
+  admin descarga 10-50 MB.
+- ⬜ Fs.writeFileSync sincrono en `persistence.ts` bloquea event loop.
+- ⬜ 89/138 páginas son `'use client'` sin necesidad.
+- ⬜ Zero `React.memo`, zero `focus-visible:` (a11y de teclado nula).
+
+*Producto/negocio:*
+- 🚨 **DISCONNECT pricing**: landing ofrece 6 SKUs (Bs 150-950), API
+  solo conoce `estandar` (150) y `pro` (300). CTAs `?plan=mono-plus`
+  caen silenciosamente en `estandar` → cliente paga Bs 150 esperando
+  Bs 300. ARREGLAR antes de cualquier campaña.
+- 🚨 **WhatsApp placeholder `591-00000000`** sigue hardcodeado en
+  `pago/page.tsx:227`. Mover a `NEXT_PUBLIC_WHATSAPP_VENTAS` env var.
+- ⬜ Persona confusa: landing habla a apurados, dashboard a formativos,
+  panel docente a docentes. Decidir QUÉ producto se vende primero.
+- ⬜ Generador Conectado invisible en landing — el diferenciador más
+  valioso ("tus datos reales, no inventados") está enterrado.
+- ⬜ Panel docente Wave 4: rúbrica + calificación + calendario de
+  entregas. Sin esto, no se le puede cobrar a un docente.
+- ⬜ Voseo argentino residual en Finanzas (15+ archivos del simuladorPRO
+  migrado). Bloqueante de calidad según CLAUDE.md.
+- ⬜ Migraciones SQL pendientes sin runtime check: si despliegas a
+  Vercel sin correrlas, el panel docente falla en silencio.
+- ⬜ Sin cancelación/freeze de plan Pro — si alguien deja de pagar,
+  sigue con acceso indefinido.
+- ⬜ Calidad de código: 261 lint problems (138 `any`, 35 unused,
+  varios react-hooks). No bloqueante, deuda crónica.
+- ⬜ 9 dependencias en package.json sin usar: `@google/generative-ai`,
+  `@hookform/resolvers`, `react-hook-form`, `@radix-ui/react-slot`,
+  `class-variance-authority`, `katex`, `@types/katex`,
+  `react-intersection-observer`, `xlsx`. ~30 MB de node_modules.
+- ⬜ Tests: 1.348 LOC de tests sobre 137.060 LOC de src → <1%. Sin
+  `npm test`, sin CI.
+
+---
+
 
 ### 2026-06-08 (sesión 6 — tanda autónoma final) — Wave 3 docente + 5 mejoras transversales
 
