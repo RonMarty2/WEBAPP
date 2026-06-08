@@ -31,6 +31,7 @@ export default function HerramientaOrganigrama() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   useEffect(() => {
     fetch(`/api/organizacion/proyectos/${params.id}`, { credentials: 'include' })
