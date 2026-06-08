@@ -135,11 +135,12 @@ export default function HerramientaPreguntas() {
               <div className="flex items-start gap-2">
                 <span className="def-accent-soft def-accent-text flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">{i + 1}</span>
                 <select value={q.categoria} onChange={(e) => upd(q.id, { categoria: e.target.value })}
-                  className="def-border rounded border px-2 py-1 text-xs">
+                  className="def-border rounded border px-2 py-1 text-xs"
+                  aria-label="Categoría de la pregunta">
                   {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
                   {!CATEGORIAS.includes(q.categoria) && <option value={q.categoria}>{q.categoria}</option>}
                 </select>
-                <button onClick={() => del(q.id)} className="ml-auto text-slate-300 hover:text-rose-600"><X className="h-4 w-4" /></button>
+                <button onClick={() => del(q.id)} className="ml-auto text-slate-300 hover:text-rose-600" aria-label="Eliminar pregunta"><X className="h-4 w-4" aria-hidden="true" /></button>
               </div>
               <textarea value={q.pregunta} onChange={(e) => upd(q.id, { pregunta: e.target.value })} rows={2} placeholder="Pregunta…"
                 className="def-border mt-2 w-full rounded border bg-white px-2 py-1 text-sm font-medium focus:outline-none" />

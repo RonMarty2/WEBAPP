@@ -138,7 +138,7 @@ export default function HerramientaOrganigrama() {
                       ))}
                     </select>
                   </label>
-                  <button onClick={() => del(n.id)} className="text-slate-300 hover:text-rose-600"><X className="h-4 w-4" /></button>
+                  <button onClick={() => del(n.id)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar cargo"><X className="h-4 w-4" aria-hidden="true" /></button>
                 </div>
               ))}
             </div>

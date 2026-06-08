@@ -223,8 +223,8 @@ export default function HerramientaCalendario() {
                 rows={2} placeholder="Idea o copy de la pieza…"
                 className="mkt-border w-full flex-1 rounded border px-2 py-1 text-sm sm:w-auto"
               />
-              <button onClick={() => del(i)} className="mkt-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
-                <X className="h-4 w-4" />
+              <button onClick={() => del(i)} className="mkt-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600" title="Eliminar" aria-label="Eliminar publicación">
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           ))}

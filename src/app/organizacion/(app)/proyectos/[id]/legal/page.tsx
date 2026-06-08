@@ -134,7 +134,7 @@ export default function HerramientaLegal() {
                   className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium ${ESTADOS.find((s) => s.v === t.estado)?.clase}`}>
                   {ESTADOS.map((s) => <option key={s.v} value={s.v}>{s.txt}</option>)}
                 </select>
-                <button onClick={() => del(i)} className="text-slate-300 hover:text-rose-600"><X className="h-4 w-4" /></button>
+                <button onClick={() => del(i)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar trámite"><X className="h-4 w-4" aria-hidden="true" /></button>
               </div>
             ))}
           </div>

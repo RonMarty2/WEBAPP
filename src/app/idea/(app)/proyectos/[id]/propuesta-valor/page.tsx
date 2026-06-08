@@ -23,6 +23,7 @@ export default function HerramientaPropuestaValor() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   useEffect(() => {
     fetch(`/api/idea/proyectos/${params.id}`, { credentials: 'include' })
@@ -69,14 +70,24 @@ export default function HerramientaPropuestaValor() {
   };
 
   const guardar = async (volver: boolean) => {
-    setGuardando(true); setGuardado(false);
+    setGuardando(true); setGuardado(false); setErrorGuardar('');
     try {
       const res = await fetch(`/api/idea/proyectos/${params.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ propuesta_valor: pv, estado: 'valor' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) router.push(`/idea/proyectos/${params.id}`); }
-    } finally { setGuardando(false); }
+      if (res.ok) {
+        setGuardado(true);
+        if (volver) router.push(`/idea/proyectos/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
+      }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   if (cargando) return <div className="idea-muted py-10 text-center text-sm">Cargando…</div>;
@@ -167,6 +178,9 @@ export default function HerramientaPropuestaValor() {
         <button onClick={() => guardar(false)} disabled={guardando} className="idea-btn-ghost px-5 py-2.5 text-sm font-medium disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
         <button onClick={() => guardar(true)} disabled={guardando} className="idea-btn-primary px-5 py-2.5 text-sm font-medium disabled:opacity-50">Guardar y volver →</button>
         {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
+        )}
       </div>
     </div>
   );
@@ -190,8 +204,8 @@ function Lista({ label, color, items, onChange, placeholder }: {
         {items.map((it, i) => (
           <li key={i} className="flex items-start gap-1.5 text-sm">
             <span className="flex-1">{it}</span>
-            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600">
-              <X className="h-3 w-3" />
+            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600" aria-label={`Eliminar ${it}`}>
+              <X className="h-3 w-3" aria-hidden="true" />
             </button>
           </li>
         ))}

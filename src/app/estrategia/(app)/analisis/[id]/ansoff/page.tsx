@@ -27,6 +27,7 @@ export default function HerramientaAnsoff() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
   const [generandoIA, setGenerandoIA] = useState(false);
 
   useEffect(() => {
@@ -47,14 +48,24 @@ export default function HerramientaAnsoff() {
   const setLista = (key: keyof Ansoff, v: string[]) => setAnsoff((a) => ({ ...a, [key]: v }));
 
   const guardar = async (volver: boolean) => {
-    setGuardando(true); setGuardado(false);
+    setGuardando(true); setGuardado(false); setErrorGuardar('');
     try {
       const res = await fetch(`/api/estrategia/proyectos/${params.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ ansoff }),
       });
-      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
-    } finally { setGuardando(false); }
+      if (res.ok) {
+        setGuardado(true);
+        if (volver) router.push(`/estrategia/analisis/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
+      }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   // Genera iniciativas para los 4 cuadrantes con IA.
@@ -177,8 +188,8 @@ function ListaAnsoff({ label, sub, riesgo, color, items, onChange }: {
         {items.map((it, i) => (
           <li key={i} className="flex items-start gap-1.5 text-sm">
             <span className="flex-1">{it}</span>
-            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600">
-              <X className="h-3 w-3" />
+            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600" aria-label={`Eliminar ${it}`}>
+              <X className="h-3 w-3" aria-hidden="true" />
             </button>
           </li>
         ))}

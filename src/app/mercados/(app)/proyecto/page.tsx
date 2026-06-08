@@ -185,8 +185,9 @@ export default function MisInvestigaciones() {
                   onClick={() => eliminar(p.id)}
                   className="mk-muted flex-shrink-0 rounded-lg p-2 hover:bg-rose-50 hover:text-rose-600"
                   title="Eliminar"
+                  aria-label={`Eliminar investigación ${p.titulo}`}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <Link
                   href={`/mercados/proyecto/${p.id}`}

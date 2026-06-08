@@ -109,7 +109,7 @@ export default function HerramientaBranding() {
             {b.valores.map((v, i) => (
               <span key={i} className="org-accent-soft org-accent-text inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs">
                 {v}
-                <button onClick={() => set('valores', b.valores.filter((_, idx) => idx !== i))} className="rounded p-0.5 hover:bg-white"><X className="h-3 w-3" /></button>
+                <button onClick={() => set('valores', b.valores.filter((_, idx) => idx !== i))} className="rounded p-0.5 hover:bg-white" aria-label={`Eliminar valor ${v}`}><X className="h-3 w-3" aria-hidden="true" /></button>
               </span>
             ))}
           </div>

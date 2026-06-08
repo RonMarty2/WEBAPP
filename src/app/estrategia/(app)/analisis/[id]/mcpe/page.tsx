@@ -155,7 +155,7 @@ export default function HerramientaMCPE() {
                   <div className="flex items-center gap-1">
                     <input value={e.nombre} onChange={(ev) => setNombre(ei, ev.target.value)} className="es-border w-28 rounded border px-1 py-0.5 text-xs" />
                     {mcpe.estrategias.length > 1 && (
-                      <button onClick={() => delEstrategia(ei)} className="text-slate-300 hover:text-rose-600"><X className="h-3 w-3" /></button>
+                      <button onClick={() => delEstrategia(ei)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar estrategia"><X className="h-3 w-3" aria-hidden="true" /></button>
                     )}
                   </div>
                 </th>
@@ -169,7 +169,7 @@ export default function HerramientaMCPE() {
                   <div className="flex items-center gap-1">
                     <span className={`flex-shrink-0 rounded px-1 py-0.5 text-[9px] font-bold ${f.tipo === 'externo' ? 'bg-sky-100 text-sky-700' : 'bg-emerald-100 text-emerald-700'}`}>{f.tipo === 'externo' ? 'EXT' : 'INT'}</span>
                     <input value={f.factor} onChange={(e) => setFactor(fi, { factor: e.target.value })} className="es-border w-full min-w-40 rounded border px-1.5 py-1 text-sm" />
-                    <button onClick={() => delFactor(fi)} className="text-slate-300 hover:text-rose-600"><X className="h-3 w-3" /></button>
+                    <button onClick={() => delFactor(fi)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar factor"><X className="h-3 w-3" aria-hidden="true" /></button>
                   </div>
                 </td>
                 <td className="py-1.5 pr-2">

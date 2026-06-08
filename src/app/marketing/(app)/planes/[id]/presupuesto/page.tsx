@@ -157,7 +157,7 @@ export default function HerramientaPresupuesto() {
                       <td className="py-1.5 pr-2 text-slate-500">{m.ventas.toLocaleString('es-BO')}</td>
                       <td className="py-1.5 pr-2 text-slate-500">{formatBs(m.ingreso)}</td>
                       <td className={`py-1.5 pr-2 font-semibold ${roasOk ? 'text-emerald-600' : 'text-rose-600'}`}>{m.roas.toFixed(2)}×</td>
-                      <td className="py-1.5 pr-2"><button onClick={() => del(i)} className="text-slate-300 hover:text-rose-600"><X className="h-3.5 w-3.5" /></button></td>
+                      <td className="py-1.5 pr-2"><button onClick={() => del(i)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar canal"><X className="h-3.5 w-3.5" aria-hidden="true" /></button></td>
                     </tr>
                   );
                 })}

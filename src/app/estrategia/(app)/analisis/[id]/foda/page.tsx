@@ -179,8 +179,8 @@ function ListaFoda({ label, color, items, onChange }: { label: string; color: st
         {items.map((it, i) => (
           <li key={i} className="flex items-start gap-1.5 text-sm">
             <span className="flex-1">{it}</span>
-            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600">
-              <X className="h-3 w-3" />
+            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600" aria-label={`Eliminar ${it}`}>
+              <X className="h-3 w-3" aria-hidden="true" />
             </button>
           </li>
         ))}

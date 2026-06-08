@@ -112,7 +112,7 @@ export default function HerramientaBCG() {
                   <input type="number" step="0.1" value={u.participacion} onChange={(e) => upd(i, { participacion: parseFloat(e.target.value) || 0 })} className="es-border ml-1 w-16 rounded border px-1.5 py-1 text-sm" />
                 </label>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium text-white ${c.color}`}>{c.nombre}</span>
-                <button onClick={() => del(i)} className="text-slate-300 hover:text-rose-600"><X className="h-4 w-4" /></button>
+                <button onClick={() => del(i)} className="text-slate-300 hover:text-rose-600" aria-label={`Eliminar ${u.nombre || `unidad ${i + 1}`}`}><X className="h-4 w-4" aria-hidden="true" /></button>
               </div>
             );
           })}

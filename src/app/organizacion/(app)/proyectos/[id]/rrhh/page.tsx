@@ -137,7 +137,7 @@ export default function HerramientaRrhh() {
                   </td>
                   <td className="py-1.5 pr-2 text-slate-500">{formatBs(subtotal)}</td>
                   <td className="py-1.5 pr-2 font-medium org-accent-text">{formatBs(conAportes)}</td>
-                  <td className="py-1.5 pr-2"><button onClick={() => delPuesto(i)} className="text-slate-300 hover:text-rose-600"><X className="h-3.5 w-3.5" /></button></td>
+                  <td className="py-1.5 pr-2"><button onClick={() => delPuesto(i)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar puesto"><X className="h-3.5 w-3.5" aria-hidden="true" /></button></td>
                 </tr>
               );
             })}

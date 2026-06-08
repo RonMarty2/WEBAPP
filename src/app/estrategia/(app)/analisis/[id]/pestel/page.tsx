@@ -23,6 +23,7 @@ export default function HerramientaPestel() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   useEffect(() => {
     fetch(`/api/estrategia/proyectos/${params.id}`, { credentials: 'include' })
@@ -51,7 +52,7 @@ export default function HerramientaPestel() {
   };
 
   const guardar = async (volver: boolean) => {
-    setGuardando(true); setGuardado(false);
+    setGuardando(true); setGuardado(false); setErrorGuardar('');
     try {
       const res = await fetch(`/api/estrategia/proyectos/${params.id}`, {
         method: 'PATCH',
@@ -62,7 +63,12 @@ export default function HerramientaPestel() {
       if (res.ok) {
         setGuardado(true);
         if (volver) router.push(`/estrategia/analisis/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
       }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
     } finally {
       setGuardando(false);
     }
@@ -128,6 +134,9 @@ export default function HerramientaPestel() {
           Guardar y volver →
         </button>
         {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
+        )}
       </div>
     </div>
   );
@@ -184,8 +193,8 @@ function Dimension({
                 <option key={e.valor} value={e.valor}>{e.label}</option>
               ))}
             </select>
-            <button onClick={() => onEliminar(i)} className="es-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600">
-              <X className="h-3.5 w-3.5" />
+            <button onClick={() => onEliminar(i)} className="es-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600" aria-label="Eliminar factor">
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </div>
         ))}

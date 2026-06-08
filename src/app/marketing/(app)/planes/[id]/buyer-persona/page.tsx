@@ -219,8 +219,8 @@ function Lista({ label, color, items, onChange, placeholder }: {
         {items.map((it, i) => (
           <li key={i} className="flex items-start gap-1.5 text-sm">
             <span className="flex-1">{it}</span>
-            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600">
-              <X className="h-3 w-3" />
+            <button onClick={() => onChange(items.filter((_, idx) => idx !== i))} className="mt-0.5 rounded p-0.5 text-slate-400 hover:bg-white hover:text-rose-600" aria-label={`Eliminar ${it}`}>
+              <X className="h-3 w-3" aria-hidden="true" />
             </button>
           </li>
         ))}
@@ -232,8 +232,8 @@ function Lista({ label, color, items, onChange, placeholder }: {
           placeholder={placeholder ?? 'Agregar…'}
           className="flex-1 rounded-md border border-white/60 bg-white/70 px-2 py-1 text-xs focus:outline-none"
         />
-        <button onClick={() => { if (nuevo.trim()) { onChange([...items, nuevo.trim()]); setNuevo(''); } }} className="rounded-md bg-white/70 px-2 py-1 text-xs hover:bg-white">
-          <Plus className="h-3 w-3" />
+        <button onClick={() => { if (nuevo.trim()) { onChange([...items, nuevo.trim()]); setNuevo(''); } }} className="rounded-md bg-white/70 px-2 py-1 text-xs hover:bg-white" aria-label={`Agregar a ${label}`}>
+          <Plus className="h-3 w-3" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -251,8 +251,8 @@ function ListaCanal({ items, onChange }: { items: string[]; onChange: (v: string
           {personalizados.map((c) => (
             <span key={c} className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs text-rose-700">
               {c}
-              <button onClick={() => onChange(items.filter((x) => x !== c))} className="rounded p-0.5 hover:bg-white">
-                <X className="h-3 w-3" />
+              <button onClick={() => onChange(items.filter((x) => x !== c))} className="rounded p-0.5 hover:bg-white" aria-label={`Eliminar canal ${c}`}>
+                <X className="h-3 w-3" aria-hidden="true" />
               </button>
             </span>
           ))}

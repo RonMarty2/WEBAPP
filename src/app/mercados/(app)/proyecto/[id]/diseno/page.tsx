@@ -19,6 +19,7 @@ export default function EtapaDiseno() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   const [tipoEstudio, setTipoEstudio] = useState<TipoEstudio | null>(null);
   const [objetivoGeneral, setObjetivoGeneral] = useState('');
@@ -51,6 +52,7 @@ export default function EtapaDiseno() {
   const guardar = async (avanzar: boolean) => {
     setGuardando(true);
     setGuardado(false);
+    setErrorGuardar('');
     try {
       const body: Record<string, unknown> = {
         tipo_estudio: tipoEstudio,
@@ -74,7 +76,12 @@ export default function EtapaDiseno() {
       if (res.ok) {
         setGuardado(true);
         if (avanzar) router.push(`/mercados/proyecto/${params.id}/muestreo`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
       }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
     } finally {
       setGuardando(false);
     }
@@ -182,6 +189,9 @@ export default function EtapaDiseno() {
             <Check className="h-4 w-4" /> Guardado
           </span>
         )}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
+        )}
       </div>
     </div>
   );
@@ -227,8 +237,9 @@ function ListaEditable({
             <button
               onClick={() => setItems(items.filter((_, idx) => idx !== i))}
               className="mk-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600"
+              aria-label={`Eliminar ${item}`}
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </li>
         ))}

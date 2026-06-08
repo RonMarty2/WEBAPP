@@ -155,8 +155,8 @@ export default function GeneradorHub() {
                   {[p.tipo_negocio, p.sector, p.modalidad].filter(Boolean).join(' · ') || 'Sin detalles aún'}
                 </p>
               </div>
-              <button onClick={() => eliminar(p.id)} className="gen-muted flex-shrink-0 rounded-lg p-2 hover:bg-rose-50 hover:text-rose-600" title="Eliminar">
-                <Trash2 className="h-4 w-4" />
+              <button onClick={() => eliminar(p.id)} className="gen-muted flex-shrink-0 rounded-lg p-2 hover:bg-rose-50 hover:text-rose-600" title="Eliminar" aria-label={`Eliminar proyecto ${p.titulo}`}>
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
               </button>
               <Link href={`/generador/${p.id}`} className="gen-btn-primary flex flex-shrink-0 items-center gap-1.5 px-4 py-2 text-sm font-medium">
                 Abrir <ArrowRight className="h-3.5 w-3.5" />
