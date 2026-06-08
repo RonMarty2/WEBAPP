@@ -1,16 +1,25 @@
 "use client";
 
+/**
+ * Página /pago — checkout con pago manual (Tigo / QR / transferencia).
+ *
+ * REFACTOR (sesión 9): ahora respeta los 6 SKUs del catálogo
+ * (mono-basico, mono-plus, mono-premium, pg-basico, pg-plus, pg-premium).
+ * Antes solo entendía 2 (estandar, pro) y cualquier otro slug se
+ * silenciaba y mostraba Bs 150 sin avisar — bug que perdía ventas.
+ */
+
 import { Suspense, useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { PLANES, planPorSlug, migrarSlugLegacy } from "@/lib/pago/catalogo";
 
-type Plan = "estandar" | "pro";
 type Metodo = "tigo_money" | "qr_bancario" | "transferencia";
 type Estado = "pendiente" | "aprobado" | "rechazado";
 
 interface Solicitud {
   id: string;
-  plan: Plan;
+  plan: string;        // slug del catálogo
   monto_bs: number;
   metodo: Metodo;
   estado: Estado;
@@ -30,23 +39,25 @@ interface PaymentConfig {
   instrucciones_extra?: string;
 }
 
-const PLANES = {
-  estandar: { label: "Plan Estándar", precio: 150, desc: "1 monografía completa · PDF + LaTeX · APA 7 · Soporte" },
-  pro: { label: "Plan Pro", precio: 300, desc: "3 documentos/mes · Mejor modelo IA · Soporte 24/7" },
-};
-
 const METODOS_LABEL: Record<Metodo, string> = {
   tigo_money: "Tigo Money",
   qr_bancario: "QR Bancario (QR-BO)",
   transferencia: "Transferencia Bancaria",
 };
 
+// Slug por defecto si la URL no trae nada o trae basura.
+const SLUG_DEFAULT = "mono-basico";
+
 function PagoContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const planParam = (searchParams.get("plan") ?? "estandar") as Plan;
+  const planParamRaw = searchParams.get("plan") ?? SLUG_DEFAULT;
+  // Soporta slugs viejos (estandar → mono-basico, pro → mono-plus).
+  const planParam = migrarSlugLegacy(planParamRaw);
+  // Si el slug no existe en el catálogo, cae al default sin romper.
+  const slugInicial = planPorSlug(planParam) ? planParam : SLUG_DEFAULT;
 
-  const [plan, setPlan] = useState<Plan>(planParam);
+  const [plan, setPlan] = useState<string>(slugInicial);
   const [metodo, setMetodo] = useState<Metodo>("tigo_money");
   const [config, setConfig] = useState<PaymentConfig>({});
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
@@ -142,7 +153,8 @@ function PagoContent() {
     </div>
   );
 
-  const planInfo = PLANES[plan];
+  // Datos del plan elegido — siempre existen por el guard en slugInicial.
+  const planInfo = planPorSlug(plan) ?? planPorSlug(SLUG_DEFAULT)!;
 
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)", color: "#f1f5f9", fontFamily: "'Inter', sans-serif", padding: "2rem 1rem" }}>
@@ -160,7 +172,7 @@ function PagoContent() {
         {solicitud?.estado === "aprobado" && (
           <div style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)", borderRadius: 12, padding: "1.5rem", marginBottom: "1.5rem", textAlign: "center" }}>
             <div style={{ fontSize: 40, marginBottom: 8 }}>✅</div>
-            <div style={{ fontWeight: 800, fontSize: 18, color: "#4ade80" }}>¡Plan {PLANES[solicitud.plan].label} activado!</div>
+            <div style={{ fontWeight: 800, fontSize: 18, color: "#4ade80" }}>¡{planPorSlug(solicitud.plan)?.nombre ?? solicitud.plan} activado!</div>
             <p style={{ color: "#94a3b8", fontSize: 13, marginTop: 8 }}>Ya puedes usar todas las funciones del plan.</p>
             <button onClick={() => router.push("/dashboard")} style={{ marginTop: "1rem", background: "#22c55e", color: "#fff", border: "none", borderRadius: 8, padding: "10px 24px", fontWeight: 700, cursor: "pointer" }}>
               Ir al Dashboard →
@@ -182,18 +194,44 @@ function PagoContent() {
         {/* Formulario inicial — si no hay solicitud pendiente */}
         {!solicitud && (
           <>
-            {/* Selector de plan */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1.5rem" }}>
-              {(Object.keys(PLANES) as Plan[]).map(p => (
-                <button key={p} onClick={() => setPlan(p)} style={{
-                  padding: "1.2rem 1rem", borderRadius: 12, border: plan === p ? "2px solid #3b82f6" : "2px solid #334155",
-                  background: plan === p ? "rgba(59,130,246,0.12)" : "rgba(30,41,59,0.8)", cursor: "pointer", textAlign: "left", color: "#f1f5f9",
-                }}>
-                  <div style={{ fontWeight: 800, fontSize: 16, color: plan === p ? "#60a5fa" : "#f1f5f9" }}>{PLANES[p].label}</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6, color: plan === p ? "#3b82f6" : "#94a3b8" }}>Bs. {PLANES[p].precio}</div>
-                  <div style={{ fontSize: 11, color: "#64748b", marginTop: 4 }}>{PLANES[p].desc}</div>
-                </button>
-              ))}
+            {/* Selector de plan — muestra los 6 SKUs del catálogo agrupados
+                por familia. El que vino en la URL viene preseleccionado. */}
+            <div style={{ marginBottom: "1.5rem" }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+                Monografía
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.7rem", marginBottom: "1rem" }}>
+                {PLANES.filter((p) => p.activo && p.familia === "monografia").map((p) => (
+                  <button key={p.slug} onClick={() => setPlan(p.slug)} style={{
+                    padding: "1rem 0.85rem", borderRadius: 12,
+                    border: plan === p.slug ? "2px solid #3b82f6" : "2px solid #334155",
+                    background: plan === p.slug ? "rgba(59,130,246,0.12)" : "rgba(30,41,59,0.8)",
+                    cursor: "pointer", textAlign: "left", color: "#f1f5f9",
+                  }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: plan === p.slug ? "#60a5fa" : "#f1f5f9" }}>{p.nombre}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, marginTop: 4, color: plan === p.slug ? "#3b82f6" : "#94a3b8" }}>Bs. {p.precio_bs}</div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{p.headline}</div>
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ fontSize: 11, fontWeight: 800, color: "#64748b", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>
+                Proyecto de Grado
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.7rem" }}>
+                {PLANES.filter((p) => p.activo && p.familia === "proyecto_grado").map((p) => (
+                  <button key={p.slug} onClick={() => setPlan(p.slug)} style={{
+                    padding: "1rem 0.85rem", borderRadius: 12,
+                    border: plan === p.slug ? "2px solid #a78bfa" : "2px solid #334155",
+                    background: plan === p.slug ? "rgba(124,58,237,0.12)" : "rgba(30,41,59,0.8)",
+                    cursor: "pointer", textAlign: "left", color: "#f1f5f9",
+                  }}>
+                    <div style={{ fontWeight: 800, fontSize: 14, color: plan === p.slug ? "#c4b5fd" : "#f1f5f9" }}>{p.nombre}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, marginTop: 4, color: plan === p.slug ? "#a78bfa" : "#94a3b8" }}>Bs. {p.precio_bs}</div>
+                    <div style={{ fontSize: 10, color: "#64748b", marginTop: 2 }}>{p.headline}</div>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Opción alternativa: comprar UN módulo individual.
@@ -264,7 +302,7 @@ function PagoContent() {
                       </>
                     : <div style={{ color: "#64748b", fontSize: 13 }}>El administrador aún no configuró el número de Tigo Money. Contáctalo directamente.</div>
                   }
-                  <div style={{ marginTop: 12, fontSize: 13, color: "#4ade80", fontWeight: 600 }}>Monto exacto: Bs. {planInfo.precio}</div>
+                  <div style={{ marginTop: 12, fontSize: 13, color: "#4ade80", fontWeight: 600 }}>Monto exacto: Bs. {planInfo.precio_bs}</div>
                 </div>
               )}
 
@@ -274,7 +312,7 @@ function PagoContent() {
                     ? <img src={`data:image/png;base64,${config.qr_imagen_b64}`} alt="QR de pago" style={{ width: 180, height: 180, border: "1px solid #334155", borderRadius: 8, background: "#fff" }} />
                     : <div style={{ color: "#64748b", fontSize: 13 }}>El QR bancario aún no está configurado. Usa otro método o contacta al admin.</div>
                   }
-                  <div style={{ marginTop: 12, fontSize: 13, color: "#4ade80", fontWeight: 600 }}>Monto exacto: Bs. {planInfo.precio}</div>
+                  <div style={{ marginTop: 12, fontSize: 13, color: "#4ade80", fontWeight: 600 }}>Monto exacto: Bs. {planInfo.precio_bs}</div>
                 </div>
               )}
 
@@ -285,7 +323,7 @@ function PagoContent() {
                   {config.banco_titular && <div style={{ fontSize: 13 }}>Titular: <strong>{config.banco_titular}</strong></div>}
                   {config.banco_ci && <div style={{ fontSize: 13 }}>CI: <strong>{config.banco_ci}</strong></div>}
                   {!config.banco_cuenta && <div style={{ color: "#64748b", fontSize: 13 }}>Datos bancarios aún no configurados.</div>}
-                  <div style={{ marginTop: 8, fontSize: 13, color: "#4ade80", fontWeight: 600 }}>Monto exacto: Bs. {planInfo.precio}</div>
+                  <div style={{ marginTop: 8, fontSize: 13, color: "#4ade80", fontWeight: 600 }}>Monto exacto: Bs. {planInfo.precio_bs}</div>
                 </div>
               )}
 
@@ -309,7 +347,7 @@ function PagoContent() {
               width: "100%", padding: "14px", borderRadius: 10, border: "none",
               background: sending ? "#334155" : "#3b82f6", color: "#fff", fontWeight: 800, fontSize: 16, cursor: sending ? "not-allowed" : "pointer",
             }}>
-              {sending ? "Creando solicitud..." : `Solicitar activación — Bs. ${planInfo.precio}`}
+              {sending ? "Creando solicitud..." : `Solicitar activación — Bs. ${planInfo.precio_bs}`}
             </button>
           </>
         )}
@@ -319,7 +357,7 @@ function PagoContent() {
           <div style={{ background: "rgba(30,41,59,0.8)", border: "1px solid #334155", borderRadius: 12, padding: "1.5rem" }}>
             <div style={{ fontWeight: 700, color: "#facc15", marginBottom: 4 }}>⏳ Solicitud pendiente de verificación</div>
             <div style={{ fontSize: 13, color: "#94a3b8", marginBottom: "1.2rem" }}>
-              Plan {PLANES[solicitud.plan].label} · Bs. {solicitud.monto_bs} · {METODOS_LABEL[solicitud.metodo]}
+              {planPorSlug(solicitud.plan)?.nombre ?? solicitud.plan} · Bs. {solicitud.monto_bs} · {METODOS_LABEL[solicitud.metodo]}
               <br />Creada: {new Date(solicitud.created_at).toLocaleString("es-BO")}
             </div>
 

@@ -9,10 +9,16 @@
  *
  * Copy enfocado en marketing: "nosotros hacemos por ti" + tiempos visibles.
  * Sin info técnica (qué IA usa, tokens, etc.) — eso queda dentro del wizard.
+ *
+ * REFACTOR (sesión 9): la fuente de datos ahora es `src/lib/pago/catalogo.ts`.
+ * Antes el array PRODUCTOS estaba hardcodeado acá y NO coincidía con lo
+ * que /api/payments aceptaba — un click en "Plus Bs 300" terminaba
+ * pagando Bs 150. Ahora landing + API + /pago leen del mismo catálogo.
  */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { planesPorFamilia, type PlanCatalogo } from "@/lib/pago/catalogo";
 
 interface Plan {
   tier: string;
@@ -35,133 +41,50 @@ interface Producto {
   planes: Plan[];
 }
 
-const PRODUCTOS: Producto[] = [
-  {
-    id: "monografia",
-    icon: "📝",
-    nombre: "Monografía Académica",
-    descripcion: "Para titularte de un diplomado o postgrado · Bolivia · UMSS",
-    planes: [
-      {
-        tier: "Básico",
-        headline: "Tu monografía, lista para entregar",
-        subhead: "La redactamos completa por ti. Lista para imprimir y presentar al tutor.",
-        tiempo: "En menos de 3 horas",
-        precio: "Bs. 150",
-        incluye: [
-          "El documento completo, capítulo por capítulo",
-          "Bibliografía citada como tu carrera exige",
-          "Validación previa de tema en tu universidad",
-          "Archivo final en PDF y formato editable",
-        ],
-        noIncluye: [
-          "Ajustes después de la entrega",
-          "Atención a observaciones del tutor",
-        ],
-        cta: "Quiero el Básico",
-        ctaSlug: "mono-basico",
-      },
-      {
-        tier: "Plus",
-        headline: "Hasta que el tutor diga \"aprobado\"",
-        subhead: "La escribimos por ti, y si el tutor observa, también la corregimos sin que tengas que rehacer nada.",
-        tiempo: "Revisiones en minutos",
-        precio: "Bs. 300",
-        recomendado: true,
-        incluye: [
-          "Corregimos las observaciones del tutor automáticamente",
-          "Mejoramos cualquier sección con un solo pedido",
-          "Cada cambio se previsualiza antes de aplicarse",
-          "Reescribimos solo lo necesario, no el documento entero",
-        ],
-        noIncluye: ["Material de referencia personalizado"],
-        cta: "Elijo el Plus",
-        ctaSlug: "mono-plus",
-      },
-      {
-        tier: "Premium",
-        headline: "Te acompañamos hasta la defensa",
-        subhead: "Todo el respaldo, desde la primera redacción hasta el día que te pares frente al tribunal.",
-        tiempo: "Soporte 24/7 hasta la defensa",
-        precio: "Bs. 500",
-        incluye: [
-          "Si tienes material propio, lo integramos al documento",
-          "Adaptamos la redacción a tu estilo personal",
-          "Banco de preguntas para defensa",
-          "Materiales listos para llevar al tribunal",
-          "Soporte 24/7 hasta defender con éxito",
-        ],
-        cta: "Voy con el Premium",
-        ctaSlug: "mono-premium",
-      },
-    ],
-  },
-  {
-    id: "proygrado",
-    icon: "📊",
-    nombre: "Proyecto de Grado",
-    descripcion: "Plan de negocio completo · producto o servicio · análisis financiero",
-    planes: [
-      {
-        tier: "Básico",
-        headline: "Tu plan de negocio, terminado",
-        subhead: "Armamos las 23 secciones por ti, con análisis y números listos para presentar.",
-        tiempo: "Listo en menos de 6 horas",
-        precio: "Bs. 350",
-        incluye: [
-          "Las 23 secciones que tu carrera exige, armadas",
-          "Análisis del mercado, competencia y entorno",
-          "Tablas, matrices y proyecciones financieras",
-          "Estructura aprobada por tu universidad",
-          "Archivo final en PDF y formato editable",
-        ],
-        noIncluye: [
-          "Ajustes después de la entrega",
-          "Atención a observaciones del tutor",
-        ],
-        cta: "Quiero el Básico",
-        ctaSlug: "pg-basico",
-      },
-      {
-        tier: "Plus",
-        headline: "El que el tutor aprueba sin rehacer",
-        subhead: "Si el tutor observa, nosotros corregimos. Tu proyecto avanza sin retroceder.",
-        tiempo: "Revisiones en minutos",
-        precio: "Bs. 600",
-        recomendado: true,
-        incluye: [
-          "Corregimos observaciones del tutor de forma quirúrgica",
-          "Ajustamos cualquier sección a pedido",
-          "Armamos la encuesta de mercado, lista para distribuir",
-          "Analizamos automáticamente los resultados",
-        ],
-        noIncluye: ["Branding visual y plan financiero avanzado"],
-        cta: "Elijo el Plus",
-        ctaSlug: "pg-plus",
-      },
-      {
-        tier: "Premium",
-        headline: "Tu negocio, listo para el mercado",
-        subhead: "Para cuando esta defensa decide si tu proyecto sale al mercado real.",
-        tiempo: "Soporte 24/7 hasta la defensa",
-        precio: "Bs. 950",
-        incluye: [
-          "Briefing completo para diseñar tu marca + logos",
-          "Plan financiero profesional con VAN, TIR y WACC",
-          "Banco de preguntas con respuestas modelo",
-          "Materiales listos para llevar al tribunal",
-          "Soporte 24/7 hasta defender con éxito",
-        ],
-        cta: "Voy con el Premium",
-        ctaSlug: "pg-premium",
-      },
-    ],
-  },
-];
+// Adapta el catálogo unificado al shape que la UI espera.
+function adaptarDeCatalogo(p: PlanCatalogo): Plan {
+  return {
+    tier: p.tier.charAt(0).toUpperCase() + p.tier.slice(1),
+    headline: p.headline,
+    subhead: p.subhead,
+    tiempo: p.tiempo,
+    precio: `Bs. ${p.precio_bs}`,
+    incluye: p.incluye,
+    noIncluye: p.no_incluye,
+    recomendado: p.recomendado,
+    cta: p.cta,
+    ctaSlug: p.slug,
+  };
+}
+
+
+// Construye los productos en runtime desde el catálogo unificado.
+// Si en el futuro se agrega un SKU al catálogo, aparece acá automáticamente.
+function construirProductosDesdeCatalogo(): Producto[] {
+  const porFamilia = planesPorFamilia();
+  return [
+    {
+      id: "monografia",
+      icon: "📝",
+      nombre: "Monografía Académica",
+      descripcion: "Para titularte de un diplomado o postgrado · Bolivia · UMSS",
+      planes: porFamilia.monografia.map(adaptarDeCatalogo),
+    },
+    {
+      id: "proygrado",
+      icon: "📊",
+      nombre: "Proyecto de Grado",
+      descripcion: "Plan de negocio completo · producto o servicio · análisis financiero",
+      planes: porFamilia.proyecto_grado.map(adaptarDeCatalogo),
+    },
+  ];
+}
 
 export default function PricingSection() {
   const router = useRouter();
   const [productoActivo, setProductoActivo] = useState<string>("monografia");
+
+  const PRODUCTOS = construirProductosDesdeCatalogo();
 
   const handleCTA = (slug: string) => {
     router.push(`/login?plan=${slug}`);

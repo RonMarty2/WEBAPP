@@ -68,12 +68,21 @@ export interface FaseTipoProyecto {
   padre_id?: string;
 }
 
+/**
+ * Slug del plan pagado. Se valida contra src/lib/pago/catalogo.ts.
+ * Se mantiene como string (no enum) para que el catálogo pueda crecer
+ * sin migrar la BD ni el tipo. Los slugs viejos ("estandar", "pro")
+ * siguen siendo válidos vía migrarSlugLegacy() y siguen siendo legibles
+ * en pagos históricos.
+ */
+export type PlanSlug = string;
+
 export interface SolicitudPagoRecord {
   id: string;
   usuario_id: string;
   usuario_email?: string;
   usuario_nombre?: string;
-  plan: "estandar" | "pro";
+  plan: PlanSlug;
   monto_bs: number;
   metodo: "tigo_money" | "qr_bancario" | "transferencia";
   estado: "pendiente" | "aprobado" | "rechazado";

@@ -14,6 +14,7 @@ import {
   dbSavePaymentConfig,
 } from "@/lib/db/payments";
 import { dbActivateUser } from "@/lib/db";
+import { slugAUserPlan } from "@/lib/pago/catalogo";
 
 export async function GET() {
   try {
@@ -50,7 +51,11 @@ export async function PATCH(req: Request) {
     }
 
     if (accion === "aprobar") {
-      await dbActivateUser(solicitud.usuario_id, "estudiante", solicitud.plan);
+      // Mapea el slug comercial (mono-basico, pg-plus, etc.) al UserPlan
+      // interno (estandar/pro/elite) que es lo que el resto del SaaS usa
+      // para gatear features.
+      const userPlan = slugAUserPlan(solicitud.plan);
+      await dbActivateUser(solicitud.usuario_id, "estudiante", userPlan);
       dbUpdateSolicitudPago(id, {
         estado: "aprobado",
         aprobado_por: user.id,
