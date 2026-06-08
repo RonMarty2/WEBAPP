@@ -291,12 +291,13 @@ export default function PanelDocente() {
                     Vinculado {new Date(a.vinculado_en).toLocaleDateString('es-BO', { day: '2-digit', month: 'short' })} · código {a.codigo_usado}
                   </p>
                 </div>
-                <span
-                  className="cursor-not-allowed rounded-md border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-400"
-                  title="En la próxima entrega podrás ver sus proyectos por módulo y dejar observaciones."
+                <Link
+                  href={`/docente/alumno/${a.id}`}
+                  className="rounded-md border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-700 hover:bg-violet-100"
+                  title="Ver sus proyectos por módulo"
                 >
-                  Ver proyectos · pronto
-                </span>
+                  Ver proyectos →
+                </Link>
                 <button
                   onClick={() => archivarAlumno(a.id)}
                   className="inline-flex items-center gap-1 rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
