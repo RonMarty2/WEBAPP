@@ -32,6 +32,57 @@ import { dbInsertObservacionBanco } from "@/lib/db/observacionesBanco";
 
 type Params = { params: Promise<{ id: string }> };
 
+// El Analizador hace UNA llamada IA densa que puede tardar 20-50s en
+// observaciones que piden agregar varias fuentes o datos. Sin declarar
+// maxDuration, Vercel mata la función con su default bajo (~10-15s) y devuelve
+// 504 FUNCTION_INVOCATION_TIMEOUT. 60s es el máximo del plan Hobby; si se pasa
+// a Pro puede subirse a 300.
+export const maxDuration = 60;
+
+// ── Helpers de cirugía (búsqueda y reemplazo del fragmento a corregir) ───────
+
+/**
+ * Reemplaza la PRIMERA aparición literal de `buscar` por `reemplazo` sin
+ * interpretar patrones de reemplazo ($1, $&, etc.) que pudieran aparecer en el
+ * texto nuevo. Más seguro que String.prototype.replace(string, string).
+ */
+function reemplazarUnaVez(texto: string, buscar: string, reemplazo: string): string {
+  const idx = texto.indexOf(buscar);
+  if (idx < 0) return texto;
+  return texto.slice(0, idx) + reemplazo + texto.slice(idx + buscar.length);
+}
+
+/**
+ * Construye un RegExp que localiza `bloque` dentro del documento tolerando las
+ * diferencias tipográficas más comunes entre lo que devuelve la IA y el texto
+ * real del capítulo: comillas rectas vs. curvas, guiones/rayas, y espacios o
+ * saltos de línea múltiples. Es estricto en el contenido (no hace fuzzy match
+ * de palabras): solo flexibiliza puntuación y espaciado. Devuelve null si el
+ * bloque queda vacío.
+ */
+function construirRegexTolerante(bloque: string): RegExp | null {
+  const dobles = '"“”«»';
+  const simples = "'‘’`";
+  const guiones = "-–—";
+  let out = "";
+  let i = 0;
+  while (i < bloque.length) {
+    const c = bloque[i];
+    if (/\s/.test(c)) {
+      out += "\\s+";
+      while (i < bloque.length && /\s/.test(bloque[i])) i++;
+      continue;
+    }
+    if (dobles.includes(c)) { out += '["“”«»]'; i++; continue; }
+    if (simples.includes(c)) { out += "['‘’`]"; i++; continue; }
+    if (guiones.includes(c)) { out += "[-–—]"; i++; continue; }
+    if (/[.*+?^${}()|[\]\\]/.test(c)) { out += "\\" + c; i++; continue; }
+    out += c;
+    i++;
+  }
+  return out.length > 0 ? new RegExp(out) : null;
+}
+
 const SERVICIO_NOMBRES: Record<string, string> = {
   "mono-001": "Monografía Académica",
   "tesis-001": "Tesis de Grado",
@@ -187,19 +238,23 @@ export async function POST(req: Request, { params }: Params) {
           errorCirugia = "La IA decidió aplicar pero no devolvió bloque_original o bloque_nuevo.";
         } else if (contenidoActual.includes(analizado.bloque_original)) {
           // Match exacto byte-por-byte
-          contenidoPropuesto = contenidoActual.replace(
+          contenidoPropuesto = reemplazarUnaVez(
+            contenidoActual,
             analizado.bloque_original,
             analizado.bloque_nuevo,
           );
         } else {
-          // Intento con espacios normalizados (saltos de línea, tabs, espacios múltiples)
-          const normOriginal = analizado.bloque_original.replace(/\s+/g, " ").trim();
-          const escapado = normOriginal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const regex = new RegExp(escapado.replace(/\s+/g, "\\s+"));
-          if (regex.test(contenidoActual)) {
-            contenidoPropuesto = contenidoActual.replace(regex, analizado.bloque_nuevo);
+          // Fallback tolerante: comillas rectas/curvas, guiones/rayas y
+          // espacios/saltos de línea múltiples. Es la causa más común de que
+          // el bloque_original de la IA no coincida byte-por-byte con el texto.
+          const regex = construirRegexTolerante(analizado.bloque_original);
+          if (regex && regex.test(contenidoActual)) {
+            const nuevo = analizado.bloque_nuevo;
+            // Reemplazo con función para no interpretar $1/$& si el texto
+            // nuevo contiene el carácter '$'.
+            contenidoPropuesto = contenidoActual.replace(regex, () => nuevo);
           } else {
-            errorCirugia = "La IA devolvió un bloque_original que no se encuentra en el documento (ni con normalización de espacios). Reformula la observación de forma más precisa o pega el fragmento exacto del documento que quieres cambiar.";
+            errorCirugia = "La IA devolvió un bloque_original que no coincide con el documento (ni tolerando comillas, guiones o espacios). Pega el fragmento exacto del documento que quieres cambiar, o divide la observación en un cambio más puntual.";
           }
         }
       }

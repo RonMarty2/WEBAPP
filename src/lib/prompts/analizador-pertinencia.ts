@@ -312,52 +312,106 @@ export interface AnalizadorOutput {
 }
 
 /**
+ * Escapa los caracteres de control crudos (saltos de línea, tabs, retornos de
+ * carro) que aparezcan DENTRO de los valores de cadena del JSON. Gemini suele
+ * devolver `bloque_nuevo`/`analisis_ia` con saltos de línea literales sin
+ * escapar cuando el contenido es multipárrafo, lo que rompe JSON.parse. Esta
+ * función los escapa preservando la estructura del JSON: solo actúa dentro de
+ * comillas, nunca sobre el espaciado estructural.
+ */
+function escaparControlesEnCadenas(json: string): string {
+  let out = "";
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < json.length; i++) {
+    const c = json[i];
+    if (escaped) { out += c; escaped = false; continue; }
+    if (c === "\\") { out += c; escaped = true; continue; }
+    if (c === '"') { inString = !inString; out += c; continue; }
+    if (inString) {
+      const code = c.charCodeAt(0);
+      if (c === "\n") out += "\\n";
+      else if (c === "\r") out += "\\r";
+      else if (c === "\t") out += "\\t";
+      else if (code < 0x20) out += "\\u" + code.toString(16).padStart(4, "0");
+      else out += c;
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
+
+/**
+ * Intenta parsear el JSON de la IA con reparaciones progresivas y seguras:
+ *   1. Tal cual.
+ *   2. Escapando caracteres de control crudos dentro de cadenas (causa #1 de
+ *      fallo de parseo con Gemini en respuestas multipárrafo).
+ *   3. Además, quitando comas colgantes antes de `}` o `]`.
+ * Ninguna reparación inventa contenido: solo corrige sintaxis. Devuelve el
+ * objeto parseado o null si ninguna funciona.
+ */
+function parseJsonTolerante(jsonStr: string): unknown | null {
+  const intentos = [
+    jsonStr,
+    escaparControlesEnCadenas(jsonStr),
+    escaparControlesEnCadenas(jsonStr).replace(/,(\s*[}\]])/g, "$1"),
+  ];
+  for (const intento of intentos) {
+    try {
+      return JSON.parse(intento);
+    } catch {
+      /* probamos la siguiente reparación */
+    }
+  }
+  return null;
+}
+
+/**
  * Parsea la respuesta de la IA al formato esperado. Defensivo: si la IA
- * devolvió texto extra alrededor del JSON, lo extrae.
+ * devolvió texto extra alrededor del JSON (p.ej. lo envolvió en ```json … ```),
+ * lo extrae; si devolvió saltos de línea crudos dentro de las cadenas (típico
+ * de Gemini en respuestas multipárrafo), los repara antes de parsear.
  */
 export function parseAnalizadorOutput(rawText: string): AnalizadorOutput | null {
   const trimmed = rawText.trim();
-  // Buscar el primer { y el último } por si la IA agregó texto antes/después
+  // Buscar el primer { y el último } por si la IA agregó texto antes/después.
   const firstBrace = trimmed.indexOf("{");
   const lastBrace = trimmed.lastIndexOf("}");
   if (firstBrace < 0 || lastBrace <= firstBrace) return null;
   const jsonStr = trimmed.slice(firstBrace, lastBrace + 1);
-  try {
-    const parsed = JSON.parse(jsonStr) as Partial<AnalizadorOutput> & {
-      // Compatibilidad con versión previa que devolvía propuesta_de_cambio
-      // como documento entero. Si viene esto y no viene bloque_original,
-      // la usamos como bloque_nuevo entero (cirugía degenerada).
-      propuesta_de_cambio?: string | null;
-    };
-    if (!parsed.decision || !["aplicar", "aplicar_con_reserva", "rechazar", "mover_a_otra_fase"].includes(parsed.decision)) {
-      return null;
-    }
-    // Limpiar el nuevo título si vino con comillas o prefijos comunes
-    const tituloLimpio = typeof parsed.nuevo_titulo === "string"
-      ? parsed.nuevo_titulo
-          .trim()
-          .replace(/^["'«»]+|["'«»]+$/g, "")  // comillas al inicio/fin
-          .replace(/^(t[íi]tulo:?\s*)/i, "")  // prefijo "Título:"
-          .trim()
-      : null;
 
-    const accionCirugia = parsed.accion_cirugia === "agregar_al_final"
-      ? "agregar_al_final"
-      : (parsed.accion_cirugia === "reemplazar" ? "reemplazar" : null);
+  const parsed = parseJsonTolerante(jsonStr) as
+    | (Partial<AnalizadorOutput> & { propuesta_de_cambio?: string | null })
+    | null;
+  if (!parsed) return null;
 
-    return {
-      decision: parsed.decision,
-      patron_detectado: parsed.patron_detectado ?? "",
-      analisis_ia: parsed.analisis_ia ?? "",
-      justificacion_para_tutor: parsed.justificacion_para_tutor ?? null,
-      bloque_original: typeof parsed.bloque_original === "string" ? parsed.bloque_original : null,
-      bloque_nuevo: typeof parsed.bloque_nuevo === "string" ? parsed.bloque_nuevo : null,
-      accion_cirugia: accionCirugia,
-      fase_destino_id: typeof parsed.fase_destino_id === "string" ? parsed.fase_destino_id : null,
-      fase_destino_label: typeof parsed.fase_destino_label === "string" ? parsed.fase_destino_label : null,
-      nuevo_titulo: tituloLimpio && tituloLimpio.length > 0 ? tituloLimpio : null,
-    };
-  } catch {
+  if (!parsed.decision || !["aplicar", "aplicar_con_reserva", "rechazar", "mover_a_otra_fase"].includes(parsed.decision)) {
     return null;
   }
+  // Limpiar el nuevo título si vino con comillas o prefijos comunes
+  const tituloLimpio = typeof parsed.nuevo_titulo === "string"
+    ? parsed.nuevo_titulo
+        .trim()
+        .replace(/^["'«»]+|["'«»]+$/g, "")  // comillas al inicio/fin
+        .replace(/^(t[íi]tulo:?\s*)/i, "")  // prefijo "Título:"
+        .trim()
+    : null;
+
+  const accionCirugia = parsed.accion_cirugia === "agregar_al_final"
+    ? "agregar_al_final"
+    : (parsed.accion_cirugia === "reemplazar" ? "reemplazar" : null);
+
+  return {
+    decision: parsed.decision,
+    patron_detectado: parsed.patron_detectado ?? "",
+    analisis_ia: parsed.analisis_ia ?? "",
+    justificacion_para_tutor: parsed.justificacion_para_tutor ?? null,
+    bloque_original: typeof parsed.bloque_original === "string" ? parsed.bloque_original : null,
+    bloque_nuevo: typeof parsed.bloque_nuevo === "string" ? parsed.bloque_nuevo : null,
+    accion_cirugia: accionCirugia,
+    fase_destino_id: typeof parsed.fase_destino_id === "string" ? parsed.fase_destino_id : null,
+    fase_destino_label: typeof parsed.fase_destino_label === "string" ? parsed.fase_destino_label : null,
+    nuevo_titulo: tituloLimpio && tituloLimpio.length > 0 ? tituloLimpio : null,
+  };
 }
