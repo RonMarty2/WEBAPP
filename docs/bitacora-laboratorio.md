@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 6: panel docente Wave 1 + auditoría completa)
+> **Última actualización:** 2026-06-08 (sesión 6: panel docente Waves 1+2)
 
 ---
 
@@ -270,6 +270,47 @@ para mantener calidad y no saturar el contexto.
 
 ## §4 Decisiones clave (orden cronológico inverso)
 
+### 2026-06-08 (sesión 6 — continuación) — Panel docente Wave 2
+
+Cierra el ciclo "docente → ve qué tiene mi alumno" sin meterse al
+contenido privado todavía. Commit `161a5b4`.
+
+- Nuevo endpoint `GET /api/docente/alumnos/[id]/proyectos`. `[id]` es
+  el vinculo_id (no alumno_id) para que la validación de propiedad sea
+  una sola query. Si el vínculo no es del docente logueado, 404 sin
+  filtrar diferencia con "no existe". Después hace 7 queries en
+  paralelo a las tablas de cada módulo filtradas por estudiante_id;
+  cada query es independiente con try/catch que devuelve [] si la
+  tabla no existe — así una migración faltante no tira abajo la
+  respuesta entera. Devuelve metadatos del alumno + arreglo por módulo
+  + flag sin_finanzas=true.
+
+- Nueva página `/docente/alumno/[id]`: avatar/nombre/email + contador,
+  nota privada del docente editable inline (PATCH al vínculo), 7
+  cards por módulo (orden del flujo) con los proyectos del alumno
+  (título, estado, fecha) o el placeholder "Aún no tiene proyectos
+  en este módulo". Aviso ámbar sobre Finanzas omitido.
+
+- `/docente`: el botón "Ver proyectos · pronto" se vuelve un Link
+  real al detalle.
+
+Decisión clave sobre privacidad:
+- Wave 2 SOLO muestra metadatos (titulo, estado, fecha). NO accede al
+  contenido del Lean Canvas, ni a la encuesta, ni al organigrama, etc.
+  Eso queda para Wave 3 con consentimiento explícito del alumno
+  (toggle "Permitir que mi docente vea el contenido").
+
+Finanzas pendiente:
+- El bridge entre `auth.users` UUID (Finanzas viene del simuladorPRO)
+  y el JWT propio de webapp TEXT requiere una decisión arquitectural:
+  o syncar IDs al alta del perfil de Finanzas, o agregar un campo
+  `webapp_user_id TEXT` en finanzas_perfiles y migrar los existentes.
+  Por ahora se muestra el aviso ámbar.
+
+Wave 3 (próxima): observaciones del docente sobre un reporte específico
+del alumno + consentimiento del alumno para ver contenido. Wave 4:
+rúbrica de calificación y calendario de entregas.
+
 ### 2026-06-08 (sesión 6 — adición) — Panel docente Wave 1 (decisión "C", híbrido)
 
 El usuario eligió la opción C del panel docente: "Mis alumnos" híbrido
@@ -394,11 +435,17 @@ de calificación y calendario de entregas.
   Marketing→Organización, Finanzas→Defensa, Defensa→Generador.
   Organización→Finanzas no aplica (Finanzas no tiene form de
   "crear proyecto"; el simulador ya tiene su propio flujo interno).
-- ⬜ **Panel docente real** — el agujero más grande del segundo público.
-  Hoy el docente ve la misma vista del estudiante. Necesita: "Mis
-  alumnos" (con su progreso), corregir/dar feedback con rúbrica,
-  calendario de entregas. Sin esto, la plataforma sirve para vender
-  como SaaS pero no como herramienta de cátedra del dueño.
+- 🔨 **Panel docente — Wave 3 pendiente**: observaciones del docente
+  sobre reportes específicos del alumno (mismo patrón que el banco de
+  observaciones de `/projects`), más toggle del alumno "Permitir ver
+  contenido a mi docente". Waves 1 y 2 ya cerradas (commits `59d7ade`
+  y `161a5b4`).
+- ⬜ **Bridge Finanzas ↔ JWT webapp**: el módulo Finanzas usa
+  Supabase Auth (UUID en `auth.users`) y los demás usan el JWT propio
+  de webapp (TEXT). Para que Finanzas aparezca en el panel docente
+  hay que decidir cómo bridgear (syncar IDs al alta del perfil o
+  agregar `webapp_user_id TEXT` en `finanzas_perfiles`). Por ahora
+  el panel muestra el aviso ámbar.
 - ⬜ **Pago automático** (Tigo Money / QR / Stripe webhook). Hoy todo
   es manual: estudiante sube comprobante → admin aprueba a mano.
 - ⬜ **Pricing por módulo individual** en `/pago`. La arquitectura ya
