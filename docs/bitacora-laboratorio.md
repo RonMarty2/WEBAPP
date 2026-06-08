@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 6: panel docente Waves 1+2)
+> **Última actualización:** 2026-06-08 (sesión 6: Waves 1+2+3 docente, voseo backend, a11y, errores silenciados, PDF directo)
 
 ---
 
@@ -37,6 +37,7 @@ funciona (Waves 1-3) y el **widget transversal** "Trabajando en" está integrado
 | `migrations-defensa/001` | ✅ |
 | `migrations-organizacion/001` | ✅ |
 | `migrations-docente/001_vinculacion` | ⬜ PENDIENTE (sesión 6) |
+| `migrations-docente/002_observaciones_consentimiento` | ⬜ PENDIENTE (sesión 6) |
 
 ### Pendientes
 - ⬜ **(opcional)** Export PDF directo del Generador. El `.tex` y el ZIP
@@ -270,6 +271,66 @@ para mantener calidad y no saturar el contexto.
 
 ## §4 Decisiones clave (orden cronológico inverso)
 
+### 2026-06-08 (sesión 6 — tanda autónoma final) — Wave 3 docente + 5 mejoras transversales
+
+El usuario pidió "haz todo sin intervención" después de Wave 2. Procesé
+una tanda grande: yo encabecé Wave 3 + PDF directo + pago modular + 2
+arreglos críticos en mercados, y dispatché 3 agentes en paralelo para
+voseo + accesibilidad + errores silenciados en los 7 módulos.
+
+**Lo que YO hice:**
+
+- **Wave 3 panel docente** (`7a0e0e4`): observaciones del docente sobre
+  proyectos específicos del alumno + consentimiento del alumno para que
+  el docente vea contenido. Migración `migrations-docente/002_observaciones_consentimiento.sql`
+  (tablas `docente_observaciones` y `docente_consentimientos`). 5
+  endpoints nuevos (`/api/docente/observaciones[/[id]]`, `/api/alumno/
+  observaciones[/[id]]`, `/api/alumno/consentimientos`). UI en
+  `/docente/alumno/[id]` (botón "Observar" inline por proyecto +
+  listado por estado) y página nueva `/mis-observaciones` para el
+  alumno. Toggle en `/unirse-docente` con explicación clara del
+  consentimiento. Link "Mis observaciones" en dashboard. **Por defecto
+  el consentimiento es OFF** — el docente solo ve metadatos hasta que
+  el alumno active explícitamente.
+- **PDF directo desde Generador Conectado + reglas de print globales**
+  (`a015847`): renombro "Imprimir" → "Imprimir / PDF" con tooltip que
+  explica usar "Guardar como PDF" del navegador. `globals.css` ahora
+  tiene `@media print` global que oculta sidebars/headers/navs y
+  formatea el documento para PDF en todas las páginas.
+- **Manejo de errores en mercados/encuesta y mercados/muestreo**
+  (`a015847`): los `.catch(() => {})` silenciosos del load y los saves
+  sin manejo de error pasaron a mostrar mensajes claros (`role="alert"`).
+- **Pago: bloque "¿solo quieres un módulo?"** (`0813c21`): card violeta
+  con los 7 módulos y CTA "Coordinar precio por WhatsApp →". No se
+  inventan precios — el pricing modular queda manual hasta que el
+  dueño decida. Número WhatsApp es placeholder (591-00000000).
+
+**Lo que los 3 agentes hicieron en paralelo:**
+
+- **Agente 1 — Voseo en prompts del backend** (`1704645`): 20 archivos
+  en `src/lib/prompts/` con voseo reemplazado por tuteo boliviano.
+  Los prompts antes contradecían su propia regla "NO uses voseo" al
+  estar escritos en voseo ellos mismos. PRESERVADAS las líneas que
+  listan las palabras prohibidas como ejemplo. Reportó 15 archivos
+  FUERA de prompts con voseo (mayoría en `/finanzas/*` y mocks/seeds)
+  — quedan como pendiente.
+- **Agente 2 — Accesibilidad / aria-labels** (`76e7e9f` admin +
+  `9a24d4a` módulos): 38 archivos modificados. 64 aria-label nuevos
+  (selects, botones-icon de eliminar/archivar/cerrar, inputs de busca),
+  32 aria-hidden en iconos decorativos, 3 htmlFor/id para conectar
+  labels con inputs. Cobertura: todo el panel admin + headers/listados
+  de los 7 módulos educativos. **No cobertura todavía:** Finanzas (otro
+  trabajo aparte por su arquitectura distinta).
+- **Agente 3 — Errores silenciados en formularios** (`9a24d4a` mezclado
+  con accesibilidad + `9405416` + `f637a31`): patrón ya aplicado en
+  encuesta/muestreo replicado a las herramientas de saves de idea,
+  estrategia (PESTEL, Porter, MPC, FODA, BCG, Ansoff, MCPE), marketing
+  (buyer persona, presupuesto, calendario), organización (organigrama,
+  RRHH, legal, branding) y defensa (preguntas). Antes: `if (res.ok)
+  setGuardado()` else NADA — alumno creía que guardó pero perdía el
+  trabajo. Ahora: setErrorGuardar con el mensaje real + render con
+  `role="alert"`.
+
 ### 2026-06-08 (sesión 6 — continuación) — Panel docente Wave 2
 
 Cierra el ciclo "docente → ve qué tiene mi alumno" sin meterse al
@@ -427,42 +488,55 @@ de calificación y calendario de entregas.
   instruyen a la IA, no se ven directo.
 
 ### Pendientes activos (post-sesión 6)
-- ✅ **Pre-llenado replicado a los 6 saltos del flujo** (`a124c85`).
-  Origenes pasan `tituloContexto`; destinos leen `?titulo=&desde=`
-  con `useSearchParams` y abren el form con hint violeta "Título
-  tomado desde tu X". Etiqueta `desde=` dinámica por módulo. Aplica
-  a: Idea→Mercados, Mercados→Estrategia, Estrategia→Marketing,
-  Marketing→Organización, Finanzas→Defensa, Defensa→Generador.
-  Organización→Finanzas no aplica (Finanzas no tiene form de
-  "crear proyecto"; el simulador ya tiene su propio flujo interno).
-- 🔨 **Panel docente — Wave 3 pendiente**: observaciones del docente
-  sobre reportes específicos del alumno (mismo patrón que el banco de
-  observaciones de `/projects`), más toggle del alumno "Permitir ver
-  contenido a mi docente". Waves 1 y 2 ya cerradas (commits `59d7ade`
-  y `161a5b4`).
-- ⬜ **Bridge Finanzas ↔ JWT webapp**: el módulo Finanzas usa
-  Supabase Auth (UUID en `auth.users`) y los demás usan el JWT propio
-  de webapp (TEXT). Para que Finanzas aparezca en el panel docente
-  hay que decidir cómo bridgear (syncar IDs al alta del perfil o
-  agregar `webapp_user_id TEXT` en `finanzas_perfiles`). Por ahora
-  el panel muestra el aviso ámbar.
-- ⬜ **Pago automático** (Tigo Money / QR / Stripe webhook). Hoy todo
-  es manual: estudiante sube comprobante → admin aprueba a mano.
-- ⬜ **Pricing por módulo individual** en `/pago`. La arquitectura ya
-  lo soporta (cada módulo funciona sin Proyecto Maestro), pero `/pago`
-  solo ofrece "el SaaS entero".
-- ⬜ **PDF directo desde el Generador Conectado** (hoy solo .tex y ZIP
-  Overleaf, el estudiante tiene que abrir Overleaf).
-- ⬜ **Limpiar voseo de prompts del backend** (14 archivos en
-  `src/lib/prompts/`) — instruyen a la IA, no se ven directo, pero
-  contradicen las propias reglas anti-voseo del prompt.
+
+**✅ Cerrados en esta sesión:**
+- ✅ Pre-llenado replicado a los 6 saltos del flujo (`a124c85`).
+- ✅ Panel docente Wave 1: vinculación con código (`59d7ade`).
+- ✅ Panel docente Wave 2: detalle del alumno con proyectos (`161a5b4`).
+- ✅ Panel docente Wave 3: observaciones por proyecto + consentimiento
+  (`7a0e0e4`).
+- ✅ PDF directo desde Generador via window.print() + reglas globales
+  de print en `globals.css` (`a015847`).
+- ✅ Pricing modular en `/pago`: bloque "¿solo quieres un módulo?"
+  con CTA WhatsApp (`0813c21`).
+- ✅ Voseo en prompts del backend: 20 archivos limpiados (`1704645`).
+- ✅ Accesibilidad: 64 aria-label + 32 aria-hidden + 3 htmlFor en
+  panel admin y headers de módulos (`76e7e9f`, `9a24d4a`).
+- ✅ Errores silenciados en saves de herramientas (idea, mercados,
+  estrategia, marketing, organización, defensa) — ahora muestran
+  mensaje claro con `role="alert"` (`9a24d4a`, `9405416`, `f637a31`).
+- ✅ Datos abiertos oculto del sidebar mercados (`cfdd141`).
+- ✅ ADMIN_JWT_SECRET sin fallback hardcoded (`cfdd141`).
+- ✅ Voseo en READMEs de paquetes LaTeX (`cfdd141`).
+- ✅ CLAUDE.md limpio de módulos fantasma (Axiom/Lumen/Mentor/Núcleo).
+- ✅ Finanzas con SiguienteModulo (`d92851a`).
+
+**⬜ Pendientes que requieren tu input (NO se pueden hacer sin ti):**
+- ⬜ **Pago automático**: necesita credenciales reales de Tigo Money,
+  pasarela QR boliviana o Stripe. Mientras tanto, manual: comprobante
+  → admin aprueba. El bloque modular ya está en `/pago` con CTA
+  WhatsApp pero el número es placeholder (`591-00000000`); cambiarlo
+  antes de deploy comercial.
+- ⬜ **Pricing modular**: definir cuánto cuesta cada módulo individual
+  (decisión comercial). La UI ya invita a coordinar por WhatsApp.
+- ⬜ **Bridge Finanzas ↔ JWT webapp**: decisión arquitectural (sync
+  IDs vs agregar `webapp_user_id TEXT` en `finanzas_perfiles`). Sin
+  eso, Finanzas no aparece en el panel docente.
+
+**⬜ Pendientes técnicos (puedo seguir cuando me digas):**
+- ⬜ **Panel docente Wave 4**: rúbrica de calificación + calendario
+  de entregas. Sería el remate del panel para uso docente real.
+- ⬜ **Voseo en 15 archivos fuera de prompts** (reportados por el
+  agente): `/finanzas/*`, mocks/seeds, algunos componentes
+  compartidos. La mayoría en finanzas que es código migrado y
+  requiere más cuidado.
 - ⬜ **Reactivar `/mercados/datos`** cuando se construya la integración
-  real con INE / datos.gob.bo / Google Trends. Hoy la nav lo oculta.
-- ⬜ **Errores silenciados** (`.catch(() => {})`) en varios formularios
-  de los módulos — el estudiante cree que guardó pero no.
-- ⬜ **Accesibilidad** — agregar `aria-label` y `alt` (solo 6 instancias
-  en todo el código).
-- ⬜ **36 `console.log`** regados — limpieza pre-deploy a producción.
+  real con INE / datos.gob.bo / Google Trends.
+- ⬜ **Console.log cleanup**: solo 11 archivos, todos server-side
+  (API routes + lib). Bajo riesgo en producción (Next.js los
+  minifica), pero conviene una pasada pre-deploy.
+- ⬜ **Accesibilidad en Finanzas**: el módulo migrado no se tocó.
+  Requiere otra pasada.
 
 ### 2026-06-07 (sesión 4) — Descubribilidad, IA en herramientas y formatos oficiales
 - **Hub `/modulos` + bloque "Tu camino" en `/dashboard`** (`b0cb21c`): el dashboard
