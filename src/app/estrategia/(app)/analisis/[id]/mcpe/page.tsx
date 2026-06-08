@@ -48,6 +48,7 @@ export default function HerramientaMCPE() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   useEffect(() => {
     fetch(`/api/estrategia/proyectos/${params.id}`, { credentials: 'include' })
@@ -96,14 +97,24 @@ export default function HerramientaMCPE() {
   const recargar = () => { if (derivado) setMcpe(derivado); };
 
   const guardar = async (volver: boolean) => {
-    setGuardando(true); setGuardado(false);
+    setGuardando(true); setGuardado(false); setErrorGuardar('');
     try {
       const res = await fetch(`/api/estrategia/proyectos/${params.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ mcpe }),
       });
-      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
-    } finally { setGuardando(false); }
+      if (res.ok) {
+        setGuardado(true);
+        if (volver) router.push(`/estrategia/analisis/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
+      }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   if (cargando) return <div className="es-muted py-10 text-center text-sm">Cargando…</div>;
@@ -228,6 +239,9 @@ export default function HerramientaMCPE() {
           Guardar y volver →
         </button>
         {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
+        )}
       </div>
     </div>
   );

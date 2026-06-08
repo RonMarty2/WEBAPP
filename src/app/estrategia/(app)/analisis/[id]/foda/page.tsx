@@ -169,6 +169,9 @@ export default function HerramientaFoda() {
           Guardar y volver →
         </button>
         {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
+        )}
       </div>
     </div>
   );
