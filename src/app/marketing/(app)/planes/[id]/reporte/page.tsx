@@ -250,7 +250,7 @@ export default function ReporteMarketing() {
       )}
 
       <div className="print:hidden">
-        <SiguienteModulo actual="marketing" modalidad={maestro?.modalidad} />
+        <SiguienteModulo actual="marketing" modalidad={maestro?.modalidad} tituloContexto={p.titulo} />
       </div>
     </div>
   );

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Plus, Layers, Trash2, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Plus, Layers, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoDefensa } from '@/types/defensa';
 
 interface ProyectoLista {
@@ -22,10 +23,14 @@ const ESTADO_LABEL: Record<EstadoDefensa, { txt: string; clase: string }> = {
 };
 
 export default function MisDefensas() {
+  const searchParams = useSearchParams();
+  const tituloPrellenado = searchParams.get('titulo') ?? '';
+  const desde = searchParams.get('desde');
+
   const [proyectos, setProyectos] = useState<ProyectoLista[]>([]);
   const [montado, setMontado] = useState(false);
-  const [creando, setCreando] = useState(false);
-  const [titulo, setTitulo] = useState('');
+  const [creando, setCreando] = useState(!!tituloPrellenado);
+  const [titulo, setTitulo] = useState(tituloPrellenado);
   const [tema, setTema] = useState('');
   const [carrera, setCarrera] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -85,6 +90,20 @@ export default function MisDefensas() {
 
       {creando && (
         <form onSubmit={crear} className="def-card mb-5 p-5">
+          {tituloPrellenado && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs text-violet-900">
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-violet-600" />
+              <span>
+                Título tomado desde <strong>
+                  {desde === 'organizacion' ? 'tu proyecto organizacional'
+                    : desde === 'finanzas' ? 'tu simulador financiero'
+                    : desde === 'estrategia' ? 'tu análisis estratégico'
+                    : desde === 'mercados' ? 'tu investigación de Mercados'
+                    : 'tu módulo anterior'}
+                </strong>. Puedes editarlo si quieres ajustarlo para tu defensa.
+              </span>
+            </div>
+          )}
           <label className="text-sm font-medium">Título del trabajo</label>
           <input
             autoFocus value={titulo} onChange={(e) => setTitulo(e.target.value)}

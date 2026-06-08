@@ -227,7 +227,7 @@ export default function EvaluacionFinal() {
         de Claude — se habilita en FASE 9.
       </div>
 
-      <SiguienteModulo actual="finanzas" modalidad={maestro?.modalidad} />
+      <SiguienteModulo actual="finanzas" modalidad={maestro?.modalidad} tituloContexto={proyecto?.nombre} />
     </div>
   );
 }

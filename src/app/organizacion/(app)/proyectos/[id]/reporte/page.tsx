@@ -247,7 +247,7 @@ export default function ReporteOrganizacion() {
       )}
 
       <div className="print:hidden">
-        <SiguienteModulo actual="organizacion" modalidad={maestro?.modalidad} />
+        <SiguienteModulo actual="organizacion" modalidad={maestro?.modalidad} tituloContexto={p.titulo} />
       </div>
     </div>
   );

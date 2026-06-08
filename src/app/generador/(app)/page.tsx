@@ -2,16 +2,31 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Plus, FolderGit2, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { ProyectoMaestro } from '@/types/maestro';
 
 const MODALIDADES = ['Proyecto de grado', 'Tesis', 'Monografía', 'Trabajo dirigido', 'Otro'];
 
+const DESDE_LABEL: Record<string, string> = {
+  idea: 'tu Idea',
+  mercados: 'tu investigación de Mercados',
+  estrategia: 'tu análisis estratégico',
+  marketing: 'tu plan de marketing',
+  organizacion: 'tu proyecto organizacional',
+  finanzas: 'tu simulador financiero',
+  defensa: 'tu preparación de defensa',
+};
+
 export default function GeneradorHub() {
+  const searchParams = useSearchParams();
+  const tituloPrellenado = searchParams.get('titulo') ?? '';
+  const desde = searchParams.get('desde');
+
   const [proyectos, setProyectos] = useState<ProyectoMaestro[]>([]);
   const [montado, setMontado] = useState(false);
-  const [creando, setCreando] = useState(false);
-  const [form, setForm] = useState({ titulo: '', tipo_negocio: '', sector: '', descripcion: '', departamento: '', modalidad: '', universidad: '' });
+  const [creando, setCreando] = useState(!!tituloPrellenado);
+  const [form, setForm] = useState({ titulo: tituloPrellenado, tipo_negocio: '', sector: '', descripcion: '', departamento: '', modalidad: '', universidad: '' });
   const [guardando, setGuardando] = useState(false);
 
   const cargar = () => {
@@ -72,6 +87,15 @@ export default function GeneradorHub() {
 
       {creando && (
         <form onSubmit={crear} className="gen-card mb-5 p-5">
+          {tituloPrellenado && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs text-violet-900">
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-violet-600" />
+              <span>
+                Título tomado desde <strong>{(desde && DESDE_LABEL[desde]) || 'tu módulo anterior'}</strong>.
+                Completa los demás campos (sector, modalidad, universidad) para enriquecer el contexto que la IA usará.
+              </span>
+            </div>
+          )}
           <h2 className="text-sm font-semibold">Nuevo proyecto maestro</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Campo label="Título *" value={form.titulo} onChange={(v) => set('titulo', v)} placeholder="Ej: Cafetería La Orquídea" full autoFocus />

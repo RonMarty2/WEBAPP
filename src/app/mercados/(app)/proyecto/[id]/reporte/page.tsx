@@ -141,7 +141,7 @@ export default function EtapaReporte() {
         </pre>
       </div>
 
-      <SiguienteModulo actual="mercados" modalidad={maestro?.modalidad} />
+      <SiguienteModulo actual="mercados" modalidad={maestro?.modalidad} tituloContexto={proyecto.titulo} />
     </div>
   );
 }

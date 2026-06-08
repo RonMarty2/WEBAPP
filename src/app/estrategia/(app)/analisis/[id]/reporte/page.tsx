@@ -357,7 +357,7 @@ export default function ReporteEstrategia() {
       )}
 
       <div className="print:hidden">
-        <SiguienteModulo actual="estrategia" modalidad={maestro?.modalidad} />
+        <SiguienteModulo actual="estrategia" modalidad={maestro?.modalidad} tituloContexto={p.titulo} />
       </div>
     </div>
   );

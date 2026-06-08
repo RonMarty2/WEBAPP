@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { Plus, Layers, Trash2, ArrowRight } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import { Plus, Layers, Trash2, ArrowRight, Sparkles } from 'lucide-react';
 import type { EstadoMarketing } from '@/types/marketing';
 
 interface PlanLista {
@@ -24,10 +25,14 @@ const ESTADO_LABEL: Record<EstadoMarketing, { txt: string; clase: string }> = {
 };
 
 export default function MisPlanes() {
+  const searchParams = useSearchParams();
+  const tituloPrellenado = searchParams.get('titulo') ?? '';
+  const desde = searchParams.get('desde');
+
   const [planes, setPlanes] = useState<PlanLista[]>([]);
   const [montado, setMontado] = useState(false);
-  const [creando, setCreando] = useState(false);
-  const [titulo, setTitulo] = useState('');
+  const [creando, setCreando] = useState(!!tituloPrellenado);
+  const [titulo, setTitulo] = useState(tituloPrellenado);
   const [marca, setMarca] = useState('');
   const [sector, setSector] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -87,6 +92,15 @@ export default function MisPlanes() {
 
       {creando && (
         <form onSubmit={crear} className="mkt-card mb-5 p-5">
+          {tituloPrellenado && (
+            <div className="mb-3 flex items-start gap-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs text-violet-900">
+              <Sparkles className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-violet-600" />
+              <span>
+                Título tomado desde <strong>{desde === 'estrategia' ? 'tu análisis estratégico' : 'tu módulo anterior'}</strong>.
+                Puedes editarlo si quieres ajustarlo para este plan.
+              </span>
+            </div>
+          )}
           <label className="text-sm font-medium">Título del plan</label>
           <input
             autoFocus value={titulo} onChange={(e) => setTitulo(e.target.value)}
