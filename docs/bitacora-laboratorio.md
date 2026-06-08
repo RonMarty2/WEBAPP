@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 6: auditoría completa + pre-fill Idea→Mercados + cleanup)
+> **Última actualización:** 2026-06-08 (sesión 6: panel docente Wave 1 + auditoría completa)
 
 ---
 
@@ -36,6 +36,7 @@ funciona (Waves 1-3) y el **widget transversal** "Trabajando en" está integrado
 | `migrations-idea/001` | ✅ |
 | `migrations-defensa/001` | ✅ |
 | `migrations-organizacion/001` | ✅ |
+| `migrations-docente/001_vinculacion` | ⬜ PENDIENTE (sesión 6) |
 
 ### Pendientes
 - ⬜ **(opcional)** Export PDF directo del Generador. El `.tex` y el ZIP
@@ -268,6 +269,48 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-08 (sesión 6 — adición) — Panel docente Wave 1 (decisión "C", híbrido)
+
+El usuario eligió la opción C del panel docente: "Mis alumnos" híbrido
+sin grupos/cursos — cada alumno vinculado directo al docente,
+independiente de si es estudiante de cátedra o tesista 1-a-1.
+
+Wave 1 construida (commit `59d7ade`):
+
+- Nueva migración SQL `migrations-docente/001_vinculacion.sql` —
+  tablas `docente_codigos` y `docente_alumno_vinculos`. **El usuario
+  debe ejecutarla en Supabase para que funcione en prod.**
+- Endpoints `/api/docente/{codigos[/codigo], vincular, alumnos[/id]}` +
+  `/api/alumno/docentes`. Gating por role: solo `docente` o `admin`
+  pueden gestionar códigos y ver la lista de alumnos.
+- Página `/docente`: hub del docente (genera códigos con etiqueta
+  opcional, los copia, los revoca; lista alumnos con avatar/email).
+  Botón "Ver proyectos" deshabilitado con tooltip "pronto" — eso
+  es la Wave 2.
+- Página `/unirse-docente`: cualquier usuario logueado pega el
+  código que le dio su docente y queda vinculado.
+- Dashboard: botón "Mis alumnos" (solo docente/admin) y link
+  "¿Código de docente?" para todos.
+
+Decisiones tomadas:
+- **Sin grupos/cursos en esta wave** (decisión del usuario "C"). Si
+  después se necesitan, va una tabla `docente_grupos` encima.
+- **Códigos en alfabeto seguro** (sin 0/O/1/I/L). 31^6 ≈ 887 millones
+  de combinaciones, suficiente; en colisión reintenta hasta 5 veces.
+- **Snapshot del nombre/email del alumno** en el vínculo, para listar
+  sin joinear con tablas de otros módulos. Si el alumno cambia el
+  nombre después, el snapshot queda viejo (aceptable, se puede
+  actualizar en Wave 3).
+- **El alumno NO puede desvincularse desde la UI todavía** — solo
+  el docente puede archivar (Wave 2 le da al alumno su propio
+  botón).
+
+Wave 2 pendiente (próxima): clic en alumno → detalle con sus proyectos
+agregados por módulo (idea + mercados + estrategia + marketing + org +
+finanzas + defensa + maestro) y avance % de cada uno. Wave 3:
+observaciones del docente sobre un reporte del alumno. Wave 4: rúbrica
+de calificación y calendario de entregas.
 
 ### 2026-06-08 (sesión 6) — Pre-fill premium + auditoría completa + cleanup
 
