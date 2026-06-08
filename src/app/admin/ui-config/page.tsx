@@ -131,11 +131,12 @@ export default function UIConfigPage() {
           {/* Selector Madre */}
           <div>
             <label className="adm-label mb-1 block">{"// módulo_objetivo"}</label>
-            <select 
+            <select
               value={targetModule}
               onChange={(e) => setTargetModule(e.target.value)}
               className="adm-select w-full"
               style={{ fontWeight: 700 }}
+              aria-label="Módulo objetivo"
             >
               {MODULES.map(m => (
                 <option key={m.id} value={m.id}>{m.name}</option>
@@ -148,21 +149,21 @@ export default function UIConfigPage() {
           <div className="flex flex-col gap-4">
             <div>
               <label className="adm-label mb-1 block">{"// patrón_geométrico"}</label>
-              <select value={config.shape} onChange={(e) => handleChange("shape", e.target.value)} className="adm-select w-full">
+              <select value={config.shape} onChange={(e) => handleChange("shape", e.target.value)} className="adm-select w-full" aria-label="Patrón geométrico">
                 {SHAPES.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
               </select>
             </div>
 
             <div>
               <label className="adm-label mb-1 block">{"// paleta_color"}</label>
-              <select value={config.palette} onChange={(e) => handleChange("palette", e.target.value)} className="adm-select w-full">
+              <select value={config.palette} onChange={(e) => handleChange("palette", e.target.value)} className="adm-select w-full" aria-label="Paleta de color">
                 {PALETTES.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
               </select>
             </div>
 
             <div>
               <label className="adm-label mb-1 block">{"// comportamiento_físico"}</label>
-              <select value={config.wave} onChange={(e) => handleChange("wave", e.target.value)} className="adm-select w-full">
+              <select value={config.wave} onChange={(e) => handleChange("wave", e.target.value)} className="adm-select w-full" aria-label="Comportamiento físico">
                 {WAVES.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
               </select>
             </div>
@@ -177,7 +178,7 @@ export default function UIConfigPage() {
                 <label className="adm-label">{"// velocidad"}</label>
                 <span className="adm-muted">[{config.speed.toFixed(1)}x]</span>
               </div>
-              <input type="range" min="0.1" max="3.0" step="0.1" value={config.speed} onChange={(e) => handleChange("speed", parseFloat(e.target.value))} className="w-full accent-black" />
+              <input type="range" min="0.1" max="3.0" step="0.1" value={config.speed} onChange={(e) => handleChange("speed", parseFloat(e.target.value))} className="w-full accent-black" aria-label="Velocidad" />
             </div>
 
             <div>
@@ -185,17 +186,17 @@ export default function UIConfigPage() {
                 <label className="adm-label">{"// escala"}</label>
                 <span className="adm-muted">[{config.swarmSize.toFixed(1)}x]</span>
               </div>
-              <input type="range" min="0.3" max="2.0" step="0.1" value={config.swarmSize} onChange={(e) => handleChange("swarmSize", parseFloat(e.target.value))} className="w-full accent-black" />
+              <input type="range" min="0.3" max="2.0" step="0.1" value={config.swarmSize} onChange={(e) => handleChange("swarmSize", parseFloat(e.target.value))} className="w-full accent-black" aria-label="Escala" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="adm-label block mb-1">{"// grosor"}</label>
-                <input type="range" min="0.2" max="3.0" step="0.1" value={config.particleSize} onChange={(e) => handleChange("particleSize", parseFloat(e.target.value))} className="w-full accent-black" />
+                <input type="range" min="0.2" max="3.0" step="0.1" value={config.particleSize} onChange={(e) => handleChange("particleSize", parseFloat(e.target.value))} className="w-full accent-black" aria-label="Grosor" />
               </div>
               <div>
                 <label className="adm-label block mb-1">{"// estela"}</label>
-                <input type="range" min="0.2" max="4.0" step="0.1" value={config.particleLength} onChange={(e) => handleChange("particleLength", parseFloat(e.target.value))} className="w-full accent-black" />
+                <input type="range" min="0.2" max="4.0" step="0.1" value={config.particleLength} onChange={(e) => handleChange("particleLength", parseFloat(e.target.value))} className="w-full accent-black" aria-label="Estela" />
               </div>
             </div>
 
@@ -204,7 +205,7 @@ export default function UIConfigPage() {
                 <label className="adm-label">{"// densidad"}</label>
                 <span className="adm-muted">[{config.density} uds]</span>
               </div>
-              <input type="range" min="100" max="2500" step="50" value={config.density} onChange={(e) => handleChange("density", parseInt(e.target.value))} className="w-full accent-black" />
+              <input type="range" min="100" max="2500" step="50" value={config.density} onChange={(e) => handleChange("density", parseInt(e.target.value))} className="w-full accent-black" aria-label="Densidad" />
             </div>
           </div>
           

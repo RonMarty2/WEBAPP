@@ -168,8 +168,9 @@ export default function FasesPage() {
 
       {/* Service selector */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <label style={{ fontSize: 13, color: "var(--fg-muted)", fontWeight: 600 }}>Tipo de proyecto:</label>
+        <label htmlFor="servicio-select" style={{ fontSize: 13, color: "var(--fg-muted)", fontWeight: 600 }}>Tipo de proyecto:</label>
         <select
+          id="servicio-select"
           value={servicioId}
           onChange={e => setServicioId(e.target.value)}
           style={{ ...inputStyle, width: "auto", minWidth: 220 }}
@@ -204,7 +205,7 @@ export default function FasesPage() {
 
       {error && (
         <div style={{ padding: "10px 14px", marginBottom: 16, borderRadius: 8, background: "rgba(220,38,38,0.1)", border: "1px solid rgba(220,38,38,0.25)", fontSize: 13, color: "#f87171" }}>
-          {error} <button onClick={() => setError("")} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", marginLeft: 8 }}>×</button>
+          {error} <button onClick={() => setError("")} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", marginLeft: 8 }} aria-label="Cerrar mensaje de error">×</button>
         </div>
       )}
 
@@ -287,11 +288,13 @@ export default function FasesPage() {
                           onClick={() => reorder(phase.id, "up")}
                           disabled={idx === 0}
                           style={{ width: 28, height: 28, background: idx === 0 ? "var(--bg-subtle)" : "transparent", border: "1px solid var(--border)", borderRadius: 6, color: idx === 0 ? "var(--border)" : "var(--fg-muted)", cursor: idx === 0 ? "not-allowed" : "pointer", fontSize: 13 }}
+                          aria-label="Mover fase arriba"
                         >↑</button>
                         <button
                           onClick={() => reorder(phase.id, "down")}
                           disabled={idx === phases.length - 1}
                           style={{ width: 28, height: 28, background: idx === phases.length - 1 ? "var(--bg-subtle)" : "transparent", border: "1px solid var(--border)", borderRadius: 6, color: idx === phases.length - 1 ? "var(--border)" : "var(--fg-muted)", cursor: idx === phases.length - 1 ? "not-allowed" : "pointer", fontSize: 13 }}
+                          aria-label="Mover fase abajo"
                         >↓</button>
                         <button
                           onClick={() => { setEditingId(phase.id); setEditDraft({}); }}
@@ -302,6 +305,7 @@ export default function FasesPage() {
                           <button
                             onClick={() => deletePhase(phase.id)}
                             style={{ fontSize: 12, padding: "4px 12px", background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.2)", borderRadius: 6, color: "#f87171", cursor: "pointer" }}
+                            aria-label={`Eliminar fase ${phase.label}`}
                           >🗑️</button>
                         )}
                       </div>

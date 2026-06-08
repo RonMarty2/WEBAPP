@@ -126,7 +126,7 @@ export default function DefensaMaterialesModal({
             <div style={{ fontSize: 11, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 }}>Materiales de defensa (Elite)</div>
             <div style={{ fontSize: 18, fontWeight: 700 }}>{proyectoTitulo}</div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#64748b" }}>×</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: "#64748b" }} aria-label="Cerrar">×</button>
         </div>
 
         <div style={{ padding: "10px 14px", background: `${colorEstado}15`, border: `1px solid ${colorEstado}40`, borderRadius: 10, marginBottom: 18, fontSize: 12, fontWeight: 600, color: colorEstado }}>
@@ -181,8 +181,9 @@ export default function DefensaMaterialesModal({
             </div>
 
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Mensaje para el estudiante (opcional)</label>
+              <label htmlFor="defensa-mensaje" style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.5 }}>Mensaje para el estudiante (opcional)</label>
               <textarea
+                id="defensa-mensaje"
                 value={mensaje}
                 onChange={e => setMensaje(e.target.value)}
                 placeholder="Ej: Te recomiendo ensayar el guión 3 veces antes de la defensa. Cualquier duda, escribime."

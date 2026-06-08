@@ -380,6 +380,7 @@ export default function AdminProyectosPage() {
           <button
             onClick={() => setError("")}
             style={{ cursor: "pointer", border: "none", background: "none", color: "#f87171" }}
+            aria-label="Cerrar mensaje de error"
           >
             x
           </button>
@@ -411,12 +412,14 @@ export default function AdminProyectosPage() {
           value={busqueda}
           onChange={(event) => setBusqueda(event.target.value)}
           placeholder="Buscar tema, email, programa..."
+          aria-label="Buscar proyectos"
         />
         <select
           className="w-[190px] rounded-xl border border-gray-200 bg-white px-3 py-2 text-[13px] text-gray-900 transition-colors focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-black/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-slate-500 dark:focus:ring-white/10"
           value={filtroPrograma}
           onChange={(e) => setFiltroPrograma(e.target.value)}
           title="Filtrar por programa / diplomado"
+          aria-label="Filtrar por programa o diplomado"
         >
           <option value="">Todos los programas</option>
           {programasUnicos.map((p) => (
@@ -428,6 +431,7 @@ export default function AdminProyectosPage() {
           value={filtroUniversidad}
           onChange={(e) => setFiltroUniversidad(e.target.value)}
           title="Filtrar por universidad"
+          aria-label="Filtrar por universidad"
         >
           <option value="">Todas las universidades</option>
           {universidadesUnicas.map((u) => (
@@ -439,6 +443,7 @@ export default function AdminProyectosPage() {
           value={filtroEstado}
           onChange={(e) => setFiltroEstado(e.target.value as "" | "completo" | "en_curso" | "abandonado")}
           title="Filtrar por estado"
+          aria-label="Filtrar por estado"
         >
           <option value="">Todos los estados</option>
           <option value="en_curso">🟡 En curso</option>

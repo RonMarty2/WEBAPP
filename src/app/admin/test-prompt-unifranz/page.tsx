@@ -447,8 +447,8 @@ function Campo({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label
+    <label>
+      <span
         style={{
           display: "block",
           fontSize: 11,
@@ -460,9 +460,9 @@ function Campo({
         }}
       >
         {label}
-      </label>
+      </span>
       {children}
-    </div>
+    </label>
   );
 }
 

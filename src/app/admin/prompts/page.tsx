@@ -512,6 +512,7 @@ export default function PromptsPage() {
                             disabled={q.id.startsWith("default-")}
                             style={{ fontSize: 11, padding: "5px 10px", color: "#f87171", borderColor: "rgba(248,113,113,0.2)" }}
                             title={q.id.startsWith("default-") ? "No se pueden eliminar las preguntas por defecto" : "Eliminar"}
+                            aria-label="Eliminar pregunta"
                           >
                             🗑️
                           </button>

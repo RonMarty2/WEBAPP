@@ -282,6 +282,7 @@ export default function ProjectTypesPage() {
                 onClick={e => { e.stopPropagation(); deleteTipo(t.id); }}
                 style={{ background: "none", border: "none", color: "var(--fg-secondary)", cursor: "pointer", fontSize: 14, padding: 2 }}
                 title="Eliminar"
+                aria-label={`Eliminar tipo de proyecto ${t.nombre}`}
               >🗑️</button>
             )}
           </button>
@@ -424,11 +425,13 @@ export default function ProjectTypesPage() {
                                 onClick={() => { setEditingFaseId(fase.id); setEditFase(fase); }}
                                 className="btn-ghost"
                                 style={{ fontSize: 11, padding: "5px 8px" }}
+                                aria-label={`Editar fase ${fase.nombre}`}
                               >✏️</button>
                               <button
                                 onClick={() => deleteFase(fase.id)}
                                 className="btn-ghost"
                                 style={{ fontSize: 11, padding: "5px 8px", color: "#f87171", borderColor: "rgba(248,113,113,0.2)" }}
+                                aria-label={`Eliminar fase ${fase.nombre}`}
                               >🗑️</button>
                             </div>
                           </div>
@@ -460,6 +463,7 @@ export default function ProjectTypesPage() {
                                   onClick={() => deleteFase(sf.id)}
                                   className="btn-ghost"
                                   style={{ fontSize: 10, padding: "4px 6px", color: "#f87171", borderColor: "rgba(248,113,113,0.2)" }}
+                                  aria-label={`Eliminar sub-fase ${sf.nombre}`}
                                 >🗑️</button>
                               </div>
                             </div>
@@ -507,7 +511,7 @@ export default function ProjectTypesPage() {
                 >
                   {savingPrompt ? "Guardando…" : savedPrompt ? "✓ Guardado" : "💾 Guardar"}
                 </button>
-                <button onClick={() => setPromptFase(null)} className="btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }}>✕</button>
+                <button onClick={() => setPromptFase(null)} className="btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} aria-label="Cerrar editor de prompts">✕</button>
               </div>
             </div>
 

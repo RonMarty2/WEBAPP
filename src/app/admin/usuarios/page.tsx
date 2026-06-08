@@ -182,6 +182,7 @@ export default function AdminUsuariosPage() {
                         value={roles[user.id] ?? "estudiante"}
                         onChange={(e) => setRoles((prev) => ({ ...prev, [user.id]: e.target.value as UserRole }))}
                         className="adm-select"
+                        aria-label={`Rol de ${user.name}`}
                       >
                         <option value="estudiante">estudiante</option>
                         <option value="docente">docente</option>
@@ -190,6 +191,7 @@ export default function AdminUsuariosPage() {
                         value={plans[user.id] ?? "estandar"}
                         onChange={(e) => setPlans((prev) => ({ ...prev, [user.id]: e.target.value as UserPlan }))}
                         className="adm-select"
+                        aria-label={`Plan de ${user.name}`}
                       >
                         <option value="estandar">estandar</option>
                         <option value="pro">pro</option>

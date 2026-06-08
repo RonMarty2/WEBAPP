@@ -326,6 +326,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <button
           onClick={() => setIsMobileMenuOpen(true)}
           className="admin-chip flex h-10 w-10 items-center justify-center"
+          aria-label="Abrir menú"
         >
           <IconMenu />
         </button>
@@ -341,6 +342,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <button
           onClick={() => setIsMobileMenuOpen(false)}
           className="md:hidden absolute right-3 top-3 admin-chip flex h-10 w-10 items-center justify-center"
+          aria-label="Cerrar menú"
         >
           <IconX />
         </button>

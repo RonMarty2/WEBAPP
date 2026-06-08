@@ -189,6 +189,7 @@ export default function UniversityModal({
             className="w-8 h-8 flex items-center justify-center rounded-full text-gray-400
                        hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-600
                        dark:hover:text-slate-300 transition-colors cursor-pointer"
+            aria-label="Cerrar"
           >
             ✕
           </button>
@@ -462,7 +463,8 @@ export default function UniversityModal({
               ">
                 {m}
                 <button onClick={() => onRemoveModality(m)}
-                  className="text-blue-400 hover:text-blue-700 dark:hover:text-blue-200 cursor-pointer bg-transparent border-0 leading-none">
+                  className="text-blue-400 hover:text-blue-700 dark:hover:text-blue-200 cursor-pointer bg-transparent border-0 leading-none"
+                  aria-label={`Eliminar modalidad ${m}`}>
                   ×
                 </button>
               </span>

@@ -265,10 +265,12 @@ export default function ModelosPage() {
                           value={keyInputs[provider.id] ?? ""}
                           onChange={(e) => setKeyInputs((prev) => ({ ...prev, [provider.id]: e.target.value }))}
                           className="adm-input"
+                          aria-label={`API key de ${provider.name}`}
                         />
                         <button
                           onClick={() => setShowKey((prev) => ({ ...prev, [provider.id]: !prev[provider.id] }))}
                           style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#8a97aa", cursor: "pointer", fontSize: 12 }}
+                          aria-label={showKey[provider.id] ? `Ocultar API key de ${provider.name}` : `Mostrar API key de ${provider.name}`}
                         >
                           {showKey[provider.id] ? "[hide]" : "[show]"}
                         </button>
@@ -352,6 +354,7 @@ export default function ModelosPage() {
                               const provider = providers.find((item) => item.id === e.target.value);
                               setServiceEdits((prev) => ({ ...prev, [svc.id]: { provider_id: e.target.value, model: provider?.defaultModel ?? "" } }));
                             }}
+                            aria-label={`Proveedor para ${svc.nombre}`}
                           >
                             <option value="">seleccionar</option>
                             {providers.filter((provider) => provider.configured).map((provider) => (
@@ -366,6 +369,7 @@ export default function ModelosPage() {
                             disabled={!cfg.provider_id}
                             className="adm-select w-full"
                             onChange={(e) => setServiceEdits((prev) => ({ ...prev, [svc.id]: { ...cfg, model: e.target.value } }))}
+                            aria-label={`Modelo para ${svc.nombre}`}
                           >
                             <option value="">seleccionar</option>
                             {availableModels.map((model) => (
