@@ -196,6 +196,47 @@ function PagoContent() {
               ))}
             </div>
 
+            {/* Opción alternativa: comprar UN módulo individual.
+                Por ahora coordinamos precio por contacto directo —
+                no hay flujo automatizado de pago modular todavía.
+                Mantiene la arquitectura visible (que cada módulo
+                se puede vender suelto) sin inventar precios. */}
+            <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.35)", borderRadius: 12, padding: "1.2rem", marginBottom: "1.5rem" }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "#a78bfa", marginBottom: "0.5rem" }}>¿SOLO QUIERES UN MÓDULO?</div>
+              <p style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.5, marginBottom: "0.8rem" }}>
+                Si solo necesitas <strong>uno</strong> de los 7 módulos (Idea, Mercados,
+                Estrategia, Marketing, Organización, Finanzas o Defensa) en vez del SaaS
+                entero, también lo vendemos suelto a un precio menor.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.8rem" }}>
+                {[
+                  { id: "idea", label: "💡 Idea" },
+                  { id: "mercados", label: "📊 Mercados" },
+                  { id: "estrategia", label: "🎯 Estrategia" },
+                  { id: "marketing", label: "📣 Marketing" },
+                  { id: "organizacion", label: "🏢 Organización" },
+                  { id: "finanzas", label: "💰 Finanzas" },
+                  { id: "defensa", label: "🎓 Defensa" },
+                ].map((m) => (
+                  <span key={m.id} style={{ fontSize: 11, padding: "4px 8px", borderRadius: 6, background: "rgba(124,58,237,0.15)", color: "#c4b5fd" }}>
+                    {m.label}
+                  </span>
+                ))}
+              </div>
+              <a
+                href="https://wa.me/59100000000?text=Hola%2C%20quiero%20comprar%20un%20m%C3%B3dulo%20individual%20del%20Laboratorio%20Acad%C3%A9mico%20PRO"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, background: "#7c3aed", color: "white", textDecoration: "none", fontSize: 13, fontWeight: 700 }}
+              >
+                Coordinar precio por WhatsApp →
+              </a>
+              <p style={{ marginTop: "0.6rem", fontSize: 11, color: "#94a3b8" }}>
+                Pago automático modular en desarrollo. Por ahora coordinamos el precio
+                contigo según qué módulo necesitas y cuánto tiempo.
+              </p>
+            </div>
+
             {/* Selector de método */}
             <div style={{ background: "rgba(30,41,59,0.8)", border: "1px solid #334155", borderRadius: 12, padding: "1.2rem", marginBottom: "1.5rem" }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#94a3b8", marginBottom: "0.8rem" }}>MÉTODO DE PAGO</div>
