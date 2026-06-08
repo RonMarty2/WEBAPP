@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 7: auditoría 360° + cierre de 14 CRÍTICOS de seguridad/funcionales/performance)
+> **Última actualización:** 2026-06-08 (sesión 8: módulo Identidad Visual completo + fixes acumulados)
 
 ---
 
@@ -270,6 +270,148 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-08 (sesión 8) — Módulo Identidad Visual + cierre de fixes acumulados
+
+**Contexto:** el usuario pidió "agrega TODO lo que falta" en respuesta
+a la auditoría 360°. Imposible en una sesión (~30 features grandes),
+así que se priorizó el hueco más crítico señalado por el agente de
+producto: **identidad visual de marca** (logos, paleta, tipografía,
+mockups). Es el diferenciador comercial más fuerte y crítico para PG
+Pre-Fact, Mejora Org, Artefacto y Trabajo Dirigido.
+
+**Commits de esta sesión:**
+- `490bbd2` — Identidad: libs + tipos + SQL
+- `5d42fe4` — Identidad: API routes (8 endpoints)
+- `38b7436` — Identidad: UI completa (6 pantallas)
+- `214ed5c` — Fixes acumulados: WhatsApp env, WidgetMaestro, Mercados reporte, obs huérfanas
+
+### Módulo Identidad Visual — arquitectura modular
+
+Vive como sub-herramienta de Marketing (1:1 con plan_id). Tiene su
+propio set de archivos por carpeta para que cada sub-herramienta se
+pueda iterar/extender sin tocar las otras:
+
+```
+src/lib/identidad/
+├── paleta.ts        ← Algoritmos de teoría del color (HSL + esquemas)
+├── tipografia.ts    ← Catálogo curado de 10 combinaciones Google Fonts
+├── logo.ts          ← Orquestador multi-proveedor de IA generativa
+├── mockup.ts        ← 6 tipos de mockups en SVG inline (cero IA)
+└── manual.ts        ← Exportador Markdown del manual de marca
+
+src/app/api/identidad/[planId]/
+├── route.ts                ← GET/POST/PATCH del registro
+├── paleta/route.ts         ← POST genera paleta sin IA
+├── tipografia/route.ts     ← GET recomienda + POST guarda
+├── logo/route.ts           ← POST genera con IA, PATCH elige principal
+├── mockups/route.ts        ← POST genera set completo sin IA
+└── manual/route.ts         ← GET descarga .md
+
+src/app/marketing/(app)/planes/[id]/identidad/
+├── page.tsx           ← Hub con progreso 0/6 → 6/6
+├── brief/             ← Captura del brief de marca (9 campos)
+├── paleta/            ← Color picker + esquema + preview WCAG
+├── tipografia/        ← Top 3 recomendaciones + catálogo
+├── logo/              ← Generación IA + mockups
+└── manual/            ← Vista previa + descarga
+```
+
+### Decisiones técnicas clave
+
+- **Paleta sin IA**: 5 esquemas matemáticos (monocromática, análoga,
+  complementaria, triada, tetrada) basados en rotaciones HSL. Mapa de
+  15 sectores → seed sugerido + razón. Helper `contrasteWCAG()` para
+  validar legibilidad. Cero costo en tokens.
+
+- **Tipografía sin IA**: catálogo curado de 10 combinaciones Google
+  Fonts probadas, cada una con tags de personalidad (moderna, clásica,
+  elegante, amigable, académica, industrial, artesanal, neutral). El
+  motor `inferirPersonalidadesDesdePalabras()` lee el brief y matchea
+  top 3. Si el alumno no le gusta, ver catálogo completo.
+
+- **Logo CON IA — orquestador multi-proveedor**: el código soporta 4
+  proveedores (OpenAI DALL-E 3, Gemini Imagen 3, Replicate Flux Pro,
+  placeholder SVG). Cada uno se activa solo si tiene su env var
+  configurada. Sin ninguna key, devuelve placeholder SVG decoroso
+  (círculo con inicial) para que el flujo sea navegable en demos.
+  El `construirPromptLogo()` arma el prompt desde brief + paleta +
+  concepto extra del alumno → cero prompt injection, output
+  consistente. AbortSignal.timeout(50s) en todas las llamadas.
+
+- **Tope de logos por plan**: Estándar 3, Pro 10, Elite ilimitado.
+  Si alguien hace 3 generaciones en Estándar, devuelve 402 con mensaje
+  de upsell. Cada generación cuesta $0.04-0.10 USD según modelo.
+
+- **Mockups sin IA**: 6 SVGs inline procedurales: tarjeta de
+  presentación, post Instagram 1:1, empaque cuadrado, polo, taza,
+  banner web horizontal. Aplican la paleta + nombre. Datos URI. Cero
+  costo. Si el usuario quiere actualizar tras cambiar paleta o nombre,
+  regenera todo de un click.
+
+- **Manual exportable**: compilado en Markdown con todas las
+  decisiones + las imágenes de paleta (vía servicio singlecolorimage.com)
+  + logo + mockups. Listo para que el alumno haga Ctrl+P y guarde PDF.
+
+### Persistencia
+
+- Migración `migrations-identidad/001_estructura_base.sql` con tabla
+  `identidad_visuales` (1 fila por plan_id, UNIQUE). Trigger
+  auto-actualiza `actualizado_en`. ON DELETE CASCADE desde
+  `marketing_planes` para evitar huérfanos.
+- Pendiente ejecutar la migración en Supabase para activar el módulo
+  en producción.
+
+### Fixes acumulados de la auditoría (commit `214ed5c`)
+
+- `NEXT_PUBLIC_WHATSAPP_VENTAS` env var para el CTA modular en /pago
+  (antes "59100000000" hardcodeado).
+- WidgetMaestro agregado al header del Generador (faltaba; los otros 6
+  módulos sí lo tenían).
+- Reporte de Mercados ahora tiene botones Copiar e Imprimir / PDF
+  (estaba inconsistente con los otros 5 reportes).
+- Migración `migrations-docente/003_observaciones_proyecto_borrado.sql`
+  agrega columna `proyecto_eliminado` boolean en `docente_observaciones`
+  para marcar huérfanas (no se puede tener FK porque el proyecto_id
+  apunta a una de 7 tablas distintas según módulo).
+
+### Cómo aporta el módulo a cada modalidad académica
+
+| Modalidad | Aplica Identidad Visual | Por qué |
+|---|---|---|
+| Tesis | ❌ | Es investigación, no creación de marca |
+| Monografía | ❌ | Es documental, no creación |
+| PG Pre-Factibilidad | ✅ | Crítico — el plan de negocio nuevo necesita marca |
+| PG Mejora Organizacional | △ | Solo si la mejora incluye rebranding |
+| PG Diseño de Artefacto | ✅ | Necesita branding del producto |
+| Trabajo Dirigido | △ | Solo si la propuesta es comercial |
+| Exploración Investigativa | ❌ | Es investigación |
+| Examen de Grado | ❌ | Es preparación oral |
+| Artículo investigación | ❌ | Es paper académico |
+| Taller de Simulación | ❌ | Es informe descriptivo |
+
+### Pendientes de la auditoría que SIGUEN sin cerrar
+
+Los más críticos comerciales:
+- 🚨 **Pricing disconnect** landing vs API (6 SKUs vs 2). Bloquea ventas.
+- 🚨 **Panel docente Wave 4**: rúbrica, calificación numérica, calendario
+  de entregas. Sin esto, no se le cobra a docentes.
+- 🚨 **Migraciones SQL** sin runtime check. Si se despliega sin correrlas,
+  los módulos fallan en silencio.
+- 🚨 **Voseo en Finanzas** (15 archivos del simuladorPRO migrado).
+  Bloqueador de calidad según CLAUDE.md.
+- 🚨 **Pago automático** (Tigo / QR / Stripe webhook). Sigue manual.
+
+Seguridad/perf restantes:
+- Endpoints legacy `/api/monografias|citas|documentos|compilar` sin auth.
+- Rate limiting global en endpoints de IA (riesgo de costo).
+- Sanitizar `error.message` de DB en respuestas.
+- workspace/page.tsx monolito 4605 LOC.
+- 9 deps en package.json sin usar.
+- <1% test coverage, sin CI.
+
+---
+
 
 ### 2026-06-08 (sesión 7) — Auditoría 360° del SaaS + cierre de 14 CRÍTICOS
 
