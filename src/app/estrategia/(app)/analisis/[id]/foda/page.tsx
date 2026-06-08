@@ -22,6 +22,7 @@ export default function HerramientaFoda() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
   const [generandoIA, setGenerandoIA] = useState(false);
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export default function HerramientaFoda() {
   }, [params.id]);
 
   const guardar = async (volver: boolean) => {
-    setGuardando(true); setGuardado(false);
+    setGuardando(true); setGuardado(false); setErrorGuardar('');
     try {
       const res = await fetch(`/api/estrategia/proyectos/${params.id}`, {
         method: 'PATCH',
@@ -58,8 +59,18 @@ export default function HerramientaFoda() {
         credentials: 'include',
         body: JSON.stringify({ foda, estado: 'foda' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) router.push(`/estrategia/analisis/${params.id}`); }
-    } finally { setGuardando(false); }
+      if (res.ok) {
+        setGuardado(true);
+        if (volver) router.push(`/estrategia/analisis/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
+      }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   // Genera las estrategias cruzadas con IA usando F/O/D/A actuales
