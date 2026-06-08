@@ -88,9 +88,9 @@ Formato obligatorio:
         }),
       });
       console.error(`[route-options] IA error: ${(e as Error).message}`);
-      const msg = (e as Error).message.includes("temporales") || (e as Error).message.includes("intentá de nuevo")
+      const msg = (e as Error).message.includes("temporales") || (e as Error).message.includes("intenta de nuevo")
         ? (e as Error).message
-        : "Estamos teniendo problemas temporales para sugerirte opciones. Intentá de nuevo en unos minutos.";
+        : "Estamos teniendo problemas temporales para sugerirte opciones. Intenta de nuevo en unos minutos.";
       return NextResponse.json({ error: msg }, { status: 502 });
     }
 

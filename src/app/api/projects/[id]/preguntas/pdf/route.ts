@@ -253,7 +253,7 @@ export async function GET(_req: Request, { params }: Params) {
     const chromePath = await findChrome();
     if (!chromePath) {
       return NextResponse.json({
-        error: "Generador de PDF no disponible. En desarrollo, instalá Chrome/Edge.",
+        error: "Generador de PDF no disponible. En desarrollo, instala Chrome/Edge.",
       }, { status: 500 });
     }
 

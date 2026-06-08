@@ -393,7 +393,7 @@ export default function LanzadorEventos({ cursoId }: { cursoId: string }) {
             />
             <span>
               <strong>Forzar a TODOS los alumnos del alcance</strong> aunque no sea
-              sectorialmente relevante (útil si querés que los del sector NO afectado
+              sectorialmente relevante (útil si quieres que los del sector NO afectado
               discutan en clase <em>por qué</em> no les aplica).
             </span>
           </label>

@@ -177,7 +177,7 @@ export default function BotonInstalarApp() {
                   2
                 </span>
                 <span>
-                  Bajá y tocá <strong>"Añadir a pantalla de inicio"</strong>.
+                  Baja y toca <strong>"Añadir a pantalla de inicio"</strong>.
                 </span>
               </li>
               <li className="flex gap-3">

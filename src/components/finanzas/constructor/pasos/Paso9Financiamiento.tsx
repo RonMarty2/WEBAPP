@@ -1009,7 +1009,7 @@ function BloqueWACC({
             valor={`${(koa * 100).toFixed(2)}%`}
             detalle="costo de oportunidad (Koa) — editable arriba"
             color="emerald"
-            tooltip="Ke = costo del Equity = costo de oportunidad del accionista. Cuánto rendimiento le exiges a tu propia plata. Si pones Bs 100.000 y exiges 15% anual, esperás Bs 15.000 al año. Lo decides editando el Koa arriba."
+            tooltip="Ke = costo del Equity = costo de oportunidad del accionista. Cuánto rendimiento le exiges a tu propia plata. Si pones Bs 100.000 y exiges 15% anual, esperas Bs 15.000 al año. Lo decides editando el Koa arriba."
           />
         </div>
       </div>

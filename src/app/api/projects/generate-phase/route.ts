@@ -1041,9 +1041,9 @@ APA 7 / UMSS que aparezca en el resto del prompt.
         });
         // Log técnico para admin, mensaje amigable para el usuario.
         console.error(`[generate-phase] IA error: ${(e as Error).message}`);
-        const userMessage = (e as Error).message.includes("temporales") || (e as Error).message.includes("intentá de nuevo")
+        const userMessage = (e as Error).message.includes("temporales") || (e as Error).message.includes("intenta de nuevo")
           ? (e as Error).message
-          : "Estamos teniendo problemas temporales para generar tu contenido. Por favor intentá de nuevo en unos minutos.";
+          : "Estamos teniendo problemas temporales para generar tu contenido. Por favor intenta de nuevo en unos minutos.";
         return NextResponse.json({ error: userMessage }, { status: 502 });
       }
     }

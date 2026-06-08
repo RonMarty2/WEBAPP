@@ -346,25 +346,82 @@ React estándar) está **desactivada** en `eslint.config.mjs` con justificación
 
 ---
 
-## 🇧🇴 REGLA DE COPY — NUNCA USAR ARGENTINISMOS (VOSEO)
+## 🇧🇴 REGLA DE COPY — NUNCA USAR ARGENTINISMOS (VOSEO) — BLOQUEANTE
 
 **El SaaS es para mercado boliviano. Usar SIEMPRE español neutro con tuteo.**
+**Esta regla es BLOQUEANTE DE CALIDAD según el usuario. No es opcional.**
 
-❌ PROHIBIDO (voseo argentino/uruguayo):
-- "sabés", "querés", "tenés", "necesitás", "descargás", "subís", "conversás", "elegís", "regenerás", "podés", "esperás"
-- "vos", "tu monografía está lista, sin vueltas"
-- Expresiones rioplatenses: "sin vueltas", "buena onda", "macanudo", "che", "bárbaro"
+### ❌ PROHIBIDO (voseo argentino/uruguayo):
 
-✅ CORRECTO (tuteo neutro boliviano):
-- "sabes", "quieres", "tienes", "necesitas", "descargas", "subes", "conversas", "eliges", "regeneras", "puedes", "esperas"
-- "tú", "tu monografía está lista, sin rodeos"
-- Expresiones neutras: "sin complicaciones", "sin rodeos", "directo al punto"
+**Pronombre:** "vos" → usar **"tú"**.
 
-**Esta regla aplica a TODO copy visible al usuario:** UI, emails, mensajes de error,
-documentación, mockups, landing, pricing, tooltips, placeholders, prompts visibles.
-Históricamente Claude ha cometido este error varias veces (ver commits e1f0dc4
-y be75c9f). El usuario lo considera bloqueante de calidad — verificar
-cada copy generado.
+**Verbos en 2ª persona singular (presente):** terminan en `-ás`/`-és`/`-ís` con acento.
+Lista completa de los más frecuentes (NO usar ninguno):
+- sabés, querés, tenés, necesitás, descargás, subís, conversás, elegís, regenerás,
+  podés, esperás, decidís, cobrás, mostrás, escuchás, leés, escribís, mirás,
+  estás (cuando es 2ª persona singular), encontrás, aprovechás, llamás, dejás,
+  llevás, traés, vivís, salís, abrís, cerrás, conoces (esto es tuteo), conocés (voseo)
+
+**Imperativos en voseo:** terminan en sílaba acentuada (no en sílaba átona como en tuteo).
+Lista completa (NO usar ninguno):
+- sabé/sabete, hacé, decí, andá, vení, mirá, escribí, llamá, dejá, traé, llevá,
+  empezá, seguí, agregá, comentá, usá, llená, completá, revisá, generá, cambiá,
+  cerrá, abrí, continuá, reformulá, pegá, guardá, pulsá, tocá, reemplazá,
+  seleccioná, intentá, instalá, compilá, entrá, descomentá, restaurá, subí,
+  preguntá, disfrutá, aprendé, cuidá, cancelá, recordá, olvidá, prestá,
+  configurá, contactá, reintentá, decidí, creá, probá, aprovechá, encontrá,
+  fijate, sumá, mantené, devolvé
+
+**Expresiones rioplatenses:** "sin vueltas", "buena onda", "macanudo", "che",
+"bárbaro", "posta", "boludo", "pelotudo", "laburo", "guita", "morfi", "facha",
+"copado", "groso", "joya", "fenómeno" (cuando significa "muy bueno").
+
+### ✅ CORRECTO (tuteo neutro boliviano):
+
+**Pronombre:** **"tú"**.
+
+**Verbos:** sabes, quieres, tienes, necesitas, descargas, subes, conversas, eliges,
+regeneras, puedes, esperas, decides, cobras, muestras, escuchas, lees, escribes,
+miras, estás, encuentras, aprovechas, llamas, dejas, llevas, traes, vives, sales,
+abres, cierras, conoces.
+
+**Imperativos:** sabe/sábete, haz, di, ve, ven, mira, escribe, llama, deja, trae,
+lleva, empieza, sigue, agrega, comenta, usa, llena, completa, revisa, genera,
+cambia, cierra, abre, continúa, reformula, pega, guarda, pulsa, toca, reemplaza,
+selecciona, intenta, instala, compila, entra, descomenta, restaura, sube,
+pregunta, disfruta, aprende, cuida, cancela, recuerda, olvida, presta, configura,
+contacta, reintenta, decide, crea, prueba, aprovecha, encuentra, fíjate, suma,
+mantén, devuelve.
+
+**Expresiones neutras:** "sin complicaciones", "sin rodeos", "directo al punto",
+"sin problemas", "tranquilo", "claro está".
+
+### Excepción única: el atributo de NEGATIVO en prompts
+
+En `src/lib/prompts/*` está PERMITIDO mencionar las palabras prohibidas
+cuando se le instruye a la IA a NO usarlas. Ejemplo válido:
+> "NO usar argentinismos/voseo (sabés, querés, tenés). Usar español neutro boliviano."
+
+### Esta regla aplica a TODO copy visible al usuario:
+UI, emails, mensajes de error, documentación, mockups, landing, pricing, tooltips,
+placeholders, prompts visibles, comentarios de código que el usuario pueda leer
+(ej. README en ZIPs descargables), instrucciones de instalación.
+
+### Auto-verificación obligatoria antes de cerrar cualquier feature:
+
+Antes de hacer commit de algo que cambia copy, ejecuta este regex de búsqueda
+en VS Code o terminal sobre `src/app` y `src/components`:
+
+```
+\b(sabés|querés|tenés|necesitás|elegís|podés|esperás|hacé|agregá|usá|completá|generá|continuá|guardá|seleccioná|intentá|reintentá|instalá|configurá|contactá|reformulá|pegá|guardá|pulsá|tocá|reemplazá|cambiá|cerrá|abrí|empezá|seguí|escribí|mandá|dejá|llená|revisá|decidí|andá|creá|cuidá|cancelá|encontrá|aprovechá|recordá|olvidá|prestá|preguntá|disfrutá|aprendé|sos|fijate|subí|bajá|tirá|sumá|mantené|devolvé|probá|cargá|descomentá|restaurá|comentá|escribí|mirá)\b
+```
+
+Si el grep encuentra algo, NO hagas commit hasta corregirlo.
+
+### Historia y commits relevantes (referencia):
+Esta regla se ha violado en commits anteriores y el usuario marcó el voseo como
+bloqueante. Sesiones que hicieron sweeps masivos: 5 (`bc0ce8c`), 6 (`cfdd141`),
+9 (sesión actual). El sweep debe ser proactivo, no reactivo.
 
 ---
 

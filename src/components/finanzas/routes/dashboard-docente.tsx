@@ -277,7 +277,7 @@ function FormCrearCurso({
           </li>
         </ul>
         <p className="text-muted-foreground">
-          Podés cambiar el modo después desde el curso. Si recién empezás, dejá{" "}
+          Puedes cambiar el modo después desde el curso. Si recién empiezas, deja{" "}
           <strong>Automático</strong>.
         </p>
       </Recomendacion>

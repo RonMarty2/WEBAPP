@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 8: módulo Identidad Visual completo + fixes acumulados)
+> **Última actualización:** 2026-06-08 (sesión 9: pricing reconciliado + voseo limpio + regla bloqueante)
 
 ---
 
@@ -270,6 +270,131 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-08 (sesión 9) — Pricing reconciliado + voseo eliminado + REGLA bloqueante
+
+**Contexto:** después del cierre de la auditoría 360° en sesión 7,
+el usuario priorizó:
+1. Cerrar el bug comercial que perdía ventas (pricing disconnect).
+2. Eliminar el voseo argentino residual en Finanzas que estaba
+   bloqueando calidad del SaaS según CLAUDE.md.
+3. Convertir la regla anti-voseo en **regla bloqueante explícita** en
+   CLAUDE.md (auto-verificación obligatoria antes de commit).
+
+**Commits de esta sesión:**
+- `3e18ea7` — Reconciliación pricing landing ↔ API (6 SKUs unificados)
+- *(este commit)* — Sweep de voseo en Finanzas + regla reforzada
+
+### Pieza 1 — Reconciliación pricing (commit `3e18ea7`)
+
+**Bug detectado:** la landing ofrecía 6 SKUs comerciales (mono-básico
+Bs 150 / plus 300 / premium 500 + pg-básico 350 / plus 600 / premium 950),
+pero el endpoint `/api/payments` solo conocía 2 ("estandar"=150, "pro"=300).
+Cualquier click en "Plus Bs 300" o "Premium Bs 500/950" se silenciaba
+en runtime → el alumno terminaba pagando Bs 150 sin enterarse.
+
+**Refactorización modular:**
+
+Nuevo archivo `src/lib/pago/catalogo.ts` como **única fuente de verdad**.
+Define los 6 SKUs con slug inmutable + precio + headline + features +
+activo. Helpers exportados:
+- `planPorSlug(slug)` → PlanCatalogo | null
+- `slugEsValido(slug)` → boolean
+- `precioDeSlug(slug)` → number
+- `planesPorFamilia()` → { monografia, proyecto_grado }
+- `migrarSlugLegacy(slug)` → mapea "estandar"→"mono-basico", "pro"→"mono-plus"
+- `descripcionAdmin(slug)` → "Nombre — Bs N" para el admin
+- `slugAUserPlan(slug)` → "estandar"|"pro"|"elite" para feature gating
+
+**Consumidores actualizados:**
+- `/api/payments` valida slug contra el catálogo (400 con lista de slugs
+  válidos si no existe).
+- `/api/admin/payments` mapea slug → UserPlan al aprobar pagos.
+- `PricingSection` construye los 2 productos (Monografía + PG) en runtime
+  desde el catálogo unificado — agregar un SKU al catálogo se refleja
+  automáticamente en la landing.
+- `/pago` lee el slug de la URL, lo valida y muestra el selector con
+  los 6 SKUs agrupados por familia, con el seleccionado de la URL
+  preseleccionado. Botones, mensajes y montos finales ahora usan el
+  precio real del SKU.
+- `persistence.ts` cambió `plan: "estandar" | "pro"` a `plan: PlanSlug`
+  (string) para que el catálogo crezca sin migrar BD/tipo. Pagos
+  históricos con "estandar"/"pro" siguen siendo legibles vía
+  `migrarSlugLegacy()`.
+
+**Verificación end-to-end:** click "Elijo el Plus" en landing → URL
+`/login?plan=mono-plus` → tras login `/pago?plan=mono-plus` → card
+"Monografía Plus" seleccionada con precio Bs. 300 y botón
+"Solicitar activación — Bs. 300".
+
+### Pieza 2 — Voseo eliminado de Finanzas
+
+Sweep ejecutado en `src/components/finanzas` + `src/lib/finanzas` +
+prompts de `src/lib/prompts` que tenían imperativos voseo, además de
+los mensajes de error en `/api/projects/*`:
+- `dashboard-docente.tsx`: "Podés cambiar / dejá / empezás" → tuteo
+- `galeria-ejemplos.tsx`: "No tenés cursos / Andá / creá" → tuteo
+- `simular-proyecto.tsx`: "no tenés / querés" → tuteo
+- `BotonInstalarApp.tsx`: "Bajá y tocá" → tuteo
+- `LanzadorEventos.tsx`: "si querés que" → tuteo
+- `ModalRevisionMasiva.tsx`: 4 strings (Decidí, revisá, reintentá, podés cerrar) → tuteo
+- `DetalleEntregaPasoAPaso.tsx`: "Acá podés ver" → tuteo
+- `Paso9Financiamiento.tsx`: "esperás Bs 15.000" → tuteo
+- `aiProvider.ts`: "intentá / contactá / Configurá" → tuteo
+- `route-options/route.ts`: "intentá / Intentá" → tuteo
+- `analyze-style/route.ts`: "intentá / Intentá" → tuteo
+- `generate-phase/route.ts`: "intentá / Intentá" → tuteo
+- `finalize/route.ts`: "intentá / Intentá" → tuteo
+- `pdf/route.ts` (2): "instalá / configurá" → tuteo
+- `cap0-idea-negocio.ts`: "Hacé un check" → tuteo
+- `podio-supabase.ts`: "si sos estudiante" → "si eres estudiante"
+
+**Verificación:** grep masivo de 50+ patrones de voseo sobre
+`src/components` y `src/app` devuelve cero matches.
+
+### Pieza 3 — REGLA BLOQUEANTE en CLAUDE.md
+
+Reescrita la sección "REGLA DE COPY" en CLAUDE.md con:
+- Marca explícita **BLOQUEANTE** (no es opcional).
+- Lista COMPLETA de verbos voseo (presente + imperativos) con sus
+  equivalentes tuteo. ~50 verbos cubriendo el 95% de los casos típicos.
+- Lista de expresiones rioplatenses prohibidas ("posta", "che",
+  "macanudo", etc.).
+- **Excepción única:** los prompts en `src/lib/prompts/*` SÍ pueden
+  mencionar las palabras prohibidas cuando se le instruye a la IA a
+  NO usarlas (las reglas anti-voseo dirigidas al modelo).
+- **Auto-verificación obligatoria antes de commit:** regex pegable para
+  buscar voseo en `src/app` y `src/components`. Si el grep encuentra
+  algo, NO hacer commit.
+- Historial de commits que han hecho sweeps (sesiones 5, 6, 9) para
+  evidencia.
+
+Esta regla es leída automáticamente por cualquier IA que abra el
+proyecto. Aplicada como pre-commit mental obligatorio.
+
+### Pendientes que siguen sin cerrar (orden de impacto)
+
+🚨 Comercial urgente:
+- ⬜ **Panel docente Wave 4**: rúbrica + calificación + calendario.
+  Sin esto, no se le puede cobrar Bs 300/mes a docentes. El usuario
+  pidió explicación antes de construir: hecha en chat antes de
+  empezar la sesión 9.
+- ⬜ **Pago automático**: Tigo/QR/Stripe webhook. Requiere
+  credenciales del usuario.
+
+🛡️ Seguridad (de la auditoría):
+- ⬜ Endpoints legacy `/api/monografias|citas|documentos|compilar` sin auth.
+- ⬜ Rate limiting global en endpoints de IA.
+- ⬜ Sanitizar `error.message` de DB en respuestas.
+
+⚙️ Técnico:
+- ⬜ `workspace/page.tsx` monolito 4605 LOC.
+- ⬜ `dbListAllProyectos()` con `select("*")` JSONB.
+- ⬜ 9 deps en package.json sin usar.
+- ⬜ <1% test coverage, sin CI.
+
+---
+
 
 ### 2026-06-08 (sesión 8) — Módulo Identidad Visual + cierre de fixes acumulados
 

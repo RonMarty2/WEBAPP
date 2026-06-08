@@ -91,9 +91,9 @@ export async function POST(req: Request) {
         }),
       });
       console.error(`[analyze-style] IA error: ${(e as Error).message}`);
-      const msg = (e as Error).message.includes("temporales") || (e as Error).message.includes("intentá de nuevo")
+      const msg = (e as Error).message.includes("temporales") || (e as Error).message.includes("intenta de nuevo")
         ? (e as Error).message
-        : "Estamos teniendo problemas temporales para analizar tu estilo. Intentá de nuevo en unos minutos.";
+        : "Estamos teniendo problemas temporales para analizar tu estilo. Intenta de nuevo en unos minutos.";
       return NextResponse.json({ error: msg }, { status: 502 });
     }
 

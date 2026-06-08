@@ -97,7 +97,7 @@ Marca uno como "RECOMENDADO" con una línea breve explicando por qué.
 
 ## Validación de viabilidad académica
 
-Hacé un check honesto de 4-6 puntos sobre la viabilidad del proyecto como
+Haz un check honesto de 4-6 puntos sobre la viabilidad del proyecto como
 TRABAJO ACADÉMICO (no como negocio real — eso es otra cosa). Valida:
 
 - ¿Hay datos secundarios disponibles para el PESTEL?

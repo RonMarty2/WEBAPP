@@ -889,10 +889,10 @@ async function runFallbackChain(opts: {
   }
 
   if (preferredProviderFailed) {
-    throw new Error(`Estamos teniendo problemas temporales con los proveedores de IA. Por favor intentá de nuevo en unos minutos. Si el problema persiste contactá al equipo.`);
+    throw new Error(`Estamos teniendo problemas temporales con los proveedores de IA. Por favor intenta de nuevo en unos minutos. Si el problema persiste contacta al equipo.`);
   }
   throw new Error(
-    `Ningún proveedor de IA disponible. Configurá al menos una API key (Anthropic, Gemini, OpenAI o Groq) en las variables de entorno de Vercel.\n${errors.join(" | ")}`
+    `Ningún proveedor de IA disponible. Configura al menos una API key (Anthropic, Gemini, OpenAI o Groq) en las variables de entorno de Vercel.\n${errors.join(" | ")}`
   );
 }
 
