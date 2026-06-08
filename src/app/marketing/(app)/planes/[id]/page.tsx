@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { ArrowLeft, UserRound, Blend, Wallet, CalendarDays, FileText, Lock } from 'lucide-react';
+import { ArrowLeft, UserRound, Blend, Wallet, CalendarDays, FileText, Lock, Palette } from 'lucide-react';
 import type { PlanMarketing } from '@/types/marketing';
 
 /**
@@ -13,6 +13,7 @@ import type { PlanMarketing } from '@/types/marketing';
 const HERRAMIENTAS = [
   { ruta: 'buyer-persona', label: 'Buyer persona', desc: 'Define a tu cliente ideal', icon: UserRound, disponible: true },
   { ruta: 'mezcla', label: 'Mezcla 4Ps / 7Ps', desc: 'Producto, precio, plaza, promoción…', icon: Blend, disponible: true },
+  { ruta: 'identidad', label: 'Identidad Visual', desc: 'Logo, paleta, tipografía y mockups con IA', icon: Palette, disponible: true },
   { ruta: 'presupuesto', label: 'Presupuesto y CPL', desc: 'Inversión y costo por lead por canal', icon: Wallet, disponible: true },
   { ruta: 'calendario', label: 'Calendario editorial', desc: 'Plan de contenidos por fecha y canal', icon: CalendarDays, disponible: true },
   { ruta: 'reporte', label: 'Reporte', desc: 'Documento consolidado + artefacto', icon: FileText, disponible: true },
