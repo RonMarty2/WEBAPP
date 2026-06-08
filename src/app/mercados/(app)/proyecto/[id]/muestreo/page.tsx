@@ -15,6 +15,7 @@ export default function EtapaMuestreo() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   const [universo, setUniverso] = useState('');
   const [confianza, setConfianza] = useState(95);
@@ -51,6 +52,7 @@ export default function EtapaMuestreo() {
     if (!resultado) return;
     setGuardando(true);
     setGuardado(false);
+    setErrorGuardar('');
     try {
       const body: Record<string, unknown> = {
         universo: parseInt(universo, 10) || null,
@@ -70,7 +72,12 @@ export default function EtapaMuestreo() {
       if (res.ok) {
         setGuardado(true);
         if (avanzar) router.push(`/mercados/proyecto/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
       }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
     } finally {
       setGuardando(false);
     }
@@ -228,8 +235,11 @@ export default function EtapaMuestreo() {
         </button>
         {guardado && (
           <span className="inline-flex items-center gap-1 text-sm text-emerald-600">
-            <Check className="h-4 w-4" /> Guardado
+            <Check className="h-4 w-4" aria-hidden="true" /> Guardado
           </span>
+        )}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
         )}
       </div>
     </div>

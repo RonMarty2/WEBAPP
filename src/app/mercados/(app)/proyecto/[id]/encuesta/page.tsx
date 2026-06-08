@@ -21,8 +21,10 @@ export default function EtapaEncuesta() {
   const router = useRouter();
 
   const [cargando, setCargando] = useState(true);
+  const [errorCarga, setErrorCarga] = useState('');
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
 
   const [titulo, setTitulo] = useState('Mi encuesta');
   const [descripcion, setDescripcion] = useState('');
@@ -47,7 +49,7 @@ export default function EtapaEncuesta() {
           })));
         }
       })
-      .catch(() => {})
+      .catch(() => setErrorCarga('No se pudo cargar la encuesta. Verifica tu conexión y recarga la página.'))
       .finally(() => setCargando(false));
   }, [params.id]);
 
@@ -84,6 +86,7 @@ export default function EtapaEncuesta() {
   const guardar = async (avanzar: boolean) => {
     setGuardando(true);
     setGuardado(false);
+    setErrorGuardar('');
     try {
       const res = await fetch(`/api/mercados/proyectos/${params.id}/encuesta`, {
         method: 'PUT',
@@ -94,7 +97,12 @@ export default function EtapaEncuesta() {
       if (res.ok) {
         setGuardado(true);
         if (avanzar) router.push(`/mercados/proyecto/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
       }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
     } finally {
       setGuardando(false);
     }
@@ -102,6 +110,16 @@ export default function EtapaEncuesta() {
 
   if (cargando) {
     return <div className="mk-muted py-10 text-center text-sm">Cargando encuesta…</div>;
+  }
+
+  if (errorCarga) {
+    return (
+      <div className="mx-auto max-w-md py-10">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-900">
+          {errorCarga}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -174,8 +192,8 @@ export default function EtapaEncuesta() {
           <div className="mk-card p-4">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-sm font-semibold">Elige el tipo de pregunta</p>
-              <button onClick={() => setSelectorAbierto(false)} className="mk-muted rounded p-1 hover:bg-slate-100">
-                <X className="h-4 w-4" />
+              <button onClick={() => setSelectorAbierto(false)} className="mk-muted rounded p-1 hover:bg-slate-100" aria-label="Cerrar selector">
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
@@ -215,8 +233,11 @@ export default function EtapaEncuesta() {
         </button>
         {guardado && (
           <span className="inline-flex items-center gap-1 text-sm text-emerald-600">
-            <Check className="h-4 w-4" /> Guardado
+            <Check className="h-4 w-4" aria-hidden="true" /> Guardado
           </span>
+        )}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
         )}
       </div>
       {preguntas.length === 0 && (
@@ -252,14 +273,14 @@ function PreguntaEditor({
         </span>
         <span className="mk-accent-text text-xs font-medium">{meta?.label}</span>
         <div className="ml-auto flex items-center gap-1">
-          <button onClick={() => onMover(-1)} disabled={indice === 0} className="mk-muted rounded p-1 hover:bg-slate-100 disabled:opacity-30">
-            <ChevronUp className="h-4 w-4" />
+          <button onClick={() => onMover(-1)} disabled={indice === 0} className="mk-muted rounded p-1 hover:bg-slate-100 disabled:opacity-30" aria-label="Mover pregunta arriba">
+            <ChevronUp className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button onClick={() => onMover(1)} disabled={indice === total - 1} className="mk-muted rounded p-1 hover:bg-slate-100 disabled:opacity-30">
-            <ChevronDown className="h-4 w-4" />
+          <button onClick={() => onMover(1)} disabled={indice === total - 1} className="mk-muted rounded p-1 hover:bg-slate-100 disabled:opacity-30" aria-label="Mover pregunta abajo">
+            <ChevronDown className="h-4 w-4" aria-hidden="true" />
           </button>
-          <button onClick={onEliminar} className="mk-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600">
-            <Trash2 className="h-4 w-4" />
+          <button onClick={onEliminar} className="mk-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600" aria-label="Eliminar pregunta">
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -293,8 +314,9 @@ function PreguntaEditor({
               <button
                 onClick={() => onActualizar({ opciones: pregunta.opciones.filter((_, idx) => idx !== oi) })}
                 className="mk-muted rounded p-1 hover:bg-rose-50 hover:text-rose-600"
+                aria-label="Eliminar opción"
               >
-                <X className="h-3.5 w-3.5" />
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             </div>
           ))}

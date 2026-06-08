@@ -263,7 +263,14 @@ export default function DocumentoProyecto() {
             <button onClick={descargarZip} disabled={descargandoZip} className="gen-btn-primary inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium disabled:opacity-50" title="ZIP listo para subir a Overleaf, con plantilla de tu universidad si la detectamos">
               {descargandoZip ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />} ZIP Overleaf
             </button>
-            <button onClick={() => window.print()} className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium"><Printer className="h-3.5 w-3.5" /> Imprimir</button>
+            <button
+              onClick={() => window.print()}
+              className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium"
+              title="Abre el diálogo de impresión del navegador. Elige 'Guardar como PDF' como destino para descargar el documento."
+              aria-label="Imprimir o guardar como PDF"
+            >
+              <Printer className="h-3.5 w-3.5" aria-hidden="true" /> Imprimir / PDF
+            </button>
           </div>
         )}
       </header>
@@ -354,9 +361,9 @@ export default function DocumentoProyecto() {
                   <input value={sec.titulo} onChange={(e) => upd(sec.id, { titulo: e.target.value })}
                     className="gen-border flex-1 rounded border bg-white px-2 py-1 text-sm font-semibold focus:outline-none" />
                   <div className="flex flex-shrink-0 items-center gap-0.5 print:hidden">
-                    <button onClick={() => mover(i, -1)} disabled={i === 0} className="gen-muted rounded p-1 hover:bg-teal-50 disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button>
-                    <button onClick={() => mover(i, 1)} disabled={i === secciones.length - 1} className="gen-muted rounded p-1 hover:bg-teal-50 disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button>
-                    <button onClick={() => del(sec.id)} className="text-slate-300 hover:text-rose-600"><X className="h-4 w-4" /></button>
+                    <button onClick={() => mover(i, -1)} disabled={i === 0} className="gen-muted rounded p-1 hover:bg-teal-50 disabled:opacity-30" aria-label="Mover sección arriba"><ChevronUp className="h-4 w-4" aria-hidden="true" /></button>
+                    <button onClick={() => mover(i, 1)} disabled={i === secciones.length - 1} className="gen-muted rounded p-1 hover:bg-teal-50 disabled:opacity-30" aria-label="Mover sección abajo"><ChevronDown className="h-4 w-4" aria-hidden="true" /></button>
+                    <button onClick={() => del(sec.id)} className="text-slate-300 hover:text-rose-600" aria-label="Eliminar sección"><X className="h-4 w-4" aria-hidden="true" /></button>
                   </div>
                 </div>
                 <textarea value={sec.contenido} onChange={(e) => upd(sec.id, { contenido: e.target.value })} rows={sec.contenido ? 8 : 3}

@@ -1131,3 +1131,56 @@ html.is-mobile-ua .admin-view-toggle-fab {
   bottom: 110px !important;
   right: 16px !important;
 }
+
+/* ────────────────────────────────────────────────────────────────────
+   Reglas globales de impresión / PDF
+   El usuario hace "Imprimir / PDF" en cualquier reporte o documento.
+   Estas reglas aseguran que solo el contenido del documento sale en
+   el PDF — sin sidebars, headers de módulo, widgets ni botones.
+   Los componentes individuales pueden agregar `print:hidden` para
+   ocultar elementos específicos a nivel UI.
+   ──────────────────────────────────────────────────────────────────── */
+@media print {
+  /* Quitar fondos y sombras para no malgastar tinta. */
+  * {
+    box-shadow: none !important;
+    background-image: none !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  /* Ocultar elementos comunes de chrome de la app que NO son contenido. */
+  header[role="banner"],
+  nav[role="navigation"],
+  aside,
+  .gen-header,
+  .mk-header,
+  .es-header,
+  .mkt-header,
+  .org-header,
+  .def-header,
+  .idea-header,
+  .admin-view-toggle-fab {
+    display: none !important;
+  }
+  /* Texto compacto, evitar saltos en medio de párrafos */
+  p, li {
+    page-break-inside: avoid;
+    orphans: 3;
+    widows: 3;
+  }
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+    color: #000 !important;
+  }
+  /* Anchos al 100% del papel */
+  main, article, section, .gen-card, .mk-card, .es-card, .org-card, .def-card, .mkt-card, .idea-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.5cm 0 !important;
+    border: none !important;
+    background: transparent !important;
+  }
+}
