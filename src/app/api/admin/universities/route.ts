@@ -3,6 +3,21 @@ import { readdir } from "node:fs/promises";
 import path from "node:path";
 import { DEFAULT_UNIVERSITIES, University } from "@/lib/data";
 import { logoUrlFor, logoVariableFromFileName, universityLogoFolder } from "@/lib/logoAssets";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
+
+// Helper para gate de mutaciones (POST/PUT/DELETE). GET es público por
+// diseño (lista de universidades es info no sensible que la landing usa).
+async function gateAdmin(): Promise<Response | null> {
+  try {
+    await requireAdmin();
+    return null;
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    throw e;
+  }
+}
 
 // In production, stored in Supabase
 let universitiesStore: University[] = [...DEFAULT_UNIVERSITIES];
@@ -44,6 +59,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const body = await req.json();
     const newUniversity: University = {
@@ -75,6 +92,8 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const body = await req.json();
     const index = universitiesStore.findIndex((u) => u.id === body.id);
@@ -91,6 +110,8 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const { id } = await req.json();
     universitiesStore = universitiesStore.filter((u) => u.id !== id);

@@ -1,9 +1,16 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import { monografiasStore, capitulosStore, citasStore, documentosStore } from "@/lib/memoryStore";
 
 // GET /api/admin/monografias
 // Devuelve todas las monografías con sus capítulos y estadísticas para el panel admin
 export async function GET() {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
   const all = [...monografiasStore.values()].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );

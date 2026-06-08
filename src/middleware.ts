@@ -41,7 +41,7 @@ function applySecurityHeaders(res: NextResponse): NextResponse {
   return res;
 }
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // ─────────────────────────────────────────────────────────────────────────

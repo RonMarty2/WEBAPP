@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import {
   listMonografias,
   getCapitulos,
@@ -10,6 +11,12 @@ type Params = Promise<{ id: string }>;
 
 // GET /api/admin/usuarios/[id]/historial
 export async function GET(_req: Request, { params }: { params: Params }) {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
   const { id } = await params;
 
   const monografias = listMonografias(id);

@@ -5,8 +5,23 @@
  */
 
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
 import type { TipoProyecto, FaseTipoProyecto } from "@/lib/persistence";
+
+// Helper para gate de mutaciones. GET lo dejamos público porque el wizard
+// `/projects/new` lo lee SIN sesión admin para mostrar los tipos disponibles.
+async function gateAdmin(): Promise<Response | null> {
+  try {
+    await requireAdmin();
+    return null;
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    throw e;
+  }
+}
 
 function uid(): string {
   return "tp-" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
@@ -146,6 +161,8 @@ export async function GET(req: Request) {
 // ── POST ───────────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const body = await req.json() as {
       action: "create_tipo" | "update_tipo" | "create_fase" | "update_fase";
@@ -241,6 +258,8 @@ export async function POST(req: Request) {
 // ── DELETE ─────────────────────────────────────────────────────────────────────
 
 export async function DELETE(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const body = await req.json() as { action: "delete_tipo" | "delete_fase"; id: string };
     if (!body.id) return NextResponse.json({ error: "id es requerido" }, { status: 400 });

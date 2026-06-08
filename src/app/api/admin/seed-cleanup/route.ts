@@ -19,6 +19,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import {
   dbUpsertUser,
   dbActivateUser,
@@ -53,6 +54,13 @@ const PROJECTS_TO_DELETE = [
 ];
 
 export async function POST(req: NextRequest) {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       { error: "Supabase no configurado. Abortando cleanup." },

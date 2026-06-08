@@ -5,8 +5,23 @@
  */
 
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import { loadFromDisk, saveToDisk } from "@/lib/persistence";
 import type { CalibracionPregunta } from "@/lib/persistence";
+
+// Gate de mutaciones. GET puede ser público porque las preguntas se usan
+// también en el wizard `/projects/new` antes de que el alumno tenga sesión.
+async function gateAdmin(): Promise<Response | null> {
+  try {
+    await requireAdmin();
+    return null;
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return NextResponse.json({ error: e.message }, { status: e.status });
+    }
+    throw e;
+  }
+}
 
 function uid(): string {
   return "cq-" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36);
@@ -61,6 +76,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const body = await req.json() as Partial<CalibracionPregunta> & { servicio_id?: string };
 
@@ -115,6 +132,8 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const gate = await gateAdmin();
+  if (gate) return gate;
   try {
     const { id } = await req.json() as { id: string };
     if (!id) return NextResponse.json({ error: "id es requerido" }, { status: 400 });

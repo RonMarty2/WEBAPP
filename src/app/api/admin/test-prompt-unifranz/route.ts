@@ -21,6 +21,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import { llamarIA } from "@/lib/aiProvider";
 import {
   getPromptUnifranzPG,
@@ -95,6 +96,12 @@ function construirContextoUsuario(contexto: ContextoProyecto): string {
 }
 
 export async function POST(req: Request) {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
   const inicio = Date.now();
 
   try {

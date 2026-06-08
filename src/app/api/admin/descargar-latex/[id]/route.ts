@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 import { getMonografia, getCapitulos, getCitas } from "@/lib/memoryStore";
 import { generarLatexMonografia } from "@/lib/latexMonografia";
 import { validarCitasEnBibliografia } from "@/lib/validaciones";
@@ -8,6 +9,12 @@ type Params = Promise<{ id: string }>;
 // GET /api/admin/descargar-latex/[id]
 // Admin endpoint: download LaTeX source for any monografía by ID.
 export async function GET(_req: Request, { params }: { params: Params }) {
+  try {
+    await requireAdmin();
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
   const { id } = await params;
 
   const monografia = getMonografia(id);
