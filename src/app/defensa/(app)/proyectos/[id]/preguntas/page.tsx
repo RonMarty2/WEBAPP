@@ -26,6 +26,7 @@ export default function HerramientaPreguntas() {
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState('');
   const [generandoIA, setGenerandoIA] = useState(false);
 
   useEffect(() => {
@@ -48,14 +49,24 @@ export default function HerramientaPreguntas() {
   const del = (id: string) => setBanco((b) => ({ items: b.items.filter((q) => q.id !== id) }));
 
   const guardar = async (volver: boolean) => {
-    setGuardando(true); setGuardado(false);
+    setGuardando(true); setGuardado(false); setErrorGuardar('');
     try {
       const res = await fetch(`/api/defensa/proyectos/${params.id}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
         body: JSON.stringify({ preguntas: banco, estado: 'preguntas' }),
       });
-      if (res.ok) { setGuardado(true); if (volver) router.push(`/defensa/proyectos/${params.id}`); }
-    } finally { setGuardando(false); }
+      if (res.ok) {
+        setGuardado(true);
+        if (volver) router.push(`/defensa/proyectos/${params.id}`);
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setErrorGuardar(d.error || `No se pudo guardar (error ${res.status}). Intenta de nuevo.`);
+      }
+    } catch {
+      setErrorGuardar('No se pudo guardar. Verifica tu conexión.');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   const generarIA = async () => {
@@ -156,6 +167,9 @@ export default function HerramientaPreguntas() {
         <button onClick={() => guardar(false)} disabled={guardando} className="def-btn-ghost px-5 py-2.5 text-sm font-medium disabled:opacity-50">{guardando ? 'Guardando…' : 'Guardar'}</button>
         <button onClick={() => guardar(true)} disabled={guardando} className="def-btn-primary px-5 py-2.5 text-sm font-medium disabled:opacity-50">Guardar y volver →</button>
         {guardado && <span className="inline-flex items-center gap-1 text-sm text-emerald-600"><Check className="h-4 w-4" /> Guardado</span>}
+        {errorGuardar && (
+          <span className="text-sm text-rose-700" role="alert">{errorGuardar}</span>
+        )}
       </div>
     </div>
   );
