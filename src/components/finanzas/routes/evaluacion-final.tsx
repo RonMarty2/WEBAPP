@@ -30,6 +30,8 @@ import { construirFlujoCaja } from "@/lib/finanzas/flujo-proyecto";
 import { formatearBolivianos } from "@/lib/finanzas/utils";
 import type { Proyecto } from "@/types/finanzas/proyecto";
 import type { Simulacion, TurnoHistorial } from "@/types/finanzas/simulacion";
+import { useMaestroActivo } from "@/lib/maestro/useMaestroActivo";
+import { SiguienteModulo } from "@/components/compartido/SiguienteModulo";
 
 interface Analisis {
   aciertos: string[];
@@ -39,6 +41,7 @@ interface Analisis {
 
 export default function EvaluacionFinal() {
   const user = useAuthStore((s) => s.user);
+  const maestro = useMaestroActivo();
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [simulacion, setSimulacion] = useState<Simulacion | null>(null);
   const [historial, setHistorial] = useState<TurnoHistorial[]>([]);
@@ -223,6 +226,8 @@ export default function EvaluacionFinal() {
         recomendaciones específicas sobre tus decisiones. Requiere configurar la API
         de Claude — se habilita en FASE 9.
       </div>
+
+      <SiguienteModulo actual="finanzas" modalidad={maestro?.modalidad} />
     </div>
   );
 }
