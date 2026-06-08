@@ -343,11 +343,14 @@ para mantener calidad y no saturar el contexto.
   instruyen a la IA, no se ven directo.
 
 ### Pendientes activos (post-sesión 6)
-- ⬜ **Replicar pre-llenado a los 5 saltos restantes** del flujo
-  (Mercados→Estrategia, Estrategia→Marketing, etc.). Solo está hecho
-  Idea→Mercados. Cada salto requiere: (a) pasar `tituloContexto` al
-  `SiguienteModulo` del módulo origen y (b) leer `?titulo=&desde=` en
-  la página "Mis ..." del módulo destino.
+- ✅ **Pre-llenado replicado a los 6 saltos del flujo** (`a124c85`).
+  Origenes pasan `tituloContexto`; destinos leen `?titulo=&desde=`
+  con `useSearchParams` y abren el form con hint violeta "Título
+  tomado desde tu X". Etiqueta `desde=` dinámica por módulo. Aplica
+  a: Idea→Mercados, Mercados→Estrategia, Estrategia→Marketing,
+  Marketing→Organización, Finanzas→Defensa, Defensa→Generador.
+  Organización→Finanzas no aplica (Finanzas no tiene form de
+  "crear proyecto"; el simulador ya tiene su propio flujo interno).
 - ⬜ **Panel docente real** — el agujero más grande del segundo público.
   Hoy el docente ve la misma vista del estudiante. Necesita: "Mis
   alumnos" (con su progreso), corregir/dar feedback con rúbrica,
