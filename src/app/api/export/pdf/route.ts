@@ -3,6 +3,7 @@ import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { requireAuth, AuthError } from "@/lib/api-auth";
 
 const execFileAsync = promisify(execFile);
 
@@ -79,6 +80,16 @@ async function findChrome(): Promise<string | null> {
 }
 
 export async function POST(request: Request) {
+  // Auth requerida: este endpoint renderiza HTML arbitrario con Chrome
+  // headless en server. Sin auth era vector de SSRF (un atacante metía
+  // <img src="http://internal-service/...">) y DoS (CPU/memoria).
+  try {
+    await requireAuth();
+  } catch (e) {
+    if (e instanceof AuthError) return Response.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
+
   let body: { html?: string; title?: string; responseMode?: "binary" | "base64" };
   try {
     body = await request.json();

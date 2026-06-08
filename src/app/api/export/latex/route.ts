@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireAuth, AuthError } from "@/lib/api-auth";
 import { SECTION_STEPS } from "@/lib/data";
 
 export async function POST(req: Request) {
+  try {
+    await requireAuth();
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
   try {
     const body = await req.json();
     const { universityName, modality, programa, sections, format } = body;

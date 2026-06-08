@@ -67,9 +67,17 @@ export async function GET(req: Request) {
     finalActive = isWhitelistedAdmin ? true : false;
   }
 
-  // Log visible en Vercel logs para debug rápido si vuelve a fallar.
-  console.log("[oauth/callback] email=%s isWhitelistedAdmin=%s existing.role=%s → finalRole=%s",
-    profile.email, isWhitelistedAdmin, existing?.role, finalRole);
+  // Antes se logueaba el email completo, lo cual es PII en logs de Vercel
+  // y permite enumerar admins. Ahora solo el dominio del email + flags.
+  // Activar log completo con LOG_AUTH_DEBUG=1 si hace falta diagnosticar.
+  if (process.env.LOG_AUTH_DEBUG === "1") {
+    console.log("[oauth/callback] email=%s isWhitelistedAdmin=%s existing.role=%s → finalRole=%s",
+      profile.email, isWhitelistedAdmin, existing?.role, finalRole);
+  } else {
+    const dominio = profile.email.split("@")[1] ?? "?";
+    console.log("[oauth/callback] dominio=%s isWhitelistedAdmin=%s existing.role=%s → finalRole=%s",
+      dominio, isWhitelistedAdmin, existing?.role, finalRole);
+  }
 
   const userRecord = await dbUpsertUser({
     id: profile.id,

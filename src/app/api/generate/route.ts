@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth, AuthError } from "@/lib/api-auth";
 import { DEFAULT_PROMPTS, SECTION_STEPS } from "@/lib/data";
 import {
   llamarIAPorPlan,
@@ -40,12 +41,24 @@ function interpolateTemplate(template: string, vars: Record<string, string>): st
 }
 
 export async function POST(req: Request) {
+  // Endpoint costoso (llama a IA). Requiere sesión válida + el userId se
+  // toma de la sesión, NUNCA del body. Antes se aceptaba `userId` arbitrario
+  // del body — vector trivial de suplantación y consumo de cuotas ajenas.
+  let sessionUserId: string;
+  let sessionPlan: string | undefined;
+  try {
+    const { user } = await requireAuth();
+    sessionUserId = user.id;
+    sessionPlan = user.plan;
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
+
   try {
     const body = await req.json();
     const {
       section_key,
-      plan = "demo",
-      userId = "anonymous",
       programa,
       modulos,
       interes,
@@ -66,9 +79,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Sección no válida." }, { status: 400 });
     }
 
+    // Plan efectivo del usuario (sin fallback a body para evitar spoofing).
+    const planEfectivo = sessionPlan ?? "demo";
+    const userIdEfectivo = sessionUserId;
+
     // Check credits (skip for unlimited/pro plan)
-    if (plan !== "pro") {
-      const credits = getUserCredits(userId, plan);
+    if (planEfectivo !== "pro") {
+      const credits = getUserCredits(userIdEfectivo, planEfectivo);
       if (credits < stepInfo.credits) {
         return NextResponse.json(
           { error: `Créditos insuficientes. Tienes ${credits} crédito(s). Esta sección requiere ${stepInfo.credits}.` },
@@ -131,19 +148,19 @@ export async function POST(req: Request) {
       conclusiones: 5, bibliografia: 5,
     };
     const phase = (sectionPhaseMap[section_key] ?? 0) as PhaseIndex;
-    const planTier = normalizePlan(plan || "demo");
+    const planTier = normalizePlan(planEfectivo);
 
     const { text: generatedText, provider: usedProvider, model: usedModel } =
       await llamarIAPorPlan(systemPrompt, userMessage, phase, planTier);
 
     // Deduct credits
-    if (plan !== "pro") {
+    if (planEfectivo !== "pro") {
       for (let i = 0; i < stepInfo.credits; i++) {
-        deductCredit(userId);
+        deductCredit(userIdEfectivo);
       }
     }
 
-    const remainingCredits = plan === "pro" ? 999 : getUserCredits(userId, plan);
+    const remainingCredits = planEfectivo === "pro" ? 999 : getUserCredits(userIdEfectivo, planEfectivo);
 
     return NextResponse.json({
       text: generatedText,
@@ -157,25 +174,31 @@ export async function POST(req: Request) {
   }
 }
 
-// Get user credits
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId") || "anonymous";
-  const plan = searchParams.get("plan") || "demo";
-  const credits = getUserCredits(userId, plan);
-  return NextResponse.json({ credits });
+// Get user credits — del usuario logueado, no de un id arbitrario en query.
+export async function GET() {
+  try {
+    const { user } = await requireAuth();
+    const credits = getUserCredits(user.id, user.plan ?? "demo");
+    return NextResponse.json({ credits });
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
+    throw e;
+  }
 }
 
-// Admin: update API keys
+// Admin: update API keys — gateado, antes era completamente abierto.
 export async function PUT(req: Request) {
   try {
+    const { requireAdmin } = await import("@/lib/api-auth");
+    await requireAdmin();
     const { provider, api_key } = await req.json();
     if (!["groq", "openai", "anthropic"].includes(provider)) {
       return NextResponse.json({ error: "Proveedor no válido." }, { status: 400 });
     }
     apiKeysStore[provider] = api_key;
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (e) {
+    if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });
     return NextResponse.json({ error: "Error al actualizar API key." }, { status: 500 });
   }
 }

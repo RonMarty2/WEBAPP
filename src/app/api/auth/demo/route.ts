@@ -7,8 +7,30 @@ const VALID_ROLES: UserRole[] = ["estudiante", "docente"];
 const VALID_PLANS: UserPlan[] = ["estandar", "pro"];
 
 export async function POST(req: Request) {
-  // Eliminado el bloqueo de producción para permitir probar la app en Vercel
+  // Modo demo: bloqueado en producción salvo que se autorice con un token
+  // de invitación. La sesión 6 detectó que dejarlo abierto permitía a
+  // cualquiera obtener una sesión `role=docente` válida y luego usar el
+  // panel docente (crear códigos, vincular alumnos, etc.) — escalación
+  // efectiva. Solo accesible si:
+  //   - estamos en development, O
+  //   - el body trae { token } y coincide con DEMO_INVITE_TOKEN.
   const body = await req.json().catch(() => ({}));
+
+  const enDesarrollo = process.env.NODE_ENV !== "production";
+  const tokenEsperado = process.env.DEMO_INVITE_TOKEN;
+  const tokenProvisto = typeof body.token === "string" ? body.token : "";
+
+  const autorizado =
+    enDesarrollo ||
+    (!!tokenEsperado && tokenEsperado.length >= 16 && tokenProvisto === tokenEsperado);
+
+  if (!autorizado) {
+    return NextResponse.json(
+      { error: "Modo demo deshabilitado en producción. Inicia sesión con Google." },
+      { status: 403 },
+    );
+  }
+
   const role: UserRole = VALID_ROLES.includes(body.role) ? body.role : "estudiante";
   const plan: UserPlan = VALID_PLANS.includes(body.plan) ? body.plan : "estandar";
 
@@ -24,8 +46,6 @@ export async function POST(req: Request) {
   const cookieStore = await cookies();
   cookieStore.set(SESSION_COOKIE, token, {
     httpOnly: true,
-    // secure: true en HTTPS (Vercel) / false en HTTP local. Sin esto
-    // browsers móviles modernos descartan la cookie en https://.
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: SESSION_MAX_AGE,

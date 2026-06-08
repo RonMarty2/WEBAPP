@@ -10,6 +10,7 @@
  */
 
 import { NextResponse } from "next/server";
+import { randomInt } from "node:crypto";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { isSupabaseConfigured, createAdminClient } from "@/lib/supabase";
 
@@ -18,10 +19,13 @@ const ROLES_PERMITIDOS = new Set(["docente", "admin"]);
 // Caracteres "seguros" para códigos: sin 0/O/1/I/L que se confunden a mano.
 const ALFABETO_SEGURO = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
+// Usa crypto.randomInt (CSPRNG) en vez de Math.random — Math.random es
+// predecible y un atacante con tiempo puede correlacionar timing con
+// salida para enumerar códigos generados y vincularse a docentes ajenos.
 function generarCodigoAleatorio(longitud = 6): string {
   let out = "";
   for (let i = 0; i < longitud; i++) {
-    out += ALFABETO_SEGURO[Math.floor(Math.random() * ALFABETO_SEGURO.length)];
+    out += ALFABETO_SEGURO[randomInt(0, ALFABETO_SEGURO.length)];
   }
   return out;
 }

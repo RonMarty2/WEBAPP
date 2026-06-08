@@ -19,6 +19,7 @@ import {
   dbListUsers,
 } from "@/lib/db";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { requireAdmin, AuthError } from "@/lib/api-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +27,24 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
   const emailQuery = url.searchParams.get("email")?.toLowerCase().trim() ?? null;
-  const detail = url.searchParams.get("detail") === "full";
+  const detailRequested = url.searchParams.get("detail") === "full";
+
+  // El modo `?detail=full` expone email + role de TODOS los usuarios y
+  // metadata de TODOS los proyectos. Es PII y un mapa para atacar al SaaS.
+  // Antes era público; ahora requiere admin. El health básico (sin detail)
+  // queda abierto porque solo devuelve conteos y flags booleanos.
+  let detail = detailRequested;
+  if (detailRequested) {
+    try {
+      await requireAdmin();
+    } catch (e) {
+      if (e instanceof AuthError) {
+        detail = false; // degrada a básico sin filtrar el por qué
+      } else {
+        throw e;
+      }
+    }
+  }
 
   const backend = dbBackend();
   const supabaseConfigured = isSupabaseConfigured();
