@@ -1,28 +1,22 @@
 'use client';
 
 /**
- * Detalle del alumno — Wave 2 del panel docente.
+ * Detalle del alumno — Waves 2 y 3 del panel docente.
  *
- * El docente entra acá desde "Mis alumnos" y ve TODOS los proyectos del
- * alumno agrupados por módulo (idea → mercados → estrategia → marketing →
- * organización → defensa → proyecto maestro). Por cada proyecto: título,
- * estado y última actualización.
+ * Wave 2: muestra metadatos de los proyectos del alumno por módulo.
+ * Wave 3: el docente puede dejar observaciones por proyecto + ver las
+ *          que ya dejó (con su estado: pendiente/atendida/descartada).
+ *          Permite editar la nota privada del docente inline.
  *
- * Permite editar inline la "nota privada del docente" sobre el alumno
- * (PATCH al endpoint del vínculo).
+ * Pendiente Wave 4: rúbrica de calificación.
  *
- * Pendiente Wave 3: dejar observaciones por reporte (no por alumno).
- * Pendiente Wave 4: calificación con rúbrica.
- *
- * Finanzas se omite hasta resolver el bridge entre auth.users (UUID) y
- * el JWT propio de webapp (TEXT). Se muestra un aviso explicando que
- * el docente debe abrir el simulador con el alumno por ahora.
+ * Finanzas se omite del agregado por ahora (bridge UUID ↔ TEXT pendiente).
  */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Layers, FolderOpen, Save, AlertTriangle, GraduationCap } from 'lucide-react';
+import { ArrowLeft, Layers, FolderOpen, Save, AlertTriangle, GraduationCap, MessageSquare, X, Check, Trash2 } from 'lucide-react';
 
 interface ProyectoResumen {
   id: string;
@@ -56,6 +50,21 @@ interface AlumnoDetalle {
   sin_finanzas?: boolean;
 }
 
+interface Observacion {
+  id: string;
+  vinculo_id: string;
+  docente_id: string;
+  alumno_id: string;
+  modulo: string;
+  proyecto_id: string;
+  proyecto_titulo: string;
+  observacion: string;
+  estado: 'pendiente' | 'atendida' | 'descartada';
+  respuesta_alumno: string | null;
+  creada_en: string;
+  actualizada_en: string;
+}
+
 function fmtFecha(iso: string | null): string {
   if (!iso) return '—';
   try {
@@ -65,40 +74,66 @@ function fmtFecha(iso: string | null): string {
   }
 }
 
+const ESTADO_BADGE: Record<Observacion['estado'], { label: string; cls: string }> = {
+  pendiente:   { label: 'Pendiente',  cls: 'bg-amber-100 text-amber-800' },
+  atendida:    { label: 'Atendida',   cls: 'bg-emerald-100 text-emerald-800' },
+  descartada:  { label: 'Descartada', cls: 'bg-slate-100 text-slate-500' },
+};
+
 export default function DetalleAlumno() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [data, setData] = useState<AlumnoDetalle | null>(null);
+  const [observaciones, setObservaciones] = useState<Observacion[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [nota, setNota] = useState('');
   const [guardandoNota, setGuardandoNota] = useState(false);
   const [notaGuardada, setNotaGuardada] = useState(false);
 
+  // Estado del form de "nueva observación" por proyecto. La clave es
+  // `${modulo}::${proyecto_id}` para distinguir entre múltiples proyectos
+  // del mismo módulo.
+  const [obsAbierta, setObsAbierta] = useState<string | null>(null);
+  const [obsTexto, setObsTexto] = useState('');
+  const [obsEnviando, setObsEnviando] = useState(false);
+
   const cargar = useCallback(() => {
     setCargando(true);
-    fetch(`/api/docente/alumnos/${params.id}/proyectos`, { credentials: 'include' })
-      .then(async (r) => {
+    Promise.all([
+      fetch(`/api/docente/alumnos/${params.id}/proyectos`, { credentials: 'include' }).then(async (r) => {
         if (r.status === 401) { router.replace('/login'); return null; }
         if (r.status === 403) { router.replace('/docente'); return null; }
         const d = await r.json();
-        if (!r.ok) {
-          setError(d.error || 'No se pudo cargar el alumno');
-          return null;
+        return r.ok ? (d as AlumnoDetalle) : null;
+      }),
+      fetch(`/api/docente/observaciones?vinculo_id=${params.id}`, { credentials: 'include' })
+        .then((r) => r.ok ? r.json() : { observaciones: [] }),
+    ])
+      .then(([detalle, obs]) => {
+        if (detalle) {
+          setData(detalle);
+          setNota(detalle.alumno.nota_docente ?? '');
+        } else {
+          setError('No se pudo cargar el alumno');
         }
-        return d as AlumnoDetalle;
-      })
-      .then((d) => {
-        if (d) {
-          setData(d);
-          setNota(d.alumno.nota_docente ?? '');
-        }
+        setObservaciones(obs.observaciones ?? []);
       })
       .catch(() => setError('No se pudo cargar el alumno'))
       .finally(() => setCargando(false));
   }, [params.id, router]);
 
   useEffect(() => { cargar(); }, [cargar]);
+
+  const obsPorProyecto = useMemo(() => {
+    const m = new Map<string, Observacion[]>();
+    for (const o of observaciones) {
+      const k = `${o.modulo}::${o.proyecto_id}`;
+      if (!m.has(k)) m.set(k, []);
+      m.get(k)!.push(o);
+    }
+    return m;
+  }, [observaciones]);
 
   const guardarNota = async () => {
     if (!data) return;
@@ -120,6 +155,67 @@ export default function DetalleAlumno() {
     }
   };
 
+  const abrirObs = (modulo: string, proyectoId: string) => {
+    setObsAbierta(`${modulo}::${proyectoId}`);
+    setObsTexto('');
+  };
+
+  const cancelarObs = () => {
+    setObsAbierta(null);
+    setObsTexto('');
+  };
+
+  const enviarObs = async (modulo: string, proyecto: ProyectoResumen) => {
+    if (!data || !obsTexto.trim()) return;
+    setObsEnviando(true);
+    try {
+      const res = await fetch('/api/docente/observaciones', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          vinculo_id: data.alumno.vinculo_id,
+          modulo,
+          proyecto_id: proyecto.id,
+          proyecto_titulo: proyecto.titulo,
+          observacion: obsTexto.trim(),
+        }),
+      });
+      const d = await res.json();
+      if (res.ok) {
+        setObservaciones((prev) => [d.observacion, ...prev]);
+        cancelarObs();
+      } else {
+        alert(d.error || 'No se pudo crear la observación');
+      }
+    } finally {
+      setObsEnviando(false);
+    }
+  };
+
+  const descartarObs = async (id: string) => {
+    if (!window.confirm('¿Descartar esta observación? El alumno seguirá viéndola pero marcada como descartada.')) return;
+    const res = await fetch(`/api/docente/observaciones/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ estado: 'descartada' }),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      setObservaciones((prev) => prev.map((o) => o.id === id ? d.observacion : o));
+    }
+  };
+
+  const eliminarObs = async (id: string) => {
+    if (!window.confirm('¿Eliminar esta observación definitivamente?')) return;
+    const res = await fetch(`/api/docente/observaciones/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    if (res.ok) setObservaciones((prev) => prev.filter((o) => o.id !== id));
+  };
+
   if (cargando) {
     return <div className="mx-auto max-w-4xl p-6 text-center text-sm text-slate-500">Cargando alumno…</div>;
   }
@@ -128,10 +224,10 @@ export default function DetalleAlumno() {
     return (
       <div className="mx-auto max-w-2xl p-6">
         <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center">
-          <AlertTriangle className="mx-auto h-6 w-6 text-rose-600" />
+          <AlertTriangle className="mx-auto h-6 w-6 text-rose-600" aria-hidden="true" />
           <p className="mt-2 text-sm font-semibold text-rose-900">{error || 'Alumno no encontrado'}</p>
           <Link href="/docente" className="mt-3 inline-flex items-center gap-1 text-sm text-rose-800 hover:underline">
-            <ArrowLeft className="h-4 w-4" /> Volver a Mis alumnos
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Volver a Mis alumnos
           </Link>
         </div>
       </div>
@@ -141,11 +237,11 @@ export default function DetalleAlumno() {
   return (
     <div className="mx-auto max-w-4xl p-6 pb-10">
       <Link href="/docente" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700">
-        <ArrowLeft className="h-4 w-4" /> Mis alumnos
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Mis alumnos
       </Link>
 
       <header className="mt-4 flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5">
-        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-xl font-semibold text-violet-700">
+        <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-violet-100 text-xl font-semibold text-violet-700" aria-hidden="true">
           {(data.alumno.nombre || '?').charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
@@ -162,7 +258,6 @@ export default function DetalleAlumno() {
         </div>
       </header>
 
-      {/* Nota privada del docente */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-slate-700">Nota privada (solo tú la ves)</h2>
@@ -170,8 +265,9 @@ export default function DetalleAlumno() {
             onClick={guardarNota}
             disabled={guardandoNota || nota === (data.alumno.nota_docente ?? '')}
             className="inline-flex items-center gap-1 rounded-md border border-slate-300 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            aria-label="Guardar nota privada"
           >
-            <Save className="h-3 w-3" />
+            <Save className="h-3 w-3" aria-hidden="true" />
             {guardandoNota ? 'Guardando…' : notaGuardada ? '✓ Guardada' : 'Guardar'}
           </button>
         </div>
@@ -180,14 +276,14 @@ export default function DetalleAlumno() {
           onChange={(e) => setNota(e.target.value)}
           placeholder='Ej: "está atrasado en mercados, le pedí ajustar la muestra el viernes"'
           rows={2}
+          aria-label="Nota privada sobre el alumno"
           className="mt-2 w-full resize-y rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
         />
       </section>
 
-      {/* Aviso de Finanzas */}
       {data.sin_finanzas && (
         <div className="mt-5 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-600" />
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-amber-600" aria-hidden="true" />
           <span>
             <strong>Finanzas no aparece todavía.</strong> El simulador usa otra
             base de datos (Supabase Auth) y aún no está conectado al panel
@@ -196,12 +292,11 @@ export default function DetalleAlumno() {
         </div>
       )}
 
-      {/* Proyectos por módulo */}
       <section className="mt-5 space-y-4">
         {data.modulos.map((m) => (
           <div key={m.modulo} className="rounded-2xl border border-slate-200 bg-white p-5">
             <div className="flex items-center gap-2">
-              <span className="text-xl">{m.emoji}</span>
+              <span className="text-xl" aria-hidden="true">{m.emoji}</span>
               <h3 className="flex-1 text-sm font-semibold text-slate-700">{m.nombre}</h3>
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
                 {m.proyectos.length} {m.proyectos.length === 1 ? 'proyecto' : 'proyectos'}
@@ -211,47 +306,130 @@ export default function DetalleAlumno() {
             {m.proyectos.length === 0 ? (
               <p className="mt-3 text-xs text-slate-400">Aún no tiene proyectos en este módulo.</p>
             ) : (
-              <ul className="mt-3 space-y-1.5">
-                {m.proyectos.map((p) => (
-                  <li key={p.id} className="flex items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs">
-                    <FolderOpen className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" />
-                    <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{p.titulo}</span>
-                    {p.estado && (
-                      <span className="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-slate-200">
-                        {p.estado}
-                      </span>
-                    )}
-                    <span className="flex-shrink-0 text-[10px] text-slate-400">
-                      {fmtFecha(p.actualizado_en)}
-                    </span>
-                  </li>
-                ))}
+              <ul className="mt-3 space-y-2">
+                {m.proyectos.map((p) => {
+                  const obsKey = `${m.modulo}::${p.id}`;
+                  const obsAbiertaActiva = obsAbierta === obsKey;
+                  const obsExistentes = obsPorProyecto.get(obsKey) ?? [];
+                  return (
+                    <li key={p.id} className="rounded-lg border border-slate-100 bg-slate-50">
+                      <div className="flex items-center gap-3 px-3 py-2 text-xs">
+                        <FolderOpen className="h-3.5 w-3.5 flex-shrink-0 text-slate-400" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate font-medium text-slate-800">{p.titulo}</span>
+                        {p.estado && (
+                          <span className="flex-shrink-0 rounded-full bg-white px-2 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-slate-200">
+                            {p.estado}
+                          </span>
+                        )}
+                        <span className="hidden flex-shrink-0 text-[10px] text-slate-400 sm:inline">
+                          {fmtFecha(p.actualizado_en)}
+                        </span>
+                        {obsExistentes.length > 0 && (
+                          <span className="flex-shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-medium text-violet-700">
+                            {obsExistentes.length} obs.
+                          </span>
+                        )}
+                        <button
+                          onClick={() => obsAbiertaActiva ? cancelarObs() : abrirObs(m.modulo, p.id)}
+                          className="inline-flex items-center gap-1 rounded-md border border-violet-200 bg-white px-2 py-0.5 text-[10px] font-medium text-violet-700 hover:bg-violet-50"
+                          aria-label={`Dejar observación sobre ${p.titulo}`}
+                        >
+                          <MessageSquare className="h-3 w-3" aria-hidden="true" />
+                          {obsAbiertaActiva ? 'Cerrar' : 'Observar'}
+                        </button>
+                      </div>
+
+                      {obsAbiertaActiva && (
+                        <div className="border-t border-slate-200 bg-white p-3">
+                          <textarea
+                            value={obsTexto}
+                            onChange={(e) => setObsTexto(e.target.value)}
+                            placeholder='Ej: "Revisa la sección de competencia — falta justificar por qué los excluiste"'
+                            rows={3}
+                            autoFocus
+                            aria-label="Texto de la observación"
+                            className="w-full resize-y rounded-md border border-slate-300 px-3 py-2 text-xs focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-200"
+                          />
+                          <div className="mt-2 flex justify-end gap-2">
+                            <button
+                              onClick={cancelarObs}
+                              className="rounded-md px-2 py-1 text-[11px] text-slate-500 hover:bg-slate-100"
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              onClick={() => enviarObs(m.modulo, p)}
+                              disabled={obsEnviando || !obsTexto.trim()}
+                              className="inline-flex items-center gap-1 rounded-md bg-violet-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-violet-700 disabled:opacity-50"
+                            >
+                              {obsEnviando ? 'Enviando…' : 'Enviar observación'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {obsExistentes.length > 0 && (
+                        <ul className="space-y-1.5 border-t border-slate-200 bg-white px-3 py-2">
+                          {obsExistentes.map((o) => (
+                            <li key={o.id} className="flex items-start gap-2 text-[11px]">
+                              <span className={`mt-0.5 flex-shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${ESTADO_BADGE[o.estado].cls}`}>
+                                {ESTADO_BADGE[o.estado].label}
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="text-slate-700">{o.observacion}</p>
+                                {o.respuesta_alumno && (
+                                  <p className="mt-1 rounded-md bg-emerald-50 px-2 py-1 text-[10px] text-emerald-900">
+                                    <strong>Respuesta del alumno:</strong> {o.respuesta_alumno}
+                                  </p>
+                                )}
+                                <p className="mt-0.5 text-[10px] text-slate-400">{fmtFecha(o.creada_en)}</p>
+                              </div>
+                              {o.estado !== 'descartada' && (
+                                <button
+                                  onClick={() => descartarObs(o.id)}
+                                  className="rounded p-0.5 text-slate-400 hover:bg-slate-100"
+                                  title="Descartar"
+                                  aria-label="Descartar observación"
+                                >
+                                  <X className="h-3 w-3" aria-hidden="true" />
+                                </button>
+                              )}
+                              <button
+                                onClick={() => eliminarObs(o.id)}
+                                className="rounded p-0.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600"
+                                title="Eliminar definitivamente"
+                                aria-label="Eliminar observación"
+                              >
+                                <Trash2 className="h-3 w-3" aria-hidden="true" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
         ))}
       </section>
 
-      {/* Footer */}
       <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-xs text-slate-500">
-        <Layers className="mx-auto h-4 w-4 text-slate-400" />
+        <Layers className="mx-auto h-4 w-4 text-slate-400" aria-hidden="true" />
         <p className="mt-1">
-          Próximamente: dejar observaciones por reporte y calificar con rúbrica.
-        </p>
-        <p className="mt-0.5 text-[10px] text-slate-400">
-          Si necesitas leer el contenido completo de un proyecto, abre el reporte del alumno
-          con él (no podemos mostrar contenido privado sin su confirmación explícita).
+          Próximamente: rúbrica de calificación y calendario de entregas.
         </p>
       </div>
 
-      {/* Nota de privacidad — diseño Wave 2 */}
       <div className="mt-3 flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-[11px] text-slate-500">
-        <GraduationCap className="mt-0.5 h-3 w-3 flex-shrink-0 text-slate-400" />
+        <GraduationCap className="mt-0.5 h-3 w-3 flex-shrink-0 text-slate-400" aria-hidden="true" />
         <span>
           Esta vista te muestra <strong>solo los metadatos</strong> de los
-          proyectos del alumno (títulos, estado, fecha). No accedemos al
-          contenido de cada herramienta sin su autorización. Eso vendrá en
-          una próxima entrega con un permiso explícito del alumno.
+          proyectos del alumno. El contenido completo se habilita solo si el
+          alumno te da permiso explícito en su pantalla <strong>Mis docentes</strong>
+          (por defecto está apagado). <Check className="inline h-3 w-3 text-emerald-600" aria-hidden="true" /> Tus observaciones SÍ
+          le llegan en cualquier caso.
         </span>
       </div>
     </div>

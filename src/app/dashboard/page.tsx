@@ -181,6 +181,9 @@ export default function DashboardPage() {
             <Link href="/unirse-docente" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(148,163,184,0.35)", background: "transparent", color: "var(--fg-secondary)", textDecoration: "none", fontSize: 13 }} title="Vincúlate a un docente con un código">
               ¿Código de docente?
             </Link>
+            <Link href="/mis-observaciones" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", textDecoration: "none", fontSize: 13 }} title="Observaciones que dejaron tus docentes">
+              Mis observaciones
+            </Link>
             {user.role === "admin" && (
               <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -356,11 +359,12 @@ export default function DashboardPage() {
                 onClick={() => router.push(`/projects/${p.id}/workspace`)}
                 style={{ display: "flex", flexDirection: "column", gap: 10, position: "relative" }}
               >
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setProyectoToDelete(p.id); }} 
-                  className="absolute top-3 right-3 hover:-translate-y-1 hover:shadow-lg transition-all" 
-                  style={{ border: "none", background: "rgba(239,68,68,0.08)", color: "#ef4444", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, zIndex: 20 }} 
+                <button
+                  onClick={(e) => { e.stopPropagation(); setProyectoToDelete(p.id); }}
+                  className="absolute top-3 right-3 hover:-translate-y-1 hover:shadow-lg transition-all"
+                  style={{ border: "none", background: "rgba(239,68,68,0.08)", color: "#ef4444", borderRadius: "50%", width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", fontSize: 12, zIndex: 20 }}
                   title="Eliminar proyecto"
+                  aria-label="Eliminar proyecto"
                 >✕</button>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: 24, gap: 4, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, color: "var(--fg-muted)", fontWeight: 600 }}>{p.servicios?.nombre || "Monografía"}</span>

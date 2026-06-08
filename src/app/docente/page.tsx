@@ -208,13 +208,14 @@ export default function PanelDocente() {
             placeholder="Etiqueta opcional (ej. MKT-2026-1)"
             className="flex-1 min-w-[200px] rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200"
             maxLength={60}
+            aria-label="Etiqueta opcional para el código de invitación"
           />
           <button
             onClick={generarCodigo}
             disabled={generando}
             className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-50"
           >
-            <Plus className="h-4 w-4" /> {generando ? 'Generando…' : 'Generar nuevo código'}
+            <Plus className="h-4 w-4" aria-hidden="true" /> {generando ? 'Generando…' : 'Generar nuevo código'}
           </button>
         </div>
 
@@ -247,8 +248,9 @@ export default function PanelDocente() {
                   onClick={() => revocarCodigo(c.codigo)}
                   className="inline-flex items-center gap-1 rounded-md p-1.5 text-rose-600 hover:bg-rose-50"
                   title="Revocar"
+                  aria-label={`Revocar código ${c.codigo}`}
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </li>
             ))}
@@ -302,8 +304,9 @@ export default function PanelDocente() {
                   onClick={() => archivarAlumno(a.id)}
                   className="inline-flex items-center gap-1 rounded-md p-1.5 text-slate-500 hover:bg-slate-100"
                   title="Archivar (sale de la lista, se mantiene el histórico)"
+                  aria-label={`Archivar a ${a.alumno_nombre}`}
                 >
-                  <Archive className="h-3.5 w-3.5" />
+                  <Archive className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </li>
             ))}
