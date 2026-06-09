@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { PlatformShell } from '@/components/ecosistema/PlatformShell';
 import { getPlatform } from '@/lib/ecosistema/platforms';
 import { ARTEFACTO_MARKETING } from '@/lib/ecosistema/mock-data';
@@ -27,8 +28,18 @@ export default function MarketingPlatform() {
   return (
     <PlatformShell platform={platform}>
       <header className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">{platform.nombre}</h1>
-        <p className="mt-2 text-slate-600">{platform.tagline}</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">{platform.nombre}</h1>
+            <p className="mt-2 text-slate-600">{platform.tagline}</p>
+          </div>
+          <Link
+            href="/ecosistema/universidad/marketing/casos"
+            className="inline-flex items-center gap-1.5 rounded-full border-2 border-rose-300 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
+          >
+            🇧🇴 Ver 5 casos bolivianos →
+          </Link>
+        </div>
       </header>
 
       <section className="mb-6 grid gap-4 md:grid-cols-3">

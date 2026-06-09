@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { PlatformShell } from '@/components/ecosistema/PlatformShell';
 import { getPlatform } from '@/lib/ecosistema/platforms';
 import { ARTEFACTO_PESTEL, ARTEFACTO_FODA } from '@/lib/ecosistema/mock-data';
@@ -22,8 +23,18 @@ export default function EstrategiaPlatform() {
   return (
     <PlatformShell platform={platform}>
       <header className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">{platform.nombre}</h1>
-        <p className="mt-2 text-slate-600">Del análisis al plan, paso a paso. Cada bloque genera un artefacto reutilizable.</p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">{platform.nombre}</h1>
+            <p className="mt-2 text-slate-600">Del análisis al plan, paso a paso. Cada bloque genera un artefacto reutilizable.</p>
+          </div>
+          <Link
+            href="/ecosistema/universidad/estrategia/casos"
+            className="inline-flex items-center gap-1.5 rounded-full border-2 border-violet-300 bg-violet-50 px-4 py-2 text-sm font-medium text-violet-700 hover:bg-violet-100"
+          >
+            🇧🇴 Ver 5 casos bolivianos →
+          </Link>
+        </div>
       </header>
 
       <div className="mb-6 flex gap-2 overflow-x-auto">
