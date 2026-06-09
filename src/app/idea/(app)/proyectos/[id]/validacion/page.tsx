@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, FlaskConical, Plus, X, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 import { AutoTextarea } from '@/components/compartido/AutoTextarea';
 import type { Validacion, Hipotesis, EstadoHipotesis, LeanCanvas, PropuestaValor } from '@/types/idea';
 
@@ -208,6 +209,17 @@ export default function HerramientaValidacion() {
           placeholder="Detalle opcional (ej: enfócate en hipótesis de precio)…"
           onAplicar={aplicarIA}
         />
+        <div className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">o pide al tutor que te enseñe:</span>
+          <TutorIA
+            modulo="idea"
+            herramienta="validacion"
+            contexto={`Idea: ${idea || titulo || '(sin descripción)'}\nSector: ${sector || 'no especificado'}\nProblema: ${leanCanvas.problema || '(no definido)'}\nSegmento: ${leanCanvas.segmentos || '(no definido)'}`}
+            contenidoActual={val.hipotesis.map((h, i) => `H${i + 1}: ${h.supuesto} — Cómo probar: ${h.comoProbar} — Criterio: ${h.criterio}`).join('\n')}
+            campo="hipótesis más riesgosas a validar primero"
+            etiqueta="3 caminos de validación"
+          />
+        </div>
         <p className="idea-muted mt-2 text-xs">
           La IA <strong>agrega</strong> hipótesis a tu lista. Usa el botón <X className="inline h-3 w-3" /> de cada una para quitar lo que no te sirva.
         </p>
