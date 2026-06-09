@@ -22,7 +22,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, Copy, Check, Plus, Trash2, Users, ArrowLeft, AlertTriangle, ExternalLink, Archive } from 'lucide-react';
+import { GraduationCap, Copy, Check, Plus, Trash2, Users, ArrowLeft, AlertTriangle, ExternalLink, Archive, ScrollText, Calendar } from 'lucide-react';
 import type { SessionUser } from '@/lib/auth';
 
 interface Codigo {
@@ -193,6 +193,34 @@ export default function PanelDocente() {
         </div>
       )}
 
+      {/* Atajos a las herramientas del docente */}
+      <section className="mt-5 grid gap-3 sm:grid-cols-2">
+        <Link
+          href="/docente/rubricas"
+          className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:border-violet-300 hover:bg-violet-50"
+        >
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700 group-hover:bg-violet-200">
+            <ScrollText className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-slate-900">Mis rúbricas</p>
+            <p className="text-xs text-slate-500">Define criterios y pesos para calificar.</p>
+          </div>
+        </Link>
+        <Link
+          href="/docente/calendario"
+          className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 hover:border-violet-300 hover:bg-violet-50"
+        >
+          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700 group-hover:bg-violet-200">
+            <Calendar className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-slate-900">Calendario de entregas</p>
+            <p className="text-xs text-slate-500">Fechas tope para tus alumnos.</p>
+          </div>
+        </Link>
+      </section>
+
       {/* Bloque: generador de código + códigos activos */}
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
         <h2 className="text-sm font-semibold text-slate-700">Código de invitación</h2>
@@ -299,6 +327,13 @@ export default function PanelDocente() {
                   title="Ver sus proyectos por módulo"
                 >
                   Ver proyectos →
+                </Link>
+                <Link
+                  href={`/docente/alumno/${a.id}/calificar`}
+                  className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+                  title="Calificar al alumno con tu rúbrica"
+                >
+                  Calificar →
                 </Link>
                 <button
                   onClick={() => archivarAlumno(a.id)}

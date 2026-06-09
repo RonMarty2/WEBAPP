@@ -184,6 +184,12 @@ export default function DashboardPage() {
             <Link href="/mis-observaciones" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", textDecoration: "none", fontSize: 13 }} title="Observaciones que dejaron tus docentes">
               Mis observaciones
             </Link>
+            <Link href="/mis-calificaciones" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", textDecoration: "none", fontSize: 13 }} title="Notas que te pusieron tus docentes">
+              Mis calificaciones
+            </Link>
+            <Link href="/mis-entregas" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", textDecoration: "none", fontSize: 13 }} title="Fechas tope de tus docentes">
+              Mis entregas
+            </Link>
             {user.role === "admin" && (
               <Link href="/admin" style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.35)", background: "rgba(139,92,246,0.08)", color: "#a78bfa", textDecoration: "none", fontSize: 13, display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
