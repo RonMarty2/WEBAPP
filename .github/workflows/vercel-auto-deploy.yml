@@ -1,0 +1,35 @@
+name: Vercel auto-deploy (main)
+
+# Cada push a main dispara el Deploy Hook de Vercel para que la app
+# de producción se actualice automaticamente. Reemplaza al webhook nativo
+# Vercel <-> GitHub que dejo de procesar pushes a main en algun momento.
+#
+# Por que existe este workflow:
+# - Antes, el webhook nativo de Vercel detectaba los push a main y
+#   disparaba el deploy de production sin que hicieramos nada.
+# - Ese webhook dejo de funcionar (puede haber sido expiracion de token,
+#   reinstalacion de la integracion o un cambio interno de Vercel).
+# - En vez de pelearnos con el webhook, usamos un Deploy Hook explicito:
+#   una URL fija que cuando recibe POST dispara el deploy de production.
+# - Este workflow corre en cada push a main y hace el POST.
+#
+# La URL del Deploy Hook esta hardcodeada porque el repo es privado.
+# Si en algun momento se filtra, basta con regenerar el hook desde
+# Vercel (Settings -> Git -> Deploy Hooks) y reemplazar la URL aqui.
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-vercel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispara Deploy Hook de Vercel
+        run: |
+          curl -fsS -X POST \
+            "https://api.vercel.com/v1/integrations/deploy/prj_ndPuzCC2z2MbtJAw77Rfdmjs6ekq/uTbFKXPUPM" \
+            -H "Content-Type: application/json" \
+            -d '{"ref":"main"}'
+          echo "✓ Deploy Hook disparado. Vercel ya esta construyendo el deploy de production."
