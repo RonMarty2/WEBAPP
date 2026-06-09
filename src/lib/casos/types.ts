@@ -239,3 +239,353 @@ export interface CasoMercados extends CasoBase {
 export function esCasoMercados(c: CasoBase): c is CasoMercados {
   return c.modulo === "mercados";
 }
+
+// ─── Módulo ESTRATEGIA ───────────────────────────────────────────────────
+
+export interface FactorPESTEL {
+  /** Nombre corto del factor (ej. "Inflación 2026"). */
+  nombre: string;
+  /** Descripción del factor en contexto boliviano. */
+  descripcion: string;
+  /** Impacto al proyecto: positivo (oportunidad) o negativo (amenaza). */
+  impacto: "positivo" | "negativo" | "neutro";
+  /** Magnitud 1-5. */
+  intensidad: number;
+  /** Acción recomendada o implicación. */
+  implicacion: string;
+}
+
+export interface PESTEL {
+  politico: FactorPESTEL[];
+  economico: FactorPESTEL[];
+  social: FactorPESTEL[];
+  tecnologico: FactorPESTEL[];
+  ecologico: FactorPESTEL[];
+  legal: FactorPESTEL[];
+}
+
+export interface FuerzaPorter {
+  /** Nivel de intensidad: bajo, medio, alto. */
+  intensidad: "bajo" | "medio" | "alto";
+  /** Justificación con 2-3 razones específicas. */
+  justificacion: string[];
+  /** Cómo el proyecto enfrenta esta fuerza. */
+  estrategia: string;
+}
+
+export interface Porter {
+  rivalidad: FuerzaPorter;
+  nuevos_entrantes: FuerzaPorter;
+  sustitutos: FuerzaPorter;
+  poder_proveedores: FuerzaPorter;
+  poder_clientes: FuerzaPorter;
+  /** Resumen interpretativo del atractivo del sector (1-5). */
+  atractivo_sector: number;
+  /** Conclusión narrativa. */
+  conclusion: string;
+}
+
+export interface CompetidorMPC {
+  nombre: string;
+  /** Notas 1-4 por factor crítico de éxito, en orden de FCE_FACTORES. */
+  notas: number[];
+  /** Total ponderado pre-calculado. */
+  total_ponderado: number;
+}
+
+export interface MPC {
+  /** Factores críticos de éxito (4-6) y su peso (suma=1). */
+  factores: { nombre: string; peso: number }[];
+  /** El proyecto evaluado más 2-3 competidores. */
+  competidores: CompetidorMPC[];
+  /** Conclusión: qué factores ganamos y cuáles perdemos. */
+  conclusion: string;
+}
+
+export interface FODA {
+  fortalezas: string[];
+  oportunidades: string[];
+  debilidades: string[];
+  amenazas: string[];
+}
+
+export interface FODACruzado {
+  /** Estrategias ofensivas (Fortalezas × Oportunidades). */
+  fo: string[];
+  /** Estrategias adaptativas (Debilidades × Oportunidades). */
+  do: string[];
+  /** Estrategias defensivas (Fortalezas × Amenazas). */
+  fa: string[];
+  /** Estrategias de supervivencia (Debilidades × Amenazas). */
+  da: string[];
+}
+
+export type MatrizDeNivel3 = "BCG" | "Ansoff" | "PEYEA";
+
+export interface MatrizNivel3 {
+  tipo: MatrizDeNivel3;
+  /** Posición elegida en la matriz (ej. "Estrella" en BCG, "Penetración" en Ansoff). */
+  posicion: string;
+  /** Justificación 1-2 párrafos. */
+  justificacion: string;
+  /** Implicación estratégica. */
+  implicacion: string;
+}
+
+export interface FilaMCPE {
+  estrategia: string;
+  /** Notas 1-4 por cada factor, en orden de los factores PESTEL/FODA agregados. */
+  notas: number[];
+  /** Total ponderado pre-calculado. */
+  total: number;
+}
+
+export interface MCPE {
+  /** Factores y sus pesos (suma=1). */
+  factores: { nombre: string; peso: number }[];
+  /** Estrategias evaluadas (mínimo 3). */
+  filas: FilaMCPE[];
+  /** Estrategia ganadora. */
+  estrategia_elegida: string;
+  /** Por qué ganó. */
+  justificacion: string;
+}
+
+export interface CasoEstrategia extends CasoBase {
+  modulo: "estrategia";
+  pestel: PESTEL;
+  porter: Porter;
+  mpc: MPC;
+  foda: FODA;
+  foda_cruzado: FODACruzado;
+  matriz_nivel3: MatrizNivel3;
+  mcpe: MCPE;
+  /** Plan de acción concreto resultante. */
+  plan_accion: string[];
+}
+
+export function esCasoEstrategia(c: CasoBase): c is CasoEstrategia {
+  return c.modulo === "estrategia";
+}
+
+// ─── Módulo MARKETING ────────────────────────────────────────────────────
+
+export interface BuyerPersona {
+  /** Nombre ficticio del arquetipo (ej. "Carla la profesional joven"). */
+  nombre: string;
+  edad: number;
+  ocupacion: string;
+  ingreso_aprox: string;
+  ubicacion: string;
+  /** 3-5 motivaciones principales. */
+  motivaciones: string[];
+  /** 3-5 frustraciones / pain points. */
+  frustraciones: string[];
+  /** Canales donde la encuentras. */
+  canales_consumo: string[];
+  /** Frase que la persona diría sobre el producto. */
+  cita: string;
+  /** Objeción típica que tendría. */
+  objecion_tipica: string;
+}
+
+export type CategoriaP = "Producto" | "Precio" | "Plaza" | "Promocion" | "Personas" | "Procesos" | "Evidencia_fisica";
+
+export interface ElementoP {
+  categoria: CategoriaP;
+  /** Decisión concreta. */
+  decision: string;
+  /** Justificación (con cifras cuando aplique). */
+  justificacion: string;
+}
+
+export interface PartidaPresupuesto {
+  canal: string;
+  monto_bs_mes: number;
+  /** Resultado esperado (alcance, leads, conversiones). */
+  resultado_esperado: string;
+  /** Costo por lead estimado. */
+  cpl_estimado_bs?: number;
+}
+
+export interface AccionCalendario {
+  semana: number;
+  /** Tipo de acción: post, anuncio, evento, email, etc. */
+  tipo: string;
+  /** Canal específico. */
+  canal: string;
+  /** Tema o copy resumido. */
+  contenido: string;
+}
+
+export interface CasoMarketing extends CasoBase {
+  modulo: "marketing";
+  /** 2 buyer personas para mostrar segmentación. */
+  buyer_personas: BuyerPersona[];
+  /** Mix 4P o 7P según tipo de negocio. */
+  mix: ElementoP[];
+  /** Presupuesto mensual con desglose. */
+  presupuesto: {
+    total_bs_mes: number;
+    desglose: PartidaPresupuesto[];
+    /** ROAS proyectado (ingresos / inversión). */
+    roas_proyectado: number;
+  };
+  /** Calendario editorial de 8-12 semanas. */
+  calendario: AccionCalendario[];
+  /** KPIs principales a monitorear. */
+  kpis: string[];
+}
+
+export function esCasoMarketing(c: CasoBase): c is CasoMarketing {
+  return c.modulo === "marketing";
+}
+
+// ─── Módulo ORGANIZACIÓN ─────────────────────────────────────────────────
+
+export interface NodoOrganigrama {
+  /** Cargo (ej. "Gerente General"). */
+  cargo: string;
+  /** Nombre del ocupante (ficticio). Opcional para puestos vacantes. */
+  ocupante?: string;
+  /** Reporta a este cargo (referencia por nombre de cargo). */
+  reporta_a?: string;
+  /** Cantidad de personas en ese cargo (default 1). */
+  cantidad?: number;
+}
+
+export interface PuestoRRHH {
+  cargo: string;
+  responsabilidades: string[];
+  requisitos: string[];
+  /** Salario líquido mensual estimado en Bs. */
+  salario_liquido_bs: number;
+  /** Costo total para la empresa incluyendo aportes (~+25%). */
+  costo_total_bs: number;
+  /** Tipo de contrato: indefinido, plazo fijo, consultoría, etc. */
+  tipo_contrato: string;
+}
+
+export interface ConstitucionLegal {
+  /** Tipo de empresa (Unipersonal, SRL, SA, Asociación Civil). */
+  tipo: string;
+  /** Justificación de la elección. */
+  justificacion: string;
+  /** Capital social inicial Bs. */
+  capital_social_bs: number;
+  /** Trámites en orden (FUNDEMPRESA, Impuestos, NIT, AFP, etc.). */
+  tramites: { nombre: string; institucion: string; costo_aprox_bs: number; plazo_dias: number }[];
+  /** Régimen tributario elegido (General/RTS/RAU). */
+  regimen_tributario: string;
+}
+
+export interface ProcesoTecnico {
+  nombre: string;
+  /** Pasos del proceso ordenados. */
+  pasos: string[];
+  /** Tiempo total estimado. */
+  tiempo_total: string;
+  /** Capacidad productiva (ej. "20 unidades/día"). */
+  capacidad: string;
+  /** Equipamiento necesario (con costos aproximados). */
+  equipamiento: { item: string; costo_bs: number }[];
+}
+
+export interface BrandingInterno {
+  /** Mision en 1 oracion. */
+  mision: string;
+  /** Vision en 1 oracion. */
+  vision: string;
+  /** 4-6 valores corporativos. */
+  valores: string[];
+  /** Cultura de trabajo (1 parrafo). */
+  cultura: string;
+  /** Identidad visual basica (colores, tipografia, estilo). */
+  identidad_visual: {
+    colores: string[];
+    tipografia: string;
+    tono_comunicacion: string;
+  };
+}
+
+export interface CasoOrganizacion extends CasoBase {
+  modulo: "organizacion";
+  organigrama: NodoOrganigrama[];
+  rrhh: PuestoRRHH[];
+  /** Costo total mensual de la planilla. */
+  planilla_total_bs: number;
+  legal: ConstitucionLegal;
+  tecnico: ProcesoTecnico;
+  branding: BrandingInterno;
+}
+
+export function esCasoOrganizacion(c: CasoBase): c is CasoOrganizacion {
+  return c.modulo === "organizacion";
+}
+
+// ─── Módulo DEFENSA ──────────────────────────────────────────────────────
+
+export type CategoriaPreguntaTribunal =
+  | "problema"
+  | "metodologia"
+  | "marco_teorico"
+  | "resultados"
+  | "conclusiones"
+  | "viabilidad"
+  | "personal";
+
+export type DificultadPregunta = "facil" | "media" | "dificil" | "trampa";
+
+export interface PreguntaTribunal {
+  numero: number;
+  categoria: CategoriaPreguntaTribunal;
+  pregunta: string;
+  dificultad: DificultadPregunta;
+  /** Respuesta modelo del estudiante. */
+  respuesta_modelo: string;
+  /** Por qué el tribunal preguntaría esto (qué evalúa). */
+  que_evalua: string;
+  /** Trampa común si la hay (cosas a NO decir). */
+  trampa_evitar?: string;
+}
+
+export interface PuntoDefendible {
+  /** Descripción de la debilidad/fortaleza. */
+  punto: string;
+  /** Cómo defenderlo / cómo resaltarlo. */
+  como_manejarlo: string;
+  /** Frase clave que puedes decir literal. */
+  frase_clave?: string;
+}
+
+export interface DatosProyectoDefendido {
+  /** Carrera de pregrado. */
+  carrera: string;
+  /** Universidad y sede. */
+  universidad: string;
+  /** Modalidad (tesis, proyecto de grado, etc.). */
+  modalidad: string;
+  /** Título del proyecto. */
+  titulo: string;
+  /** Resumen del proyecto en 2-3 oraciones. */
+  resumen_proyecto: string;
+  /** Año de defensa. */
+  ano: number;
+}
+
+export interface CasoDefensa extends CasoBase {
+  modulo: "defensa";
+  proyecto: DatosProyectoDefendido;
+  /** 15-20 preguntas con respuesta modelo. */
+  preguntas: PreguntaTribunal[];
+  /** 3-5 puntos débiles del proyecto y cómo manejarlos. */
+  puntos_debiles: PuntoDefendible[];
+  /** 3-5 fortalezas del proyecto y cómo resaltarlas. */
+  fortalezas: PuntoDefendible[];
+  /** Consejo final del caso (1 párrafo de cierre). */
+  cierre: string;
+}
+
+export function esCasoDefensa(c: CasoBase): c is CasoDefensa {
+  return c.modulo === "defensa";
+}
