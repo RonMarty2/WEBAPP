@@ -347,7 +347,91 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
     );
   }
 
-  // ── Caso C: LaTeX listo — UI con acciones ─────────────────────────────────
+  // ── Caso C.1: ESTUDIANTE — vista limpia, sin LaTeX/PDF/Overleaf ───────────
+  // El alumno NO necesita ver código LaTeX, ni esperar 1-2 horas de compilación,
+  // ni opciones de Overleaf. Para él, su documento está armado en /documento-web
+  // listo para copiar al Word. Toda la complejidad técnica queda escondida en
+  // el flujo admin (Caso C.2 abajo).
+  if (!isAdmin && proyectoId) {
+    return (
+      <div style={{ padding: "40px 24px 60px", maxWidth: 800, margin: "0 auto" }}>
+        <div style={{ marginBottom: 28, textAlign: "center" }}>
+          <div style={{ fontSize: 56, marginBottom: 12 }}>📖</div>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--fg-primary)", margin: "0 0 10px" }}>
+            ¡Tu documento está listo!
+          </h1>
+          <p style={{ fontSize: 15, color: "var(--fg-secondary)", margin: 0, lineHeight: 1.6, maxWidth: 560, marginLeft: "auto", marginRight: "auto" }}>
+            Ya tienes todos tus capítulos generados. Mira tu documento armado
+            con índice, carátula, numeración y bibliografía — y cópialo al Word
+            con un clic para entregarlo.
+          </p>
+        </div>
+
+        <a
+          href={`/projects/${proyectoId}/documento-web`}
+          style={{
+            display: "block",
+            background: "linear-gradient(135deg, #059669 0%, #047857 100%)",
+            color: "#fff",
+            padding: "22px 28px",
+            borderRadius: 14,
+            textDecoration: "none",
+            textAlign: "center",
+            fontSize: 18,
+            fontWeight: 700,
+            boxShadow: "0 8px 20px rgba(5,150,105,0.25)",
+            marginBottom: 18,
+            transition: "transform 0.15s",
+          }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(-2px)"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.transform = "translateY(0)"; }}
+        >
+          📖 Ver mi documento armado →
+        </a>
+
+        <div style={{
+          padding: "14px 18px",
+          background: "var(--bg-card)",
+          border: "1px solid var(--border)",
+          borderRadius: 10,
+          fontSize: 13,
+          color: "var(--fg-secondary)",
+          lineHeight: 1.6,
+        }}>
+          <strong style={{ color: "var(--fg-primary)" }}>¿Qué vas a ver?</strong>
+          <ul style={{ margin: "8px 0 0 18px", padding: 0 }}>
+            <li>Carátula con tu universidad, carrera y datos personales</li>
+            <li>Índice clickeable con todos los capítulos</li>
+            <li>Capítulos numerados (I, II, III…) con subsecciones (1.1, 1.2, 2.1…)</li>
+            <li>Tablas y figuras con su numeración automática</li>
+            <li>Bibliografía consolidada al final</li>
+            <li>Un botón verde grande <strong>&quot;Copiar todo al Word&quot;</strong> — pegas en Word y queda con formato listo</li>
+          </ul>
+        </div>
+
+        {onConfigurarCaratula && (
+          <div style={{ marginTop: 16, textAlign: "center" }}>
+            <button
+              onClick={onConfigurarCaratula}
+              style={{
+                background: "transparent",
+                border: "1px solid var(--border)",
+                color: "var(--fg-secondary)",
+                padding: "8px 16px",
+                borderRadius: 8,
+                fontSize: 13,
+                cursor: "pointer",
+              }}
+            >
+              ⚙️ Configurar datos de la carátula
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Caso C.2: ADMIN — UI completa con LaTeX/PDF/Overleaf ──────────────────
   return (
     <div style={{ padding: "20px 24px 40px", maxWidth: 1100, margin: "0 auto" }}>
 
@@ -359,6 +443,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
         </h1>
         <p style={{ fontSize: 13.5, color: "var(--fg-muted)", margin: 0, lineHeight: 1.6 }}>
           Documento completo generado. Elige cómo seguir.
+          <span style={{ display: "inline-block", marginLeft: 8, padding: "1px 6px", background: "rgba(124,58,237,0.15)", color: "#7c3aed", borderRadius: 4, fontSize: 11, fontWeight: 600 }}>VISTA ADMIN</span>
         </p>
       </div>
 
