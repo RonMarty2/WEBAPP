@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { GraduationCap, Layers, ArrowRight } from 'lucide-react';
+import { GraduationCap, Layers, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/stores/idea/auth-store';
 
 export default function IdeaHub() {
@@ -23,7 +23,7 @@ export default function IdeaHub() {
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Link
           href="/idea/academia"
           className="idea-card group flex flex-col p-5 transition hover:-translate-y-0.5 hover:shadow-md"
@@ -37,6 +37,22 @@ export default function IdeaHub() {
           </p>
           <span className="idea-accent-text mt-3 inline-flex items-center gap-1 text-sm font-medium">
             Aprender <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+          </span>
+        </Link>
+
+        <Link
+          href="/idea/casos"
+          className="idea-card group flex flex-col p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <h3 className="text-base font-semibold">Casos de Bolivia</h3>
+          <p className="idea-muted mt-1 flex-1 text-sm">
+            5 emprendimientos reales con su Lean Canvas, validación e hipótesis ya resueltos.
+          </p>
+          <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-emerald-700">
+            Explorar <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </span>
         </Link>
 
