@@ -2621,8 +2621,12 @@ export default function WorkspacePage() {
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize:10, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:3 }}>{currentFaseDef.short}</div>
-                  <div style={{ fontSize:13.5, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>{currentFaseDef.label}</div>
+                  <div style={{ fontSize:10, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:3 }}>
+                    {phaseId === "ph-latex" && !mostrarHerramientasAdmin ? "DOCUMENTO" : currentFaseDef.short}
+                  </div>
+                  <div style={{ fontSize:13.5, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.3, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    {phaseId === "ph-latex" && !mostrarHerramientasAdmin ? "Tu documento final" : currentFaseDef.label}
+                  </div>
                 </div>
                 <span style={{ fontSize: 14, color: "var(--fg-muted)", flexShrink: 0, fontWeight: 700 }}>
                   {showPhaseNav ? "▲" : "☰"}
@@ -2630,8 +2634,12 @@ export default function WorkspacePage() {
               </button>
             ) : (
               <div style={{ padding:"14px 16px", borderBottom:"1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
-                <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>{currentFaseDef.short}</div>
-                <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>{currentFaseDef.label}</div>
+                <div style={{ fontSize:11, color:"var(--accent)", fontWeight:700, textTransform:"uppercase", letterSpacing:"0.1em", marginBottom:4 }}>
+                  {phaseId === "ph-latex" && !mostrarHerramientasAdmin ? "DOCUMENTO" : currentFaseDef.short}
+                </div>
+                <div style={{ fontSize:15, fontWeight:700, color:"var(--fg-primary)", lineHeight:1.35 }}>
+                  {phaseId === "ph-latex" && !mostrarHerramientasAdmin ? "Tu documento final" : currentFaseDef.label}
+                </div>
               </div>
             )}
 
