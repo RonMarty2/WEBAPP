@@ -137,3 +137,105 @@ export interface CasoIdea extends CasoBase {
 export function esCasoIdea(c: CasoBase): c is CasoIdea {
   return c.modulo === "idea";
 }
+
+// ─── Módulo MERCADOS ─────────────────────────────────────────────────────
+
+export type TipoEstudio = "exploratorio" | "descriptivo" | "causal";
+export type EnfoqueEstudio = "cualitativo" | "cuantitativo" | "mixto";
+
+export interface DisenoInvestigacion {
+  /** Pregunta de investigación en formato interrogativo. */
+  pregunta: string;
+  /** Tipo de estudio según objetivo. */
+  tipo: TipoEstudio;
+  /** Enfoque metodológico. */
+  enfoque: EnfoqueEstudio;
+  /** Objetivo general en una oración. */
+  objetivo_general: string;
+  /** 3-5 objetivos específicos. */
+  objetivos_especificos: string[];
+  /** Hipótesis a contrastar (1-3). */
+  hipotesis: string[];
+}
+
+export type TecnicaMuestreo =
+  | "aleatorio_simple"
+  | "estratificado"
+  | "conglomerados"
+  | "sistematico"
+  | "por_conveniencia"
+  | "bola_nieve";
+
+export interface DisenoMuestral {
+  /** Población objetivo definida con criterios concretos. */
+  poblacion: string;
+  /** Tamaño estimado de la población. */
+  N_poblacion: number;
+  /** Tamaño de muestra calculado. */
+  n_muestra: number;
+  /** Cómo se llegó al n (Cochran, Slovin, judgment). */
+  formula_usada: string;
+  /** Nivel de confianza usado (90/95/99). */
+  nivel_confianza: number;
+  /** Margen de error usado (típicamente 3-10%). */
+  margen_error: number;
+  /** Técnica de muestreo elegida. */
+  tecnica: TecnicaMuestreo;
+  /** Justificación de la técnica elegida. */
+  justificacion_tecnica: string;
+}
+
+export type TipoPregunta =
+  | "abierta"
+  | "cerrada_si_no"
+  | "opcion_multiple"
+  | "likert"
+  | "ranking"
+  | "escala_numerica";
+
+export interface PreguntaEncuesta {
+  numero: number;
+  texto: string;
+  tipo: TipoPregunta;
+  /** Opciones cuando aplica (Likert, opción múltiple). */
+  opciones?: string[];
+  /** Qué objetivo específico ataca esta pregunta. */
+  objetivo_que_ataca?: string;
+}
+
+export interface ResultadoClave {
+  /** Pregunta o variable analizada. */
+  variable: string;
+  /** Hallazgo cuantitativo principal. */
+  hallazgo: string;
+  /** Interpretación en lenguaje de negocio. */
+  interpretacion: string;
+}
+
+export interface CasoMercados extends CasoBase {
+  modulo: "mercados";
+  diseno: DisenoInvestigacion;
+  muestreo: DisenoMuestral;
+  /** Selección representativa de preguntas (5-10) — no la encuesta completa. */
+  encuesta: PreguntaEncuesta[];
+  /** Canal y forma de recolección. */
+  recoleccion: {
+    canal: string;
+    duracion_promedio_min: number;
+    incentivo?: string;
+    tasa_respuesta_pct: number;
+  };
+  /** 4-6 resultados clave del análisis. */
+  resultados_clave: ResultadoClave[];
+  /** Insight de cruce de variables (la "tabla cruzada" típica). */
+  cruce_destacado: {
+    variables: [string, string];
+    hallazgo: string;
+  };
+  /** Recomendación final basada en datos. */
+  recomendacion: string;
+}
+
+export function esCasoMercados(c: CasoBase): c is CasoMercados {
+  return c.modulo === "mercados";
+}
