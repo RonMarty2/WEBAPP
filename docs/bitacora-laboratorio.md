@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-08 (sesión 9: pricing reconciliado + voseo limpio + regla bloqueante)
+> **Última actualización:** 2026-06-09 (sesión 10: Wave 4 docente — rúbrica + calificación + calendario)
 
 ---
 
@@ -38,6 +38,8 @@ funciona (Waves 1-3) y el **widget transversal** "Trabajando en" está integrado
 | `migrations-organizacion/001` | ✅ |
 | `migrations-docente/001_vinculacion` | ⬜ PENDIENTE (sesión 6) |
 | `migrations-docente/002_observaciones_consentimiento` | ⬜ PENDIENTE (sesión 6) |
+| `migrations-docente/003_observaciones_proyecto_borrado` | ⬜ PENDIENTE (sesión 6) |
+| `migrations-docente/004_wave4_rubrica_calificacion_calendario` | ✅ APLICADA (sesión 10, 2026-06-09) |
 
 ### Pendientes
 - ⬜ **(opcional)** Export PDF directo del Generador. El `.tex` y el ZIP
@@ -270,6 +272,176 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-09 (sesión 10) — Wave 4 docente: rúbrica + calificación + calendario
+
+**Contexto:** sesión 9 cerró el pricing y el voseo. Quedaba pendiente
+desde sesión 6 cerrar el ciclo del panel docente: el docente podía
+vincular alumnos (Wave 1), ver sus proyectos (Wave 2) y dejarle
+observaciones (Wave 3), pero NO calificarlos formalmente ni asignar
+fechas tope. Sin eso, el panel docente era un visor, no una herramienta
+de evaluación. El usuario confirmó "Los 3, los 3" para los 3 escenarios
+de uso (alumno-only, docente propio, y vender a otros docentes), así
+que esta wave debía cubrir los tres usos sin duplicar.
+
+**Commits de esta sesión (rama `claude/tender-keller-G855A`):**
+- `023b2bf` — Pieza 1/2: backend (SQL + tipos + libs + 8 endpoints)
+- `388db8e` — Pieza 2/2: UI completa (5 páginas + atajos)
+
+#### Pieza 1 — Backend (commit `023b2bf`)
+
+**SQL nuevo (`migrations-docente/004_wave4_rubrica_calificacion_calendario.sql`):**
+- `docente_rubricas`: id UUID + docente_id TEXT + nombre + descripción +
+  criterios JSONB + escala_max (CHECK IN 7/10/20/100) + nota_aprueba +
+  default_actual + archivada + timestamps.
+  - **UNIQUE INDEX parcial** `uq_doc_rub_default` que garantiza que solo
+    UNA rúbrica por docente puede tener `default_actual=TRUE`.
+- `docente_calificaciones`: id + vinculo_id (FK cascade) + docente_id +
+  alumno_id + rubrica_id (FK restrict, para no perder histórico) +
+  modulo (CHECK 9 valores) + proyecto_id + proyecto_titulo +
+  notas_por_criterio JSONB + promedio_ponderado NUMERIC(5,2) +
+  comentario_general + estado (borrador/publicada) + publicada_en +
+  timestamps. **CONSTRAINT UNIQUE** por (docente_id, alumno_id, modulo,
+  proyecto_id, rubrica_id) → permite recalificar el mismo entregable
+  vía UPSERT.
+- `docente_entregas`: id + docente_id + vinculo_id NULLABLE (NULL = para
+  todos los alumnos) + titulo + descripcion + modulo_sugerido +
+  fecha_tope + estado (programada/vencida/cumplida/cancelada) +
+  prioridad + timestamps.
+- Triggers `docente_touch_actualizado()` en las 3 tablas para refrescar
+  `actualizada_en` en cada UPDATE.
+
+**Tipos (`src/types/docente-wave4.ts`):**
+- Interfaces: `Rubrica`, `CriterioRubrica`, `Calificacion`,
+  `NotaPorCriterio`, `Entrega`. Unions: `EscalaCalificacion`,
+  `ModuloCalificable`, `EstadoCalificacion`, `EstadoEntrega`,
+  `PrioridadEntrega`.
+- **Helpers puros sin deps** (reutilizables en cliente y servidor):
+  - `calcularPromedioPonderado(criterios, notas)` → number | null.
+    Implementa `sum(nota_i * peso_pct_i) / sum(peso_pct_i con nota)`.
+  - `sumaDePesos(criterios)` → number, para validar UI "100%".
+  - `nuevoCriterioId()` → string local (no FK), vive en el JSONB.
+  - `convertirEscala(valor, desde, hasta)` → number proporcional.
+
+**Endpoints (8 nuevos):**
+- `GET/POST /api/docente/rubricas` — lista no archivadas, crea. POST
+  valida suma de pesos === 100, escala IN (7,10,20,100), nombre 1-200
+  chars, desmarca la default anterior si la nueva es default.
+- `PATCH/DELETE /api/docente/rubricas/[id]` — actualización selectiva
+  con whitelist; DELETE archiva (no borra) para preservar calificaciones
+  que la usan.
+- `GET/POST /api/docente/calificaciones` — GET acepta filtros
+  vinculo_id, alumno_id, modulo, estado. POST hace UPSERT con
+  `onConflict: docente_id,alumno_id,modulo,proyecto_id,rubrica_id`,
+  valida ownership de vínculo + rúbrica, calcula promedio_ponderado
+  en backend.
+- `PATCH/DELETE /api/docente/calificaciones/[id]` — cambiar estado
+  (borrador↔publicada con timestamp `publicada_en`), comentario_general,
+  o eliminar.
+- `GET/POST /api/docente/entregas` — vinculo_id=null = global para
+  todos los alumnos del docente.
+- `PATCH/DELETE /api/docente/entregas/[id]` — modificar título,
+  descripción, fecha_tope, estado, prioridad.
+- `GET /api/alumno/calificaciones` — devuelve solo las publicadas del
+  alumno logueado. Enriquece con docente_nombre (vía `idea_perfiles`)
+  y la rúbrica completa para que el cliente pueda renderizar el detalle
+  por criterio con su peso.
+- `GET /api/alumno/entregas` — devuelve entregas asignadas a sus
+  vínculos + entregas globales (vinculo_id IS NULL) de docentes a los
+  que está vinculado. Auto-marca como 'vencida' las programadas con
+  fecha pasada (fire-and-forget update; reflejado en el output sin
+  esperar la confirmación de DB).
+
+#### Pieza 2 — UI (commit `388db8e`)
+
+**5 páginas nuevas:**
+
+- `src/app/docente/rubricas/page.tsx` — CRUD del docente:
+  - Form con N criterios ponderados, validación de "suma=100%" en
+    vivo con badge dinámico, botón "Distribuir parejo" que reparte
+    100 entre todos los criterios (con resto en los primeros).
+  - Pre-llenado con 4 criterios típicos académicos (claridad,
+    profundidad, aplicación, originalidad) para arranque rápido.
+  - Soporta cambio de escala (al cambiar, recalcula nota mínima
+    aprobación default: 4/6/11/51 para 7/10/20/100).
+  - Listado muestra badge "Por defecto" + chips con cada criterio
+    y su peso.
+
+- `src/app/docente/calendario/page.tsx` — fechas tope agrupadas en
+  bloques: **vencidas (rosa)**, **próximas (azul)**, **historial
+  collapsed**. Form distingue "para todos" vs "un alumno específico"
+  (dropdown con vinculados). Cada item permite marcar cumplida,
+  cancelar o eliminar. Calcula "Faltan X días" / "Venció hace X días"
+  en vivo.
+
+- `src/app/docente/alumno/[id]/calificar/page.tsx` — aplicar rúbrica:
+  - Pre-llena con la rúbrica default + los proyectos existentes del
+    alumno como chips clickeables.
+  - **Soporta deep-link** `?modulo=X&proyecto=Y&titulo=Z` para que
+    desde `/docente/alumno/[id]` se pueda saltar directo con contexto.
+  - Sliders + inputs numéricos por criterio (step 0.5 si escala=7),
+    comentario por criterio, comentario general.
+  - **Promedio ponderado calculado en cliente** vía
+    `calcularPromedioPonderado` para feedback instantáneo. Indica
+    visualmente Aprueba/Reprueba comparando contra `nota_aprueba`.
+  - **UPSERT en pre-llenado:** si ya existe calificación para
+    (módulo, proyecto, rúbrica), la carga al elegirla; al guardar
+    sobreescribe.
+  - Acciones separadas: "Guardar borrador" (alumno NO ve) vs
+    "Publicar al alumno" (alumno ve).
+  - Historial inline con editar/publicar/eliminar.
+
+- `src/app/mis-calificaciones/page.tsx` — vista del alumno:
+  - Header con 3 stats: total / aprobadas / promedio general.
+  - Lista colapsable. Expand muestra comentario general en card
+    violeta + detalle por criterio con barra de progreso roja/verde,
+    nota, peso y comentario individual.
+
+- `src/app/mis-entregas/page.tsx` — vista del alumno:
+  - Cuatro bloques por urgencia: vencidas, esta semana (≤7 días),
+    próximas (>7 días), historial collapsed.
+  - Tarjetas distinguen "Para todos" vs "Solo para ti", muestran
+    prioridad y módulo sugerido.
+
+**Atajos de navegación agregados:**
+- `/docente`: cards "Mis rúbricas" y "Calendario de entregas" bajo el
+  header; botón verde "Calificar →" en cada alumno listado.
+- `/dashboard`: links "Mis calificaciones" y "Mis entregas" en el
+  header (mismo estilo violeta que "Mis observaciones").
+
+**Verificación de calidad:**
+- Type-check limpio en los 12 archivos nuevos (sin contar deuda
+  preexistente de tests sin @types/jest).
+- Voseo: cero coincidencias en los 5 archivos UI nuevos vía el regex
+  bloqueante de CLAUDE.md. Imperativos usados: "elige", "pon", "crea",
+  "guarda" — todos tuteo neutro.
+- Empty states: las 3 pantallas del alumno (sin calificaciones,
+  sin entregas, sin docente) llevan a `/unirse-docente`.
+
+**Cómo cubre los 3 escenarios del usuario:**
+1. **Alumno-only (alumno paga, docente externo lo evalúa):** el alumno
+   ve `/mis-calificaciones` y `/mis-entregas` con lo que su docente
+   externo publica.
+2. **Docente propio (Ronald usa sus propios cursos):** arma rúbrica
+   en `/docente/rubricas`, fija calendario en `/docente/calendario`,
+   califica en `/docente/alumno/[id]/calificar`.
+3. **Vender a otros docentes:** el panel completo
+   `/docente/{rubricas,calendario,alumno/[id]/calificar}` es el
+   producto que se ofrece como upsell.
+
+**Decisión de diseño clave:** las rúbricas son **soft-delete** (archivar
+en lugar de borrar) porque las calificaciones tienen FK con `ON DELETE
+RESTRICT` hacia rúbricas. Si se permitiera borrado duro, las notas
+históricas perderían el contexto del criterio aplicado.
+
+**Pendiente para Wave 5 (no se hizo):**
+- Exportar reporte agregado por alumno en PDF.
+- Grupos / cohortes para asignar entregas a un subconjunto de alumnos.
+- Calendario en formato grilla mensual (hoy es lista).
+- Comparativa entre alumnos del mismo docente (estadísticas).
+- Notificaciones push/email cuando se publica una calificación.
+
+---
 
 ### 2026-06-08 (sesión 9) — Pricing reconciliado + voseo eliminado + REGLA bloqueante
 
