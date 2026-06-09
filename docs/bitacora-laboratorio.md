@@ -398,19 +398,23 @@ Solución: `.github/workflows/vercel-auto-deploy.yml`:
 Ahora cada `git push origin main` → deploy automático en ~30s + build.
 Cero "Promote to Production" manual.
 
-#### Plataformas Organización y Defensa
+#### Plataformas Organización y Defensa (COMPLETADO)
 
-Antes: stubs con solo galería de casos. Ahora con academia + 1-2
+Antes: stubs con solo galería de casos. Ahora con academia +
 herramientas interactivas:
 - **Organización**: 5 clases (estructura legal, costo real empleado,
   organigrama, manual de funciones, plan técnico), calculadora de
   planilla con aportes patronales 16.71% + provisión aguinaldo 8.33%,
-  layout con sidebar 5 secciones.
+  **constructor de organigrama jerárquico en vivo**, layout con sidebar
+  5 secciones.
 - **Defensa**: 4 clases (anatomía tribunal, cómo responder cuando no
-  sabes, defender metodología, comunicación no verbal), mini-simulacro
-  con pregunta random + respuesta modelo, layout con sidebar 4
+  sabes, defender metodología, comunicación no verbal), **mini-simulacro
+  que toma pregunta aleatoria del banco CASOS_DEFENSA → textarea →
+  revela respuesta modelo + qué evalúa + trampa**, layout con sidebar 4
   secciones.
 - Ambos agregados al catálogo `platforms.ts` con emoji, color, bloques.
+- **Resultado: los 6 módulos educativos tienen plataforma completa**
+  (resumen + clases + casos + herramientas). Ya no hay stubs.
 
 #### Resumen ejecutivo de la sesión 11
 
