@@ -1,35 +1,41 @@
 name: Vercel auto-deploy (main)
 
-# Cada push a main dispara el Deploy Hook de Vercel para que la app
-# de producción se actualice automaticamente. Reemplaza al webhook nativo
-# Vercel <-> GitHub que dejo de procesar pushes a main en algun momento.
+# Cada push a main dispara el Deploy Hook de Vercel.
 #
-# Por que existe este workflow:
-# - Antes, el webhook nativo de Vercel detectaba los push a main y
-#   disparaba el deploy de production sin que hicieramos nada.
-# - Ese webhook dejo de funcionar (puede haber sido expiracion de token,
-#   reinstalacion de la integracion o un cambio interno de Vercel).
-# - En vez de pelearnos con el webhook, usamos un Deploy Hook explicito:
-#   una URL fija que cuando recibe POST dispara el deploy de production.
-# - Este workflow corre en cada push a main y hace el POST.
+# DEBOUNCE / CONCURRENCY:
+# - Si llegan varios pushes seguidos en pocos segundos, solo el ultimo
+#   sobrevive (concurrency.cancel-in-progress cancela los previos).
+# - Esperamos 30s antes de disparar el hook para dar tiempo a que se
+#   acumulen pushes rapidos. Asi Vercel siempre recibe UN trigger del
+#   commit mas reciente, en vez de N triggers que se pisan entre si.
+# - Sin este debounce, Vercel descarta los triggers que llegan mientras
+#   esta construyendo el anterior (limitacion de Hobby).
 #
-# La URL del Deploy Hook esta hardcodeada porque el repo es privado.
-# Si en algun momento se filtra, basta con regenerar el hook desde
-# Vercel (Settings -> Git -> Deploy Hooks) y reemplazar la URL aqui.
+# Si necesitas un deploy inmediato sin esperar el debounce, dispara
+# manualmente con: workflow_dispatch desde la pestana Actions de GitHub.
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-deploy-main
+  cancel-in-progress: true
 
 jobs:
   trigger-vercel:
     runs-on: ubuntu-latest
     steps:
+      - name: Espera 30s para debouncear pushes rapidos
+        run: |
+          echo "Esperando 30s — si llega otro push, este job se cancela y solo sobrevive el ultimo."
+          sleep 30
       - name: Dispara Deploy Hook de Vercel
         run: |
           curl -fsS -X POST \
             "https://api.vercel.com/v1/integrations/deploy/prj_ndPuzCC2z2MbtJAw77Rfdmjs6ekq/uTbFKXPUPM" \
             -H "Content-Type: application/json" \
             -d '{"ref":"main"}'
-          echo "✓ Deploy Hook disparado. Vercel ya esta construyendo el deploy de production."
+          echo "✓ Deploy Hook disparado. Vercel construira con el commit mas reciente de main."
