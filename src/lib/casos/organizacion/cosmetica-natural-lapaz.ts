@@ -1,0 +1,220 @@
+import type { CasoOrganizacion } from "../types";
+
+/**
+ * Caso 2 — Cosmética natural artesanal en La Paz centro.
+ *
+ * Caso **básico** ideal para emprendimientos micro que pasan de
+ * informal a formal. El foco está en el lado legal: SENASAG, AGEMED
+ * y FUNDEMPRESA Unipersonal vs SRL, decisión del régimen RAU vs
+ * General, y un proceso técnico de producción por lote.
+ */
+
+export const casoCosmeticaNaturalLapaz: CasoOrganizacion = {
+  slug: "cosmetica-natural-lapaz",
+  modulo: "organizacion",
+  titulo: "Cosmética natural artesanal lanzamiento legal",
+  tagline: "Pasar de un emprendimiento casero a una empresa formal lista para vender en farmacias y tiendas especializadas.",
+  zona: "La Paz centro",
+  rubro: "Cosmética / cuidado personal",
+  dificultad: "basico",
+  emoji: "🌿",
+  emprendedor: {
+    nombre: "Luciana Sánchez",
+    edad: 28,
+    rol: "Química farmacéutica egresada de la UMSA. Desde 2024 elabora jabones, cremas y bálsamos naturales con insumos andinos como quinua, coca y achiote. Trabaja desde su casa con producción artesanal y quiere formalizarse para entrar a farmacias y tiendas naturistas de La Paz.",
+  },
+  contexto: [
+    "Luciana arrancó como hobby pandémico haciendo jabones con aceite de quinua para su familia. En dos años, el boca a boca creció a 60 clientes recurrentes que le piden por WhatsApp y le pagan por QR. La cocina de su casa quedó pequeña y la demanda de tiendas naturistas (que la contactaron en Instagram) le exige factura y registro sanitario.",
+    "Por su formación en química farmacéutica sabe que vender cosmética sin registro AGEMED es riesgoso: una inspección puede decomisar todo y multarla. Además entiende que los testimonios de clientes la podrían meter en problemas si se interpretan como promesas medicinales no autorizadas.",
+    "Decidió formalizar el proyecto bajo el nombre Lumina Botánica. Necesita decidir si registra como Unipersonal o SRL, si tributa por RAU o Régimen General, y cómo organizar la operación con ella sola en la fórmula y una ayudante de medio tiempo en el llenado. Su madre, contadora, le ayudará en la contabilidad básica.",
+  ],
+  problema: "Luciana necesita formalizar Lumina Botánica para vender legalmente en farmacias y tiendas naturistas, sin sobredimensionar la estructura ni los costos para un emprendimiento que aún factura menos de Bs 8.000 al mes.",
+  segmento: "Mujeres 25-50 años, NSE B y C+, con interés en cosmética natural sin químicos agresivos, ubicadas en La Paz (zona centro, sur y miraflores), que compran en tiendas naturistas o farmacias seleccionadas.",
+  organigrama: [
+    { cargo: "Fundadora y Formuladora", ocupante: "Luciana Sánchez" },
+    { cargo: "Ayudante de Producción", ocupante: "Marisol Quispe", reporta_a: "Fundadora y Formuladora" },
+    { cargo: "Contadora Externa", ocupante: "Patricia Sánchez", reporta_a: "Fundadora y Formuladora" },
+    { cargo: "Diseñadora Freelance", ocupante: "Andrea Vargas", reporta_a: "Fundadora y Formuladora" },
+    { cargo: "Vendedora a Comisión", ocupante: "Vanessa Choque", reporta_a: "Fundadora y Formuladora" },
+  ],
+  rrhh: [
+    {
+      cargo: "Fundadora y Formuladora",
+      responsabilidades: [
+        "Diseñar fórmulas nuevas y validarlas con pruebas de estabilidad.",
+        "Comprar insumos andinos a proveedores certificados de Sucre y Cochabamba.",
+        "Supervisar la producción semanal y firmar los lotes terminados.",
+        "Atender directamente a las tiendas y farmacias aliadas.",
+        "Mantener al día los registros AGEMED y los protocolos de buenas prácticas.",
+      ],
+      requisitos: [
+        "Título de Química Farmacéutica o equivalente reconocido.",
+        "Conocimiento de buenas prácticas de manufactura cosmética.",
+        "Experiencia en formulación con insumos vegetales y aceites esenciales.",
+        "Capacidad comercial para presentar el producto a tiendas y farmacias.",
+        "Disponibilidad de tiempo completo durante la etapa de despegue.",
+      ],
+      salario_liquido_bs: 4500,
+      costo_total_bs: 5625,
+      tipo_contrato: "Indefinido (autoasignación como titular)",
+    },
+    {
+      cargo: "Ayudante de Producción",
+      responsabilidades: [
+        "Apoyar en el llenado, etiquetado y empaque de los lotes.",
+        "Mantener limpio el área de producción y los utensilios.",
+        "Llevar el registro físico de cada lote con fecha y código.",
+        "Preparar pedidos de tiendas y entregarlos al motorizado.",
+        "Avisar a la fundadora cuando algún insumo o envase esté por agotarse.",
+      ],
+      requisitos: [
+        "Bachiller mayor de edad con disponibilidad de medio tiempo.",
+        "Atención al detalle y cuidado en manejo de envases pequeños.",
+        "Compromiso con higiene personal y uso de mandil, guantes y cofia.",
+        "Buena lectura y escritura para llenar fichas de lote.",
+        "Residencia cercana al taller para optimizar transporte.",
+      ],
+      salario_liquido_bs: 2500,
+      costo_total_bs: 3125,
+      tipo_contrato: "Plazo fijo 6 meses renovable, medio tiempo",
+    },
+    {
+      cargo: "Contadora Externa",
+      responsabilidades: [
+        "Llevar libros contables y registrar ventas mensuales.",
+        "Presentar declaraciones de impuestos según el régimen elegido.",
+        "Emitir facturas y notas fiscales del NIT cuando corresponda.",
+        "Mantener al día la planilla y los aportes de la ayudante.",
+        "Asesorar en decisiones financieras y de proveedores.",
+      ],
+      requisitos: [
+        "Auditor o contador público con CAUB vigente.",
+        "Experiencia con micro y pequeñas empresas en La Paz.",
+        "Manejo del sistema RC-IVA y formularios actuales de Impuestos.",
+        "Disponibilidad para reuniones mensuales presenciales o virtuales.",
+        "Honorarios competitivos por servicio puntual mensual.",
+      ],
+      salario_liquido_bs: 800,
+      costo_total_bs: 800,
+      tipo_contrato: "Consultoría externa por honorarios mensuales",
+    },
+    {
+      cargo: "Diseñadora Freelance",
+      responsabilidades: [
+        "Diseñar etiquetas, empaques y materiales gráficos.",
+        "Producir piezas para redes sociales semanales.",
+        "Mantener consistencia visual de la marca Lumina Botánica.",
+        "Apoyar en sesiones fotográficas de producto.",
+        "Entregar archivos editables para futuras ampliaciones.",
+      ],
+      requisitos: [
+        "Diseñadora gráfica con portafolio de marcas pequeñas.",
+        "Manejo de Adobe Illustrator, Photoshop y Canva profesional.",
+        "Sensibilidad estética alineada al naturalismo botánico.",
+        "Capacidad de cumplir plazos y revisiones rápidas.",
+        "Trabajo remoto bajo demanda según necesidad.",
+      ],
+      salario_liquido_bs: 600,
+      costo_total_bs: 600,
+      tipo_contrato: "Consultoría freelance por proyecto o pieza",
+    },
+    {
+      cargo: "Vendedora a Comisión",
+      responsabilidades: [
+        "Visitar tiendas naturistas y farmacias para presentar productos nuevos.",
+        "Tomar pedidos y reportarlos a la fundadora el mismo día.",
+        "Hacer seguimiento de pagos pendientes en cada punto de venta.",
+        "Recoger feedback de las tiendas sobre rotación y precio.",
+        "Asistir a ferias locales como representante de la marca.",
+      ],
+      requisitos: [
+        "Experiencia previa en venta a tiendas o farmacias.",
+        "Movilidad propia para desplazarse por La Paz.",
+        "Buena presencia y trato comercial profesional.",
+        "Disponibilidad de 4 horas diarias de lunes a viernes.",
+        "Disposición a remuneración mixta de base más comisión.",
+      ],
+      salario_liquido_bs: 1500,
+      costo_total_bs: 1875,
+      tipo_contrato: "Plazo fijo 6 meses con base más comisión 8%",
+    },
+  ],
+  // 5625 + 3125 + 800 + 600 + 1875 = 12025
+  planilla_total_bs: 12025,
+  legal: {
+    tipo: "Unipersonal",
+    justificacion: "El negocio factura menos de Bs 100.000 al año en su primer ejercicio y tiene una sola dueña. La empresa Unipersonal es la figura más liviana y barata, no exige capital social mínimo y permite operar legalmente con NIT y facturas. Si Lumina Botánica crece sobre Bs 15.000 mensuales sostenidos, Luciana migrará a SRL en el segundo año.",
+    capital_social_bs: 8000,
+    tramites: [
+      { nombre: "Reserva de nombre comercial", institucion: "FUNDEMPRESA", costo_aprox_bs: 136, plazo_dias: 2 },
+      { nombre: "Matrícula de comercio Unipersonal", institucion: "FUNDEMPRESA", costo_aprox_bs: 260, plazo_dias: 5 },
+      { nombre: "Padrón Nacional de Contribuyentes (NIT)", institucion: "Impuestos Nacionales", costo_aprox_bs: 0, plazo_dias: 3 },
+      { nombre: "Licencia sanitaria de funcionamiento", institucion: "SENASAG", costo_aprox_bs: 800, plazo_dias: 30 },
+      { nombre: "Registro sanitario de producto cosmético", institucion: "AGEMED", costo_aprox_bs: 1500, plazo_dias: 60 },
+      { nombre: "Licencia de funcionamiento municipal", institucion: "Gobierno Autónomo Municipal de La Paz", costo_aprox_bs: 450, plazo_dias: 15 },
+      { nombre: "Afiliación patronal CNS por una empleada", institucion: "Caja Nacional de Salud", costo_aprox_bs: 0, plazo_dias: 5 },
+      { nombre: "Registro patronal AFP", institucion: "AFP Previsión BBVA", costo_aprox_bs: 0, plazo_dias: 3 },
+    ],
+    regimen_tributario: "Régimen General con NIT (los productos cosméticos exigen factura para venta en farmacias, descartando RAU y Régimen Simplificado)",
+  },
+  tecnico: {
+    nombre: "Producción por lote de jabón sólido de quinua",
+    pasos: [
+      "Verificar que el área esté limpia y desinfectada antes de iniciar.",
+      "Pesar los aceites base (oliva, coco, ricino) y mezclarlos a 40 grados.",
+      "Pesar el hidróxido de sodio y disolverlo en agua destilada con extremo cuidado.",
+      "Combinar la solución alcalina con los aceites y batir hasta el punto de traza.",
+      "Incorporar harina de quinua, aceite esencial y colorante natural sin acelerar.",
+      "Verter la mezcla en moldes individuales identificados con el lote.",
+      "Cubrir con manta y dejar saponificar durante 24 horas en reposo.",
+      "Desmoldar, cortar en barras y registrar lote con código en ficha física.",
+      "Curar las barras en estantería ventilada por 4 semanas mínimo.",
+      "Etiquetar, empacar y enviar a control de calidad antes de salida.",
+    ],
+    tiempo_total: "4 horas de producción activa por lote, más 4 semanas de curado obligatorio",
+    capacidad: "Cada lote produce 80 barras de 90 gramos. La capacidad mensual del taller actual es de 4 lotes (320 barras al mes).",
+    equipamiento: [
+      { item: "Balanza de precisión digital hasta 5 kg", costo_bs: 1200 },
+      { item: "Olla de acero inoxidable 15 litros con termómetro", costo_bs: 850 },
+      { item: "Batidora industrial de inmersión de 800W", costo_bs: 950 },
+      { item: "Juego de moldes de silicona para 80 unidades", costo_bs: 1400 },
+      { item: "Estantería de acero inoxidable para curado", costo_bs: 2200 },
+      { item: "Equipo de protección personal completo (mandil, guantes, gafas, mascarilla)", costo_bs: 600 },
+      { item: "Etiquetadora manual y rollo de etiquetas inicial", costo_bs: 1100 },
+      { item: "Refrigeradora pequeña para insumos sensibles", costo_bs: 2800 },
+    ],
+  },
+  branding: {
+    mision: "Crear cosmética natural artesanal con insumos andinos que cuide la piel sin agredirla.",
+    vision: "Convertir Lumina Botánica en la marca boliviana de cosmética natural más respetada de Sudamérica para el año 2032.",
+    valores: [
+      "Pureza verificada: insumos andinos trazables hasta el productor.",
+      "Honestidad cosmética: cuidamos, no prometemos curar.",
+      "Cercanía artesanal: cada lote tiene un código y una historia.",
+      "Respeto a la piel: sin parabenos, sin sulfatos agresivos, sin pruebas en animales.",
+      "Aprendizaje constante: cada nueva fórmula nace de un proceso técnico documentado.",
+    ],
+    cultura: "Lumina Botánica trabaja con calma y precisión. No hay urgencias que justifiquen apurar un lote o saltar un control. La fundadora y la ayudante comparten un ritual semanal: lunes de planificación, martes y jueves de producción, viernes de cierre y limpieza profunda. El feedback fluye directo, sin jerarquías rígidas, y cada error se documenta para no repetirlo. Las tiendas y clientas son tratadas como aliadas, no como números.",
+    identidad_visual: {
+      colores: ["Verde salvia #7A8B5C", "Crema arena #EFE4D2", "Marrón corteza #4A352B", "Dorado tenue #C9A86A"],
+      tipografia: "Cormorant Garamond para títulos y Lato para textos secundarios y empaque.",
+      tono_comunicacion: "Cálido, informativo y honesto. Segunda persona del singular tuteo. Explicamos los insumos sin tecnicismos pero sin disfrazar la ciencia detrás de cada producto.",
+    },
+  },
+  conclusion: "Luciana puede formalizar Lumina Botánica como Unipersonal con una inversión legal aproximada de Bs 3.150 en trámites y un capital social inicial de Bs 8.000 que cubre insumos y equipamiento básico. La planilla mensual de Bs 12.025 está dentro de su capacidad si mantiene la producción de 320 barras al mes con precio mayorista de Bs 35. SENASAG y AGEMED son obligatorios y no negociables. El régimen General con NIT es indispensable para vender en farmacias, aunque exige declaraciones mensuales. La estructura es deliberadamente liviana para sostener un crecimiento gradual.",
+  lecciones: [
+    "Cosmética sin registro AGEMED es ilegal en Bolivia y vender en farmacias sin él es decomiso seguro.",
+    "La figura Unipersonal con NIT permite emitir factura, contratar empleadas y crecer sin saltar a SRL.",
+    "El régimen RAU está reservado a productores agropecuarios sin transformación industrial, no aplica a cosmética.",
+    "Pagar a un contador externo cuesta Bs 600-1.200 mensuales y evita multas de miles por declaraciones mal hechas.",
+    "Vender a tiendas exige factura: emprendimientos sin NIT pierden el canal mayorista por falta de respaldo fiscal.",
+  ],
+  errores_evitados: [
+    "No vender cosmética sin registro AGEMED aunque sea producto natural: la ley boliviana no distingue.",
+    "No usar el RAU pensando que es para artesanos: el régimen aplica solo al productor agropecuario sin industrializar.",
+    "No omitir SENASAG porque se elabore en casa: la cocina debe acreditarse como ambiente sanitario.",
+    "No pagar a la ayudante en sobre cerrado sin aportes: en caso de inspección se generan deudas retroactivas.",
+    "No prometer efectos curativos en redes: la AGEMED puede multar y exigir retirada de publicaciones.",
+  ],
+  tags: ["cosmetica", "natural", "La-Paz", "unipersonal", "AGEMED", "SENASAG", "artesanal", "micro"],
+};
