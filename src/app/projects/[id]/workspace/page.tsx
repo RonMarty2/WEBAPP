@@ -2707,10 +2707,34 @@ export default function WorkspacePage() {
               </div>
             )}
 
+            {/* En la fase final ph-latex, para el ALUMNO mostramos solo un
+                aviso amigable apuntando al documento web. Los tabs técnicos
+                (chat de generación, fuentes, tribunal, bitácora, cuadernillo)
+                los ocultamos aquí — el alumno los tuvo en las fases anteriores
+                cuando los necesitaba. Admin SIGUE viendo todo en esta fase. */}
+            {phaseId === "ph-latex" && !mostrarHerramientasAdmin && (hasBorrador || hasFinal) && (
+              <div style={{ padding: "32px 24px", display: "flex", flexDirection: "column", gap: 14, alignItems: "center", textAlign: "center" }}>
+                <div style={{ fontSize: 40 }}>📖</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--fg-primary)", lineHeight: 1.4 }}>
+                  Tu documento está armado
+                </div>
+                <div style={{ fontSize: 12, color: "var(--fg-secondary)", lineHeight: 1.6 }}>
+                  Mira el centro de la pantalla y aprieta el botón verde
+                  para verlo completo y copiarlo al Word.
+                </div>
+                <div style={{ marginTop: 6, padding: "8px 12px", background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.18)", borderRadius: 8, fontSize: 11, color: "var(--fg-secondary)", lineHeight: 1.5 }}>
+                  Si necesitas hacer cambios al contenido, vuelve a la
+                  fase del capítulo que quieras editar usando el menú de
+                  fases de arriba.
+                </div>
+              </div>
+            )}
+
             {/* TABS — etiquetas claras para el estudiante. Las tabs que no
                 puede usar por su plan se OCULTAN (no se muestran con candado:
-                eso confunde y suma ruido visual). Admin siempre ve todo. */}
-            {!isCap0Phase && (hasBorrador || hasFinal) && (
+                eso confunde y suma ruido visual). Admin siempre ve todo.
+                En ph-latex se ocultan al alumno (ya tiene el aviso de arriba). */}
+            {!isCap0Phase && (hasBorrador || hasFinal) && !(phaseId === "ph-latex" && !mostrarHerramientasAdmin) && (
               <div style={{ display: "flex", borderBottom: "1px solid rgba(148,163,184,0.18)", flexShrink: 0 }}>
                 <button
                   onClick={() => setCol1Tab("generacion")}
@@ -2765,7 +2789,7 @@ export default function WorkspacePage() {
               </div>
             )}
 
-            {col1Tab === "generacion" && (
+            {col1Tab === "generacion" && !(phaseId === "ph-latex" && !mostrarHerramientasAdmin) && (
               <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                 {/* Warnings */}
                 {needsUpdate && (
@@ -3088,7 +3112,7 @@ export default function WorkspacePage() {
         </div>
       )}
 
-      {col1Tab === "fuentes" && (
+      {col1Tab === "fuentes" && !(phaseId === "ph-latex" && !mostrarHerramientasAdmin) && (
         <div style={{ padding: "24px 20px", display: "flex", flexDirection: "column", gap: 16 }}>
           <div style={{ fontSize: 13, color: "var(--fg-primary)", fontWeight: 700, lineHeight: 1.4 }}>
             📎 Material adicional
