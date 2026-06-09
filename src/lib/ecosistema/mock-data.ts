@@ -1,4 +1,4 @@
-export type PlatformId = 'finanzas' | 'mercados' | 'estrategia' | 'marketing';
+export type PlatformId = 'finanzas' | 'mercados' | 'estrategia' | 'marketing' | 'organizacion' | 'defensa';
 
 export interface MockUser {
   id: string;

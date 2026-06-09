@@ -10,6 +10,7 @@ const SECTIONS = [
   { href: '/ecosistema/universidad/mercados/clases', label: 'Clases', icono: '🎓' },
   { href: '/ecosistema/universidad/mercados/casos', label: 'Casos de Bolivia', icono: '🇧🇴' },
   { href: '/ecosistema/universidad/mercados/muestreo', label: 'Calculadora de muestreo', icono: '🔢' },
+  { href: '/ecosistema/universidad/mercados/calculadora-reactiva', label: 'Cochran visual (sliders)', icono: '🎚️' },
   { href: '/ecosistema/universidad/mercados/encuesta', label: 'Diseñador de encuesta', icono: '📝' },
   { href: '/ecosistema/universidad/mercados/resultados', label: 'Resultados y tablas', icono: '📈' },
 ];

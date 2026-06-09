@@ -36,12 +36,20 @@ export default function MarketingPlatform() {
             <h1 className="text-3xl font-bold text-slate-900">{platform.nombre}</h1>
             <p className="mt-2 text-slate-600">{platform.tagline}</p>
           </div>
-          <Link
-            href="/ecosistema/universidad/marketing/casos"
-            className="inline-flex items-center gap-1.5 rounded-full border-2 border-rose-300 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
-          >
-            🇧🇴 Ver 5 casos bolivianos →
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/ecosistema/universidad/marketing/calculadora-reactiva"
+              className="inline-flex items-center gap-1.5 rounded-full border-2 border-rose-300 bg-white px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50"
+            >
+              🎚️ ROAS + embudo interactivo
+            </Link>
+            <Link
+              href="/ecosistema/universidad/marketing/casos"
+              className="inline-flex items-center gap-1.5 rounded-full border-2 border-rose-300 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100"
+            >
+              🇧🇴 Ver 5 casos bolivianos →
+            </Link>
+          </div>
         </div>
       </header>
 

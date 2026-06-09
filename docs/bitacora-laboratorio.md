@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-09 (sesión 10: Wave 4 docente — rúbrica + calificación + calendario)
+> **Última actualización:** 2026-06-09 (sesión 11: mejora didáctica — casos, tutor IA, calculadoras reactivas, simulador eventos, documento web, plataformas Org/Defensa)
 
 ---
 
@@ -272,6 +272,173 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-09 (sesión 11) — Mejora didáctica del SaaS (4 sprints + documento web + plataformas)
+
+**Contexto:** después de cerrar Wave 4 docente en sesión 10, el usuario
+reportó que los módulos "se sienten simplones, sin interactividad real,
+sin ejemplos aplicados". Mi auditoría confirmó: 6 de 7 módulos eran
+"formulario + botón Sugerir IA"; solo Finanzas era ricamente interactivo
+(simulador turno-a-turno con 26 ejemplos). Roadmap propuesto y aprobado:
+4 sprints de mejora didáctica + documento web limpio + extras.
+
+**Commits de esta sesión:**
+- Múltiples commits encadenados de los 4 sprints + documento web +
+  Tutor IA expandido + simulador en proyecto + GitHub Action CI/CD.
+
+#### Sprint 1 — Galería de 30 casos bolivianos pre-resueltos
+
+`src/lib/casos/<modulo>/*.ts` + `src/app/<ruta>/casos/`. 6 módulos × 5
+casos = 30 archivos de casos cada uno con:
+- Emprendedor ficticio pero verosímil (nombre, edad, rol).
+- Zona específica (Sopocachi, Cala Cala, Plan 3000, Equipetrol, El Alto
+  Ceja, Coroico, Sucre, Tarija).
+- Datos reales: Bs/USD plausibles, % de mercado, ROAS, planillas.
+- Estructura propia por módulo: Idea (Lean Canvas + Validación), Mercados
+  (Diseño + Muestreo + Encuesta + Resultados), Estrategia (PESTEL +
+  Porter + FODA + matriz), Marketing (Buyer Persona + Mix + Presupuesto),
+  Organización (Organigrama + RRHH + Legal + Técnico), Defensa (18
+  preguntas tribunal × caso).
+- Lecciones + errores evitados + tags.
+
+UI: galería filtrable + detalle con tabs específicos del módulo.
+
+#### Sprint 2a — Tutor IA aditivo (no reemplaza "Sugerir IA")
+
+`src/lib/prompts/tutor-ia/refinar.ts` + endpoint
+`/api/tutor-ia/refinar` + componente `<TutorIA>`. Devuelve **3 alternativas**
+con pros/cons + pregunta crítica + lección clave + siguiente paso. NO
+inserta texto por default; abre modal informativo. Coexiste con el
+botón "Sugerir IA" original.
+
+Integrado en 12 puntos del SaaS:
+- Idea: lean-canvas, propuesta-valor, validacion (3).
+- Mercados: muestreo, encuesta, resultados (3).
+- Estrategia: PESTEL, Porter, MEFE, FODA (4).
+- Marketing: canales, calendario (2).
+
+#### Sprint 3 — 4 calculadoras reactivas (cero IA, matemática pura)
+
+`src/components/calc-reactivas/` con 4 componentes:
+- `CalcMuestraCochran` (Mercados): n con corrección por N finito.
+- `CalcROASEmbudo` (Marketing): inversión / CPC / conversión / ticket
+  con embudo visual y ROAS coloreado.
+- `CalcPuntoEquilibrio` (Finanzas/Idea): CF/precio/CV con gráfica SVG
+  inline del cruce ingresos vs costos.
+- `CalcPESTELScore` (Estrategia): 6 dimensiones con slider -5/+5,
+  agregación + top oportunidades vs amenazas.
+
+Cada una con su demo en `/ecosistema/universidad/<modulo>/calculadora-reactiva`.
+
+#### Sprint 4 — Simulador de eventos sorpresa (turno-a-turno con IA)
+
+`src/lib/eventos-sorpresa/banco.ts` con 15 eventos (5 × 3 módulos).
+Componente `<SimuladorEventos>` con localStorage por módulo (después
+extendido para localStorage por módulo+proyectoId). Endpoint
+`/api/eventos-sorpresa/evaluar` que la IA usa para evaluar la decisión
+del alumno con: acertada/no, puntaje 1-10, feedback, consecuencias
+corto/largo plazo, lección, próxima decisión sugerida.
+
+**Extensión posterior:** página `/projects/[id]/simulador-eventos` que
+toma el proyecto real del alumno y pasa título + contexto al simulador.
+La IA evalúa contra SU caso, no genérico.
+
+#### Documento web (NUEVO — feedback explícito del usuario)
+
+El usuario observó que el flujo final (Compilar LaTeX) confundía al
+alumno: código LaTeX crudo, "tu PDF tarda 1-2 horas", botones Overleaf,
+opciones avanzadas. Decisión: el alumno NO necesita ver nada de eso,
+el admin SÍ.
+
+Solución aditiva:
+- `src/lib/documento-web/numeracion.ts` — parser de markdown con
+  numeración automática: capítulos en romanos (I, II, III),
+  subsecciones decimales (1.1, 1.2.1), figuras y tablas con contador
+  global.
+- `src/lib/documento-web/citas.ts` — detecta APA paréntesis
+  (Pérez, 2023), APA flujo Pérez (2023), numérica [1]. Consolida
+  bibliografía única.
+- `src/lib/documento-web/copiar-html.ts` — Clipboard API con
+  ClipboardItem text/html (preserva formato al pegar en Word).
+- `src/lib/documento-web/exportar-word.ts` — genera HTML con estilos
+  inline que Word entiende: Times New Roman, márgenes, page-break.
+- `src/lib/documento-web/normas-universitarias.ts` — **10 universidades
+  bolivianas** mapeadas a sus normas (tipografía, tamaño, interlineado,
+  márgenes, alineación, citas APA 7 / ISO 690, color de acento). UMSS,
+  UNIFRANZ (Verdana 10pt portada guindo+dorado), UMSA, UAGRM, UTO, USFX,
+  UCB, UPB, EMI (ISO 690), UCATEC.
+- Componente `<DocumentoCompleto>` que procesa fases con numerador
+  compartido, renderiza carátula + índice + capítulos + bibliografía,
+  aplica la norma de la universidad del proyecto al CSS de pantalla.
+- Página `/projects/[id]/documento-web` que carga el proyecto y muestra
+  todo armado con botón "Copiar todo al Word".
+- Workspace: nuevo botón verde "📖 Ver mi documento" prominente para
+  alumno. Botón admin "Vista técnica" mantiene acceso a LaTeX/PDF.
+- `LatexExportView.tsx` modificado: si NO es admin, muestra pantalla
+  limpia con un CTA gigante al documento web (cero LaTeX visible).
+- Workspace: en fase `ph-latex` y NO admin, sidebar técnico oculto.
+  Solo aparece "Tu documento está armado" con guía corta.
+- Label del sidebar cambia "LATEX / Compilar LaTeX" → "DOCUMENTO / Tu
+  documento final" para alumno.
+
+#### Infraestructura — GitHub Action de auto-deploy
+
+Diagnóstico clave: el webhook nativo Vercel↔GitHub dejó de procesar
+pushes a main (causa desconocida — token, integración). El "Promote
+to Production" manual era requerido cada deploy.
+
+Solución: `.github/workflows/vercel-auto-deploy.yml`:
+- `on: push: branches: main` + `workflow_dispatch`.
+- `concurrency: cancel-in-progress: true` (si llegan varios pushes
+  seguidos, solo sobrevive el último).
+- `sleep 30` antes de disparar el hook (debounce — Vercel Hobby a veces
+  descartaba el segundo trigger consecutivo).
+- `curl POST` al Deploy Hook de Vercel que dispara build de production.
+
+Ahora cada `git push origin main` → deploy automático en ~30s + build.
+Cero "Promote to Production" manual.
+
+#### Plataformas Organización y Defensa
+
+Antes: stubs con solo galería de casos. Ahora con academia + 1-2
+herramientas interactivas:
+- **Organización**: 5 clases (estructura legal, costo real empleado,
+  organigrama, manual de funciones, plan técnico), calculadora de
+  planilla con aportes patronales 16.71% + provisión aguinaldo 8.33%,
+  layout con sidebar 5 secciones.
+- **Defensa**: 4 clases (anatomía tribunal, cómo responder cuando no
+  sabes, defender metodología, comunicación no verbal), mini-simulacro
+  con pregunta random + respuesta modelo, layout con sidebar 4
+  secciones.
+- Ambos agregados al catálogo `platforms.ts` con emoji, color, bloques.
+
+#### Resumen ejecutivo de la sesión 11
+
+- **30 casos bolivianos** pre-resueltos navegables.
+- **12 botones Tutor IA** distribuidos en 5 módulos.
+- **4 calculadoras reactivas** + 4 demos.
+- **Simulador de eventos** disponible en `/projects/[id]/simulador-eventos`
+  con contexto del proyecto real.
+- **Documento web** que reemplaza LaTeX para el alumno + 10 universidades
+  con normas específicas.
+- **Plataformas Organización y Defensa** completas con academia.
+- **Auto-deploy a Vercel** vía GitHub Action.
+- 30+ archivos nuevos en `src/lib/`, 12+ páginas UI nuevas, 5+ páginas
+  modificadas.
+- Cero archivos del sistema existente borrados; aditivo puro.
+- Cero migraciones SQL nuevas; todo usa los endpoints/tablas existentes.
+
+#### Pendientes ABIERTOS al cierre de sesión 11
+
+- **Supabase real conectado en producción** (hoy in-memory en varios módulos).
+- **Webhook real de activación de pagos** (Tigo / Stripe / QR).
+- **Imágenes del estudiante en el ZIP de Overleaf** (Opción B en CLAUDE.md).
+- **CI básico** (hoy <1% test coverage).
+- **Sprint 5: videos cortos por concepto** (no se hizo, requiere grabación).
+- Pulido futuro del simulador de eventos: integrar eventos generados
+  por IA en runtime (hoy banco estático de 15).
+
+---
 
 ### 2026-06-09 (sesión 10) — Wave 4 docente: rúbrica + calificación + calendario
 

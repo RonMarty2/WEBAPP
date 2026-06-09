@@ -12,6 +12,10 @@ export interface PlatformMeta {
   mundo: 'universidad' | 'generador';
   precioStandalone: number;
   precioBundle: number;
+  /** Emoji visible en cards/encabezados (opcional, complementa `icono`). */
+  emoji?: string;
+  /** Bloques o capacidades destacadas del módulo (3-6 ítems). */
+  bloques?: string[];
 }
 
 export const PLATFORMS: PlatformMeta[] = [
@@ -66,6 +70,47 @@ export const PLATFORMS: PlatformMeta[] = [
     mundo: 'universidad',
     precioStandalone: 49,
     precioBundle: 0,
+  },
+  {
+    id: 'organizacion',
+    nombre: 'Organización & RRHH',
+    tagline: 'Organigrama, costos y estructura legal',
+    descripcionCorta: 'Arma la estructura interna de tu empresa con planilla boliviana real y trámites legales paso a paso.',
+    color: 'amber',
+    colorAccent: '#f59e0b',
+    icono: 'Building2',
+    ruta: '/ecosistema/universidad/organizacion',
+    mundo: 'universidad',
+    precioStandalone: 49,
+    precioBundle: 0,
+    emoji: '🧩',
+    bloques: [
+      'Organigrama jerárquico editable',
+      'Planilla RRHH con salarios bolivianos',
+      'Estructura legal (FUNDEMPRESA, NIT, AFP)',
+      'Plan técnico y operativo',
+      'Branding interno (misión, visión, valores)',
+    ],
+  },
+  {
+    id: 'defensa',
+    nombre: 'Defensa de Tesis y Proyectos',
+    tagline: 'Prepara tu defensa con preguntas reales',
+    descripcionCorta: 'Banco de preguntas tribunal con respuestas modelo y estrategias para puntos débiles.',
+    color: 'indigo',
+    colorAccent: '#6366f1',
+    icono: 'GraduationCap',
+    ruta: '/ecosistema/universidad/defensa',
+    mundo: 'universidad',
+    precioStandalone: 49,
+    precioBundle: 0,
+    emoji: '🎓',
+    bloques: [
+      'Banco de preguntas tribunal por categoría',
+      'Respuestas modelo memorizable',
+      'Puntos débiles y cómo manejarlos',
+      'Frases clave para situaciones difíciles',
+    ],
   },
   {
     id: 'generador',
