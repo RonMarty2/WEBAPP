@@ -1,7 +1,10 @@
+'use client';
+
 import Link from 'next/link';
 import { PlatformShell } from '@/components/ecosistema/PlatformShell';
 import { getPlatform } from '@/lib/ecosistema/platforms';
 import { ARTEFACTO_MARKETING } from '@/lib/ecosistema/mock-data';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 
 interface CanalData {
   canal: string;
@@ -89,6 +92,27 @@ export default function MarketingPlatform() {
         <p className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-600">
           Alcance y CPL provienen de Meta Ads API + TikTok Ads API + Google Ads Insights (en producción).
         </p>
+        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="max-w-xl">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-700">¿Quieres entender el porqué?</p>
+              <p className="mt-1 text-sm text-slate-600">
+                El tutor te propone 3 caminos para repartir el presupuesto por canal según objetivo, CPL y tipo de cliente.
+              </p>
+            </div>
+            <TutorIA
+              modulo="marketing"
+              herramienta="canales:asignacion-presupuesto"
+              campo="asignación del presupuesto por canal"
+              etiqueta="Tutor: ¿en qué canal invertir más?"
+              variante="amplio"
+              contexto={`Plan de marketing del sector cafetería en Cochabamba, Bolivia. Segmento: ${datos.segmento}. Presupuesto mensual total: Bs. ${totalPresupuesto.toLocaleString('es-BO')}. Alcance estimado total: ${totalAlcance.toLocaleString('es-BO')} usuarios.`}
+              contenidoActual={datos.canales
+                .map(c => `${c.canal}: Bs. ${c.presupuesto.toLocaleString('es-BO')}/mes (${((c.presupuesto / totalPresupuesto) * 100).toFixed(0)}% del presupuesto) · alcance ${c.alcance.toLocaleString('es-BO')} · CPL Bs. ${c.cpl}`)
+                .join('\n')}
+            />
+          </div>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6">
@@ -105,6 +129,27 @@ export default function MarketingPlatform() {
             </li>
           ))}
         </ol>
+        <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50/40 p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="max-w-xl">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-700">¿Quieres entender el porqué?</p>
+              <p className="mt-1 text-sm text-slate-600">
+                El tutor te muestra 3 caminos para ordenar las acciones del primer mes y priorizar qué lanzar primero.
+              </p>
+            </div>
+            <TutorIA
+              modulo="marketing"
+              herramienta="calendario:planificacion"
+              campo="planificación de acciones del primer mes"
+              etiqueta="Tutor: orden de acciones"
+              variante="amplio"
+              contexto={`Calendario editorial del primer mes para el sector cafetería en Cochabamba, Bolivia. Segmento: ${datos.segmento}. Presupuesto mensual: Bs. ${totalPresupuesto.toLocaleString('es-BO')}.`}
+              contenidoActual={datos.calendario
+                .map(item => `Semana ${item.semana}: ${item.accion}`)
+                .join('\n')}
+            />
+          </div>
+        </div>
       </section>
     </PlatformShell>
   );

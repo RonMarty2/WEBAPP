@@ -34,6 +34,7 @@ import {
 import { detectarCitas, consolidarCitas, resaltarCitasEnTexto, type CitaUnica } from '@/lib/documento-web/citas';
 import { copiarHTMLAlPortapapeles } from '@/lib/documento-web/copiar-html';
 import { generarHTMLParaWord, type DatosCaratulaWord } from '@/lib/documento-web/exportar-word';
+import { obtenerNorma } from '@/lib/documento-web/normas-universitarias';
 
 export interface FaseDoc {
   id: string;
@@ -53,6 +54,12 @@ export interface DocumentoCompletoProps {
   phaseContents: Record<string, string | null | undefined>;
   /** Mostrar carátula en pantalla (default true). Si false, solo se incluye al exportar. */
   mostrarCaratula?: boolean;
+  /**
+   * ID de la universidad del proyecto (ej. "umss-001"). Determina la norma
+   * que se aplica al render (tipografía, tamaño, interlineado, márgenes,
+   * color de acento, estilo de citas). Si se omite, usa la norma default.
+   */
+  universidadId?: string | null;
 }
 
 export default function DocumentoCompleto({
@@ -61,9 +68,14 @@ export default function DocumentoCompleto({
   fases,
   phaseContents,
   mostrarCaratula = true,
+  universidadId,
 }: DocumentoCompletoProps) {
   const [copiado, setCopiado] = useState(false);
   const [errorCopia, setErrorCopia] = useState<string | null>(null);
+
+  // Resuelve la norma de la universidad — controla tipografía, tamaño,
+  // interlineado, márgenes, color de acento y estilo de citas.
+  const norma = useMemo(() => obtenerNorma(universidadId ?? null), [universidadId]);
 
   // Procesa todas las fases con un numerador compartido.
   const { capitulos, indice, bibliografia, hayContenido } = useMemo(() => {
@@ -115,6 +127,7 @@ export default function DocumentoCompleto({
     const datosCaratula: DatosCaratulaWord = {
       titulo: caratula.titulo ?? titulo,
       universidad: caratula.universidad,
+      universidadId: universidadId ?? caratula.universidadId,
       facultad: caratula.facultad,
       carrera: caratula.carrera,
       modalidad: caratula.modalidad,
@@ -142,6 +155,7 @@ export default function DocumentoCompleto({
     const datosCaratula: DatosCaratulaWord = {
       titulo: caratula.titulo ?? titulo,
       universidad: caratula.universidad,
+      universidadId: universidadId ?? caratula.universidadId,
       facultad: caratula.facultad,
       carrera: caratula.carrera,
       modalidad: caratula.modalidad,
@@ -237,13 +251,35 @@ export default function DocumentoCompleto({
         {bibliografia.length > 0 && <Bibliografia citas={bibliografia} />}
       </article>
 
-      {/* Estilos académicos */}
+      {/* Banda visual con la norma activa — el alumno sabe que el formato
+          que ve coincide con lo que pide su universidad. */}
+      <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-violet-200 bg-violet-50/50 px-3 py-2 text-xs">
+        <span className="text-violet-900">
+          📐 Formato aplicado: <strong>{norma.nombreCorto}</strong> · {norma.fuenteWord.split(',')[0].replace(/"/g, '')} {norma.tamanoBasePt}pt, interlineado {norma.interlineado === 2.0 ? 'doble' : norma.interlineado}, márgenes {norma.margenes.izquierda}cm
+        </span>
+        <span className="text-violet-700">
+          Citas: <strong>{norma.citas === 'apa7' ? 'APA 7' : norma.citas === 'iso690' ? 'ISO 690' : 'Vancouver'}</strong>
+        </span>
+      </div>
+
+      {/* Estilos académicos — la fuente, tamaño base, interlineado y color
+          de acento vienen de la norma de la universidad del proyecto. */}
       <style jsx global>{`
         .doc-tipografia {
-          font-family: "Georgia", "Times New Roman", serif;
+          font-family: ${norma.fuentePantalla};
           color: #1a1a1a;
           padding: 64px 72px;
-          line-height: 1.6;
+          line-height: ${norma.interlineado === 2.0 ? 1.8 : norma.interlineado === 1.5 ? 1.6 : 1.5};
+          font-size: ${Math.max(13, norma.tamanoBasePt + 2)}px;
+        }
+        .doc-tipografia .h1-cap,
+        .doc-tipografia .h2,
+        .doc-tipografia .h3,
+        .doc-tipografia .h4 {
+          color: ${norma.colorAcento} !important;
+        }
+        .doc-tipografia p {
+          text-align: ${norma.alineacion};
         }
         .doc-tipografia .h1-cap {
           font-size: 22px;

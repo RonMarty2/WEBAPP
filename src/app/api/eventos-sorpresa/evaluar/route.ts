@@ -131,6 +131,12 @@ export async function POST(req: Request) {
   }
 
   const { proyecto, evento, opcion, turnoActual, historial } = body;
+  // proyectoContexto es opcional: cuando el simulador se monta desde un
+  // proyecto real del alumno, viene un párrafo con la idea/sector/segmento
+  // que la IA puede usar para contextualizar la evaluación.
+  const proyectoContexto = typeof (body as unknown as { proyectoContexto?: unknown }).proyectoContexto === "string"
+    ? ((body as unknown as { proyectoContexto: string }).proyectoContexto).slice(0, 2000)
+    : "";
   if (
     typeof proyecto !== "string" ||
     !evento ||
@@ -150,7 +156,7 @@ export async function POST(req: Request) {
 
   const system = buildSistemaEvaluarEvento(evento.modulo);
   const user = buildUserEvaluarEvento({
-    proyecto,
+    proyecto: proyectoContexto ? `${proyecto}\n\nContexto: ${proyectoContexto}` : proyecto,
     evento,
     opcion,
     turnoActual,

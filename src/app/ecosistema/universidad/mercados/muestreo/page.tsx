@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 
 export default function MuestreoCalculator() {
   const [poblacion, setPoblacion] = useState(50000);
@@ -52,6 +53,26 @@ export default function MuestreoCalculator() {
           <button className="mt-6 w-full rounded-full bg-sky-600 py-3 font-medium text-white hover:bg-sky-700">
             Guardar en mi proyecto →
           </button>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-sky-200 bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="max-w-xl">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-700">¿Quieres entender el porqué?</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Pide al tutor 3 caminos para decidir qué muestra y técnica de muestreo conviene a tu investigación.
+            </p>
+          </div>
+          <TutorIA
+            modulo="mercados"
+            herramienta="muestreo:eleccion-tamano"
+            campo="tamaño de muestra y técnica de muestreo"
+            etiqueta="Tutor: ¿qué muestra elegir?"
+            variante="amplio"
+            contexto={`Calculadora de muestreo para investigación de mercado. Población (N)=${poblacion.toLocaleString('es-BO')}; Nivel de confianza=${confianza}%; Margen de error=${error}%; Proporción esperada=${proporcion}%.`}
+            contenidoActual={`N=${poblacion}\nConfianza=${confianza}%\nError=${error}%\np=${proporcion}%\nTamaño calculado (Cochran ajustado)=${muestra}`}
+          />
         </div>
       </div>
     </div>

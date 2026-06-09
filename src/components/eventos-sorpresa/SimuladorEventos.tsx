@@ -28,6 +28,24 @@ import { obtenerEventoAleatorio } from '@/lib/eventos-sorpresa/banco';
 
 interface Props {
   modulo: ModuloEvento;
+  /**
+   * Cuando se monta desde un proyecto del alumno (ej.
+   * /projects/[id]/simulador-eventos), pasamos el título real del proyecto.
+   * Si está definido, la simulación arranca automáticamente sin pedir input.
+   */
+  proyectoTituloExterno?: string;
+  /**
+   * Contexto adicional del proyecto del alumno (idea base, sector, segmento)
+   * que se envía a la IA para que los eventos sean específicos a SU caso
+   * en lugar de genéricos.
+   */
+  proyectoContexto?: string;
+  /**
+   * ID del proyecto, para que la persistencia en localStorage no se
+   * confunda entre proyectos distintos del mismo módulo. Si está, la key
+   * pasa a ser `simulacion-{modulo}-{proyectoId}-v1`.
+   */
+  proyectoId?: string;
 }
 
 type FaseUI =
@@ -44,14 +62,16 @@ interface EstadoCompleto {
 
 // ── Helpers de localStorage ─────────────────────────────────────────────
 
-function storageKey(modulo: ModuloEvento): string {
-  return `simulacion-${modulo}-v1`;
+function storageKey(modulo: ModuloEvento, proyectoId?: string): string {
+  return proyectoId
+    ? `simulacion-${modulo}-${proyectoId}-v1`
+    : `simulacion-${modulo}-v1`;
 }
 
-function cargarEstado(modulo: ModuloEvento): EstadoCompleto | null {
+function cargarEstado(modulo: ModuloEvento, proyectoId?: string): EstadoCompleto | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = window.localStorage.getItem(storageKey(modulo));
+    const raw = window.localStorage.getItem(storageKey(modulo, proyectoId));
     if (!raw) return null;
     const parsed = JSON.parse(raw) as EstadoCompleto;
     if (!parsed?.simulacion || !parsed?.eventoActual) return null;
@@ -61,19 +81,19 @@ function cargarEstado(modulo: ModuloEvento): EstadoCompleto | null {
   }
 }
 
-function guardarEstado(modulo: ModuloEvento, estado: EstadoCompleto): void {
+function guardarEstado(modulo: ModuloEvento, estado: EstadoCompleto, proyectoId?: string): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(storageKey(modulo), JSON.stringify(estado));
+    window.localStorage.setItem(storageKey(modulo, proyectoId), JSON.stringify(estado));
   } catch {
     // ignorar: cuota llena o storage no disponible
   }
 }
 
-function borrarEstado(modulo: ModuloEvento): void {
+function borrarEstado(modulo: ModuloEvento, proyectoId?: string): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.removeItem(storageKey(modulo));
+    window.localStorage.removeItem(storageKey(modulo, proyectoId));
   } catch {
     // ignorar
   }
@@ -122,9 +142,9 @@ const MODULO_NOMBRE: Record<ModuloEvento, string> = {
 
 // ── Componente ──────────────────────────────────────────────────────────
 
-export default function SimuladorEventos({ modulo }: Props) {
+export default function SimuladorEventos({ modulo, proyectoTituloExterno, proyectoContexto, proyectoId }: Props) {
   const [fase, setFase] = useState<FaseUI>('inicio');
-  const [tituloProyecto, setTituloProyecto] = useState('');
+  const [tituloProyecto, setTituloProyecto] = useState(proyectoTituloExterno ?? '');
   const [estado, setEstado] = useState<EstadoCompleto | null>(null);
   const [opcionElegida, setOpcionElegida] = useState<OpcionDecision | null>(null);
   const [evaluacion, setEvaluacion] = useState<RespuestaEvaluacion | null>(null);
@@ -134,14 +154,18 @@ export default function SimuladorEventos({ modulo }: Props) {
 
   // Cargar estado del localStorage al montar
   useEffect(() => {
-    const guardado = cargarEstado(modulo);
+    const guardado = cargarEstado(modulo, proyectoId);
     if (guardado) {
       setEstado(guardado);
       setTituloProyecto(guardado.simulacion.proyecto_titulo);
       setFase('evento');
+    } else if (proyectoTituloExterno) {
+      // Si viene un título externo (desde un proyecto real) y no hay estado
+      // previo, lo usamos directamente como inicio implícito.
+      setTituloProyecto(proyectoTituloExterno);
     }
     setHidratado(true);
-  }, [modulo]);
+  }, [modulo, proyectoId, proyectoTituloExterno]);
 
   const racha = useMemo(
     () => (estado ? calcularRacha(estado.simulacion.historial) : 0),
@@ -164,7 +188,7 @@ export default function SimuladorEventos({ modulo }: Props) {
       eventoActual: primerEvento,
     };
     setEstado(nuevoEstado);
-    guardarEstado(modulo, nuevoEstado);
+    guardarEstado(modulo, nuevoEstado, proyectoId);
     setOpcionElegida(null);
     setEvaluacion(null);
     setErrorIA(null);
@@ -183,6 +207,7 @@ export default function SimuladorEventos({ modulo }: Props) {
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify({
             proyecto: estado.simulacion.proyecto_titulo,
+            proyectoContexto: proyectoContexto ?? '',
             evento: estado.eventoActual,
             opcion,
             turnoActual: estado.simulacion.turno,
@@ -214,7 +239,7 @@ export default function SimuladorEventos({ modulo }: Props) {
           simulacion: simulacionActualizada,
         };
         setEstado(estadoActualizado);
-        guardarEstado(modulo, estadoActualizado);
+        guardarEstado(modulo, estadoActualizado, proyectoId);
         setFase('resultado');
       } catch (e) {
         setErrorIA((e as Error).message);
@@ -237,7 +262,7 @@ export default function SimuladorEventos({ modulo }: Props) {
       eventoActual: proximoEvento,
     };
     setEstado(estadoActualizado);
-    guardarEstado(modulo, estadoActualizado);
+    guardarEstado(modulo, estadoActualizado, proyectoId);
     setOpcionElegida(null);
     setEvaluacion(null);
     setErrorIA(null);
@@ -245,7 +270,7 @@ export default function SimuladorEventos({ modulo }: Props) {
   }, [estado, modulo]);
 
   const resetSimulacion = useCallback(() => {
-    borrarEstado(modulo);
+    borrarEstado(modulo, proyectoId);
     setEstado(null);
     setOpcionElegida(null);
     setEvaluacion(null);

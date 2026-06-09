@@ -1,4 +1,7 @@
+'use client';
+
 import { ARTEFACTO_MERCADOS } from '@/lib/ecosistema/mock-data';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 
 interface Segmento {
   nombre: string;
@@ -84,6 +87,32 @@ export default function ResultadosMercados() {
         <p className="mt-4 text-xs text-sky-900/70">
           En producción, estos números vendrán en vivo de las APIs de Google, Meta y TikTok.
         </p>
+      </section>
+
+      <section className="rounded-2xl border border-sky-200 bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="max-w-xl">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-700">¿Quieres entender el porqué?</p>
+            <p className="mt-1 text-sm text-slate-600">
+              El tutor te propone 3 caminos para interpretar la demanda, los segmentos y la competencia. Útil para sostener tus conclusiones en la defensa.
+            </p>
+          </div>
+          <TutorIA
+            modulo="mercados"
+            herramienta="resultados:interpretacion"
+            campo="interpretación de los resultados"
+            etiqueta="Tutor: cómo leer estos resultados"
+            variante="amplio"
+            contexto={`Investigación de mercado del sector cafetería en Cochabamba. Demanda potencial=${datos.demandaPotencial} clientes/mes; Demanda real cubierta=${datos.demandaReal}; Demanda insatisfecha=${datos.demandaInsatisfecha}; Google Trends=${datos.googleTrendsScore}/100.`}
+            contenidoActual={[
+              'Segmentos detectados:',
+              ...datos.segmentos.map(s => `- ${s.nombre} (${s.edad}): ${s.porcentaje}%`),
+              '',
+              'Competidores principales:',
+              ...datos.competidores.map(c => `- ${c.nombre} (${c.ubicacion}): ${(c.share * 100).toFixed(0)}% de market share`),
+            ].join('\n')}
+          />
+        </div>
       </section>
     </div>
   );

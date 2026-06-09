@@ -137,6 +137,7 @@ export default function DocumentoWebPage() {
           titulo={titulo}
           fases={fasesDoc}
           phaseContents={proyecto.phase_contents ?? {}}
+          universidadId={universidadId || null}
           caratula={{
             titulo,
             universidad: univ?.name ?? ctx.universidad_nombre,

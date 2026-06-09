@@ -1,4 +1,7 @@
+'use client';
+
 import { ARTEFACTO_MERCADOS } from '@/lib/ecosistema/mock-data';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 
 const PREGUNTAS_DEMO = [
   { tipo: 'Cerrada · Likert 5', texto: '¿Qué tan importante es para ti la calidad del café que consumes?', opciones: ['Nada', 'Poco', 'Neutro', 'Importante', 'Muy importante'] },
@@ -10,6 +13,9 @@ const PREGUNTAS_DEMO = [
 
 export default function EncuestaDesigner() {
   const datos = ARTEFACTO_MERCADOS.contenido as Record<string, number>;
+  const resumenPreguntas = PREGUNTAS_DEMO
+    .map((p, i) => `${i + 1}. [${p.tipo}] ${p.texto}${p.opciones ? ` Opciones: ${p.opciones.join(' / ')}` : ''}`)
+    .join('\n');
   return (
     <div className="space-y-6">
       <header>
@@ -44,6 +50,26 @@ export default function EncuestaDesigner() {
             </li>
           ))}
         </ol>
+      </div>
+
+      <div className="rounded-2xl border border-sky-200 bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="max-w-xl">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-sky-700">¿Quieres entender el porqué?</p>
+            <p className="mt-1 text-sm text-slate-600">
+              El tutor te propone 3 caminos para ordenar la encuesta y elegir el tipo de pregunta adecuado en cada caso.
+            </p>
+          </div>
+          <TutorIA
+            modulo="mercados"
+            herramienta="encuesta:diseno-preguntas"
+            campo="diseño y tipo de preguntas de la encuesta"
+            etiqueta="Tutor: tipos de pregunta y orden"
+            variante="amplio"
+            contexto={`Diseño de encuesta para investigación de mercado (sector cafetería en Cochabamba). Total de preguntas en borrador: ${PREGUNTAS_DEMO.length}. Respuestas esperadas: ${datos.respuestas}.`}
+            contenidoActual={resumenPreguntas}
+          />
+        </div>
       </div>
     </div>
   );
