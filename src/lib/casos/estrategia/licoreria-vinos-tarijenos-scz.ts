@@ -306,12 +306,12 @@ export const casoLicoreriaVinosTarijenosScz: CasoEstrategia = {
       {
         estrategia: "Club de vino por suscripción (3 botellas/mes con curaduría)",
         notas: [3, 4, 4, 4, 3, 4, 3, 4],
-        total: 3.60,
+        total: 3.65,
       },
       {
         estrategia: "Wine bar con cata diaria + venta de botella (tipo enoteca)",
         notas: [4, 2, 4, 2, 4, 2, 3, 2],
-        total: 2.85,
+        total: 2.90,
       },
     ],
     estrategia_elegida: "Club de vino por suscripción (3 botellas/mes con curaduría)",

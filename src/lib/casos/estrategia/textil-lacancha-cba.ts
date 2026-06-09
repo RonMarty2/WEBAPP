@@ -207,25 +207,25 @@ export const casoTextilLacanchaCba: CasoEstrategia = {
       {
         nombre: "Textil Salinas (Don Roberto, post-pivote)",
         notas: [3, 2, 3, 2, 3, 4],
-        total_ponderado: 2.75,
+        total_ponderado: 2.70,
       },
       {
         nombre: "Confecciones Andina (líder local)",
         notas: [3, 4, 3, 4, 3, 4],
-        total_ponderado: 3.40,
+        total_ponderado: 3.50,
       },
       {
         nombre: "Uniformes Cochabamba (especialista colegios)",
         notas: [4, 4, 3, 4, 4, 4],
-        total_ponderado: 3.80,
+        total_ponderado: 3.85,
       },
       {
         nombre: "Sastres independientes (taller casero)",
         notas: [2, 2, 4, 2, 2, 1],
-        total_ponderado: 2.25,
+        total_ponderado: 2.20,
       },
     ],
-    conclusion: "Textil Salinas en su estado actual está 1,05 puntos por debajo del líder (Uniformes CBA). Donde gana frente a competidores informales: formalidad (NIT + factura), donde indispensable está parejo: precio. Donde claramente pierde: calidad de bordado (no tiene máquina, terceriza), red comercial (recién entrando) y plazos (capacidad pero sin estructura de gestión). El pivote requiere cerrar dos brechas concretas: invertir USD 3.800 en bordadora propia + Marco dedica 100% a desarrollo comercial los primeros 12 meses.",
+    conclusion: "Textil Salinas en su estado actual (2,70) está 1,15 puntos por debajo del líder Uniformes Cochabamba (3,85). Donde gana frente a competidores informales: formalidad (NIT + factura), donde indispensable está parejo: precio. Donde claramente pierde: calidad de bordado (no tiene máquina, terceriza), red comercial (recién entrando) y plazos (capacidad pero sin estructura de gestión). El pivote requiere cerrar dos brechas concretas: invertir USD 3.800 en bordadora propia + Marco dedica 100% a desarrollo comercial los primeros 12 meses.",
   },
   foda: {
     fortalezas: [
@@ -302,7 +302,7 @@ export const casoTextilLacanchaCba: CasoEstrategia = {
       {
         estrategia: "Pivot total a uniformes B2B (cerrar retail, invertir bordadora, foco 100%)",
         notas: [4, 4, 4, 3, 3, 4, 3, 3],
-        total: 3.50,
+        total: 3.55,
       },
       {
         estrategia: "Híbrido (mantener retail + abrir B2B gradualmente)",
@@ -312,7 +312,7 @@ export const casoTextilLacanchaCba: CasoEstrategia = {
       {
         estrategia: "Cerrar taller y dedicarse a comercializar ropa importada en La Cancha",
         notas: [2, 1, 1, 1, 3, 2, 1, 2],
-        total: 1.70,
+        total: 1.65,
       },
     ],
     estrategia_elegida: "Pivot total a uniformes B2B (cerrar retail, invertir bordadora, foco 100%)",

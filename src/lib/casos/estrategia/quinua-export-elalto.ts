@@ -213,12 +213,12 @@ export const casoQuinuaExportElalto: CasoEstrategia = {
       {
         nombre: "Andina Premium (este proyecto)",
         notas: [3, 4, 2, 3, 3, 4],
-        total_ponderado: 3.05,
+        total_ponderado: 3.15,
       },
       {
         nombre: "ANAPQUI (Bolivia, cooperativa exportadora)",
         notas: [3, 4, 3, 3, 2, 3],
-        total_ponderado: 3.05,
+        total_ponderado: 3.10,
       },
       {
         nombre: "Andean Naturals (Perú, líder regional)",
@@ -228,10 +228,10 @@ export const casoQuinuaExportElalto: CasoEstrategia = {
       {
         nombre: "Andean Valley (Bolivia, exportadora veterana)",
         notas: [4, 3, 2, 4, 3, 3],
-        total_ponderado: 3.20,
+        total_ponderado: 3.30,
       },
     ],
-    conclusion: "Andina Premium iguala al promedio boliviano pero queda 0,85 puntos por debajo del líder peruano (Andean Naturals). Los dos factores donde claramente pierde son costo logístico (estructural, no se puede arreglar individualmente) y capacidad de procesamiento (resoluble invirtiendo USD 92.000 en selección óptica). El factor donde gana es storytelling de origen, que Perú no puede igualar. Estrategia: cerrar la brecha técnica con la seleccionadora óptica + apalancar el storytelling como diferenciador único, sin pretender competir en costo logístico contra Callao.",
+    conclusion: "Andina Premium iguala al promedio boliviano (3,15 vs 3,10 ANAPQUI, 3,30 Andean Valley) pero queda 0,75 puntos por debajo del líder peruano (Andean Naturals con 3,90). Los dos factores donde claramente pierde son costo logístico (estructural, no se puede arreglar individualmente) y capacidad de procesamiento (resoluble invirtiendo USD 92.000 en selección óptica). El factor donde gana es storytelling de origen, que Perú no puede igualar. Estrategia: cerrar la brecha técnica con la seleccionadora óptica + apalancar el storytelling como diferenciador único, sin pretender competir en costo logístico contra Callao.",
   },
   foda: {
     fortalezas: [
@@ -305,12 +305,12 @@ export const casoQuinuaExportElalto: CasoEstrategia = {
       {
         estrategia: "Premium gourmet directo (5-7 compradores EU, certificación + storytelling)",
         notas: [4, 4, 4, 3, 3, 3, 3],
-        total: 3.30,
+        total: 3.40,
       },
       {
         estrategia: "Volumen commodity (vender a brokers Hamburgo, sin diferenciación)",
         notas: [3, 4, 3, 2, 2, 1, 2],
-        total: 2.40,
+        total: 2.35,
       },
       {
         estrategia: "B2C marca propia (vender bolsas 500g con marca al consumidor europeo)",

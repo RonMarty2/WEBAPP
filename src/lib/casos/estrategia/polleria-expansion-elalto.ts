@@ -218,7 +218,7 @@ export const casoPolleriaExpansionElalto: CasoEstrategia = {
       {
         nombre: "Pollería esquinera promedio Ceja",
         notas: [2, 4, 4, 3, 1, 2],
-        total_ponderado: 2.65,
+        total_ponderado: 2.70,
       },
       {
         nombre: "Don Lucho (cadena establecida)",
@@ -226,7 +226,7 @@ export const casoPolleriaExpansionElalto: CasoEstrategia = {
         total_ponderado: 3.50,
       },
     ],
-    conclusion: "Pollos Mamani supera a la pollería esquinera promedio (3,00 vs 2,65) pero queda 0,80 puntos por debajo de Pollos Copacabana y 0,50 por debajo de Don Lucho. Donde Mamani gana frente a la esquinera: consistencia, identidad y delivery. Donde pierde frente a cadenas grandes: precisamente lo mismo, pero con menor escala. La expansión a 4 locales con estandarización es la única forma de cerrar la brecha con cadenas formales antes de que estas saturen El Alto. Si Pollos Mamani se queda en 1 local, queda a merced de cualquier cadena que abra cerca.",
+    conclusion: "Pollos Mamani supera a la pollería esquinera promedio (3,00 vs 2,70) pero queda 0,80 puntos por debajo de Pollos Copacabana y 0,50 por debajo de Don Lucho. Donde Mamani gana frente a la esquinera: consistencia, identidad y delivery. Donde pierde frente a cadenas grandes: precisamente lo mismo, pero con menor escala. La expansión a 4 locales con estandarización es la única forma de cerrar la brecha con cadenas formales antes de que estas saturen El Alto. Si Pollos Mamani se queda en 1 local, queda a merced de cualquier cadena que abra cerca.",
   },
   foda: {
     fortalezas: [
@@ -305,12 +305,12 @@ export const casoPolleriaExpansionElalto: CasoEstrategia = {
       {
         estrategia: "Abrir 3 sucursales propias secuencialmente (modelo retail tradicional)",
         notas: [4, 3, 2, 3, 4, 3, 3, 3],
-        total: 3.10,
+        total: 3.15,
       },
       {
         estrategia: "Franquiciar la marca Pollos Mamani a 3 inversionistas externos",
         notas: [3, 4, 4, 2, 3, 4, 2, 3],
-        total: 3.10,
+        total: 3.20,
       },
       {
         estrategia: "Dark kitchens (3 cocinas solo delivery sin local físico)",
