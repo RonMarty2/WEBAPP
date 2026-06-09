@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Gift, Plus, X, Check, User, Package } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 import type { PropuestaValor, LeanCanvas } from '@/types/idea';
 
 const VACIO: PropuestaValor = {
@@ -168,6 +169,24 @@ export default function HerramientaPropuestaValor() {
           placeholder="Detalle opcional (ej: enfócate en clientes urbanos jóvenes)…"
           onAplicar={aplicarIA}
         />
+        <div className="mt-3 flex items-center gap-2 border-t border-slate-200 pt-3">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">o pide al tutor que te explique:</span>
+          <TutorIA
+            modulo="idea"
+            herramienta="propuesta-valor"
+            contexto={`Idea: ${idea || titulo || '(sin descripción)'}\nSector: ${sector || 'no especificado'}\nProblema: ${leanCanvas.problema || '(no definido)'}\nSegmento: ${leanCanvas.segmentos || '(no definido)'}`}
+            contenidoActual={[
+              pv.trabajos.length ? `Trabajos: ${pv.trabajos.join('; ')}` : '',
+              pv.dolores.length ? `Dolores: ${pv.dolores.join('; ')}` : '',
+              pv.alegrias?.length ? `Alegrías: ${pv.alegrias.join('; ')}` : '',
+              pv.productos?.length ? `Productos: ${pv.productos.join('; ')}` : '',
+              pv.aliviadores?.length ? `Aliviadores: ${pv.aliviadores.join('; ')}` : '',
+              pv.creadores?.length ? `Creadores: ${pv.creadores.join('; ')}` : '',
+            ].filter(Boolean).join('\n')}
+            campo="encaje cliente-producto (perfil del cliente vs mapa de valor)"
+            etiqueta="3 perfiles de cliente"
+          />
+        </div>
         <p className="idea-muted mt-2 text-xs">
           La IA <strong>agrega</strong> sugerencias a tus listas sin borrar lo que ya tienes.
           Usa el botón <X className="inline h-3 w-3" /> de cada ítem para quitar lo que no te sirva.

@@ -1,0 +1,260 @@
+import type { CasoDefensa } from "../types";
+
+/**
+ * Caso 5 — Defensa de tesis de Ing. Sebastián Costas (Univalle, Cochabamba).
+ *
+ * Tesis avanzada de Ingeniería Industrial sobre rediseño de layout en una
+ * planta industrial mediante simulación de eventos discretos en Arena. El
+ * tribunal son ingenieros con experiencia en manufactura y son
+ * particularmente duros con la validación del modelo, supuestos de la
+ * simulación, identificación de cuellos de botella y la aplicación correcta
+ * de Lean Six Sigma. Defensa con nivel técnico alto que muestra cómo se
+ * defiende un trabajo de simulación industrial.
+ */
+
+export const casoDefensaTesisIndustrialUnivalle: CasoDefensa = {
+  slug: "defensa-tesis-industrial-univalle",
+  modulo: "defensa",
+  titulo: "Defensa de tesis: rediseño de layout en planta industrial",
+  tagline: "Sebastián defiende un rediseño de layout con simulación Arena ante tribunal ingenieril de Univalle.",
+  zona: "Cochabamba",
+  rubro: "Defensa académica",
+  dificultad: "avanzado",
+  emoji: "🏭",
+  emprendedor: {
+    nombre: "Ing. Sebastián Costas",
+    edad: 25,
+    rol: "Egresado de Ingeniería Industrial en Univalle Cochabamba. Hizo dos semestres de proyecto en Embotelladora Andina en planta Quillacollo bajo convenio universidad empresa. La pasantía le permitió obtener datos reales de tiempos, capacidades y flujos para construir el modelo de simulación.",
+  },
+  contexto: [
+    "Sebastián entra a la sala con la laptop abierta en Arena Simulation, el binder con 246 páginas de tesis, los planos del layout actual y propuesto a escala A1 enrollados bajo el brazo. El tribunal es severo: la tutora es ingeniera industrial con doctorado en operaciones, el lector cercano al tema es docente de Procesos y consultor en Lean Manufacturing, y el lector externo es un ingeniero con quince años en industria embotelladora que conoce la planta que se está analizando. Esta combinación es la pesadilla y la oportunidad de Sebastián.",
+    "La tesis propone un rediseño del layout de la planta de producción de Embotelladora Andina basado en simulación de eventos discretos con Arena Simulation y herramientas de Lean Manufacturing. Sebastián construyó el modelo digital de la planta actual, lo validó contra datos históricos, propuso tres escenarios de rediseño y los corrió en simulación para comparar OEE, tiempo de ciclo y utilización de recursos. El escenario ganador proyecta un incremento de OEE del 67% al 79%.",
+    "Lo que más le preocupa son cinco preguntas que sabe que llegarán: la elección de Arena en lugar de FlexSim o ProModel, la validación del modelo contra la realidad, los supuestos de distribuciones de probabilidad de los tiempos, la identificación del cuello de botella verdadero y la aplicabilidad real de la propuesta dadas las restricciones físicas de la planta. El lector externo va a probar cada uno de esos puntos.",
+  ],
+  problema: "Sebastián debe defender una tesis de simulación industrial ante tribunal de ingenieros con experiencia de campo, sosteniendo decisiones de software, validación del modelo, supuestos estadísticos de tiempos de operación y la factibilidad física del rediseño propuesto en una planta real.",
+  segmento: "Tribunal académico de Univalle Cochabamba en Ingeniería Industrial: 3 docentes — 1 tutora con doctorado en operaciones, 1 lector cercano al tema (Lean Manufacturing y procesos), 1 lector externo crítico (ingeniero senior con experiencia en planta embotelladora, exige aplicabilidad real). Defensa pública con presencia de gerentes de la empresa colaboradora.",
+  proyecto: {
+    carrera: "Ingeniería Industrial",
+    universidad: "Universidad del Valle (Univalle), Cochabamba",
+    modalidad: "Tesis de Grado",
+    titulo: "Rediseño del layout de la planta de producción de Embotelladora Andina mediante simulación de eventos discretos para incrementar la eficiencia operativa",
+    resumen_proyecto: "La tesis propone un rediseño del layout de la planta de producción de Embotelladora Andina con base en simulación de eventos discretos en Arena Simulation y herramientas de Lean Manufacturing. Se construyó el modelo digital de la planta actual validado contra datos históricos de seis meses, se identificó el cuello de botella en la estación de etiquetado, se evaluaron tres escenarios de rediseño y se seleccionó el escenario óptimo con incremento proyectado del OEE de 67% a 79%, reducción del tiempo de ciclo en 18% y mejora en utilización de mano de obra del 12%.",
+    ano: 2026,
+  },
+  preguntas: [
+    {
+      numero: 1,
+      categoria: "problema",
+      pregunta: "Comencemos por el problema. ¿Por qué la planta de Embotelladora Andina y qué oportunidad real identificó?",
+      dificultad: "facil",
+      respuesta_modelo: "Doctor, la planta de Embotelladora Andina en Quillacollo opera con un OEE histórico del 67% según datos del último semestre 2024, claramente por debajo del benchmark mundial de manufactura de bebidas que se ubica entre 80% y 85%. Esa brecha de 13 puntos porcentuales representa pérdida operativa estimada en Bs 2,8 millones anuales en utilidad bruta. Durante mi pasantía detecté tres factores que sugerían que el problema no era de capacidad instalada sino de configuración del flujo: distancias largas entre estaciones de etiquetado y empaque, generación de inventario en proceso significativo entre llenado y etiquetado, y subutilización de operarios. La oportunidad es rediseñar el layout y la secuencia de operaciones para reducir el tiempo no productivo y elevar el OEE sin requerir inversión en nuevos equipos. La hipótesis central de la tesis es que un rediseño del layout sustentado en simulación de eventos discretos puede incrementar el OEE en al menos 10 puntos porcentuales.",
+      que_evalua: "Articulación del problema con cuantificación económica y diferenciación entre problema de capacidad y problema de configuración.",
+    },
+    {
+      numero: 2,
+      categoria: "metodologia",
+      pregunta: "Eligió Arena Simulation. ¿Por qué no FlexSim o ProModel? Justifique técnicamente.",
+      dificultad: "dificil",
+      respuesta_modelo: "Ingeniero, evalué los tres software y la decisión está documentada en la matriz de selección de la página 78. Arena Simulation se eligió por cuatro razones técnicas. Primero, robustez del lenguaje SIMAN subyacente para representación de eventos discretos en líneas de manufactura continua, particularmente fuerte en sistemas con conveyors y batch processing como el embotellado. Segundo, soporte nativo de OptQuest para optimización por algoritmos, que utilicé para comparar los tres escenarios. Tercero, disponibilidad de licencia académica completa en Univalle, mientras FlexSim ofrece licencia académica limitada y ProModel requiere licencia comercial. Cuarto, la base instalada en industria boliviana: las tres principales consultoras de Cochabamba usan Arena, lo que facilita transferencia futura del modelo. FlexSim sería superior si la prioridad fuera visualización tridimensional de alta fidelidad, pero mi prioridad era análisis estadístico riguroso y optimización. ProModel tiene curva de aprendizaje similar pero menor capacidad de modelar variabilidad. La matriz comparativa con ocho criterios ponderados está en la página 81.",
+      que_evalua: "Conocimiento técnico de los tres software y capacidad de justificar la elección con criterios ponderados.",
+      trampa_evitar: "No decir 'porque Arena es el más usado'. Justificar con criterios técnicos específicos.",
+    },
+    {
+      numero: 3,
+      categoria: "metodologia",
+      pregunta: "¿Cómo validó que su modelo en Arena representa fielmente la realidad de la planta? Sin validación todo lo demás se cae.",
+      dificultad: "dificil",
+      respuesta_modelo: "Doctora, la validación del modelo la trabajé en tres niveles según Sargent en su paper clásico sobre verificación y validación de modelos de simulación, 2013. Primero, validación de cara: presenté el modelo a tres ingenieros de planta de Embotelladora Andina y a la gerencia de producción para que validaran que el flujo modelado correspondía al flujo real; las observaciones recibidas se incorporaron en dos iteraciones del modelo. Segundo, validación de datos de entrada: las distribuciones de probabilidad de los tiempos de operación se ajustaron a datos históricos de seis meses, 142 días productivos, mediante prueba Kolmogorov Smirnov para verificar bondad de ajuste; todas las distribuciones se aceptaron a p mayor 0,15. Tercero, validación de salida: comparé los resultados de 30 réplicas del modelo contra los KPI reales históricos de la planta. La producción diaria simulada fue 28.470 unidades versus 28.142 real, error del 1,16%; el OEE simulado fue 67,8% versus 67,0% real, error del 1,19%. Ambos errores están dentro del 5% que la literatura considera aceptable. La validación detallada está en el capítulo seis, páginas 158 a 176.",
+      que_evalua: "Conocimiento profundo del proceso de validación de modelos de simulación y aplicación rigurosa de las tres etapas.",
+      trampa_evitar: "No decir 'el modelo se ve realista'. Mostrar los tres niveles de validación con datos cuantitativos.",
+    },
+    {
+      numero: 4,
+      categoria: "metodologia",
+      pregunta: "¿Qué distribuciones de probabilidad asumió para los tiempos de operación? ¿Y por qué?",
+      dificultad: "dificil",
+      respuesta_modelo: "Doctor, las distribuciones de probabilidad las ajusté con la herramienta Input Analyzer integrada en Arena, alimentada con datos históricos de seis meses por estación. Las distribuciones finales son las siguientes. Estación de llenado: distribución triangular con tiempo mínimo 1,8 segundos, modo 2,1 y máximo 2,7; ajuste KS p igual a 0,42. Estación de etiquetado, que resultó ser el cuello de botella: distribución log normal con media 3,2 segundos y desviación estándar 0,8; ajuste KS p igual a 0,38. Estación de empaque: distribución gamma con parámetros alfa 4,2 y beta 0,9; ajuste KS p igual a 0,21. Los tiempos entre fallas de cada máquina los ajusté con distribución Weibull, que es estándar para confiabilidad de equipos según Ebeling en Reliability and Maintainability Engineering. Las cinco distribuciones principales están en la página 134 con sus parámetros y pruebas de ajuste. Verifiqué adicionalmente con prueba chi cuadrado para distribuciones discretas como el número de defectos por lote, donde aplica Poisson con lambda 2,4.",
+      que_evalua: "Dominio técnico del análisis de entradas y capacidad de elegir distribuciones correctas para cada fenómeno.",
+    },
+    {
+      numero: 5,
+      categoria: "resultados",
+      pregunta: "Identificó el etiquetado como cuello de botella. ¿Cómo está seguro? Pude haber sido el llenado.",
+      dificultad: "dificil",
+      respuesta_modelo: "Ingeniero, la identificación del cuello de botella se sustenta en cuatro métricas complementarias documentadas en página 184. Primero, utilización de recursos: etiquetado opera al 94,3% de utilización promedio, mientras llenado al 71,8%, empaque al 68,2% y paletizado al 52,7%; el etiquetado es claramente el más cargado. Segundo, inventario en proceso aguas arriba: el buffer entre llenado y etiquetado promedia 142 botellas con picos de 287, indicando que la estación siguiente no puede absorber el flujo. Tercero, tiempo en espera promedio: las botellas esperan 12,8 segundos en cola antes del etiquetado, frente a 3,1 segundos en otras estaciones. Cuarto, sensibilidad: cuando aumenté capacidad simulada de etiquetado en 15%, el throughput total del sistema subió 11,3%, mientras el mismo incremento en otras estaciones generó incremento menor al 2% en throughput. Los cuatro indicadores convergen en etiquetado como cuello de botella, no es opinión sino convergencia métrica. La metodología es la propuesta por Goldratt en La Meta para identificación de bottleneck.",
+      que_evalua: "Capacidad de identificar un cuello de botella con métricas convergentes, no con intuición.",
+    },
+    {
+      numero: 6,
+      categoria: "marco_teorico",
+      pregunta: "Mencionó Lean Six Sigma. ¿Aplicó la metodología DMAIC? ¿Cuál fue la herramienta Lean específica que más usó?",
+      dificultad: "media",
+      respuesta_modelo: "Doctora, sí, apliqué la metodología DMAIC como hilo conductor de la tesis, lo cual está explicado en la página 64 con el alineamiento de los cinco capítulos a las cinco etapas: Definir corresponde al planteamiento del problema; Medir corresponde a la recolección y validación de datos; Analizar corresponde a la modelación en Arena e identificación del cuello de botella; Mejorar corresponde a la propuesta de rediseño y los tres escenarios; Controlar corresponde a las recomendaciones de monitoreo continuo del OEE. La herramienta Lean específica que más usé es Value Stream Mapping para visualizar el flujo actual y el flujo propuesto, ambos VSM están en los anexos A y B en tamaño A1. Adicionalmente apliqué Diagrama de Espagueti para analizar movimientos de operarios entre estaciones, lo que reveló que en el layout actual los operarios caminan en promedio 3,8 kilómetros por turno; el rediseño reduce esa distancia a 2,1 kilómetros. La integración entre simulación y Lean es uno de los aportes metodológicos que destaco en las conclusiones.",
+      que_evalua: "Conocimiento de Lean Six Sigma como marco y herramientas específicas, no solo nombres.",
+    },
+    {
+      numero: 7,
+      categoria: "metodologia",
+      pregunta: "Corrió 30 réplicas del modelo. ¿Por qué 30 y no 100? ¿Es suficiente?",
+      dificultad: "media",
+      respuesta_modelo: "Ingeniero, el número de réplicas lo determiné con la fórmula de réplicas adicionales propuesta por Banks en Discrete Event System Simulation. Apliqué corrida piloto de 10 réplicas para estimar varianza de la métrica de salida principal, throughput diario. Con varianza piloto, intervalo de confianza del 95% y semi amplitud objetivo del 1% del valor medio, la fórmula dio 27 réplicas necesarias; redondeé a 30 para tener colchón. La fórmula es n igual a t alfa medios al cuadrado por sigma al cuadrado dividido entre semiamplitud al cuadrado. El cálculo completo está en página 168 con la varianza piloto y el valor t. Para escenarios de mayor sensibilidad podría requerirse más réplicas, pero el análisis de varianza con las 30 muestra estabilidad de los KPI clave; el coeficiente de variación de la corrida media de los últimos 10 versus las primeras 10 réplicas es inferior al 1%, lo que indica convergencia.",
+      que_evalua: "Conocimiento estadístico del diseño de simulación, no aplicación arbitraria de número de corridas.",
+    },
+    {
+      numero: 8,
+      categoria: "resultados",
+      pregunta: "Proyecta subir OEE de 67% a 79%, doce puntos. ¿No es muy optimista? ¿Cómo descompone esa mejora?",
+      dificultad: "dificil",
+      respuesta_modelo: "Doctora, la mejora de doce puntos la descompongo en tres componentes del OEE según la fórmula clásica de Nakajima en Introduction to TPM. Disponibilidad: sube de 81,2% a 86,4% por reducción de paradas no planificadas, gracias a reubicación del almacén de insumos próximo al etiquetado, que elimina 28 minutos diarios de transporte. Eficiencia de desempeño: sube de 86,5% a 92,1% porque la nueva configuración elimina cuellos de botella secundarios entre etiquetado y empaque, reduciendo microparadas del 9% al 4%. Calidad: sube de 95,3% a 96,7% porque la separación física entre estación de etiquetado y zona húmeda reduce defectos por humedad de etiquetas del 4,7% al 3,3%. La fórmula del OEE da 86,4% por 92,1% por 96,7% igual a 76,9%, no exactamente 79%; el porcentaje declarado en la tesis usa el modelo de simulación que incluye sinergias de segundo orden no capturadas en la descomposición simple. La descomposición está en página 196.",
+      que_evalua: "Conocimiento profundo de la fórmula del OEE y capacidad de descomponer un resultado agregado.",
+    },
+    {
+      numero: 9,
+      categoria: "viabilidad",
+      pregunta: "Su rediseño implica mover la estación de etiquetado. ¿Verificó las restricciones físicas reales de la planta? ¿Conexiones eléctricas, tuberías, alturas?",
+      dificultad: "dificil",
+      respuesta_modelo: "Ingeniero, sí, las restricciones físicas las trabajé con el jefe de mantenimiento de planta durante tres reuniones formales documentadas en el anexo D. Las restricciones identificadas son cinco. Primero, conexión eléctrica trifásica de 380 V, requiere extensión de aproximadamente 18 metros con cable AWG cuatro; costo estimado Bs 8.500 incluyendo instalación. Segundo, conexión de aire comprimido, requiere prolongación de seis metros de tubería; costo Bs 3.200. Tercero, drenaje al sistema sanitario, sin restricción porque la nueva ubicación está más cerca del drenaje principal. Cuarto, altura libre, la viga principal está a 4,2 metros, suficiente para los 2,8 metros del equipo; restricción cumplida. Quinto, peso sobre piso, el equipo pesa 1,8 toneladas y el piso soporta hasta 5 toneladas por metro cuadrado según estudio estructural de la planta de 2019; restricción cumplida. La inversión total en adecuaciones para implementar el escenario óptimo es Bs 47.300, contemplada en el capítulo de evaluación económica. Los planos del layout propuesto con las cinco restricciones señaladas están en el anexo B.",
+      que_evalua: "Si el estudiante conectó la simulación con la factibilidad física real, no solo con el modelo digital.",
+    },
+    {
+      numero: 10,
+      categoria: "viabilidad",
+      pregunta: "Su tesis es académica pero la empresa colaboró. ¿La gerencia está dispuesta a implementar el rediseño? ¿Con qué inversión?",
+      dificultad: "media",
+      respuesta_modelo: "Doctora, la inversión total proyectada para implementar el escenario óptimo es Bs 178.500 que incluye adecuaciones físicas Bs 47.300, paradas de planta planificadas durante implementación Bs 96.200 estimadas como costo de oportunidad, capacitación de operarios en el nuevo flujo Bs 18.000 y contingencia del 10% Bs 17.000. La proyección de beneficio anual del incremento del OEE es Bs 2,8 millones, lo que da payback de 0,76 meses, menos de un trimestre. La gerencia de Embotelladora Andina recibió presentación ejecutiva en enero de 2026 y manifestó interés en implementación piloto durante el segundo trimestre 2026. No es compromiso firme; depende de aprobación del comité regional. El acta de la reunión con la firma del gerente de planta está en el anexo E. Es la prueba de que la tesis no quedó en archivo académico.",
+      que_evalua: "Si el proyecto tiene tracción real más allá del componente académico.",
+    },
+    {
+      numero: 11,
+      categoria: "marco_teorico",
+      pregunta: "Hablemos de Goldratt. ¿Por qué lo cita y qué aporta a su tesis específicamente?",
+      dificultad: "media",
+      respuesta_modelo: "Doctor, cito a Eliyahu Goldratt por su Teoría de las Restricciones, TOC, expuesta en La Meta y posteriormente en Cadena Crítica. TOC es el marco que sustenta mi enfoque metodológico en la identificación del cuello de botella como punto focal de la mejora. Goldratt argumenta que en cualquier sistema productivo existe una o pocas restricciones que determinan el throughput global, y que toda mejora en estaciones no restringidas tiene retorno marginal mientras la restricción no se elimina. Aplicado a mi tesis: identificar etiquetado como cuello de botella significa que la inversión y el rediseño deben enfocarse primero en ese punto; eso justifica que el escenario óptimo concentre el 64% de la inversión total en la zona de etiquetado y solo el 36% en el resto del layout. Goldratt está citado en el marco teórico páginas 71 a 75, con tres conceptos específicos: drum-buffer-rope, throughput accounting y los cinco pasos para superar restricciones.",
+      que_evalua: "Conocimiento específico del aporte de un autor central y conexión con la propia metodología.",
+    },
+    {
+      numero: 12,
+      categoria: "metodologia",
+      pregunta: "Su modelo asume comportamiento estable. ¿Y si una máquina se rompe? ¿Modeló paradas no planificadas?",
+      dificultad: "dificil",
+      respuesta_modelo: "Doctora, las paradas no planificadas están explícitamente modeladas en Arena mediante módulos Failure. Para cada una de las siete máquinas principales asigné dos parámetros: tiempo medio entre fallas TMEF y tiempo medio de reparación TMR, ajustados con distribución Weibull para TMEF y log normal para TMR según datos históricos del área de mantenimiento. Por ejemplo, la línea de llenado tiene TMEF de 14,6 horas y TMR de 0,8 horas con distribución log normal sigma 0,4. Las paradas no planificadas representan en promedio el 9,3% del tiempo total de operación en el modelo, consistente con el dato real de 9,1%. El modelo incluye además paradas planificadas: cambios de formato 22 minutos cada dos turnos, mantenimiento preventivo 45 minutos diarios y reuniones de calidad 15 minutos diarios. La estructura completa de paradas modeladas está en página 142 con sus distribuciones y parámetros.",
+      que_evalua: "Si el modelo de simulación incluye variabilidad real y no asume comportamiento ideal.",
+    },
+    {
+      numero: 13,
+      categoria: "resultados",
+      pregunta: "Evaluó tres escenarios. ¿Cómo se diferencian y por qué eligió el ganador?",
+      dificultad: "media",
+      respuesta_modelo: "Ingeniero, los tres escenarios y sus resultados están en página 202. Escenario A: mover solo la estación de etiquetado más cerca del empaque, inversión Bs 92.000, incremento OEE proyectado de 67% a 73%, payback 0,84 meses. Escenario B: rediseño completo del flujo con reubicación de etiquetado y empaque, configuración en U, inversión Bs 178.500, incremento OEE proyectado de 67% a 79%, payback 0,76 meses. Escenario C: rediseño con automatización adicional del transporte interno mediante AGV, inversión Bs 380.000, incremento OEE proyectado de 67% a 82%, payback 1,82 meses. Elegí el escenario B mediante matriz de selección con cuatro criterios ponderados: ROI, riesgo de implementación, complejidad técnica y plazo de retorno. El escenario B obtiene la mejor relación entre incremento de OEE y riesgo de implementación. El escenario C, aunque tiene mayor OEE, introduce complejidad de automatización que excede la capacidad técnica actual de la planta y duplica el payback. La matriz comparativa está en página 208.",
+      que_evalua: "Capacidad de evaluar escenarios con criterios múltiples y justificar la elección con argumentos económicos y técnicos.",
+    },
+    {
+      numero: 14,
+      categoria: "marco_teorico",
+      pregunta: "¿Conoce el método SLP, Systematic Layout Planning de Muther? ¿Por qué simulación y no solo SLP?",
+      dificultad: "trampa",
+      respuesta_modelo: "Doctora, sí, conozco SLP de Richard Muther que es el método clásico de planificación de layout publicado en Systematic Layout Planning, 1973. SLP estructura el análisis en tres fases: análisis P-Q, diagrama de relación de actividades y diagrama de espacio. Es excelente para diseñar el layout inicial pero tiene una limitación importante: es estático, no captura la variabilidad operacional, las colas, los tiempos de espera ni el comportamiento del sistema bajo distintas condiciones. Por eso la tesis combina ambos enfoques: aplico SLP en la fase de propuesta de layout para generar las opciones de configuración con criterios cualitativos de adyacencia y flujo, y luego utilizo simulación de eventos discretos en Arena para evaluar dinámicamente cada propuesta con métricas cuantitativas de throughput, utilización y tiempos. La complementariedad entre SLP y simulación es uno de los aportes metodológicos. Muther está citado en página 67 y la matriz de relación de actividades del SLP aplicada a la planta está en página 122.",
+      que_evalua: "Si el estudiante conoce la metodología clásica del layout y puede justificar por qué la complementó con simulación.",
+      trampa_evitar: "No defender la simulación sola descartando SLP. Reconocer la complementariedad y la limitación de la simulación cuando se usa sin diseño previo.",
+    },
+    {
+      numero: 15,
+      categoria: "personal",
+      pregunta: "¿Qué fue lo más difícil del trabajo de tesis?",
+      dificultad: "facil",
+      respuesta_modelo: "Doctor, lo más difícil fue la construcción del modelo en Arena durante los primeros tres meses. Aunque tenía conocimiento del software por la materia electiva, modelar una planta real con 24 estaciones, siete tipos de productos y políticas de cambio de formato es un nivel de complejidad muy superior a los ejercicios de aula. Pasé cinco semanas hasta lograr que el modelo corriera sin errores y otras tres semanas hasta validar contra datos reales. Lo segundo más difícil fue convencer a la gerencia de planta de darme acceso a datos sensibles como tiempos de paradas y reportes de OEE; tomó cuatro reuniones formales y firma de acuerdo de confidencialidad. Lo más satisfactorio fue ver el modelo corriendo a velocidad veinte mil veces real y reproducir los KPI históricos con error inferior al 1,2%. Ese momento confirmó que la simulación era una herramienta utilizable, no solo un ejercicio académico.",
+      que_evalua: "Honestidad sobre el proceso técnico y las dificultades no técnicas como acceso a datos.",
+    },
+    {
+      numero: 16,
+      categoria: "personal",
+      pregunta: "Si tuviera que volver a empezar, ¿qué haría diferente?",
+      dificultad: "facil",
+      respuesta_modelo: "Doctora, tres cambios. Primero, habría incluido análisis de sensibilidad multivariable más extenso; mi tesis incluye sensibilidad por OEE pero no por demanda. Si la demanda de Embotelladora Andina sube 20% en 2027, el escenario óptimo podría perder ventaja frente al escenario C con AGV. Segundo, habría modelado dos turnos en paralelo en lugar de un turno tipo; la planta opera tres turnos con dinámicas distintas, particularmente el turno noche con menor dotación. Tercero, habría incluido entrevistas con operarios sobre la viabilidad del rediseño desde la perspectiva ergonómica y de seguridad; el rediseño me lo enfoqué en eficiencia y faltó perspectiva del operario. Esos tres cambios fortalecerían la tesis sin requerir reestructuración mayor.",
+      que_evalua: "Capacidad de autocrítica con propuestas específicas y honestas.",
+    },
+    {
+      numero: 17,
+      categoria: "viabilidad",
+      pregunta: "El payback de 0,76 meses suena demasiado bueno. ¿Hay algún costo oculto que está omitiendo?",
+      dificultad: "trampa",
+      respuesta_modelo: "Ingeniero, agradezco la observación porque me hace revisar los costos. El payback de 0,76 meses se calcula con la inversión declarada Bs 178.500 contra el beneficio anual Bs 2,8 millones. Los costos que sí incluí son cinco: adecuaciones físicas, paradas planificadas durante implementación, capacitación, contingencia del 10% y costo de oportunidad. Los costos que podría haber subestimado son tres. Primero, productividad reducida durante la curva de aprendizaje de operarios, estimada conservadoramente en dos semanas; podría extenderse a un mes según experiencia industrial, lo cual agregaría aproximadamente Bs 28.000. Segundo, posibles ajustes finos al modelo durante implementación real, estimaba Bs 5.000 pero podrían ser Bs 15.000. Tercero, no incluí costos administrativos de gestión del cambio, posiblemente Bs 8.000. Si agrego estos tres costos adicionales, la inversión total sube a Bs 230.000 y el payback a 0,98 meses, sigue siendo muy bueno. El proyecto se mantiene atractivo aún con esos ajustes. Reconozco que la sección de costos puede ser más conservadora y eso es una limitación válida de la tesis.",
+      que_evalua: "Honestidad para reconocer costos posiblemente subestimados sin desmoronar todo el análisis.",
+      trampa_evitar: "No defender el payback como dato cerrado. Reconocer los costos que podrían no haberse incluido y mostrar que el proyecto sigue siendo viable.",
+    },
+    {
+      numero: 18,
+      categoria: "conclusiones",
+      pregunta: "En una frase, ¿cuál es el aporte metodológico de su tesis?",
+      dificultad: "media",
+      respuesta_modelo: "Doctor, el aporte metodológico principal de la tesis es la integración rigurosa entre SLP de Muther para la generación de propuestas de layout, simulación de eventos discretos en Arena para la evaluación dinámica de cada propuesta y herramientas Lean específicas como VSM y diagrama de espagueti para identificar y cuantificar el movimiento improductivo, todo articulado bajo metodología DMAIC. Esa integración tridimensional no la encontré documentada explícitamente en tesis recientes de la carrera ni en publicaciones técnicas bolivianas, lo que se convierte en una contribución académica replicable para futuras intervenciones industriales en plantas de manufactura nacional.",
+      que_evalua: "Capacidad de sintetizar el aporte académico de manera precisa y diferenciada.",
+    },
+  ],
+  puntos_debiles: [
+    {
+      punto: "La elección de Arena en lugar de FlexSim o ProModel debe sostenerse con criterios técnicos, no por familiaridad.",
+      como_manejarlo: "Lleva memorizados los cuatro criterios técnicos de tu matriz: SIMAN para línea continua, OptQuest para optimización, licencia académica completa, base instalada en industria boliviana. Si te ofrecen FlexSim como alternativa superior reconoce el aspecto donde sí supera, visualización 3D, y vuelve a tu criterio prioritario, análisis estadístico riguroso.",
+      frase_clave: "Arena se eligió por SIMAN para sistemas continuos, OptQuest para optimización, licencia completa en Univalle y base instalada en consultoras bolivianas. La matriz con ocho criterios está en página 81.",
+    },
+    {
+      punto: "La validación del modelo es el punto crítico: si el modelo no representa la realidad, todo lo demás se cae.",
+      como_manejarlo: "Despliega los tres niveles de Sargent en cada respuesta sobre validación: validación de cara con ingenieros de planta, validación de datos con KS, validación de salida con error inferior al 1,2% en producción y OEE. No improvises esta sección; los números deben estar memorizados al céntimo.",
+      frase_clave: "Validación en tres niveles según Sargent: cara con ingenieros, datos con Kolmogorov Smirnov, salida con error inferior al 1,2% en producción diaria y OEE simulado versus real.",
+    },
+    {
+      punto: "Los supuestos de distribuciones de probabilidad de los tiempos pueden cuestionarse si no se justifican con prueba de bondad de ajuste.",
+      como_manejarlo: "Cada distribución debe venir con su prueba KS y el p valor. Triangular para llenado p igual a 0,42, log normal para etiquetado p igual a 0,38, gamma para empaque p igual a 0,21. Si un docente cuestiona una distribución específica, responde con el p valor exacto.",
+      frase_clave: "Cada distribución se ajustó con Input Analyzer y Kolmogorov Smirnov: triangular para llenado, log normal para etiquetado, gamma para empaque, Weibull para confiabilidad.",
+    },
+    {
+      punto: "El payback de 0,76 meses puede sonar a optimismo exagerado para un proyecto industrial.",
+      como_manejarlo: "Cuando te lo cuestionen, reconoce que la sección de costos puede ser conservadora pero no excesiva. Añade los tres costos posibles que podrían haberse subestimado, curva de aprendizaje, ajustes y gestión del cambio, y muestra que aún incorporándolos el payback sigue siendo menos de un mes. La transparencia fortalece la defensa.",
+      frase_clave: "Si añado curva de aprendizaje, ajustes finos y gestión del cambio, la inversión sube a Bs 230.000 y el payback a 0,98 meses. El proyecto se mantiene atractivo aún con costos adicionales.",
+    },
+    {
+      punto: "La factibilidad física del rediseño en la planta real puede levantar dudas sobre restricciones no identificadas.",
+      como_manejarlo: "Despliega las cinco restricciones que sí trabajaste con el jefe de mantenimiento: eléctrica, aire comprimido, drenaje, altura, peso. Lleva el plano A1 a la defensa por si te piden mostrarlo. La conexión con el equipo de mantenimiento documentada en el anexo D es prueba de que el rediseño no es solo digital.",
+      frase_clave: "Las cinco restricciones físicas se trabajaron con el jefe de mantenimiento en tres reuniones formales documentadas en anexo D. Los planos con las restricciones están en anexo B.",
+    },
+  ],
+  fortalezas: [
+    {
+      punto: "Validación rigurosa del modelo en tres niveles según Sargent con datos cuantitativos.",
+      como_manejarlo: "La validación es el sello de calidad de una tesis de simulación. Resáltala desde la introducción: 'el modelo está validado en tres niveles con error inferior al 1,2%'. Esto te coloca por encima del 80% de las tesis de simulación que solo presentan validación visual.",
+      frase_clave: "El modelo está validado en validación de cara, validación de datos con Kolmogorov Smirnov y validación de salida con error inferior al 1,2% en producción y OEE.",
+    },
+    {
+      punto: "Integración rigurosa entre SLP, simulación de eventos discretos y Lean bajo metodología DMAIC.",
+      como_manejarlo: "Es tu aporte metodológico principal. Cuando hablen del aporte académico, sostén la integración tridimensional con SLP como generador de propuestas, simulación como evaluador dinámico y Lean como identificador de desperdicio. Esa estructura no la encuentras en tesis comunes.",
+      frase_clave: "El aporte es la integración tridimensional: SLP de Muther para propuestas, simulación en Arena para evaluación dinámica y Lean con VSM y diagrama de espagueti para cuantificar desperdicio, todo bajo DMAIC.",
+    },
+    {
+      punto: "Identificación del cuello de botella con cuatro métricas convergentes, no con intuición.",
+      como_manejarlo: "Memoriza las cuatro métricas: utilización 94,3%, buffer 142 botellas promedio, espera 12,8 segundos, sensibilidad 11,3%. La convergencia de cuatro indicadores es el argumento técnico irrefutable que el tribunal valora.",
+      frase_clave: "El etiquetado es cuello de botella por convergencia de cuatro métricas: utilización 94,3%, buffer 142 botellas, espera 12,8 segundos y sensibilidad de 11,3% en throughput.",
+    },
+    {
+      punto: "Tracción institucional real con la gerencia de Embotelladora Andina y posibilidad de implementación piloto en 2026.",
+      como_manejarlo: "Resalta que la tesis no quedó en archivo académico. Lleva el acta de la reunión con la firma del gerente a la defensa por si te piden mostrarla. Una tesis que pasa del binder al piloto industrial es excepción, no regla.",
+      frase_clave: "La gerencia de Embotelladora Andina recibió presentación ejecutiva en enero 2026 y evalúa implementación piloto en el segundo trimestre 2026. El acta firmada está en anexo E.",
+    },
+  ],
+  cierre: "Sebastián, recuerda que el lector externo conoce la planta y va a probar cada decisión técnica. No lo veas como amenaza sino como oportunidad de demostrar que tu tesis se sostiene en la realidad industrial. Cuando te pregunten por la validación, los supuestos o el cuello de botella, no improvises: los números están en tu tesis y los conoces. Lleva siempre a la mano los tres elementos críticos, validación, cuello de botella y las cinco restricciones físicas. Si una pregunta te toma por sorpresa, respira y di 'Ingeniero, déjeme revisar la cédula correspondiente'. La simulación es un campo donde la honestidad técnica vale más que la elocuencia. Tus 246 páginas, el modelo validado al 1,2% de error y la tracción institucional con la empresa son tres argumentos fuertes. Defiéndelos con la calma del ingeniero que conoce su modelo.",
+  conclusion: "Defensa de tesis avanzada que requiere dominio técnico profundo en Arena, validación rigurosa según Sargent, identificación del cuello de botella con métricas convergentes y conexión clara entre el modelo digital y las restricciones físicas reales de la planta. El éxito depende de la capacidad de articular SLP, simulación y Lean bajo DMAIC y sostener cada supuesto con coeficiente o prueba estadística.",
+  lecciones: [
+    "En simulación industrial la validación del modelo es el sello de calidad. Sin validación rigurosa en tres niveles toda métrica posterior es sospechosa.",
+    "La identificación del cuello de botella requiere métricas convergentes, no intuición. Cuatro indicadores diferentes deben apuntar al mismo lugar.",
+    "El número de réplicas se calcula con fórmula estadística sobre varianza piloto, no por convención. Conocer la fórmula de Banks separa al ingeniero técnico del aplicador mecánico.",
+    "Cada distribución de probabilidad en simulación debe acompañarse de su prueba de bondad de ajuste. Kolmogorov Smirnov o chi cuadrado con p valor son obligatorios.",
+    "La factibilidad física del rediseño se valida con el equipo de mantenimiento de la planta, no solo con el modelo digital. Conectar simulación con realidad operativa es lo que hace la diferencia.",
+  ],
+  errores_evitados: [
+    "No defender la elección de software con familiaridad. Justificar con criterios técnicos ponderados en matriz.",
+    "No declarar validación visual. La validación rigurosa requiere los tres niveles de Sargent con datos cuantitativos.",
+    "No identificar cuello de botella con una sola métrica. Convergencia de cuatro indicadores es el argumento irrefutable.",
+    "No omitir prueba de bondad de ajuste para las distribuciones. Kolmogorov Smirnov con p valor por cada distribución.",
+    "No presentar payback de meses con apariencia de optimismo. Reconocer costos posibles que podrían haberse subestimado fortalece la defensa.",
+  ],
+  tags: ["defensa", "tesis", "Univalle", "Cochabamba", "ingenieria-industrial", "Arena", "simulacion", "Lean-Six-Sigma"],
+};

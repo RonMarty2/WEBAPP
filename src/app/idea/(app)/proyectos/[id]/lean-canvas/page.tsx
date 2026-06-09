@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, LayoutGrid, Check } from 'lucide-react';
 import { SugerirIA } from '@/components/compartido/SugerirIA';
+import { TutorIA } from '@/components/tutor-ia/TutorIA';
 import type { LeanCanvas } from '@/types/idea';
 
 const VACIO: LeanCanvas = {
@@ -118,22 +119,41 @@ export default function HerramientaLeanCanvas() {
         ))}
       </div>
 
-      <div className="mt-4">
-        <SugerirIA
-          modulo="idea"
-          tarea={
-            'Para un Lean Canvas de esta idea en Bolivia, propón texto breve por bloque. Devuelve EXACTAMENTE estas líneas (formato literal):\n' +
-            'Problema: …\nSegmentos: …\nPropuestaValor: …\nSolución: …\nCanales: …\nIngresos: …\nCostos: …\nMétricas: …\nVentaja: …'
-          }
-          formato="texto"
-          acentoClase="idea-accent-bg text-white"
-          contexto={
-            `MI IDEA: ${idea || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
-            'IMPORTANTE: NO inventes un negocio distinto. Trabaja SOLO sobre la idea y el sector que te di arriba. Si la idea es vaga, refina sin cambiar el rubro.'
-          }
-          placeholder="Detalle opcional para afinar la sugerencia…"
-          onAplicar={aplicarIA}
-        />
+      <div className="mt-4 flex flex-wrap items-start gap-3">
+        <div className="flex-1 min-w-[280px]">
+          <SugerirIA
+            modulo="idea"
+            tarea={
+              'Para un Lean Canvas de esta idea en Bolivia, propón texto breve por bloque. Devuelve EXACTAMENTE estas líneas (formato literal):\n' +
+              'Problema: …\nSegmentos: …\nPropuestaValor: …\nSolución: …\nCanales: …\nIngresos: …\nCostos: …\nMétricas: …\nVentaja: …'
+            }
+            formato="texto"
+            acentoClase="idea-accent-bg text-white"
+            contexto={
+              `MI IDEA: ${idea || titulo}\nSECTOR: ${sector || 'no especificado'}\n\n` +
+              'IMPORTANTE: NO inventes un negocio distinto. Trabaja SOLO sobre la idea y el sector que te di arriba. Si la idea es vaga, refina sin cambiar el rubro.'
+            }
+            placeholder="Detalle opcional para afinar la sugerencia…"
+            onAplicar={aplicarIA}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">¿Quieres entender el porqué?</p>
+          <TutorIA
+            modulo="idea"
+            herramienta="lean-canvas:modelo-completo"
+            contexto={`Idea: ${idea || titulo || '(sin descripción aún)'}\nSector: ${sector || 'no especificado'}`}
+            contenidoActual={[
+              c.problema && `Problema: ${c.problema}`,
+              c.segmentos && `Segmentos: ${c.segmentos}`,
+              c.propuestaValor && `Propuesta: ${c.propuestaValor}`,
+              c.solucion && `Solución: ${c.solucion}`,
+            ].filter(Boolean).join('\n')}
+            campo="enfoque del modelo de negocio en su conjunto"
+            etiqueta="Tutor IA · 3 caminos"
+            variante="amplio"
+          />
+        </div>
       </div>
 
       <div className="mt-6 flex items-center gap-3">
