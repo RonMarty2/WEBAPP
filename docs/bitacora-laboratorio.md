@@ -4,7 +4,7 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-09 (sesión 11: mejora didáctica — casos, tutor IA, calculadoras reactivas, simulador eventos, documento web, plataformas Org/Defensa)
+> **Última actualización:** 2026-06-09 (sesión 12: acta de entendimiento aprobada — migración mock→real, limpieza ecosistema/scribe, plan de calidad)
 
 ---
 
@@ -272,6 +272,83 @@ para mantener calidad y no saturar el contexto.
 ---
 
 ## §4 Decisiones clave (orden cronológico inverso)
+
+### 2026-06-09 (sesión 12) — ACTA DE ENTENDIMIENTO (aprobada explícitamente por el usuario)
+
+**Contexto:** el usuario pidió una revisión a fondo de la bitácora con
+preguntas iterativas hasta dejar CERO sobreentendidos sobre qué es y
+qué tiene el SaaS. Se hicieron 5 rondas de preguntas. Resultado: acta
+aprobada con "Sí, apruebo todo".
+
+#### Hallazgos de la revisión
+
+1. **GRAVE — Sesión 11 montó piezas en el prototipo mock:** por los
+   reseteos del entorno de trabajo, 25 de los 30 casos + las 4
+   calculadoras reactivas + el Tutor IA de Mercados/Estrategia/
+   Marketing + las "plataformas Org/Defensa" quedaron bajo
+   `/ecosistema/universidad/*` (prototipo con mock-state que la propia
+   bitácora marca como "NO se toca"), NO en los módulos reales
+   (`/mercados`, `/estrategia`, `/marketing`, `/organizacion`,
+   `/defensa`). Solo Idea, `/projects` y el documento web cayeron en
+   el producto real. **Nota:** las "plataformas Org/Defensa" del mock
+   son además redundantes — los módulos reales YA tenían academia y
+   laboratorio completos desde sesiones previas.
+2. **Ruta `/adaptativo` sin documentar:** wizard que analiza la guía
+   de la universidad del alumno con IA (`/api/adaptativo/analyze-guide`
+   + `create-project`) y crea un proyecto con plan adaptado. No
+   aparece en la bitácora; origen desconocido.
+3. **Axiom confirmado eliminado** del código (0 restos en src).
+   CLAUDE.md de main ya está actualizado (cascada Anthropic→Gemini→
+   OpenAI→Groq); quedan 3 menciones residuales menores.
+4. **Core DB:** `db/index.ts` usa Supabase si hay env vars, con
+   fallback a memoria. Supabase CONFIRMADO operativo en producción
+   (evidencia: el proyecto de prueba sobrevivió 8 deploys con sus
+   fases intactas).
+
+#### Decisiones aprobadas (las 12)
+
+1. **Migrar** todo lo útil del mock `/ecosistema` a los módulos
+   reales: galerías de casos (5 módulos), Tutor IA en herramientas
+   reales, simulador de eventos en Marketing/Estrategia reales,
+   calculadoras solo donde no dupliquen herramientas existentes.
+2. **Eliminar `/ecosistema` completo** después de la migración
+   (vitrina con datos falsos y precios inventados; riesgo de
+   confusión).
+3. **Eliminar `/scribe`** y endpoints legacy sin auth
+   (`/api/monografias|citas|documentos|compilar`) verificando antes
+   que nada actual dependa de ellos.
+4. **Auditar `/adaptativo`** → reporte para decidir si se queda
+   (es un experimento, según el usuario).
+5. **Bridge Finanzas↔docente: arreglarlo pronto** (subió de
+   prioridad). El docente debe ver el trabajo de Finanzas del alumno.
+6. **Precios actuales (6 SKUs Bs 150–950) son DE PRUEBA.** Los
+   finales los define el usuario más adelante. Cobro a docentes: sin
+   decidir (ya no se asume Bs 300/mes).
+7. **Público objetivo: los 3 a la vez** (alumno apurado + alumno
+   formativo + docente). La landing debe hablarles a los tres.
+8. **PDF compilado a mano queda ESCONDIDO** (solo admin). El alumno
+   usa exclusivamente el documento web + copiar a Word.
+9. **Universidades prioritarias: las 7 de los 3 ejes** — CBBA (UMSS,
+   UNIFRANZ, UCATEC), LP (UMSA, UCB), SCZ (UAGRM, UPB).
+10. **Botón WhatsApp de ventas: esconderlo** mientras el usuario no
+    configure `NEXT_PUBLIC_WHATSAPP_VENTAS` en Vercel (hoy abre un
+    número falso). Instrucción entregada al usuario.
+11. **PLAN DE CALIDAD (preocupación central del usuario):**
+    a) *QA de lo generado* — generar documentos completos de prueba
+       y revisarlos con rúbrica de tribunal (coherencia, citas,
+       números, formato). b) *Auditoría pedagógica* — revisar las 41
+       clases y los 30 casos con rúbrica docente; el usuario valida
+       una muestra para calibrar criterio. Reportes por módulo.
+12. **Estado operativo confirmado:** solo el usuario usa la app
+    (datos de prueba, se pueden tocar); Supabase conectado.
+
+#### Orden de ejecución acordado
+
+1. Migración mock → módulos reales. 2. Eliminar `/ecosistema` y
+`/scribe`. 3. Esconder WhatsApp sin env var. 4. Auditoría
+`/adaptativo`. 5. Bridge Finanzas↔docente. 6. Plan de Calidad.
+
+---
 
 ### 2026-06-09 (sesión 11) — Mejora didáctica del SaaS (4 sprints + documento web + plataformas)
 
