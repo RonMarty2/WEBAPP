@@ -237,8 +237,11 @@ function PagoContent() {
             {/* Opción alternativa: comprar UN módulo individual.
                 Por ahora coordinamos precio por contacto directo —
                 no hay flujo automatizado de pago modular todavía.
-                Mantiene la arquitectura visible (que cada módulo
-                se puede vender suelto) sin inventar precios. */}
+                El bloque entero SOLO aparece si el dueño configuró su
+                número real en NEXT_PUBLIC_WHATSAPP_VENTAS (decisión
+                sesión 12): sin número, el botón abría un WhatsApp
+                falso y generaba desconfianza. */}
+            {process.env.NEXT_PUBLIC_WHATSAPP_VENTAS && (
             <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.35)", borderRadius: 12, padding: "1.2rem", marginBottom: "1.5rem" }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: "#a78bfa", marginBottom: "0.5rem" }}>¿SOLO QUIERES UN MÓDULO?</div>
               <p style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.5, marginBottom: "0.8rem" }}>
@@ -262,7 +265,7 @@ function PagoContent() {
                 ))}
               </div>
               <a
-                href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_VENTAS || "").replace(/[^0-9]/g, "") || "59100000000"}?text=Hola%2C%20quiero%20comprar%20un%20m%C3%B3dulo%20individual%20del%20Laboratorio%20Acad%C3%A9mico%20PRO`}
+                href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_VENTAS || "").replace(/[^0-9]/g, "")}?text=Hola%2C%20quiero%20comprar%20un%20m%C3%B3dulo%20individual%20del%20Laboratorio%20Acad%C3%A9mico%20PRO`}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 14px", borderRadius: 8, background: "#7c3aed", color: "white", textDecoration: "none", fontSize: 13, fontWeight: 700 }}
@@ -274,6 +277,7 @@ function PagoContent() {
                 contigo según qué módulo necesitas y cuánto tiempo.
               </p>
             </div>
+            )}
 
             {/* Selector de método */}
             <div style={{ background: "rgba(30,41,59,0.8)", border: "1px solid #334155", borderRadius: 12, padding: "1.2rem", marginBottom: "1.5rem" }}>
