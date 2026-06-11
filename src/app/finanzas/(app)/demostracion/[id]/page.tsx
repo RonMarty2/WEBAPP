@@ -25,7 +25,7 @@ import {
 } from 'recharts';
 import { useAuthStore } from '@/stores/finanzas/auth-store';
 import { listarMisProyectos, listarProyectosGrupales } from '@/lib/finanzas/proyecto-supabase';
-import { calcularKpis, calcularSeries, calcularPuntoEquilibrioSimple, formatearBolivianos, formatearPorcentaje } from '@/lib/finanzas/demostracion';
+import { calcularKpis, calcularSeries, calcularPuntoEquilibrioSimple, calcularTributacion, formatearBolivianos, formatearPorcentaje } from '@/lib/finanzas/demostracion';
 import type { Proyecto } from '@/types/finanzas/proyecto';
 import { ArrowLeft, ArrowRight, Maximize2, Minimize2, Printer, X } from 'lucide-react';
 
@@ -124,7 +124,7 @@ export default function ModoDemostracionPage() {
   }, [user, params.id]);
 
   // Navegación con teclado.
-  const total = 10;
+  const total = 11;
   const irAnterior = useCallback(() => setLamina((n) => Math.max(0, n - 1)), []);
   const irSiguiente = useCallback(() => setLamina((n) => Math.min(total - 1, n + 1)), [total]);
   const salir = useCallback(() => router.back(), [router]);
@@ -161,6 +161,7 @@ export default function ModoDemostracionPage() {
   const kpis = useMemo(() => (proyecto ? calcularKpis(proyecto) : null), [proyecto]);
   const series = useMemo(() => (proyecto ? calcularSeries(proyecto) : null), [proyecto]);
   const peq = useMemo(() => (proyecto ? calcularPuntoEquilibrioSimple(proyecto) : null), [proyecto]);
+  const trib = useMemo(() => (proyecto ? calcularTributacion(proyecto) : null), [proyecto]);
 
   if (estado === 'cargando') {
     return <div className="flex h-screen items-center justify-center bg-zinc-900 text-zinc-400">Cargando proyecto…</div>;
@@ -336,7 +337,54 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 6 && (
-          <Lamina numero={7} total={total} titulo="Indicadores financieros" subtitulo="VAN, TIR, Payback, IR y B/C">
+          <Lamina numero={7} total={total} titulo="Carga tributaria boliviana" subtitulo={
+            trib?.regimen === 'general' ? 'IVA 13% débito/crédito · IT 3% · IUE 25% (Ley 843)'
+            : trib?.regimen === 'rts' ? 'Régimen Tributario Simplificado · cuota fija bimensual'
+            : trib?.regimen === 'rau' ? 'Régimen Agropecuario Unificado · cuota anual por hectárea'
+            : 'Proyecto sin actividad fiscal (caso académico)'
+          }>
+            {!trib || trib.regimen === 'sin_actividad' ? (
+              <EmptyData msg="El proyecto no tiene régimen tributario asignado. Para ver la carga real, ve al Paso 1 y elige Régimen General, RTS o RAU." />
+            ) : trib.regimen === 'general' ? (
+              <>
+                <div className="grid grid-cols-3 gap-6">
+                  <MetricCard label="IVA pagado (5 años)" value={formatearBolivianos(trib.ivaTotal)} sub="13% débito − crédito + arrastre" semaforo="amber" />
+                  <MetricCard label="IT pagado (5 años)" value={formatearBolivianos(trib.itTotal)} sub="3% sobre ingresos con factura" semaforo="amber" />
+                  <MetricCard label="Compras con factura" value={formatearBolivianos(trib.comprasConFacturaTotal)} sub="base del crédito fiscal" semaforo="verde" />
+                </div>
+                {trib.cargaPorAnio.length > 0 && (
+                  <div className="mt-8 h-[42vh]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={trib.cargaPorAnio.map((c, i) => ({ anio: c.anio, IVA: trib.serieIVA[i]?.valor ?? 0, IT: trib.serieIT[i]?.valor ?? 0 }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                        <XAxis dataKey="anio" stroke="#a1a1aa" />
+                        <YAxis stroke="#a1a1aa" tickFormatter={(v: number) => Math.round(v / 1000) + "k"} />
+                        <Tooltip formatter={(v: unknown) => formatearBolivianos(Number(v) || 0)} contentStyle={{ background: '#18181b', border: '1px solid #3f3f46' }} />
+                        <Legend wrapperStyle={{ color: '#a1a1aa' }} />
+                        <Bar dataKey="IVA" name="IVA a pagar" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="IT" name="IT" stackId="a" fill="#ef4444" radius={[8, 8, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-6">
+                  <MetricCard label={trib.regimen === 'rts' ? 'Cuota RTS (5 años)' : 'Cuota RAU (5 años)'} value={formatearBolivianos(trib.cuotaFijaTotal)} sub={trib.regimen === 'rts' ? 'pagos bimensuales acumulados' : 'cuota anual por hectárea'} semaforo="amber" />
+                  <MetricCard label="Ingresos totales" value={formatearBolivianos(trib.ingresosConFacturaTotal || 0)} sub="referencia (no genera IVA en este régimen)" />
+                </div>
+                <p className="mt-6 max-w-3xl text-base leading-relaxed text-zinc-300">
+                  En este régimen el alumno paga una <strong className="text-amber-300">cuota fija</strong> en lugar de IVA, IT e IUE.
+                  Es el régimen pensado para comercios y productores pequeños en Bolivia.
+                </p>
+              </>
+            )}
+          </Lamina>
+        )}
+
+        {lamina === 7 && (
+          <Lamina numero={8} total={total} titulo="Indicadores financieros" subtitulo="VAN, TIR, Payback, IR y B/C">
             <div className="grid grid-cols-3 gap-6">
               <MetricCard label="VAN" value={formatearBolivianos(kpis.van)} sub={`a ${formatearPorcentaje(kpis.tasaDescuento)} de descuento`} semaforo={kpis.van > 0 ? 'verde' : 'rojo'} />
               <MetricCard label="TIR" value={kpis.tir !== null ? formatearPorcentaje(kpis.tir) : '—'} sub={kpis.tir !== null ? (kpis.tir > kpis.tasaDescuento ? '✓ supera el costo del capital' : '✗ por debajo del costo del capital') : 'No se pudo calcular'} semaforo={kpis.tir !== null && kpis.tir > kpis.tasaDescuento ? 'verde' : 'rojo'} />
@@ -348,8 +396,8 @@ export default function ModoDemostracionPage() {
           </Lamina>
         )}
 
-        {lamina === 7 && (
-          <Lamina numero={8} total={total} titulo="Recuperación de la inversión" subtitulo="Flujo acumulado a lo largo del horizonte">
+        {lamina === 8 && (
+          <Lamina numero={9} total={total} titulo="Recuperación de la inversión" subtitulo="Flujo acumulado a lo largo del horizonte">
             {series.flujoAcumulado.length > 0 ? (
               <div className="h-[60vh]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -368,8 +416,8 @@ export default function ModoDemostracionPage() {
           </Lamina>
         )}
 
-        {lamina === 8 && (
-          <Lamina numero={9} total={total} titulo="Punto de equilibrio" subtitulo="Mínimo de unidades para cubrir costos fijos">
+        {lamina === 9 && (
+          <Lamina numero={10} total={total} titulo="Punto de equilibrio" subtitulo="Mínimo de unidades para cubrir costos fijos">
             {peq ? (
               <div className="grid grid-cols-2 gap-8">
                 <MetricCard label="Unidades de equilibrio" value={Math.round(peq.unidades).toLocaleString('es-BO')} sub="unidades anuales" semaforo="amber" />
@@ -381,8 +429,8 @@ export default function ModoDemostracionPage() {
           </Lamina>
         )}
 
-        {lamina === 9 && (
-          <Lamina numero={10} total={total} titulo={kpis.veredictoViable ? '✓ Proyecto viable' : '⚠ Revisar viabilidad'} subtitulo={kpis.veredictoViable ? 'Los indicadores respaldan la decisión de invertir.' : 'Los indicadores recomiendan ajustar el modelo antes de invertir.'}>
+        {lamina === 10 && (
+          <Lamina numero={11} total={total} titulo={kpis.veredictoViable ? '✓ Proyecto viable' : '⚠ Revisar viabilidad'} subtitulo={kpis.veredictoViable ? 'Los indicadores respaldan la decisión de invertir.' : 'Los indicadores recomiendan ajustar el modelo antes de invertir.'}>
             <div className="flex h-full flex-col items-center justify-center gap-8 text-center">
               <p className="text-7xl">{kpis.veredictoViable ? '🚀' : '⚠️'}</p>
               <p className="max-w-2xl text-xl leading-relaxed text-zinc-300">

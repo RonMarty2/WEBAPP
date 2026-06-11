@@ -48,6 +48,19 @@ export interface SeriesGraficos {
   flujoAcumulado: SerieAnual[];
 }
 
+export interface KpisTributacion {
+  regimen: "general" | "rts" | "rau" | "sin_actividad";
+  ivaTotal: number;
+  itTotal: number;
+  cuotaFijaTotal: number;
+  ingresosConFacturaTotal: number;
+  comprasConFacturaTotal: number;
+  cargaPorAnio: SerieAnual[];
+  serieIVA: SerieAnual[];
+  serieIT: SerieAnual[];
+  serieCuota: SerieAnual[];
+}
+
 /** Suma el costoTotal de todos los ítems de inversión de un proyecto. */
 function sumaInversionInicial(p: Proyecto): number {
   const cats = Object.values(p.inversiones ?? {});
@@ -147,6 +160,54 @@ export function calcularSeries(proyecto: Proyecto): SeriesGraficos {
     utilidad: map(utilidad),
     flujoNeto: map(flujoNeto),
     flujoAcumulado,
+  };
+}
+
+/**
+ * Datos tributarios para la lámina de carga tributaria mensual/anual.
+ * Lee del flujo lo que `construirFlujoCaja` deja en `tributacion` (sesión 13).
+ */
+export function calcularTributacion(proyecto: Proyecto): KpisTributacion {
+  const flujo = construirFlujoCaja(proyecto);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const trib = (flujo as any).tributacion ?? {};
+  const regimen: KpisTributacion["regimen"] =
+    (trib.regimen as KpisTributacion["regimen"]) ?? "sin_actividad";
+  const ivaArr: number[] = (trib.ivaPagadoPorAnio as number[]) ?? [];
+  const itArr: number[] = (trib.itPagadoPorAnio as number[]) ?? [];
+  const cuotaArr: number[] = (trib.cuotaFijaPorAnio as number[]) ?? [];
+  const ingresosCF: number[] = (trib.ingresosConFactura as number[]) ?? [];
+  const comprasCF: number[] = (trib.comprasConFactura as number[]) ?? [];
+
+  const label = (i: number) => `Año ${i + 1}`;
+  const anios = Math.max(ivaArr.length, itArr.length, cuotaArr.length, 5);
+  const sum = (arr: number[]) => arr.reduce((s, v) => s + (v || 0), 0);
+
+  const cargaPorAnio: SerieAnual[] = [];
+  const serieIVA: SerieAnual[] = [];
+  const serieIT: SerieAnual[] = [];
+  const serieCuota: SerieAnual[] = [];
+  for (let i = 0; i < anios; i++) {
+    const iva = ivaArr[i] ?? 0;
+    const it = itArr[i] ?? 0;
+    const cuota = cuotaArr[i] ?? 0;
+    cargaPorAnio.push({ anio: label(i), valor: iva + it + cuota });
+    serieIVA.push({ anio: label(i), valor: iva });
+    serieIT.push({ anio: label(i), valor: it });
+    serieCuota.push({ anio: label(i), valor: cuota });
+  }
+
+  return {
+    regimen,
+    ivaTotal: sum(ivaArr),
+    itTotal: sum(itArr),
+    cuotaFijaTotal: sum(cuotaArr),
+    ingresosConFacturaTotal: sum(ingresosCF),
+    comprasConFacturaTotal: sum(comprasCF),
+    cargaPorAnio,
+    serieIVA,
+    serieIT,
+    serieCuota,
   };
 }
 
