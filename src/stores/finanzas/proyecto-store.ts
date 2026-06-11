@@ -40,6 +40,9 @@ interface ProyectoState {
     cambios: Partial<Pick<Proyecto, "nombre" | "ubicacion" | "descripcion" | "sector">>
   ) => void;
 
+  // Tributación (sesión 13)
+  setTributacion: (config: Proyecto["tributacion"]) => void;
+
   // Inversiones
   agregarInversion: (
     categoria: CategoriaInversion,
@@ -173,6 +176,13 @@ export const useProyectoStore = create<ProyectoState>((set, get) => ({
       const _: Sector = cambios.sector;
       void _;
     }
+  },
+
+  // -- Tributación (sesión 13) --
+  setTributacion: (config) => {
+    const p = get().proyecto;
+    if (!p) return;
+    set({ proyecto: conTimestamp({ ...p, tributacion: config } as Proyecto) });
   },
 
   // -- Inversiones --

@@ -11,7 +11,12 @@
 import {
   calcularAportesPatronales,
   calcularCuotaPrestamoFrancesa,
+  calcularCuotaRAU,
+  calcularCuotaRTSAnual,
   calcularIR,
+  calcularITPeriodo,
+  calcularIUEConDeduccionIT,
+  calcularIVAPeriodo,
   calcularPayback,
   calcularRBC,
   calcularServicioDeuda,
@@ -166,6 +171,22 @@ export function construirFlujoCaja(proyecto: any) {
     productos.reduce((acc: number, p: any) => acc + p.cantidades[i] * p.precios[i], 0)
   );
 
+  // ── IVA / IT (sesión 13): solo se calcula si régimen = "general" ─────────
+  // Ingresos CON factura por año = suma de productos con emiteFactura=true.
+  const regimen = proyecto.tributacion?.regimen ?? "sin_actividad";
+  const ingresosConFactura = [0, 1, 2, 3, 4].map((i) =>
+    productos.reduce((acc: number, p: any) => {
+      if (regimen !== "general" || !p.emiteFactura) return acc;
+      return acc + (p.cantidades[i] ?? 0) * (p.precios[i] ?? 0);
+    }, 0)
+  );
+  // Compras CON factura del año 0 (inversiones que entran en activos fijos —
+  // generan crédito fiscal recuperable, descontable contra el débito mensual).
+  const comprasFacturaAnioCero =
+    regimen === "general"
+      ? inversionItems.filter((it) => it.conFactura).reduce((s, it) => s + (it.costoTotal ?? 0), 0)
+      : 0;
+
   // ── Costos directos POR PRODUCTO ─────────────────────────────────────────
   const g = proyecto.crecimientoCostosAnual;
   const costosProduccion = [0, 1, 2, 3, 4].map((i) => {
@@ -206,6 +227,72 @@ export function construirFlujoCaja(proyecto: any) {
     return base * proyecto.imprevistosPorcentaje;
   });
 
+  // ── Compras CON factura POR AÑO (crédito fiscal operativo) ──────────────
+  // Para los costos recurrentes (directos, admin, comercialización), miramos
+  // qué proporción del costo del año viene de ítems con conFactura=true.
+  // Para no cambiar el shape del flujo, calculamos un ratio por categoría.
+  function ratioConFactura(items: any[]): number {
+    if (!Array.isArray(items) || items.length === 0) return 0;
+    const totalBase = items.reduce((s, c) => s + Math.abs(Number(c.costoUnitario ?? c.costoTotal ?? c.monto ?? 0)), 0);
+    if (totalBase === 0) return 0;
+    const conFact = items.filter((c) => c.conFactura).reduce(
+      (s, c) => s + Math.abs(Number(c.costoUnitario ?? c.costoTotal ?? c.monto ?? 0)),
+      0,
+    );
+    return conFact / totalBase;
+  }
+  const ratioCostosDirectos = regimen === "general" ? ratioConFactura(proyecto.costosDirectos ?? []) : 0;
+  const ratioCostosAdmin = regimen === "general" ? ratioConFactura(proyecto.costosAdministracion ?? []) : 0;
+  const ratioCostosComerc = regimen === "general" ? ratioConFactura(proyecto.costosComercializacion ?? []) : 0;
+
+  const comprasConFactura = [0, 1, 2, 3, 4].map((i) => {
+    if (regimen !== "general") return 0;
+    const opex =
+      costosProduccion[i] * ratioCostosDirectos +
+      gastosAdmin[i] * ratioCostosAdmin +
+      gastosComerc[i] * ratioCostosComerc;
+    // Las inversiones con factura del año 0 generan crédito UNA VEZ (todo en el año 1).
+    return opex + (i === 0 ? comprasFacturaAnioCero : 0);
+  });
+
+  // ── IVA mensual con arrastre de saldo a favor ──────────────────────────
+  // El SIN boliviano arrastra el crédito no usado al período siguiente.
+  // Modelamos a nivel anual (12 períodos compactados en 1 cifra anual).
+  const ivaPagadoPorAnio: number[] = [];
+  const itPagadoPorAnio: number[] = [];
+  {
+    let saldoFavor = 0;
+    for (let i = 0; i < 5; i++) {
+      if (regimen !== "general") {
+        ivaPagadoPorAnio.push(0);
+        itPagadoPorAnio.push(0);
+        continue;
+      }
+      const { ivaAPagar, saldoFavorSiguiente } = calcularIVAPeriodo(
+        ingresosConFactura[i],
+        comprasConFactura[i],
+        saldoFavor,
+      );
+      ivaPagadoPorAnio.push(ivaAPagar);
+      saldoFavor = saldoFavorSiguiente;
+      // IT = 3% sobre ingresos brutos con factura.
+      itPagadoPorAnio.push(calcularITPeriodo(ingresosConFactura[i]));
+    }
+  }
+
+  // Cuotas fijas por régimen (RTS o RAU) — reemplazan IUE/IT/IVA.
+  const cuotaFijaPorAnio: number[] = (() => {
+    if (regimen === "rts" && proyecto.tributacion?.categoriaRts) {
+      const c = calcularCuotaRTSAnual(proyecto.tributacion.categoriaRts);
+      return [c, c, c, c, c];
+    }
+    if (regimen === "rau" && proyecto.tributacion?.hectareasRau) {
+      const c = calcularCuotaRAU(proyecto.tributacion.hectareasRau);
+      return [c, c, c, c, c];
+    }
+    return [0, 0, 0, 0, 0];
+  })();
+
   // Utilidad y flujo
   const utilidadAAI: number[] = [];
   const impuestos: number[] = [];
@@ -221,7 +308,18 @@ export function construirFlujoCaja(proyecto: any) {
       imprevistos[i];
     const aai = uOp - intereses[i];
     utilidadAAI.push(aai);
-    const imp = Math.max(0, aai) * TASA_IMP;
+
+    // Régimen "general": IUE deducible contra IT del año + IVA neto.
+    // Régimen "rts"/"rau": cuota fija sustituye al IUE.
+    // Régimen "sin_actividad" (legado): solo TASA_IUE 25% como antes.
+    let imp: number;
+    if (regimen === "general") {
+      imp = calcularIUEConDeduccionIT(aai, itPagadoPorAnio[i]) + itPagadoPorAnio[i] + ivaPagadoPorAnio[i];
+    } else if (regimen === "rts" || regimen === "rau") {
+      imp = cuotaFijaPorAnio[i];
+    } else {
+      imp = Math.max(0, aai) * TASA_IMP; // sin_actividad o ausente → comportamiento legado
+    }
     impuestos.push(imp);
     utilidadNeta.push(aai - imp);
   }
@@ -290,6 +388,17 @@ export function construirFlujoCaja(proyecto: any) {
     flujoCaja,
     wacc,
     indicadores: { van, tir, payback, ir, trc, sd, rbc, cuotaAnualTotal },
+    // ── Detalle tributario (sesión 13). Los proyectos en régimen "general"
+    // exponen el IVA neto / IT / IUE separados; los otros regímenes los
+    // tienen en cero y la carga va en cuotaFijaPorAnio.
+    tributacion: {
+      regimen,
+      ingresosConFactura,
+      comprasConFactura,
+      ivaPagadoPorAnio,
+      itPagadoPorAnio,
+      cuotaFijaPorAnio,
+    },
   };
 }
 

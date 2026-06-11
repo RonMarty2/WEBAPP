@@ -36,6 +36,13 @@ export interface ItemInversion {
   vidaUtilAnios: number | null; // null = no se deprecia (terreno)
   depreciacionAnual: number;
   valorResidual: number;
+  /**
+   * Si esta inversión se compra CON FACTURA (régimen general boliviano), el
+   * 13% del costo genera crédito fiscal (IVA-CF) recuperable. Ausente o
+   * false = compra sin factura (mercado informal, no genera crédito).
+   * Solo afecta cuando proyecto.tributacion?.regimen = "general".
+   */
+  conFactura?: boolean;
 }
 
 export interface PuestoTrabajo {
@@ -79,6 +86,8 @@ export interface CostoDirecto {
   unidadMedida: string;
   cantidadPorUnidad: number;
   costoUnitario: number;
+  /** Igual que ItemInversion.conFactura: 13% genera crédito fiscal si true. */
+  conFactura?: boolean;
 }
 
 export interface CostoGeneral {
@@ -87,6 +96,8 @@ export interface CostoGeneral {
   unidadMedida: "mes" | "año";
   cantidad: number;
   costoUnitario: number;
+  /** Igual que ItemInversion.conFactura: 13% genera crédito fiscal si true. */
+  conFactura?: boolean;
 }
 
 export interface Producto {
@@ -99,6 +110,37 @@ export interface Producto {
   precios: [number, number, number, number, number];
   /** @deprecated reemplazado por `precios` (un valor por año). Se mantiene solo para datos legados. */
   precioVenta?: number;
+  /**
+   * Si este producto/servicio EMITE FACTURA al cliente, sus ventas generan
+   * débito fiscal IVA (13%) e Impuesto a las Transacciones IT (3%). Ausente
+   * o false = venta sin factura (mercado informal). Solo afecta cuando
+   * proyecto.tributacion?.regimen = "general".
+   */
+  emiteFactura?: boolean;
+}
+
+/**
+ * Régimen tributario boliviano elegido por el proyecto. Default "general".
+ *
+ * - "general"      → factura, IVA 13% débito/crédito, IT 3% mensual, IUE 25% anual.
+ * - "rts"          → Régimen Tributario Simplificado: cuota fija bimensual
+ *                   según categoría de capital. NO IVA ni IT. Comercios pequeños.
+ * - "rau"          → Régimen Agropecuario Unificado: cuota anual por hectárea.
+ * - "sin_actividad" → didáctico, sin carga fiscal (caso académico puro).
+ */
+export type RegimenTributario = "general" | "rts" | "rau" | "sin_actividad";
+
+export interface ConfiguracionTributaria {
+  regimen: RegimenTributario;
+  /**
+   * Categoría del RTS (solo aplica si regimen="rts"). De 1 a 5 según el
+   * capital de operaciones (SIN actualiza tabla cada año; al 2025:
+   * cat 1 Bs 12.001-15.000 → Bs 47 bimensual, ..., cat 5 Bs 25.001-37.000
+   * → Bs 700 bimensual).
+   */
+  categoriaRts?: 1 | 2 | 3 | 4 | 5;
+  /** Hectáreas (solo aplica si regimen="rau"). Cuota anual por ha. */
+  hectareasRau?: number;
 }
 
 /**
@@ -270,6 +312,14 @@ export interface Proyecto {
     previsionAguinaldo?: number;
     previsionIndemnizacion?: number;
   };
+
+  /**
+   * Configuración tributaria boliviana (sesión 13). Si ausente, el flujo
+   * asume "general" pero sin aplicar IVA/IT porque ningún producto/costo
+   * tiene los switches encendidos — mismo comportamiento que antes de
+   * agregar este campo. Activación gradual sin romper proyectos viejos.
+   */
+  tributacion?: ConfiguracionTributaria;
 
   /**
    * Parámetros del CAPM para calcular el costo del capital propio (Ke).

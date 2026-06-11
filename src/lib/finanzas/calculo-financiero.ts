@@ -158,6 +158,92 @@ export function calcularIT(ingresosBrutos: number): number {
   return Math.max(0, ingresosBrutos) * TASA_IT;
 }
 
+// ─── IVA débito/crédito fiscal (régimen general boliviano) ────────────────
+
+/**
+ * Débito fiscal IVA: 13% del ingreso facturado al cliente. Es lo que el
+ * negocio CARGA al cliente y debe entregar al SIN.
+ */
+export function calcularDebitoFiscal(ingresoConFactura: number): number {
+  return Math.max(0, ingresoConFactura) * TASA_IVA;
+}
+
+/**
+ * Crédito fiscal IVA: 13% de las compras CON FACTURA. Es lo que el negocio
+ * ya pagó de IVA al comprar, y puede restar de su débito.
+ */
+export function calcularCreditoFiscal(compraConFactura: number): number {
+  return Math.max(0, compraConFactura) * TASA_IVA;
+}
+
+/**
+ * IVA neto a pagar: débito − crédito. Si el crédito supera al débito, el
+ * saldo a favor del contribuyente se ARRASTRA al período siguiente (Ley
+ * boliviana — Art. 8 Ley 843, no se pierde). Esta función calcula UN período
+ * usando un saldo previo, y devuelve el {pagado, nuevoSaldoFavor}.
+ */
+export function calcularIVAPeriodo(
+  ingresoConFactura: number,
+  compraConFactura: number,
+  saldoFavorPrevio: number = 0,
+): { ivaAPagar: number; saldoFavorSiguiente: number } {
+  const debito = calcularDebitoFiscal(ingresoConFactura);
+  const credito = calcularCreditoFiscal(compraConFactura) + saldoFavorPrevio;
+  if (credito >= debito) {
+    return { ivaAPagar: 0, saldoFavorSiguiente: credito - debito };
+  }
+  return { ivaAPagar: debito - credito, saldoFavorSiguiente: 0 };
+}
+
+/**
+ * Aplica la regla del IT (3% sobre ingresos brutos con factura), que es
+ * DEDUCIBLE contra el IUE anual (hasta el monto del IUE — Ley 843 Art. 77).
+ * Devuelve el IT del período y el IT total pagado en el año para arrastrar
+ * al cálculo del IUE.
+ */
+export function calcularITPeriodo(ingresoConFactura: number): number {
+  return calcularIT(ingresoConFactura);
+}
+
+/**
+ * IUE neto a pagar después de deducir el IT del año (no puede ser negativo).
+ * En Bolivia: IUE = max(0, utilidad × 25% − IT del año).
+ */
+export function calcularIUEConDeduccionIT(
+  utilidadAntesImpuestos: number,
+  itTotalDelAnio: number,
+): number {
+  const iueBruto = calcularIUE(utilidadAntesImpuestos);
+  return Math.max(0, iueBruto - Math.max(0, itTotalDelAnio));
+}
+
+/**
+ * Cuota fija bimensual del Régimen Tributario Simplificado (RTS) según
+ * categoría 1-5. Valores Bs vigentes al 2025 (SIN actualiza anualmente).
+ * 6 cuotas al año (un pago cada 2 meses).
+ */
+export function calcularCuotaRTSAnual(categoria: 1 | 2 | 3 | 4 | 5): number {
+  const tablaBimensual: Record<1 | 2 | 3 | 4 | 5, number> = {
+    1: 47,
+    2: 90,
+    3: 147,
+    4: 158,
+    5: 200,
+  };
+  return tablaBimensual[categoria] * 6; // 6 bimestres por año
+}
+
+/**
+ * Cuota anual del Régimen Agropecuario Unificado (RAU) según hectáreas.
+ * Tarifa Bs por ha vigente (SIN). Categorías escalonadas — usamos la mínima
+ * representativa para fines didácticos.
+ */
+export function calcularCuotaRAU(hectareas: number): number {
+  // Tarifa simplificada: pequeño productor ~Bs 10/ha (referencial). Para uso
+  // didáctico — el SIN ajusta por zona y tipo de uso.
+  return Math.max(0, hectareas) * 10;
+}
+
 // ============================================================================
 // FINANCIAMIENTO — Sistema de amortización francés (cuota fija)
 // ============================================================================
