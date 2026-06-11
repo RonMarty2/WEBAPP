@@ -104,6 +104,7 @@ export default function Paso7GastosOperativos() {
           onAgregar={agAdmin}
           onEditar={edAdmin}
           onEliminar={elAdmin}
+          regimenGeneral={proyecto.tributacion?.regimen === "general"}
         />
 
         <SeccionGastos
@@ -113,6 +114,7 @@ export default function Paso7GastosOperativos() {
           onAgregar={agComerc}
           onEditar={edComerc}
           onEliminar={elComerc}
+          regimenGeneral={proyecto.tributacion?.regimen === "general"}
         />
 
         {/* Tasa de crecimiento aplicable a ambos grupos */}
@@ -212,6 +214,7 @@ function SeccionGastos({
   onAgregar,
   onEditar,
   onEliminar,
+  regimenGeneral,
 }: {
   config: ConfigSubcat;
   items: CostoGeneral[];
@@ -219,6 +222,8 @@ function SeccionGastos({
   onAgregar: (c: Omit<CostoGeneral, "id">) => void;
   onEditar: (id: string, cambios: Partial<CostoGeneral>) => void;
   onEliminar: (id: string) => void;
+  /** Sesión 13: muestra el toggle F (con factura) cuando el régimen es general. */
+  regimenGeneral?: boolean;
 }) {
   // Colapsada por defecto si ya tiene ítems; abierta si está vacía (para agregar).
   const [abierto, setAbierto] = useState(items.length === 0);
@@ -264,11 +269,19 @@ function SeccionGastos({
             <table className="w-full text-xs">
               <thead className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 <tr className="border-b border-border">
-                  <th className="p-1.5 text-left w-[35%]">Descripción</th>
-                  <th className="p-1.5 text-center w-[12%]">Unidad</th>
-                  <th className="p-1.5 text-right w-[12%]">Cantidad</th>
-                  <th className="p-1.5 text-right w-[16%]">Costo unit.</th>
-                  <th className="p-1.5 text-right w-[18%]">Total anual</th>
+                  <th className="p-1.5 text-left w-[32%]">Descripción</th>
+                  <th className="p-1.5 text-center w-[11%]">Unidad</th>
+                  <th className="p-1.5 text-right w-[11%]">Cantidad</th>
+                  <th className="p-1.5 text-right w-[15%]">Costo unit.</th>
+                  <th className="p-1.5 text-right w-[17%]">Total anual</th>
+                  {regimenGeneral && (
+                    <th
+                      className="p-1.5 text-center w-[7%]"
+                      title="¿Compra CON factura? El 13% es crédito fiscal recuperable."
+                    >
+                      F
+                    </th>
+                  )}
                   <th className="w-8"></th>
                 </tr>
               </thead>
@@ -324,6 +337,19 @@ function SeccionGastos({
                       <td className="p-1 text-right font-semibold">
                         {formatearBolivianos(c.cantidad * c.costoUnitario * factor)}
                       </td>
+                      {regimenGeneral && (
+                        <td className="p-1 text-center">
+                          <input
+                            type="checkbox"
+                            checked={!!c.conFactura}
+                            onChange={(e) =>
+                              onEditar(c.id, { conFactura: e.target.checked })
+                            }
+                            className="h-3.5 w-3.5 accent-amber-600"
+                            title="Con factura — el 13% es crédito fiscal IVA"
+                          />
+                        </td>
+                      )}
                       <td className="p-1">
                         <button
                           onClick={() => onEliminar(c.id)}
@@ -397,6 +423,19 @@ function SeccionGastos({
                     <span className="text-muted-foreground">Total anual:</span>{" "}
                     <strong>{formatearBolivianos(c.cantidad * c.costoUnitario * factor)}</strong>
                   </div>
+                  {regimenGeneral && (
+                    <label className="mt-2 flex items-center gap-2 rounded-md border border-amber-400/30 bg-amber-500/5 px-2 py-1 text-[10px] text-amber-900 dark:text-amber-200">
+                      <input
+                        type="checkbox"
+                        checked={!!c.conFactura}
+                        onChange={(e) =>
+                          onEditar(c.id, { conFactura: e.target.checked })
+                        }
+                        className="h-3 w-3 accent-amber-600"
+                      />
+                      <span><strong>Con factura</strong> (13% crédito fiscal IVA)</span>
+                    </label>
+                  )}
                 </div>
               );
             })}

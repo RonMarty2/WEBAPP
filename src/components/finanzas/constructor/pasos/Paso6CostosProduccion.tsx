@@ -134,7 +134,7 @@ export default function Paso6CostosProduccion() {
     return (
       <div className="rounded-lg border border-border bg-card p-8 text-center">
         <p className="text-sm text-muted-foreground">
-          Aún no agregaste productos. Volve al <strong>Paso 2 · Proyección de demanda</strong> y
+          Aún no agregaste productos. Vuelve al <strong>Paso 2 · Proyección de demanda</strong> y
           define al menos un producto antes de configurar sus costos directos.
         </p>
       </div>
@@ -181,6 +181,7 @@ export default function Paso6CostosProduccion() {
               }
               onEditar={editar}
               onEliminar={eliminar}
+              regimenGeneral={proyecto.tributacion?.regimen === "general"}
             />
           );
         })}
@@ -325,6 +326,7 @@ function BloqueProducto({
   onAgregar,
   onEditar,
   onEliminar,
+  regimenGeneral,
 }: {
   producto: ReturnType<typeof migrarProducto>;
   productoIndex: number;
@@ -335,6 +337,8 @@ function BloqueProducto({
   onAgregar: (categoria: CategoriaCostoDirecto) => void;
   onEditar: (id: string, cambios: Partial<CostoDirecto>) => void;
   onEliminar: (id: string) => void;
+  /** Sesión 13: muestra el toggle F (con factura) cuando el régimen es general. */
+  regimenGeneral?: boolean;
 }) {
   // Colapsado por defecto (vista limpia); el resumen del header muestra costo/u y margen.
   const [abierto, setAbierto] = useState(false);
@@ -449,6 +453,14 @@ function BloqueProducto({
                         </th>
                         <th className="p-1.5 text-right">Costo unit. (Bs)</th>
                         <th className="p-1.5 text-right">Subtotal/u</th>
+                        {regimenGeneral && (
+                          <th
+                            className="p-1.5 text-center"
+                            title="¿Compra CON factura? El 13% es crédito fiscal recuperable."
+                          >
+                            F
+                          </th>
+                        )}
                         <th
                           className="p-1.5 text-center text-[9px] font-bold uppercase tracking-wide text-foreground/60"
                           colSpan={5}
@@ -458,7 +470,7 @@ function BloqueProducto({
                         <th className="w-8 p-1.5"></th>
                       </tr>
                       <tr className="border-b border-border text-[9px]">
-                        <th colSpan={5}></th>
+                        <th colSpan={regimenGeneral ? 6 : 5}></th>
                         {[1, 2, 3, 4, 5].map((a) => (
                           <th key={a} className="bg-secondary/40 p-1 text-right">
                             Año {a}
@@ -519,6 +531,19 @@ function BloqueProducto({
                           <td className="p-1 text-right font-semibold">
                             {formatearBolivianos(it.cantidadPorUnidad * it.costoUnitario)}
                           </td>
+                          {regimenGeneral && (
+                            <td className="p-1 text-center">
+                              <input
+                                type="checkbox"
+                                checked={!!it.conFactura}
+                                onChange={(e) =>
+                                  onEditar(it.id, { conFactura: e.target.checked })
+                                }
+                                className="h-3.5 w-3.5 accent-amber-600"
+                                title="Con factura — el 13% es crédito fiscal IVA"
+                              />
+                            </td>
+                          )}
                           {[0, 1, 2, 3, 4].map((i) => {
                             const totalUnidades =
                               it.cantidadPorUnidad * producto.cantidades[i];
@@ -610,6 +635,19 @@ function BloqueProducto({
                         <span className="text-muted-foreground">Subtotal por unidad:</span>{" "}
                         <strong>{formatearBolivianos(it.cantidadPorUnidad * it.costoUnitario)}</strong>
                       </div>
+                      {regimenGeneral && (
+                        <label className="mt-2 flex items-center gap-2 rounded-md border border-amber-400/30 bg-amber-500/5 px-2 py-1 text-[10px] text-amber-900 dark:text-amber-200">
+                          <input
+                            type="checkbox"
+                            checked={!!it.conFactura}
+                            onChange={(e) =>
+                              onEditar(it.id, { conFactura: e.target.checked })
+                            }
+                            className="h-3 w-3 accent-amber-600"
+                          />
+                          <span><strong>Con factura</strong> (13% crédito fiscal IVA)</span>
+                        </label>
+                      )}
                     </div>
                   ))}
                 </div>

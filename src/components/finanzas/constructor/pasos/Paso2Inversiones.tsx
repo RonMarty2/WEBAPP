@@ -82,14 +82,15 @@ const ANIOS_PROYECTO = 5;
 
 // Anchos consistentes de columnas para que se alineen entre categorías
 const COLS_ANCHO = {
-  descripcion: "w-[20%]",
-  unidad: "w-[8%]",
-  cantidad: "w-[8%]",
+  descripcion: "w-[17%]",
+  unidad: "w-[7%]",
+  cantidad: "w-[7%]",
   costo: "w-[11%]",
-  total: "w-[12%]",
-  vidaUtil: "w-[11%]",
+  total: "w-[11%]",
+  vidaUtil: "w-[10%]",
   depAnio: "w-[9%]",
-  valorResidual: "w-[12%]",
+  valorResidual: "w-[11%]",
+  factura: "w-[5%]",
   acciones: "w-[5%]",
 };
 
@@ -161,6 +162,7 @@ export default function Paso2Inversiones() {
             onEditar={(id, cambios) => editar(c.valor, id, cambios)}
             onEliminar={(id) => eliminar(c.valor, id)}
             onKeyEnter={onKeyEnter}
+            regimenGeneral={proyecto.tributacion?.regimen === "general"}
           />
         ))}
 
@@ -223,6 +225,7 @@ function SeccionCategoria({
   onEditar,
   onEliminar,
   onKeyEnter,
+  regimenGeneral,
 }: {
   config: ConfigCategoria;
   items: ReturnType<typeof useProyectoStore.getState>["proyecto"] extends infer P
@@ -240,6 +243,8 @@ function SeccionCategoria({
   onEditar: (id: string, cambios: any) => void;
   onEliminar: (id: string) => void;
   onKeyEnter: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  /** Sesión 13: si el proyecto está en régimen "general", muestra el toggle F (factura) por ítem. */
+  regimenGeneral?: boolean;
 }) {
   // Siempre colapsado por defecto. El alumno expande la categoría que quiere
   // editar — vista limpia, especialmente útil en proyectos largos.
@@ -373,6 +378,14 @@ function SeccionCategoria({
                     <th className={cn("p-1.5 text-right", COLS_ANCHO.valorResidual)}>
                       Valor residual
                     </th>
+                    {regimenGeneral && (
+                      <th
+                        className={cn("p-1.5 text-center", COLS_ANCHO.factura)}
+                        title="¿La compra se hace con factura? Genera 13% de crédito fiscal IVA."
+                      >
+                        F
+                      </th>
+                    )}
                     <th className={cn("p-1.5", COLS_ANCHO.acciones)}></th>
                   </tr>
                 </thead>
@@ -487,6 +500,19 @@ function SeccionCategoria({
                           );
                         })()}
                       </td>
+                      {regimenGeneral && (
+                        <td className="p-1 text-center">
+                          <input
+                            type="checkbox"
+                            checked={!!it.conFactura}
+                            onChange={(e) =>
+                              onEditar(it.id, { conFactura: e.target.checked })
+                            }
+                            className="h-3.5 w-3.5 accent-amber-600"
+                            title="Con factura — el 13% de IVA es crédito fiscal recuperable"
+                          />
+                        </td>
+                      )}
                       <td className="p-1 text-right">
                         <button
                           onClick={() => onEliminar(it.id)}
@@ -583,6 +609,19 @@ function SeccionCategoria({
                       )}
                       <span><span className="text-muted-foreground">Residual año 5:</span> {formatearBolivianos(vr)}</span>
                     </div>
+                    {regimenGeneral && (
+                      <label className="mt-2 flex items-center gap-2 rounded-md border border-amber-400/30 bg-amber-500/5 px-2 py-1 text-[10px] text-amber-900 dark:text-amber-200">
+                        <input
+                          type="checkbox"
+                          checked={!!it.conFactura}
+                          onChange={(e) =>
+                            onEditar(it.id, { conFactura: e.target.checked })
+                          }
+                          className="h-3 w-3 accent-amber-600"
+                        />
+                        <span><strong>Con factura</strong> (13% crédito fiscal IVA)</span>
+                      </label>
+                    )}
                   </div>
                 );
               })}

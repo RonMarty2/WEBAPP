@@ -377,6 +377,23 @@ export default function Paso2Proyeccion() {
                       />
                     </label>
                   </div>
+                  {/* Switch IVA débito (sesión 13): solo visible en régimen general */}
+                  {proyecto.tributacion?.regimen === "general" && (
+                    <label
+                      className="flex items-start gap-2 rounded-md border border-amber-400/30 bg-amber-500/5 px-2 py-1.5 text-[10px] text-amber-900 dark:text-amber-200"
+                      title="Si emite factura, las ventas suman 13% de IVA débito y 3% de IT"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={!!p.emiteFactura}
+                        onChange={(e) => editar(p.id, { emiteFactura: e.target.checked })}
+                        className="mt-0.5 h-3 w-3 accent-amber-600"
+                      />
+                      <span>
+                        <strong>Emite factura</strong> al cliente (suma IVA 13% débito + IT 3%)
+                      </span>
+                    </label>
+                  )}
                   {[0, 1, 2, 3, 4].map((i) => (
                     <div key={i} className="rounded-md border border-border bg-background/60 p-2">
                       <div className="mb-1 text-[10px] font-semibold text-muted-foreground">Año {i + 1}</div>
