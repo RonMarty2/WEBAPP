@@ -348,6 +348,61 @@ aprobada con "Sí, apruebo todo".
 `/scribe`. 3. Esconder WhatsApp sin env var. 4. Auditoría
 `/adaptativo`. 5. Bridge Finanzas↔docente. 6. Plan de Calidad.
 
+#### Estado de ejecución del acta (al final de la sesión 12)
+
+- ✅ **Mercados real**: galería de casos bolivianos en `/mercados/casos`
+  y `/mercados/casos/[slug]` + card en el hub.
+- ✅ **Estrategia, Marketing, Organización, Defensa reales**: galería +
+  detalle migrados del mock con sed (todos los links reapuntados a las
+  rutas reales). Card "Casos de Bolivia" en cada hub.
+- ✅ **`/ecosistema` ELIMINADO** (488 KB de mock con datos falsos +
+  componentes propios + libs). Cero consumidores externos.
+- ✅ **`/scribe` legacy ELIMINADO** + endpoints sin auth eliminados
+  (`/api/monografias|citas|documentos|compilar|export/latex`). `cap1-variants`
+  y `export/pdf` se quedan porque sí los consume el flujo actual.
+- ✅ **Bridge Finanzas↔docente por email**: el endpoint
+  `/api/docente/alumnos/[id]/proyectos` ahora consulta `finanzas_perfiles`
+  por email (UNIQUE NOT NULL) y agrega Finanzas como 8º módulo del
+  agregado del alumno. `sin_finanzas` ahora es dinámico.
+- ✅ **WhatsApp bloque oculto sin env var**: el card "¿solo quieres un
+  módulo?" en `/pago` solo se renderiza si `NEXT_PUBLIC_WHATSAPP_VENTAS`
+  está configurada. Antes abría un número 591-00000000 falso.
+- ✅ **Modo Demostración Finanzas**: ruta `/finanzas/demostracion/[id]`
+  con 10 láminas (portada, idea, inversión, ingresos, costos, flujo,
+  indicadores VAN/TIR/payback/IR/RBC, recuperación, punto de equilibrio,
+  veredicto). Navegación con flechas, fullscreen, imprimir A4 landscape
+  con una lámina por página. Botón 🎬 en el header de simular-proyecto.
+  Cero IA, cero migración SQL.
+
+#### `/adaptativo` — VEREDICTO de la auditoría (NO eliminar)
+
+Es un feature de IA (1239 LOC en `page.tsx` + 1028 demo + 4 libs +
+2 endpoints) que NO estaba documentado en la bitácora. Qué hace:
+
+1. El alumno SUBE la guía oficial de su universidad (PDF/DOCX/TXT, ≤10 MB)
+   o pega el texto del syllabus.
+2. `/api/adaptativo/analyze-guide` extrae texto (RAG processor) + manda
+   a la IA (sistema en `prompts/adaptativo/analizar-guia.ts`) para
+   identificar secciones obligatorias, formato, extensión, citas.
+3. `templateMatcher` matchea contra el catálogo curado (UMSS clásico,
+   UMSS posgrado, UCB, UNIFRANZ x4 modalidades, Plan de Negocio
+   genérico) y devuelve un ranking con score.
+4. `planBuilder` arma un `PlanAdaptativo` con las secciones requeridas
+   por la guía remapeadas a las fases de la plataforma.
+5. `/api/adaptativo/create-project` crea un proyecto REAL en
+   `proyectos` con `servicio_id` y `tipo_proyecto_id` derivados de la
+   plantilla matcheada — el flujo se conecta con `/projects/[id]/
+   workspace` que ya existe.
+
+**Por qué NO eliminarlo:** comercialmente es el captador más potente.
+Reemplaza el wizard `/projects/new` (donde el alumno elige modalidad y
+universidad a mano, errando seguido) con un flujo guiado por la guía
+real de su tribunal. Hoy está como isla sin links: nadie llega ahí.
+
+**Recomendación:** promoverlo al landing/dashboard como camino premium
+("Sube la guía de tu tribunal y la IA te arma el flujo"). Queda como
+pendiente accionable de la próxima sesión, no se toca esta vuelta.
+
 ---
 
 ### 2026-06-09 (sesión 11) — Mejora didáctica del SaaS (4 sprints + documento web + plataformas)

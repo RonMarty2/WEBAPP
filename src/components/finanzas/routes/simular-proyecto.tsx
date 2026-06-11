@@ -182,12 +182,24 @@ export default function SimularProyecto() {
               Mes {mesActual} de {mesesTotales}
             </div>
           </div>
-          <button
-            onClick={abandonar}
-            className="text-xs text-muted-foreground transition hover:text-destructive"
-          >
-            Abandonar simulación
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Modo Demostración — defensa visual del análisis financiero (sesión 12) */}
+            <a
+              href={`/finanzas/demostracion/${proyecto.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/15 px-2.5 py-1 text-xs font-semibold text-amber-300 ring-1 ring-amber-500/30 transition hover:bg-amber-500/25"
+              title="Presenta tu análisis a pantalla completa, como en una defensa de proyecto de grado"
+            >
+              🎬 Modo demostración
+            </a>
+            <button
+              onClick={abandonar}
+              className="text-xs text-muted-foreground transition hover:text-destructive"
+            >
+              Abandonar simulación
+            </button>
+          </div>
         </div>
         <div className="mt-2 h-1.5 w-full rounded bg-muted">
           <div className="h-full rounded bg-primary transition-all" style={{ width: `${progreso}%` }} />
