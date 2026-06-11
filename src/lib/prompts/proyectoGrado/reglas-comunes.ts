@@ -175,7 +175,7 @@ PROHIBIDO TAMBIÉN (calidad factual):
 - Inventar leyes específicas (Ley N° XXXX) con números inventados.
 - Citar URLs falsas (paginas-que-no-existen.com).
 
-CÓMO REDACTAR CUANDO NO TENÉS UN DATO PUNTUAL:
+CÓMO REDACTAR CUANDO NO TIENES UN DATO PUNTUAL:
 - Si no sabes la cifra exacta, usa un valor conservador y razonable
   ENMARCADO en el rango plausible. Ejemplo:
     ✓ "El sector de exportaciones no tradicionales ha mostrado

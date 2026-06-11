@@ -136,7 +136,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
       }
       const { pdfBase64, bytes, fileName } = data as { pdfBase64?: string; bytes?: number; fileName?: string };
       if (!pdfBase64 || !bytes) {
-        throw new Error("El PDF se generó pero llegó vacío. Intentá de nuevo.");
+        throw new Error("El PDF se generó pero llegó vacío. Intenta de nuevo.");
       }
       // Decodificar base64 → bytes → Blob → descarga
       const binary = atob(pdfBase64);
@@ -340,7 +340,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
           background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)",
           borderRadius: 10, fontSize: 13, color: "#ef4444",
         }}>
-          ⚠️ No se pudo extraer código LaTeX del output. Intentá regenerar la fase.
+          ⚠️ No se pudo extraer código LaTeX del output. Intenta regenerar la fase.
         </div>
         <pre style={{ whiteSpace: "pre-wrap", fontSize: 13, lineHeight: 1.7 }}>{rawContent}</pre>
       </div>
@@ -655,7 +655,7 @@ export default function LatexExportView({ rawContent, tituloProyecto, logoUrl, p
               {paqueteError && <div style={{ fontSize: 11, color: "#ef4444" }}>⚠ {paqueteError}</div>}
               {paqueteWarning && (
                 <div style={{ padding: "10px 12px", borderRadius: 8, background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.25)", fontSize: 11.5, color: "var(--fg-secondary)" }}>
-                  ⚠ Se omitieron {paqueteWarning.count} figura{paqueteWarning.count === 1 ? "" : "s"} sin archivo. Mirá el README dentro del ZIP.
+                  ⚠ Se omitieron {paqueteWarning.count} figura{paqueteWarning.count === 1 ? "" : "s"} sin archivo. Mira el README dentro del ZIP.
                 </div>
               )}
             </>

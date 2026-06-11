@@ -464,7 +464,7 @@ PROHIBICIONES ESPECÍFICAS DE ESTA FASE
   cierra con el cuadro resumen PESTEL — Porter, matrices, encuesta
   y demanda van en fases siguientes.
 
-- ❌ Tono de "consultor que vende el proyecto". Sos analista académico
+- ❌ Tono de "consultor que vende el proyecto". Eres analista académico
   imparcial.
 
 - ❌ Generar menos de 5 párrafos por factor. Un factor con análisis

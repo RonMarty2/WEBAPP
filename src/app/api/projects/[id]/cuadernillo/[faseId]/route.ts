@@ -103,7 +103,7 @@ export async function POST(_req: Request, { params }: Params) {
       console.error(`[cuadernillo] parser falló. Texto: ${aiResult.text.slice(0, 500)}`);
       return NextResponse.json(
         {
-          error: "La IA devolvió un cuadernillo en formato no parseable. Reintentá.",
+          error: "La IA devolvió un cuadernillo en formato no parseable. Reintenta.",
           raw: aiResult.text.slice(0, 500),
         },
         { status: 502 },

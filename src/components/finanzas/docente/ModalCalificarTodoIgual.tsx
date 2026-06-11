@@ -96,7 +96,7 @@ export default function ModalCalificarTodoIgual({
             ) : (
               <span>
                 ⚠ Se calificaron {resultado.ok} de {entregas.length}. Faltaron{" "}
-                {resultado.fallidas} (problema de red, reintentá).
+                {resultado.fallidas} (problema de red, reintenta).
               </span>
             )}
           </div>
@@ -180,7 +180,7 @@ export default function ModalCalificarTodoIgual({
               onChange={(e) => setComentario(e.target.value)}
               disabled={guardando}
               rows={3}
-              placeholder="Ej: Buen trabajo general. Revisá el cálculo de depreciación en próximas entregas."
+              placeholder="Ej: Buen trabajo general. Revisa el cálculo de depreciación en próximas entregas."
               className="mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs disabled:opacity-50"
             />
           </div>

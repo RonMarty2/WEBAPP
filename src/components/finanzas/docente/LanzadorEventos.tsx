@@ -648,7 +648,7 @@ function ModalRespuestas({
             </div>
           ) : total === 0 ? (
             <div className="rounded-md border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
-              Todavía ningún alumno respondió a esta situación. Volvé a abrir esto en unos
+              Todavía ningún alumno respondió a esta situación. Vuelve a abrir esto en unos
               minutos cuando hayan avanzado el turno.
             </div>
           ) : (

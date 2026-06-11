@@ -198,7 +198,7 @@ No incluyas:
 - "(Autor, año)" sin apellido real   → PROHIBIDO.
 
 Si una REFERENCIAS_ETAPA contiene "Autor desconocido" o variantes:
-  1. Intentá identificar el autor real desde el contexto del capítulo
+  1. Intenta identificar el autor real desde el contexto del capítulo
      (a veces es una institución cuyo nombre quedó truncado).
   2. Si no se puede recuperar el autor → MOVÉ la entrada a "Referencias
      observadas que requieren verificación" con nota explicativa.

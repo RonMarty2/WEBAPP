@@ -62,7 +62,7 @@ export default function CleanupPage() {
 
       if (res.status === 401) {
         setErrorMsg(
-          "Tu sesión no tiene permisos de admin. Cerrá sesión y volvé a entrar como admin.",
+          "Tu sesión no tiene permisos de admin. Cierra sesión y vuelve a entrar como admin.",
         );
       }
 

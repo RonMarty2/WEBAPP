@@ -183,7 +183,7 @@ export default function DashboardEstudiante() {
           </div>
           <div className="text-[11px] text-indigo-800/80">
             Restaurantes, fábricas, podcast, canal de YouTube, gimnasio, turismo, agricultura…
-            Mirá ejemplos completos antes de armar el tuyo.
+            Mira ejemplos completos antes de armar el tuyo.
           </div>
         </div>
         <span className="hidden flex-shrink-0 rounded-full bg-indigo-600 px-3 py-1 text-[11px] font-bold text-white sm:inline">

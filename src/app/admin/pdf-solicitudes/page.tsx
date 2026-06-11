@@ -231,7 +231,7 @@ export default function PdfSolicitudesPage() {
     <AdminShell
       title="Solicitudes de PDF"
       code="PDF MANUAL"
-      subtitle="Estudiantes pidieron compilación. Bajá el .tex, compilá en tu PC, subí el PDF."
+      subtitle="Estudiantes pidieron compilación. Descarga el .tex, compílalo en tu PC, sube el PDF."
     >
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
         <Kpi code="TOTAL" value={solicitudes.length} index={0} />

@@ -208,7 +208,7 @@ export default function GruposEstudiante({
             </div>
           )}
           <div className="text-[11px] text-muted-foreground">
-            Podés <strong>crear tu propio grupo</strong> o unirte a uno existente (solo uno
+            Puedes <strong>crear tu propio grupo</strong> o unirte a uno existente (solo uno
             por curso). Cupo máximo: <strong>{curso.grupo_cupo_max ?? 4}</strong> integrantes.
           </div>
 

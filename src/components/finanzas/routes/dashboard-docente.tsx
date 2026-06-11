@@ -309,7 +309,7 @@ function FormCrearCurso({
         </div>
         <p className="mb-2 text-[11px] text-amber-800/80">
           El alumno solo va a ver en su pantalla "Simular" los tipos que marques. El lanzador
-          de situaciones también respeta esto. Podés cambiarlo después.
+          de situaciones también respeta esto. Puedes cambiarlo después.
         </p>
         <div className="space-y-1.5">
           <label className="flex cursor-pointer items-start gap-2 text-xs">

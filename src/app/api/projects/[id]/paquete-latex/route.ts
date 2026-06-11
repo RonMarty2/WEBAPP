@@ -214,7 +214,7 @@ export async function GET(_req: Request, { params }: Params) {
 
     if (fasesConContenido.length === 0) {
       return NextResponse.json(
-        { error: "Aún no hay capítulos generados. Generá Cap I-V primero." },
+        { error: "Aún no hay capítulos generados. Genera Cap I-V primero." },
         { status: 400 },
       );
     }
@@ -314,7 +314,7 @@ export async function GET(_req: Request, { params }: Params) {
       const ids = sinContenido.map((r) => r.faseId).join(", ");
       return NextResponse.json(
         {
-          error: `No se pudo generar el LaTeX para: ${ids}. Tanto la IA como el fallback de respaldo fallaron. Probá de nuevo en unos minutos — los proveedores de IA pueden estar saturados temporalmente.`,
+          error: `No se pudo generar el LaTeX para: ${ids}. Tanto la IA como el fallback de respaldo fallaron. Prueba de nuevo en unos minutos — los proveedores de IA pueden estar saturados temporalmente.`,
         },
         { status: 502 },
       );

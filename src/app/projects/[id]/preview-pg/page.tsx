@@ -337,7 +337,7 @@ export default function PreviewPgPage() {
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#999" }}>{p.label}</div>
                 <div style={{ fontSize: 12, color: "#bbb", textAlign: "center", padding: "0 40px" }}>
                   Esta fase aún no ha sido generada.<br/>
-                  Volvé al workspace y apretá &quot;Generar {p.label}&quot;.
+                  Vuelve al workspace y aprieta &quot;Generar {p.label}&quot;.
                 </div>
               </div>
             </Hoja>

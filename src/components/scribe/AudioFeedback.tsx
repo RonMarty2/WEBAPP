@@ -106,7 +106,7 @@ export default function AudioFeedback({ proyectoId, onAplicarComoFeedback }: Pro
 
         const blob = new Blob(chunks, { type: mimeType || "audio/webm" });
         if (blob.size < 1024) {
-          setEstado({ kind: "error", mensaje: "Grabación demasiado corta. Intentá hablar al menos 3 segundos." });
+          setEstado({ kind: "error", mensaje: "Grabación demasiado corta. Intenta hablar al menos 3 segundos." });
           return;
         }
         const ext = mimeType.includes("webm") ? "webm" : "ogg";

@@ -374,7 +374,7 @@ export async function GET(_req: Request, { params }: Params) {
     if (!tieneAlgo) {
       return NextResponse.json(
         {
-          error: "Aún no hay capítulos del documento generados. Generá al menos Cap. I (Marco Referencial) antes de descargar el LaTeX. El Cap. 0 (Idea de Negocio) es solo validación interna y NO va al documento final.",
+          error: "Aún no hay capítulos del documento generados. Genera al menos Cap. I (Marco Referencial) antes de descargar el LaTeX. El Cap. 0 (Idea de Negocio) es solo validación interna y NO va al documento final.",
         },
         { status: 400 },
       );

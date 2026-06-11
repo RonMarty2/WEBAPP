@@ -74,7 +74,7 @@ Si en cualquier capítulo del proyecto aparece una cita a un autor que
 NO está en este whitelist (ej: "Smith, 2020" o "García, 2019"), debes:
 (a) IGNORAR esa cita y NO crear entrada bibliográfica para ella,
 (b) si no encuentras suficientes citas para hacer una bibliografía
-mínima de 12-15 entradas, COMPLETÁ con autores del whitelist que
+mínima de 12-15 entradas, COMPLETA con autores del whitelist que
 encajen temáticamente con el proyecto — NO inventes autores nuevos.
 
 Las entradas exactas (copiar literal, año y edición incluidos):
