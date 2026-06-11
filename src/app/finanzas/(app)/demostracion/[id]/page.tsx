@@ -46,17 +46,17 @@ interface LaminaProps {
 function Lamina({ numero, total, titulo, subtitulo, children, accion }: LaminaProps) {
   return (
     <section className="lamina flex h-full flex-col bg-zinc-900 text-zinc-100 print:break-after-page print:bg-white print:text-black">
-      <header className="flex items-end justify-between gap-6 border-b border-zinc-700/60 px-12 py-8 print:border-zinc-300">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.25em] text-amber-400/90">
+      <header className="flex flex-wrap items-end justify-between gap-3 border-b border-zinc-700/60 px-4 py-5 sm:gap-6 sm:px-12 sm:py-8 print:border-zinc-300">
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-400/90 sm:text-xs">
             Lámina {numero} / {total}
           </p>
-          <h2 className="mt-2 text-4xl font-bold leading-tight tracking-tight text-white print:text-black">{titulo}</h2>
-          {subtitulo && <p className="mt-2 max-w-3xl text-base text-zinc-300 print:text-zinc-700">{subtitulo}</p>}
+          <h2 className="mt-1.5 text-2xl font-bold leading-tight tracking-tight text-white sm:mt-2 sm:text-4xl print:text-black">{titulo}</h2>
+          {subtitulo && <p className="mt-1.5 max-w-3xl text-sm text-zinc-300 sm:mt-2 sm:text-base print:text-zinc-700">{subtitulo}</p>}
         </div>
         {accion && <div className="print:hidden">{accion}</div>}
       </header>
-      <div className="flex-1 overflow-auto px-12 py-10">{children}</div>
+      <div className="flex-1 overflow-auto px-4 py-5 sm:px-12 sm:py-10">{children}</div>
     </section>
   );
 }
@@ -79,10 +79,10 @@ function MetricCard({ label, value, sub, semaforo }: { label: string; value: str
     : semaforo === 'amber' ? 'border-amber-500/40 bg-amber-500/5'
     : 'border-zinc-700/60 bg-zinc-800/50';
   return (
-    <div className={`rounded-2xl border ${borderCol} p-6`}>
+    <div className={`rounded-2xl border ${borderCol} p-4 sm:p-6`}>
       <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">{label}</p>
-      <p className="mt-2 text-4xl font-bold tabular-nums text-white">{value}</p>
-      {sub && <p className="mt-1 text-sm text-zinc-400">{sub}</p>}
+      <p className="mt-1.5 break-words text-2xl font-bold tabular-nums text-white sm:mt-2 sm:text-4xl">{value}</p>
+      {sub && <p className="mt-1 text-xs text-zinc-400 sm:text-sm">{sub}</p>}
     </div>
   );
 }
@@ -191,22 +191,26 @@ export default function ModoDemostracionPage() {
   return (
     <div ref={contenedorRef} className="fixed inset-0 z-50 flex flex-col bg-zinc-900 text-zinc-100">
       {/* Barra superior — se oculta al imprimir */}
-      <div className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-800 bg-zinc-950/80 px-6 py-3 print:hidden">
-        <button onClick={salir} className="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700" title="Salir (Esc)">
-          <X className="h-3.5 w-3.5" /> Salir
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-zinc-800 bg-zinc-950/80 px-3 py-2 sm:gap-4 sm:px-6 sm:py-3 print:hidden">
+        <button onClick={salir} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-zinc-800 px-2.5 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700" title="Salir (Esc)">
+          <X className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Salir</span>
         </button>
-        <p className="text-xs text-zinc-400">
+        {/* Atajos de teclado: solo en pantallas grandes (en móvil no hay teclado) */}
+        <p className="hidden text-xs text-zinc-400 lg:block">
           <kbd className="rounded bg-zinc-800 px-1.5 py-0.5">←</kbd> <kbd className="rounded bg-zinc-800 px-1.5 py-0.5">→</kbd> mover ·{' '}
           <kbd className="rounded bg-zinc-800 px-1.5 py-0.5">F</kbd> pantalla completa ·{' '}
           <kbd className="rounded bg-zinc-800 px-1.5 py-0.5">P</kbd> imprimir
         </p>
-        <div className="flex items-center gap-2">
-          <BotonDescargaExcel proyecto={proyecto} tono="neutral" etiqueta="Excel completo" />
-          <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700" title="Imprimir respaldo (P)">
-            <Printer className="h-3.5 w-3.5" /> Imprimir
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <BotonDescargaExcel proyecto={proyecto} tono="neutral" etiqueta="Excel" />
+          <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-zinc-800 px-2.5 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700" title="Imprimir respaldo (P)">
+            <Printer className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Imprimir</span>
           </button>
-          <button onClick={toggleFullscreen} className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-black hover:bg-amber-400" title="Pantalla completa (F)">
-            {esFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />} {esFullscreen ? 'Salir' : 'Pantalla completa'}
+          <button onClick={toggleFullscreen} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-500 px-2.5 py-1.5 text-xs font-semibold text-black hover:bg-amber-400" title="Pantalla completa (F)">
+            {esFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">{esFullscreen ? 'Salir' : 'Pantalla completa'}</span>
           </button>
         </div>
       </div>
@@ -227,7 +231,7 @@ export default function ModoDemostracionPage() {
 
         {lamina === 1 && (
           <Lamina numero={2} total={total} titulo="La idea de negocio" subtitulo="Qué proponemos hacer y dónde">
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-8">
               <div className="rounded-2xl border border-zinc-700/60 bg-zinc-800/40 p-8">
                 <p className="text-[11px] uppercase tracking-wider text-zinc-400">Descripción</p>
                 <p className="mt-3 text-lg leading-relaxed text-zinc-100">{proyecto.descripcion || 'Sin descripción registrada.'}</p>
@@ -246,12 +250,12 @@ export default function ModoDemostracionPage() {
 
         {lamina === 2 && (
           <Lamina numero={3} total={total} titulo="Inversión inicial" subtitulo="Cuánto capital necesita arrancar" accion={accionDescarga('inversiones')}>
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <MetricCard label="Inversión total" value={formatearBolivianos(kpis.inversionInicial)} semaforo="amber" />
               <MetricCard label="Capital propio" value={formatearBolivianos(kpis.capitalPropio)} sub={formatearPorcentaje(kpis.ratioPropio)} semaforo="verde" />
               <MetricCard label="Préstamo" value={formatearBolivianos(kpis.capitalPrestamo)} sub={formatearPorcentaje(1 - kpis.ratioPropio)} semaforo="rojo" />
             </div>
-            <div className="mt-8 grid grid-cols-2 gap-6">
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:mt-8 sm:grid-cols-2 sm:gap-6">
               <div className="rounded-2xl border border-zinc-700/60 bg-zinc-800/40 p-6">
                 <p className="text-[11px] uppercase tracking-wider text-zinc-400">Categorías</p>
                 <ul className="mt-3 space-y-2 text-sm text-zinc-300">
@@ -302,7 +306,7 @@ export default function ModoDemostracionPage() {
           <Lamina numero={5} total={total} titulo="Costos y gastos" subtitulo="Estructura de egresos" accion={accionDescarga('costos_directos')}>
             {series.costos.length > 0 ? (
               <>
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                   <MetricCard label="Costos directos" value={String(proyecto.costosDirectos?.length ?? 0)} sub="ítems" />
                   <MetricCard label="Administración" value={String(proyecto.costosAdministracion?.length ?? 0)} sub="ítems" />
                   <MetricCard label="Comercialización" value={String(proyecto.costosComercializacion?.length ?? 0)} sub="ítems" />
@@ -359,7 +363,7 @@ export default function ModoDemostracionPage() {
               <EmptyData msg="El proyecto no tiene régimen tributario asignado. Para ver la carga real, ve al Paso 1 y elige Régimen General, RTS o RAU." />
             ) : trib.regimen === 'general' ? (
               <>
-                <div className="grid grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
                   <MetricCard label="IVA pagado (5 años)" value={formatearBolivianos(trib.ivaTotal)} sub="13% débito − crédito + arrastre" semaforo="amber" />
                   <MetricCard label="IT pagado (5 años)" value={formatearBolivianos(trib.itTotal)} sub="3% sobre ingresos con factura" semaforo="amber" />
                   <MetricCard label="Compras con factura" value={formatearBolivianos(trib.comprasConFacturaTotal)} sub="base del crédito fiscal" semaforo="verde" />
@@ -382,7 +386,7 @@ export default function ModoDemostracionPage() {
               </>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
                   <MetricCard label={trib.regimen === 'rts' ? 'Cuota RTS (5 años)' : 'Cuota RAU (5 años)'} value={formatearBolivianos(trib.cuotaFijaTotal)} sub={trib.regimen === 'rts' ? 'pagos bimensuales acumulados' : 'cuota anual por hectárea'} semaforo="amber" />
                   <MetricCard label="Ingresos totales" value={formatearBolivianos(trib.ingresosConFacturaTotal || 0)} sub="referencia (no genera IVA en este régimen)" />
                 </div>
@@ -397,7 +401,7 @@ export default function ModoDemostracionPage() {
 
         {lamina === 7 && (
           <Lamina numero={8} total={total} titulo="Indicadores financieros" subtitulo="VAN, TIR, Payback, IR y B/C" accion={accionDescarga('indicadores')}>
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               <MetricCard label="VAN" value={formatearBolivianos(kpis.van)} sub={`a ${formatearPorcentaje(kpis.tasaDescuento)} de descuento`} semaforo={kpis.van > 0 ? 'verde' : 'rojo'} />
               <MetricCard label="TIR" value={kpis.tir !== null ? formatearPorcentaje(kpis.tir) : '—'} sub={kpis.tir !== null ? (kpis.tir > kpis.tasaDescuento ? '✓ supera el costo del capital' : '✗ por debajo del costo del capital') : 'No se pudo calcular'} semaforo={kpis.tir !== null && kpis.tir > kpis.tasaDescuento ? 'verde' : 'rojo'} />
               <MetricCard label="Payback" value={`${kpis.payback.toFixed(1)} años`} sub="recuperación de la inversión" semaforo={kpis.payback > 0 && kpis.payback < 5 ? 'verde' : 'amber'} />
@@ -431,7 +435,7 @@ export default function ModoDemostracionPage() {
         {lamina === 9 && (
           <Lamina numero={10} total={total} titulo="Punto de equilibrio" subtitulo="Mínimo de unidades para cubrir costos fijos" accion={accionDescarga('equilibrio')}>
             {peq ? (
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-8">
                 <MetricCard label="Unidades de equilibrio" value={Math.round(peq.unidades).toLocaleString('es-BO')} sub="unidades anuales" semaforo="amber" />
                 <MetricCard label="Ingreso de equilibrio" value={formatearBolivianos(peq.ingresoEquilibrio)} sub="ventas anuales mínimas" semaforo="amber" />
               </div>
@@ -458,17 +462,25 @@ export default function ModoDemostracionPage() {
       </div>
 
       {/* Navegación inferior */}
-      <div className="flex shrink-0 items-center justify-between gap-4 border-t border-zinc-800 bg-zinc-950/80 px-6 py-3 print:hidden">
-        <button onClick={irAnterior} disabled={lamina === 0} className="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-3 py-1.5 text-sm font-semibold text-zinc-200 hover:bg-zinc-700 disabled:opacity-30">
-          <ArrowLeft className="h-4 w-4" /> Anterior
+      <div className="flex shrink-0 items-center justify-between gap-2 border-t border-zinc-800 bg-zinc-950/80 px-3 py-2 sm:gap-4 sm:px-6 sm:py-3 print:hidden">
+        <button onClick={irAnterior} disabled={lamina === 0} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-zinc-800 px-2.5 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700 disabled:opacity-30 sm:gap-2 sm:px-3 sm:text-sm">
+          <ArrowLeft className="h-4 w-4" />
+          <span>Anterior</span>
         </button>
-        <div className="flex items-center gap-1.5">
-          {Array.from({ length: total }, (_, i) => (
-            <button key={i} onClick={() => setLamina(i)} className={`h-2 w-8 rounded-full transition ${i === lamina ? 'bg-amber-500' : 'bg-zinc-700 hover:bg-zinc-600'}`} aria-label={`Ir a la lámina ${i + 1}`} />
-          ))}
+        {/* Indicador: en móvil mostramos "n/total" para no romper la barra con 11 puntos. */}
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="text-xs font-semibold tabular-nums text-zinc-300 sm:hidden">
+            {lamina + 1} / {total}
+          </span>
+          <div className="hidden items-center gap-1.5 sm:flex">
+            {Array.from({ length: total }, (_, i) => (
+              <button key={i} onClick={() => setLamina(i)} className={`h-2 w-8 rounded-full transition ${i === lamina ? 'bg-amber-500' : 'bg-zinc-700 hover:bg-zinc-600'}`} aria-label={`Ir a la lámina ${i + 1}`} />
+            ))}
+          </div>
         </div>
-        <button onClick={irSiguiente} disabled={lamina === total - 1} className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-3 py-1.5 text-sm font-semibold text-black hover:bg-amber-400 disabled:opacity-30">
-          Siguiente <ArrowRight className="h-4 w-4" />
+        <button onClick={irSiguiente} disabled={lamina === total - 1} className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-amber-500 px-2.5 py-1.5 text-xs font-semibold text-black hover:bg-amber-400 disabled:opacity-30 sm:gap-2 sm:px-3 sm:text-sm">
+          <span>Siguiente</span>
+          <ArrowRight className="h-4 w-4" />
         </button>
       </div>
 
