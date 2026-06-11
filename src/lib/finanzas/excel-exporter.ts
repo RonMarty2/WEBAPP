@@ -13,7 +13,7 @@
  */
 
 import type { Workbook, Worksheet } from "exceljs";
-import type { Proyecto, CategoriaInversion } from "@/types/finanzas/proyecto";
+import type { Proyecto, Producto, CategoriaInversion } from "@/types/finanzas/proyecto";
 import { construirFlujoCaja } from "./flujo-proyecto";
 import { calcularTributacion } from "./demostracion";
 import {
@@ -22,6 +22,8 @@ import {
   calcularPayback,
   calcularIR,
   calcularRBC,
+  calcularAportesPatronales,
+  obtenerTasasAportes,
 } from "./calculo-financiero";
 
 // ── Estilos comunes ──────────────────────────────────────────────────────────
@@ -551,6 +553,112 @@ export async function hojaFinanciamiento(wb: Workbook, p: Proyecto): Promise<Wor
   return ws;
 }
 
+export async function hojaCapitalTrabajo(wb: Workbook, p: Proyecto): Promise<Worksheet> {
+  const ws = wb.addWorksheet("Capital de trabajo");
+  ws.columns = [
+    { width: 36 }, // Componente
+    { width: 48 }, // De dónde sale
+    { width: 18 }, // Bs/año
+  ];
+  aplicarTituloHoja(ws, "Capital de trabajo — derivación", 3);
+
+  // Réplica exacta del cálculo del Paso 8 del constructor: costos operativos
+  // anuales + imprevistos, escalados a los meses de colchón. La cuota del
+  // préstamo NO entra (es flujo de financiamiento, no capital pre-operativo).
+  const tasas = obtenerTasasAportes(p.aportesPatronalesOverride);
+  const personalAnual = (p.personal ?? []).reduce((acc, puesto) => {
+    const ap = calcularAportesPatronales(puesto.sueldoMensual, tasas);
+    return acc + ap.costoTotalAnual * puesto.cantidad;
+  }, 0);
+
+  const productos = p.productos ?? [];
+  const costosDirectos = p.costosDirectos ?? [];
+  const unidadesAnio1 = (prod: Producto): number => {
+    const legado = prod as Producto & { cantidadAnio1?: number };
+    return prod.cantidades?.[0] ?? legado.cantidadAnio1 ?? 0;
+  };
+  const produccionPorProducto = productos.reduce((acc, prod) => {
+    const costoUnitario = costosDirectos
+      .filter((c) => c.productoId === prod.id)
+      .reduce((a, c) => a + c.cantidadPorUnidad * c.costoUnitario, 0);
+    return acc + unidadesAnio1(prod) * costoUnitario;
+  }, 0);
+  const unidadesTotales = productos.reduce((acc, prod) => acc + unidadesAnio1(prod), 0);
+  const costoUnitHuerfanos = costosDirectos
+    .filter((c) => c.productoId == null)
+    .reduce((a, c) => a + c.cantidadPorUnidad * c.costoUnitario, 0);
+  const produccionAnual = produccionPorProducto + unidadesTotales * costoUnitHuerfanos;
+
+  const anualizar = (items: Array<{ cantidad: number; costoUnitario: number; unidadMedida: "mes" | "año" }>) =>
+    items.reduce((a, c) => a + c.cantidad * c.costoUnitario * (c.unidadMedida === "mes" ? 12 : 1), 0);
+  const adminAnual = anualizar(p.costosAdministracion ?? []);
+  const comercAnual = anualizar(p.costosComercializacion ?? []);
+
+  const subtotal = personalAnual + produccionAnual + adminAnual + comercAnual;
+  const porcImprevistos = p.imprevistosPorcentaje ?? 0;
+  const imprevistosAnual = subtotal * porcImprevistos;
+  const totalAnual = subtotal + imprevistosAnual;
+  const meses = p.mesesBufferCapitalTrabajo ?? 3;
+  const capital = Math.round((totalAnual * meses) / 12);
+
+  ws.getRow(3).values = ["Componente", "De dónde sale", "Bs / año"];
+  aplicarHeaderFila(ws, 3, 3);
+
+  const filas: Array<[string, string, number]> = [
+    ["Personal + aportes patronales", "Paso 4 — sueldos × 12 + aportes patronales", personalAnual],
+    ["Costos directos de producción", "Paso 5 — insumos × unidades del año 1", produccionAnual],
+    ["Gastos de administración", "Paso 6 — gastos administrativos anualizados", adminAnual],
+    ["Gastos de comercialización", "Paso 6 — gastos de comercialización anualizados", comercAnual],
+  ];
+  let fila = 4;
+  for (const [comp, detalle, valor] of filas) {
+    ws.getCell(fila, 1).value = comp;
+    ws.getCell(fila, 2).value = detalle;
+    ws.getCell(fila, 3).value = valor;
+    ws.getCell(fila, 3).numFmt = FMT_BOLIVIANOS;
+    fila++;
+  }
+
+  ws.getCell(fila, 1).value = "Subtotal operativo anual";
+  ws.getCell(fila, 3).value = subtotal;
+  ws.getCell(fila, 3).numFmt = FMT_BOLIVIANOS;
+  aplicarFilaTotal(ws, fila, 3);
+  fila++;
+
+  ws.getCell(fila, 1).value = `Imprevistos (${(porcImprevistos * 100).toFixed(1)}% del subtotal)`;
+  ws.getCell(fila, 2).value = "Paso 8 — margen de seguridad sobre los costos";
+  ws.getCell(fila, 3).value = imprevistosAnual;
+  ws.getCell(fila, 3).numFmt = FMT_BOLIVIANOS;
+  fila++;
+
+  ws.getCell(fila, 1).value = "Total operativo anual";
+  ws.getCell(fila, 3).value = totalAnual;
+  ws.getCell(fila, 3).numFmt = FMT_BOLIVIANOS;
+  aplicarFilaTotal(ws, fila, 3);
+  fila++;
+
+  ws.getCell(fila, 1).value = "Equivalente mensual";
+  ws.getCell(fila, 2).value = "Total operativo anual ÷ 12";
+  ws.getCell(fila, 3).value = totalAnual / 12;
+  ws.getCell(fila, 3).numFmt = FMT_BOLIVIANOS;
+  fila++;
+
+  ws.getCell(fila, 1).value = "Meses de colchón";
+  ws.getCell(fila, 2).value = "Meses de operación cubiertos antes de recibir ingresos";
+  ws.getCell(fila, 3).value = meses;
+  ws.getCell(fila, 3).numFmt = FMT_NUMERO;
+  fila++;
+
+  ws.getCell(fila, 1).value = "CAPITAL DE TRABAJO";
+  ws.getCell(fila, 2).value = `Total operativo anual × ${meses} ÷ 12`;
+  ws.getCell(fila, 3).value = capital;
+  ws.getCell(fila, 3).numFmt = FMT_BOLIVIANOS;
+  aplicarFilaTotal(ws, fila, 3);
+
+  aplicarBordeBloque(ws, 3, fila, 1, 3);
+  return ws;
+}
+
 interface FlujoData {
   ingresos: number[];
   costosProduccion: number[];
@@ -773,6 +881,7 @@ export async function exportarLibroCompleto(p: Proyecto): Promise<Workbook> {
   await hojaGastosOperativos(wb, p);
   await hojaPersonal(wb, p);
   await hojaFinanciamiento(wb, p);
+  await hojaCapitalTrabajo(wb, p);
   await hojaFlujoCaja(wb, p);
   await hojaCargaTributaria(wb, p);
   await hojaIndicadores(wb, p);
@@ -781,24 +890,31 @@ export async function exportarLibroCompleto(p: Proyecto): Promise<Workbook> {
 }
 
 export type HojaIndividual =
+  | "datos"
   | "inversiones"
   | "demanda"
   | "costos_directos"
   | "gastos_operativos"
   | "personal"
   | "financiamiento"
+  | "capital_trabajo"
   | "flujo_caja"
   | "tributacion"
   | "indicadores"
-  | "equilibrio";
+  | "equilibrio"
+  | "resumen";
 
-const GENERADORES: Record<HojaIndividual, (wb: Workbook, p: Proyecto) => Promise<Worksheet>> = {
+const GENERADORES: Record<
+  Exclude<HojaIndividual, "datos" | "resumen">,
+  (wb: Workbook, p: Proyecto) => Promise<Worksheet>
+> = {
   inversiones: hojaInversiones,
   demanda: hojaProyeccionDemanda,
   costos_directos: hojaCostosDirectos,
   gastos_operativos: hojaGastosOperativos,
   personal: hojaPersonal,
   financiamiento: hojaFinanciamiento,
+  capital_trabajo: hojaCapitalTrabajo,
   flujo_caja: hojaFlujoCaja,
   tributacion: hojaCargaTributaria,
   indicadores: hojaIndicadores,
@@ -808,6 +924,15 @@ const GENERADORES: Record<HojaIndividual, (wb: Workbook, p: Proyecto) => Promise
 export async function exportarHoja(p: Proyecto, hoja: HojaIndividual): Promise<Workbook> {
   const wb = await nuevoWorkbook();
   await hojaDatosGenerales(wb, p);
+  if (hoja === "datos") return wb;
+  if (hoja === "resumen") {
+    // Pack del Paso 9: todo lo que esa pantalla muestra junta.
+    await hojaFlujoCaja(wb, p);
+    await hojaCargaTributaria(wb, p);
+    await hojaIndicadores(wb, p);
+    await hojaPuntoEquilibrio(wb, p);
+    return wb;
+  }
   await GENERADORES[hoja](wb, p);
   return wb;
 }

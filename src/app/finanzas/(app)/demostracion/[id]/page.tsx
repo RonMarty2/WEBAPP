@@ -24,7 +24,7 @@ import {
   Legend,
 } from 'recharts';
 import { useAuthStore } from '@/stores/finanzas/auth-store';
-import { listarMisProyectos, listarProyectosGrupales } from '@/lib/finanzas/proyecto-supabase';
+import { obtenerProyectoPorId } from '@/lib/finanzas/proyecto-supabase';
 import { calcularKpis, calcularSeries, calcularPuntoEquilibrioSimple, calcularTributacion, formatearBolivianos, formatearPorcentaje } from '@/lib/finanzas/demostracion';
 import type { Proyecto } from '@/types/finanzas/proyecto';
 import { ArrowLeft, ArrowRight, Maximize2, Minimize2, Printer, X } from 'lucide-react';
@@ -107,24 +107,26 @@ export default function ModoDemostracionPage() {
   const [esFullscreen, setEsFullscreen] = useState(false);
   const contenedorRef = useRef<HTMLDivElement>(null);
 
-  // Carga el proyecto: prueba en proyectos del estudiante + en proyectos grupales.
+  // Carga el proyecto por id directo: el Modo Demostración es accesible para
+  // cualquier usuario autenticado del módulo (estudiante, docente o admin),
+  // no solo para el dueño. Así el docente puede proyectar el trabajo del
+  // alumno en clase o en la defensa.
   useEffect(() => {
     if (!user) return;
     let cancelado = false;
-    Promise.all([
-      listarMisProyectos(user.id).catch(() => [] as Proyecto[]),
-      listarProyectosGrupales(user.id).catch(() => [] as Proyecto[]),
-    ]).then(([mios, grupales]) => {
-      if (cancelado) return;
-      const todos = [...mios, ...grupales.filter((g) => !mios.some((m) => m.id === g.id))];
-      const encontrado = todos.find((p) => p.id === params.id);
-      if (encontrado) {
-        setProyecto(encontrado);
-        setEstado('listo');
-      } else {
-        setEstado('noEncontrado');
-      }
-    });
+    obtenerProyectoPorId(params.id)
+      .then((p) => {
+        if (cancelado) return;
+        if (p) {
+          setProyecto(p);
+          setEstado('listo');
+        } else {
+          setEstado('noEncontrado');
+        }
+      })
+      .catch(() => {
+        if (!cancelado) setEstado('noEncontrado');
+      });
     return () => { cancelado = true; };
   }, [user, params.id]);
 
@@ -174,7 +176,7 @@ export default function ModoDemostracionPage() {
   if (estado === 'noEncontrado' || !proyecto || !kpis || !series) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-zinc-900 text-zinc-300">
-        <p className="text-lg">No encontramos ese proyecto entre los tuyos.</p>
+        <p className="text-lg">No encontramos ese proyecto.</p>
         <button onClick={() => router.push('/finanzas/simular')} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400">Volver al simulador</button>
       </div>
     );

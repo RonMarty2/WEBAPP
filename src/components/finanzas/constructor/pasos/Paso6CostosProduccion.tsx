@@ -6,7 +6,6 @@ import { formatearBolivianos, cn } from "@/lib/finanzas/utils";
 import { migrarProducto } from "@/lib/finanzas/proyecto-factory";
 import CantidadFraccionInput from "../CantidadFraccionInput";
 import InputNumero from "../InputNumero";
-import BotonDescargaExcel from "../../BotonDescargaExcel";
 import type { CategoriaCostoDirecto, CostoDirecto, Sector } from "@/types/finanzas/proyecto";
 
 interface ConfigSubcat {
@@ -156,7 +155,6 @@ export default function Paso6CostosProduccion() {
               <span className="font-medium capitalize">{proyecto.sector}</span>.
             </p>
           </div>
-          <BotonDescargaExcel proyecto={proyecto} hoja="costos_directos" tono="compacto" etiqueta="Descargar Excel" />
         </div>
 
         {productos.map((p, idx) => {

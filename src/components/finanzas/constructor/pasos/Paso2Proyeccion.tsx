@@ -4,7 +4,6 @@ import { useProyectoStore } from "@/stores/finanzas/proyecto-store";
 import FichaPedagogica from "../FichaPedagogica";
 import Recomendacion from "../Recomendacion";
 import InputNumero from "../InputNumero";
-import BotonDescargaExcel from "../../BotonDescargaExcel";
 import { formatearBolivianos, cn } from "@/lib/finanzas/utils";
 import { migrarProducto } from "@/lib/finanzas/proyecto-factory";
 import { calcularLTVSuscripcion, proyectarPublicidad, proyectarSuscriptores } from "@/lib/finanzas/calculo-financiero";
@@ -134,7 +133,6 @@ export default function Paso2Proyeccion() {
               siguiente celda. Click en una celda selecciona el contenido para escribir.
             </p>
           </div>
-          <BotonDescargaExcel proyecto={proyecto} hoja="demanda" tono="compacto" etiqueta="Descargar Excel" />
         </div>
 
         <div className="hidden overflow-x-auto rounded-md border border-border md:block">

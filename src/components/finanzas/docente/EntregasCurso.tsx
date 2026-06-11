@@ -297,6 +297,15 @@ function TarjetaAgrupada({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
+          <a
+            href={`/finanzas/demostracion/${grupo.entregas[0].proyecto_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ver la presentación del proyecto (11 láminas) en una pestaña nueva"
+            className="flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-900 transition hover:bg-amber-100"
+          >
+            🎬 Demostración
+          </a>
           {pendientes.length >= 2 && (
             <button
               onClick={() => onCalificarTodoIgual(pendientes)}

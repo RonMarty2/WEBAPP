@@ -27,6 +27,7 @@ import Paso9Financiamiento from "@/components/finanzas/constructor/pasos/Paso9Fi
 import Paso9Resumen from "@/components/finanzas/constructor/pasos/Paso9Resumen";
 import BotonGuardarComoCaso from "@/components/finanzas/docente/BotonGuardarComoCaso";
 import BotonVistaPreviaEstudiante from "@/components/finanzas/docente/BotonVistaPreviaEstudiante";
+import BarraDescargaExcel from "@/components/finanzas/constructor/BarraDescargaExcel";
 
 const TOTAL_PASOS = 9;
 
@@ -183,6 +184,8 @@ export default function ConstruirProyecto() {
         titulos={titulosPasos}
         titulosCortos={titulosCortos}
       />
+
+      <BarraDescargaExcel proyecto={proyecto} paso={pasoActual} />
 
       <ContenidoPaso paso={pasoActual} />
 

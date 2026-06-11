@@ -4,7 +4,6 @@ import { useProyectoStore } from "@/stores/finanzas/proyecto-store";
 import FichaPedagogica from "../FichaPedagogica";
 import InputNumero from "../InputNumero";
 import Recomendacion from "../Recomendacion";
-import BotonDescargaExcel from "../../BotonDescargaExcel";
 import { formatearBolivianos, cn } from "@/lib/finanzas/utils";
 import type { CategoriaInversion } from "@/types/finanzas/proyecto";
 
@@ -147,7 +146,6 @@ export default function Paso2Inversiones() {
             </p>
           </div>
           <div className="flex items-start gap-3">
-            <BotonDescargaExcel proyecto={proyecto} hoja="inversiones" tono="compacto" etiqueta="Descargar Excel" />
             <div className="text-right">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Total inversiones

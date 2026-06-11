@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { CheckCircle2, Loader2, X, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Presentation, X, XCircle } from "lucide-react";
 import { revisarEntrega } from "@/lib/finanzas/proyecto-supabase";
 import type { Entrega } from "@/types/finanzas/proyecto";
 import { formatearBolivianos, cn } from "@/lib/finanzas/utils";
 import DetalleEntregaPasoAPaso from "./DetalleEntregaPasoAPaso";
+import BotonDescargaExcel from "../BotonDescargaExcel";
+import { HOJA_POR_PASO } from "../constructor/BarraDescargaExcel";
 
 export default function ModalRevisarEntrega({
   entrega,
@@ -70,6 +72,30 @@ export default function ModalRevisarEntrega({
 
         {/* Body */}
         <div className="max-h-[calc(90vh-160px)] space-y-4 overflow-y-auto p-4">
+          {/* Exportar / presentar el trabajo del alumno */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            {entrega.paso_entregado && HOJA_POR_PASO[entrega.paso_entregado] && (
+              <BotonDescargaExcel
+                proyecto={datos}
+                hoja={HOJA_POR_PASO[entrega.paso_entregado].hoja}
+                tono="compacto"
+                etiqueta={`Excel: ${HOJA_POR_PASO[entrega.paso_entregado].etiqueta}`}
+                sufijo={`etapa${entrega.paso_entregado}`}
+              />
+            )}
+            <BotonDescargaExcel proyecto={datos} tono="compacto" etiqueta="Excel completo" />
+            <a
+              href={`/finanzas/demostracion/${entrega.proyecto_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Presentación a pantalla completa del análisis del alumno (11 láminas), en pestaña nueva"
+              className="inline-flex items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[11px] font-semibold text-amber-700 transition hover:bg-amber-500/20"
+            >
+              <Presentation className="h-3 w-3" />
+              Modo demostración
+            </a>
+          </div>
+
           {/* Indicadores del estudiante */}
           <div>
             <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">

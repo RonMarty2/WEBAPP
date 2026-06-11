@@ -134,6 +134,21 @@ export async function listarProyectosGrupales(estudianteId: string): Promise<Pro
   return (data ?? []).map(deFilaSupabase);
 }
 
+/**
+ * Carga UN proyecto por su id, sin exigir ser el dueño. Lo usan el Modo
+ * Demostración y las vistas del docente/admin: cualquier usuario autenticado
+ * del módulo con el enlace puede ver la presentación y exportar a Excel.
+ */
+export async function obtenerProyectoPorId(id: string): Promise<Proyecto | null> {
+  const { data, error } = await conTimeout(
+    supabase.from("finanzas_proyectos").select("*").eq("id", id).maybeSingle(),
+    8000,
+    "cargando el proyecto"
+  );
+  if (error) throw error;
+  return data ? deFilaSupabase(data) : null;
+}
+
 /** Upsert: inserta si no existe, actualiza si ya existe. */
 export async function guardarProyecto(p: Proyecto): Promise<void> {
   const fila = aFilaSupabase(p);
