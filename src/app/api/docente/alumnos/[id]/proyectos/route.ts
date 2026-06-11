@@ -13,11 +13,13 @@
  * [id] es el id del vínculo `docente_alumno_vinculos.id` (NO el alumno_id),
  * para que la verificación de propiedad sea una sola query.
  *
- * NOTA: Finanzas se omite del agregado por ahora. Usa Supabase Auth con
- * id UUID en `auth.users`, mientras los demás módulos usan TEXT del JWT
- * propio de webapp; sin un bridge entre ambos, el join no es directo.
- * Se mostrará "Para finanzas, pídele al alumno que abra el simulador
- * contigo" en la UI hasta resolver el bridge.
+ * FINANZAS — bridge por email (sesión 12): Finanzas usa Supabase Auth con
+ * id UUID, los demás módulos usan el TEXT del JWT propio. El puente es el
+ * EMAIL: `finanzas_perfiles.email` es UNIQUE NOT NULL y el vínculo guarda
+ * `alumno_email` como snapshot. Buscamos el perfil de Finanzas por email
+ * y con su UUID consultamos `finanzas_proyectos`. Si el alumno usó otro
+ * correo en Finanzas, no matchea y devolvemos sin_finanzas=true (la UI
+ * mantiene el aviso ámbar).
  */
 
 import { NextResponse } from "next/server";
@@ -114,7 +116,39 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       }
     }
 
-    const [idea, mercados, estrategia, marketing, organizacion, defensa, maestro] = await Promise.all([
+    // Finanzas: bridge por email. finanzas_proyectos usa `nombre` (no
+    // `titulo`) y estudiante_id UUID de finanzas_perfiles.
+    async function tablaFinanzas(): Promise<{ rows: Array<Record<string, string | null>>; sinPerfil: boolean }> {
+      try {
+        const email = (vinculo.alumno_email as string | null)?.trim().toLowerCase();
+        if (!email) return { rows: [], sinPerfil: true };
+        const { data: perfil } = await sb
+          .from("finanzas_perfiles")
+          .select("id")
+          .ilike("email", email)
+          .maybeSingle();
+        if (!perfil?.id) return { rows: [], sinPerfil: true };
+        const { data, error } = await sb
+          .from("finanzas_proyectos")
+          .select("id, nombre, estado, actualizado_en")
+          .eq("estudiante_id", perfil.id)
+          .order("actualizado_en", { ascending: false });
+        if (error) return { rows: [], sinPerfil: false };
+        return {
+          rows: ((data ?? []) as Array<{ id: string; nombre: string; estado: string | null; actualizado_en: string | null }>).map((p) => ({
+            id: p.id,
+            titulo: p.nombre,
+            estado: p.estado,
+            actualizado_en: p.actualizado_en,
+          })),
+          sinPerfil: false,
+        };
+      } catch {
+        return { rows: [], sinPerfil: true };
+      }
+    }
+
+    const [idea, mercados, estrategia, marketing, organizacion, defensa, maestro, finanzas] = await Promise.all([
       tabla("idea_proyectos"),
       tabla("mercados_proyectos"),
       tabla("estrategia_proyectos"),
@@ -122,6 +156,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       tabla("organizacion_proyectos"),
       tabla("defensa_proyectos"),
       tablaMaestro(),
+      tablaFinanzas(),
     ]);
 
     function pack(modulo: string, nombre: string, emoji: string, ruta: string, rows: Array<Record<string, string | null>>): ModuloResumen {
@@ -146,6 +181,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       pack("estrategia",   "Estrategia",            "🎯", "/estrategia/analisis", estrategia),
       pack("marketing",    "Marketing",             "📣", "/marketing/planes", marketing),
       pack("organizacion", "Organización",          "🏢", "/organizacion/proyectos", organizacion),
+      pack("finanzas",     "Finanzas (simulador)",  "💰", "/finanzas", finanzas.rows),
       pack("defensa",      "Defensa",               "🎓", "/defensa/proyectos", defensa),
       pack("generador",    "Proyecto Maestro / Generador", "✨", "/generador", maestro),
     ];
@@ -186,8 +222,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       // El alumno permite ver contenido completo (no solo metadatos).
       // Wave 4 expondrá el contenido real condicional a este flag.
       consentimiento_ver_contenido: consentimientoVerContenido,
-      // Aviso para la UI sobre Finanzas
-      sin_finanzas: true,
+      // true SOLO si no se encontró perfil de Finanzas con el email del
+      // alumno (usó otro correo o nunca entró al simulador). La UI
+      // mantiene el aviso ámbar en ese caso.
+      sin_finanzas: finanzas.sinPerfil,
     });
   } catch (e) {
     if (e instanceof AuthError) return NextResponse.json({ error: e.message }, { status: e.status });

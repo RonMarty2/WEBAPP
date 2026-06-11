@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { GraduationCap, FolderSearch, ArrowRight } from 'lucide-react';
+import { GraduationCap, FolderSearch, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/stores/mercados/auth-store';
 
 /**
@@ -37,6 +37,13 @@ export default function MercadosHub() {
           titulo="Academia"
           desc="13 clases: del muestreo al análisis de demanda."
           cta="Aprender"
+        />
+        <AccesoCard
+          href="/mercados/casos"
+          icon={<Sparkles className="h-5 w-5" />}
+          titulo="Casos de Bolivia"
+          desc="5 estudios reales resueltos: diseño, muestra, encuesta y resultados."
+          cta="Explorar"
         />
         <AccesoCard
           href="/mercados/proyecto"
