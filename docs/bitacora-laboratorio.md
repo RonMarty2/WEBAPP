@@ -374,6 +374,72 @@ aprobada con "Sí, apruebo todo".
   con una lámina por página. Botón 🎬 en el header de simular-proyecto.
   Cero IA, cero migración SQL.
 
+#### IVA débito/crédito + IT — DISEÑO APROBADO (a ejecutar próxima sesión)
+
+**Diagnóstico:** `src/lib/finanzas/calculo-financiero.ts` exporta
+`TASA_IVA = 0.13` y `TASA_IT = 0.03` y los menciona en el comment de
+contexto boliviano, pero **el flujo nunca los aplica** (`flujo-proyecto.ts`
+solo usa IUE 25%). Resultado: el simulador hoy enseña una verdad a
+medias — el alumno calcula utilidad y VAN sin la carga tributaria
+real que enfrentará el negocio.
+
+**Plan aprobado por el usuario:**
+
+1. **Régimen tributario** — nuevo subpaso en el constructor (o subsección
+   del Paso 1 Datos):
+   - 🟢 Régimen General (factura, IVA débito/crédito, IT mensual, IUE anual).
+   - 🟡 RTS (Régimen Tributario Simplificado) — cuota fija bimensual por
+     categoría de capital, SIN IVA ni IT. Ideal para comercios pequeños.
+   - 🔵 RAU (Régimen Agropecuario Unificado) — productores rurales,
+     cuota anual por hectárea.
+   - ⚪ Sin actividad fiscal formal — para casos didácticos sin factura.
+
+2. **Débito fiscal (ventas)** — en `productos[]` agregar campo
+   `emiteFactura: boolean`. Si true → al ingreso bruto se le aplica IVA
+   débito 13% e IT 3%. Si false → ingreso sin carga fiscal (mercado
+   informal).
+
+3. **Crédito fiscal (compras)** — agregar campo `conFactura: boolean`
+   a CADA ítem comprable: `ItemInversion`, `CostoDirecto`, `CostoGeneral`
+   (administración + comercialización). Si true → 13% del costo es
+   recuperable como crédito fiscal.
+
+4. **Cálculo mensual del IVA** (nuevo helper en `calculo-financiero.ts`):
+   - `IVA_debito_mes = sum(ingresos_con_factura) × 0.13`
+   - `Crédito_fiscal_mes = sum(compras_con_factura_del_mes) × 0.13`
+   - `IVA_a_pagar = max(0, IVA_debito − Crédito_fiscal)`
+   - Si el crédito supera al débito, el saldo a favor se arrastra al
+     siguiente mes (Ley boliviana — crédito acumulable, no se pierde).
+
+5. **IT (Impuesto a las Transacciones)** — 3% sobre ingresos brutos
+   con factura, mensual. Pagable contra IUE al final del año (lo que
+   pagaste de IT se descuenta del IUE, hasta el monto del IUE).
+
+6. **Integración al flujo**: nuevos arreglos `ivaPorMes[]`, `itPorMes[]`,
+   `creditoAcumulado[]` en el resultado de `construirFlujoCaja`. Se
+   restan del flujo neto operativo.
+
+7. **Modo Demostración** — nueva lámina "Carga tributaria mensual"
+   entre la 6 (flujo) y la 7 (indicadores) con barras apiladas de
+   IVA + IT + IUE por año.
+
+**Trade-off honesto:** sin esto, el simulador es académicamente útil
+pero no realista (el alumno termina con flujos sin IVA, que en la
+realidad consumen 13% de las ventas mensuales formales). Con esto, el
+simulador enseña la tributación boliviana real y los alumnos defienden
+proyectos con cifras que el tribunal puede objetar técnicamente.
+
+**Compatibilidad con proyectos existentes:** todos los campos nuevos
+tienen default `false` o `"general"`, así que un proyecto guardado hoy
+se carga con régimen General + emiteFactura=false + conFactura=false →
+mismo comportamiento de hoy (sin IVA aplicado). El alumno activa los
+switches uno a uno cuando quiere incorporar la fiscalidad real.
+
+Cero migración SQL — todo cabe en el JSONB `datos` de `finanzas_proyectos`.
+
+**Próximo paso al retomar:** ejecutar este plan (estimado: 1 sesión
+de trabajo, 6-8 archivos tocados).
+
 #### `/adaptativo` — VEREDICTO de la auditoría (NO eliminar)
 
 Es un feature de IA (1239 LOC en `page.tsx` + 1028 demo + 4 libs +
