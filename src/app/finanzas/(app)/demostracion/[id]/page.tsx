@@ -28,6 +28,8 @@ import { listarMisProyectos, listarProyectosGrupales } from '@/lib/finanzas/proy
 import { calcularKpis, calcularSeries, calcularPuntoEquilibrioSimple, calcularTributacion, formatearBolivianos, formatearPorcentaje } from '@/lib/finanzas/demostracion';
 import type { Proyecto } from '@/types/finanzas/proyecto';
 import { ArrowLeft, ArrowRight, Maximize2, Minimize2, Printer, X } from 'lucide-react';
+import BotonDescargaExcel from '@/components/finanzas/BotonDescargaExcel';
+import type { HojaIndividual } from '@/lib/finanzas/excel-exporter';
 
 // ── Lámina base ────────────────────────────────────────────────────────────
 
@@ -37,9 +39,11 @@ interface LaminaProps {
   titulo: string;
   subtitulo?: string;
   children: React.ReactNode;
+  /** Slot superior derecho: típicamente el botón "Descargar esta tabla". */
+  accion?: React.ReactNode;
 }
 
-function Lamina({ numero, total, titulo, subtitulo, children }: LaminaProps) {
+function Lamina({ numero, total, titulo, subtitulo, children, accion }: LaminaProps) {
   return (
     <section className="lamina flex h-full flex-col bg-zinc-900 text-zinc-100 print:break-after-page print:bg-white print:text-black">
       <header className="flex items-end justify-between gap-6 border-b border-zinc-700/60 px-12 py-8 print:border-zinc-300">
@@ -50,6 +54,7 @@ function Lamina({ numero, total, titulo, subtitulo, children }: LaminaProps) {
           <h2 className="mt-2 text-4xl font-bold leading-tight tracking-tight text-white print:text-black">{titulo}</h2>
           {subtitulo && <p className="mt-2 max-w-3xl text-base text-zinc-300 print:text-zinc-700">{subtitulo}</p>}
         </div>
+        {accion && <div className="print:hidden">{accion}</div>}
       </header>
       <div className="flex-1 overflow-auto px-12 py-10">{children}</div>
     </section>
@@ -177,6 +182,10 @@ export default function ModoDemostracionPage() {
 
   const totalCostos = (proyecto.costosDirectos?.length ?? 0) + (proyecto.costosAdministracion?.length ?? 0) + (proyecto.costosComercializacion?.length ?? 0);
 
+  const accionDescarga = (hoja: HojaIndividual) => (
+    <BotonDescargaExcel proyecto={proyecto} hoja={hoja} tono="neutral" etiqueta="Descargar tabla" />
+  );
+
   return (
     <div ref={contenedorRef} className="fixed inset-0 z-50 flex flex-col bg-zinc-900 text-zinc-100">
       {/* Barra superior — se oculta al imprimir */}
@@ -190,6 +199,7 @@ export default function ModoDemostracionPage() {
           <kbd className="rounded bg-zinc-800 px-1.5 py-0.5">P</kbd> imprimir
         </p>
         <div className="flex items-center gap-2">
+          <BotonDescargaExcel proyecto={proyecto} tono="neutral" etiqueta="Excel completo" />
           <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-zinc-800 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-zinc-700" title="Imprimir respaldo (P)">
             <Printer className="h-3.5 w-3.5" /> Imprimir
           </button>
@@ -233,7 +243,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 2 && (
-          <Lamina numero={3} total={total} titulo="Inversión inicial" subtitulo="Cuánto capital necesita arrancar">
+          <Lamina numero={3} total={total} titulo="Inversión inicial" subtitulo="Cuánto capital necesita arrancar" accion={accionDescarga('inversiones')}>
             <div className="grid grid-cols-3 gap-6">
               <MetricCard label="Inversión total" value={formatearBolivianos(kpis.inversionInicial)} semaforo="amber" />
               <MetricCard label="Capital propio" value={formatearBolivianos(kpis.capitalPropio)} sub={formatearPorcentaje(kpis.ratioPropio)} semaforo="verde" />
@@ -267,7 +277,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 3 && (
-          <Lamina numero={4} total={total} titulo="Proyección de ingresos" subtitulo="Crecimiento de ventas año a año">
+          <Lamina numero={4} total={total} titulo="Proyección de ingresos" subtitulo="Crecimiento de ventas año a año" accion={accionDescarga('demanda')}>
             {series.ingresos.length > 0 ? (
               <div className="h-[60vh]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -287,7 +297,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 4 && (
-          <Lamina numero={5} total={total} titulo="Costos y gastos" subtitulo="Estructura de egresos">
+          <Lamina numero={5} total={total} titulo="Costos y gastos" subtitulo="Estructura de egresos" accion={accionDescarga('costos_directos')}>
             {series.costos.length > 0 ? (
               <>
                 <div className="grid grid-cols-3 gap-6">
@@ -314,7 +324,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 5 && (
-          <Lamina numero={6} total={total} titulo="Flujo de caja proyectado" subtitulo="Ingresos vs. costos a lo largo del horizonte">
+          <Lamina numero={6} total={total} titulo="Flujo de caja proyectado" subtitulo="Ingresos vs. costos a lo largo del horizonte" accion={accionDescarga('flujo_caja')}>
             {series.utilidad.length > 0 ? (
               <div className="h-[60vh]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -337,7 +347,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 6 && (
-          <Lamina numero={7} total={total} titulo="Carga tributaria boliviana" subtitulo={
+          <Lamina numero={7} total={total} titulo="Carga tributaria boliviana" accion={accionDescarga('tributacion')} subtitulo={
             trib?.regimen === 'general' ? 'IVA 13% débito/crédito · IT 3% · IUE 25% (Ley 843)'
             : trib?.regimen === 'rts' ? 'Régimen Tributario Simplificado · cuota fija bimensual'
             : trib?.regimen === 'rau' ? 'Régimen Agropecuario Unificado · cuota anual por hectárea'
@@ -384,7 +394,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 7 && (
-          <Lamina numero={8} total={total} titulo="Indicadores financieros" subtitulo="VAN, TIR, Payback, IR y B/C">
+          <Lamina numero={8} total={total} titulo="Indicadores financieros" subtitulo="VAN, TIR, Payback, IR y B/C" accion={accionDescarga('indicadores')}>
             <div className="grid grid-cols-3 gap-6">
               <MetricCard label="VAN" value={formatearBolivianos(kpis.van)} sub={`a ${formatearPorcentaje(kpis.tasaDescuento)} de descuento`} semaforo={kpis.van > 0 ? 'verde' : 'rojo'} />
               <MetricCard label="TIR" value={kpis.tir !== null ? formatearPorcentaje(kpis.tir) : '—'} sub={kpis.tir !== null ? (kpis.tir > kpis.tasaDescuento ? '✓ supera el costo del capital' : '✗ por debajo del costo del capital') : 'No se pudo calcular'} semaforo={kpis.tir !== null && kpis.tir > kpis.tasaDescuento ? 'verde' : 'rojo'} />
@@ -397,7 +407,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 8 && (
-          <Lamina numero={9} total={total} titulo="Recuperación de la inversión" subtitulo="Flujo acumulado a lo largo del horizonte">
+          <Lamina numero={9} total={total} titulo="Recuperación de la inversión" subtitulo="Flujo acumulado a lo largo del horizonte" accion={accionDescarga('flujo_caja')}>
             {series.flujoAcumulado.length > 0 ? (
               <div className="h-[60vh]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -417,7 +427,7 @@ export default function ModoDemostracionPage() {
         )}
 
         {lamina === 9 && (
-          <Lamina numero={10} total={total} titulo="Punto de equilibrio" subtitulo="Mínimo de unidades para cubrir costos fijos">
+          <Lamina numero={10} total={total} titulo="Punto de equilibrio" subtitulo="Mínimo de unidades para cubrir costos fijos" accion={accionDescarga('equilibrio')}>
             {peq ? (
               <div className="grid grid-cols-2 gap-8">
                 <MetricCard label="Unidades de equilibrio" value={Math.round(peq.unidades).toLocaleString('es-BO')} sub="unidades anuales" semaforo="amber" />

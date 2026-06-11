@@ -4,6 +4,7 @@ import { useProyectoStore } from "@/stores/finanzas/proyecto-store";
 import FichaPedagogica from "../FichaPedagogica";
 import Recomendacion from "../Recomendacion";
 import InputNumero from "../InputNumero";
+import BotonDescargaExcel from "../../BotonDescargaExcel";
 import { formatearBolivianos, cn } from "@/lib/finanzas/utils";
 import { migrarProducto } from "@/lib/finanzas/proyecto-factory";
 import { calcularLTVSuscripcion, proyectarPublicidad, proyectarSuscriptores } from "@/lib/finanzas/calculo-financiero";
@@ -121,16 +122,19 @@ export default function Paso2Proyeccion() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
       <div ref={containerRef} className="space-y-3 rounded-lg border border-border bg-card p-5">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">
-            Paso 2 · Proyección de demanda
-          </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Las tasas de arriba aplican a <strong>todos los productos por igual</strong>.
-            Puedes editar valores individuales en cada celda.{" "}
-            <kbd className="rounded bg-secondary px-1 text-[10px]">Enter</kbd> baja a la
-            siguiente celda. Click en una celda selecciona el contenido para escribir.
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">
+              Paso 2 · Proyección de demanda
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Las tasas de arriba aplican a <strong>todos los productos por igual</strong>.
+              Puedes editar valores individuales en cada celda.{" "}
+              <kbd className="rounded bg-secondary px-1 text-[10px]">Enter</kbd> baja a la
+              siguiente celda. Click en una celda selecciona el contenido para escribir.
+            </p>
+          </div>
+          <BotonDescargaExcel proyecto={proyecto} hoja="demanda" tono="compacto" etiqueta="Descargar Excel" />
         </div>
 
         <div className="hidden overflow-x-auto rounded-md border border-border md:block">

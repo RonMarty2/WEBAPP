@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
 import { useProyectoStore } from "@/stores/finanzas/proyecto-store";
 import FichaPedagogica from "../FichaPedagogica";
 import InputNumero from "../InputNumero";
+import BotonDescargaExcel from "../../BotonDescargaExcel";
 import { formatearBolivianos, cn } from "@/lib/finanzas/utils";
 import type { CostoGeneral } from "@/types/finanzas/proyecto";
 
@@ -68,14 +69,18 @@ export default function Paso7GastosOperativos() {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_280px]">
       <div className="space-y-3 rounded-lg border border-border bg-card p-5">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">
-            Paso 6 · Gastos administrativos y comercialización
-          </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Gastos fijos del proyecto que no escalan con cada unidad producida.
-          </p>
-          <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-semibold tracking-tight">
+              Paso 6 · Gastos administrativos y comercialización
+            </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Gastos fijos del proyecto que no escalan con cada unidad producida.
+            </p>
+          </div>
+          <BotonDescargaExcel proyecto={proyecto} hoja="gastos_operativos" tono="compacto" etiqueta="Descargar Excel" />
+        </div>
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="rounded-md border border-blue-500/40 bg-blue-50 px-2.5 py-1.5 text-[11px]">
               <span className="font-semibold text-blue-900">
                 Administrativos →
@@ -94,7 +99,6 @@ export default function Paso7GastosOperativos() {
                 sirven para <em>vender</em> el producto (publicidad, comisiones, transporte de despacho).
               </span>
             </div>
-          </div>
         </div>
 
         <SeccionGastos
