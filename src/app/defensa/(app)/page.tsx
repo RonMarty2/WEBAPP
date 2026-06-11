@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { GraduationCap, Layers, ArrowRight } from 'lucide-react';
+import { GraduationCap, Layers, ArrowRight, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/stores/defensa/auth-store';
 
 export default function DefensaHub() {
@@ -23,7 +23,7 @@ export default function DefensaHub() {
         </p>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <Link
           href="/defensa/academia"
           className="def-card group flex flex-col p-5 transition hover:-translate-y-0.5 hover:shadow-md"
@@ -37,6 +37,22 @@ export default function DefensaHub() {
           </p>
           <span className="def-accent-text mt-3 inline-flex items-center gap-1 text-sm font-medium">
             Aprender <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
+          </span>
+        </Link>
+
+        <Link
+          href="/defensa/casos"
+          className="def-card group flex flex-col p-5 transition hover:-translate-y-0.5 hover:shadow-md"
+        >
+          <div className="def-accent-soft def-accent-text mb-3 flex h-10 w-10 items-center justify-center rounded-lg">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <h3 className="text-base font-semibold">Casos de Bolivia</h3>
+          <p className="def-muted mt-1 flex-1 text-sm">
+            5 defensas reales con 18 preguntas tribunal, respuestas modelo y trampas.
+          </p>
+          <span className="def-accent-text mt-3 inline-flex items-center gap-1 text-sm font-medium">
+            Explorar <ArrowRight className="h-3.5 w-3.5 transition group-hover:translate-x-0.5" />
           </span>
         </Link>
 
