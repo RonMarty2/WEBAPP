@@ -11,7 +11,18 @@
 ## §0 Cómo retomar (LEER PRIMERO)
 
 **Para arrancar la próxima sesión, dile a Claude:**
-> "Lee `docs/bitacora-laboratorio.md` y seguimos."
+> "Lee `docs/bitacora-laboratorio.md` y arranquemos con el IVA del simulador."
+
+🚨 **PRÓXIMO PASO CONFIRMADO POR EL USUARIO (sesión 12 → sesión 13):**
+Implementar el plan de **IVA débito/crédito + IT + régimen tributario**
+en el simulador de Finanzas. El diseño completo está aprobado y
+documentado en §4 → sesión 12 → "IVA débito/crédito + IT — DISEÑO
+APROBADO". 6-8 archivos a tocar, cero migración SQL.
+
+Tras eso, los pendientes que el usuario entendió y aceptó posponer:
+1. Auditoría pedagógica de las 38 clases + 30 casos.
+2. Promover `/adaptativo` (existe pero está escondido) al landing.
+3. Generar un documento completo de prueba end-to-end y revisarlo.
 
 Con eso retoma todo el contexto. El proyecto está MUY avanzado: los **7 módulos
 educativos están COMPLETOS** (academia + laboratorio), el **Generador conectado**
