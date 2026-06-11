@@ -4,22 +4,26 @@
 > decisiones, la visión actual y los próximos pasos — NO el código.
 > Se actualiza cada vez que cambia algo importante.
 >
-> **Última actualización:** 2026-06-09 (sesión 12: acta de entendimiento aprobada — migración mock→real, limpieza ecosistema/scribe, plan de calidad)
+> **Última actualización:** 2026-06-11 (sesión 13: IVA débito/crédito + IT + régimen tributario boliviano implementado end-to-end + lámina tributaria en Modo Demostración)
 
 ---
 
 ## §0 Cómo retomar (LEER PRIMERO)
 
 **Para arrancar la próxima sesión, dile a Claude:**
-> "Lee `docs/bitacora-laboratorio.md` y arranquemos con el IVA del simulador."
+> "Lee `docs/bitacora-laboratorio.md` y elige el próximo pendiente de la lista."
 
-🚨 **PRÓXIMO PASO CONFIRMADO POR EL USUARIO (sesión 12 → sesión 13):**
-Implementar el plan de **IVA débito/crédito + IT + régimen tributario**
-en el simulador de Finanzas. El diseño completo está aprobado y
-documentado en §4 → sesión 12 → "IVA débito/crédito + IT — DISEÑO
-APROBADO". 6-8 archivos a tocar, cero migración SQL.
+✅ **CERRADO EN SESIÓN 13:** IVA débito/crédito fiscal + IT + régimen tributario
+boliviano implementado en el simulador Finanzas. Backend (tipos, helpers de
+cálculo, integración en `construirFlujoCaja`), UI (selector de régimen en
+Paso 1, switch `emiteFactura` por producto, switch `conFactura` por inversión,
+por insumo directo y por gasto operativo) y lámina #7 de Modo Demostración
+("Carga tributaria boliviana") con gráfico apilado IVA+IT y cuota fija RTS/RAU.
+Commits: `a8e5064` (backend + Paso 1), `8294e8e` (switches en pasos 2/5/6),
+`01c2c27` (lámina tributaria). Cero migración SQL — todo en JSONB con campos
+opcionales que preservan el comportamiento legado en proyectos viejos.
 
-Tras eso, los pendientes que el usuario entendió y aceptó posponer:
+🚨 **PRÓXIMOS PENDIENTES (orden propuesto, el usuario decide):**
 1. Auditoría pedagógica de las 38 clases + 30 casos.
 2. Promover `/adaptativo` (existe pero está escondido) al landing.
 3. Generar un documento completo de prueba end-to-end y revisarlo.
