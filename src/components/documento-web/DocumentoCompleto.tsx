@@ -21,7 +21,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { Copy, Check, Download, AlertCircle, BookOpen, ChevronRight } from 'lucide-react';
+import { Copy, Check, Download, AlertCircle, BookOpen, ChevronRight, Loader2 } from 'lucide-react';
 import {
   parsearMarkdownNumerado,
   nuevoNumerador,
@@ -39,6 +39,7 @@ import { limpiarParaDocumentoFinal } from '@/lib/documento-web/limpieza-final';
 import { parseDiagrama } from '@/lib/diagramas/parse';
 import { diagramaASvg } from '@/lib/diagramas/svg';
 import { svgAPng } from '@/lib/diagramas/rasterizar';
+import { generarDocx } from '@/lib/documento-web/exportar-docx';
 
 export interface FaseDoc {
   id: string;
@@ -99,6 +100,7 @@ export default function DocumentoCompleto({
 }: DocumentoCompletoProps) {
   const [copiado, setCopiado] = useState(false);
   const [errorCopia, setErrorCopia] = useState<string | null>(null);
+  const [generandoDocx, setGenerandoDocx] = useState(false);
 
   // Resuelve la norma de la universidad — controla tipografía, tamaño,
   // interlineado, márgenes, color de acento y estilo de citas.
@@ -203,41 +205,46 @@ export default function DocumentoCompleto({
   }
 
   async function descargarWord() {
-    const datosCaratula: DatosCaratulaWord = {
-      titulo: caratula.titulo ?? titulo,
-      universidad: caratula.universidad,
-      universidadId: universidadId ?? caratula.universidadId,
-      facultad: caratula.facultad,
-      carrera: caratula.carrera,
-      modalidad: caratula.modalidad,
-      estudiante: caratula.estudiante,
-      tutor: caratula.tutor,
-      ciudad: caratula.ciudad,
-      ano: caratula.ano ?? new Date().getFullYear(),
-    };
-    const pngDiagramas = await rasterizarDiagramas(capitulos);
-    const html = generarHTMLParaWord({
-      caratula: datosCaratula,
-      capitulos: capitulos.map((c) => ({ label: c.fase.label, bloques: c.bloques })),
-      bibliografia,
-      pngDiagramas,
-    });
-    // Descarga como .doc: Word abre HTML con formato (Times, márgenes, tablas)
-    // de forma nativa. El MIME application/msword hace que el SO lo asocie a Word.
-    const blob = new Blob(['﻿', html], { type: 'application/msword;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const safe = (caratula.titulo ?? titulo)
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 80) || 'documento';
-    a.download = `${safe}.doc`;
-    a.click();
-    URL.revokeObjectURL(url);
+    setErrorCopia(null);
+    setGenerandoDocx(true);
+    try {
+      const datosCaratula: DatosCaratulaWord = {
+        titulo: caratula.titulo ?? titulo,
+        universidad: caratula.universidad,
+        universidadId: universidadId ?? caratula.universidadId,
+        facultad: caratula.facultad,
+        carrera: caratula.carrera,
+        modalidad: caratula.modalidad,
+        estudiante: caratula.estudiante,
+        tutor: caratula.tutor,
+        ciudad: caratula.ciudad,
+        ano: caratula.ano ?? new Date().getFullYear(),
+      };
+      // Word AUTÉNTICO (.docx): índice automático, estilos APA, numeración,
+      // tablas APA y diagramas como imagen. Generado con la librería docx.
+      const blob = await generarDocx({
+        caratula: datosCaratula,
+        capitulos: capitulos.map((c) => ({ label: c.fase.label, bloques: c.bloques })),
+        bibliografia,
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safe = (caratula.titulo ?? titulo)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 80) || 'documento';
+      a.download = `${safe}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setErrorCopia(e instanceof Error ? e.message : 'No se pudo generar el Word.');
+    } finally {
+      setGenerandoDocx(false);
+    }
   }
 
   if (!hayContenido) {
@@ -265,9 +272,13 @@ export default function DocumentoCompleto({
         <button
           type="button"
           onClick={descargarWord}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+          disabled={generandoDocx}
+          title="Descarga un Word (.docx) con índice automático, numeración y formato APA"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
         >
-          <Download className="h-3.5 w-3.5" /> Descargar Word
+          {generandoDocx
+            ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Generando Word…</>
+            : <><Download className="h-3.5 w-3.5" /> Descargar Word</>}
         </button>
         <button
           type="button"
