@@ -13,6 +13,7 @@
 
 import type { CitaDetectada } from "./citas";
 import { parseDiagrama } from "@/lib/diagramas/parse";
+import { normalizarMarcadores } from "@/lib/diagramas/marcadores";
 
 export interface NumeradorEstado {
   /** Capítulo actual (1-indexed). */
@@ -92,7 +93,7 @@ export function parsearMarkdownNumerado(
     prefijoId?: string;
   },
 ): BloqueNumerado[] {
-  const lineas = markdown.split("\n");
+  const lineas = normalizarMarcadores(markdown).split("\n");
   const bloques: BloqueNumerado[] = [];
   const prefijoId = opciones?.prefijoId ?? "";
   let yaInicioCapitulo = !opciones?.iniciaCapitulo;

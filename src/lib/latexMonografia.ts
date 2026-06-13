@@ -4,6 +4,7 @@
 import { getUniversityTemplate, type CaratulaInput } from "./universityTemplates";
 import { parseDiagrama } from "./diagramas/parse";
 import { diagramaATikz } from "./diagramas/tikz";
+import { normalizarMarcadores } from "./diagramas/marcadores";
 
 export interface CitaBiblio {
   autor: string;
@@ -116,7 +117,7 @@ export function mdALatex(text: string): string {
   // con "Unicode character not set up for use with LaTeX".
   // sanearUnicodeParaLatex los reemplaza por equivalentes ASCII compatibles.
   text = sanearUnicodeParaLatex(text);
-  const lines = text.split("\n");
+  const lines = normalizarMarcadores(text).split("\n");
   const out: string[] = [];
   let inItemize = false;
   let inEnumerate = false;

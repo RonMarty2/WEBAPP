@@ -24,6 +24,7 @@
 import React, { useMemo } from "react";
 import { Diagrama } from "@/components/diagramas/Diagrama";
 import { parseDiagrama } from "@/lib/diagramas/parse";
+import { normalizarMarcadores } from "@/lib/diagramas/marcadores";
 
 interface MarkdownAcademicoProps {
   markdown: string;
@@ -329,7 +330,7 @@ function Tabla({ filas }: { filas: string[][] }) {
 }
 
 export default function MarkdownAcademico({ markdown }: MarkdownAcademicoProps) {
-  const bloques = useMemo(() => parsearBloques(markdown), [markdown]);
+  const bloques = useMemo(() => parsearBloques(normalizarMarcadores(markdown)), [markdown]);
 
   return (
     <article
