@@ -5,6 +5,7 @@ import { getUniversityTemplate, type CaratulaInput } from "./universityTemplates
 import { parseDiagrama } from "./diagramas/parse";
 import { diagramaATikz } from "./diagramas/tikz";
 import { normalizarMarcadores } from "./diagramas/marcadores";
+import { tablaAGrafico } from "./diagramas/desde-tabla";
 
 export interface CitaBiblio {
   autor: string;
@@ -123,6 +124,9 @@ export function mdALatex(text: string): string {
   let inEnumerate = false;
   let inTabular = false;
   let tabularCols = 0;
+  // Buffer de filas de la tabla en curso (texto plano sin escapar) para
+  // poder generar un gráfico TikZ derivado al cerrar la tabla.
+  let tabularFilasRaw: string[][] = [];
   // 📊 Detección de bloques ```latex ... ``` (TikZ, pgfplots, figure, etc.)
   // Estos bloques se pegan TAL CUAL al .tex final, sin escapar caracteres.
   // El preamble tiene tikz + pgfplots + pgf-pie, así que el compilador
@@ -137,6 +141,15 @@ export function mdALatex(text: string): string {
     if (inTabular) {
       out.push("\\end{tabular}");
       out.push("\\end{center}");
+      // Si la tabla recién cerrada es convertible a gráfico, lo añadimos
+      // como figura TikZ inmediatamente después. Reutiliza el detector de
+      // pantalla/Word para que los tres destinos rindan la misma decisión.
+      const grafico = tablaAGrafico(tabularFilasRaw);
+      if (grafico) {
+        const tex = diagramaATikz(grafico);
+        if (tex) { out.push(""); out.push(tex); }
+      }
+      tabularFilasRaw = [];
       inTabular = false;
     }
   }
@@ -205,11 +218,12 @@ export function mdALatex(text: string): string {
       if (isSep) continue; // skip separator rows
 
       closeList();
-      const cells = line
+      const celdasCrudas = line
         .replace(/^\s*\|/, "")
         .replace(/\|?\s*$/, "")
         .split("|")
-        .map(c => escaparLatexPlain(c.trim()));
+        .map(c => c.trim());
+      const cells = celdasCrudas.map(c => escaparLatexPlain(c));
 
       if (!inTabular) {
         tabularCols = cells.length;
@@ -218,7 +232,9 @@ export function mdALatex(text: string): string {
         out.push(`\\begin{tabular}{|${colSpec}|}`);
         out.push("\\hline");
         inTabular = true;
+        tabularFilasRaw = [];
       }
+      tabularFilasRaw.push(celdasCrudas);
       out.push(cells.join(" & ") + " \\\\ \\hline");
       continue;
     }

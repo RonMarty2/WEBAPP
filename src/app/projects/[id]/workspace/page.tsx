@@ -8,6 +8,9 @@ import AdminPlanSwitcher from "@/components/AdminPlanSwitcher";
 import DiffPreview from "@/components/DiffPreview";
 import BibliografiaInsights from "@/components/scribe/BibliografiaInsights";
 import ResumenInsights from "@/components/scribe/ResumenInsights";
+import { parseDiagrama } from "@/lib/diagramas/parse";
+import { diagramaASvg } from "@/lib/diagramas/svg";
+import { tablaAGrafico } from "@/lib/diagramas/desde-tabla";
 import CalidadInsights from "@/components/scribe/CalidadInsights";
 import CapituloInsights from "@/components/scribe/CapituloInsights";
 import type { SessionUser } from "@/lib/auth";
@@ -388,9 +391,19 @@ function renderMd(text: string): string {
   const codeBlocks: string[] = [];
   cleaned = cleaned.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
     const idx = codeBlocks.length;
-    codeBlocks.push(
-      `<pre class="md-pre"><code class="md-code">${escapeHtml(code)}</code></pre>`
-    );
+    if (typeof lang === "string" && lang.toLowerCase() === "diagrama") {
+      const spec = parseDiagrama(code);
+      const svg = spec ? diagramaASvg(spec) : "";
+      codeBlocks.push(
+        svg
+          ? `<figure style="margin:18px 0;text-align:center">${svg}</figure>`
+          : `<pre class="md-pre"><code class="md-code">${escapeHtml(code)}</code></pre>`
+      );
+    } else {
+      codeBlocks.push(
+        `<pre class="md-pre"><code class="md-code">${escapeHtml(code)}</code></pre>`
+      );
+    }
     return ` CODE_BLOCK_${idx} `;
   });
 
@@ -508,6 +521,17 @@ function renderMdTable(md: string): string {
     html += '</tr>';
   });
   html += '</tbody></table></div>';
+  // Auto-conversión tabla → gráfico (mismo motor que documento-web/Word).
+  // Si las filas son frecuencias/datos numéricos claros, se dibuja al pie
+  // un gráfico. La tabla queda igual; cero modificación del markdown.
+  try {
+    const filasParaGraf = [header, ...body];
+    const grafico = tablaAGrafico(filasParaGraf);
+    if (grafico) {
+      const svg = diagramaASvg(grafico, { sinTitulo: true });
+      if (svg) html += `<figure style="margin:10px 0 4px;text-align:center">${svg}</figure>`;
+    }
+  } catch { /* nunca rompe el render de la tabla */ }
   return html;
 }
 
