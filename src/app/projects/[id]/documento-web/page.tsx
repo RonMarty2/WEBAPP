@@ -16,7 +16,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, AlertCircle, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, AlertCircle, Loader2, Sparkles, FileDown } from 'lucide-react';
 import DocumentoCompleto, { type FaseDoc } from '@/components/documento-web/DocumentoCompleto';
 import { DEFAULT_UNIVERSITIES } from '@/lib/data';
 
@@ -48,6 +48,8 @@ export default function DocumentoWebPage() {
   const [proyecto, setProyecto] = useState<Proyecto | null>(null);
   const [fases, setFases] = useState<PhaseDef[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [generandoPdf, setGenerandoPdf] = useState(false);
+  const [errorPdf, setErrorPdf] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -117,6 +119,42 @@ export default function DocumentoWebPage() {
     orden: f.orden,
   }));
 
+  // Proyecto de Grado usa su propio paquete LaTeX; el resto (monografía/tesis)
+  // usa el paquete scribe. Determinamos por servicio/tipo.
+  const esPG = /proy[-_]?(grado|prod|serv)/i.test(
+    `${proyecto.servicio_id ?? ''} ${proyecto.tipo_proyecto_id ?? ''}`,
+  );
+  const endpointLatex = esPG
+    ? `/api/projects/${id}/paquete-latex-pg`
+    : `/api/projects/${id}/paquete-latex`;
+
+  async function descargarPaqueteLatex() {
+    setErrorPdf(null);
+    setGenerandoPdf(true);
+    try {
+      const res = await fetch(endpointLatex, { credentials: 'include' });
+      if (!res.ok) throw new Error('No se pudo generar el paquete. Intenta de nuevo en un momento.');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const safe = titulo
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 60) || 'documento';
+      a.download = `${safe}-overleaf.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setErrorPdf(e instanceof Error ? e.message : 'Error al generar el paquete.');
+    } finally {
+      setGenerandoPdf(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 pb-12 pt-6">
       <div className="mx-auto max-w-4xl px-4">
@@ -127,11 +165,29 @@ export default function DocumentoWebPage() {
           >
             <ArrowLeft className="h-4 w-4" /> Volver al workspace
           </Link>
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-            <Sparkles className="h-3.5 w-3.5" />
-            Vista limpia para entregar
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={descargarPaqueteLatex}
+              disabled={generandoPdf}
+              title="Descarga un ZIP para subir a Overleaf y compilar el PDF con el formato exacto de tu universidad"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+            >
+              {generandoPdf ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+              {generandoPdf ? 'Generando paquete…' : 'Descargar para PDF (Overleaf)'}
+            </button>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+              <Sparkles className="h-3.5 w-3.5" />
+              Vista limpia para entregar
+            </span>
           </div>
         </div>
+        {errorPdf && (
+          <div className="mb-4 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
+            <AlertCircle className="h-4 w-4 flex-shrink-0" />
+            <span>{errorPdf}</span>
+          </div>
+        )}
 
         <DocumentoCompleto
           titulo={titulo}
