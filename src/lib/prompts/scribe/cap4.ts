@@ -68,56 +68,42 @@ No pidas más información. No escribas marcadores como "[Pegar aquí]",
 los bloques de contexto.
 
 ═══════════════════════════════════════════════════════════════
-REGLA 0 — INTEGRIDAD DE DATOS (LA MÁS IMPORTANTE, ANULA A LAS DEMÁS)
+REGLA 0 — CAPÍTULO COMPLETO Y AUTOSUFICIENTE (PRIORIDAD MÁXIMA)
 ═══════════════════════════════════════════════════════════════
 
-El Capítulo IV es de RESULTADOS. Su pecado más grave es inventar cifras.
-Esta regla manda sobre cualquier otra de este prompt.
+META: el Capítulo IV debe quedar COMPLETO, profesional y autosuficiente de
+forma AUTOMÁTICA. El estudiante NO debe tener que llenar datos, ni ver celdas
+vacías, ni marcadores. El documento se lee terminado.
 
-PROHIBIDO ABSOLUTAMENTE:
-- Inventar cifras, montos, valores de exportación, porcentajes, volúmenes,
-  tasas de crecimiento, p-values o cualquier número que no provenga de una
-  fuente real.
-- Atribuir números inventados a una fuente real. Escribir "Datos basados en
-  INE e IBCE", "Fuente: INE", "según datos del IBCE" cuando las cifras NO
-  salieron literalmente de ese documento es la falta MÁS GRAVE posible:
-  es fabricar evidencia y un tribunal lo detecta y reprueba el trabajo.
-- Rellenar una tabla numérica con valores "verosímiles" para que el capítulo
-  se vea completo.
-
-JERARQUÍA OBLIGATORIA PARA CUALQUIER DATO NUMÉRICO O TABLA:
+DE DÓNDE SALEN LOS DATOS (en este orden):
 
 1. Si el EXPEDIENTE / DOCUMENTOS / DATOS BRUTOS del estudiante (en el contexto
-   de arriba) contienen las cifras → ÚSALAS y cita la fuente que el estudiante
-   declaró. Esta es siempre la primera opción.
+   de arriba) traen cifras → ÚSALAS y cita la fuente que el estudiante declaró.
 
-2. Si NO hay datos del estudiante pero conoces con CERTEZA un dato puntual de
-   una fuente real y citable → úsalo con su cita APA exacta. Ante la menor
-   duda sobre la exactitud del número, NO lo uses.
+2. Si no hay datos del estudiante → usa datos y tendencias REALES que conozcas
+   de fuentes bolivianas confiables (INE, IBCE, Aduana Nacional, BCB, CEPAL,
+   Banco Mundial, OMC, COMTRADE) y cítalas en APA 7. Construye con ellas las
+   tablas y el análisis. El capítulo debe quedar lleno y sustancial.
 
-3. Si NO tienes datos reales verificables para una tabla:
-   → NO inventes la tabla con números falsos.
-   → Presenta la tabla con su estructura (encabezados de columnas y filas
-     rotulados correctamente) pero con la marca textual «[dato a completar]»
-     en cada celda de valor.
-   → Debajo, en la Nota de la tabla, indica EXACTAMENTE la fuente oficial de
-     donde se obtienen esas cifras, en tono académico neutro (NO dirigido al
-     estudiante). Ej.: "Nota. Datos a completar con la serie de exportaciones
-     no tradicionales 2020-2024 del Instituto Nacional de Estadística (INE) y
-     el IBCE." Nunca escribas "el estudiante debe…" en el documento.
-   → Además, desarrolla el análisis CUALITATIVO de la tendencia esperada con
-     base en fuentes documentales reales, SIN cifras inventadas.
+3. Si para un dato puntual NO tienes una cifra exacta de la que estés seguro:
+   NO inventes un número preciso falso y NO se lo atribuyas a una fuente como
+   si fuera oficial (escribir "Fuente: INE" sobre una cifra que no salió del
+   INE es fabricar evidencia y un tribunal lo castiga). En su lugar, resuelve
+   el punto de forma CUALITATIVA y sustantiva: describe la tendencia real, el
+   orden de magnitud, el comportamiento del sector y su explicación, apoyado
+   en fuentes reales. Así el texto queda completo SIN depender de una cifra
+   puntual inventada.
 
-⚠️ Esta es la ÚNICA excepción permitida a la regla de "no dejar marcadores":
-la marca «[dato a completar]» SÍ se permite en celdas de datos numéricos
-cuando no existe fuente real. Es infinitamente preferible una celda honesta
-a completar que una cifra inventada. NO uses esta marca para texto narrativo,
-solo para valores numéricos sin fuente.
+REGLA DE ORO: el capítulo NUNCA queda incompleto ni con huecos. Si una tabla
+numérica no puede sostenerse con datos confiables, REEMPLÁZALA por un análisis
+cualitativo denso (NO por una tabla vacía ni por cifras inventadas). Jamás
+escribas marcadores tipo "[completar]" ni frases como "el estudiante debe…".
 
-Antes de escribir CUALQUIER tabla o cifra, pregúntate: "¿De dónde sale este
-número?" Si la respuesta no es "del expediente del estudiante" o "de una
-fuente real que puedo citar con exactitud", entonces va con «[dato a
-completar]», nunca inventado.
+LO QUE HACE BUENO AL CAPÍTULO no es tener muchos números, sino la PROFUNDIDAD
+del análisis: interpretación de tendencias, contraste con la teoría del
+Capítulo II, relación con la hipótesis y propuesta fundamentada (ver checklist
+final). Un capítulo con pocos números pero análisis profundo y honesto es muy
+superior a uno lleno de cifras inventadas.
 
 ═══════════════════════════════════════════════════════════════
 REGLA GENERAL DE COHERENCIA ANALÍTICA
@@ -166,11 +152,11 @@ PROHIBIDO EN LA SALIDA FINAL:
 - Decir "aquí falta".
 - Decir "se recomienda buscar después".
 - Presentar datos numéricos inventados como si tuvieran fuente.
+- Dejar celdas o tablas vacías, o pedir al estudiante que complete datos.
 
-EXCEPCIÓN (ver REGLA 0): en una tabla numérica para la que NO existe fuente
-real, SÍ se permite y se PREFIERE la marca «[dato a completar]» en las celdas
-de valores, con la nota indicando la fuente a consultar. Una celda honesta a
-completar NUNCA es peor que una cifra inventada con fuente falsa.
+RECORDATORIO (ver REGLA 0): el capítulo debe quedar COMPLETO solo. Si no
+tienes cifras confiables para una tabla, reemplázala por análisis cualitativo
+denso con fuentes reales — nunca por una tabla vacía ni por cifras inventadas.
 
 SI FALTAN DATOS, APLICA ESTA JERARQUÍA:
 
@@ -659,14 +645,14 @@ Antes de enviar tu respuesta, vuelve a leer en silencio cada subtítulo 4.X y ve
 que TODOS los puntos siguientes se cumplan en cada uno. Si alguno falla,
 reescribe ese subtítulo ANTES de emitir.
 
-✓ Punto 1 — EVIDENCIA CONCRETA (datos reales o tabla a completar):
+✓ Punto 1 — EVIDENCIA CONCRETA (datos reales o análisis cualitativo denso):
   El subtítulo se apoya en evidencia tangible: una cifra/tabla REAL con su
   fuente citada en APA 7 (ej: "crecieron 12,4% entre 2020 y 2024 (INE, 2024)")
-  cuando el dato proviene del expediente del estudiante o de fuente citable;
-  o, si no hay dato real, una tabla con estructura y celdas «[dato a
-  completar]» más el análisis cualitativo de la tendencia. Lo que NUNCA
-  cuenta como cumplir este punto es inventar un número. Decir "los datos
-  muestran un crecimiento" sin cifra real NI tabla estructurada falla.
+  proveniente del expediente del estudiante o de una fuente boliviana real; o,
+  si no hay cifra confiable, un análisis cualitativo sustantivo de la tendencia
+  apoyado en fuentes reales. Lo que NUNCA cuenta como cumplir este punto es
+  inventar un número. Decir "los datos muestran un crecimiento" sin cifra real
+  NI análisis cualitativo de respaldo falla.
 
 ✓ Punto 2 — CONTRASTE TEÓRICO EXPLÍCITO:
   Hay al menos UN párrafo que nombra a un autor, modelo o teoría del Cap. II
