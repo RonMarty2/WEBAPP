@@ -24,6 +24,7 @@
  */
 
 import { REGLAS_BASE_PROYECTO_GRADO } from "./reglas-comunes";
+import { INSTRUCCION_GRAFICO } from "../instruccionGrafico";
 
 export const SISTEMA_PROY_CAP3E = `${REGLAS_BASE_PROYECTO_GRADO}
 
@@ -148,6 +149,10 @@ Por cada pregunta clave (no todas — solo las que aportan insights):
 | ... | | | |
 | **Total** | **n** | **1.00** | **100%** |
 
+Después de cada tabla de distribución, emite el gráfico correspondiente
+(variante "pastel" para una pregunta de opción única, "barras" para comparar
+opciones o categorías), con los MISMOS porcentajes de la tabla:
+${INSTRUCCION_GRAFICO}
 INTERPRETACIÓN (2-3 párrafos sustantivos):
 
   - ¿Qué dice el resultado sobre el perfil del segmento?

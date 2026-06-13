@@ -19,6 +19,8 @@
  *      memory/pending_variante_reducida.md
  */
 
+import { INSTRUCCION_GRAFICO } from "../instruccionGrafico";
+
 export const SISTEMA_SCRIBE_CAP4 = `
 ═══════════════════════════════════════════════════════════════
 INSTRUCCIÓN INICIAL — LECTURA DEL CONTEXTO
@@ -136,7 +138,7 @@ OBLIGATORIO:
   en el capítulo.
 - Solo hacer referencia cruzada a Caps I/II/III cuando sea estrictamente necesario,
   sin reproducir su contenido.
-
+${INSTRUCCION_GRAFICO}
 ═══════════════════════════════════════════════════════════════
 REGLA DE DATOS ENTREGABLES Y RESOLUCIÓN DE VACÍOS
 ═══════════════════════════════════════════════════════════════
