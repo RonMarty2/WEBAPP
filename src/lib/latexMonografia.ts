@@ -5,7 +5,6 @@ import { getUniversityTemplate, type CaratulaInput } from "./universityTemplates
 import { parseDiagrama } from "./diagramas/parse";
 import { diagramaATikz } from "./diagramas/tikz";
 import { normalizarMarcadores } from "./diagramas/marcadores";
-import { tablaAGrafico } from "./diagramas/desde-tabla";
 
 export interface CitaBiblio {
   autor: string;
@@ -124,9 +123,7 @@ export function mdALatex(text: string): string {
   let inEnumerate = false;
   let inTabular = false;
   let tabularCols = 0;
-  // Buffer de filas de la tabla en curso (texto plano sin escapar) para
-  // poder generar un gráfico TikZ derivado al cerrar la tabla.
-  let tabularFilasRaw: string[][] = [];
+  let tabularPrimeraFila = true;   // primera fila = encabezado (booktabs APA)
   // 📊 Detección de bloques ```latex ... ``` (TikZ, pgfplots, figure, etc.)
   // Estos bloques se pegan TAL CUAL al .tex final, sin escapar caracteres.
   // El preamble tiene tikz + pgfplots + pgf-pie, así que el compilador
@@ -139,18 +136,11 @@ export function mdALatex(text: string): string {
   }
   function closeTabular() {
     if (inTabular) {
+      out.push("\\bottomrule");
       out.push("\\end{tabular}");
-      out.push("\\end{center}");
-      // Si la tabla recién cerrada es convertible a gráfico, lo añadimos
-      // como figura TikZ inmediatamente después. Reutiliza el detector de
-      // pantalla/Word para que los tres destinos rindan la misma decisión.
-      const grafico = tablaAGrafico(tabularFilasRaw);
-      if (grafico) {
-        const tex = diagramaATikz(grafico);
-        if (tex) { out.push(""); out.push(tex); }
-      }
-      tabularFilasRaw = [];
+      out.push("\\end{table}");
       inTabular = false;
+      tabularPrimeraFila = true;
     }
   }
 
@@ -226,16 +216,30 @@ export function mdALatex(text: string): string {
       const cells = celdasCrudas.map(c => escaparLatexPlain(c));
 
       if (!inTabular) {
+        // Captura el caption del párrafo previo ("Tabla N. Título" /
+        // "**Tabla...**") y lo vuelve \caption para que la tabla entre en el
+        // ÍNDICE DE TABLAS. Detección estricta: debe empezar con "Tabla/Cuadro N".
+        while (out.length > 0 && out[out.length - 1].trim() === "") out.pop();
+        let caption = "";
+        if (out.length > 0 && /^(?:\\textbf\{)?\**\s*(Tabla|Cuadro)\s+[\dXx]/i.test(out[out.length - 1])) {
+          caption = out.pop()!
+            .replace(/\\textbf\{([\s\S]*?)\}/g, "$1")
+            .replace(/\\textit\{([\s\S]*?)\}/g, "$1")
+            .replace(/^\s*(Tabla|Cuadro)\s*[\d.]*\s*[:.\-]?\s*/i, "")
+            .trim();
+        }
         tabularCols = cells.length;
-        const colSpec = Array(tabularCols).fill("p{\\dimexpr\\linewidth/" + tabularCols + "-2\\tabcolsep}").join("|");
-        out.push("\\begin{center}");
-        out.push(`\\begin{tabular}{|${colSpec}|}`);
-        out.push("\\hline");
+        const colSpec = Array(tabularCols).fill("p{\\dimexpr\\linewidth/" + tabularCols + "-2\\tabcolsep}").join("");
+        out.push("\\begin{table}[H]");
+        out.push("\\centering");
+        if (caption) out.push(`\\caption{${caption}}`);
+        out.push(`\\begin{tabular}{${colSpec}}`);
+        out.push("\\toprule");
         inTabular = true;
-        tabularFilasRaw = [];
+        tabularPrimeraFila = true;
       }
-      tabularFilasRaw.push(celdasCrudas);
-      out.push(cells.join(" & ") + " \\\\ \\hline");
+      out.push(cells.join(" & ") + " \\\\");
+      if (tabularPrimeraFila) { out.push("\\midrule"); tabularPrimeraFila = false; }
       continue;
     }
 

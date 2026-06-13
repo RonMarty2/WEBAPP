@@ -39,7 +39,6 @@ import { limpiarParaDocumentoFinal } from '@/lib/documento-web/limpieza-final';
 import { parseDiagrama } from '@/lib/diagramas/parse';
 import { diagramaASvg } from '@/lib/diagramas/svg';
 import { svgAPng } from '@/lib/diagramas/rasterizar';
-import { tablaAGrafico } from '@/lib/diagramas/desde-tabla';
 
 export interface FaseDoc {
   id: string;
@@ -84,14 +83,6 @@ async function rasterizarDiagramas(
         if (!spec) continue;
         const dataUri = await svgAPng(diagramaASvg(spec, { sinTitulo: true }));
         if (dataUri) png[b.id] = dataUri;
-      }
-      // Tablas convertibles a gráfico (auto-derivado, sin tocar el markdown).
-      // Se rasteriza con clave `${id}::graf` para no chocar con la tabla.
-      if (b.tipo === 'tabla' && b.filas && b.id) {
-        const grafico = tablaAGrafico(b.filas, b.texto);
-        if (!grafico) continue;
-        const dataUri = await svgAPng(diagramaASvg(grafico, { sinTitulo: true }));
-        if (dataUri) png[`${b.id}::graf`] = dataUri;
       }
     }
   }
@@ -594,11 +585,6 @@ function BloqueRender({ b }: { b: BloqueNumerado }) {
     );
   }
   if (b.tipo === 'tabla') {
-    // Si la tabla tiene formato de frecuencias/datos numéricos claros, la
-    // dibujamos TAMBIÉN como gráfico debajo (solo en el render — no toca
-    // el markdown guardado). Si la tabla es de prosa, tablaAGrafico devuelve
-    // null y no aparece nada extra.
-    const grafico = b.filas ? tablaAGrafico(b.filas, b.texto) : null;
     return (
       <div className="doc-tabla" id={b.id}>
         <p className="doc-tabla-caption">
@@ -623,11 +609,6 @@ function BloqueRender({ b }: { b: BloqueNumerado }) {
           </tbody>
         </table>
         <p className="doc-tabla-fuente">Fuente: Elaboración propia con base en datos del estudio.</p>
-        {grafico && (
-          <figure style={{ margin: '14px 0 4px', textAlign: 'center' }}>
-            <div dangerouslySetInnerHTML={{ __html: diagramaASvg(grafico, { sinTitulo: true }) }} />
-          </figure>
-        )}
       </div>
     );
   }
