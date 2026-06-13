@@ -164,6 +164,9 @@ export async function POST(req: Request, { params }: Params) {
       contenidoActual,
       observacionTutor: observacion,
       listaFases,
+      // Fases de ensamblado: su contenido es el .tex completo. Ahí no se hace
+      // cirugía de contenido; se enruta la observación a la fase del capítulo.
+      faseEnsamblado: phaseId === "ph-latex" || phaseId === "ph-proy-latex",
     });
 
     console.log(`[analizador] llamando IA para proyecto=${proyectoId} fase=${phaseId} obs="${observacion.slice(0, 80)}"`);
@@ -188,14 +191,16 @@ export async function POST(req: Request, { params }: Params) {
     //
     // Si en el futuro el usuario pasa a Vercel Pro (maxDuration=300s),
     // podemos reactivar Grounding sin riesgo de timeout.
-    // 8000 tokens: la regla multi-componente puede exigir un bloque_nuevo
-    // de 500+ palabras. Con 4000 el JSON se truncaba a mitad de string y
-    // quedaba no parseable. 8000 es el máximo de salida de gemini-2.5-flash
-    // y entra cómodo en el timeout de 50s.
+    // 6000 tokens: punto de equilibrio. El contenido real de una respuesta
+    // multi-componente (bloque_nuevo <900 palabras + campos) cabe en ~2500
+    // tokens, así que 6000 da holgura de sobra contra truncado SIN inflar el
+    // tiempo de generación. 8000 hacía que gemini superara el AbortSignal de
+    // 50s y, al no quedar margen dentro del maxDuration=60s de Vercel para la
+    // cascada de fallback, todo el flujo caía con "problemas con proveedores".
     const aiResult = await llamarIA(
       SISTEMA_ANALIZADOR_PERTINENCIA,
       userPrompt,
-      8000,
+      6000,
       proyecto.servicio_id ?? "mono-001",
     );
     const groundingSources: GroundingSource[] = [];

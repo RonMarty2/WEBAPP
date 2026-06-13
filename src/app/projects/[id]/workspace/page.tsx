@@ -1335,7 +1335,7 @@ export default function WorkspacePage() {
               { role: "user", text: mensaje, ts: Date.now() },
               {
                 role: "assistant",
-                text: `📍 Esta observación corresponde al capítulo **${faseDestinoLabel}**, no a ${faseDef.label}.\n\n_${analisisIa}_\n\nTe llevé directo al capítulo correcto y dejé tu observación lista en el cuadro de chat. Revisala y dale a la flecha para aplicarla acá.`,
+                text: `📍 Esta observación corresponde al capítulo **${faseDestinoLabel}**, no a ${faseDef.label}.\n\n_${analisisIa}_\n\nTe llevé directo al capítulo correcto y dejé tu observación lista en el cuadro de chat. Revísala y dale a la flecha para aplicarla aquí.`,
                 ts: Date.now(),
               },
             ]);
@@ -1349,7 +1349,7 @@ export default function WorkspacePage() {
           { role: "user", text: mensaje, ts: Date.now() },
           {
             role: "assistant",
-            text: `⚠️ Esta observación parece pertenecer al capítulo "${faseDestinoLabel ?? "otro"}" pero no logré localizarlo automáticamente. Cambiá manualmente al capítulo correcto y pegá la observación.\n\n_${analisisIa}_`,
+            text: `⚠️ Esta observación parece pertenecer al capítulo "${faseDestinoLabel ?? "otro"}" pero no logré localizarlo automáticamente. Cambia manualmente al capítulo correcto y pega la observación.\n\n_${analisisIa}_`,
             ts: Date.now(),
           },
         ]);

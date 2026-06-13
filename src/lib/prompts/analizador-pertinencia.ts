@@ -332,6 +332,11 @@ export interface AnalizadorInput {
    *  analizador detectar si la observación corresponde a otra fase y
    *  devolver decision='mover_a_otra_fase' con el id correcto. */
   listaFases: FaseDisponible[];
+  /** true cuando la fase actual es la de ENSAMBLADO/COMPILACIÓN (ph-latex,
+   *  ph-proy-latex): su contenido es el .tex completo con TODOS los capítulos.
+   *  En ese caso NO se debe hacer cirugía de contenido — hay que enrutar la
+   *  observación a la fase del capítulo correspondiente. */
+  faseEnsamblado?: boolean;
 }
 
 export function buildAnalizadorUserPrompt(input: AnalizadorInput): string {
@@ -351,6 +356,20 @@ export function buildAnalizadorUserPrompt(input: AnalizadorInput): string {
     `═══ LISTA DE FASES DISPONIBLES DEL PROYECTO ═══`,
     `(Si la observación pertenece a OTRA fase, usa el id exacto de la lista.)`,
     listaFasesTexto,
+    ``,
+    input.faseEnsamblado
+      ? `🚨 ESTÁS EN LA FASE DE COMPILACIÓN/ENSAMBLADO. El contenido de abajo es\n` +
+        `el documento .tex COMPLETO con TODOS los capítulos juntos. Esta fase NO\n` +
+        `es el lugar para mejorar el contenido de un capítulo. Si la observación\n` +
+        `pide mejorar, profundizar, agregar datos, contrastar teoría/hipótesis o\n` +
+        `reestructurar un capítulo (ej. "Sobre el Capítulo IV…"), DEBES devolver\n` +
+        `decision='mover_a_otra_fase' apuntando a la fase de ESE capítulo en la\n` +
+        `LISTA DE FASES (ph-cap1…ph-cap5 según el número que mencione el tutor).\n` +
+        `NUNCA hagas cirugía de contenido (aplicar/aplicar_con_reserva) sobre el\n` +
+        `.tex ensamblado: una edición mínima aquí no mejora el capítulo y rompe\n` +
+        `el documento. Solo usa 'aplicar' aquí si la observación es EXCLUSIVAMENTE\n` +
+        `de formato LaTeX (un comando, un paquete, la carátula, numeración).`
+      : null,
     ``,
     `═══ CONTENIDO ACTUAL DE LA FASE ═══`,
     input.contenidoActual,
