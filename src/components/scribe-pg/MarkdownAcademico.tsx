@@ -22,13 +22,15 @@
  */
 
 import React, { useMemo } from "react";
+import { Diagrama } from "@/components/diagramas/Diagrama";
+import { parseDiagrama } from "@/lib/diagramas/parse";
 
 interface MarkdownAcademicoProps {
   markdown: string;
 }
 
 interface Bloque {
-  tipo: "parrafo" | "h1" | "h2" | "h3" | "h4" | "ul" | "ol" | "tabla" | "tikz" | "latex" | "pgfplots" | "code" | "vacio";
+  tipo: "parrafo" | "h1" | "h2" | "h3" | "h4" | "ul" | "ol" | "tabla" | "diagrama" | "tikz" | "latex" | "pgfplots" | "code" | "vacio";
   contenido: string;
   items?: string[];          // para ul/ol
   filas?: string[][];        // para tabla
@@ -71,6 +73,7 @@ function parsearBloques(md: string): Bloque[] {
       i++; // saltar el cierre ```
       const contenido = buf.join("\n");
       const tipo: Bloque["tipo"] =
+        lang === "diagrama" ? "diagrama" :
         lang === "tikz" ? "tikz" :
         lang === "pgfplots" ? "pgfplots" :
         (lang === "latex" || lang === "tex") ? "latex" :
@@ -435,6 +438,12 @@ export default function MarkdownAcademico({ markdown }: MarkdownAcademicoProps) 
             );
           case "tabla":
             return <Tabla key={i} filas={b.filas ?? []} />;
+          case "diagrama": {
+            const spec = parseDiagrama(b.contenido);
+            return spec
+              ? <Diagrama key={i} spec={spec} />
+              : <PlaceholderDiagrama key={i} tipo="pgfplots" contenido={b.contenido} />;
+          }
           case "tikz":
           case "latex":
           case "pgfplots":
