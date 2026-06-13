@@ -21,6 +21,7 @@ import type { CitaUnica } from "./citas";
 import { obtenerNorma, type NormaUniversitaria } from "./normas-universitarias";
 import { parseDiagrama } from "@/lib/diagramas/parse";
 import { diagramaASvg } from "@/lib/diagramas/svg";
+import { tablaAGrafico } from "@/lib/diagramas/desde-tabla";
 
 export interface DatosCaratulaWord {
   titulo: string;
@@ -103,6 +104,17 @@ function bloqueAWord(
           `<tr>${fila.map((c) => `<td style="border: 1px solid #333; padding: 6pt 8pt; vertical-align: top;">${inlineWord(c)}</td>`).join("")}</tr>`,
         )
         .join("");
+      // Gráfico derivado de la tabla (PNG ya rasterizado en el cliente;
+      // si no llegó, cae a SVG inline). El markdown guardado NO se toca.
+      const grafico = tablaAGrafico(filas, b.texto);
+      let graficoHtml = "";
+      if (grafico) {
+        const pngKey = b.id ? `${b.id}::graf` : "";
+        const png = pngKey ? pngDiagramas?.[pngKey] : undefined;
+        graficoHtml = png
+          ? `<div style="margin: 10pt 0 0; text-align: center;"><img src="${png}" alt="${esc(grafico.titulo ?? "Gráfico")}" style="max-width: 90%; height: auto;" /></div>`
+          : `<div style="margin: 10pt 0 0; text-align: center;">${diagramaASvg(grafico, { sinTitulo: true })}</div>`;
+      }
       return `<div style="margin: 18pt 0;">
 <p style="font-family: ${fuente}; font-size: ${Math.max(10, baseSize - 1)}pt; font-weight: bold; margin: 0 0 6pt 0; text-align: center;">${b.numero ?? ""}${b.texto ? ": " + esc(b.texto) : ""}</p>
 <table style="border-collapse: collapse; width: 100%; font-family: ${fuente}; font-size: ${sizeFuenteTabla}pt;">
@@ -110,6 +122,7 @@ function bloqueAWord(
 <tbody>${cuerpoHtml}</tbody>
 </table>
 <p style="font-family: ${fuente}; font-size: ${sizeFiguraCaption}pt; font-style: italic; margin: 4pt 0 0 0; text-align: center; color: #555;">Fuente: Elaboración propia con base en datos del estudio.</p>
+${graficoHtml}
 </div>`;
     }
     case "figura": {
