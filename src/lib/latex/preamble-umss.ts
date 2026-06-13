@@ -67,8 +67,9 @@ export function buildPreambleUMSS(): string {
     "\\usepackage{setspace}",
     "\\doublespacing                     % UMSS Posgrado: doble espacio",
     "\\usepackage{indentfirst}",
-    "\\setlength{\\parindent}{1.27cm}     % Sangría primera línea APA 7",
+    "\\setlength{\\parindent}{1.27cm}     % Sangría primera línea (como el ejemplo aprobado)",
     "\\setlength{\\parskip}{0pt}",
+    "\\usepackage[document]{ragged2e}     % Texto alineado a la izquierda, sin justificar (guía UMSS)",
     "",
     "% --- Citas y comillas ---",
     "\\usepackage{csquotes}",
@@ -126,12 +127,13 @@ export function buildPreambleUMSS(): string {
     "\\rhead{\\thepage}",
     "\\renewcommand{\\headrulewidth}{0pt}",
     "",
-    "% --- Numeración arábiga de capítulos (UMSS Posgrado) ---",
-    "\\counterwithin{table}{chapter}     % Cuadro 2.1, 2.2, 3.1, etc.",
-    "\\counterwithin{figure}{chapter}    % Figura 2.1, 3.4, etc.",
-    "% UMSS usa 'Cuadro' en lugar de 'Tabla' para todas las tablas.",
-    "\\renewcommand{\\tablename}{Cuadro}",
-    "\\renewcommand{\\listtablename}{Lista de Cuadros}",
+    "% --- Tablas y figuras (guía UMSS: 'Tabla N' / 'Gráfico N', numeración consecutiva) ---",
+    "\\renewcommand{\\tablename}{Tabla}",
+    "\\renewcommand{\\listtablename}{ÍNDICE DE TABLAS}",
+    "\\renewcommand{\\figurename}{Gráfico}",
+    "\\renewcommand{\\listfigurename}{ÍNDICE DE GRÁFICOS}",
+    "% Caption estilo APA 7: número en negrita, título en cursiva debajo, a la izquierda.",
+    "\\captionsetup{labelfont=bf, textfont=it, labelsep=newline, justification=raggedright, singlelinecheck=false}",
     "",
     "% Compactar el espacio del \\chapter (sin franja blanca enorme)",
     "\\makeatletter",
@@ -244,12 +246,18 @@ export function buildResumenHeader(): string {
   ].join("\n");
 }
 
-/** Índice general (después del resumen). */
+/** Índice general + índice de tablas + índice de gráficos (después del resumen). */
 export function buildIndice(): string {
   return [
     "% ===== ÍNDICE GENERAL =====",
+    "\\renewcommand{\\contentsname}{ÍNDICE}",
     "\\newpage",
     "\\tableofcontents",
+    "% ===== ÍNDICE DE TABLAS Y DE GRÁFICOS (guía UMSS) =====",
+    "\\newpage",
+    "\\listoftables",
+    "\\newpage",
+    "\\listoffigures",
     "\\newpage",
     "\\pagenumbering{arabic}",
     "\\setcounter{page}{1}",
