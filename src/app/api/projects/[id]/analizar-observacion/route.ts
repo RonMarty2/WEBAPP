@@ -188,10 +188,14 @@ export async function POST(req: Request, { params }: Params) {
     //
     // Si en el futuro el usuario pasa a Vercel Pro (maxDuration=300s),
     // podemos reactivar Grounding sin riesgo de timeout.
+    // 8000 tokens: la regla multi-componente puede exigir un bloque_nuevo
+    // de 500+ palabras. Con 4000 el JSON se truncaba a mitad de string y
+    // quedaba no parseable. 8000 es el máximo de salida de gemini-2.5-flash
+    // y entra cómodo en el timeout de 50s.
     const aiResult = await llamarIA(
       SISTEMA_ANALIZADOR_PERTINENCIA,
       userPrompt,
-      4000,
+      8000,
       proyecto.servicio_id ?? "mono-001",
     );
     const groundingSources: GroundingSource[] = [];

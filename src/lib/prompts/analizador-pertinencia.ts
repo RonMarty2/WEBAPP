@@ -192,12 +192,22 @@ CUANDO ESTO OCURRE — REGLAS OBLIGATORIAS:
    pie indicando la limitación, y baja la decision a "aplicar_con_reserva"
    con justificación al tutor.
 
-5. Si la observación afecta a un CAPÍTULO COMPLETO (no a un párrafo
-   suelto), bloque_original puede ser el capítulo completo (o su
-   subsección) y bloque_nuevo es la versión expandida — siempre
-   conservando el texto existente que ya cumple alguno de los
-   componentes. Esto NO es "regenerar todo": es expandir lo que falta
-   manteniendo lo válido.
+5. Si la observación pide que el capítulo CONTENGA componentes que hoy
+   le faltan (datos, tendencias, contraste teórico, contraste con
+   hipótesis, propuesta), NO copies el capítulo entero en
+   bloque_original — eso desborda el límite de salida y corta la
+   respuesta. En su lugar:
+   - accion_cirugia = "agregar_al_final"
+   - bloque_original = ""
+   - bloque_nuevo = las subsecciones nuevas que aportan los componentes
+     faltantes (cada una con su encabezado markdown, ej.
+     "### 4.X Contrastación con el marco teórico\\n\\n..."), DENSAS y con
+     citas APA reales.
+   Solo usa accion_cirugia="reemplazar" cuando el defecto está en UN
+   párrafo o subsección concreta y localizable; en ese caso
+   bloque_original es ESE fragmento puntual (nunca el capítulo entero).
+   bloque_nuevo es el único campo que puede ser extenso; manténlo por
+   debajo de 900 palabras para no truncar la respuesta.
 
 6. PROHIBIDO en el bloque_nuevo (lista exacta de fórmulas vacías que
    anulan la cirugía y obligan a reescribir antes de devolver):
@@ -428,8 +438,13 @@ function parseJsonTolerante(jsonStr: string): unknown | null {
     jsonStr,
     escaparControlesEnCadenas(jsonStr),
     escaparControlesEnCadenas(jsonStr).replace(/,(\s*[}\]])/g, "$1"),
+    // Red de seguridad final: si la respuesta llegó TRUNCADA (límite de
+    // tokens), cierra strings y llaves/corchetes abiertos para rescatar
+    // al menos los campos completos (decision, patron, analisis_ia…).
+    cerrarJsonTruncado(escaparControlesEnCadenas(jsonStr)),
   ];
   for (const intento of intentos) {
+    if (!intento) continue;
     try {
       return JSON.parse(intento);
     } catch {
@@ -440,18 +455,54 @@ function parseJsonTolerante(jsonStr: string): unknown | null {
 }
 
 /**
+ * Intenta cerrar un JSON cortado a la mitad (típico cuando la IA agota el
+ * presupuesto de tokens en un bloque_nuevo extenso). Recorre el texto
+ * respetando comillas y escapes; si termina dentro de una cadena la cierra,
+ * elimina una posible coma colgante y agrega los `]` y `}` que falten en el
+ * orden correcto. El último campo puede quedar parcial, pero los anteriores
+ * (que es donde viven decisión y justificación) se recuperan.
+ */
+function cerrarJsonTruncado(jsonStr: string): string | null {
+  let dentroDeString = false;
+  let escapando = false;
+  const pila: Array<"}" | "]"> = [];
+  for (let i = 0; i < jsonStr.length; i++) {
+    const ch = jsonStr[i];
+    if (escapando) { escapando = false; continue; }
+    if (ch === "\\") { if (dentroDeString) escapando = true; continue; }
+    if (ch === '"') { dentroDeString = !dentroDeString; continue; }
+    if (dentroDeString) continue;
+    if (ch === "{") pila.push("}");
+    else if (ch === "[") pila.push("]");
+    else if (ch === "}" || ch === "]") pila.pop();
+  }
+  if (pila.length === 0 && !dentroDeString) return null; // no estaba truncado
+  let reparado = jsonStr;
+  if (dentroDeString) reparado += '"';
+  // Quitar coma colgante antes de cerrar (ej. ..."valor",  → ..."valor")
+  reparado = reparado.replace(/,\s*$/, "");
+  while (pila.length > 0) reparado += pila.pop();
+  return reparado;
+}
+
+/**
  * Parsea la respuesta de la IA al formato esperado. Defensivo: si la IA
  * devolvió texto extra alrededor del JSON (p.ej. lo envolvió en ```json … ```),
  * lo extrae; si devolvió saltos de línea crudos dentro de las cadenas (típico
  * de Gemini en respuestas multipárrafo), los repara antes de parsear.
  */
 export function parseAnalizadorOutput(rawText: string): AnalizadorOutput | null {
-  const trimmed = rawText.trim();
-  // Buscar el primer { y el último } por si la IA agregó texto antes/después.
+  // Quitar un posible cerco ```json … ``` antes de buscar el objeto.
+  const trimmed = rawText.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
   const firstBrace = trimmed.indexOf("{");
+  if (firstBrace < 0) return null;
   const lastBrace = trimmed.lastIndexOf("}");
-  if (firstBrace < 0 || lastBrace <= firstBrace) return null;
-  const jsonStr = trimmed.slice(firstBrace, lastBrace + 1);
+  // Si hay un } de cierre, recortamos hasta ahí. Si NO lo hay (respuesta
+  // truncada por límite de tokens), tomamos desde el primer { hasta el final
+  // y dejamos que parseJsonTolerante intente cerrar el JSON.
+  const jsonStr = lastBrace > firstBrace
+    ? trimmed.slice(firstBrace, lastBrace + 1)
+    : trimmed.slice(firstBrace);
 
   const parsed = parseJsonTolerante(jsonStr) as
     | (Partial<AnalizadorOutput> & { propuesta_de_cambio?: string | null })
