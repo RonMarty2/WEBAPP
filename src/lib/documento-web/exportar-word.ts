@@ -19,6 +19,8 @@
 import type { BloqueNumerado } from "./numeracion";
 import type { CitaUnica } from "./citas";
 import { obtenerNorma, type NormaUniversitaria } from "./normas-universitarias";
+import { parseDiagrama } from "@/lib/diagramas/parse";
+import { diagramaASvg } from "@/lib/diagramas/svg";
 
 export interface DatosCaratulaWord {
   titulo: string;
@@ -55,7 +57,11 @@ function inlineWord(texto: string): string {
   return r;
 }
 
-function bloqueAWord(b: BloqueNumerado, norma: NormaUniversitaria): string {
+function bloqueAWord(
+  b: BloqueNumerado,
+  norma: NormaUniversitaria,
+  pngDiagramas?: Record<string, string>,
+): string {
   const fuente = norma.fuenteWord;
   const color = norma.colorAcento;
   const baseSize = norma.tamanoBasePt;
@@ -108,6 +114,26 @@ function bloqueAWord(b: BloqueNumerado, norma: NormaUniversitaria): string {
     }
     case "figura": {
       const captionText = `${b.numero ?? ""}: ${esc(b.texto)}`;
+      const captionSize = Math.max(10, baseSize - 1);
+      if (b.lang === "diagrama" && b.raw) {
+        const caption = `<p style="font-family: ${fuente}; font-size: ${captionSize}pt; font-weight: bold; margin: 6pt 0 0 0;">${captionText}</p>`;
+        const png = b.id ? pngDiagramas?.[b.id] : undefined;
+        if (png) {
+          return `<div style="margin: 18pt 0; text-align: center;">
+<img src="${png}" alt="${esc(b.texto)}" style="max-width: 90%; height: auto;" />
+${caption}
+</div>`;
+        }
+        // Respaldo: SVG inline (Word moderno lo abre; si no, el PNG de arriba
+        // ya lo cubre cuando el rasterizado está disponible).
+        const spec = parseDiagrama(b.raw);
+        if (spec) {
+          return `<div style="margin: 18pt 0; text-align: center;">
+${diagramaASvg(spec, { sinTitulo: true })}
+${caption}
+</div>`;
+        }
+      }
       if (b.lang === "imagen" && b.raw) {
         return `<div style="margin: 18pt 0; text-align: center;">
 <img src="${esc(b.raw)}" alt="${esc(b.texto)}" style="max-width: 80%; height: auto; border: 1px solid #ddd;" />
@@ -135,6 +161,8 @@ export function generarHTMLParaWord(input: {
   caratula: DatosCaratulaWord;
   capitulos: CapituloParaExport[];
   bibliografia?: CitaUnica[];
+  /** PNG (data URI) por id de bloque-figura, para embeber diagramas en Word. */
+  pngDiagramas?: Record<string, string>;
 }): string {
   const c = input.caratula;
   const norma = obtenerNorma(c.universidadId);
@@ -193,7 +221,7 @@ ${indiceEntradas.join("\n")}
 `;
 
   const capitulosHtml = input.capitulos
-    .map((cap) => cap.bloques.map((b) => bloqueAWord(b, norma)).join("\n"))
+    .map((cap) => cap.bloques.map((b) => bloqueAWord(b, norma, input.pngDiagramas)).join("\n"))
     .join("\n");
 
   let bibHtml = "";

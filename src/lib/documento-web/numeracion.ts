@@ -12,6 +12,7 @@
  */
 
 import type { CitaDetectada } from "./citas";
+import { parseDiagrama } from "@/lib/diagramas/parse";
 
 export interface NumeradorEstado {
   /** Capítulo actual (1-indexed). */
@@ -120,10 +121,13 @@ export function parsearMarkdownNumerado(
       }
       i++;
       const contenido = buf.join("\n");
-      const esFigura = ["tikz", "pgfplots", "latex", "tex"].includes(lang);
+      const esFigura = ["tikz", "pgfplots", "latex", "tex", "diagrama"].includes(lang);
       if (esFigura) {
         numerador.figuras++;
-        const captionTexto = extraerCaptionFigura(contenido) || `${lang.toUpperCase()} (figura sin caption)`;
+        const captionTexto =
+          lang === "diagrama"
+            ? captionDiagrama(contenido)
+            : extraerCaptionFigura(contenido) || `${lang.toUpperCase()} (figura sin caption)`;
         bloques.push({
           tipo: "figura",
           texto: captionTexto,
@@ -271,6 +275,14 @@ export function parsearMarkdownNumerado(
   }
 
   return bloques;
+}
+
+/** Caption para un bloque ```diagrama: usa el título del JSON, o uno por defecto. */
+function captionDiagrama(contenido: string): string {
+  const spec = parseDiagrama(contenido);
+  if (spec?.titulo) return spec.titulo;
+  if (spec?.tipo === "arbol-problemas") return "Árbol de problemas";
+  return "Gráfico";
 }
 
 function extraerCaptionFigura(contenido: string): string | undefined {

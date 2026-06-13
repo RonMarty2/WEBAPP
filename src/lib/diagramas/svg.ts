@@ -351,15 +351,24 @@ function svgPastel(spec: GraficoSpec): string {
   return placa(W, H, "", cuerpo);
 }
 
+export interface OpcionesSvg {
+  /**
+   * Omite el título dentro del SVG. Útil cuando el diagrama va dentro de un
+   * marco "Figura N: <título>" (documento-web, LaTeX) y repetirlo sobraría.
+   */
+  sinTitulo?: boolean;
+}
+
 /**
  * Punto de entrada: convierte cualquier DiagramaSpec en un SVG completo.
  * Devuelve "" solo si el dato es irrepresentable (el llamador cae al placeholder).
  */
-export function diagramaASvg(spec: DiagramaSpec): string {
+export function diagramaASvg(spec: DiagramaSpec, opts?: OpcionesSvg): string {
   try {
-    if (spec.tipo === "arbol-problemas") return svgArbol(spec);
-    if (spec.tipo === "grafico") {
-      return spec.variante === "pastel" ? svgPastel(spec) : svgBarrasLineas(spec);
+    const s: DiagramaSpec = opts?.sinTitulo && spec.titulo ? { ...spec, titulo: undefined } : spec;
+    if (s.tipo === "arbol-problemas") return svgArbol(s);
+    if (s.tipo === "grafico") {
+      return s.variante === "pastel" ? svgPastel(s) : svgBarrasLineas(s);
     }
     return "";
   } catch {

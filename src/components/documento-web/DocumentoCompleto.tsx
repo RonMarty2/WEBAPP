@@ -35,6 +35,9 @@ import { detectarCitas, consolidarCitas, resaltarCitasEnTexto, type CitaUnica } 
 import { copiarHTMLAlPortapapeles } from '@/lib/documento-web/copiar-html';
 import { generarHTMLParaWord, type DatosCaratulaWord } from '@/lib/documento-web/exportar-word';
 import { obtenerNorma } from '@/lib/documento-web/normas-universitarias';
+import { parseDiagrama } from '@/lib/diagramas/parse';
+import { diagramaASvg } from '@/lib/diagramas/svg';
+import { svgAPng } from '@/lib/diagramas/rasterizar';
 
 export interface FaseDoc {
   id: string;
@@ -60,6 +63,28 @@ export interface DocumentoCompletoProps {
    * color de acento, estilo de citas). Si se omite, usa la norma default.
    */
   universidadId?: string | null;
+}
+
+/**
+ * Rasteriza a PNG los diagramas (bloques ```diagrama) para embeberlos como
+ * imagen real en la descarga/copia a Word. Se hace en el cliente con Canvas;
+ * si algo falla, el builder de Word cae al SVG inline.
+ */
+async function rasterizarDiagramas(
+  capitulos: { bloques: BloqueNumerado[] }[],
+): Promise<Record<string, string>> {
+  const png: Record<string, string> = {};
+  for (const cap of capitulos) {
+    for (const b of cap.bloques) {
+      if (b.tipo === 'figura' && b.lang === 'diagrama' && b.raw && b.id) {
+        const spec = parseDiagrama(b.raw);
+        if (!spec) continue;
+        const dataUri = await svgAPng(diagramaASvg(spec, { sinTitulo: true }));
+        if (dataUri) png[b.id] = dataUri;
+      }
+    }
+  }
+  return png;
 }
 
 export default function DocumentoCompleto({
@@ -147,10 +172,12 @@ export default function DocumentoCompleto({
       ciudad: caratula.ciudad,
       ano: caratula.ano ?? new Date().getFullYear(),
     };
+    const pngDiagramas = await rasterizarDiagramas(capitulos);
     const html = generarHTMLParaWord({
       caratula: datosCaratula,
       capitulos: capitulos.map((c) => ({ label: c.fase.label, bloques: c.bloques })),
       bibliografia,
+      pngDiagramas,
     });
 
     const res = await copiarHTMLAlPortapapeles(html);
@@ -162,7 +189,7 @@ export default function DocumentoCompleto({
     }
   }
 
-  function descargarWord() {
+  async function descargarWord() {
     const datosCaratula: DatosCaratulaWord = {
       titulo: caratula.titulo ?? titulo,
       universidad: caratula.universidad,
@@ -175,10 +202,12 @@ export default function DocumentoCompleto({
       ciudad: caratula.ciudad,
       ano: caratula.ano ?? new Date().getFullYear(),
     };
+    const pngDiagramas = await rasterizarDiagramas(capitulos);
     const html = generarHTMLParaWord({
       caratula: datosCaratula,
       capitulos: capitulos.map((c) => ({ label: c.fase.label, bloques: c.bloques })),
       bibliografia,
+      pngDiagramas,
     });
     // Descarga como .doc: Word abre HTML con formato (Times, márgenes, tablas)
     // de forma nativa. El MIME application/msword hace que el SO lo asocie a Word.
@@ -571,6 +600,19 @@ function BloqueRender({ b }: { b: BloqueNumerado }) {
     );
   }
   if (b.tipo === 'figura') {
+    if (b.lang === 'diagrama' && b.raw) {
+      const spec = parseDiagrama(b.raw);
+      if (spec) {
+        return (
+          <figure id={b.id} style={{ margin: '20px 0', textAlign: 'center' }}>
+            <div dangerouslySetInnerHTML={{ __html: diagramaASvg(spec, { sinTitulo: true }) }} />
+            <figcaption style={{ fontSize: 13, fontWeight: 700, marginTop: 6, color: '#0c1e44' }}>
+              {b.numero}: {b.texto}
+            </figcaption>
+          </figure>
+        );
+      }
+    }
     return (
       <div className="doc-figura" id={b.id}>
         <p className="doc-figura-caption">{b.numero}: {b.texto}</p>
