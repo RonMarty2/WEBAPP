@@ -153,9 +153,10 @@ ${caption}
 <p style="font-family: ${fuente}; font-size: ${Math.max(10, baseSize - 1)}pt; font-weight: bold; margin: 6pt 0 0 0;">${captionText}</p>
 </div>`;
       }
-      return `<div style="margin: 18pt 0; padding: 24pt; border: 1px dashed #999; text-align: center;">
-<p style="font-family: ${fuente}; font-size: ${Math.max(10, baseSize - 1)}pt; font-weight: bold; margin: 0 0 6pt 0;">${captionText}</p>
-<p style="font-family: ${fuente}; font-size: ${sizeFiguraCaption}pt; font-style: italic; color: #666; margin: 0;">[Reemplazar con el diagrama/gráfico vectorial generado en Word o herramienta visual.]</p>
+      // Figura antigua sin imagen renderizable: mostramos solo el caption
+      // (sin el "[reemplazar...]" que parecía un pendiente en el documento final).
+      return `<div style="margin: 12pt 0; text-align: center;">
+<p style="font-family: ${fuente}; font-size: ${Math.max(10, baseSize - 1)}pt; font-weight: bold; margin: 0;">${captionText}</p>
 </div>`;
     }
     case "code":

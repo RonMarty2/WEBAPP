@@ -20,11 +20,11 @@ const SEPARADORES_RE = /^[\s]*[─━═\-_*]{3,}[\s]*$/;
  * o superior). Match case-insensitive.
  */
 const HEADERS_INTERNOS: RegExp[] = [
-  /^#{2,4}\s+Referencias observadas(\s+que requieren verificaci[oó]n)?\b/i,
-  /^#{2,4}\s+Resumen editorial\b/i,
-  /^#{2,4}\s+Sugerencias para enriquecer\b/i,
-  /^#{2,4}\s+Notas? interna(s)?\b/i,
-  /^#{2,4}\s+REFERENCIAS_ETAPA\b/i,
+  /^#{1,4}\s+Referencias observadas(\s+que requieren verificaci[oó]n)?\b/i,
+  /^#{1,4}\s+Resumen editorial\b/i,
+  /^#{1,4}\s+Sugerencias para enriquecer\b/i,
+  /^#{1,4}\s+Notas? interna(s)?\b/i,
+  /^#{1,4}\s+REFERENCIAS_ETAPA\b/i,
 ];
 
 /**

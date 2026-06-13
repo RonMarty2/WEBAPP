@@ -153,3 +153,92 @@ export function resaltarCitasEnTexto(texto: string): string {
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Recolección de referencias REALES desde las secciones del documento.
+//
+// La IA escribe las referencias completas (APA) en cada capítulo, bajo
+// "REFERENCIAS_ETAPA" o "REFERENCIAS BIBLIOGRÁFICAS". Antes, la bibliografía
+// final se armaba detectando "(Autor, año)" en el cuerpo → salían placeholders
+// "Título de la fuente. Editorial...". Esto recolecta las refs REALES de todos
+// los capítulos, las deduplica y arma UNA sola bibliografía de verdad.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const RE_SECCION_REFS =
+  /#{1,4}\s*(?:\d+(?:\.\d+)*\.?\s+)?(?:REFERENCIAS_ETAPA|REFERENCIAS\s+BIBLIOGR[ÁA]FICAS|BIBLIOGRAF[ÍI]A)\b[^\n]*\n([\s\S]*?)(?=\n#{1,4}\s|\n\[\[|$)/gi;
+
+/** Clave de dedup: minúsculas, sin acentos, alfanumérico, primeros 60 chars. */
+function claveReferencia(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .slice(0, 60);
+}
+
+/** Una referencia "parece" real si trae año (2023) o (s.f.) y tiene cuerpo. */
+function pareceReferencia(s: string): boolean {
+  return s.length >= 15 && /\(\s*(?:\d{4}[a-z]?|s\.?\s*f\.?)\s*\)/i.test(s);
+}
+
+/**
+ * Divide un bloque de referencias en entradas individuales, uniendo líneas de
+ * continuación (una referencia puede ocupar 2-3 líneas) y separando cuando
+ * empieza claramente otra (línea capitalizada y la entrada actual ya tiene año).
+ */
+function dividirEntradas(bloque: string): string[] {
+  const lineas = bloque.split("\n").map((l) => l.replace(/^\s*[-*]\s+/, "").trim());
+  const entradas: string[] = [];
+  let actual = "";
+  for (const l of lineas) {
+    if (!l) {
+      if (actual) { entradas.push(actual); actual = ""; }
+      continue;
+    }
+    const empiezaNueva = /^[A-ZÁÉÍÓÚÑ"“]/.test(l);
+    const actualConAnio = /\(\s*\d{4}/.test(actual);
+    if (actual && empiezaNueva && actualConAnio) {
+      entradas.push(actual);
+      actual = l;
+    } else {
+      actual = actual ? `${actual} ${l}` : l;
+    }
+  }
+  if (actual) entradas.push(actual);
+  return entradas;
+}
+
+/**
+ * Recolecta las referencias reales de todas las fases y devuelve una
+ * bibliografía consolidada (deduplicada, ordenada). Si no encuentra ninguna,
+ * devuelve [] y el llamador puede caer a `consolidarCitas` (placeholders).
+ */
+export function recolectarReferenciasReales(
+  phaseContents: Record<string, string | null | undefined>,
+): CitaUnica[] {
+  const mapa = new Map<string, CitaUnica>();
+  for (const md of Object.values(phaseContents)) {
+    if (typeof md !== "string" || md.length === 0) continue;
+    for (const m of md.matchAll(RE_SECCION_REFS)) {
+      const bloque = m[1] ?? "";
+      for (const entrada of dividirEntradas(bloque)) {
+        const limpio = entrada.replace(/\s+/g, " ").trim();
+        if (!pareceReferencia(limpio)) continue;
+        if (/^referencias?\s+observad/i.test(limpio)) continue; // incompletas: fuera
+        const clave = claveReferencia(limpio);
+        if (!clave || mapa.has(clave)) continue;
+        mapa.set(clave, {
+          clave,
+          texto_display: limpio,
+          estilo: "apa_parentesis",
+          apariciones: 1,
+        });
+      }
+    }
+  }
+  return Array.from(mapa.values()).sort((a, b) =>
+    a.texto_display.localeCompare(b.texto_display, "es"),
+  );
+}

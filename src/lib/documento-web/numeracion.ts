@@ -79,6 +79,69 @@ export function slugify(texto: string): string {
 }
 
 /**
+ * La IA escribe sus encabezados CON su propia numeración ("CAPÍTULO II:",
+ * "2.1.", "2.1.1."). El numerador del documento agregaba OTRA encima → salía
+ * doble ("1. 2. CAPÍTULO II"). Esto extrae la numeración previa de la IA y
+ * devuelve el título limpio, para preferir SU numeración (que ya es la
+ * académica correcta, con prefijo de capítulo) y no duplicar.
+ */
+export function limpiarTituloHeading(t: string): { numeroPrevio: string | null; texto: string } {
+  let texto = t.trim();
+  let numeroPrevio: string | null = null;
+  const reCapitulo = /^cap[íi]tulo\s+([ivxlcdm]+|\d+)\s*[:.\-–]?\s*/i;
+  const reDecimal = /^(\d+(?:\.\d+)*)\.?\s+/;
+  // "CAPÍTULO II:" al inicio (antes de un número decimal).
+  texto = texto.replace(reCapitulo, "").trim();
+  // Número decimal de la IA ("2.1.1.").
+  const dec = texto.match(reDecimal);
+  if (dec) { numeroPrevio = dec[1]; texto = texto.slice(dec[0].length).trim(); }
+  // "CAPÍTULO II:" que quedó DESPUÉS del número decimal ("2. CAPÍTULO II: ...").
+  texto = texto.replace(reCapitulo, "").trim();
+  return { numeroPrevio, texto: texto || t.trim() };
+}
+
+/** Quita un "Figura/Cuadro/Tabla/Gráfico N.N" inicial del caption para que el
+ * numerador no duplique ("Figura 1: Figura 4.1. ..."). */
+export function limpiarCaptionFigura(caption: string): string {
+  return caption
+    .replace(/^(figura|fig\.?|cuadro|tabla|gr[áa]fico)\s+[\d.]+\s*[:.\-–]?\s*/i, "")
+    .trim() || caption.trim();
+}
+
+/**
+ * Une filas de tabla partidas en varias líneas. La IA a veces escribe una
+ * celda con saltos de línea: la fila empieza con "|" pero no cierra con "|",
+ * y la continuación cae como párrafo suelto con pipes (lo que se veía como
+ * texto roto "| La ineficiencia... |"). Aquí unimos esas líneas en UNA fila
+ * válida. Conservador: solo actúa sobre filas que abren con "|" y no cierran;
+ * una tabla bien formada queda intacta.
+ */
+export function unirFilasTablaMultilinea(md: string): string {
+  const lineas = md.split("\n");
+  const out: string[] = [];
+  for (let i = 0; i < lineas.length; i++) {
+    let l = lineas[i];
+    const abreSinCerrar = /^\s*\|/.test(l) && !/\|\s*$/.test(l.trimEnd());
+    if (abreSinCerrar) {
+      let j = i + 1;
+      while (j < lineas.length) {
+        const sig = lineas[j];
+        if (sig.trim() === "") break;          // fin del bloque roto
+        if (/^\s*#{1,4}\s/.test(sig)) break;    // nuevo encabezado
+        l += " " + sig.trim();
+        j++;
+        if (/\|\s*$/.test(sig.trimEnd())) break; // fila cerrada
+      }
+      out.push(l);
+      i = j - 1;
+      continue;
+    }
+    out.push(l);
+  }
+  return out.join("\n");
+}
+
+/**
  * Parsea el markdown de una fase y devuelve los bloques con numeración resuelta.
  * El estado se mantiene entre llamadas (mismo objeto numerador) para que la
  * numeración de figuras/tablas sea continua a través de los capítulos.
@@ -93,7 +156,7 @@ export function parsearMarkdownNumerado(
     prefijoId?: string;
   },
 ): BloqueNumerado[] {
-  const lineas = normalizarMarcadores(markdown).split("\n");
+  const lineas = unirFilasTablaMultilinea(normalizarMarcadores(markdown)).split("\n");
   const bloques: BloqueNumerado[] = [];
   const prefijoId = opciones?.prefijoId ?? "";
   let yaInicioCapitulo = !opciones?.iniciaCapitulo;
@@ -125,10 +188,11 @@ export function parsearMarkdownNumerado(
       const esFigura = ["tikz", "pgfplots", "latex", "tex", "diagrama"].includes(lang);
       if (esFigura) {
         numerador.figuras++;
-        const captionTexto =
+        const captionTexto = limpiarCaptionFigura(
           lang === "diagrama"
             ? captionDiagrama(contenido)
-            : extraerCaptionFigura(contenido) || `${lang.toUpperCase()} (figura sin caption)`;
+            : extraerCaptionFigura(contenido) || "Figura",
+        );
         bloques.push({
           tipo: "figura",
           texto: captionTexto,
@@ -147,7 +211,9 @@ export function parsearMarkdownNumerado(
     const h = linea.match(/^(#{1,4})\s+(.*)$/);
     if (h) {
       const nivel = h[1].length;
-      const titulo = h[2].trim().replace(/\*+$/, "").trim();
+      const tituloCrudo = h[2].trim().replace(/\*+$/, "").trim();
+      // Preferimos la numeración que la IA ya escribió; evita "1. 2. CAPÍTULO II".
+      const { numeroPrevio, texto: titulo } = limpiarTituloHeading(tituloCrudo);
 
       if (nivel === 1 && !yaInicioCapitulo) {
         numerador.capitulo++;
@@ -171,7 +237,8 @@ export function parsearMarkdownNumerado(
       if (numerador.secciones.length > 0) {
         numerador.secciones[profundidad - 1] = (numerador.secciones[profundidad - 1] ?? 0) + 1;
       }
-      const numero = numerador.secciones.join(".");
+      // Preferimos la numeración de la IA si la trae; si no, la del numerador.
+      const numero = numeroPrevio ?? numerador.secciones.join(".");
       bloques.push({
         tipo: `h${nivel}` as BloqueNumerado["tipo"],
         texto: titulo,

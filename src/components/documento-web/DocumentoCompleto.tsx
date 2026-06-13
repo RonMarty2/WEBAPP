@@ -31,7 +31,7 @@ import {
   type NumeradorEstado,
   type EntradaIndice,
 } from '@/lib/documento-web/numeracion';
-import { detectarCitas, consolidarCitas, resaltarCitasEnTexto, type CitaUnica } from '@/lib/documento-web/citas';
+import { detectarCitas, consolidarCitas, recolectarReferenciasReales, resaltarCitasEnTexto, type CitaUnica } from '@/lib/documento-web/citas';
 import { copiarHTMLAlPortapapeles } from '@/lib/documento-web/copiar-html';
 import { generarHTMLParaWord, type DatosCaratulaWord } from '@/lib/documento-web/exportar-word';
 import { obtenerNorma } from '@/lib/documento-web/normas-universitarias';
@@ -165,7 +165,14 @@ export default function DocumentoCompleto({
       }
     }
 
-    const bibliografia = consolidarCitas(todasCitas);
+    // Bibliografía: preferimos las referencias REALES escritas por la IA en
+    // las secciones de cada capítulo (REFERENCIAS_ETAPA / REFERENCIAS
+    // BIBLIOGRÁFICAS). Solo si no hay ninguna caemos a la detección de citas
+    // del cuerpo (que produce placeholders "Título de la fuente...").
+    const referenciasReales = recolectarReferenciasReales(phaseContents);
+    const bibliografia = referenciasReales.length > 0
+      ? referenciasReales
+      : consolidarCitas(todasCitas);
     const indice = capitulos.flatMap((c) => c.indice);
 
     return { capitulos, indice, bibliografia, hayContenido };
@@ -639,16 +646,14 @@ function BloqueRender({ b }: { b: BloqueNumerado }) {
       }
     }
     return (
-      <div className="doc-figura" id={b.id}>
-        <p className="doc-figura-caption">{b.numero}: {b.texto}</p>
-        {b.lang === 'imagen' && b.raw ? (
-          <img src={b.raw} alt={b.texto} />
-        ) : (
-          <p className="text-xs italic text-slate-500">
-            [Diagrama/gráfico {b.lang?.toUpperCase()}. Al copiar al Word, reemplaza con la imagen final.]
-          </p>
+      <figure id={b.id} style={{ margin: '18px 0', textAlign: 'center' }}>
+        {b.lang === 'imagen' && b.raw && (
+          <img src={b.raw} alt={b.texto} style={{ maxWidth: '100%', height: 'auto' }} />
         )}
-      </div>
+        <figcaption style={{ fontSize: 13, fontWeight: 700, marginTop: 6, color: '#0c1e44' }}>
+          {b.numero}: {b.texto}
+        </figcaption>
+      </figure>
     );
   }
   if (b.tipo === 'code') {
