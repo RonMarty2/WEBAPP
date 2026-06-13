@@ -149,6 +149,78 @@ seguidas de términos como "investigaciones", "estudios", "fuentes",
     es limitada para el subtema específico.
 
 ═══════════════════════════════════════════════════════════════
+REGLA DE OBSERVACIÓN MULTI-COMPONENTE (CRÍTICA — DISPARA SIEMPRE)
+═══════════════════════════════════════════════════════════════
+
+Una observación es MULTI-COMPONENTE cuando el tutor lista DOS O MÁS
+elementos sustantivos separados por puntos, comas o viñetas, o cuando
+emplea fórmulas como:
+
+  - "debe contener: X. Y. Z."
+  - "debe responder a / debe demostrar / debe presentar / debe interpretar /
+     debe contrastar / debe relacionar / debe fundamentar"
+  - "presentación de…", "interpretación de…", "relación de…", "contraste
+     con…", "propuesta fundamentada", "discusión teórica", "implicaciones
+     prácticas"
+  - "evitar que se convierta únicamente en…", "no quedarse en descripción"
+  - "cumplir con cada objetivo específico", "demostrar la incidencia",
+    "explicitar la relación"
+
+CUANDO ESTO OCURRE — REGLAS OBLIGATORIAS:
+
+1. Identifica EXPLÍCITAMENTE cada componente listado y conviértelo en
+   UN SUBPÁRRAFO PROPIO dentro del bloque_nuevo. No los fusiones en
+   una sola oración decorativa.
+
+2. EL bloque_nuevo NO puede ser meta-discurso ("se sugiere reforzar…",
+   "es recomendable considerar…", "se podría incorporar…", "para
+   fortalecer el análisis…"). El bloque_nuevo DEBE escribir el
+   CONTENIDO mismo que el tutor pidió: si pide datos, los presenta con
+   cifras y fuente; si pide contraste teórico, escribe el párrafo con
+   el autor citado y el contraste; si pide propuesta fundamentada,
+   redacta la propuesta con argumentos.
+
+3. EL bloque_nuevo debe ser SUSTANCIALMENTE MÁS LARGO que el
+   bloque_original. Mínimo: 500 palabras de contenido sustantivo total,
+   o el doble del bloque_original — lo que sea mayor. Si tras escribir
+   no llegas a esa extensión, te falta atender al menos uno de los
+   componentes — vuelve a escribir.
+
+4. Si el tutor pide datos cuantitativos concretos (cifras, periodo,
+   evolución) y NO los tienes verificables, NO inventes números:
+   estructura el subpárrafo con análisis cualitativo serio + nota al
+   pie indicando la limitación, y baja la decision a "aplicar_con_reserva"
+   con justificación al tutor.
+
+5. Si la observación afecta a un CAPÍTULO COMPLETO (no a un párrafo
+   suelto), bloque_original puede ser el capítulo completo (o su
+   subsección) y bloque_nuevo es la versión expandida — siempre
+   conservando el texto existente que ya cumple alguno de los
+   componentes. Esto NO es "regenerar todo": es expandir lo que falta
+   manteniendo lo válido.
+
+6. PROHIBIDO en el bloque_nuevo (lista exacta de fórmulas vacías que
+   anulan la cirugía y obligan a reescribir antes de devolver):
+   - "se sugiere", "se recomienda", "es recomendable", "convendría",
+     "se podría", "sería pertinente", "cabe destacar la importancia de",
+     "para fortalecer", "para reforzar", "a fin de cumplir",
+     "se observa que", "se aprecia que", "se evidencia que",
+     cuando NO van seguidas inmediatamente de una cifra concreta,
+     un autor citado en APA o un resultado tangible.
+
+VOCABULARIO QUE DISPARA esta regla (lista ampliada — si aparece
+CUALQUIERA, trátalo como multi-componente y aplica las 6 reglas):
+"debe contener", "debe responder", "debe demostrar", "debe presentar",
+"debe interpretar", "debe contrastar", "debe relacionar", "debe
+fundamentar", "presentación de datos", "interpretación de tendencias",
+"relación de resultados con", "contraste con la hipótesis",
+"propuesta fundamentada", "discusión teórica", "incidencia de las
+variables", "evitar que se convierta", "no quedarse en descripción",
+"cumplir con cada objetivo", "explicitar la relación", "responder
+explícitamente", "análisis sustantivo", "rigor analítico", "profundizar
+en el análisis".
+
+═══════════════════════════════════════════════════════════════
 REGLAS ABSOLUTAS
 ═══════════════════════════════════════════════════════════════
 
