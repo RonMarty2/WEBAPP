@@ -35,6 +35,7 @@ import { detectarCitas, consolidarCitas, resaltarCitasEnTexto, type CitaUnica } 
 import { copiarHTMLAlPortapapeles } from '@/lib/documento-web/copiar-html';
 import { generarHTMLParaWord, type DatosCaratulaWord } from '@/lib/documento-web/exportar-word';
 import { obtenerNorma } from '@/lib/documento-web/normas-universitarias';
+import { limpiarParaDocumentoFinal } from '@/lib/documento-web/limpieza-final';
 import { parseDiagrama } from '@/lib/diagramas/parse';
 import { diagramaASvg } from '@/lib/diagramas/svg';
 import { svgAPng } from '@/lib/diagramas/rasterizar';
@@ -121,7 +122,11 @@ export default function DocumentoCompleto({
 
     for (const fase of fases) {
       if (esFaseInterna(fase.id, fase.label)) continue;
-      const md = (phaseContents[fase.id] ?? '').trim();
+      // Limpiamos marcadores y secciones internas ANTES del parser:
+      // "Referencias observadas", "[VERIFICAR]", separadores ───, etc.
+      // Sin esto, el numerador las trata como subsecciones del cuerpo y
+      // el estudiante ve notas editoriales mezcladas con su tesis.
+      const md = limpiarParaDocumentoFinal((phaseContents[fase.id] ?? '').trim());
       if (!md) {
         capitulos.push({ fase, bloques: [], indice: [] });
         continue;
