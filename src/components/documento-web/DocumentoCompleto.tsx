@@ -84,7 +84,18 @@ export default function DocumentoCompleto({
     const todasCitas: ReturnType<typeof detectarCitas> = [];
     let hayContenido = false;
 
+    // Fases internas que NUNCA deben aparecer como capítulos del documento
+    // legible: la compilación LaTeX (su contenido es el .tex crudo con %%%%),
+    // el control de calidad y la propuesta de temas (Cap.0). Mismo criterio
+    // que /documento. Sin esto, "Compilar LaTeX" salía como "Capítulo III".
+    const esFaseInterna = (id: string, label?: string) =>
+      /latex|calidad/i.test(id) ||
+      id === 'ph-cap0' ||
+      id === 'ph-proy-cap0' ||
+      /compilar\s*latex|control\s*de\s*calidad|propuesta\s*de\s*tema/i.test(label ?? '');
+
     for (const fase of fases) {
+      if (esFaseInterna(fase.id, fase.label)) continue;
       const md = (phaseContents[fase.id] ?? '').trim();
       if (!md) {
         capitulos.push({ fase, bloques: [], indice: [] });
@@ -151,7 +162,7 @@ export default function DocumentoCompleto({
     }
   }
 
-  function descargarHtml() {
+  function descargarWord() {
     const datosCaratula: DatosCaratulaWord = {
       titulo: caratula.titulo ?? titulo,
       universidad: caratula.universidad,
@@ -169,7 +180,9 @@ export default function DocumentoCompleto({
       capitulos: capitulos.map((c) => ({ label: c.fase.label, bloques: c.bloques })),
       bibliografia,
     });
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    // Descarga como .doc: Word abre HTML con formato (Times, márgenes, tablas)
+    // de forma nativa. El MIME application/msword hace que el SO lo asocie a Word.
+    const blob = new Blob(['﻿', html], { type: 'application/msword;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -180,7 +193,7 @@ export default function DocumentoCompleto({
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .slice(0, 80) || 'documento';
-    a.download = `${safe}.html`;
+    a.download = `${safe}.doc`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -209,10 +222,10 @@ export default function DocumentoCompleto({
         </div>
         <button
           type="button"
-          onClick={descargarHtml}
+          onClick={descargarWord}
           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
         >
-          <Download className="h-3.5 w-3.5" /> Descargar HTML
+          <Download className="h-3.5 w-3.5" /> Descargar Word
         </button>
         <button
           type="button"
@@ -271,6 +284,13 @@ export default function DocumentoCompleto({
           padding: 64px 72px;
           line-height: ${norma.interlineado === 2.0 ? 1.8 : norma.interlineado === 1.5 ? 1.6 : 1.5};
           font-size: ${Math.max(13, norma.tamanoBasePt + 2)}px;
+          /* Evita que un texto largo sin espacios (ej. una fila de %%% de
+             LaTeX) ensanche la hoja y recorte el contenido centrado en móvil. */
+          overflow-wrap: break-word;
+          word-break: break-word;
+        }
+        @media (max-width: 640px) {
+          .doc-tipografia { padding: 28px 20px; }
         }
         .doc-tipografia .h1-cap,
         .doc-tipografia .h2,
