@@ -38,6 +38,21 @@ export default function ObservacionesTribunal({ proyectoId, phaseDefs = [] }: Pr
   const [atendiendo, setAtendiendo] = useState<string | null>(null);
   const [eliminando, setEliminando] = useState<string | null>(null);
 
+  // Regeneración incremental por observación de FONDO (tipo 3).
+  // Estado por observación: propuesta de la IA antes de que el estudiante
+  // decida aplicarla al documento.
+  type Propuesta = {
+    capitulo: string;
+    texto_nuevo: string;
+    cambios: string[];
+    longitud_actual?: number;
+    longitud_nueva?: number;
+  };
+  const [regenerando, setRegenerando] = useState<string | null>(null);
+  const [aplicando, setAplicando] = useState<string | null>(null);
+  const [propuestas, setPropuestas] = useState<Record<string, Propuesta>>({});
+  const [previewVisible, setPreviewVisible] = useState<Record<string, boolean>>({});
+
   // Create form
   const [showForm, setShowForm] = useState(false);
   const [nuevoTexto, setNuevoTexto] = useState("");
@@ -112,6 +127,61 @@ export default function ObservacionesTribunal({ proyectoId, phaseDefs = [] }: Pr
     } catch (e) {
       setMsg((e as Error).message);
     }
+  }
+
+  async function regenerar(o: Observacion) {
+    setRegenerando(o.id);
+    setMsg("");
+    try {
+      const res = await fetch(`${base}/${o.id}/regenerar`, { method: "POST" });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Error regenerando");
+      setPropuestas(prev => ({ ...prev, [o.id]: d as Propuesta }));
+      setPreviewVisible(prev => ({ ...prev, [o.id]: true }));
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setRegenerando(null);
+    }
+  }
+
+  async function aplicarPropuesta(o: Observacion) {
+    const prop = propuestas[o.id];
+    if (!prop) return;
+    setAplicando(o.id);
+    setMsg("");
+    try {
+      const res = await fetch(`${base}/${o.id}/aplicar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto_nuevo: prop.texto_nuevo }),
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.error || "Error aplicando");
+      setObs(prev => prev.map(x => x.id === o.id ? { ...x, estado: "atendida" } : x));
+      setPropuestas(prev => {
+        const n = { ...prev };
+        delete n[o.id];
+        return n;
+      });
+      setPreviewVisible(prev => ({ ...prev, [o.id]: false }));
+      // Aviso fuerte al estudiante: el capítulo cambió en el documento real,
+      // conviene refrescar la vista del workspace para verlo.
+      setMsg("Capítulo actualizado. Refresca el workspace para ver el resultado.");
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setAplicando(null);
+    }
+  }
+
+  function descartarPropuesta(o: Observacion) {
+    setPropuestas(prev => {
+      const n = { ...prev };
+      delete n[o.id];
+      return n;
+    });
+    setPreviewVisible(prev => ({ ...prev, [o.id]: false }));
   }
 
   async function eliminar(o: Observacion) {
@@ -317,6 +387,114 @@ export default function ObservacionesTribunal({ proyectoId, phaseDefs = [] }: Pr
                             ? <><div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} /><span>Analizando…</span></>
                             : "⚡ Atender con IA"}
                         </button>
+                      )}
+
+                      {/* Regeneración incremental — solo para FONDO (tipo 3)
+                          con capítulo asignado, mientras esté pendiente. */}
+                      {o.estado === "pendiente" && o.tipo === 3 && o.capitulo_afectado && !propuestas[o.id] && (
+                        <button
+                          onClick={() => regenerar(o)}
+                          disabled={regenerando === o.id}
+                          className="btn-ghost"
+                          style={{
+                            marginTop: 10, width: "100%", justifyContent: "center",
+                            fontSize: 12, padding: "8px",
+                            color: "#f59e0b", borderColor: "rgba(245,158,11,0.4)",
+                            background: "rgba(245,158,11,0.06)",
+                          }}
+                          title="Mejora el capítulo aplicando la observación, conservando lo que ya está bien."
+                        >
+                          {regenerando === o.id
+                            ? <><div className="spinner" style={{ width: 12, height: 12, borderWidth: 2 }} /><span>Mejorando capítulo (incremental)…</span></>
+                            : "✨ Regenerar capítulo aplicando esta observación"}
+                        </button>
+                      )}
+
+                      {/* Preview de la propuesta de regeneración */}
+                      {propuestas[o.id] && (
+                        <div style={{
+                          marginTop: 12, padding: "10px 12px", borderRadius: 8,
+                          background: "rgba(245,158,11,0.04)",
+                          border: "1px solid rgba(245,158,11,0.3)",
+                        }}>
+                          <div style={{ fontSize: 10, fontWeight: 700, color: "#f59e0b", marginBottom: 6, textTransform: "uppercase" }}>
+                            Propuesta de mejora incremental
+                          </div>
+
+                          {/* Lista de cambios */}
+                          {propuestas[o.id].cambios.length > 0 && (
+                            <div style={{ marginBottom: 8 }}>
+                              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--fg-muted)", marginBottom: 4 }}>
+                                Cambios que propone la IA:
+                              </div>
+                              <ul style={{ margin: 0, paddingLeft: 18, fontSize: 11, color: "var(--fg-primary)", lineHeight: 1.5 }}>
+                                {propuestas[o.id].cambios.map((c, i) => (
+                                  <li key={i} style={{ marginBottom: 2 }}>{c}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Métrica del delta de longitud */}
+                          {propuestas[o.id].longitud_actual != null && propuestas[o.id].longitud_nueva != null && (
+                            <div style={{ fontSize: 10, color: "var(--fg-muted)", marginBottom: 8 }}>
+                              Longitud: {propuestas[o.id].longitud_actual} → {propuestas[o.id].longitud_nueva} caracteres
+                              {(() => {
+                                const delta = (propuestas[o.id].longitud_nueva ?? 0) - (propuestas[o.id].longitud_actual ?? 0);
+                                const pct = propuestas[o.id].longitud_actual ? Math.round((delta / propuestas[o.id].longitud_actual!) * 100) : 0;
+                                return <> ({delta >= 0 ? "+" : ""}{delta}, {pct >= 0 ? "+" : ""}{pct}%)</>;
+                              })()}
+                            </div>
+                          )}
+
+                          {/* Toggle preview del texto */}
+                          <button
+                            onClick={() => setPreviewVisible(prev => ({ ...prev, [o.id]: !prev[o.id] }))}
+                            className="btn-ghost"
+                            style={{ width: "100%", justifyContent: "center", fontSize: 11, padding: "6px", marginBottom: 6 }}
+                          >
+                            {previewVisible[o.id] ? "▼ Ocultar texto propuesto" : "▶ Ver texto propuesto"}
+                          </button>
+
+                          {previewVisible[o.id] && (
+                            <div style={{
+                              maxHeight: 260, overflowY: "auto",
+                              background: "rgba(15,23,42,0.06)",
+                              border: "1px solid rgba(148,163,184,0.2)",
+                              borderRadius: 6, padding: "8px 10px",
+                              fontSize: 11, lineHeight: 1.5, color: "var(--fg-primary)",
+                              whiteSpace: "pre-wrap", marginBottom: 8,
+                            }}>
+                              {propuestas[o.id].texto_nuevo}
+                            </div>
+                          )}
+
+                          <div style={{ display: "flex", gap: 6 }}>
+                            <button
+                              onClick={() => aplicarPropuesta(o)}
+                              disabled={aplicando === o.id}
+                              className="btn-ghost"
+                              style={{
+                                flex: 1, justifyContent: "center", fontSize: 11, padding: "7px",
+                                color: "#4ade80", borderColor: "rgba(74,222,128,0.4)",
+                                background: "rgba(74,222,128,0.08)",
+                              }}
+                            >
+                              {aplicando === o.id ? "Aplicando…" : "✓ Aplicar al documento"}
+                            </button>
+                            <button
+                              onClick={() => descartarPropuesta(o)}
+                              disabled={aplicando === o.id}
+                              className="btn-ghost"
+                              style={{
+                                flex: 1, justifyContent: "center", fontSize: 11, padding: "7px",
+                                color: "#94a3b8",
+                              }}
+                            >
+                              ✕ Descartar
+                            </button>
+                          </div>
+                        </div>
                       )}
 
                       {/* Estado actions */}

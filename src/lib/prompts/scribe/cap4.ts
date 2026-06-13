@@ -592,6 +592,60 @@ Antes de cerrar el Capítulo IV, verifica internamente:
 10. Que el análisis no contradiga la metodología del Capítulo III.
 
 ═══════════════════════════════════════════════════════════════
+CHECKLIST OBLIGATORIO DE AUTO-VERIFICACIÓN — ANTES DE EMITIR
+═══════════════════════════════════════════════════════════════
+
+Esta checklist EXISTE porque la falla más común en este capítulo es entregar
+prosa genérica del tipo "se presenta el análisis…", "se examina la incidencia…",
+"se aborda el objetivo…" sin números, sin autores citados, sin contraste real.
+ESO NO ES ACEPTABLE.
+
+Antes de enviar tu respuesta, vuelve a leer en silencio cada subtítulo 4.X y verifica
+que TODOS los puntos siguientes se cumplan en cada uno. Si alguno falla,
+reescribe ese subtítulo ANTES de emitir.
+
+✓ Punto 1 — DATOS CONCRETOS:
+  El subtítulo contiene al menos UNA cifra, porcentaje, tabla o resultado
+  numérico CONCRETO con su fuente citada en APA 7 (ej: "las exportaciones
+  no tradicionales crecieron 12,4% entre 2020 y 2024 (INE, 2024)").
+  Decir "los datos muestran un crecimiento" SIN número falla.
+
+✓ Punto 2 — CONTRASTE TEÓRICO EXPLÍCITO:
+  Hay al menos UN párrafo que nombra a un autor, modelo o teoría del Cap. II
+  Y conecta el hallazgo con esa teoría ("este patrón coincide con el modelo
+  de ventaja comparativa de Ricardo (1817), citado en el Cap. II, …").
+  Decir "esto coincide con la teoría" sin nombrar la teoría falla.
+
+✓ Punto 3 — RELACIÓN CON LA HIPÓTESIS (solo si Cap. I es clásico):
+  Hay una frase que dice explícitamente si el hallazgo RESPALDA, MATIZA o
+  CONTRADICE la hipótesis del Cap. I. No basta "se confirma lo planteado".
+
+✓ Punto 4 — INTERPRETACIÓN, NO SOLO DESCRIPCIÓN:
+  El subtítulo no se limita a anunciar contenido ("se presenta…",
+  "se analiza…"); explica POR QUÉ los datos son como son, qué los causa
+  o qué implican.
+
+✓ Punto 5 — IMPLICACIÓN PARA LA PROPUESTA:
+  Cada subtítulo (excepto el introductorio) cierra con una frase que conecta
+  el hallazgo con una decisión, una mejora o un componente de la propuesta.
+
+VOCABULARIO DE ALARMA — si lo escribes, párate y revisa:
+"se presenta", "se analiza", "se examina", "se evalúa", "se aborda",
+"se discute", "se interpreta", "se aprecia", "se observa", "se evidencia",
+"se identifica", "se considera", "se realiza un análisis", "se efectúa un
+estudio", "se llevará a cabo", "examinando la incidencia", "presentando los
+resultados".
+
+Estas formas SOLO son aceptables cuando van seguidas INMEDIATAMENTE por
+una cifra concreta, una tabla, un autor citado o un resultado tangible.
+Si están "flotando" sin contenido, REESCRIBE el párrafo.
+
+EXTENSIÓN MÍNIMA POR SUBTÍTULO:
+Cada subtítulo 4.X de objetivo específico debe tener al menos 350 palabras
+de análisis sustantivo (sin contar tablas). Subtítulos más cortos suelen
+indicar evasión.
+
+═══════════════════════════════════════════════════════════════
 SALIDA FINAL OBLIGATORIA
 ═══════════════════════════════════════════════════════════════
 
