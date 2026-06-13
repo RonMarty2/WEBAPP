@@ -631,7 +631,7 @@ function BloqueRender({ b }: { b: BloqueNumerado }) {
           <figure id={b.id} style={{ margin: '20px 0', textAlign: 'center' }}>
             <div dangerouslySetInnerHTML={{ __html: diagramaASvg(spec, { sinTitulo: true }) }} />
             <figcaption style={{ fontSize: 13, fontWeight: 700, marginTop: 6, color: '#0c1e44' }}>
-              {b.numero}: {b.texto}
+              {b.numero}{b.texto ? `. ${b.texto}` : ''}
             </figcaption>
           </figure>
         );
@@ -643,7 +643,7 @@ function BloqueRender({ b }: { b: BloqueNumerado }) {
           <img src={b.raw} alt={b.texto} style={{ maxWidth: '100%', height: 'auto' }} />
         )}
         <figcaption style={{ fontSize: 13, fontWeight: 700, marginTop: 6, color: '#0c1e44' }}>
-          {b.numero}: {b.texto}
+          {b.numero}{b.texto ? `. ${b.texto}` : ''}
         </figcaption>
       </figure>
     );

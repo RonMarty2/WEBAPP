@@ -138,12 +138,14 @@ export async function generarDocx(input: DocxInput): Promise<Blob> {
           cuerpo.push(new Paragraph({ bullet: { level: 0 }, spacing: { line }, children: runsInline(it, font, size) }));
         }
       } else if (b.tipo === "tabla" && b.filas && b.filas.length > 0) {
-        // Caption APA: "Tabla N" en negrita + título en cursiva.
+        // Caption APA: "Tabla N" en negrita + título en cursiva (si lo hay).
         cuerpo.push(new Paragraph({
           spacing: { line, before: 160, after: 40 },
           children: [
             new TextRun({ text: b.numero ?? "Tabla", bold: true, font, size }),
-            ...(b.texto ? [new TextRun({ text: `. ${b.texto}`, italics: true, font, size })] : []),
+            ...(b.texto && b.texto.trim()
+              ? [new TextRun({ text: `. ${b.texto}`, italics: true, font, size })]
+              : []),
           ],
         }));
         cuerpo.push(tablaApa(b.filas, font, size));

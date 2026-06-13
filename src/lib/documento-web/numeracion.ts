@@ -253,10 +253,16 @@ export function parsearMarkdownNumerado(
     if (isTablaRow(linea)) {
       const filas: string[][] = [];
       let captionPrevio: string | undefined;
-      // Caption previo en el bloque anterior?
+      // Caption previo en el bloque anterior. Reconocemos las formas que la
+      // IA usa más: 'Tabla 4.5 Título', '**Tabla 4.5** Título',
+      // '**Tabla 4.5.** *Título*', '_Tabla 4.5_ Título', 'Cuadro 2.1 ...'.
+      const reCaptionInicio = /^(?:\*{1,2}|_)?\s*(Tabla|Cuadro)\s+[\d.]+/i;
       const prevBloque = bloques[bloques.length - 1];
-      if (prevBloque?.tipo === "parrafo" && /^_?(Tabla|Cuadro)/i.test(prevBloque.texto.trim())) {
-        captionPrevio = prevBloque.texto.replace(/^_?(Tabla|Cuadro)\s+\d*:?\s*/i, "").replace(/_$/, "").trim();
+      if (prevBloque?.tipo === "parrafo" && reCaptionInicio.test(prevBloque.texto.trim())) {
+        captionPrevio = prevBloque.texto
+          .replace(/^\s*(?:\*{1,2}|_)?\s*(Tabla|Cuadro)\s+[\d.]+\s*\*{0,2}_?\s*[:.\-–]?\s*/i, "")
+          .replace(/[*_]+/g, "")
+          .trim();
         bloques.pop();
       }
       let j = i;
@@ -272,7 +278,7 @@ export function parsearMarkdownNumerado(
         numerador.tablas++;
         bloques.push({
           tipo: "tabla",
-          texto: captionPrevio ?? "Datos del estudio",
+          texto: captionPrevio ?? "",
           numero: `Tabla ${numerador.tablas}`,
           filas,
           id: `${prefijoId}-tabla-${numerador.tablas}`,
