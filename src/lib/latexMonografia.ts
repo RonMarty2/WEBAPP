@@ -2,6 +2,8 @@
 // Format: 12pt, letterpaper, Times New Roman, 2.54 cm margins, 1.5 spacing.
 
 import { getUniversityTemplate, type CaratulaInput } from "./universityTemplates";
+import { parseDiagrama } from "./diagramas/parse";
+import { diagramaATikz } from "./diagramas/tikz";
 
 export interface CitaBiblio {
   autor: string;
@@ -141,6 +143,25 @@ export function mdALatex(text: string): string {
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
     const line = raw.trimEnd();
+
+    // 📊 Bloque ```diagrama → TikZ determinista generado desde el JSON.
+    // Nunca se vuelca el JSON: si no parsea, se omite con un comentario.
+    if (/^\s*```diagrama\s*$/i.test(line)) {
+      closeList();
+      closeTabular();
+      const buf: string[] = [];
+      i++;
+      while (i < lines.length && !/^\s*```\s*$/.test(lines[i].trim())) {
+        buf.push(lines[i]);
+        i++;
+      }
+      const spec = parseDiagrama(buf.join("\n"));
+      const tex = spec ? diagramaATikz(spec) : "";
+      out.push("");
+      out.push(tex || "% [diagrama omitido: dato no interpretable]");
+      out.push("");
+      continue;
+    }
 
     // 📊 Bloque LaTeX raw (```latex / ```tex / ```tikz)
     const fenceMatch = line.match(/^\s*```(latex|tex|tikz|pgfplots)?\s*$/i);
