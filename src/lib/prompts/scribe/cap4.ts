@@ -100,10 +100,11 @@ JERARQUÍA OBLIGATORIA PARA CUALQUIER DATO NUMÉRICO O TABLA:
    → Presenta la tabla con su estructura (encabezados de columnas y filas
      rotulados correctamente) pero con la marca textual «[dato a completar]»
      en cada celda de valor.
-   → Debajo, en la Nota de la tabla, escribe EXACTAMENTE qué fuente debe
-     consultar el estudiante para llenarla (ej.: "Nota. El estudiante debe
-     completar con la serie de exportaciones no tradicionales 2020-2024
-     publicada por el INE (ine.gob.bo) y/o el IBCE.").
+   → Debajo, en la Nota de la tabla, indica EXACTAMENTE la fuente oficial de
+     donde se obtienen esas cifras, en tono académico neutro (NO dirigido al
+     estudiante). Ej.: "Nota. Datos a completar con la serie de exportaciones
+     no tradicionales 2020-2024 del Instituto Nacional de Estadística (INE) y
+     el IBCE." Nunca escribas "el estudiante debe…" en el documento.
    → Además, desarrolla el análisis CUALITATIVO de la tendencia esperada con
      base en fuentes documentales reales, SIN cifras inventadas.
 

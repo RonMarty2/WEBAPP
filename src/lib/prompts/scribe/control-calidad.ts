@@ -111,7 +111,11 @@ Clasifica cada observación según esta escala:
 🔴 CRÍTICO:
 Error que impide pasar a LaTeX o entregar el documento. Debe corregirse sí o sí.
 Ejemplos:
-- Marcadores como [COMPLETAR DATO].
+- Marcadores como [COMPLETAR DATO] en el texto narrativo (NO aplica a la marca
+  «[dato a completar]» dentro de celdas de tablas numéricas, que es honesta y
+  esperada cuando el estudiante aún no aportó las cifras: eso es RECORDATORIO).
+- Cifras inventadas o atribuidas a una fuente real (INE, IBCE…) sin provenir
+  de ella.
 - Gráficos vacíos.
 - Tablas sin datos.
 - Objetivos no respondidos.
@@ -342,7 +346,7 @@ Revisa:
 4. Que los datos tengan fuente.
 5. Que las tablas sean interpretadas.
 6. Que los gráficos tengan datos reales o tabla base.
-7. Que no existan placeholders.
+7. Que no existan placeholders en el texto narrativo.
 8. Que los indicadores se calculen o analicen correctamente.
 9. Que la propuesta derive de los hallazgos.
 10. Que se contraste hipótesis o supuesto si corresponde.
@@ -358,13 +362,25 @@ Detecta:
 - Cálculos no explicados.
 - Propuesta genérica.
 - Recomendaciones disfrazadas de análisis.
-- Resultados inventados.
-- Marcadores como [COMPLETAR DATO].
+- Resultados inventados (LA MÁS GRAVE: cifras inventadas, sobre todo si se
+  atribuyen a una fuente real como INE o IBCE sin provenir de ella).
+- Marcadores como [COMPLETAR DATO] en el texto narrativo.
 - Texto que diga "insertar gráfico".
 - Análisis que no se conecta con teoría.
 - Hallazgos que no se usarán en conclusiones.
 
-Si hay cualquier placeholder en Capítulo IV, marcar como CRÍTICO.
+DISTINCIÓN OBLIGATORIA SOBRE DATOS A COMPLETAR:
+- Una tabla numérica con celdas «[dato a completar]» y su nota indicando la
+  fuente a consultar NO es un defecto crítico: es la forma HONESTA y correcta
+  de presentar datos que el estudiante aún debe aportar. Repórtala como
+  RECORDATORIO (nivel informativo): "Completa la Tabla X con tus datos reales
+  de [fuente]". NUNCA como CRÍTICO, y JAMÁS sugieras rellenarla con cifras
+  estimadas o inventadas.
+- Lo CRÍTICO es lo contrario: una cifra inventada presentada como real o con
+  fuente falsa. Eso sí se marca como CRÍTICO.
+
+Marca como CRÍTICO un placeholder SOLO si está en el texto narrativo
+(párrafos de análisis), no en celdas de datos numéricos a completar.
 
 ═══════════════════════════════════════════════════════════════
 REVISIÓN 8 — CAPÍTULO V
