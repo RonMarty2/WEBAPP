@@ -16,7 +16,7 @@ import JSZip from "jszip";
 import { requireAuth, AuthError } from "@/lib/api-auth";
 import { dbGetProyecto } from "@/lib/db";
 import { DEFAULT_UNIVERSITIES } from "@/lib/data";
-import { sanitizeOrphanIncludes, quitarTocDuplicadoDeChapters, tablasAEstiloApa } from "@/lib/latex/sanitize";
+import { sanitizeOrphanIncludes, quitarTocDuplicadoDeChapters, tablasAEstiloApa, quitarTitleInternoDeGraficos } from "@/lib/latex/sanitize";
 import { llamarIA, hydrateAIConfigAsync } from "@/lib/aiProvider";
 import { mdALatex, escaparLatexPlain } from "@/lib/latexMonografia";
 import {
@@ -727,7 +727,9 @@ export async function GET(_req: Request, { params }: Params) {
     const availableFiles = logoBuffer ? [logoFilename] : [];
     // Saneamiento de formato (anti-duplicados en índice + tablas APA) ANTES
     // de buscar huérfanos de imagen, para que ambos vean el mismo .tex limpio.
-    const texPreLimpio = tablasAEstiloApa(quitarTocDuplicadoDeChapters(texConDatos));
+    const texPreLimpio = quitarTitleInternoDeGraficos(
+      tablasAEstiloApa(quitarTocDuplicadoDeChapters(texConDatos)),
+    );
     const { tex: texLimpio, orphans } = sanitizeOrphanIncludes(texPreLimpio, availableFiles);
     if (orphans.length > 0) {
       console.warn(`[paquete-latex] Se eliminaron ${orphans.length} \\includegraphics huérfano(s): ${orphans.join(", ")}`);

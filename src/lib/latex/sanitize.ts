@@ -43,6 +43,70 @@ export function quitarTocDuplicadoDeChapters(tex: string): string {
 }
 
 /**
+ * Quita el `title={...}` dentro de los entornos pgfplots / TikZ axis.
+ *
+ * APA 7 y la guía UMSS piden el título del gráfico SOLO en el caption debajo
+ * de la figura. Si la IA emite además un `title={...}` dentro de
+ * `\begin{axis}[...]` se duplica visualmente (un título dentro del gráfico
+ * + otro caption debajo).
+ *
+ * Conservador: solo actúa dentro de los `\begin{axis}[...]` / `\begin{...axis}`
+ * de pgfplots. Si la línea tiene `title={...}` la quita; si no hay key=, no
+ * toca nada.
+ */
+export function quitarTitleInternoDeGraficos(tex: string): string {
+  if (typeof tex !== "string") return tex;
+  // Recorre cada \begin{axis}[...]\end{axis} y, dentro de los corchetes [...]
+  // de opciones, quita la línea/par 'title={...}'.
+  return tex.replace(
+    /\\begin\{(axis|semilogxaxis|semilogyaxis|loglogaxis|polaraxis)\}\[([\s\S]*?)\]/g,
+    (_full, env: string, opts: string) => {
+      // Quita 'title={...}' balanceando llaves, y la coma/blanco contiguo.
+      let limpio = "";
+      let i = 0;
+      while (i < opts.length) {
+        // Detecta el inicio de 'title' como key (al inicio o después de coma/espacio).
+        const inicio = opts.indexOf("title", i);
+        if (inicio === -1) { limpio += opts.slice(i); break; }
+        // Verifica que sea key real: precedido por inicio o por separador.
+        const prev = inicio === 0 ? "," : opts[inicio - 1];
+        const post = opts[inicio + 5] ?? "";
+        if (!/[,\s\n]/.test(prev) || !/[\s=]/.test(post)) {
+          limpio += opts.slice(i, inicio + 5);
+          i = inicio + 5;
+          continue;
+        }
+        limpio += opts.slice(i, inicio);
+        // Avanza hasta el '=' después de 'title'.
+        let k = inicio + 5;
+        while (k < opts.length && /[\s\n]/.test(opts[k])) k++;
+        if (opts[k] !== "=") { limpio += opts.slice(inicio, k); i = k; continue; }
+        k++;
+        while (k < opts.length && /[\s\n]/.test(opts[k])) k++;
+        // Salta el valor: puede ser {...} balanceado o un literal hasta coma.
+        if (opts[k] === "{") {
+          let depth = 1; k++;
+          while (k < opts.length && depth > 0) {
+            if (opts[k] === "{") depth++;
+            else if (opts[k] === "}") depth--;
+            k++;
+          }
+        } else {
+          while (k < opts.length && opts[k] !== ",") k++;
+        }
+        // Consume la coma final (si la hay) y los blancos previos.
+        while (k < opts.length && /[,\s\n]/.test(opts[k])) k++;
+        // Limpia la coma anterior que quedó suelta.
+        limpio = limpio.replace(/[,\s\n]+$/, "");
+        if (limpio.length > 0 && k < opts.length) limpio += ",\n";
+        i = k;
+      }
+      return `\\begin{${env}}[${limpio}]`;
+    },
+  );
+}
+
+/**
  * Tablas APA: cuando la IA genera \begin{tabular}{|p{...}|...|} con bordes
  * verticales y \hline en cada fila (estilo no-APA), reformatea SI el caption
  * y la estructura lo permiten. Si la conversión es ambigua, lo deja igual.
