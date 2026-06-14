@@ -55,33 +55,58 @@ export function quitarTocDuplicadoDeChapters(tex: string): string {
  */
 export function tablasAEstiloApa(tex: string): string {
   if (typeof tex !== "string") return tex;
-  return tex.replace(
-    /(\\begin\{tabular\}\{)([^}]+)(\})([\s\S]*?)(\\end\{tabular\})/g,
-    (_full, ini, colspec, fin, body, endTab) => {
-      // Solo actuamos si tiene bordes verticales o \hline en el colspec/cuerpo.
-      const tieneBordes = /\|/.test(colspec) || /\\hline/.test(body);
-      if (!tieneBordes) return _full;
-      const colspecLimpio = colspec.replace(/\|/g, "").trim();
-      // Divide el cuerpo en filas por "\\" (separadores LaTeX). Quita \hline.
-      const filas = body
-        .split(/\\\\/)
-        .map((f: string) => f.replace(/\\hline/g, "").trim())
-        .filter((f: string) => f.length > 0);
-      if (filas.length < 2) return _full;
-      const header = filas[0];
-      const cuerpo = filas.slice(1);
-      const lineas = [
-        ini + colspecLimpio + fin,
-        "\\toprule",
-        header + " \\\\",
-        "\\midrule",
-        ...cuerpo.map((f: string) => f + " \\\\"),
-        "\\bottomrule",
-        endTab,
-      ];
-      return lineas.join("\n");
-    },
-  );
+  // Parser que respeta llaves anidadas: colspec de tabular puede contener
+  // `p{3cm}|p{2cm}`, donde las llaves internas confunden a un regex simple.
+  let out = "";
+  let i = 0;
+  const ABRE = "\\begin{tabular}{";
+  const CIERRA = "\\end{tabular}";
+  while (i < tex.length) {
+    const idx = tex.indexOf(ABRE, i);
+    if (idx === -1) { out += tex.slice(i); break; }
+    out += tex.slice(i, idx);
+    // Lee el colspec balanceando llaves.
+    let j = idx + ABRE.length;
+    let depth = 1;
+    while (j < tex.length && depth > 0) {
+      if (tex[j] === "{") depth++;
+      else if (tex[j] === "}") depth--;
+      if (depth > 0) j++;
+    }
+    const colspec = tex.slice(idx + ABRE.length, j);
+    const finIdx = tex.indexOf(CIERRA, j);
+    if (finIdx === -1) { out += tex.slice(idx); break; }
+    const body = tex.slice(j + 1, finIdx); // +1 para saltar el `}` del colspec
+    const tieneBordes = /\|/.test(colspec) || /\\hline/.test(body);
+    if (!tieneBordes) {
+      out += tex.slice(idx, finIdx + CIERRA.length);
+      i = finIdx + CIERRA.length;
+      continue;
+    }
+    const colspecLimpio = colspec.replace(/\|/g, "").trim();
+    const filas = body
+      .split(/\\\\/)
+      .map((f: string) => f.replace(/\\hline/g, "").trim())
+      .filter((f: string) => f.length > 0);
+    if (filas.length < 2) {
+      out += tex.slice(idx, finIdx + CIERRA.length);
+      i = finIdx + CIERRA.length;
+      continue;
+    }
+    const header = filas[0];
+    const cuerpo = filas.slice(1);
+    out += [
+      ABRE + colspecLimpio + "}",
+      "\\toprule",
+      header + " \\\\",
+      "\\midrule",
+      ...cuerpo.map((f: string) => f + " \\\\"),
+      "\\bottomrule",
+      CIERRA,
+    ].join("\n");
+    i = finIdx + CIERRA.length;
+  }
+  return out;
 }
 
 export interface SanitizeResult {
