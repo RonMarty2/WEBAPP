@@ -22,6 +22,68 @@
  * mostrará una página de "Índice de Figuras" más corta o vacía.
  */
 
+/**
+ * Quita los `\addcontentsline{toc}{chapter}{...}` que la IA agrega después de
+ * `\chapter{...}`. El comando `\chapter` YA agrega la entrada al TOC; el
+ * `\addcontentsline` manual genera ENTRADA DUPLICADA en el índice.
+ *
+ * Preserva los `\addcontentsline` para `\chapter*` (no numerado, sí los
+ * necesita) y los `\addcontentsline{lof}{figure}{...}` / `{lot}{table}{...}`.
+ *
+ * Conservador: solo quita líneas que siguen INMEDIATAMENTE a un `\chapter{}`
+ * (no `\chapter*{}`).
+ */
+export function quitarTocDuplicadoDeChapters(tex: string): string {
+  if (typeof tex !== "string") return tex;
+  // \chapter{...}  + (líneas vacías)  + \addcontentsline{toc}{chapter}{...}
+  return tex.replace(
+    /(\\chapter\{[^}]*\})\s*\n+\s*\\addcontentsline\{toc\}\{chapter\}\{[^}]*\}\s*\n?/g,
+    "$1\n",
+  );
+}
+
+/**
+ * Tablas APA: cuando la IA genera \begin{tabular}{|p{...}|...|} con bordes
+ * verticales y \hline en cada fila (estilo no-APA), reformatea SI el caption
+ * y la estructura lo permiten. Si la conversión es ambigua, lo deja igual.
+ *
+ * Cambios mínimos y seguros:
+ *   - Quita los `|` entre las columnas del colspec (p{3cm}|p{2cm} → p{3cm}p{2cm}).
+ *   - Quita los `\hline` redundantes después de cada fila; deja \toprule
+ *     después del \begin{tabular}, \midrule después del header, \bottomrule
+ *     antes del \end{tabular}.
+ */
+export function tablasAEstiloApa(tex: string): string {
+  if (typeof tex !== "string") return tex;
+  return tex.replace(
+    /(\\begin\{tabular\}\{)([^}]+)(\})([\s\S]*?)(\\end\{tabular\})/g,
+    (_full, ini, colspec, fin, body, endTab) => {
+      // Solo actuamos si tiene bordes verticales o \hline en el colspec/cuerpo.
+      const tieneBordes = /\|/.test(colspec) || /\\hline/.test(body);
+      if (!tieneBordes) return _full;
+      const colspecLimpio = colspec.replace(/\|/g, "").trim();
+      // Divide el cuerpo en filas por "\\" (separadores LaTeX). Quita \hline.
+      const filas = body
+        .split(/\\\\/)
+        .map((f: string) => f.replace(/\\hline/g, "").trim())
+        .filter((f: string) => f.length > 0);
+      if (filas.length < 2) return _full;
+      const header = filas[0];
+      const cuerpo = filas.slice(1);
+      const lineas = [
+        ini + colspecLimpio + fin,
+        "\\toprule",
+        header + " \\\\",
+        "\\midrule",
+        ...cuerpo.map((f: string) => f + " \\\\"),
+        "\\bottomrule",
+        endTab,
+      ];
+      return lineas.join("\n");
+    },
+  );
+}
+
 export interface SanitizeResult {
   /** El .tex limpio, sin includegraphics huérfanos. */
   tex: string;

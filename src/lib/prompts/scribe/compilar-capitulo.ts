@@ -212,9 +212,13 @@ ESTRUCTURA DE TU OUTPUT
 Para un capítulo normal (1, 2, 3, 4, 5):
 
 \\chapter{TÍTULO DEL CAPÍTULO EN MAYÚSCULAS}
-\\addcontentsline{toc}{chapter}{Capítulo N: Título}
 
 <contenido convertido a LaTeX, sin el título duplicado>
+
+🚨 NO agregues \\addcontentsline{toc}{chapter}{...} después del \\chapter{}.
+El comando \\chapter{} YA agrega la entrada al índice automáticamente. Si
+agregas el \\addcontentsline manual el índice sale DUPLICADO ("Capítulo I:"
+dos veces). Solo \\chapter{TÍTULO} y nada más.
 
 Para el RESUMEN EJECUTIVO o BIBLIOGRAFÍA:
 
