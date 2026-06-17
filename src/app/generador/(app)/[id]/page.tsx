@@ -3,13 +3,43 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState, useCallback } from 'react';
-import { ArrowLeft, Link2, Unlink, Layers, Sparkles, Loader2, Copy, Check, FileText } from 'lucide-react';
+import { ArrowLeft, Link2, Unlink, Layers, Sparkles, Loader2, Copy, Check, FileText, Brain, RefreshCw } from 'lucide-react';
 import { MODULOS } from '@/lib/generador/utils';
 import type { ProyectoMaestro, VinculoModulo } from '@/types/maestro';
 import { ProgresoFlujo } from '@/components/compartido/ProgresoFlujo';
 import { SiguienteModulo } from '@/components/compartido/SiguienteModulo';
 
 type Disponibles = Record<string, Array<{ id: string; titulo: string }>>;
+
+interface ProyectoCerebro {
+  project_id: string;
+  titulo: string;
+  status: string;
+  completeness_pct: number;
+  key_metrics: Array<{ label: string; value: string | number; unit?: string }>;
+}
+
+interface CerebroVinculado {
+  cerebro_id: string;
+  project_id: string;
+  titulo: string;
+  resumen: string | null;
+  key_metrics: Array<{ label: string; value: string | number; unit?: string }>;
+  status: string;
+  completeness_pct: number;
+  artifact_fetched_at: string;
+}
+
+const CEREBROS_CONFIG = [
+  {
+    id: 'simuladorPRO',
+    label: 'Simulador de Finanzas',
+    descripcion: 'Trae tu análisis financiero (VAN, TIR, Payback) al documento.',
+    emoji: '💰',
+    color: 'text-emerald-700',
+    bg: 'bg-emerald-50 border-emerald-200',
+  },
+];
 
 export default function GeneradorWorkspace() {
   const params = useParams<{ id: string }>();
@@ -21,6 +51,13 @@ export default function GeneradorWorkspace() {
 
   const [contextoTxt, setContextoTxt] = useState<string | null>(null);
   const [cargandoCtx, setCargandoCtx] = useState(false);
+
+  // Cerebros externos
+  const [cerebrosVinculados, setCerebrosVinculados] = useState<CerebroVinculado[]>([]);
+  const [proyectosCerebro, setProyectosCerebro] = useState<Record<string, ProyectoCerebro[]>>({});
+  const [seleccionCerebro, setSeleccionCerebro] = useState<Record<string, string>>({});
+  const [cargandoCerebro, setCargandoCerebro] = useState<Record<string, boolean>>({});
+  const [vinculandoCerebro, setVinculandoCerebro] = useState<Record<string, boolean>>({});
 
   const [borrador, setBorrador] = useState<string | null>(null);
   const [generando, setGenerando] = useState(false);
@@ -35,13 +72,41 @@ export default function GeneradorWorkspace() {
     setEstado('ok');
   }, [params.id]);
 
+  const cargarCerebrosVinculados = useCallback(async () => {
+    const r = await fetch(`/api/maestro/${params.id}/vincular-cerebro-externo`, { credentials: 'include' });
+    if (r.ok) { const d = await r.json(); setCerebrosVinculados(d.cerebros ?? []); }
+  }, [params.id]);
+
+  const cargarProyectosCerebro = async (cerebroId: string) => {
+    setCargandoCerebro((p) => ({ ...p, [cerebroId]: true }));
+    try {
+      const r = await fetch(`/api/maestro/${params.id}/vincular-cerebro-externo?cerebroId=${cerebroId}`, { credentials: 'include' });
+      if (r.ok) { const d = await r.json(); setProyectosCerebro((p) => ({ ...p, [cerebroId]: d.proyectos ?? [] })); }
+    } finally { setCargandoCerebro((p) => ({ ...p, [cerebroId]: false })); }
+  };
+
+  const vincularCerebro = async (cerebroId: string) => {
+    const projectId = seleccionCerebro[cerebroId];
+    if (!projectId) return;
+    setVinculandoCerebro((p) => ({ ...p, [cerebroId]: true }));
+    try {
+      await fetch(`/api/maestro/${params.id}/vincular-cerebro-externo`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+        body: JSON.stringify({ cerebroId, projectId }),
+      });
+      setContextoTxt(null);
+      await cargarCerebrosVinculados();
+    } finally { setVinculandoCerebro((p) => ({ ...p, [cerebroId]: false })); }
+  };
+
   useEffect(() => {
     cargarMaestro();
+    cargarCerebrosVinculados();
     fetch('/api/maestro/disponibles', { credentials: 'include' })
       .then((r) => r.json())
       .then((d) => setDisponibles(d.disponibles ?? {}))
       .catch(() => {});
-  }, [cargarMaestro]);
+  }, [cargarMaestro, cargarCerebrosVinculados]);
 
   const vinculado = (modulo: string) => vinculos.find((v) => v.modulo === modulo);
   const tituloVinculado = (modulo: string, refId: string) =>
@@ -171,6 +236,87 @@ export default function GeneradorWorkspace() {
                   </div>
                 ) : (
                   <Link href={m.ruta} className="gen-btn-ghost px-3 py-1.5 text-xs">Ir al módulo</Link>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Cerebros especializados */}
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold flex items-center gap-1.5">
+          <Brain className="h-4 w-4" /> Cerebros especializados
+        </h2>
+        <p className="gen-muted mt-0.5 text-xs">Conecta tu trabajo de otras herramientas para que la IA use tus datos reales.</p>
+        <div className="mt-3 space-y-2">
+          {CEREBROS_CONFIG.map((cfg) => {
+            const vinculado = cerebrosVinculados.find((c) => c.cerebro_id === cfg.id);
+            const proyectos = proyectosCerebro[cfg.id] ?? [];
+            const cargando = cargandoCerebro[cfg.id];
+            const vinculando = vinculandoCerebro[cfg.id];
+
+            return (
+              <div key={cfg.id} className={`gen-card flex flex-wrap items-start gap-3 p-3 border ${vinculado ? cfg.bg : ''}`}>
+                <span className="text-xl">{cfg.emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium">{cfg.label}</p>
+                  {vinculado ? (
+                    <div>
+                      <p className={`text-xs font-medium ${cfg.color}`}>✓ {vinculado.titulo} ({vinculado.completeness_pct}% completo)</p>
+                      {vinculado.key_metrics.length > 0 && (
+                        <p className="gen-muted text-xs mt-0.5">
+                          {vinculado.key_metrics.map((m) => `${m.label}: ${m.value}${m.unit ? ' ' + m.unit : ''}`).join(' · ')}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="gen-muted text-xs">{cfg.descripcion}</p>
+                  )}
+                </div>
+
+                {vinculado ? (
+                  <button
+                    onClick={() => { cargarProyectosCerebro(cfg.id); setSeleccionCerebro((s) => ({ ...s, [cfg.id]: '' })); }}
+                    className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-1.5 text-xs"
+                    title="Actualizar o cambiar proyecto"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" /> Actualizar
+                  </button>
+                ) : proyectos.length === 0 ? (
+                  <button
+                    onClick={() => cargarProyectosCerebro(cfg.id)}
+                    disabled={cargando}
+                    className="gen-btn-ghost inline-flex items-center gap-1.5 px-3 py-1.5 text-xs disabled:opacity-50"
+                  >
+                    {cargando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                    {cargando ? 'Buscando…' : 'Conectar'}
+                  </button>
+                ) : null}
+
+                {proyectos.length > 0 && (
+                  <div className="w-full flex items-center gap-1.5 mt-1">
+                    <select
+                      value={seleccionCerebro[cfg.id] ?? ''}
+                      onChange={(e) => setSeleccionCerebro((s) => ({ ...s, [cfg.id]: e.target.value }))}
+                      className="gen-border flex-1 rounded border px-2 py-1.5 text-sm"
+                    >
+                      <option value="">Elegir proyecto…</option>
+                      {proyectos.map((p) => (
+                        <option key={p.project_id} value={p.project_id}>
+                          {p.titulo} ({p.completeness_pct}%)
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => vincularCerebro(cfg.id)}
+                      disabled={!seleccionCerebro[cfg.id] || vinculando}
+                      className="gen-btn-primary inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium disabled:opacity-40"
+                    >
+                      {vinculando ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Link2 className="h-3.5 w-3.5" />}
+                      {vinculando ? 'Vinculando…' : 'Vincular'}
+                    </button>
+                  </div>
                 )}
               </div>
             );

@@ -52,15 +52,51 @@ async function esDueno(sb: any, maestroId: string, userId: string) {
   return !!data;
 }
 
-// ── GET — lista cerebros vinculados ────────────────────────────────────────
+// ── GET — lista cerebros vinculados (o proyectos disponibles de un cerebro) ─
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
   const user = await getUser();
   if (!user) return NextResponse.json({ error: 'no_session' }, { status: 401 });
+
+  const { searchParams } = new URL(req.url);
+  const cerebroId = searchParams.get('cerebroId');
+
+  // Si se pasa ?cerebroId=simuladorPRO → devuelve los proyectos disponibles
+  // del estudiante en ese cerebro (para mostrar en el dropdown antes de vincular)
+  if (cerebroId) {
+    const config = CEREBRO_CONFIG[cerebroId];
+    if (!config?.url) return NextResponse.json({ proyectos: [] });
+
+    try {
+      const url = new URL(config.url);
+      url.searchParams.set('email', user.email);
+      const resp = await fetch(url.toString(), {
+        headers: { 'X-Webapp-Key': config.apiKey },
+        signal: AbortSignal.timeout(10_000),
+      });
+      if (!resp.ok) return NextResponse.json({ proyectos: [] });
+      const data = await resp.json();
+      // El endpoint devuelve un array de StudentArtifact
+      const lista = Array.isArray(data) ? data : [data];
+      return NextResponse.json({
+        proyectos: lista.map((a: Record<string, unknown>) => ({
+          project_id: a.project_id,
+          titulo: a.titulo,
+          status: a.status,
+          completeness_pct: a.completeness_pct,
+          key_metrics: a.key_metrics,
+        })),
+      });
+    } catch {
+      return NextResponse.json({ proyectos: [] });
+    }
+  }
+
+  // Sin cerebroId → lista los cerebros ya vinculados al maestro
   if (!isSupabaseConfigured()) return NextResponse.json({ cerebros: [] });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
