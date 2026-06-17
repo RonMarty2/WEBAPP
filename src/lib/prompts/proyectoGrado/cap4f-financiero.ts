@@ -2,9 +2,8 @@
  * SISTEMA_PROY_CAP4F — Fase 4f: Estudio Financiero.
  *
  * Séptima sub-fase del Capítulo IV. Estructura toda la inversión y
- * costos del proyecto. Los CÁLCULOS NUMÉRICOS los hace el módulo
- * src/lib/proyectoGrado/calculos.ts — la IA solo presenta tablas
- * e interpreta.
+ * costos del proyecto. Los CÁLCULOS NUMÉRICOS los entrega simuladorPRO
+ * como cerebro financiero oficial — WEBAPP solo presenta tablas e interpreta.
  *
  * Cubre:
  *   - Inversión inicial (activos fijos, intangibles, capital de trabajo).
@@ -30,10 +29,9 @@ Estás generando la sub-sección 4.7 — ESTUDIO FINANCIERO del Cap. IV.
 Es la sub-fase más extensa del marco propositivo y la que alimenta
 toda la evaluación del proyecto (Fase 4g).
 
-Importante: los cálculos numéricos los hace el sistema con
-calculos.ts. Tú produces las TABLAS estructuradas con datos
-plausibles y la interpretación. El sistema reemplaza valores
-puntuales en runtime cuando es necesario.
+Importante: los cálculos numéricos los hace simuladorPRO. Tú produces
+las TABLAS estructuradas con datos plausibles y la interpretación.
+WEBAPP no debe recalcular valores financieros.
 
 Recibes:
 1. [CONTEXTO DEL PROYECTO].
@@ -178,8 +176,8 @@ francés (cuota fija) — el más común en bancos bolivianos.
 | ... (5 años x 12 meses = 60 filas, podes mostrar resumen anual) | | | | | |
 | **Total** | — | **XXX.XXX** | **XXX.XXX** | XXX.XXX | 0 |
 
-El sistema calcula la tabla exacta con amortizacion() de calculos.ts;
-aquí presentas un resumen anual con totales.
+simuladorPRO calcula la tabla exacta de amortización; aquí presentas
+un resumen anual con totales.
 
 ### 4.7.9 Resumen general de costos e ingresos
 
@@ -192,12 +190,17 @@ aquí presentas un resumen anual con totales.
 | (-) Costos fijos | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
 | (-) Aportes patronales | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
 | (-) Gastos comerciales | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
-| **Utilidad antes de impuestos** | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
-| (-) IUE 25% | X.XXX | X.XXX | X.XXX | X.XXX | X.XXX |
+| (-) IT 3% sobre ingresos brutos | X.XXX | X.XXX | X.XXX | X.XXX | X.XXX |
+| **Utilidad antes de IUE** | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
+| (-) IUE 25% sobre utilidad | X.XXX | X.XXX | X.XXX | X.XXX | X.XXX |
 | **Utilidad neta** | **XX.XXX** | **XX.XXX** | **XX.XXX** | **XX.XXX** | **XX.XXX** |
+| IVA neto a pagar (flujo de caja) | X.XXX | X.XXX | X.XXX | X.XXX | X.XXX |
 
 Cierra con párrafo interpretando la tendencia (¿utilidad creciente?
 ¿hay año de pérdida inicial? ¿cuándo se equilibra?).
+
+Nota: usa los valores entregados por simuladorPRO. IT e IUE se presentan en
+resultado; IVA neto se presenta como efecto de caja, no como utilidad.
 
 ═══════════════════════════════════════════════════════════════
 EXTENSIÓN Y CALIDAD

@@ -98,7 +98,7 @@ function parsearPropuestas(markdown: string): Propuesta[] {
     if (inicio) {
       pushCurrent();
       currentNum = parseInt(inicio[1], 10);
-      let resto = inicio[2];
+      const resto = inicio[2];
 
       // Detectar marcador RECOMENDADO antes de limpiar
       currentReco = /⭐|RECOMENDADO|Recomendado/i.test(resto);

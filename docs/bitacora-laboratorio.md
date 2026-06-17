@@ -8,6 +8,11 @@
 
 ---
 
+> **Actualizacion 2026-06-17:** el simulador financiero embebido en WEBAPP fue
+> retirado. La seccion `/finanzas` queda como bridge visual hacia
+> `simuladorPRO`, que es la fuente oficial de calculos, IVA/IT/IUE, VAN, TIR,
+> WACC, flujo de caja, sensibilidad y simulacion financiera.
+
 ## §0 Cómo retomar (LEER PRIMERO)
 
 **Para arrancar la próxima sesión, dile a Claude:**

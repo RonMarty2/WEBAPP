@@ -28,7 +28,7 @@ cambia acá.
 | 5 | Asignación de subtipo | El estudiante elige al inicio (wizard pregunta directo) |
 | 6 | Encuestas | Híbrido: sistema genera modelo + estudiante aplica + sistema analiza |
 | 7 | Logos | Gemini Imagen 4 + Ideogram → 6 variantes por proyecto |
-| 8 | Cálculos financieros | JavaScript del servidor, gratis (sin Python pago) |
+| 8 | Cálculos financieros | Motor `simuladorPRO` consumido por WEBAPP (sin Python pago) |
 | 9 | Búsqueda real (PESTEL) | Gemini Grounding with Google Search (incluido, gratis) |
 | 10 | Análisis estadístico | `simple-statistics` (npm), gratis |
 | 11 | Gráficos | Chart.js, gratis |
@@ -326,7 +326,7 @@ proyectos UCATEC aparece como sección 4.4 separada del estudio organizacional.
 |---|---|
 | Objetivo | Inversión inicial, costos fijos/variables, ingresos, financiamiento, amortización |
 | Max tokens | 8000 |
-| Herramientas | **JavaScript** para todos los cálculos; IA solo para interpretación |
+| Herramientas | **simuladorPRO** para todos los cálculos; WEBAPP/IA solo presentan e interpretan |
 | Output | Tablas financieras precisas + amortización detallada |
 | Validaciones | Cero inconsistencias entre tablas; montos en Bs.; financiamiento (deuda + capital) = inversión total |
 
@@ -336,14 +336,16 @@ proyectos UCATEC aparece como sección 4.4 separada del estudio organizacional.
 |---|---|
 | Objetivo | Flujo de caja 5 años, VAN, TIR, WACC, punto de equilibrio |
 | Max tokens | 6000 |
-| Herramientas | **JavaScript** para cálculos exactos; IA solo para interpretación |
+| Herramientas | **simuladorPRO** para cálculos exactos; WEBAPP/IA solo presentan e interpretan |
 | Validaciones | VAN, TIR, WACC consistentes entre sí; flujo de caja sin errores aritméticos |
 
-**Fórmulas implementadas en JavaScript** (no las inventa la IA):
+**Fórmulas implementadas en `simuladorPRO`** (no las inventa la IA ni WEBAPP):
 - VAN: `Σ(FCt / (1+k)^t) - I₀`
 - TIR: método de Newton-Raphson o bisección
 - WACC: `(E/V × Re) + (D/V × Rd × (1-T))`
 - Punto de equilibrio: `CF / (P - CVu)`
+- IVA/IT/IUE Bolivia: IVA 13% por debito/credito fiscal, IT 3% sobre
+  ingresos brutos e IUE 25% sobre utilidad positiva.
 
 ### Fase 5 — Resumen Ejecutivo (`ph-proy-resumen`) 🟦
 
@@ -514,16 +516,17 @@ Grounding nativo).
 | Chrome headless (Overleaf flow) | PDF (futuro) | $0 |
 | **Total APIs extras** | | **~$0.21 por proyecto** |
 
-### 8.4 Cálculos en JavaScript del servidor
+### 8.4 Cálculos financieros centralizados
 
-Implementación propia en `src/lib/proyectoGrado/calculos.ts`:
+Los cálculos financieros ya no viven en WEBAPP. La fuente oficial es
+`simuladorPRO`, consumida desde WEBAPP mediante una capa cliente:
 
-- VAN, TIR, WACC, payback descontado.
+- VAN, TIR, WACC, payback y payback descontado.
 - Amortización (método francés, alemán, americano).
 - Punto de equilibrio por unidad y por monto.
 - Flujo de caja proyectado.
-- Tamaño de muestra (poblaciones finitas e infinitas).
-- Frecuencias absolutas y relativas.
+- Sensibilidad y escenarios recalibrados.
+- Tamaño de muestra y encuestas siguen siendo lógica académica no financiera.
 - Chi-cuadrado con tabla de contingencia (vía `simple-statistics`).
 
 Cero dependencia de Python o servicios pagos para esto.
@@ -656,7 +659,7 @@ Cuando este documento esté aprobado, el orden de trabajo es:
 ### Semana 1 — Cimientos
 - Crear `servicio_id: "proy-grado-001"` y los 2 `tipo_proyecto_id`.
 - Wizard de creación de proyecto con la pregunta producción/servicios.
-- Implementar `src/lib/proyectoGrado/calculos.ts` (VAN, TIR, WACC, etc.) + tests.
+- Conectar la capa cliente de WEBAPP con el motor financiero de `simuladorPRO`.
 - Implementar `src/lib/proyectoGrado/encuestas.ts` (frecuencias, chi-cuadrado) + tests.
 
 ### Semana 2 — Fases textuales (fases 0, 1, 2)
@@ -727,7 +730,7 @@ Cuando este documento esté aprobado, el orden de trabajo es:
 - 2 subtipos: producción + servicios.
 - 22 fases (organizacional y RRHH están separadas, no fusionadas).
 - Estudiante elige el subtipo al inicio (no se deduce).
-- Cálculos financieros en JavaScript, no Python.
+- Cálculos financieros en `simuladorPRO`, no dentro de WEBAPP ni Python.
 - Búsqueda real con Gemini Grounding, no Tavily/Perplexity.
 - Logos con 2 APIs combinadas (6 variantes).
 - Tono profesional propio del sistema, no copia de UCATEC.
@@ -760,13 +763,11 @@ Cuando todas las casillas estén tildadas, **arrancamos código**.
 
 ```
 src/lib/proyectoGrado/
-├── calculos.ts            ← Fórmulas financieras (VAN, TIR, WACC, etc.)
-├── calculos.test.ts       ← 24/24 tests pasan
 ├── encuestas.ts           ← Frecuencias, chi-cuadrado, descriptivos
 ├── encuestas.test.ts      ← 18/18 tests pasan
 ├── fases.ts               ← Definición de las 22 fases con prompts reales
 ├── flujo.test.ts          ← 20/20 tests E2E lógicos pasan
-└── runtime-helpers.ts     ← Inyección de cálculos reales en prompts
+└── runtime-helpers.ts     ← Orquestación; delega finanzas a simuladorPRO
 
 src/lib/prompts/proyectoGrado/
 ├── reglas-comunes.ts      ← Reglas base prepended a cada prompt
@@ -806,7 +807,6 @@ src/lib/prompts/proyectoGrado/
 
 | Test | Pasa | Total | Cobertura |
 |---|:-:|:-:|---|
-| `calculos.test.ts` | 24 | 24 | VAN, TIR, WACC, amortización 3 métodos, payback, muestra, flujo caja |
 | `encuestas.test.ts` | 18 | 18 | Frecuencias, descriptivos, tabla contingencia, chi-cuadrado |
 | `flujo.test.ts` | 20 | 20 | Orden de fases, prompts reales, variantes, coherencia IDs |
 | `npm run build` | ✓ | — | 82 rutas, sin warnings |
@@ -816,7 +816,7 @@ src/lib/prompts/proyectoGrado/
 - 🟡 **Testing E2E con IA real**: generar 3 proyectos completos (uno por subtipo + 1 caso límite) para validar outputs reales. Requiere API keys y consumo de tokens.
 - 🟡 **Conexión Gemini Imagen 4 + Ideogram** en endpoint de Fase 4d (los briefs ya están listos en el prompt).
 - 🟡 **Conexión Gemini Grounding** para PESTEL/Porter/Legal con datos reales actualizados.
-- 🟡 **Inyección automática de runtime-helpers** en el endpoint generador (Fases 3d, 4f, 4g).
+- 🟡 **Conexión real con simuladorPRO** para inyectar indicadores financieros calculados en Fases 4f y 4g.
 - 🔴 **Supabase real** (pendiente macro del proyecto).
 - 🔴 **Pricing y quota** mensual por plan.
 
@@ -830,4 +830,3 @@ verificar". El sistema entrega documento ENTREGABLE en todos los casos, con:
 - Notas metodológicas formales cuando aplica (ej: Fase 3e sin CSV real).
 - Citas a fuentes institucionales reales (INE, BCB, SEPREC, SIN, etc.).
 - Autores académicos autorizados en una lista cerrada (no se inventan).
-

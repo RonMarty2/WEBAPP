@@ -1,5 +1,5 @@
-import RouteContent from '@/components/finanzas/routes/simular-proyecto';
+import SimuladorProBridge from "@/components/finanzas/SimuladorProBridge";
 
 export default function Page() {
-  return <RouteContent />;
+  return <SimuladorProBridge seccion="Finanzas - Simular" />;
 }

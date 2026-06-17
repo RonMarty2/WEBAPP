@@ -12,8 +12,8 @@
  *   - Punto de equilibrio.
  *   - Período de recuperación (Payback descontado).
  *
- * Los CÁLCULOS los hace el módulo calculos.ts en runtime — la IA solo
- * presenta los resultados con tablas e interpretaciones.
+ * Los CÁLCULOS los hace simuladorPRO en runtime — la IA solo presenta
+ * los resultados con tablas e interpretaciones.
  *
  * Max tokens recomendado: 6000.
  * Subtipo: común a producción y servicios.
@@ -31,9 +31,9 @@ Estás generando la sub-sección 4.8 — EVALUACIÓN DEL PROYECTO del Cap. IV.
 Es la sub-fase que CIERRA el Marco Propositivo con los indicadores
 financieros que demuestran si el proyecto es VIABLE.
 
-Importante: los cálculos exactos los hace el sistema con calculos.ts.
-Tú produces las tablas estructuradas y las interpretaciones. Los
-valores numéricos puntuales se reemplazan en runtime cuando aplica.
+Importante: los cálculos exactos los hace simuladorPRO. Tú produces
+las tablas estructuradas y las interpretaciones. WEBAPP no debe
+recalcular VAN, TIR, WACC, flujo de caja ni sensibilidad.
 
 Recibes:
 1. [CONTEXTO DEL PROYECTO].
@@ -62,16 +62,21 @@ y TIR.
 | Ingresos | — | XXX.XXX | XXX.XXX | XXX.XXX | XXX.XXX | XXX.XXX |
 | (-) Costos operativos | — | (XX.XXX) | (XX.XXX) | (XX.XXX) | (XX.XXX) | (XX.XXX) |
 | (-) Depreciación | — | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) |
-| **Utilidad antes de impuestos** | — | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
-| (-) IUE 25% | — | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) |
+| (-) IT 3% sobre ingresos brutos | — | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) |
+| **Utilidad antes de IUE** | — | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
+| (-) IUE 25% sobre utilidad | — | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) |
 | Utilidad neta | — | XX.XXX | XX.XXX | XX.XXX | XX.XXX | XX.XXX |
 | (+) Depreciación (reverso) | — | X.XXX | X.XXX | X.XXX | X.XXX | X.XXX |
+| (-) IVA neto a pagar | — | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) | (X.XXX) |
 | (+) Valor de rescate | — | — | — | — | — | X.XXX |
 | **Flujo de caja libre** | **(XXX.XXX)** | **XX.XXX** | **XX.XXX** | **XX.XXX** | **XX.XXX** | **XX.XXX** |
 
 Año 0: solo la inversión inicial negativa. Años 1-5: flujos operativos
 positivos (esperablemente crecientes). Año 5 incluye valor de rescate
 (10-20% de los activos depreciables).
+
+Nota tributaria: simuladorPRO separa IT e IUE como impuestos del resultado,
+e IVA como efecto de caja por débito fiscal menos crédito fiscal.
 
 ### 4.8.2 Cálculo del WACC
 
