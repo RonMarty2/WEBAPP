@@ -14,6 +14,31 @@
 
 ---
 
+## Variables de entorno — Cerebros externos
+
+Agregar en `.env.local` y en Vercel cuando cada cerebro esté desplegado:
+
+```env
+# simuladorPRO (C1) — URL de la Edge Function export-artifact
+SIMULADOR_PRO_ARTIFACT_URL=https://<proyecto-supabase>.supabase.co/functions/v1/export-artifact
+SIMULADOR_PRO_API_KEY=la-misma-clave-que-pusiste-en-el-secret-WEBAPP_API_KEY-de-simuladorPRO
+
+# market-intelligence-engine (C2) — cuando implemente el endpoint
+MIE_ARTIFACT_URL=
+MIE_API_KEY=
+
+# Los demás cerebros se agregan aquí cuando implementen GET /api/artifact
+```
+
+### Migración SQL pendiente (cerebros externos)
+
+Ejecutar en Supabase → SQL Editor:
+```
+supabase/migrations-maestro/003_cerebros_externos.sql
+```
+
+---
+
 ## Paso 1 — Conectar Supabase real (5 min)
 
 > Hoy `.env.local` tiene placeholders (`https://your-project.supabase.co`). Mientras eso siga así, los proyectos de los estudiantes viven en memoria y se pierden al reiniciar el server.

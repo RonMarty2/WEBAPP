@@ -18,8 +18,20 @@ export interface ContextoMaestro {
     universidad: string | null;
     modalidad: string | null;
   };
-  // Resúmenes por módulo vinculado (lo construido en cada uno).
+  // Resúmenes por módulo vinculado (módulos internos de WEBAPP).
   modulos: Record<string, unknown>;
+  // Artefactos de cerebros externos (simuladorPRO, MIE, etc.)
+  // Clave: cerebroId ('simuladorPRO', 'market-intelligence-engine', ...)
+  cerebros: Record<string, {
+    titulo: string;
+    resumen: string | null;
+    key_metrics: Array<{ label: string; value: string | number; unit?: string }>;
+    feeds_sections: string[];
+    content: Record<string, unknown>;
+    status: string;
+    completeness_pct: number;
+    artifact_fetched_at: string;
+  }>;
 }
 
 /**
@@ -55,6 +67,7 @@ export async function construirContextoMaestro(
       modalidad: maestro.modalidad,
     },
     modulos: {},
+    cerebros: {},
   };
 
   // Vínculos a módulos
@@ -92,6 +105,25 @@ export async function construirContextoMaestro(
     }
   }
 
+  // ── Cerebros externos vinculados ─────────────────────────────────────────
+  const { data: cerebros } = await sb
+    .from('proyecto_maestro_cerebros')
+    .select('cerebro_id, titulo, resumen, key_metrics, feeds_sections, content, status, completeness_pct, artifact_fetched_at')
+    .eq('maestro_id', maestroId);
+
+  for (const c of cerebros ?? []) {
+    ctx.cerebros[c.cerebro_id] = {
+      titulo: c.titulo,
+      resumen: c.resumen,
+      key_metrics: c.key_metrics ?? [],
+      feeds_sections: c.feeds_sections ?? [],
+      content: c.content ?? {},
+      status: c.status,
+      completeness_pct: c.completeness_pct,
+      artifact_fetched_at: c.artifact_fetched_at,
+    };
+  }
+
   return ctx;
 }
 
@@ -109,8 +141,22 @@ export function contextoATexto(ctx: ContextoMaestro | null): string {
 
   const mods = Object.keys(ctx.modulos);
   if (mods.length > 0) {
-    L.push('Trabajo previo en otros módulos (úsalo para dar coherencia):');
+    L.push('Trabajo previo en módulos internos (úsalo para dar coherencia):');
     L.push(JSON.stringify(ctx.modulos));
   }
+
+  const cerebs = Object.entries(ctx.cerebros);
+  if (cerebs.length > 0) {
+    L.push('Datos reales del estudiante desde cerebros especializados:');
+    for (const [cerebroId, c] of cerebs) {
+      L.push(`[${cerebroId}] ${c.titulo} (${c.status}, ${c.completeness_pct}% completo)`);
+      if (c.resumen) L.push(`  Resumen: ${c.resumen}`);
+      if (c.key_metrics.length > 0) {
+        const metricas = c.key_metrics.map(m => `${m.label}: ${m.value}${m.unit ? ' ' + m.unit : ''}`).join(', ');
+        L.push(`  Métricas clave: ${metricas}`);
+      }
+    }
+  }
+
   return L.join('\n');
 }
