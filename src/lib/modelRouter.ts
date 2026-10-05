@@ -67,20 +67,20 @@ const DEMO: PhaseMap = {
 };
 
 const ESTANDAR: PhaseMap = {
-  0: { provider: "deepseek", model: "deepseek-chat", maxTokens: 3000 },
-  1: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
-  2: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
-  3: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
-  4: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
-  5: { provider: "deepseek", model: "deepseek-chat", maxTokens: 4096 },
-  // Compilar LaTeX en ESTANDAR: deepseek-chat con 12K.
-  6: { provider: "deepseek", model: "deepseek-chat", maxTokens: 12000 },
+  0: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 3000 },
+  1: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 4096 },
+  2: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 4096 },
+  3: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 4096 },
+  4: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 4096 },
+  5: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 4096 },
+  // Compilar LaTeX en ESTANDAR: Claude Sonnet con 12K.
+  6: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 12000 },
 };
 
 const PRO: PhaseMap = {
-  0: { provider: "gemini",    model: "gemini-2.5-flash", maxTokens: 3000  },
+  0: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 3000  },
   1: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
-  2: { provider: "gemini",    model: "gemini-2.5-pro",   maxTokens: 8192  },
+  2: { provider: "anthropic", model: "claude-sonnet-5-5",   maxTokens: 8192  },
   3: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
   4: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
   5: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 8192  },
@@ -90,9 +90,9 @@ const PRO: PhaseMap = {
 };
 
 const ELITE: PhaseMap = {
-  0: { provider: "gemini",    model: "gemini-2.5-flash", maxTokens: 4096  },
+  0: { provider: "anthropic", model: "claude-sonnet-5-5", maxTokens: 4096  },
   1: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
-  2: { provider: "gemini",    model: "gemini-2.5-pro",   maxTokens: 12000 },
+  2: { provider: "anthropic", model: "claude-sonnet-5-5",   maxTokens: 12000 },
   3: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
   4: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
   5: { provider: "anthropic", model: "claude-opus-4-7",  maxTokens: 12000 },
@@ -152,9 +152,18 @@ export async function llamarIAPorPlan(
   const cfg = getModelConfig(phase, normalizePlan(plan));
   const apiKey = getProviderKey(cfg.provider);
 
+  const errors: string[] = [];
   if (apiKey) {
-    const text = await llamarIAConConfig(cfg.provider, cfg.model, apiKey, system, user, cfg.maxTokens);
-    return { text, provider: cfg.provider, model: cfg.model };
+    try {
+      const text = await llamarIAConConfig(cfg.provider, cfg.model, apiKey, system, user, cfg.maxTokens);
+      return { text, provider: cfg.provider, model: cfg.model };
+    } catch (e) {
+      // Si el modelo preferido falla (cuota, timeout, modelo inválido) seguimos
+      // con la cascada en vez de romperle la generación al estudiante.
+      errors.push(`${cfg.provider}: ${(e as Error).message}`);
+    }
+  } else {
+    errors.push(`${cfg.provider}: API key no configurada`);
   }
 
   // Fallback ordenado de MEJOR a ÚLTIMO RECURSO:
@@ -173,7 +182,6 @@ export async function llamarIAPorPlan(
     { id: "groq",      model: "llama-3.3-70b-versatile"   },
   ].filter((p) => p.id !== cfg.provider); // no reintentar el mismo
 
-  const errors: string[] = [`${cfg.provider}: API key no configurada`];
   for (const { id, model } of fallback) {
     const key = getProviderKey(id);
     if (!key) continue;
@@ -199,7 +207,7 @@ export async function llamarIAPorPlan(
  * premium definido para la fase 6 del plan del usuario.
  *
  * - DEMO     → groq llama-3.3-70b (7K tokens, legacy fallback)
- * - ESTANDAR → deepseek-chat (12K tokens)
+ * - ESTANDAR → claude-sonnet-5-5 (12K tokens)
  * - PRO      → claude-opus-4-7 (16K tokens)
  * - ELITE    → claude-opus-4-7 (16K tokens)
  *

@@ -13,16 +13,16 @@ describe("getModelConfig", () => {
     expect(cfg.model).toBe("llama-3.3-70b-versatile");
   });
 
-  it("estandar → siempre DeepSeek", () => {
+  it("estandar → siempre Claude Sonnet", () => {
     const cfg = getModelConfig(2, "estandar");
-    expect(cfg.provider).toBe("deepseek");
-    expect(cfg.model).toBe("deepseek-chat");
+    expect(cfg.provider).toBe("anthropic");
+    expect(cfg.model).toBe("claude-sonnet-5-5");
   });
 
-  it("pro fase 2 (Cap. II) → Gemini Pro (contexto 1M)", () => {
+  it("pro fase 2 (Cap. II) → Claude Sonnet", () => {
     const cfg = getModelConfig(2, "pro");
-    expect(cfg.provider).toBe("gemini");
-    expect(cfg.model).toBe("gemini-2.5-pro");
+    expect(cfg.provider).toBe("anthropic");
+    expect(cfg.model).toBe("claude-sonnet-5-5");
   });
 
   it("pro fase 1 (Cap. I) → Claude Opus 4.7", () => {
@@ -44,15 +44,15 @@ describe("getModelConfig", () => {
 });
 
 describe("getModelConfigForSection", () => {
-  it("marco_teorico → fase 2 → Gemini Pro en plan pro", () => {
+  it("marco_teorico → fase 2 → Claude en plan pro", () => {
     const cfg = getModelConfigForSection("marco_teorico", "pro");
-    expect(cfg.provider).toBe("gemini");
+    expect(cfg.provider).toBe("anthropic");
   });
 
-  it("titulo → fase 0 → Gemini Flash en plan pro", () => {
+  it("titulo → fase 0 → Claude Sonnet en plan pro", () => {
     const cfg = getModelConfigForSection("titulo", "pro");
-    expect(cfg.provider).toBe("gemini");
-    expect(cfg.model).toBe("gemini-2.5-flash");
+    expect(cfg.provider).toBe("anthropic");
+    expect(cfg.model).toBe("claude-sonnet-5-5");
   });
 });
 
