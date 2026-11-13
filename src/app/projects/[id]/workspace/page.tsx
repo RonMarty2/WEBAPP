@@ -1427,7 +1427,7 @@ export default function WorkspacePage() {
           { role: "user", text: revisionPreview.mensajeUsuario, ts: Date.now() },
           {
             role: "assistant",
-            text: `⚠️ La observación parece pertenecer al capítulo "${revisionPreview.faseDestinoLabel}" pero no logré localizarlo en este proyecto. Cambiá manualmente al capítulo correcto y pegá la observación.`,
+            text: `⚠️ La observación parece pertenecer al capítulo "${revisionPreview.faseDestinoLabel}" pero no logré localizarlo en este proyecto. Cambia manualmente al capítulo correcto y pega la observación.`,
             ts: Date.now(),
           },
         ]);
@@ -3383,7 +3383,7 @@ export default function WorkspacePage() {
                               ✓ Cuadernillo listo · {new Date(cuad.created_at).toLocaleDateString("es-BO", { day: "2-digit", month: "short" })}
                             </div>
                           : <div style={{ fontSize: 10.5, color: "var(--fg-muted)", marginTop: 2 }}>
-                              {tieneContenido ? "Sin cuadernillo aún" : "Generá la fase primero"}
+                              {tieneContenido ? "Sin cuadernillo aún" : "Genera la fase primero"}
                             </div>
                         }
                       </div>
@@ -4521,7 +4521,7 @@ export default function WorkspacePage() {
                         </div>
                       )}
                       <div style={{ fontSize: 12.5, color: "var(--fg-secondary)", paddingTop: 8, borderTop: "1px solid rgba(245,158,11,0.25)" }}>
-                        <strong>Sugerencia:</strong> reformulá la observación indicando con más precisión qué párrafo o sección querés cambiar. Por ejemplo: <em>&ldquo;En la sección 2.1.2 sobre normas de origen, agregar un párrafo que cite expresamente el Acuerdo sobre Facilitación del Comercio de la OMC.&rdquo;</em>
+                        <strong>Sugerencia:</strong> reformula la observación indicando con más precisión qué párrafo o sección quieres cambiar. Por ejemplo: <em>&ldquo;En la sección 2.1.2 sobre normas de origen, agregar un párrafo que cite expresamente el Acuerdo sobre Facilitación del Comercio de la OMC.&rdquo;</em>
                       </div>
                     </div>
                   </div>

@@ -1,5 +1,15 @@
 # Laboratorio Académico PRO — Contexto Maestro del Proyecto
 
+> **Empieza aquí:** `docs/ARQUITECTURA.md` (mapa corto y verificado del producto) y
+> `docs/dev-sessions/CURRENT.md`. La idea simple del producto manda sobre las bitácoras técnicas.
+> **Ayudantes** (`.claude/agents/`): `universidades`, `expediente`, `redactor-ia`,
+> `armador-documento`, `cerebros`, `revisor`. Coordinador: `/sprint <tarea>`.
+> **Antes de cerrar cualquier tarea:** `npm run verify` y pasar por `revisor`.
+> **Estilo con el usuario:** español natural, sin jerga técnica, una idea por mensaje,
+> explicar primero y preguntar después. Trabajar directo en `main`, sin ramas.
+> Si el resto de este archivo contradice ese mapa (p. ej. "Supabase no conectado", rutas
+> `Desktop\WEBAPP`), verifica contra el código: partes de este documento están desactualizadas.
+
 ## ¿Qué es este proyecto?
 SaaS académico con IA para Bolivia y Latinoamérica. Plataforma multi-producto:
 estudiantes generan **monografías**, **proyectos de grado** y se preparan para

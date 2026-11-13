@@ -15,8 +15,9 @@
  *   ✓ Jerarquía de títulos:
  *       - PROYECTO DE INVESTIGACIÓN: Verdana 16, MAYÚS, Negrilla
  *       - CAPÍTULO I — MARCO TEÓRICO: Verdana 14, MAYÚS, Negrilla
- *       - 1.1, 1.1.1: Verdana 12, Tipo Título, Negrilla
- *       - 1.1.1.1: Verdana 12, Tipo Título, Negrilla + Cursiva
+ *       - 1.1: Verdana 12, Tipo Título, Negrilla
+ *       - 1.1.1: Verdana 10, Tipo Título, Negrilla
+ *       - 1.1.1.1: Verdana 10, Tipo Título, Negrilla + Cursiva
  *   ✓ Tapa: color plomo con letras doradas, fuente Verdana
  *
  * NOTA sobre Verdana: Overleaf no tiene Verdana como fuente PDF nativa
@@ -185,20 +186,20 @@ export function buildPreambleUNIFRANZ(): string {
     "% --- Jerarquía de títulos UNIFRANZ (pág. 12) ---",
     "% Cap.I / MARCO TEÓRICO: 14pt MAYÚS Negrilla (manejado arriba)",
     "% 1.1: 12pt Tipo Título Negrilla",
-    "% 1.1.1: 12pt Tipo Título Negrilla",
-    "% 1.1.1.1: 12pt Tipo Título Negrilla + Cursiva",
+    "% 1.1.1: 10pt Tipo Título Negrilla",
+    "% 1.1.1.1: 10pt Tipo Título Negrilla + Cursiva",
     "\\titleformat{\\section}",
     "  {\\normalfont\\fontsize{12pt}{14pt}\\bfseries}",
     "  {\\thesection}{0.5em}{}",
     "\\titlespacing*{\\section}{0pt}{1em}{0.5em}",
     "",
     "\\titleformat{\\subsection}",
-    "  {\\normalfont\\fontsize{12pt}{14pt}\\bfseries}",
+    "  {\\normalfont\\fontsize{10pt}{12pt}\\bfseries}",
     "  {\\thesubsection}{0.5em}{}",
     "\\titlespacing*{\\subsection}{0pt}{0.8em}{0.4em}",
     "",
     "\\titleformat{\\subsubsection}",
-    "  {\\normalfont\\fontsize{12pt}{14pt}\\bfseries\\itshape}",
+    "  {\\normalfont\\fontsize{10pt}{12pt}\\bfseries\\itshape}",
     "  {\\thesubsubsection}{0.5em}{}",
     "\\titlespacing*{\\subsubsection}{0pt}{0.7em}{0.3em}",
     "",
@@ -211,12 +212,13 @@ export function buildPreambleUNIFRANZ(): string {
  * Carátula UNIFRANZ oficial — pág. 4 y Anexo 1 (pág. 21) de la guía.
  *
  * Estructura:
- *   - Cabecera centrada: UNIVERSIDAD + FACULTAD + CARRERA (Verdana 16, MAYÚS, Negrilla)
- *   - Escudo (placeholder si no se sube)
+ *   - Cabecera centrada: UNIVERSIDAD (18, MAYÚS, Negrilla) + FACULTAD + CARRERA (16, MAYÚS, Negrilla)
+ *   - Escudo 6 cm × 5.5 cm (placeholder si no se sube)
  *   - Título entre comillas (Verdana 18, MAYÚS, Negrilla)
- *   - Modalidad: TESIS / PROYECTO / TRABAJO DIRIGIDO + leyenda de Licenciatura (Verdana 14)
- *   - POSTULANTE + TUTOR (Verdana 12, minúscula, Negrilla)
- *   - Ciudad – País + Año (Verdana 12, centrado)
+ *   - Modalidad: TESIS / PROYECTO / TRABAJO DIRIGIDO + leyenda de Licenciatura
+ *     (Verdana 14, MAYÚS, Negrilla, alineado a la derecha)
+ *   - POSTULANTE + TUTOR (Verdana 12, sin negrilla)
+ *   - Ciudad – País + Año (Verdana 12, sin negrilla, centrado)
  */
 export function buildCaratulaUNIFRANZ(d: UnifranzDatosCaratula): string {
   const universidad = (d.universidad || "UNIVERSIDAD PRIVADA FRANZ TAMAYO").toUpperCase();
@@ -230,16 +232,16 @@ export function buildCaratulaUNIFRANZ(d: UnifranzDatosCaratula): string {
     "\\thispagestyle{empty}",
     "",
     "\\begin{center}",
-    `{\\fontsize{16pt}{20pt}\\selectfont \\bfseries ${escLatex(universidad)}}\\\\[8pt]`,
+    `{\\fontsize{18pt}{22pt}\\selectfont \\bfseries ${escLatex(universidad)}}\\\\[8pt]`,
     `{\\fontsize{16pt}{20pt}\\selectfont \\bfseries ${escLatex(facultad)}}\\\\[8pt]`,
     `{\\fontsize{16pt}{20pt}\\selectfont \\bfseries ${escLatex(carrera)}}`,
     "",
     "\\vspace{1.2cm}",
     "",
     "\\IfFileExists{logos/unifranz.png}{%",
-    "  \\includegraphics[width=4cm,height=4cm,keepaspectratio]{logos/unifranz.png}%",
+    "  \\includegraphics[width=6cm,height=5.5cm,keepaspectratio]{logos/unifranz.png}%",
     "}{%",
-    "  \\framebox[4cm]{\\parbox[c][4cm][c]{3.6cm}{\\centering\\footnotesize Escudo\\\\UNIFRANZ}}%",
+    "  \\framebox[6cm]{\\parbox[c][5.5cm][c]{5.6cm}{\\centering\\footnotesize Escudo\\\\UNIFRANZ}}%",
     "}",
     "",
     "\\vspace{1.2cm}",
@@ -248,21 +250,26 @@ export function buildCaratulaUNIFRANZ(d: UnifranzDatosCaratula): string {
     "",
     "\\vspace{1.5cm}",
     "",
+    // Modalidad: alineada a la derecha (guía pág. 14).
+    "\\begin{flushright}",
     `{\\fontsize{14pt}{18pt}\\selectfont \\bfseries ${escLatex(modalidad)} PARA OPTAR}\\\\[4pt]`,
     `{\\fontsize{14pt}{18pt}\\selectfont \\bfseries AL GRADO ACADÉMICO DE LICENCIATURA EN}\\\\[4pt]`,
     `{\\fontsize{14pt}{18pt}\\selectfont \\bfseries ${escLatex(carrera)}}`,
+    "\\end{flushright}",
     "",
     "\\vspace{1.5cm}",
     "",
-    `{\\fontsize{12pt}{15pt}\\selectfont \\bfseries POSTULANTE: ${escLatex(d.nombre)}}`,
+    // POSTULANTE y TUTOR en mayúsculas, nombres tal cual, sin negrilla (guía pág. 14).
+    `{\\fontsize{12pt}{15pt}\\selectfont POSTULANTE: ${escLatex(d.nombre)}}`,
     d.tutor
-      ? `\\\\[6pt]\n{\\fontsize{12pt}{15pt}\\selectfont \\bfseries TUTOR: ${escLatex(d.tutor)}}`
+      ? `\\\\[6pt]\n{\\fontsize{12pt}{15pt}\\selectfont TUTOR: ${escLatex(d.tutor)}}`
       : "",
     "",
     "\\vfill",
     "",
-    `{\\fontsize{12pt}{15pt}\\selectfont \\bfseries ${escLatex(d.ciudad)} -- ${escLatex(d.pais)}}\\\\[4pt]`,
-    `{\\fontsize{12pt}{15pt}\\selectfont \\bfseries ${escLatex(d.anio)}}`,
+    // Ciudad – País y año: tamaño 12, sin negrilla (guía pág. 14).
+    `{\\fontsize{12pt}{15pt}\\selectfont ${escLatex(d.ciudad)} -- ${escLatex(d.pais)}}\\\\[4pt]`,
+    `{\\fontsize{12pt}{15pt}\\selectfont ${escLatex(d.anio)}}`,
     "\\end{center}",
     "\\end{titlepage}",
     "",

@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:copy": "node scripts/check-copy.mjs",
+    "check:seguridad": "node scripts/check-seguridad.mjs",
+    "test:inspectores": "node --test tests/inspectores-unifranz.test.mjs tests/inspectores-ucb.test.mjs tests/requisitos.test.mjs",
+    "verify": "npm run check:copy && npm run check:seguridad && tsc --noEmit"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
