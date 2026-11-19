@@ -180,3 +180,5 @@ node .claude/skills/impeccable/scripts/pin.mjs <pin|unpin> <command>
 ```
 
 Valid `<command>` is any command from the table above. Report the script's result concisely — confirm the new shortcut on success, relay stderr verbatim on error.
+## Lección 19-11 · NO DISEÑAR UNA PANTALLA DESDE CERO
+Idea tomada de Astryx (Meta) al evaluarlo; Ronald pidió que sirva en todas las carpetas. Antes de diseñar o rehacer una pantalla, buscar primero una pieza o plantilla ya probada: las propias del proyecto; después, un kit compatible con su versión de React. Astryx pide React 19, así que aquí NO se instala (WEBAPP usa React 18); la idea sí vale. Recién si no hay nada, diseñar de cero, y decir en una línea qué se buscó.
